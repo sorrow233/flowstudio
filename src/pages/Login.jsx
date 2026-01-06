@@ -8,7 +8,7 @@ import './Login.css';
 
 export default function Login() {
     const { t } = useTranslation();
-    const { login, signup, loginWithGoogle, authError } = useAuth();
+    const { login, signup, loginWithGoogle, loginAsGuest, authError } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from?.pathname || '/app';
@@ -20,7 +20,13 @@ export default function Login() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // If there's a critical auth error (like missing config), show it
+    // Helper to handle guest login
+    const handleGuestLogin = async () => {
+        await loginAsGuest();
+        navigate(from, { replace: true });
+    };
+
+    // If there's a critical auth error (like missing config), show it BUT allow guest access
     if (authError) {
         return (
             <div className="login-container">
@@ -29,8 +35,19 @@ export default function Login() {
                     <p style={{ marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>
                         {authError}
                     </p>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '2rem' }}>
                         Please check your <code>.env</code> file or environment variables.
+                    </p>
+
+                    <button
+                        onClick={handleGuestLogin}
+                        className="btn-primary"
+                        style={{ backgroundColor: 'var(--text-secondary)', width: 'auto', padding: '0.5rem 2rem', margin: '0 auto' }}
+                    >
+                        {t('auth.continue_guest', 'Continue as Guest')}
+                    </button>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '1rem' }}>
+                        You can use the app offline with local storage.
                     </p>
                 </div>
             </div>
@@ -140,6 +157,17 @@ export default function Login() {
                         {loading ? <Loader2 className="animate-spin" size={20} /> : (isLogin ? t('auth.login', 'Log In') : t('auth.signup', 'Sign Up'))}
                     </button>
                 </form>
+
+                <div style={{ marginTop: '1rem' }}>
+                    <button
+                        type="button"
+                        className="btn-google"
+                        style={{ border: 'none', background: 'transparent', color: 'var(--text-secondary)', textDecoration: 'underline' }}
+                        onClick={handleGuestLogin}
+                    >
+                        {t('auth.continue_guest', 'Continue as Guest')}
+                    </button>
+                </div>
 
                 <div className="divider">
                     <span>{t('auth.or', 'or')}</span>

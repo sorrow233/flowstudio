@@ -24,10 +24,17 @@ const ALLOWED_DOMAINS = [
 
 export function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(null);
+    const [isGuest, setIsGuest] = useState(false);
     const [loading, setLoading] = useState(true);
     const [authError, setAuthError] = useState(null);
 
     useEffect(() => {
+        // Load guest status from local storage on mount
+        const storedGuest = localStorage.getItem('isGuest');
+        if (storedGuest === 'true') {
+            setIsGuest(true);
+        }
+
         if (!auth) {
             setAuthError('Firebase configuration is missing or invalid.');
             setLoading(false);
@@ -36,6 +43,10 @@ export function AuthProvider({ children }) {
 
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setCurrentUser(user);
+            if (user) {
+                setIsGuest(false);
+                localStorage.removeItem('isGuest');
+            }
             setLoading(false);
         }, (error) => {
             console.error("Auth State Check Error:", error);
@@ -48,6 +59,12 @@ export function AuthProvider({ children }) {
 
     function checkAuth() {
         if (!auth) throw new Error("Authentication service is unavailable. Please check configuration.");
+    }
+
+    function loginAsGuest() {
+        setIsGuest(true);
+        localStorage.setItem('isGuest', 'true');
+        return Promise.resolve();
     }
 
     function signup(email, password) {
@@ -71,15 +88,22 @@ export function AuthProvider({ children }) {
     }
 
     function logout() {
+        if (isGuest) {
+            setIsGuest(false);
+            localStorage.removeItem('isGuest');
+            return Promise.resolve();
+        }
         if (!auth) return Promise.resolve();
         return signOut(auth);
     }
 
     const value = {
         currentUser,
+        isGuest,
         signup,
         login,
         loginWithGoogle,
+        loginAsGuest,
         logout,
         authError // Expose error so UI can show it
     };

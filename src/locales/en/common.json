@@ -1,3 +1,4 @@
+```json
 {
     "app": {
         "title": "Flow Studio",
@@ -89,6 +90,8 @@
         "error_invalid_credentials": "Invalid email or password",
         "error_email_in_use": "Email is already in use",
         "error_generic": "Failed to authenticate. Please try again.",
-        "error_google": "Failed to sign in with Google."
+        "error_google": "Failed to sign in with Google.",
+        "continue_guest": "Continue as Guest"
     }
 }
+```
