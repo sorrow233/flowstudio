@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Home, Zap, Layers, Layout as LayoutIcon, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/contexts/AuthContext';
 import LanguageSwitcher from './LanguageSwitcher';
 
 const NavItem = ({ to, icon: Icon, label, isActive }) => (
@@ -17,15 +18,16 @@ const NavItem = ({ to, icon: Icon, label, isActive }) => (
 export default function Layout() {
     const location = useLocation();
     const { t } = useTranslation();
+    const { isGuest } = useAuth();
 
     return (
         <div className="app-layout">
             {/* Sidebar */}
             <aside className="app-sidebar">
-                <div className="sidebar-header">
+                <Link to="/" className="sidebar-header">
                     <div className="logo-box"></div>
                     <span className="app-title">{t('app.title')}</span>
-                </div>
+                </Link>
 
                 <nav className="sidebar-nav">
                     <NavItem to="/app" icon={Home} label={t('nav.dashboard')} isActive={location.pathname === '/app'} />
@@ -39,6 +41,11 @@ export default function Layout() {
                     <div style={{ padding: '0 1rem 1rem 1rem' }}>
                         <LanguageSwitcher />
                     </div>
+                    {isGuest && (
+                        <div style={{ padding: '0 1rem 1rem 1rem' }}>
+                            <NavItem to="/login" icon={LayoutIcon} label={t('auth.login', 'Sign In')} isActive={false} />
+                        </div>
+                    )}
                     <NavItem to="/app/settings" icon={Settings} label={t('nav.settings')} isActive={location.pathname === '/app/settings'} />
                 </div>
             </aside>

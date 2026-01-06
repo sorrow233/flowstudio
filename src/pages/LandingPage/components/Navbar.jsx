@@ -7,7 +7,7 @@ const Navbar = () => {
     const { t } = useTranslation();
     return (
         <nav className="landing-nav">
-            <div className="landing-logo">Flow Studio</div>
+            <Link to="/" className="landing-logo">Flow Studio</Link>
             <div className="landing-links">
                 <Link to="/pricing">{t('landing.pricing', 'Pricing')}</Link>
                 <Link to="/about">{t('landing.about', 'About')}</Link>
