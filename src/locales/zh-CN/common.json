@@ -75,5 +75,11 @@
             "start_project": "启动项目",
             "discard": "丢弃"
         }
+    },
+    "common": {
+        "add": "添加",
+        "add_idea": "添加创意",
+        "add_project": "添加项目",
+        "add_task": "添加任务"
     }
 }

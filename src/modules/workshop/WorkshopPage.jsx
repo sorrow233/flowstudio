@@ -1,25 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Sprout, TrendingUp, Award, DollarSign } from 'lucide-react';
 
 export default function WorkshopPage() {
     const { t } = useTranslation();
 
-    const [earlyStage] = useState([
+    // Static demo data - in production, these would come from a data store
+    const earlyStage = [
         { id: 101, name: 'New UI Prototype', color: '#e0f7fa', textColor: '#006064' }
-    ]);
+    ];
 
-    const [growthStage] = useState([
+    const growthStage = [
         { id: 102, name: 'API Integration', color: '#e1bee7', textColor: '#4a148c' }
-    ]);
+    ];
 
-    const [advancedStage] = useState([
+    const advancedStage = [
         { id: 103, name: 'Security Audit', color: '#ffecb3', textColor: '#ff6f00' }
-    ]);
+    ];
 
-    const [commercialStage] = useState([
+    const commercialStage = [
         { id: 104, name: 'Pro Version Launch', color: '#c8e6c9', textColor: '#1b5e20' }
-    ]);
+    ];
 
     const renderSection = (titleKey, icon, items) => (
         <section className="works-section">
@@ -41,7 +42,7 @@ export default function WorkshopPage() {
                 ))}
                 <div className="works-card works-card-add">
                     <Plus size={32} />
-                    <span>Add Task</span>
+                    <span>{t('common.add_task')}</span>
                 </div>
             </div>
         </section>
@@ -54,10 +55,10 @@ export default function WorkshopPage() {
                 <div className="works-divider"></div>
             </header>
 
-            {renderSection('early', <Sprout size={20} className="text-green-400" />, earlyStage)}
-            {renderSection('growth', <TrendingUp size={20} className="text-blue-400" />, growthStage)}
-            {renderSection('advanced', <Award size={20} className="text-purple-400" />, advancedStage)}
-            {renderSection('commercial', <DollarSign size={20} className="text-yellow-400" />, commercialStage)}
+            {renderSection('early', <Sprout size={20} style={{ color: 'var(--color-accent-teal)' }} />, earlyStage)}
+            {renderSection('growth', <TrendingUp size={20} style={{ color: 'var(--color-accent-indigo)' }} />, growthStage)}
+            {renderSection('advanced', <Award size={20} style={{ color: '#9c27b0' }} />, advancedStage)}
+            {renderSection('commercial', <DollarSign size={20} style={{ color: 'var(--color-accent-vermilion)' }} />, commercialStage)}
         </div>
     );
 }

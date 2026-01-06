@@ -14,6 +14,8 @@
         "dashboard": "대시보드",
         "incubator": "인큐베이터",
         "vision_studio": "비전 스튜디오",
+        "backlog": "백로그",
+        "workshop": "워크샵",
         "command_tower": "커맨드 타워",
         "archive": "아카이브",
         "settings": "설정"
@@ -22,6 +24,8 @@
         "subtitle": "당신의 AI 기반 개인 소프트웨어 아스날.",
         "incubator_desc": "AI로 새로운 아이디어를 포착하고 분석하세요.",
         "vision_studio_desc": "프로젝트 범위와 마일스톤을 정의하세요.",
+        "backlog_desc": "승인된 아이디어의 개발 대기 관리.",
+        "workshop_desc": "진행 중인 프로젝트와 작업 추적.",
         "command_tower_desc": "AI 코파일럿과 함께 작업을 수행하세요.",
         "archive_desc": "재사용 가능한 블록 및 회고 로그."
     },
@@ -34,6 +38,26 @@
         },
         "vision_studio": {
             "subtitle": "범위 정의: MVP, Pro 또는 Ultimate."
+        },
+        "backlog": {
+            "subtitle": "실현을 기다리는 아이디어들.",
+            "start_sprint": "스프린트 시작",
+            "priority": "우선순위",
+            "sections": {
+                "inspiration": "영감",
+                "pending": "개발 대기"
+            }
+        },
+        "workshop": {
+            "subtitle": "마법이 일어나는 곳.",
+            "active_tasks": "활성 작업",
+            "progress": "진행률",
+            "stages": {
+                "early": "초기 단계",
+                "growth": "성장 단계",
+                "advanced": "고급 단계",
+                "commercial": "상업화 단계"
+            }
         },
         "incubator": {
             "subtitle": "아이디어가 탄생하고 분석되는 곳.",
@@ -51,5 +75,11 @@
             "start_project": "프로젝트 시작",
             "discard": "삭제"
         }
+    },
+    "common": {
+        "add": "추가",
+        "add_idea": "아이디어 추가",
+        "add_project": "프로젝트 추가",
+        "add_task": "작업 추가"
     }
 }

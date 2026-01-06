@@ -14,6 +14,8 @@
         "dashboard": "ダッシュボード",
         "incubator": "インキュベーター",
         "vision_studio": "ビジョンスタジオ",
+        "backlog": "バックログ",
+        "workshop": "ワークショップ",
         "command_tower": "コマンドタワー",
         "archive": "アーカイブ",
         "settings": "設定"
@@ -22,6 +24,8 @@
         "subtitle": "AI駆動のあなた専用ソフトウェア兵器庫。",
         "incubator_desc": "AIで新しいアイデアを捉え、分析します。",
         "vision_studio_desc": "プロジェクトの範囲とマイルストーンを定義します。",
+        "backlog_desc": "承認済みアイデアの開発待ち管理。",
+        "workshop_desc": "進行中のプロジェクトとタスクを追跡。",
         "command_tower_desc": "AIコパイロットと共にタスクを実行します。",
         "archive_desc": "再利用可能なブロックと振り返りログ。"
     },
@@ -34,6 +38,26 @@
         },
         "vision_studio": {
             "subtitle": "スコープ定義：MVP、Pro、またはUltimate。"
+        },
+        "backlog": {
+            "subtitle": "実現を待つアイデアたち。",
+            "start_sprint": "スプリント開始",
+            "priority": "優先度",
+            "sections": {
+                "inspiration": "インスピレーション",
+                "pending": "開発待ち"
+            }
+        },
+        "workshop": {
+            "subtitle": "魔法が起こる場所。",
+            "active_tasks": "アクティブタスク",
+            "progress": "進捗",
+            "stages": {
+                "early": "初期段階",
+                "growth": "成長段階",
+                "advanced": "上級段階",
+                "commercial": "商業化段階"
+            }
         },
         "incubator": {
             "subtitle": "アイデアが生まれ、分析される場所。",
@@ -51,5 +75,11 @@
             "start_project": "プロジェクト開始",
             "discard": "破棄"
         }
+    },
+    "common": {
+        "add": "追加",
+        "add_idea": "アイデア追加",
+        "add_project": "プロジェクト追加",
+        "add_task": "タスク追加"
     }
 }

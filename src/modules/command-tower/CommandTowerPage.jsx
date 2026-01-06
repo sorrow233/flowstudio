@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Lightbulb, Rocket, Sprout, TrendingUp, Award, DollarSign } from 'lucide-react';
 
@@ -6,7 +6,8 @@ export default function CommandTowerPage() {
     const { t } = useTranslation();
 
     // Commands organized by stage
-    const [commands, setCommands] = useState({
+    // Static demo data - in production, these would come from a data store
+    const commands = {
         inspiration: [
             { id: 1, title: 'Code Review Prompt', content: 'Review this code for best practices...' }
         ],
@@ -21,7 +22,7 @@ export default function CommandTowerPage() {
         ],
         advanced: [],
         commercial: []
-    });
+    };
 
     const stageConfig = [
         { key: 'inspiration', icon: <Lightbulb size={18} />, label: t('modules.backlog.sections.inspiration') },
@@ -32,8 +33,20 @@ export default function CommandTowerPage() {
         { key: 'commercial', icon: <DollarSign size={18} />, label: t('modules.workshop.stages.commercial') }
     ];
 
-    const copyToClipboard = (text) => {
-        navigator.clipboard.writeText(text);
+    const copyToClipboard = async (text) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            // TODO: Add toast notification for success feedback
+        } catch (err) {
+            console.error('Failed to copy:', err);
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+        }
     };
 
     return (
@@ -63,7 +76,7 @@ export default function CommandTowerPage() {
                         ))}
                         <div className="command-card command-card-add">
                             <Plus size={24} />
-                            <span>Add</span>
+                            <span>{t('common.add')}</span>
                         </div>
                     </div>
                 </section>

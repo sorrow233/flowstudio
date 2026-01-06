@@ -104,6 +104,12 @@ a {
   flex: 1;
 }
 
+.sidebar-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-4);
+}
+
 .nav-item {
   display: flex;
   align-items: center;
@@ -619,6 +625,7 @@ a {
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
+
 /* --- Command Tower Card Styles (Compact) --- */
 
 .command-grid {
@@ -641,7 +648,7 @@ a {
 .command-card:hover {
   border-color: var(--text-primary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .command-card-title {
@@ -682,4 +689,29 @@ a {
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+
+/* Icon Color Utilities (replacing Tailwind classes) */
+.icon-yellow {
+  color: #facc15;
+}
+
+.icon-red {
+  color: #f87171;
+}
+
+.icon-green {
+  color: #4ade80;
+}
+
+.icon-blue {
+  color: #60a5fa;
+}
+
+.icon-purple {
+  color: #a78bfa;
+}
+
+.icon-teal {
+  color: #2dd4bf;
 }

@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Lightbulb, Rocket } from 'lucide-react';
 
 export default function BacklogPage() {
     const { t } = useTranslation();
 
-    const [inspirationItems] = useState([
+    // Static demo data - in production, these would come from a data store
+    const inspirationItems = [
         { id: 1, name: 'AI Storyteller', color: '#ffd1dc' }, // Pastel Pink
         { id: 2, name: 'Crypto Tracker', color: '#c1e1c1' }, // Pastel Green
-    ]);
+    ];
 
-    const [pendingItems] = useState([
+    const pendingItems = [
         { id: 3, name: 'Flow Studio Mobile', color: '#ffaaa5' }, // Red-ish
         { id: 4, name: 'Database Optimization', color: '#a8e6cf' }, // Teal-ish
         { id: 5, name: 'User Authentication', color: '#dcedc1' }, // Light Green
-    ]);
+    ];
 
     return (
         <div className="works-page">
@@ -26,7 +27,7 @@ export default function BacklogPage() {
             {/* Inspiration Pool */}
             <section className="works-section">
                 <div className="works-section-header">
-                    <Lightbulb size={20} className="text-yellow-400" />
+                    <Lightbulb size={20} style={{ color: 'var(--color-accent-teal)' }} />
                     <h2 className="works-section-title">{t('modules.backlog.sections.inspiration')}</h2>
                 </div>
                 <div className="works-grid-Refined">
@@ -44,7 +45,7 @@ export default function BacklogPage() {
                     ))}
                     <div className="works-card works-card-add">
                         <Plus size={32} />
-                        <span>Add Idea</span>
+                        <span>{t('common.add_idea')}</span>
                     </div>
                 </div>
             </section>
@@ -52,7 +53,7 @@ export default function BacklogPage() {
             {/* Pending Development */}
             <section className="works-section">
                 <div className="works-section-header">
-                    <Rocket size={20} className="text-red-400" />
+                    <Rocket size={20} style={{ color: 'var(--color-accent-vermilion)' }} />
                     <h2 className="works-section-title">{t('modules.backlog.sections.pending')}</h2>
                 </div>
                 <div className="works-grid-Refined">
@@ -70,7 +71,7 @@ export default function BacklogPage() {
                     ))}
                     <div className="works-card works-card-add">
                         <Plus size={32} />
-                        <span>Add Project</span>
+                        <span>{t('common.add_project')}</span>
                     </div>
                 </div>
             </section>

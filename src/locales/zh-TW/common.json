@@ -14,6 +14,8 @@
         "dashboard": "儀表板",
         "incubator": "孵化器",
         "vision_studio": "願景工作室",
+        "backlog": "待開發",
+        "workshop": "進行中",
         "command_tower": "指揮塔",
         "archive": "歸檔",
         "settings": "設定"
@@ -22,6 +24,8 @@
         "subtitle": "您的 AI 驅動個人軟體軍火庫。",
         "incubator_desc": "用 AI 捕捉和分析新創意。",
         "vision_studio_desc": "定義專案範圍和里程碑。",
+        "backlog_desc": "管理待開發的已批准創意。",
+        "workshop_desc": "追蹤進行中的專案和任務。",
         "command_tower_desc": "與 AI 副駕駛協同執行任務。",
         "archive_desc": "可重複使用的模組與回顧日誌。"
     },
@@ -34,6 +38,26 @@
         },
         "vision_studio": {
             "subtitle": "定義範圍：MVP、專業版或旗艦版。"
+        },
+        "backlog": {
+            "subtitle": "準備實現的創意庫。",
+            "start_sprint": "開始衝刺",
+            "priority": "優先級",
+            "sections": {
+                "inspiration": "靈感池",
+                "pending": "待開發"
+            }
+        },
+        "workshop": {
+            "subtitle": "奇蹟發生的地方。",
+            "active_tasks": "活躍任務",
+            "progress": "進度",
+            "stages": {
+                "early": "初級階段",
+                "growth": "中級階段",
+                "advanced": "高級階段",
+                "commercial": "商業化階段"
+            }
         },
         "incubator": {
             "subtitle": "創意誕生與分析之地。",
@@ -51,5 +75,11 @@
             "start_project": "啟動專案",
             "discard": "丟棄"
         }
+    },
+    "common": {
+        "add": "新增",
+        "add_idea": "新增創意",
+        "add_project": "新增專案",
+        "add_task": "新增任務"
     }
 }

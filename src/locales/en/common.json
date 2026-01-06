@@ -75,5 +75,11 @@
             "start_project": "Start Project",
             "discard": "Discard"
         }
+    },
+    "common": {
+        "add": "Add",
+        "add_idea": "Add Idea",
+        "add_project": "Add Project",
+        "add_task": "Add Task"
     }
 }
