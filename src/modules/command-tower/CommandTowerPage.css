@@ -32,22 +32,24 @@
     font-size: 1rem;
 }
 
-/* Stage Grid - Vertical Stack */
+/* Stage Grid - Flex Wrap (Auto Flow) */
 .ct-stage-grid {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 1.5rem;
     padding-bottom: 2rem;
     height: auto;
     padding-right: 0;
+    align-items: flex-start;
+    /* Align items to top */
 }
 
-/* Scrollbar styling for the grid - Removed as it's no longer scrolling */
+/* Scrollbar styling for the grid - Removed as it's no longer scrolling horizontally */
 .ct-stage-grid::-webkit-scrollbar {
     display: none;
 }
 
-/* Stage Card (Category Row) */
+/* Stage Card (Category Column) */
 .ct-stage-card {
     background: var(--bg-card);
     backdrop-filter: blur(12px);
@@ -57,10 +59,12 @@
     padding: 1rem;
     display: flex;
     flex-direction: column;
-    width: 100%;
-    min-width: unset;
-    max-width: 100%;
-    height: auto;
+    /* Restore Card Dimensions */
+    width: 320px;
+    min-width: 320px;
+    max-width: 320px;
+    height: 600px;
+    /* Fixed height to allow internal scrolling */
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
