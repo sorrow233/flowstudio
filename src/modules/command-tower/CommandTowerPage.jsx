@@ -225,7 +225,7 @@ export default function CommandTowerPage() {
                                             className="ct-command-item"
                                             onClick={() => copyToClipboard(cmd.content, cmd.id)}
                                         >
-                                            <div className="ct-command-header">
+                                            <div className="ct-command-header" style={{ marginBottom: 0 }}>
                                                 <span className="ct-command-title">{cmd.title}</span>
                                                 {copiedId === cmd.id ? (
                                                     <Check size={14} color="#4ade80" />
@@ -233,9 +233,11 @@ export default function CommandTowerPage() {
                                                     <Copy size={14} color="#64748b" />
                                                 )}
                                             </div>
+                                            {/* Content hidden as requested
                                             <div className="ct-command-code">
                                                 {cmd.content}
                                             </div>
+                                            */}
                                             <button
                                                 className="command-delete-btn-new"
                                                 style={{ position: 'absolute', top: '10px', right: '10px', opacity: 0 }} // Hidden by default, shown on hover via CSS
@@ -258,7 +260,7 @@ export default function CommandTowerPage() {
                     );
                 })}
 
-                {/* Add Category Card */}
+                {/* Add Category Column */}
                 <button
                     className="ct-stage-card"
                     style={{
@@ -266,12 +268,21 @@ export default function CommandTowerPage() {
                         justifyContent: 'center',
                         alignItems: 'center',
                         cursor: 'pointer',
-                        opacity: 0.7
+                        opacity: 0.7,
+                        minWidth: '100px', /* Smaller width for the add button */
+                        maxWidth: '100px',
+                        background: 'transparent'
                     }}
                     onClick={() => setShowAddStageModal(true)}
                 >
-                    <Plus size={48} color="#64748b" />
-                    <span style={{ marginTop: '1rem', color: '#94a3b8' }}>
+                    <Plus size={32} color="#64748b" />
+                    <span style={{
+                        marginTop: '1rem',
+                        color: '#94a3b8',
+                        writingMode: 'vertical-rl',
+                        textOrientation: 'mixed',
+                        fontSize: '0.9rem'
+                    }}>
                         {t('common.add_category') || "Add Category"}
                     </span>
                 </button>
