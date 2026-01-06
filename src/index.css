@@ -71,6 +71,7 @@ body {
 }
 
 /* Atmospheric Background */
+/* Atmospheric Background */
 body::before {
   content: "";
   position: fixed;
@@ -78,7 +79,7 @@ body::before {
   right: -100px;
   width: 600px;
   height: 600px;
-  background: var(--glow-indigo);
+  background: var(--glow-sora);
   pointer-events: none;
   z-index: -1;
   opacity: 0.6;
@@ -91,20 +92,15 @@ body::after {
   left: -100px;
   width: 500px;
   height: 500px;
-  background: var(--glow-vermilion);
+  background: var(--glow-sakura);
   pointer-events: none;
   z-index: -1;
   opacity: 0.4;
 }
 
 .noise-overlay {
-  position: fixed;
-  inset: 0;
-  background-image: var(--bg-noise);
-  pointer-events: none;
-  z-index: 100;
-  opacity: 0.3;
-  mix-blend-mode: overlay;
+  display: none;
+  /* Disable noise for clearer look */
 }
 
 /* --- Layout (Ma) --- */
@@ -644,7 +640,7 @@ input[type="text"]:focus {
 }
 
 .command-delete-btn:hover {
-  color: var(--color-accent-vermilion);
+  color: var(--color-accent-sakura);
   background-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -848,7 +844,7 @@ input[type="text"]:focus {
   align-items: center;
   gap: 4px;
   font-size: 0.6875rem;
-  color: var(--color-accent-teal);
+  color: var(--color-accent-matcha);
   font-weight: 500;
 }
 
@@ -871,7 +867,7 @@ input[type="text"]:focus {
 }
 
 .command-delete-btn-new:hover {
-  color: var(--color-accent-vermilion);
+  color: var(--color-accent-sakura);
   background-color: rgba(0, 0, 0, 0.05);
 }
 

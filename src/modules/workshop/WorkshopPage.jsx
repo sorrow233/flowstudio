@@ -62,17 +62,17 @@ export default function WorkshopPage() {
     const stageConfig = [
         {
             key: STAGES.EARLY,
-            icon: <Sprout size={18} style={{ color: 'var(--color-accent-teal)' }} />,
+            icon: <Sprout size={18} style={{ color: 'var(--color-accent-matcha)' }} />,
             title: t('modules.workshop.stages.early'),
             items: earlyStage,
-            color: 'var(--color-accent-teal)'
+            color: 'var(--color-accent-matcha)'
         },
         {
             key: STAGES.GROWTH,
-            icon: <TrendingUp size={18} style={{ color: 'var(--color-accent-indigo)' }} />,
+            icon: <TrendingUp size={18} style={{ color: 'var(--color-accent-sora)' }} />,
             title: t('modules.workshop.stages.growth'),
             items: growthStage,
-            color: 'var(--color-accent-indigo)'
+            color: 'var(--color-accent-sora)'
         },
         {
             key: STAGES.ADVANCED,
@@ -83,10 +83,10 @@ export default function WorkshopPage() {
         },
         {
             key: STAGES.COMMERCIAL,
-            icon: <DollarSign size={18} style={{ color: 'var(--color-accent-vermilion)' }} />,
+            icon: <DollarSign size={18} style={{ color: 'var(--color-accent-sakura)' }} />,
             title: t('modules.workshop.stages.commercial'),
             items: commercialStage,
-            color: 'var(--color-accent-vermilion)',
+            color: 'var(--color-accent-sakura)',
             isLast: true
         }
     ];

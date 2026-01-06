@@ -82,7 +82,7 @@ export default function Layout() {
                                     width: '32px',
                                     height: '32px',
                                     borderRadius: '50%',
-                                    backgroundColor: 'var(--primary-color)',
+                                    backgroundColor: 'var(--color-accent)',
                                     color: 'white',
                                     display: 'flex',
                                     alignItems: 'center',

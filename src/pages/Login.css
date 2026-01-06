@@ -28,7 +28,7 @@
     right: -10%;
     width: 600px;
     height: 600px;
-    background: var(--color-accent-indigo);
+    background: var(--color-accent-sora);
 }
 
 .glow-sphere.vermilion {
@@ -36,7 +36,7 @@
     left: -10%;
     width: 500px;
     height: 500px;
-    background: var(--color-accent-vermilion);
+    background: var(--color-accent-sakura);
 }
 
 .login-back-btn {
@@ -106,7 +106,7 @@
 .login-error-zen {
     background: rgba(184, 58, 57, 0.1);
     border: 1px solid rgba(184, 58, 57, 0.2);
-    color: var(--color-accent-vermilion);
+    color: var(--color-accent-sakura);
     padding: var(--space-3) var(--space-4);
     border-radius: var(--radius-md);
     font-size: 0.9rem;

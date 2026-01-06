@@ -20,12 +20,12 @@ export default function CommandTowerPage() {
 
     // Stages: Custom + Default
     const defaultStages = [
-        { key: 'inspiration', icon: 'Lightbulb', label: 'modules.backlog.sections.inspiration', color: 'var(--color-accent-teal)' },
-        { key: 'pending', icon: 'Rocket', label: 'modules.backlog.sections.pending', color: 'var(--color-accent-vermilion)' },
-        { key: 'early', icon: 'Sprout', label: 'modules.workshop.stages.early', color: 'var(--color-accent-teal)' },
-        { key: 'growth', icon: 'TrendingUp', label: 'modules.workshop.stages.growth', color: 'var(--color-accent-indigo)' },
+        { key: 'inspiration', icon: 'Lightbulb', label: 'modules.backlog.sections.inspiration', color: 'var(--color-accent-matcha)' },
+        { key: 'pending', icon: 'Rocket', label: 'modules.backlog.sections.pending', color: 'var(--color-accent-sakura)' },
+        { key: 'early', icon: 'Sprout', label: 'modules.workshop.stages.early', color: 'var(--color-accent-matcha)' },
+        { key: 'growth', icon: 'TrendingUp', label: 'modules.workshop.stages.growth', color: 'var(--color-accent-sora)' },
         { key: 'advanced', icon: 'Award', label: 'modules.workshop.stages.advanced', color: '#9c27b0' },
-        { key: 'commercial', icon: 'DollarSign', label: 'modules.workshop.stages.commercial', color: 'var(--color-accent-vermilion)' }
+        { key: 'commercial', icon: 'DollarSign', label: 'modules.workshop.stages.commercial', color: 'var(--color-accent-sakura)' }
     ];
 
     const [stages, setStages] = useState(() => {

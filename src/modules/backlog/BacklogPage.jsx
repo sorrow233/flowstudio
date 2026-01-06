@@ -167,7 +167,7 @@ export default function BacklogPage() {
                     <>
                         <section className="project-section">
                             <SectionHeader
-                                icon={<Lightbulb size={18} style={{ color: 'var(--color-accent-teal)' }} />}
+                                icon={<Lightbulb size={18} style={{ color: 'var(--color-accent-matcha)' }} />}
                                 title={t('modules.backlog.sections.inspiration')}
                                 count={inspirationItems.length}
                             />
@@ -181,13 +181,13 @@ export default function BacklogPage() {
                                             onDelete={deleteProject}
                                             onMoveNext={handleMoveNext}
                                             onArchive={toggleArchive}
-                                            accentColor="var(--color-accent-teal)"
+                                            accentColor="var(--color-accent-matcha)"
                                         />
                                     </DraggableCard>
                                 ))}
                                 <AddProjectCard
                                     onAdd={handleAddItem(STAGES.INSPIRATION)}
-                                    accentColor="var(--color-accent-teal)"
+                                    accentColor="var(--color-accent-matcha)"
                                     addLabel={t('common.add_idea')}
                                 />
                             </DroppableSection>
@@ -195,7 +195,7 @@ export default function BacklogPage() {
 
                         <section className="project-section">
                             <SectionHeader
-                                icon={<Rocket size={18} style={{ color: 'var(--color-accent-vermilion)' }} />}
+                                icon={<Rocket size={18} style={{ color: 'var(--color-accent-sakura)' }} />}
                                 title={t('modules.backlog.sections.pending')}
                                 count={pendingItems.length}
                             />
@@ -209,7 +209,7 @@ export default function BacklogPage() {
                                             onDelete={deleteProject}
                                             onMoveNext={() => handleTransferToWorkshop(item)}
                                             onArchive={toggleArchive}
-                                            accentColor="var(--color-accent-vermilion)"
+                                            accentColor="var(--color-accent-sakura)"
                                             moveButtonLabel={t('common.start_development') || '开始开发'}
                                             moveButtonIcon={<Play size={14} />}
                                         />
@@ -217,7 +217,7 @@ export default function BacklogPage() {
                                 ))}
                                 <AddProjectCard
                                     onAdd={handleAddItem(STAGES.PENDING)}
-                                    accentColor="var(--color-accent-vermilion)"
+                                    accentColor="var(--color-accent-sakura)"
                                     addLabel={t('common.add_project')}
                                 />
                             </DroppableSection>
@@ -229,7 +229,7 @@ export default function BacklogPage() {
                     {activeItem ? (
                         <DragOverlayCard
                             item={activeItem}
-                            accentColor={activeItem.stage === STAGES.INSPIRATION ? 'var(--color-accent-teal)' : 'var(--color-accent-vermilion)'}
+                            accentColor={activeItem.stage === STAGES.INSPIRATION ? 'var(--color-accent-matcha)' : 'var(--color-accent-sakura)'}
                         />
                     ) : null}
                 </DragOverlay>
