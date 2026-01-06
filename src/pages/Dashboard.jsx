@@ -3,30 +3,30 @@ import { Sparkles, Target, Zap, Archive } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const ModuleCard = ({ title, icon: Icon, description, to, color }) => (
-    <Link to={to} className="card flex flex-col gap-4 hover:border-[color:var(--text-primary)] transition-colors text-inherit no-underline">
-        <div className="flex items-center justify-between">
-            <div className="p-2 rounded-full" style={{ backgroundColor: `var(--bg-app)` }}>
+    <Link to={to} className="module-card">
+        <div className="module-header">
+            <div className="module-icon" style={{ '--icon-color': color }}>
                 <Icon size={24} color={color} />
             </div>
         </div>
-        <div>
-            <h3 className="text-h3" style={{ marginBottom: '0.5rem' }}>{title}</h3>
-            <p className="text-small">{description}</p>
+        <div className="module-content">
+            <h3 className="text-h3 module-title">{title}</h3>
+            <p className="text-small module-desc">{description}</p>
         </div>
     </Link>
 );
 
 export default function Dashboard() {
     return (
-        <div className="flex flex-col gap-8">
-            <div className="flex flex-col gap-2">
+        <div className="dashboard-container">
+            <div className="dashboard-header">
                 <h1 className="text-h1">Flow Studio</h1>
-                <p className="text-body" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-body subtitle">
                     Your AI-Driven Personal Software Arsenal.
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
+            <div className="dashboard-grid">
                 <ModuleCard
                     title="Incubator"
                     icon={Sparkles}

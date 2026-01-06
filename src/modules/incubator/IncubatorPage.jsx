@@ -12,29 +12,25 @@ export default function IncubatorPage() {
     }
 
     return (
-        <div className="flex flex-col gap-8 max-w-2xl mx-auto w-full">
-            <div className="flex flex-col gap-2 text-center">
+        <div className="page-container incubator-page">
+            <div className="page-header center">
                 <h1 className="text-h2">Incubator</h1>
                 <p className="text-small">Where ideas are born and analyzed.</p>
             </div>
 
-            <div className="card flex flex-col gap-4 p-6 shadow-lg" style={{ borderColor: 'var(--color-accent)' }}>
-                <div className="flex items-center gap-2" style={{ color: 'var(--color-accent)' }}>
+            <div className="card incubate-card">
+                <div className="card-header highlight">
                     <Sparkles size={20} />
                     <h3 className="text-h3 font-bold">Quick Capture</h3>
                 </div>
-                <form onSubmit={handleCapture} className="flex flex-col gap-4">
+                <form onSubmit={handleCapture} className="incubate-form">
                     <textarea
-                        className="w-full bg-[var(--bg-app)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-md p-3 focus:outline-none transition-colors min-h-[120px] resize-none text-body"
-                        style={{
-                            borderColor: 'var(--border-subtle)',
-                            fontFamily: 'inherit'
-                        }}
+                        className="input-textarea"
                         placeholder="I want to build a software that..."
                         value={idea}
                         onChange={(e) => setIdea(e.target.value)}
                     />
-                    <div className="flex justify-end">
+                    <div className="form-actions">
                         <button type="submit" className="btn btn-primary gap-2">
                             <span>Ignite Idea</span>
                             <Send size={16} />
