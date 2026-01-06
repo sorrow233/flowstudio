@@ -74,7 +74,7 @@ export function useWorkshopItems() {
         onSuccess: () => queryClient.invalidateQueries({ queryKey }),
     });
 
-    const addItem = async (stage = WORKSHOP_STAGES.EARLY, formData = {}) => {
+    const addProject = async (stage = WORKSHOP_STAGES.EARLY, formData = {}) => {
         const newItem = {
             name: formData.name || '',
             link: formData.link || '',
@@ -89,12 +89,12 @@ export function useWorkshopItems() {
         return result.id;
     };
 
-    const updateItem = (id, updates) => updateMutation.mutateAsync({ id, updates });
-    const deleteItem = (id) => deleteMutation.mutateAsync(id);
+    const updateProject = (id, updates) => updateMutation.mutateAsync({ id, updates });
+    const deleteProject = (id) => deleteMutation.mutateAsync(id);
 
     const toggleArchive = (id) => {
         const item = items.find(i => i.id === id);
-        if (item) updateItem(id, { archived: !item.archived });
+        if (item) updateProject(id, { archived: !item.archived });
     };
 
     // Stage validation for advanced stages
@@ -116,7 +116,7 @@ export function useWorkshopItems() {
         const validation = validateForNextStage(item, newStage);
         if (!validation.valid) return { success: false, message: validation.message };
 
-        await updateItem(id, { stage: newStage });
+        await updateProject(id, { stage: newStage });
         return { success: true };
     };
 
@@ -135,15 +135,15 @@ export function useWorkshopItems() {
         const validation = validateForNextStage(item, nextStage);
         if (!validation.valid) return;
 
-        await updateItem(id, { stage: nextStage });
+        await updateProject(id, { stage: nextStage });
     };
 
     return {
-        items,
+        projects: items,
         loading: isLoading,
-        addItem,
-        updateItem,
-        deleteItem,
+        addProject,
+        updateProject,
+        deleteProject,
         moveItemNext,
         moveItemToStage,
         toggleArchive,

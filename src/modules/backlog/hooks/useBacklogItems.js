@@ -73,7 +73,7 @@ export function useBacklogItems() {
         onSuccess: () => queryClient.invalidateQueries({ queryKey }),
     });
 
-    const addItem = async (stage = BACKLOG_STAGES.INSPIRATION, formData = {}) => {
+    const addProject = async (stage = BACKLOG_STAGES.INSPIRATION, formData = {}) => {
         const newItem = {
             name: formData.name || '',
             link: formData.link || '',
@@ -88,19 +88,19 @@ export function useBacklogItems() {
         return result.id;
     };
 
-    const updateItem = (id, updates) => updateMutation.mutateAsync({ id, updates });
-    const deleteItem = (id) => deleteMutation.mutateAsync(id);
+    const updateProject = (id, updates) => updateMutation.mutateAsync({ id, updates });
+    const deleteProject = (id) => deleteMutation.mutateAsync(id);
 
     const toggleArchive = (id) => {
         const item = items.find(i => i.id === id);
-        if (item) updateItem(id, { archived: !item.archived });
+        if (item) updateProject(id, { archived: !item.archived });
     };
 
     const moveItemToStage = async (id, newStage) => {
         if (!Object.values(BACKLOG_STAGES).includes(newStage)) {
             return { success: false, message: 'Invalid stage for Backlog' };
         }
-        await updateItem(id, { stage: newStage });
+        await updateProject(id, { stage: newStage });
         return { success: true };
     };
 
@@ -109,7 +109,7 @@ export function useBacklogItems() {
         if (!item) return;
 
         if (item.stage === BACKLOG_STAGES.INSPIRATION) {
-            await updateItem(id, { stage: BACKLOG_STAGES.PENDING });
+            await updateProject(id, { stage: BACKLOG_STAGES.PENDING });
         }
         // pending 阶段的 "next" 是转入 Workshop，由 transferToWorkshop 处理
     };
@@ -145,20 +145,20 @@ export function useBacklogItems() {
         localStorage.setItem(workshopKey, JSON.stringify([...workshopItems, workshopItem]));
 
         // 4. 从 Backlog 删除
-        await deleteItem(id);
+        await deleteProject(id);
 
         // 5. 通知 Workshop 刷新（通过 invalidate 其 queryKey）
         queryClient.invalidateQueries({ queryKey: ['workshop-items'] });
 
         return { success: true };
-    }, [items, deleteItem, queryClient]);
+    }, [items, deleteProject, queryClient]);
 
     return {
-        items,
+        projects: items,
         loading: isLoading,
-        addItem,
-        updateItem,
-        deleteItem,
+        addProject,
+        updateProject,
+        deleteProject,
         moveItemNext,
         moveItemToStage,
         toggleArchive,

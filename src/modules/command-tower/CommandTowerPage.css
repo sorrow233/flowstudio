@@ -19,13 +19,12 @@
 }
 
 .ct-title-group h1 {
-    font-family: 'Outfit', 'Inter', sans-serif;
+    font-family: var(--font-serif);
     font-size: 2.5rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-weight: 500;
+    color: var(--text-primary);
     margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
 }
 
 .ct-subtitle {
@@ -43,11 +42,11 @@
 
 /* Stage Card (Category) */
 .ct-stage-card {
-    background: rgba(30, 41, 59, 0.4);
+    background: var(--bg-card);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
+    border: none;
+    border-radius: var(--radius-lg);
     padding: 1.5rem;
     display: flex;
     flex-direction: column;

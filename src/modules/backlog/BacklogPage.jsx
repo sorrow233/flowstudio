@@ -28,8 +28,8 @@ export default function BacklogPage() {
         moveItemToStage,
         toggleArchive,
         transferToWorkshop,
-    } = useBacklogItems(); // Assuming useBacklogItems is renamed to useProjects in a separate change, and STAGES is now BACKLOG_STAGES
-    const STAGES = BACKLOG_STAGES; // Use the imported BACKLOG_STAGES
+        STAGES
+    } = useBacklogItems();
     const [activeId, setActiveId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [showArchived, setShowArchived] = useState(false);
@@ -204,8 +204,8 @@ export default function BacklogPage() {
                                         <ProjectCard
                                             item={item}
                                             variant="backlog"
-                                            onUpdate={updateItem}
-                                            onDelete={deleteItem}
+                                            onUpdate={updateProject}
+                                            onDelete={deleteProject}
                                             onMoveNext={() => handleTransferToWorkshop(item)}
                                             onArchive={toggleArchive}
                                             accentColor="var(--color-accent-vermilion)"

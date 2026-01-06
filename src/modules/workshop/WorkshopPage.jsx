@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sprout, TrendingUp, Award, DollarSign, Archive, RotateCcw } from 'lucide-react';
-import { useProjects } from '@/features/projects/hooks/useProjects';
-import { STAGES } from '@/features/projects/domain';
+import { useWorkshopItems, WORKSHOP_STAGES } from './hooks/useWorkshopItems';
 import ProjectCard from '@/components/ProjectCard';
 import AddProjectCard from '@/components/AddProjectCard';
 import SectionHeader from '@/components/SectionHeader';
@@ -28,8 +27,10 @@ export default function WorkshopPage() {
         moveItemNext,
         validateForNextStage,
         moveItemToStage,
-        toggleArchive
-    } = useProjects();
+        toggleArchive,
+        STAGES
+    } = useWorkshopItems();
+
     const [activeId, setActiveId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [showArchived, setShowArchived] = useState(false);
@@ -55,20 +56,6 @@ export default function WorkshopPage() {
     };
 
     const handleMoveNext = (item) => {
-        let nextStage;
-        switch (item.stage) {
-            case STAGES.EARLY: nextStage = STAGES.GROWTH; break;
-            case STAGES.GROWTH: nextStage = STAGES.ADVANCED; break;
-            case STAGES.ADVANCED: nextStage = STAGES.COMMERCIAL; break;
-            default: return;
-        }
-
-        const validation = validateForNextStage(item, nextStage);
-        if (!validation.valid) {
-            alert(validation.message);
-            return;
-        }
-
         moveItemNext(item.id);
     };
 
@@ -123,7 +110,7 @@ export default function WorkshopPage() {
         if (over && active.id !== over.id) {
             const overStage = over.id;
 
-            const validStages = [STAGES.EARLY, STAGES.GROWTH, STAGES.ADVANCED, STAGES.COMMERCIAL];
+            const validStages = Object.values(STAGES);
             if (validStages.includes(overStage) && !showArchived) {
                 const result = moveItemToStage(active.id, overStage);
                 if (!result.success) {
