@@ -73,7 +73,13 @@
         "project_link": "项目链接",
         "project_goal": "项目目标",
         "search_placeholder": "搜索指令...",
-        "no_results": "没有找到匹配的指令。"
+        "no_results": "没有找到匹配的指令。",
+        "add_category": "添加分类",
+        "delete_confirm": "确定要删除吗？",
+        "delete_stage_confirm": "删除此分类及其所有命令？",
+        "empty_stage_hint": "暂无命令",
+        "name": "名称",
+        "color": "颜色"
     },
     "landing": {
         "hero_title": "您的 AI 驱动个人软件军火库",

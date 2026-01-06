@@ -1,4 +1,31 @@
+import React, { lazy } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ProjectProvider } from '@/contexts/ProjectContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import Layout from '@/components/Layout';
+import AppErrorBoundary from '@/components/AppErrorBoundary';
+import OfflineAlert from '@/components/OfflineAlert';
+import LandingPage from '@/pages/LandingPage/LandingPage';
+import Login from '@/pages/Login';
+import PricingPage from '@/pages/Pricing';
+import AboutPage from '@/pages/About';
+import ChangelogPage from '@/pages/Changelog';
+
+// Lazy load protected pages for performance
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const BacklogPage = lazy(() => import('@/modules/backlog/BacklogPage'));
+const WorkshopPage = lazy(() => import('@/modules/workshop/WorkshopPage'));
+const CommandTowerPage = lazy(() => import('@/modules/command-tower/CommandTowerPage'));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="loading-container">
+    <div className="loading-spinner"></div>
+  </div>
+);
 
 function App() {
   const { t } = useTranslation();
