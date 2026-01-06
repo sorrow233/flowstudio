@@ -46,7 +46,7 @@
 }
 
 /* Dark Mode Base */
-.dark-mode .project-card {
+.dark .project-card {
     background: rgba(30, 30, 40, 0.75);
     border-color: rgba(255, 255, 255, 0.08);
     box-shadow:
@@ -54,7 +54,7 @@
         0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.dark-mode .project-card:hover {
+.dark .project-card:hover {
     box-shadow:
         0 24px 48px rgba(0, 0, 0, 0.4),
         0 12px 24px rgba(0, 0, 0, 0.25);
@@ -82,7 +82,7 @@
     word-break: break-word;
 }
 
-.dark-mode .project-card-name {
+.dark .project-card-name {
     color: rgba(255, 255, 255, 0.95);
 }
 
@@ -133,11 +133,11 @@
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
-.dark-mode .project-icon-btn {
+.dark .project-icon-btn {
     background: rgba(255, 255, 255, 0.1);
 }
 
-.dark-mode .project-icon-btn:hover {
+.dark .project-icon-btn:hover {
     background: rgba(255, 255, 255, 0.15);
 }
 
@@ -167,12 +167,12 @@
     background: rgba(0, 0, 0, 0.06);
 }
 
-.dark-mode .project-card-info {
+.dark .project-card-info {
     color: rgba(255, 255, 255, 0.7);
     background: rgba(255, 255, 255, 0.05);
 }
 
-.dark-mode .project-card-info:hover {
+.dark .project-card-info:hover {
     background: rgba(255, 255, 255, 0.08);
 }
 
@@ -215,7 +215,7 @@
     color: rgba(0, 0, 0, 0.45);
 }
 
-.dark-mode .project-card-footer {
+.dark .project-card-footer {
     border-top-color: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.5);
 }
@@ -268,11 +268,11 @@
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-.dark-mode .project-input {
+.dark .project-input {
     background: rgba(255, 255, 255, 0.08);
 }
 
-.dark-mode .project-input:focus {
+.dark .project-input:focus {
     background: rgba(255, 255, 255, 0.12);
 }
 
@@ -322,7 +322,7 @@
     color: var(--text-primary);
 }
 
-.dark-mode .project-action-cancel {
+.dark .project-action-cancel {
     background: rgba(255, 255, 255, 0.1);
 }
 
@@ -364,11 +364,11 @@
     font-weight: 600;
 }
 
-.dark-mode .project-card-add {
+.dark .project-card-add {
     border-color: rgba(255, 255, 255, 0.15);
 }
 
-.dark-mode .project-card-add:hover {
+.dark .project-card-add:hover {
     border-color: #818cf8;
     background: rgba(129, 140, 248, 0.08);
     color: #818cf8;
@@ -383,7 +383,7 @@
     border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-.dark-mode .project-section {
+.dark .project-section {
     background: rgba(30, 30, 40, 0.3);
     border-color: rgba(255, 255, 255, 0.05);
 }
@@ -423,7 +423,7 @@
     border-radius: 20px;
 }
 
-.dark-mode .project-section-count {
+.dark .project-section-count {
     background: rgba(255, 255, 255, 0.1);
 }
 
@@ -453,7 +453,7 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.dark-mode .project-page-header {
+.dark .project-page-header {
     border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
@@ -529,7 +529,7 @@
 
 .command-search-input {
     width: 100%;
-    padding: 10px 40px 10px 40px;
+    padding: 10px 40px 10px 48px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.8);
@@ -546,12 +546,12 @@
     background: white;
 }
 
-.dark-mode .command-search-input {
+.dark .command-search-input {
     background: rgba(30, 30, 35, 0.8);
     border-color: rgba(255, 255, 255, 0.1);
 }
 
-.dark-mode .command-search-input:focus {
+.dark .command-search-input:focus {
     background: rgba(40, 40, 45, 0.9);
     border-color: #818cf8;
 }

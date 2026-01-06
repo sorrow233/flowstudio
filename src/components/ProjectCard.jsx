@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, Trash2, ExternalLink, Target, Calendar, Edit3, Check, X, Archive, RotateCcw, AlertTriangle, Image, Palette } from 'lucide-react';
+import { ArrowRight, Trash2, ExternalLink, Target, Calendar, Edit3, Check, X, Archive, RotateCcw, AlertTriangle, Image, Palette, FastForward } from 'lucide-react';
 import Modal from './Modal';
 import './ProjectCard.css';
 
@@ -32,6 +32,7 @@ export default function ProjectCard({
     const { t } = useTranslation();
     const [isEditing, setIsEditing] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showMoveConfirm, setShowMoveConfirm] = useState(false);
     const [showBackgroundPicker, setShowBackgroundPicker] = useState(false);
     const fileInputRef = useRef(null);
     const [editData, setEditData] = useState({
@@ -228,7 +229,7 @@ export default function ProjectCard({
                     {showMoveButton && !isArchived && (
                         <button
                             className="project-icon-btn project-icon-btn-primary"
-                            onClick={() => onMoveNext(item)}
+                            onClick={() => setShowMoveConfirm(true)}
                             title={t('common.next_stage')}
                         >
                             <ArrowRight size={14} />
@@ -295,6 +296,39 @@ export default function ProjectCard({
                             {t('common.delete_permanent_warning') || "This action cannot be undone."}
                         </p>
                     )}
+                </div>
+            </Modal>
+
+            {/* Move to Next Stage Confirmation Modal */}
+            <Modal
+                isOpen={showMoveConfirm}
+                onClose={() => setShowMoveConfirm(false)}
+                title={t('common.confirm_move') || "确认推进"}
+                footer={
+                    <>
+                        <button className="project-action-btn project-action-cancel" onClick={() => setShowMoveConfirm(false)}>
+                            {t('common.cancel')}
+                        </button>
+                        <button
+                            className="project-action-btn project-action-save"
+                            onClick={() => {
+                                onMoveNext(item);
+                                setShowMoveConfirm(false);
+                            }}
+                        >
+                            <FastForward size={14} /> {t('common.confirm') || '确认'}
+                        </button>
+                    </>
+                }
+            >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', textAlign: 'center', padding: '10px' }}>
+                    <FastForward size={48} color="var(--color-accent-sora)" />
+                    <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>
+                        {t('common.move_to_next_stage') || "确定要将此项目推进到下一阶段吗？"}
+                    </p>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                        {item.name}
+                    </p>
                 </div>
             </Modal>
 

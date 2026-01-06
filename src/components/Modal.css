@@ -14,7 +14,7 @@
 }
 
 .modal-content {
-    background: var(--bg-secondary, #ffffff);
+    background: var(--bg-card);
     color: var(--text-primary);
     border-radius: 12px;
     width: 90%;
@@ -22,9 +22,9 @@
     max-height: 90vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--shadow-lg);
     animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    border: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
+    border: 1px solid var(--border-subtle);
 }
 
 .modal-header {
@@ -66,11 +66,11 @@
 
 .modal-footer {
     padding: 1rem 1.5rem;
-    border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
+    border-top: 1px solid var(--border-subtle);
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
-    background-color: var(--bg-tertiary, rgba(0, 0, 0, 0.02));
+    background-color: var(--color-accent-kinari);
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
 }
@@ -100,7 +100,7 @@
 /* Dark mode adjustments */
 @media (prefers-color-scheme: dark) {
     .modal-content {
-        background: var(--bg-secondary, #1a1a1a);
-        border-color: var(--border-color, #333);
+        background: var(--bg-card);
+        border-color: var(--border-subtle);
     }
 }
