@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:main": "npm run build && npx wrangler pages deploy dist --project-name flow-studio --branch main --commit-dirty=true",
+    "deploy:beta": "npm run build && npx wrangler pages deploy dist --project-name flow-studio --branch beta --commit-dirty=true"
   },
   "dependencies": {
     "lucide-react": "^0.562.0",
