@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, Sparkles, Target, Zap, Archive, Settings, Layers, Layout } from 'lucide-react';
+import { Home, Sparkles, Target, Zap, Archive, Settings, Layers, Layout as LayoutIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -32,7 +32,7 @@ export default function Layout() {
                     <div className="nav-divider"></div>
                     <NavItem to="/incubator" icon={Sparkles} label={t('nav.incubator')} isActive={location.pathname.startsWith('/incubator')} />
                     <NavItem to="/backlog" icon={Layers} label={t('nav.backlog')} isActive={location.pathname.startsWith('/backlog')} />
-                    <NavItem to="/workshop" icon={Layout} label={t('nav.workshop')} isActive={location.pathname.startsWith('/workshop')} />
+                    <NavItem to="/workshop" icon={LayoutIcon} label={t('nav.workshop')} isActive={location.pathname.startsWith('/workshop')} />
                     <NavItem to="/vision-studio" icon={Target} label={t('nav.vision_studio')} isActive={location.pathname.startsWith('/vision-studio')} />
                     <NavItem to="/command-tower" icon={Zap} label={t('nav.command_tower')} isActive={location.pathname.startsWith('/command-tower')} />
                     <NavItem to="/archive" icon={Archive} label={t('nav.archive')} isActive={location.pathname.startsWith('/archive')} />
