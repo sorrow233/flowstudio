@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProjectProvider } from '@/contexts/ProjectContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import Login from '@/pages/Login';
-import LandingPage from '@/pages/LandingPage';
+import LandingPage from '@/pages/LandingPage/LandingPage';
 import PricingPage from '@/pages/Pricing';
 import AboutPage from '@/pages/About';
 import ChangelogPage from '@/pages/Changelog';
