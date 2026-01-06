@@ -123,6 +123,20 @@
   --shadow-lg: 0 24px 48px -12px rgba(0, 0, 0, 0.3);
 }
 
+:root.light {
+  --bg-app: var(--color-bg-light);
+  --bg-card: var(--color-surface-light);
+  --bg-glass: rgba(255, 255, 255, 0.7);
+  --text-primary: var(--color-text-main-light);
+  --text-secondary: var(--color-text-muted-light);
+  --border-subtle: var(--color-border-light);
+  --border-hover: var(--color-border-hover-light);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 24px 48px -12px rgba(0, 0, 0, 0.08);
+}
+
 body {
   background-color: var(--bg-app);
   color: var(--text-primary);
