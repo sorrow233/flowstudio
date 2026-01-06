@@ -14,6 +14,8 @@
         "dashboard": "仪表盘",
         "incubator": "孵化器",
         "vision_studio": "愿景工作室",
+        "backlog": "待开发",
+        "workshop": "进行中",
         "command_tower": "指挥塔",
         "archive": "归档",
         "settings": "设置"
@@ -22,6 +24,8 @@
         "subtitle": "您的 AI 驱动个人软件军火库。",
         "incubator_desc": "用 AI 捕捉和分析新创意。",
         "vision_studio_desc": "定义项目范围和里程碑。",
+        "backlog_desc": "管理待开发的已批准创意。",
+        "workshop_desc": "追踪进行中的项目和任务。",
         "command_tower_desc": "与 AI 副驾驶协同执行任务。",
         "archive_desc": "可复用模块与回顾日志。"
     },
@@ -34,6 +38,16 @@
         },
         "vision_studio": {
             "subtitle": "定义范围：MVP、专业版或旗舰版。"
+        },
+        "backlog": {
+            "subtitle": "准备变现的创意库。",
+            "start_sprint": "开始冲刺",
+            "priority": "优先级"
+        },
+        "workshop": {
+            "subtitle": "奇迹发生的地方。",
+            "active_tasks": "活跃任务",
+            "progress": "进度"
         },
         "incubator": {
             "subtitle": "创意诞生与分析之地。",
