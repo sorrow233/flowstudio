@@ -39,8 +39,8 @@ export default function AddBacklogItem({ onAdd, accentColor, addLabel }) {
                             className="project-input project-input-name"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            placeholder={t('module.backlog.add_objective_placeholder')}
-                            title={t('module.backlog.add_objective')}
+                            placeholder={t('modules.backlog.add_objective_placeholder')}
+                            title={t('modules.backlog.add_objective')}
                             autoFocus
                             onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
                         />
@@ -53,8 +53,8 @@ export default function AddBacklogItem({ onAdd, accentColor, addLabel }) {
                             className="project-input"
                             value={formData.goal}
                             onChange={(e) => setFormData({ ...formData, goal: e.target.value })}
-                            placeholder={t('module.backlog.add_driven_placeholder')}
-                            title={t('module.backlog.add_driven')}
+                            placeholder={t('modules.backlog.add_driven_placeholder')}
+                            title={t('modules.backlog.add_driven')}
                         />
                     </div>
                     <div className="project-form-actions">

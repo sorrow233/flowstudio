@@ -14,14 +14,14 @@
         "dashboard": "仪表盘",
         "backlog": "待开发",
         "workshop": "进行中",
-        "command_tower": "指挥塔",
+        "command_tower": "AI指令管理",
         "settings": "设置"
     },
     "dashboard": {
         "subtitle": "您的 AI 驱动个人软件军火库。",
         "backlog_desc": "管理待开发的已批准创意。",
         "workshop_desc": "追踪进行中的项目和任务。",
-        "command_tower_desc": "与 AI 副驾驶协同执行任务。"
+        "command_tower_desc": "管理您的AI工作流指令。"
     },
     "settings": {
         "title": "设置"
