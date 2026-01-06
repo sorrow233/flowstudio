@@ -19,7 +19,7 @@ const Dashboard = React.lazy(() => import('@/pages/Dashboard'));
 const BacklogPage = React.lazy(() => import('@/modules/backlog/BacklogPage'));
 const WorkshopPage = React.lazy(() => import('@/modules/workshop/WorkshopPage'));
 const CommandTowerPage = React.lazy(() => import('@/modules/command-tower/CommandTowerPage'));
-const SettingsPage = React.lazy(() => import('@/pages/Settings')); // Assuming you might have one or just use the div
+
 
 function App() {
   const { t } = useTranslation();

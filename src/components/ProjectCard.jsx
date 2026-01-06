@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, Trash2, ExternalLink, Target, Calendar, Edit3, Check, X, Archive, RotateCcw } from 'lucide-react';
+import { ArrowRight, Trash2, ExternalLink, Target, Calendar, Edit3, Check, X, Archive, RotateCcw, AlertTriangle } from 'lucide-react';
+import Modal from './Modal';
 import './ProjectCard.css';
 
 export default function ProjectCard({
@@ -16,6 +17,7 @@ export default function ProjectCard({
 }) {
     const { t } = useTranslation();
     const [isEditing, setIsEditing] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [editData, setEditData] = useState({
         name: item.name || '',
         link: item.link || '',
@@ -34,6 +36,24 @@ export default function ProjectCard({
             goal: item.goal || ''
         });
         setIsEditing(false);
+    };
+
+    const handleDeleteClick = () => {
+        if (isArchived) {
+            // High risk action - confirm
+            setShowDeleteConfirm(true);
+        } else {
+            // Check if we mean "Archive" (Soft Delete) or actual Delete.
+            // If the UI shows Trash Icon for non-archived items, it usually means "Delete".
+            // If the user hasn't archived it first, maybe we should ask?
+            // "Are you sure you want to delete this active project?"
+            setShowDeleteConfirm(true);
+        }
+    };
+
+    const confirmDelete = () => {
+        onDelete(item.id);
+        setShowDeleteConfirm(false);
     };
 
     const formatDate = (dateString) => {
@@ -149,13 +169,44 @@ export default function ProjectCard({
                     {/* Delete is always available but maybe styled differently in archive */}
                     <button
                         className="project-icon-btn project-icon-btn-danger"
-                        onClick={() => onDelete(item.id)}
+                        onClick={handleDeleteClick}
                         title={isArchived ? t('common.delete_forever') : t('common.delete')}
                     >
                         <Trash2 size={14} />
                     </button>
                 </div>
             </div>
+
+            <Modal
+                isOpen={showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(false)}
+                title={t('common.confirm_delete') || "Confirm Deletion"}
+                footer={
+                    <>
+                        <button className="project-action-btn project-action-cancel" onClick={() => setShowDeleteConfirm(false)}>
+                            {t('common.cancel')}
+                        </button>
+                        <button className="project-action-btn project-action-delete" style={{ backgroundColor: '#ff4d4f', color: 'white', border: 'none' }} onClick={confirmDelete}>
+                            <Trash2 size={14} /> {t('common.delete')}
+                        </button>
+                    </>
+                }
+            >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', textAlign: 'center', padding: '10px' }}>
+                    <AlertTriangle size={48} color="#ff4d4f" />
+                    <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>
+                        {t('common.delete_warning') || "Are you sure you want to delete this project?"}
+                    </p>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                        {item.name}
+                    </p>
+                    {isArchived && (
+                        <p style={{ color: '#ff4d4f', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                            {t('common.delete_permanent_warning') || "This action cannot be undone."}
+                        </p>
+                    )}
+                </div>
+            </Modal>
 
             <div className="project-card-body">
                 {item.link && (
