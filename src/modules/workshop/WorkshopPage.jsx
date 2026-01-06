@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sprout, TrendingUp, Award, DollarSign, Archive, RotateCcw } from 'lucide-react';
-import { useProjects } from '@/features/projects/hooks/useProjects';
+import { useProjects } from '@/hooks/useProjects';
 import { STAGES } from '@/features/projects/domain';
 import ProjectCard from '@/components/ProjectCard';
 import AddProjectCard from '@/components/AddProjectCard';
