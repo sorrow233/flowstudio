@@ -5,10 +5,21 @@ import { useProject, STAGES } from '@/contexts/ProjectContext';
 import ProjectCard from '@/components/ProjectCard';
 import AddProjectCard from '@/components/AddProjectCard';
 import SectionHeader from '@/components/SectionHeader';
+import {
+    DndContext,
+    DragOverlay,
+    useSensor,
+    useSensors,
+    PointerSensor
+} from '@dnd-kit/core';
+import DraggableCard from '@/components/DraggableCard';
+import DroppableSection from '@/components/DroppableSection';
+import DragOverlayCard from '@/components/DragOverlayCard';
 
 export default function WorkshopPage() {
     const { t } = useTranslation();
-    const { items, addItem, updateItem, deleteItem, moveItemNext, validateForNextStage } = useProject();
+    const { items, addItem, updateItem, deleteItem, moveItemNext, validateForNextStage, moveItemToStage } = useProject();
+    const [activeId, setActiveId] = React.useState(null);
 
     const earlyStage = items.filter(item => item.stage === STAGES.EARLY);
     const growthStage = items.filter(item => item.stage === STAGES.GROWTH);
@@ -30,7 +41,6 @@ export default function WorkshopPage() {
 
         const validation = validateForNextStage(item, nextStage);
         if (!validation.valid) {
-            // TODO: Show elegant toast notification instead of alert
             alert(validation.message);
             return;
         }
@@ -70,40 +80,92 @@ export default function WorkshopPage() {
         }
     ];
 
-    return (
-        <div className="project-page">
-            <header className="project-page-header">
-                <h1 className="project-page-title">{t('nav.workshop')}</h1>
-                <p className="project-page-subtitle">{t('dashboard.workshop_desc')}</p>
-            </header>
+    // DnD Logic
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        })
+    );
 
-            {stageConfig.map(({ key, icon, title, items: stageItems, color, isLast }) => (
-                <section key={key} className="project-section">
-                    <SectionHeader
-                        icon={icon}
-                        title={title}
-                        count={stageItems.length}
-                    />
-                    <div className="project-grid">
-                        {stageItems.map((item) => (
-                            <ProjectCard
-                                key={item.id}
-                                item={item}
-                                onUpdate={updateItem}
-                                onDelete={deleteItem}
-                                onMoveNext={handleMoveNext}
-                                accentColor={color}
-                                showMoveButton={!isLast}
-                            />
-                        ))}
-                        <AddProjectCard
-                            onAdd={handleAddItem(key)}
-                            accentColor={color}
-                            addLabel={t('common.add_task')}
+    const handleDragStart = (event) => {
+        setActiveId(event.active.id);
+    };
+
+    const handleDragEnd = (event) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const overStage = over.id;
+
+            // Check if it's a valid stage in this view
+            const validStages = [STAGES.EARLY, STAGES.GROWTH, STAGES.ADVANCED, STAGES.COMMERCIAL];
+            if (validStages.includes(overStage)) {
+                const result = moveItemToStage(active.id, overStage);
+                if (!result.success) {
+                    // Show validation error
+                    alert(result.message);
+                }
+            }
+        }
+        setActiveId(null);
+    };
+
+    const activeItem = activeId ? items.find(i => i.id === activeId) : null;
+
+    return (
+        <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+        >
+            <div className="project-page">
+                <header className="project-page-header">
+                    <h1 className="project-page-title">{t('nav.workshop')}</h1>
+                    <p className="project-page-subtitle">{t('dashboard.workshop_desc')}</p>
+                </header>
+
+                {stageConfig.map(({ key, icon, title, items: stageItems, color, isLast }) => (
+                    <section key={key} className="project-section">
+                        <SectionHeader
+                            icon={icon}
+                            title={title}
+                            count={stageItems.length}
                         />
-                    </div>
-                </section>
-            ))}
-        </div>
+                        <DroppableSection id={key} className="project-grid">
+                            {stageItems.map((item) => (
+                                <DraggableCard key={item.id} id={item.id}>
+                                    <ProjectCard
+                                        item={item}
+                                        onUpdate={updateItem}
+                                        onDelete={deleteItem}
+                                        onMoveNext={handleMoveNext}
+                                        accentColor={color}
+                                        showMoveButton={!isLast}
+                                    />
+                                </DraggableCard>
+                            ))}
+                            <AddProjectCard
+                                onAdd={handleAddItem(key)}
+                                accentColor={color}
+                                addLabel={t('common.add_task')}
+                            />
+                        </DroppableSection>
+                    </section>
+                ))}
+
+                <DragOverlay>
+                    {activeItem ? (
+                        <DragOverlayCard
+                            item={activeItem}
+                            accentColor={
+                                stageConfig.find(s => s.key === activeItem.stage)?.color || 'var(--color-accent)'
+                            }
+                        />
+                    ) : null}
+                </DragOverlay>
+            </div>
+        </DndContext>
     );
 }

@@ -71,7 +71,9 @@
         "untitled": "未命名",
         "project_name": "项目名称",
         "project_link": "项目链接",
-        "project_goal": "项目目标"
+        "project_goal": "项目目标",
+        "search_placeholder": "搜索指令...",
+        "no_results": "没有找到匹配的指令。"
     },
     "landing": {
         "hero_title": "您的 AI 驱动个人软件军火库",

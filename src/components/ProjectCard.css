@@ -337,3 +337,104 @@
     color: var(--text-secondary);
     font-size: 0.875rem;
 }
+
+/* Drag and Drop Styles */
+.draggable-card {
+    touch-action: none;
+}
+
+.draggable-card-dragging {
+    opacity: 0.5;
+    box-shadow: var(--shadow-lg);
+    z-index: 50;
+}
+
+.droppable-section {
+    transition: background-color var(--transition-fast), outline-color var(--transition-fast);
+    border-radius: var(--radius-md);
+    min-height: 200px;
+    outline: 2px solid transparent;
+    outline-offset: 4px;
+}
+
+.droppable-section-over {
+    background-color: var(--bg-hover);
+    outline-color: var(--border-hover);
+}
+
+.drag-overlay-card {
+    opacity: 0.9;
+    box-shadow: var(--shadow-xl);
+    cursor: grabbing;
+    transform: rotate(3deg);
+    pointer-events: none;
+}
+
+/* Search Bar Styles */
+.command-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-bottom: var(--space-2);
+}
+
+.command-search-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+}
+
+.command-search-input {
+    width: 100%;
+    padding: var(--space-2) var(--space-8);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    transition: all var(--transition-fast);
+}
+
+.command-search-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb), 0.1);
+}
+
+.command-search-icon {
+    position: absolute;
+    left: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.command-search-clear {
+    position: absolute;
+    right: var(--space-2);
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border-radius: 50%;
+}
+
+.command-search-clear:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.search-highlight {
+    background-color: rgba(255, 255, 0, 0.2);
+    color: inherit;
+    border-radius: 2px;
+}

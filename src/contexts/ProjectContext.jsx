@@ -92,11 +92,31 @@ export const ProjectProvider = ({ children }) => {
         });
     };
 
-    // Explicit move for UI flexibility if needed, but strict flow prefers moveItemNext
-    const moveItemToStage = (id, stage) => {
+    // Explicit move for UI flexibility (Drag & Drop) with validation
+    const moveItemToStage = (id, newStage) => {
+        let itemToMove;
+
+        // Find the item first to validate
+        // We can't access state directly in the simpler setFn(prev => ...) for validation *return* 
+        // without a ref or finding it first. Since `items` is in scope, we can find it.
+        // Wait, `items` from `useState` might be stale in closure? 
+        // But `items` is a dependency of the context value, so this function is recreated when items change?
+        // Actually this component re-renders when items change, so `items` is fresh.
+        itemToMove = items.find(i => i.id === id);
+
+        if (!itemToMove) return { success: false, message: 'Item not found' };
+
+        // Validate
+        const validation = validateForNextStage(itemToMove, newStage);
+        if (!validation.valid) {
+            return { success: false, message: validation.message };
+        }
+
         setItems(prev => prev.map(item =>
-            item.id === id ? { ...item, stage: stage } : item
+            item.id === id ? { ...item, stage: newStage } : item
         ));
+
+        return { success: true };
     };
 
     const generatePastelColor = () => {
