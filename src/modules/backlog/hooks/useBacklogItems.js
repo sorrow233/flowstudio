@@ -23,9 +23,25 @@ const setLocalItems = (items) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 };
 
-const generatePastelColor = () => {
-    const hue = Math.floor(Math.random() * 360);
-    return `hsl(${hue}, 70%, 85%)`;
+// 现代清新的渐变色卡背景
+const GRADIENT_BACKGROUNDS = [
+    'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)', // 清新薄荷
+    'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)', // 天空蓝
+    'linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%)', // 暖阳橙
+    'linear-gradient(135deg, #FCE4EC 0%, #F8BBD9 100%)', // 樱花粉
+    'linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%)', // 薰衣草
+    'linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 100%)', // 青碧
+    'linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%)', // 柠檬黄
+    'linear-gradient(135deg, #ECEFF1 0%, #CFD8DC 100%)', // 银灰
+    'linear-gradient(135deg, #E8EAF6 0%, #C5CAE9 100%)', // 靛蓝
+    'linear-gradient(145deg, #f5f7fa 0%, #c3cfe2 100%)', // 极简白
+    'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)', // 蜜桃
+    'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)', // 糖果
+];
+
+const getRandomGradientBackground = () => {
+    const index = Math.floor(Math.random() * GRADIENT_BACKGROUNDS.length);
+    return GRADIENT_BACKGROUNDS[index];
 };
 
 const generateId = () => `backlog_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
@@ -74,13 +90,15 @@ export function useBacklogItems() {
     });
 
     const addProject = async (stage = BACKLOG_STAGES.INSPIRATION, formData = {}) => {
+        const gradientBg = getRandomGradientBackground();
         const newItem = {
             name: formData.name || '',
             link: formData.link || '',
             goal: formData.goal || '',
             priority: formData.priority || 'medium',
             deadline: formData.deadline || null,
-            color: generatePastelColor(),
+            backgroundType: 'gradient',
+            backgroundValue: gradientBg,
             stage: stage,
             archived: false,
         };

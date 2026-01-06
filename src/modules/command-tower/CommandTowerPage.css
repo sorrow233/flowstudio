@@ -317,3 +317,80 @@
     font-size: 0.9rem;
     font-style: italic;
 }
+
+/* Command Item - New Layout */
+.ct-command-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    flex: 1;
+}
+
+.ct-copy-indicator {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.ct-command-actions {
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ct-command-item:hover .ct-command-actions {
+    opacity: 1;
+}
+
+.ct-action-btn {
+    background: transparent;
+    border: none;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.ct-edit-btn {
+    color: #64748b;
+}
+
+.ct-edit-btn:hover {
+    color: #60a5fa;
+    background: rgba(96, 165, 250, 0.1);
+}
+
+.ct-delete-btn {
+    color: #64748b;
+}
+
+.ct-delete-btn:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Re-layout command item for flex row */
+.ct-command-item {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    cursor: default;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.ct-command-item:hover {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(99, 102, 241, 0.3);
+}

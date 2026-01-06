@@ -15,6 +15,7 @@ export default function CommandTowerPage() {
     const [copiedId, setCopiedId] = useState(null);
     const [showAddCommandModal, setShowAddCommandModal] = useState(false);
     const [showAddStageModal, setShowAddStageModal] = useState(false);
+    const [editingCommand, setEditingCommand] = useState(null); // { stageKey, command }
 
     // --- State Management ---
 
@@ -125,6 +126,21 @@ export default function CommandTowerPage() {
         }
     };
 
+    const handleEditCommand = (stageKey, command) => {
+        setEditingCommand({ stageKey, command: { ...command } });
+    };
+
+    const handleSaveEdit = () => {
+        if (!editingCommand || !editingCommand.command.title.trim()) return;
+        setCommands(prev => ({
+            ...prev,
+            [editingCommand.stageKey]: prev[editingCommand.stageKey].map(cmd =>
+                cmd.id === editingCommand.command.id ? editingCommand.command : cmd
+            )
+        }));
+        setEditingCommand(null);
+    };
+
     const handleAddStage = () => {
         if (!newStage.label.trim()) return;
         const key = `custom_${Date.now()}`;
@@ -223,31 +239,43 @@ export default function CommandTowerPage() {
                                         <div
                                             key={cmd.id}
                                             className="ct-command-item"
-                                            onClick={() => copyToClipboard(cmd.content, cmd.id)}
                                         >
-                                            <div className="ct-command-header" style={{ marginBottom: 0 }}>
-                                                <span className="ct-command-title">{cmd.title}</span>
-                                                {copiedId === cmd.id ? (
-                                                    <Check size={14} color="#4ade80" />
-                                                ) : (
-                                                    <Copy size={14} color="#64748b" />
-                                                )}
-                                            </div>
-                                            {/* Content hidden as requested
-                                            <div className="ct-command-code">
-                                                {cmd.content}
-                                            </div>
-                                            */}
-                                            <button
-                                                className="command-delete-btn-new"
-                                                style={{ position: 'absolute', top: '10px', right: '10px', opacity: 0 }} // Hidden by default, shown on hover via CSS
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteCommand(stage.key, cmd.id);
-                                                }}
+                                            <div
+                                                className="ct-command-main"
+                                                onClick={() => copyToClipboard(cmd.content, cmd.id)}
+                                                title={t('common.click_to_copy')}
                                             >
-                                                <Trash2 size={12} />
-                                            </button>
+                                                <span className="ct-command-title">{cmd.title}</span>
+                                                <span className="ct-copy-indicator">
+                                                    {copiedId === cmd.id ? (
+                                                        <Check size={14} color="#4ade80" />
+                                                    ) : (
+                                                        <Copy size={14} color="#64748b" />
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <div className="ct-command-actions">
+                                                <button
+                                                    className="ct-action-btn ct-edit-btn"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleEditCommand(stage.key, cmd);
+                                                    }}
+                                                    title={t('common.edit')}
+                                                >
+                                                    <Edit2 size={12} />
+                                                </button>
+                                                <button
+                                                    className="ct-action-btn ct-delete-btn"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteCommand(stage.key, cmd.id);
+                                                    }}
+                                                    title={t('common.delete')}
+                                                >
+                                                    <Trash2 size={12} />
+                                                </button>
+                                            </div>
                                         </div>
                                     ))
                                 ) : (
@@ -389,6 +417,51 @@ export default function CommandTowerPage() {
                         <div className="modal-footer">
                             <button className="btn" onClick={() => setShowAddStageModal(false)}>{t('common.cancel')}</button>
                             <button className="btn btn-primary" onClick={handleAddStage}>{t('common.add')}</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Command Modal */}
+            {editingCommand && (
+                <div className="modal-overlay" onClick={() => setEditingCommand(null)}>
+                    <div className="ct-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px', padding: '0' }}>
+                        <div className="modal-header">
+                            <h3>{t('common.edit')}</h3>
+                            <button className="modal-close" onClick={() => setEditingCommand(null)}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="form-group">
+                                <label>{t('command_tower.title')}</label>
+                                <input
+                                    type="text"
+                                    value={editingCommand.command.title}
+                                    onChange={e => setEditingCommand({
+                                        ...editingCommand,
+                                        command: { ...editingCommand.command, title: e.target.value }
+                                    })}
+                                    placeholder={t('command_tower.title_placeholder')}
+                                    autoFocus
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>{t('command_tower.command')}</label>
+                                <textarea
+                                    value={editingCommand.command.content}
+                                    onChange={e => setEditingCommand({
+                                        ...editingCommand,
+                                        command: { ...editingCommand.command, content: e.target.value }
+                                    })}
+                                    placeholder={t('command_tower.command_placeholder')}
+                                    rows={3}
+                                />
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn" onClick={() => setEditingCommand(null)}>{t('common.cancel')}</button>
+                            <button className="btn btn-primary" onClick={handleSaveEdit}>{t('common.save')}</button>
                         </div>
                     </div>
                 </div>
