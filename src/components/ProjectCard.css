@@ -1,95 +1,141 @@
-/* Project Card - Kanso Style */
+/* ============================================
+   Project Card - Premium Redesign
+   ============================================ */
+
+/* === Base Card === */
 .project-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: var(--space-4);
-    transition: all var(--transition-fast);
     position: relative;
+    min-height: 140px;
+    padding: var(--space-5);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.06),
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
 }
 
 .project-card::before {
     content: '';
     position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background-color: var(--accent-color, var(--color-accent));
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+    pointer-events: none;
     opacity: 0;
-    transition: opacity var(--transition-fast);
+    transition: opacity 0.3s ease;
 }
 
 .project-card:hover {
-    border-color: var(--border-hover);
-    box-shadow: var(--shadow-sm);
+    transform: translateY(-6px);
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.1),
+        0 8px 16px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border-color: rgba(255, 255, 255, 0.6);
 }
 
 .project-card:hover::before {
     opacity: 1;
 }
 
-/* Card Header */
+/* Dark Mode Base */
+.dark-mode .project-card {
+    background: rgba(30, 30, 35, 0.7);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.3),
+        0 1px 2px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode .project-card:hover {
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 8px 16px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* === Card Header === */
 .project-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: var(--space-3);
-    margin-bottom: var(--space-2);
+    margin-bottom: var(--space-3);
 }
 
 .project-card-name {
-    font-size: 0.9375rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 700;
     color: var(--text-primary);
     margin: 0;
     flex: 1;
     line-height: 1.4;
+    letter-spacing: -0.01em;
 }
 
 .project-card-actions {
     display: flex;
-    gap: var(--space-1);
+    gap: 6px;
     opacity: 0;
-    transition: opacity var(--transition-fast);
+    transform: translateX(8px);
+    transition: all 0.25s ease;
 }
 
 .project-card:hover .project-card-actions {
     opacity: 1;
+    transform: translateX(0);
 }
 
-/* Icon Buttons */
+/* === Icon Buttons === */
 .project-icon-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     border: none;
-    background: var(--bg-app);
-    border-radius: var(--radius-sm);
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 8px;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.2s ease;
 }
 
 .project-icon-btn:hover {
-    background: var(--border-subtle);
+    background: rgba(0, 0, 0, 0.1);
     color: var(--text-primary);
+    transform: scale(1.1);
 }
 
 .project-icon-btn-primary:hover {
-    background: var(--color-accent-indigo);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 
 .project-icon-btn-danger:hover {
-    background: var(--color-accent-vermilion);
+    background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
     color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
-/* Card Body */
+.dark-mode .project-icon-btn {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .project-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* === Card Body === */
 .project-card-body {
     display: flex;
     flex-direction: column;
@@ -106,7 +152,7 @@
 
 .project-card-info svg {
     flex-shrink: 0;
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
 .project-link {
@@ -115,11 +161,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    transition: color 0.2s ease;
 }
 
 .project-link:hover {
-    color: var(--color-accent-indigo);
-    text-decoration: underline;
+    color: #6366f1;
 }
 
 .project-goal {
@@ -128,28 +174,34 @@
     white-space: nowrap;
 }
 
-/* Card Footer */
+/* === Card Footer === */
 .project-card-footer {
     display: flex;
     align-items: center;
-    gap: var(--space-1);
-    margin-top: var(--space-3);
-    padding-top: var(--space-2);
-    border-top: 1px solid var(--border-subtle);
+    gap: 6px;
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
     font-size: 0.6875rem;
     color: var(--text-secondary);
     opacity: 0.7;
 }
 
-/* Editing Mode */
+.dark-mode .project-card-footer {
+    border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+/* === Editing Mode === */
 .project-card-editing {
-    padding: var(--space-4);
-    border-color: var(--accent-color, var(--color-accent));
-    box-shadow: 0 0 0 2px rgba(var(--accent-color), 0.1);
+    padding: var(--space-5);
+    box-shadow:
+        0 0 0 2px rgba(99, 102, 241, 0.3),
+        0 20px 40px rgba(99, 102, 241, 0.15);
 }
 
 .project-card-editing::before {
     opacity: 1;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
 }
 
 .project-card-form {
@@ -172,23 +224,32 @@
 .project-input {
     flex: 1;
     padding: var(--space-2) var(--space-3);
-    background: var(--bg-app);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid transparent;
+    border-radius: 10px;
     font-size: 0.875rem;
     color: var(--text-primary);
-    transition: all var(--transition-fast);
+    transition: all 0.2s ease;
 }
 
 .project-input:focus {
     outline: none;
-    border-color: var(--text-secondary);
-    background: var(--bg-card);
+    border-color: #6366f1;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.dark-mode .project-input {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.dark-mode .project-input:focus {
+    background: rgba(255, 255, 255, 0.12);
 }
 
 .project-input-name {
     font-weight: 600;
-    font-size: 0.9375rem;
+    font-size: 1rem;
 }
 
 .project-form-actions {
@@ -201,40 +262,47 @@
 .project-action-btn {
     display: flex;
     align-items: center;
-    gap: var(--space-1);
-    padding: var(--space-2) var(--space-3);
+    gap: 6px;
+    padding: 8px 16px;
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: 10px;
     font-size: 0.8125rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.2s ease;
 }
 
 .project-action-save {
-    background: var(--color-accent-indigo);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .project-action-save:hover {
-    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
 }
 
 .project-action-cancel {
-    background: var(--bg-app);
+    background: rgba(0, 0, 0, 0.06);
     color: var(--text-secondary);
-    border: 1px solid var(--border-subtle);
 }
 
 .project-action-cancel:hover {
-    background: var(--border-subtle);
+    background: rgba(0, 0, 0, 0.1);
     color: var(--text-primary);
 }
 
-/* Add Card */
+.dark-mode .project-action-cancel {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* === Add Card === */
 .project-card-add {
-    border: 1px dashed var(--border-subtle);
+    min-height: 140px;
+    border: 2px dashed rgba(0, 0, 0, 0.15);
     background: transparent;
+    backdrop-filter: none;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -242,28 +310,39 @@
     gap: var(--space-2);
     color: var(--text-secondary);
     cursor: pointer;
-    min-height: 100px;
-    transition: all var(--transition-fast);
-}
-
-.project-card-add:hover {
-    border-color: var(--text-secondary);
-    background: var(--bg-card);
-    color: var(--text-primary);
+    transition: all 0.3s ease;
+    box-shadow: none;
 }
 
 .project-card-add::before {
     display: none;
 }
 
+.project-card-add:hover {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.04);
+    color: #6366f1;
+    transform: translateY(-2px);
+}
+
 .project-card-add span {
     font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 500;
+    letter-spacing: 0.1em;
+    font-weight: 600;
 }
 
-/* Section Styles */
+.dark-mode .project-card-add {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.dark-mode .project-card-add:hover {
+    border-color: #818cf8;
+    background: rgba(129, 140, 248, 0.08);
+    color: #818cf8;
+}
+
+/* === Section Styles === */
 .project-section {
     margin-bottom: var(--space-10);
 }
@@ -279,36 +358,42 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: var(--bg-card);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-subtle);
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+    border-radius: 10px;
+    color: #6366f1;
 }
 
 .project-section-title {
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.125rem;
+    font-weight: 700;
     color: var(--text-primary);
     margin: 0;
+    letter-spacing: -0.01em;
 }
 
 .project-section-count {
     font-size: 0.75rem;
+    font-weight: 600;
     color: var(--text-secondary);
-    background: var(--bg-app);
-    padding: 2px 8px;
-    border-radius: 99px;
-    border: 1px solid var(--border-subtle);
+    background: rgba(0, 0, 0, 0.06);
+    padding: 4px 10px;
+    border-radius: 20px;
 }
 
+.dark-mode .project-section-count {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* === Grid === */
 .project-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, 320px);
-    gap: var(--space-4);
+    gap: var(--space-5);
 }
 
-/* Page Styles */
+/* === Page Styles === */
 .project-page {
     max-width: 1200px;
 }
@@ -318,59 +403,60 @@
 }
 
 .project-page-title {
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: 1.75rem;
+    font-weight: 700;
     color: var(--text-primary);
     margin: 0 0 var(--space-2) 0;
+    letter-spacing: -0.02em;
 }
 
 .project-page-subtitle {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     color: var(--text-secondary);
     margin: 0;
 }
 
-/* Empty State */
+/* === Empty State === */
 .project-empty-hint {
     text-align: center;
-    padding: var(--space-8);
+    padding: var(--space-10);
     color: var(--text-secondary);
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
 }
 
-/* Drag and Drop Styles */
+/* === Drag and Drop === */
 .draggable-card {
     touch-action: none;
 }
 
 .draggable-card-dragging {
-    opacity: 0.5;
-    box-shadow: var(--shadow-lg);
+    opacity: 0.6;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
     z-index: 50;
 }
 
 .droppable-section {
-    transition: background-color var(--transition-fast), outline-color var(--transition-fast);
-    border-radius: var(--radius-md);
+    transition: all 0.3s ease;
+    border-radius: 16px;
     min-height: 200px;
     outline: 2px solid transparent;
-    outline-offset: 4px;
+    outline-offset: 8px;
 }
 
 .droppable-section-over {
-    background-color: var(--bg-hover);
-    outline-color: var(--border-hover);
+    background: rgba(99, 102, 241, 0.04);
+    outline-color: rgba(99, 102, 241, 0.3);
 }
 
 .drag-overlay-card {
-    opacity: 0.9;
-    box-shadow: var(--shadow-xl);
+    opacity: 0.95;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
     cursor: grabbing;
-    transform: rotate(3deg);
+    transform: rotate(4deg) scale(1.02);
     pointer-events: none;
 }
 
-/* Search Bar Styles */
+/* === Search Bar === */
 .command-header-flex {
     display: flex;
     justify-content: space-between;
@@ -388,24 +474,36 @@
 
 .command-search-input {
     width: 100%;
-    padding: var(--space-2) var(--space-8);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-full);
-    background: var(--bg-card);
+    padding: 10px 40px 10px 40px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
     color: var(--text-primary);
     font-size: 0.875rem;
-    transition: all var(--transition-fast);
+    transition: all 0.2s ease;
 }
 
 .command-search-input:focus {
     outline: none;
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb), 0.1);
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    background: white;
+}
+
+.dark-mode .command-search-input {
+    background: rgba(30, 30, 35, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .command-search-input:focus {
+    background: rgba(40, 40, 45, 0.9);
+    border-color: #818cf8;
 }
 
 .command-search-icon {
     position: absolute;
-    left: var(--space-3);
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-secondary);
@@ -414,7 +512,7 @@
 
 .command-search-clear {
     position: absolute;
-    right: var(--space-2);
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
     background: none;
@@ -424,88 +522,117 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2px;
-    border-radius: 50%;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
 }
 
 .command-search-clear:hover {
-    background: var(--bg-hover);
+    background: rgba(0, 0, 0, 0.08);
     color: var(--text-primary);
 }
 
 .search-highlight {
-    background-color: rgba(255, 255, 0, 0.2);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
     color: inherit;
-    border-radius: 2px;
+    border-radius: 3px;
+    padding: 1px 2px;
 }
 
+/* ============================================
+   Variant: Backlog (Creative Cards)
+   ============================================ */
 
-/* === Variant: Backlog (Style: Creative Note) === */
+/* Gradient color palette for backlog cards */
 .project-card.variant-backlog {
-    border-radius: var(--radius-lg);
     border: none;
-    box-shadow: var(--shadow-sm);
-    /* Background color is set inline from item.color */
-}
-
-.project-card.variant-backlog::before {
-    display: none;
-    /* No accent border */
-}
-
-.project-card.variant-backlog .project-card-name {
-    font-weight: 700;
-    font-family: var(--font-display, sans-serif);
-    color: #333;
-    /* Ensure contrast on pastels */
-}
-
-.dark-mode .project-card.variant-backlog .project-card-name {
-    color: #1a1a1a;
+    min-height: 140px;
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease infinite;
+    animation-play-state: paused;
 }
 
 .project-card.variant-backlog:hover {
-    transform: translateY(-2px) rotate(1deg);
-    box-shadow: var(--shadow-md);
+    animation-play-state: running;
+    transform: translateY(-6px) rotate(1deg);
 }
 
-/* === Variant: Workshop (Style: Technical Task) === */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.project-card.variant-backlog .project-card-name {
+    font-weight: 800;
+    font-size: 1.0625rem;
+    color: rgba(0, 0, 0, 0.8);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.project-card.variant-backlog .project-card-footer {
+    border-top-color: rgba(0, 0, 0, 0.08);
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.project-card.variant-backlog .project-icon-btn {
+    background: rgba(255, 255, 255, 0.4);
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.project-card.variant-backlog .project-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.7);
+    color: rgba(0, 0, 0, 0.8);
+}
+
+/* ============================================
+   Variant: Workshop (Technical Cards)
+   ============================================ */
 .project-card.variant-workshop {
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-subtle);
     background: var(--bg-card);
-    /* Override inline color */
-    padding-left: var(--space-4);
-    /* Standard padding */
+    border: 1px solid var(--border-subtle);
+    border-left: 4px solid;
+    border-left-color: var(--accent-color, #6366f1);
+    border-radius: 12px;
+    min-height: 140px;
 }
 
 .project-card.variant-workshop::before {
-    width: 4px;
-    /* Thicker accent */
-    border-top-left-radius: var(--radius-sm);
-    border-bottom-left-radius: var(--radius-sm);
-    opacity: 1;
-    /* Always visible */
+    display: none;
 }
 
 .project-card.variant-workshop .project-card-header {
-    border-bottom: 1px solid var(--border-subtle);
     padding-bottom: var(--space-2);
     margin-bottom: var(--space-2);
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 .project-card.variant-workshop .project-card-name {
-    font-family: var(--font-mono, monospace);
-    font-size: 0.875rem;
-    letter-spacing: -0.01em;
+    font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
 }
 
 .project-card.variant-workshop:hover {
-    border-color: var(--accent-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: var(--accent-color, #6366f1);
+    transform: translateY(-4px);
+    box-shadow:
+        0 12px 24px rgba(0, 0, 0, 0.08),
+        0 4px 8px rgba(0, 0, 0, 0.04);
 }
 
-/* === Background Picker Styles === */
+/* ============================================
+   Background Picker (Modal)
+   ============================================ */
 .background-picker {
     display: flex;
     flex-direction: column;
@@ -522,46 +649,46 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    font-size: 0.8125rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    font-weight: 700;
     color: var(--text-secondary);
     margin: 0;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
 }
 
 .background-picker-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: var(--space-2);
+    gap: 10px;
 }
 
 .background-picker-item {
     aspect-ratio: 1;
     border: 2px solid transparent;
-    border-radius: var(--radius-md);
+    border-radius: 12px;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(0, 0, 0, 0.4);
+    color: rgba(0, 0, 0, 0.3);
     min-height: 48px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .background-picker-item:hover {
-    transform: scale(1.05);
-    border-color: var(--text-secondary);
-    box-shadow: var(--shadow-sm);
+    transform: scale(1.08);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
 .background-picker-item.active {
-    border-color: var(--color-accent-indigo);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
 }
 
 .background-picker-item.active svg {
-    color: var(--color-accent-indigo);
+    color: #6366f1;
 }
 
 .background-picker-actions {
@@ -575,38 +702,41 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-2) var(--space-4);
+    padding: 10px 16px;
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
+    border-radius: 10px;
     background: var(--bg-card);
     color: var(--text-primary);
     font-size: 0.8125rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.2s ease;
 }
 
 .background-picker-upload-btn:hover {
-    background: var(--color-accent-indigo);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
-    border-color: var(--color-accent-indigo);
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .background-picker-remove-btn {
     background: transparent;
-    color: var(--color-accent-vermilion);
-    border-color: var(--color-accent-vermilion);
+    color: #ef4444;
+    border-color: #ef4444;
 }
 
 .background-picker-remove-btn:hover {
-    background: var(--color-accent-vermilion);
+    background: #ef4444;
     color: white;
 }
 
 .background-picker-preview {
     margin-top: var(--space-2);
-    border-radius: var(--radius-md);
+    border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--border-subtle);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .background-picker-preview img {
@@ -618,13 +748,15 @@
 /* === Card with Background Image === */
 .project-card.has-background-image {
     position: relative;
+    background-size: cover;
+    background-position: center;
 }
 
 .project-card.has-background-image::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.85) 100%);
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.9) 100%);
     border-radius: inherit;
     pointer-events: none;
     z-index: 0;
@@ -635,22 +767,10 @@
     z-index: 1;
 }
 
-/* Dark mode adjustments for background picker */
-.dark-mode .background-picker-item {
-    color: rgba(255, 255, 255, 0.5);
-}
-
 .dark-mode .project-card.has-background-image::after {
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.75) 100%);
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.85) 100%);
 }
 
-/* Fresh gradient card styling */
-.project-card.variant-backlog {
-    border: none;
-    box-shadow: var(--shadow-sm);
-}
-
-.project-card.variant-backlog:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+.dark-mode .background-picker-item {
+    color: rgba(255, 255, 255, 0.4);
 }
