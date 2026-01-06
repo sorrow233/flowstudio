@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { RotateCcw, Archive, Lightbulb, Rocket } from 'lucide-react';
-import { useProjects } from '@/hooks/useProjects';
-import { STAGES } from '@/features/projects/domain';
+import { RotateCcw, Archive, Lightbulb, Rocket, Play } from 'lucide-react';
+import { useBacklogItems, BACKLOG_STAGES } from './hooks/useBacklogItems';
 import ProjectCard from '@/components/ProjectCard';
 import AddProjectCard from '@/components/AddProjectCard';
 import SectionHeader from '@/components/SectionHeader';
@@ -21,14 +20,16 @@ import DragOverlayCard from '@/components/DragOverlayCard';
 export default function BacklogPage() {
     const { t } = useTranslation();
     const {
-        items,
-        addItem,
-        updateItem,
-        deleteItem,
+        projects: items,
+        addProject,
+        updateProject,
+        deleteProject,
         moveItemNext,
         moveItemToStage,
-        toggleArchive
-    } = useProjects();
+        toggleArchive,
+        transferToWorkshop,
+    } = useBacklogItems(); // Assuming useBacklogItems is renamed to useProjects in a separate change, and STAGES is now BACKLOG_STAGES
+    const STAGES = BACKLOG_STAGES; // Use the imported BACKLOG_STAGES
     const [activeId, setActiveId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [showArchived, setShowArchived] = useState(false);
@@ -46,15 +47,21 @@ export default function BacklogPage() {
 
     const inspirationItems = filteredItems.filter(item => item.stage === STAGES.INSPIRATION);
     const pendingItems = filteredItems.filter(item => item.stage === STAGES.PENDING);
-    // For archived view, we can just show everything flat
     const archivedItems = filteredItems;
 
     const handleAddItem = (stage) => (formData) => {
-        addItem(stage, formData);
+        addProject(stage, formData);
     };
 
     const handleMoveNext = (item) => {
         moveItemNext(item.id);
+    };
+
+    const handleTransferToWorkshop = async (item) => {
+        const result = await transferToWorkshop(item.id);
+        if (!result.success) {
+            alert(result.message);
+        }
     };
 
     // DnD Logic
@@ -142,8 +149,8 @@ export default function BacklogPage() {
                                     key={item.id}
                                     item={item}
                                     variant="backlog"
-                                    onUpdate={updateItem}
-                                    onDelete={deleteItem}
+                                    onUpdate={updateProject}
+                                    onDelete={deleteProject}
                                     onArchive={toggleArchive}
                                     isArchived={true}
                                 />
@@ -169,8 +176,8 @@ export default function BacklogPage() {
                                         <ProjectCard
                                             item={item}
                                             variant="backlog"
-                                            onUpdate={updateItem}
-                                            onDelete={deleteItem}
+                                            onUpdate={updateProject}
+                                            onDelete={deleteProject}
                                             onMoveNext={handleMoveNext}
                                             onArchive={toggleArchive}
                                             accentColor="var(--color-accent-teal)"
@@ -199,9 +206,11 @@ export default function BacklogPage() {
                                             variant="backlog"
                                             onUpdate={updateItem}
                                             onDelete={deleteItem}
-                                            onMoveNext={handleMoveNext}
+                                            onMoveNext={() => handleTransferToWorkshop(item)}
                                             onArchive={toggleArchive}
                                             accentColor="var(--color-accent-vermilion)"
+                                            moveButtonLabel={t('common.start_development') || '开始开发'}
+                                            moveButtonIcon={<Play size={14} />}
                                         />
                                     </DraggableCard>
                                 ))}

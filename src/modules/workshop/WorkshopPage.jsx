@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sprout, TrendingUp, Award, DollarSign, Archive, RotateCcw } from 'lucide-react';
-import { useProjects } from '@/hooks/useProjects';
+import { useProjects } from '@/features/projects/hooks/useProjects';
 import { STAGES } from '@/features/projects/domain';
 import ProjectCard from '@/components/ProjectCard';
 import AddProjectCard from '@/components/AddProjectCard';
@@ -21,10 +21,10 @@ import DragOverlayCard from '@/components/DragOverlayCard';
 export default function WorkshopPage() {
     const { t } = useTranslation();
     const {
-        items,
-        addItem,
-        updateItem,
-        deleteItem,
+        projects: items,
+        addProject,
+        updateProject,
+        deleteProject,
         moveItemNext,
         validateForNextStage,
         moveItemToStage,
@@ -51,7 +51,7 @@ export default function WorkshopPage() {
     const archivedItems = filteredItems;
 
     const handleAddItem = (stage) => (formData) => {
-        addItem(stage, formData);
+        addProject(stage, formData);
     };
 
     const handleMoveNext = (item) => {
@@ -193,8 +193,8 @@ export default function WorkshopPage() {
                                     key={item.id}
                                     item={item}
                                     variant="workshop"
-                                    onUpdate={updateItem}
-                                    onDelete={deleteItem}
+                                    onUpdate={updateProject}
+                                    onDelete={deleteProject}
                                     onArchive={toggleArchive}
                                     isArchived={true}
                                 />
@@ -221,8 +221,8 @@ export default function WorkshopPage() {
                                             <ProjectCard
                                                 item={item}
                                                 variant="workshop"
-                                                onUpdate={updateItem}
-                                                onDelete={deleteItem}
+                                                onUpdate={updateProject}
+                                                onDelete={deleteProject}
                                                 onMoveNext={handleMoveNext}
                                                 onArchive={toggleArchive}
                                                 accentColor={color}

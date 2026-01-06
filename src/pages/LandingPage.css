@@ -58,14 +58,14 @@
 }
 
 .hero-section h1 {
+    font-family: var(--font-serif);
     font-size: 3.5rem;
-    font-weight: 800;
+    font-weight: 500;
     line-height: 1.2;
     margin-bottom: var(--space-6);
-    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: var(--tracking-tight);
+    color: var(--text-primary);
+    /* Solid color instead of gradient for Zen */
+    letter-spacing: -0.02em;
 }
 
 .hero-subtitle {
