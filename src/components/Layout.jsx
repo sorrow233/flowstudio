@@ -28,18 +28,18 @@ export default function Layout() {
                 </div>
 
                 <nav className="sidebar-nav">
-                    <NavItem to="/" icon={Home} label={t('nav.dashboard')} isActive={location.pathname === '/'} />
+                    <NavItem to="/app" icon={Home} label={t('nav.dashboard')} isActive={location.pathname === '/app'} />
                     <div className="nav-divider"></div>
-                    <NavItem to="/backlog" icon={Layers} label={t('nav.backlog')} isActive={location.pathname.startsWith('/backlog')} />
-                    <NavItem to="/workshop" icon={LayoutIcon} label={t('nav.workshop')} isActive={location.pathname.startsWith('/workshop')} />
-                    <NavItem to="/command-tower" icon={Zap} label={t('nav.command_tower')} isActive={location.pathname.startsWith('/command-tower')} />
+                    <NavItem to="/app/backlog" icon={Layers} label={t('nav.backlog')} isActive={location.pathname.startsWith('/app/backlog')} />
+                    <NavItem to="/app/workshop" icon={LayoutIcon} label={t('nav.workshop')} isActive={location.pathname.startsWith('/app/workshop')} />
+                    <NavItem to="/app/command-tower" icon={Zap} label={t('nav.command_tower')} isActive={location.pathname.startsWith('/app/command-tower')} />
                 </nav>
 
                 <div className="sidebar-footer">
                     <div style={{ padding: '0 1rem 1rem 1rem' }}>
                         <LanguageSwitcher />
                     </div>
-                    <NavItem to="/settings" icon={Settings} label={t('nav.settings')} isActive={location.pathname === '/settings'} />
+                    <NavItem to="/app/settings" icon={Settings} label={t('nav.settings')} isActive={location.pathname === '/app/settings'} />
                 </div>
             </aside>
 

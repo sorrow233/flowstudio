@@ -34,21 +34,21 @@ export default function Dashboard() {
                     title={t('nav.backlog')}
                     icon={IconLayers}
                     description={t('dashboard.backlog_desc')}
-                    to="/backlog"
+                    to="/app/backlog"
                     color="var(--color-accent-orange)"
                 />
                 <ModuleCard
                     title={t('nav.workshop')}
                     icon={IconLayout}
                     description={t('dashboard.workshop_desc')}
-                    to="/workshop"
+                    to="/app/workshop"
                     color="var(--color-accent-blue)"
                 />
                 <ModuleCard
                     title={t('nav.command_tower')}
                     icon={Zap}
                     description={t('dashboard.command_tower_desc')}
-                    to="/command-tower"
+                    to="/app/command-tower"
                     color="var(--color-accent-indigo)"
                 />
             </div>
