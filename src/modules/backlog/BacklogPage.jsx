@@ -27,9 +27,9 @@ export default function BacklogPage() {
     // Filter Logic
     const filteredItems = items.filter(item => {
         const matchesSearch = (
-            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.link.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.goal.toLowerCase().includes(searchQuery.toLowerCase())
+            (item.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (item.link || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (item.goal || '').toLowerCase().includes(searchQuery.toLowerCase())
         );
         const matchesArchive = showArchived ? item.archived : !item.archived;
         return matchesSearch && matchesArchive;
