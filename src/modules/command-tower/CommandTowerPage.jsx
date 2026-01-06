@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import SectionHeader from '@/components/SectionHeader';
 import SearchInput from '@/components/SearchInput';
+import Modal from '@/components/Modal';
 import './CommandTowerPage.css';
 
 export default function CommandTowerPage() {
@@ -324,148 +325,141 @@ export default function CommandTowerPage() {
 
 
             {/* Add Command Modal */}
-            {showAddCommandModal && (
-                <div className="modal-overlay" onClick={() => setShowAddCommandModal(false)}>
-                    <div className="ct-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px', padding: '0' }}>
-                        <div className="modal-header">
-                            <h3>{t('command_tower.add_command')}</h3>
-                            <button className="modal-close" onClick={() => setShowAddCommandModal(false)}>
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            <div className="form-group">
-                                <label>{t('command_tower.title')}</label>
-                                <input
-                                    type="text"
-                                    value={newCommand.title}
-                                    onChange={e => setNewCommand({ ...newCommand, title: e.target.value })}
-                                    placeholder={t('command_tower.title_placeholder')}
-                                    autoFocus
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>{t('command_tower.command')}</label>
-                                <textarea
-                                    value={newCommand.content}
-                                    onChange={e => setNewCommand({ ...newCommand, content: e.target.value })}
-                                    placeholder={t('command_tower.command_placeholder')}
-                                    rows={3}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>{t('command_tower.stage')}</label>
-                                <select
-                                    value={newCommand.stage}
-                                    onChange={e => setNewCommand({ ...newCommand, stage: e.target.value })}
-                                >
-                                    {stages.map(s => (
-                                        <option key={s.key} value={s.key}>{s.isCustom ? s.label : t(s.label)}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn" onClick={() => setShowAddCommandModal(false)}>{t('common.cancel')}</button>
-                            <button className="btn btn-primary" onClick={handleAddCommand}>{t('common.add')}</button>
-                        </div>
-                    </div>
+            <Modal
+                isOpen={showAddCommandModal}
+                onClose={() => setShowAddCommandModal(false)}
+                title={t('command_tower.add_command')}
+                footer={
+                    <>
+                        <button className="btn" onClick={() => setShowAddCommandModal(false)}>{t('common.cancel')}</button>
+                        <button className="btn btn-primary" onClick={handleAddCommand}>{t('common.add')}</button>
+                    </>
+                }
+            >
+                <div className="form-group">
+                    <label>{t('command_tower.title')}</label>
+                    <input
+                        type="text"
+                        value={newCommand.title}
+                        onChange={e => setNewCommand({ ...newCommand, title: e.target.value })}
+                        placeholder={t('command_tower.title_placeholder')}
+                        autoFocus
+                        className="project-input"
+                    />
                 </div>
-            )}
+                <div className="form-group">
+                    <label>{t('command_tower.command')}</label>
+                    <textarea
+                        value={newCommand.content}
+                        onChange={e => setNewCommand({ ...newCommand, content: e.target.value })}
+                        placeholder={t('command_tower.command_placeholder')}
+                        rows={3}
+                        className="project-input"
+                    />
+                </div>
+                <div className="form-group">
+                    <label>{t('command_tower.stage')}</label>
+                    <select
+                        value={newCommand.stage}
+                        onChange={e => setNewCommand({ ...newCommand, stage: e.target.value })}
+                        className="project-input"
+                    >
+                        {stages.map(s => (
+                            <option key={s.key} value={s.key}>{s.isCustom ? s.label : t(s.label)}</option>
+                        ))}
+                    </select>
+                </div>
+            </Modal>
 
             {/* Add Stage Modal */}
-            {showAddStageModal && (
-                <div className="modal-overlay" onClick={() => setShowAddStageModal(false)}>
-                    <div className="ct-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', padding: '0' }}>
-                        <div className="modal-header">
-                            <h3>{t('common.add_category') || "Add Category"}</h3>
-                            <button className="modal-close" onClick={() => setShowAddStageModal(false)}>
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            <div className="form-group">
-                                <label>{t('common.name') || "Name"}</label>
-                                <input
-                                    type="text"
-                                    value={newStage.label}
-                                    onChange={e => setNewStage({ ...newStage, label: e.target.value })}
-                                    placeholder="Category Name"
-                                    autoFocus
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>{t('common.color') || "Color"}</label>
-                                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                                    {['#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'].map(c => (
-                                        <div
-                                            key={c}
-                                            onClick={() => setNewStage({ ...newStage, color: c })}
-                                            style={{
-                                                width: '24px',
-                                                height: '24px',
-                                                borderRadius: '50%',
-                                                backgroundColor: c,
-                                                cursor: 'pointer',
-                                                border: newStage.color === c ? '2px solid white' : 'none'
-                                            }}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn" onClick={() => setShowAddStageModal(false)}>{t('common.cancel')}</button>
-                            <button className="btn btn-primary" onClick={handleAddStage}>{t('common.add')}</button>
-                        </div>
+            <Modal
+                isOpen={showAddStageModal}
+                onClose={() => setShowAddStageModal(false)}
+                title={t('common.add_category') || "Add Category"}
+                footer={
+                    <>
+                        <button className="btn" onClick={() => setShowAddStageModal(false)}>{t('common.cancel')}</button>
+                        <button className="btn btn-primary" onClick={handleAddStage}>{t('common.add')}</button>
+                    </>
+                }
+            >
+                <div className="form-group">
+                    <label>{t('common.name') || "Name"}</label>
+                    <input
+                        type="text"
+                        value={newStage.label}
+                        onChange={e => setNewStage({ ...newStage, label: e.target.value })}
+                        placeholder="Category Name"
+                        autoFocus
+                        className="project-input"
+                    />
+                </div>
+                <div className="form-group">
+                    <label>{t('common.color') || "Color"}</label>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                        {['#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'].map(c => (
+                            <div
+                                key={c}
+                                onClick={() => setNewStage({ ...newStage, color: c })}
+                                style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '50%',
+                                    backgroundColor: c,
+                                    cursor: 'pointer',
+                                    border: newStage.color === c ? '2px solid var(--text-primary)' : '2px solid transparent',
+                                    boxShadow: newStage.color === c ? '0 0 0 2px var(--bg-card)' : 'none'
+                                }}
+                            />
+                        ))}
                     </div>
                 </div>
-            )}
+            </Modal>
 
             {/* Edit Command Modal */}
-            {editingCommand && (
-                <div className="modal-overlay" onClick={() => setEditingCommand(null)}>
-                    <div className="ct-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px', padding: '0' }}>
-                        <div className="modal-header">
-                            <h3>{t('common.edit')}</h3>
-                            <button className="modal-close" onClick={() => setEditingCommand(null)}>
-                                <X size={20} />
-                            </button>
+            <Modal
+                isOpen={!!editingCommand}
+                onClose={() => setEditingCommand(null)}
+                title={t('common.edit')}
+                footer={
+                    <>
+                        <button className="btn" onClick={() => setEditingCommand(null)}>{t('common.cancel')}</button>
+                        <button className="btn btn-primary" onClick={handleSaveEdit}>{t('common.save')}</button>
+                    </>
+                }
+            >
+                {editingCommand && (
+                    <>
+                        <div className="form-group">
+                            <label>{t('command_tower.title')}</label>
+                            <input
+                                type="text"
+                                value={editingCommand.command.title}
+                                onChange={e => setEditingCommand({
+                                    ...editingCommand,
+                                    command: { ...editingCommand.command, title: e.target.value }
+                                })}
+                                placeholder={t('command_tower.title_placeholder')}
+                                autoFocus
+                                className="project-input"
+                            />
                         </div>
-                        <div className="modal-body">
-                            <div className="form-group">
-                                <label>{t('command_tower.title')}</label>
-                                <input
-                                    type="text"
-                                    value={editingCommand.command.title}
-                                    onChange={e => setEditingCommand({
-                                        ...editingCommand,
-                                        command: { ...editingCommand.command, title: e.target.value }
-                                    })}
-                                    placeholder={t('command_tower.title_placeholder')}
-                                    autoFocus
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>{t('command_tower.command')}</label>
-                                <textarea
-                                    value={editingCommand.command.content}
-                                    onChange={e => setEditingCommand({
-                                        ...editingCommand,
-                                        command: { ...editingCommand.command, content: e.target.value }
-                                    })}
-                                    placeholder={t('command_tower.command_placeholder')}
-                                    rows={3}
-                                />
-                            </div>
+                        <div className="form-group">
+                            <label>{t('command_tower.command')}</label>
+                            <textarea
+                                value={editingCommand.command.content}
+                                onChange={e => setEditingCommand({
+                                    ...editingCommand,
+                                    command: { ...editingCommand.command, content: e.target.value }
+                                })}
+                                placeholder={t('command_tower.command_placeholder')}
+                                rows={3}
+                                className="project-input"
+                            />
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn" onClick={() => setEditingCommand(null)}>{t('common.cancel')}</button>
-                            <button className="btn btn-primary" onClick={handleSaveEdit}>{t('common.save')}</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                    </>
+                )}
+            </Modal>
         </div>
     );
 }

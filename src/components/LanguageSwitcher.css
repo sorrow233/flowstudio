@@ -5,7 +5,7 @@
 
 .language-select {
     width: 100%;
-    padding: 8px 12px;
+    padding: 8px 32px 8px 12px;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-subtle);
     background-color: transparent;
