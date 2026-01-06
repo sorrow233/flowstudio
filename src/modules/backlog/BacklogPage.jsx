@@ -21,10 +21,10 @@ import DragOverlayCard from '@/components/DragOverlayCard';
 export default function BacklogPage() {
     const { t } = useTranslation();
     const {
-        projects: items, // Alias to matches legacy generic name if preferred, or rename variable
+        items,
         addItem,
-        updateProject: updateItem, // Rename to match component props
-        deleteProject: deleteItem,
+        updateItem,
+        deleteItem,
         moveItemNext,
         moveItemToStage,
         toggleArchive

@@ -21,10 +21,10 @@ import DragOverlayCard from '@/components/DragOverlayCard';
 export default function WorkshopPage() {
     const { t } = useTranslation();
     const {
-        projects: items,
+        items,
         addItem,
-        updateProject: updateItem,
-        deleteProject: deleteItem,
+        updateItem,
+        deleteItem,
         moveItemNext,
         validateForNextStage,
         moveItemToStage,
@@ -36,9 +36,9 @@ export default function WorkshopPage() {
 
     const filteredItems = items.filter(item => {
         const matchesSearch = (
-            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.link.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.goal.toLowerCase().includes(searchQuery.toLowerCase())
+            (item.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (item.link || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (item.goal || '').toLowerCase().includes(searchQuery.toLowerCase())
         );
         const matchesArchive = showArchived ? item.archived : !item.archived;
         return matchesSearch && matchesArchive;

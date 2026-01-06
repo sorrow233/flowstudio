@@ -6,9 +6,12 @@ const LEGACY_SYNC_KEY = 'flow_items';
 class LocalDataService {
     constructor() {
         this.items = [];
+        this._initialized = false;
     }
 
     async init() {
+        if (this._initialized) return this.items;
+
         const saved = localStorage.getItem(SYNC_KEY);
         if (saved) {
             try {
@@ -34,14 +37,14 @@ class LocalDataService {
                 }
             }
         }
-        return Promise.resolve(this.items);
+        this._initialized = true;
+        return this.items;
     }
 
     async getItems() {
-        // Always ensure we have fresh data from storage in case of multi-tab (though not perfect without storage event listener)
-        // For simplicity, we just rely on what we loaded or reload if we want strictness.
-        // But for "Guest" mode, simplified reload is better.
-        await this.init();
+        if (!this._initialized) {
+            await this.init();
+        }
         return this.items.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
     }
 
