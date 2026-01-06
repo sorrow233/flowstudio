@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Lightbulb, Rocket, Archive, RotateCcw } from 'lucide-react';
-import { useProject, STAGES } from '@/contexts/ProjectContext';
+import { RotateCcw, Archive, Lightbulb, Rocket } from 'lucide-react';
+import { useProjects } from '@/features/projects/hooks/useProjects';
+import { STAGES } from '@/features/projects/domain';
 import ProjectCard from '@/components/ProjectCard';
 import AddProjectCard from '@/components/AddProjectCard';
 import SectionHeader from '@/components/SectionHeader';
@@ -19,7 +20,15 @@ import DragOverlayCard from '@/components/DragOverlayCard';
 
 export default function BacklogPage() {
     const { t } = useTranslation();
-    const { items, addItem, updateItem, deleteItem, moveItemNext, moveItemToStage, toggleArchive } = useProject();
+    const {
+        projects: items, // Alias to matches legacy generic name if preferred, or rename variable
+        addItem,
+        updateProject: updateItem, // Rename to match component props
+        deleteProject: deleteItem,
+        moveItemNext,
+        moveItemToStage,
+        toggleArchive
+    } = useProjects();
     const [activeId, setActiveId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [showArchived, setShowArchived] = useState(false);

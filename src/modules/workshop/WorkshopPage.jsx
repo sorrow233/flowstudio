@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sprout, TrendingUp, Award, DollarSign, Archive, RotateCcw } from 'lucide-react';
-import { useProject, STAGES } from '@/contexts/ProjectContext';
+import { useProjects } from '@/features/projects/hooks/useProjects';
+import { STAGES } from '@/features/projects/domain';
 import ProjectCard from '@/components/ProjectCard';
 import AddProjectCard from '@/components/AddProjectCard';
 import SectionHeader from '@/components/SectionHeader';
@@ -19,7 +20,16 @@ import DragOverlayCard from '@/components/DragOverlayCard';
 
 export default function WorkshopPage() {
     const { t } = useTranslation();
-    const { items, addItem, updateItem, deleteItem, moveItemNext, validateForNextStage, moveItemToStage, toggleArchive } = useProject();
+    const {
+        projects: items,
+        addItem,
+        updateProject: updateItem,
+        deleteProject: deleteItem,
+        moveItemNext,
+        validateForNextStage,
+        moveItemToStage,
+        toggleArchive
+    } = useProjects();
     const [activeId, setActiveId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [showArchived, setShowArchived] = useState(false);
