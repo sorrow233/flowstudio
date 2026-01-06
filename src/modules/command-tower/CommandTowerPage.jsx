@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2, Lightbulb, Rocket, Sprout, TrendingUp, Award, DollarSign, X, Copy, Check, Search } from 'lucide-react';
+import { Plus, Trash2, Lightbulb, Rocket, Sprout, TrendingUp, Award, DollarSign, X, Copy, Check } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import SectionHeader from '@/components/SectionHeader';
+import SearchInput from '@/components/SearchInput';
 import '@/components/ProjectCard.css';
 
 export default function CommandTowerPage() {
@@ -24,14 +27,6 @@ export default function CommandTowerPage() {
     const [newCommand, setNewCommand] = useState({ title: '', content: '', stage: 'inspiration' });
     const [searchQuery, setSearchQuery] = useState('');
     const [showAddModal, setShowAddModal] = useState(false);
-
-    const highlightText = (text, query) => {
-        if (!query) return text;
-        const parts = text.split(new RegExp(`(${query})`, 'gi'));
-        return parts.map((part, i) =>
-            part.toLowerCase() === query.toLowerCase() ? <span key={i} className="search-highlight">{part}</span> : part
-        );
-    };
 
     function getDefaultCommands() {
         return {
@@ -113,23 +108,13 @@ export default function CommandTowerPage() {
                         <h1 className="project-page-title">{t('nav.command_tower')}</h1>
                         <p className="project-page-subtitle">{t('dashboard.command_tower_desc')}</p>
                     </div>
-                    <div className="command-search-wrapper">
-                        <Search size={16} className="command-search-icon" />
-                        <input
-                            type="text"
-                            className="command-search-input"
-                            placeholder={t('common.search_placeholder') || "Search commands..."}
+                    <div className="command-search-wrapper" style={{ width: 'auto' }}>
+                        <SearchInput
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={setSearchQuery}
+                            placeholder={t('common.search_placeholder') || "Search commands..."}
+                            onClear={() => setSearchQuery('')}
                         />
-                        {searchQuery && (
-                            <button
-                                className="command-search-clear"
-                                onClick={() => setSearchQuery('')}
-                            >
-                                <X size={14} />
-                            </button>
-                        )}
                     </div>
                 </div>
             </header>
@@ -158,7 +143,7 @@ export default function CommandTowerPage() {
                                 >
                                     <div className="command-card-header-new">
                                         <h3 className="command-card-title-new">
-                                            {highlightText(cmd.title, searchQuery)}
+                                            {cmd.title}
                                         </h3>
                                         <div className="command-card-actions-new">
                                             {copiedId === cmd.id ? (
@@ -180,9 +165,11 @@ export default function CommandTowerPage() {
                                             </button>
                                         </div>
                                     </div>
-                                    <code className="command-card-code">
-                                        {highlightText(cmd.content, searchQuery)}
-                                    </code>
+                                    <div className="command-card-code">
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                            {cmd.content}
+                                        </ReactMarkdown>
+                                    </div>
                                 </div>
                             ))}
                             {!searchQuery && (

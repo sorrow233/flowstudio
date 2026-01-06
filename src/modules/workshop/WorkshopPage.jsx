@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sprout, TrendingUp, Award, DollarSign, CheckCircle } from 'lucide-react';
+import { Sprout, TrendingUp, Award, DollarSign, Archive, RotateCcw } from 'lucide-react';
 import { useProject, STAGES } from '@/contexts/ProjectContext';
 import ProjectCard from '@/components/ProjectCard';
 import AddProjectCard from '@/components/AddProjectCard';
 import SectionHeader from '@/components/SectionHeader';
+import SearchInput from '@/components/SearchInput';
 import {
     DndContext,
     DragOverlay,
@@ -18,13 +19,26 @@ import DragOverlayCard from '@/components/DragOverlayCard';
 
 export default function WorkshopPage() {
     const { t } = useTranslation();
-    const { items, addItem, updateItem, deleteItem, moveItemNext, validateForNextStage, moveItemToStage } = useProject();
-    const [activeId, setActiveId] = React.useState(null);
+    const { items, addItem, updateItem, deleteItem, moveItemNext, validateForNextStage, moveItemToStage, toggleArchive } = useProject();
+    const [activeId, setActiveId] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showArchived, setShowArchived] = useState(false);
 
-    const earlyStage = items.filter(item => item.stage === STAGES.EARLY);
-    const growthStage = items.filter(item => item.stage === STAGES.GROWTH);
-    const advancedStage = items.filter(item => item.stage === STAGES.ADVANCED);
-    const commercialStage = items.filter(item => item.stage === STAGES.COMMERCIAL);
+    const filteredItems = items.filter(item => {
+        const matchesSearch = (
+            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.link.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.goal.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        const matchesArchive = showArchived ? item.archived : !item.archived;
+        return matchesSearch && matchesArchive;
+    });
+
+    const earlyStage = filteredItems.filter(item => item.stage === STAGES.EARLY);
+    const growthStage = filteredItems.filter(item => item.stage === STAGES.GROWTH);
+    const advancedStage = filteredItems.filter(item => item.stage === STAGES.ADVANCED);
+    const commercialStage = filteredItems.filter(item => item.stage === STAGES.COMMERCIAL);
+    const archivedItems = filteredItems;
 
     const handleAddItem = (stage) => (formData) => {
         addItem(stage, formData);
@@ -99,12 +113,10 @@ export default function WorkshopPage() {
         if (over && active.id !== over.id) {
             const overStage = over.id;
 
-            // Check if it's a valid stage in this view
             const validStages = [STAGES.EARLY, STAGES.GROWTH, STAGES.ADVANCED, STAGES.COMMERCIAL];
-            if (validStages.includes(overStage)) {
+            if (validStages.includes(overStage) && !showArchived) {
                 const result = moveItemToStage(active.id, overStage);
                 if (!result.success) {
-                    // Show validation error
                     alert(result.message);
                 }
             }
@@ -122,39 +134,102 @@ export default function WorkshopPage() {
         >
             <div className="project-page">
                 <header className="project-page-header">
-                    <h1 className="project-page-title">{t('nav.workshop')}</h1>
-                    <p className="project-page-subtitle">{t('dashboard.workshop_desc')}</p>
+                    <div>
+                        <h1 className="project-page-title">
+                            {showArchived ? t('common.archived_projects') : t('nav.workshop')}
+                        </h1>
+                        <p className="project-page-subtitle">
+                            {showArchived ? t('common.archived_desc') : t('dashboard.workshop_desc')}
+                        </p>
+                    </div>
+
+                    <div className="header-actions" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <SearchInput
+                            value={searchQuery}
+                            onChange={setSearchQuery}
+                            placeholder={t('common.search_projects')}
+                            onClear={() => setSearchQuery('')}
+                        />
+                        <button
+                            className={`btn-icon ${showArchived ? 'active' : ''}`}
+                            onClick={() => setShowArchived(!showArchived)}
+                            title={showArchived ? t('common.view_active') : t('common.view_archive')}
+                            style={{
+                                padding: '8px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--border-color)',
+                                backgroundColor: showArchived ? 'var(--bg-active)' : 'transparent',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            {showArchived ? <RotateCcw size={18} /> : <Archive size={18} />}
+                        </button>
+                    </div>
                 </header>
 
-                {stageConfig.map(({ key, icon, title, items: stageItems, color, isLast }) => (
-                    <section key={key} className="project-section">
+                {showArchived ? (
+                    <section className="project-section">
                         <SectionHeader
-                            icon={icon}
-                            title={title}
-                            count={stageItems.length}
+                            icon={<Archive size={18} />}
+                            title={t('common.archived_items')}
+                            count={archivedItems.length}
                         />
-                        <DroppableSection id={key} className="project-grid">
-                            {stageItems.map((item) => (
-                                <DraggableCard key={item.id} id={item.id}>
-                                    <ProjectCard
-                                        item={item}
-                                        variant="workshop"
-                                        onUpdate={updateItem}
-                                        onDelete={deleteItem}
-                                        onMoveNext={handleMoveNext}
-                                        accentColor={color}
-                                        showMoveButton={!isLast}
-                                    />
-                                </DraggableCard>
+                        <div className="project-grid">
+                            {archivedItems.map((item) => (
+                                <ProjectCard
+                                    key={item.id}
+                                    item={item}
+                                    variant="workshop"
+                                    onUpdate={updateItem}
+                                    onDelete={deleteItem}
+                                    onArchive={toggleArchive}
+                                    isArchived={true}
+                                />
                             ))}
-                            <AddProjectCard
-                                onAdd={handleAddItem(key)}
-                                accentColor={color}
-                                addLabel={t('common.add_task')}
-                            />
-                        </DroppableSection>
+                            {archivedItems.length === 0 && (
+                                <div className="empty-state">
+                                    <p>{t('common.no_archived_items') || "No archived items"}</p>
+                                </div>
+                            )}
+                        </div>
                     </section>
-                ))}
+                ) : (
+                    <>
+                        {stageConfig.map(({ key, icon, title, items: stageItems, color, isLast }) => (
+                            <section key={key} className="project-section">
+                                <SectionHeader
+                                    icon={icon}
+                                    title={title}
+                                    count={stageItems.length}
+                                />
+                                <DroppableSection id={key} className="project-grid">
+                                    {stageItems.map((item) => (
+                                        <DraggableCard key={item.id} id={item.id}>
+                                            <ProjectCard
+                                                item={item}
+                                                variant="workshop"
+                                                onUpdate={updateItem}
+                                                onDelete={deleteItem}
+                                                onMoveNext={handleMoveNext}
+                                                onArchive={toggleArchive}
+                                                accentColor={color}
+                                                showMoveButton={!isLast}
+                                            />
+                                        </DraggableCard>
+                                    ))}
+                                    <AddProjectCard
+                                        onAdd={handleAddItem(key)}
+                                        accentColor={color}
+                                        addLabel={t('common.add_task')}
+                                    />
+                                </DroppableSection>
+                            </section>
+                        ))}
+                    </>
+                )}
 
                 <DragOverlay>
                     {activeItem ? (

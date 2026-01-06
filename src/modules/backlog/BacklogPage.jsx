@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Lightbulb, Rocket } from 'lucide-react';
+import { Lightbulb, Rocket, Archive, RotateCcw } from 'lucide-react';
 import { useProject, STAGES } from '@/contexts/ProjectContext';
 import ProjectCard from '@/components/ProjectCard';
 import AddProjectCard from '@/components/AddProjectCard';
 import SectionHeader from '@/components/SectionHeader';
+import SearchInput from '@/components/SearchInput';
 import {
     DndContext,
     DragOverlay,
@@ -18,11 +19,26 @@ import DragOverlayCard from '@/components/DragOverlayCard';
 
 export default function BacklogPage() {
     const { t } = useTranslation();
-    const { items, addItem, updateItem, deleteItem, moveItemNext, moveItemToStage } = useProject();
-    const [activeId, setActiveId] = React.useState(null);
+    const { items, addItem, updateItem, deleteItem, moveItemNext, moveItemToStage, toggleArchive } = useProject();
+    const [activeId, setActiveId] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showArchived, setShowArchived] = useState(false);
 
-    const inspirationItems = items.filter(item => item.stage === STAGES.INSPIRATION);
-    const pendingItems = items.filter(item => item.stage === STAGES.PENDING);
+    // Filter Logic
+    const filteredItems = items.filter(item => {
+        const matchesSearch = (
+            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.link.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.goal.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        const matchesArchive = showArchived ? item.archived : !item.archived;
+        return matchesSearch && matchesArchive;
+    });
+
+    const inspirationItems = filteredItems.filter(item => item.stage === STAGES.INSPIRATION);
+    const pendingItems = filteredItems.filter(item => item.stage === STAGES.PENDING);
+    // For archived view, we can just show everything flat
+    const archivedItems = filteredItems;
 
     const handleAddItem = (stage) => (formData) => {
         addItem(stage, formData);
@@ -49,13 +65,9 @@ export default function BacklogPage() {
         const { active, over } = event;
 
         if (over && active.id !== over.id) {
-            // over.id should be the stage name (container id)
-            // or we might need to be careful if we dropping on a card? 
-            // DroppableSection id = stage
             const overStage = over.id;
 
-            // Only handle if dropping onto a valid stage section
-            if (overStage === STAGES.INSPIRATION || overStage === STAGES.PENDING) {
+            if ((overStage === STAGES.INSPIRATION || overStage === STAGES.PENDING) && !showArchived) {
                 moveItemToStage(active.id, overStage);
             }
         }
@@ -72,65 +84,127 @@ export default function BacklogPage() {
         >
             <div className="project-page">
                 <header className="project-page-header">
-                    <h1 className="project-page-title">{t('nav.backlog')}</h1>
-                    <p className="project-page-subtitle">{t('dashboard.backlog_desc')}</p>
+                    <div>
+                        <h1 className="project-page-title">
+                            {showArchived ? t('common.archived_projects') : t('nav.backlog')}
+                        </h1>
+                        <p className="project-page-subtitle">
+                            {showArchived ? t('common.archived_desc') : t('dashboard.backlog_desc')}
+                        </p>
+                    </div>
+
+                    <div className="header-actions" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <SearchInput
+                            value={searchQuery}
+                            onChange={setSearchQuery}
+                            placeholder={t('common.search_projects')}
+                            onClear={() => setSearchQuery('')}
+                        />
+                        <button
+                            className={`btn-icon ${showArchived ? 'active' : ''}`}
+                            onClick={() => setShowArchived(!showArchived)}
+                            title={showArchived ? t('common.view_active') : t('common.view_archive')}
+                            style={{
+                                padding: '8px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--border-color)',
+                                backgroundColor: showArchived ? 'var(--bg-active)' : 'transparent',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            {showArchived ? <RotateCcw size={18} /> : <Archive size={18} />}
+                        </button>
+                    </div>
                 </header>
 
-                {/* Inspiration Pool */}
-                <section className="project-section">
-                    <SectionHeader
-                        icon={<Lightbulb size={18} style={{ color: 'var(--color-accent-teal)' }} />}
-                        title={t('modules.backlog.sections.inspiration')}
-                        count={inspirationItems.length}
-                    />
-                    <DroppableSection id={STAGES.INSPIRATION} className="project-grid">
-                        {inspirationItems.map((item) => (
-                            <DraggableCard key={item.id} id={item.id}>
+                {showArchived ? (
+                    <section className="project-section">
+                        <SectionHeader
+                            icon={<Archive size={18} />}
+                            title={t('common.archived_items')}
+                            count={archivedItems.length}
+                        />
+                        <div className="project-grid">
+                            {archivedItems.map((item) => (
                                 <ProjectCard
+                                    key={item.id}
                                     item={item}
                                     variant="backlog"
                                     onUpdate={updateItem}
                                     onDelete={deleteItem}
-                                    onMoveNext={handleMoveNext}
+                                    onArchive={toggleArchive}
+                                    isArchived={true}
+                                />
+                            ))}
+                            {archivedItems.length === 0 && (
+                                <div className="empty-state">
+                                    <p>{t('common.no_archived_items') || "No archived items"}</p>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+                ) : (
+                    <>
+                        <section className="project-section">
+                            <SectionHeader
+                                icon={<Lightbulb size={18} style={{ color: 'var(--color-accent-teal)' }} />}
+                                title={t('modules.backlog.sections.inspiration')}
+                                count={inspirationItems.length}
+                            />
+                            <DroppableSection id={STAGES.INSPIRATION} className="project-grid">
+                                {inspirationItems.map((item) => (
+                                    <DraggableCard key={item.id} id={item.id}>
+                                        <ProjectCard
+                                            item={item}
+                                            variant="backlog"
+                                            onUpdate={updateItem}
+                                            onDelete={deleteItem}
+                                            onMoveNext={handleMoveNext}
+                                            onArchive={toggleArchive}
+                                            accentColor="var(--color-accent-teal)"
+                                        />
+                                    </DraggableCard>
+                                ))}
+                                <AddProjectCard
+                                    onAdd={handleAddItem(STAGES.INSPIRATION)}
                                     accentColor="var(--color-accent-teal)"
+                                    addLabel={t('common.add_idea')}
                                 />
-                            </DraggableCard>
-                        ))}
-                        <AddProjectCard
-                            onAdd={handleAddItem(STAGES.INSPIRATION)}
-                            accentColor="var(--color-accent-teal)"
-                            addLabel={t('common.add_idea')}
-                        />
-                    </DroppableSection>
-                </section>
+                            </DroppableSection>
+                        </section>
 
-                {/* Pending Development */}
-                <section className="project-section">
-                    <SectionHeader
-                        icon={<Rocket size={18} style={{ color: 'var(--color-accent-vermilion)' }} />}
-                        title={t('modules.backlog.sections.pending')}
-                        count={pendingItems.length}
-                    />
-                    <DroppableSection id={STAGES.PENDING} className="project-grid">
-                        {pendingItems.map((item) => (
-                            <DraggableCard key={item.id} id={item.id}>
-                                <ProjectCard
-                                    item={item}
-                                    variant="backlog"
-                                    onUpdate={updateItem}
-                                    onDelete={deleteItem}
-                                    onMoveNext={handleMoveNext}
+                        <section className="project-section">
+                            <SectionHeader
+                                icon={<Rocket size={18} style={{ color: 'var(--color-accent-vermilion)' }} />}
+                                title={t('modules.backlog.sections.pending')}
+                                count={pendingItems.length}
+                            />
+                            <DroppableSection id={STAGES.PENDING} className="project-grid">
+                                {pendingItems.map((item) => (
+                                    <DraggableCard key={item.id} id={item.id}>
+                                        <ProjectCard
+                                            item={item}
+                                            variant="backlog"
+                                            onUpdate={updateItem}
+                                            onDelete={deleteItem}
+                                            onMoveNext={handleMoveNext}
+                                            onArchive={toggleArchive}
+                                            accentColor="var(--color-accent-vermilion)"
+                                        />
+                                    </DraggableCard>
+                                ))}
+                                <AddProjectCard
+                                    onAdd={handleAddItem(STAGES.PENDING)}
                                     accentColor="var(--color-accent-vermilion)"
+                                    addLabel={t('common.add_project')}
                                 />
-                            </DraggableCard>
-                        ))}
-                        <AddProjectCard
-                            onAdd={handleAddItem(STAGES.PENDING)}
-                            accentColor="var(--color-accent-vermilion)"
-                            addLabel={t('common.add_project')}
-                        />
-                    </DroppableSection>
-                </section>
+                            </DroppableSection>
+                        </section>
+                    </>
+                )}
 
                 <DragOverlay>
                     {activeItem ? (

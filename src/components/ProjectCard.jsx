@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, Trash2, ExternalLink, Target, Calendar, Edit3, Check, X } from 'lucide-react';
+import { ArrowRight, Trash2, ExternalLink, Target, Calendar, Edit3, Check, X, Archive, RotateCcw } from 'lucide-react';
 import './ProjectCard.css';
 
 export default function ProjectCard({
@@ -8,6 +8,8 @@ export default function ProjectCard({
     onUpdate,
     onDelete,
     onMoveNext,
+    onArchive,
+    isArchived = false,
     accentColor,
     showMoveButton = true,
     variant = 'default'
@@ -113,7 +115,7 @@ export default function ProjectCard({
                     >
                         <Edit3 size={14} />
                     </button>
-                    {showMoveButton && (
+                    {showMoveButton && !isArchived && (
                         <button
                             className="project-icon-btn project-icon-btn-primary"
                             onClick={() => onMoveNext(item)}
@@ -122,10 +124,33 @@ export default function ProjectCard({
                             <ArrowRight size={14} />
                         </button>
                     )}
+
+                    {/* Archive / Restore Logic */}
+                    {onArchive && !isArchived ? (
+                        <button
+                            className="project-icon-btn"
+                            onClick={() => onArchive(item.id)}
+                            title={t('common.archive')}
+                        >
+                            <Archive size={14} />
+                        </button>
+                    ) : null}
+
+                    {onArchive && isArchived ? (
+                        <button
+                            className="project-icon-btn"
+                            onClick={() => onArchive(item.id)} // Toggles back to active
+                            title={t('common.restore')}
+                        >
+                            <RotateCcw size={14} />
+                        </button>
+                    ) : null}
+
+                    {/* Delete is always available but maybe styled differently in archive */}
                     <button
                         className="project-icon-btn project-icon-btn-danger"
                         onClick={() => onDelete(item.id)}
-                        title={t('common.delete')}
+                        title={isArchived ? t('common.delete_forever') : t('common.delete')}
                     >
                         <Trash2 size={14} />
                     </button>
