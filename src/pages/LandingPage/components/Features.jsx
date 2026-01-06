@@ -29,31 +29,31 @@ const Features = () => {
     const features = [
         {
             icon: Zap,
-            title: t('landing.feature_backlog_title', 'Strategic Backlog'),
+            title: t('landing.feature_backlog_title', 'NEURAL BACKLOG'),
             description: t('landing.feature_backlog_desc', 'Organize your digital arsenal. Prioritize ideas with AI-driven insights.'),
             className: 'card-wide'
         },
         {
             icon: Globe,
-            title: t('landing.feature_workshop_title', 'The Workshop'),
+            title: t('landing.feature_workshop_title', 'QUANTUM WORKSHOP'),
             description: t('landing.feature_workshop_desc', 'Where ideas take physical form. Track every phase of development.'),
             className: 'card-tall'
         },
         {
             icon: Shield,
-            title: t('landing.feature_command_title', 'Command Tower'),
+            title: t('landing.feature_command_title', 'COMMAND TOWER'),
             description: t('landing.feature_command_desc', 'Centralized execution. Deploy and manage with professional precision.'),
             className: 'card-standard'
         },
         {
             icon: Code,
-            title: t('landing.feature_ai_title', 'AI Forge'),
+            title: t('landing.feature_ai_title', 'SYNTHETIC INTELLIGENCE'),
             description: t('landing.feature_ai_desc', 'Collaborate with advanced LLMs to generate high-quality codebases.'),
             className: 'card-standard'
         },
         {
             icon: Cpu,
-            title: t('landing.feature_infra_title', 'Smart Infra'),
+            title: t('landing.feature_infra_title', 'GLOBAL INFRASTRUCTURE'),
             description: t('landing.feature_infra_desc', 'Automated Cloudflare and Firebase integrations for instant scale.'),
             className: 'card-wide'
         }
