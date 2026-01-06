@@ -138,6 +138,7 @@ export default function WorkshopPage() {
                                 <DraggableCard key={item.id} id={item.id}>
                                     <ProjectCard
                                         item={item}
+                                        variant="workshop"
                                         onUpdate={updateItem}
                                         onDelete={deleteItem}
                                         onMoveNext={handleMoveNext}

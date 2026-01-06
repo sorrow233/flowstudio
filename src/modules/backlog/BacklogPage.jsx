@@ -88,6 +88,7 @@ export default function BacklogPage() {
                             <DraggableCard key={item.id} id={item.id}>
                                 <ProjectCard
                                     item={item}
+                                    variant="backlog"
                                     onUpdate={updateItem}
                                     onDelete={deleteItem}
                                     onMoveNext={handleMoveNext}
@@ -115,6 +116,7 @@ export default function BacklogPage() {
                             <DraggableCard key={item.id} id={item.id}>
                                 <ProjectCard
                                     item={item}
+                                    variant="backlog"
                                     onUpdate={updateItem}
                                     onDelete={deleteItem}
                                     onMoveNext={handleMoveNext}

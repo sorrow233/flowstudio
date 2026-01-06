@@ -9,7 +9,8 @@ export default function ProjectCard({
     onDelete,
     onMoveNext,
     accentColor,
-    showMoveButton = true
+    showMoveButton = true,
+    variant = 'default'
 }) {
     const { t } = useTranslation();
     const [isEditing, setIsEditing] = useState(false);
@@ -41,8 +42,9 @@ export default function ProjectCard({
 
     if (isEditing) {
         return (
-            <div className="project-card project-card-editing" style={{ '--accent-color': accentColor }}>
+            <div className={`project-card project-card-editing variant-${variant}`} style={{ '--accent-color': accentColor }}>
                 <div className="project-card-form">
+                    {/* ... form content ... */}
                     <div className="project-form-row">
                         <input
                             type="text"
@@ -88,10 +90,16 @@ export default function ProjectCard({
         );
     }
 
+    // Dynamic styles based on variant
+    const cardStyle = {
+        '--accent-color': accentColor,
+        backgroundColor: variant === 'workshop' ? 'var(--bg-card)' : item.color
+    };
+
     return (
         <div
-            className="project-card"
-            style={{ '--accent-color': accentColor, backgroundColor: item.color }}
+            className={`project-card variant-${variant}`}
+            style={cardStyle}
         >
             <div className="project-card-header">
                 <h3 className="project-card-name">

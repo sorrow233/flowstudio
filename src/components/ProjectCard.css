@@ -438,3 +438,69 @@
     color: inherit;
     border-radius: 2px;
 }
+
+
+/* === Variant: Backlog (Style: Creative Note) === */
+.project-card.variant-backlog {
+    border-radius: var(--radius-lg);
+    border: none;
+    box-shadow: var(--shadow-sm);
+    /* Background color is set inline from item.color */
+}
+
+.project-card.variant-backlog::before {
+    display: none;
+    /* No accent border */
+}
+
+.project-card.variant-backlog .project-card-name {
+    font-weight: 700;
+    font-family: var(--font-display, sans-serif);
+    color: #333;
+    /* Ensure contrast on pastels */
+}
+
+.dark-mode .project-card.variant-backlog .project-card-name {
+    color: #1a1a1a;
+}
+
+.project-card.variant-backlog:hover {
+    transform: translateY(-2px) rotate(1deg);
+    box-shadow: var(--shadow-md);
+}
+
+/* === Variant: Workshop (Style: Technical Task) === */
+.project-card.variant-workshop {
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    /* Override inline color */
+    padding-left: var(--space-4);
+    /* Standard padding */
+}
+
+.project-card.variant-workshop::before {
+    width: 4px;
+    /* Thicker accent */
+    border-top-left-radius: var(--radius-sm);
+    border-bottom-left-radius: var(--radius-sm);
+    opacity: 1;
+    /* Always visible */
+}
+
+.project-card.variant-workshop .project-card-header {
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.project-card.variant-workshop .project-card-name {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.875rem;
+    letter-spacing: -0.01em;
+}
+
+.project-card.variant-workshop:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
