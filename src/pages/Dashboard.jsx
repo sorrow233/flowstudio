@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sparkles, Target, Zap, Archive } from 'lucide-react';
+import { Sparkles, Target, Zap, Archive, Layers as IconLayers, Layout as IconLayout } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const ModuleCard = ({ title, icon: Icon, description, to, color }) => (
@@ -36,6 +36,20 @@ export default function Dashboard() {
                     description={t('dashboard.incubator_desc')}
                     to="/incubator"
                     color="var(--color-accent-vermilion)"
+                />
+                <ModuleCard
+                    title={t('nav.backlog')}
+                    icon={IconLayers}
+                    description={t('dashboard.backlog_desc')}
+                    to="/backlog"
+                    color="var(--color-accent-orange)"
+                />
+                <ModuleCard
+                    title={t('nav.workshop')}
+                    icon={IconLayout}
+                    description={t('dashboard.workshop_desc')}
+                    to="/workshop"
+                    color="var(--color-accent-blue)"
                 />
                 <ModuleCard
                     title={t('nav.vision_studio')}
