@@ -184,6 +184,8 @@ export const ProjectProvider = ({ children }) => {
             name: formData.name || '',
             link: formData.link || '',
             goal: formData.goal || '',
+            priority: formData.priority || 'medium', // low, medium, high
+            deadline: formData.deadline || null,
             color: generatePastelColor(),
             stage: stage,
             archived: false,

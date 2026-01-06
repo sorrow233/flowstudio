@@ -1,8 +1,9 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, Zap, Layers, Layout as LayoutIcon, Settings, LogOut } from 'lucide-react';
+import { Home, Zap, Layers, Layout as LayoutIcon, Settings, LogOut, Sun, Moon, Laptop } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import LanguageSwitcher from './LanguageSwitcher';
 
 const NavItem = ({ to, icon: Icon, label, isActive }) => (
@@ -19,6 +20,21 @@ export default function Layout() {
     const location = useLocation();
     const { t } = useTranslation();
     const { isGuest, currentUser, logout } = useAuth();
+    const { theme, setTheme } = useTheme();
+
+    const toggleTheme = () => {
+        if (theme === 'light') setTheme('dark');
+        else if (theme === 'dark') setTheme('system');
+        else setTheme('light');
+    };
+
+    const getThemeIcon = () => {
+        if (theme === 'light') return Sun;
+        if (theme === 'dark') return Moon;
+        return Laptop;
+    };
+
+    const ThemeIcon = getThemeIcon();
 
     return (
         <div className="app-layout">
@@ -38,8 +54,25 @@ export default function Layout() {
                 </nav>
 
                 <div className="sidebar-footer">
-                    <div style={{ padding: '0 1rem 1rem 1rem' }}>
+                    <div style={{ padding: '0 1rem 1rem 1rem', display: 'flex', gap: '8px' }}>
                         <LanguageSwitcher />
+                        <button
+                            className="nav-item"
+                            onClick={toggleTheme}
+                            style={{
+                                border: '1px solid var(--border-subtle)',
+                                background: 'transparent',
+                                padding: '6px',
+                                justifyContent: 'center',
+                                width: '36px',
+                                height: '36px',
+                                cursor: 'pointer',
+                                color: 'var(--text-secondary)'
+                            }}
+                            title={`Current theme: ${theme}`}
+                        >
+                            <ThemeIcon size={18} />
+                        </button>
                     </div>
 
                     {currentUser ? (
