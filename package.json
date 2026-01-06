@@ -1,14 +1,14 @@
 {
   "name": "flow-studio",
   "private": true,
-  "version": "2.4.9",
+  "version": "2.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy:main": "npm run build && npx wrangler pages deploy dist --project-name flow-studio --branch main --commit-dirty=true",
+    "deploy:main": "node scripts/generate-sitemap.js && npm run build && npx wrangler pages deploy dist --project-name flow-studio --branch main --commit-dirty=true",
     "deploy:beta": "npm run build && npx wrangler pages deploy dist --project-name flow-studio --branch beta --commit-dirty=true"
   },
   "dependencies": {
