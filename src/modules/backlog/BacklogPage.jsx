@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RotateCcw, Archive, Lightbulb, Rocket, Play } from 'lucide-react';
 import { useBacklogItems, BACKLOG_STAGES } from './hooks/useBacklogItems';
+
 import ProjectCard from '@/components/ProjectCard';
 import AddProjectCard from '@/components/AddProjectCard';
 import SectionHeader from '@/components/SectionHeader';
