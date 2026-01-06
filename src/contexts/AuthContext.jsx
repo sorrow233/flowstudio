@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
     onAuthStateChanged,
     signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     GoogleAuthProvider,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
@@ -39,11 +41,22 @@ export function AuthProvider({ children }) {
             console.warn('Firebase configuration is missing. Defaulting to Guest Mode.');
             // Automatically enable guest mode if config is missing
             setIsGuest(true);
-            // We don't set authError here anymore to avoid blocking the UI
-            // setAuthError('Firebase configuration is missing or invalid.'); 
             setLoading(false);
             return;
         }
+
+        // Handle Redirect Result
+        getRedirectResult(auth)
+            .then((result) => {
+                // If we have a result, it means we just came back from a redirect login
+                if (result?.user) {
+                    console.log('Redirect login successful:', result.user.email);
+                }
+            })
+            .catch((error) => {
+                console.error('Redirect sign-in error:', error);
+                setAuthError(error.message);
+            });
 
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setCurrentUser(user);
@@ -90,7 +103,8 @@ export function AuthProvider({ children }) {
     function loginWithGoogle() {
         checkAuth();
         const provider = new GoogleAuthProvider();
-        return signInWithPopup(auth, provider);
+        // Use redirect instead of popup to avoid COOP issues
+        return signInWithRedirect(auth, provider);
     }
 
     function logout() {

@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
@@ -14,6 +15,7 @@ const firebaseConfig = {
 
 let app;
 let auth;
+let db;
 let analytics;
 
 try {
@@ -22,6 +24,7 @@ try {
     }
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
+    db = getFirestore(app);
     if (firebaseConfig.measurementId) {
         analytics = getAnalytics(app);
     }
@@ -30,5 +33,5 @@ try {
     // We explicitly don't crash here so the UI can render an error message instead of white screen
 }
 
-export { auth, analytics };
+export { auth, db, analytics };
 export default app;

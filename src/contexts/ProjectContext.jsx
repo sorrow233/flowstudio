@@ -1,5 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { doc, getDoc, setDoc, onSnapshot, updateDoc, deleteDoc, collection, query, where, getDocs, writeBatch } from 'firebase/firestore';
+import { db } from '@/services/firebase';
+import { useAuth } from './AuthContext';
 
 const ProjectContext = createContext();
 
@@ -12,23 +15,69 @@ export const STAGES = {
     COMMERCIAL: 'commercial'    // Completed / Commercial
 };
 
+const SYNC_KEY = 'flow_items';
+
 export const ProjectProvider = ({ children }) => {
-    const [items, setItems] = useState(() => {
-        const saved = localStorage.getItem('flow_items');
-        return saved ? JSON.parse(saved) : [
-            // Initial Demo Data
-            { id: 1, name: 'AI Storyteller', color: '#ffd1dc', stage: STAGES.INSPIRATION },
-            { id: 2, name: 'Crypto Tracker', color: '#c1e1c1', stage: STAGES.INSPIRATION },
-            { id: 3, name: 'Flow Studio Mobile', color: '#ffaaa5', stage: STAGES.PENDING },
-            { id: 4, name: 'Database Optimization', color: '#a8e6cf', stage: STAGES.PENDING },
-        ];
-    });
+    const { currentUser, isGuest } = useAuth();
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(true);
 
+    // Initial load from LocalStorage for immediate UI
     useEffect(() => {
-        localStorage.setItem('flow_items', JSON.stringify(items));
-    }, [items]);
+        const saved = localStorage.getItem(SYNC_KEY);
+        if (saved) {
+            setItems(JSON.parse(saved));
+        }
+        setLoading(false);
+    }, []);
 
-    const addItem = (stage = STAGES.INSPIRATION, formData = {}) => {
+    // Firestore Sync Logic
+    useEffect(() => {
+        if (!currentUser || isGuest) {
+            // In guest mode, we just use local storage (already handled by state updates below)
+            return;
+        }
+
+        const userDocRef = doc(db, 'users', currentUser.uid);
+
+        // Real-time listener for user data
+        const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const cloudData = docSnap.data().items || [];
+                setItems(cloudData);
+                // Also update local storage for offline fallback
+                localStorage.setItem(SYNC_KEY, JSON.stringify(cloudData));
+            } else {
+                // If it's a new user, migrate guest data if it exists
+                const saved = localStorage.getItem(SYNC_KEY);
+                const guestData = saved ? JSON.parse(saved) : [];
+                if (guestData.length > 0) {
+                    setDoc(userDocRef, { items: guestData }, { merge: true });
+                }
+            }
+        }, (error) => {
+            console.error("Firestore Sync Error:", error);
+        });
+
+        return () => unsubscribe();
+    }, [currentUser, isGuest]);
+
+    // Persistence Helper
+    const persistItems = useCallback(async (newItems) => {
+        setItems(newItems);
+        localStorage.setItem(SYNC_KEY, JSON.stringify(newItems));
+
+        if (currentUser && !isGuest) {
+            try {
+                const userDocRef = doc(db, 'users', currentUser.uid);
+                await setDoc(userDocRef, { items: newItems }, { merge: true });
+            } catch (error) {
+                console.error("Failed to sync to Firestore:", error);
+            }
+        }
+    }, [currentUser, isGuest]);
+
+    const addItem = async (stage = STAGES.INSPIRATION, formData = {}) => {
         const newItem = {
             id: uuidv4(),
             name: formData.name || '',
@@ -39,28 +88,31 @@ export const ProjectProvider = ({ children }) => {
             archived: false,
             createdAt: new Date().toISOString()
         };
-        setItems(prev => [...prev, newItem]);
+        const newItems = [...items, newItem];
+        await persistItems(newItems);
         return newItem.id;
     };
 
-    const updateItem = (id, updates) => {
-        setItems(prev => prev.map(item =>
+    const updateItem = async (id, updates) => {
+        const newItems = items.map(item =>
             item.id === id ? { ...item, ...updates } : item
-        ));
+        );
+        await persistItems(newItems);
     };
 
-    const deleteItem = (id) => {
-        setItems(prev => prev.filter(item => item.id !== id));
+    const deleteItem = async (id) => {
+        const newItems = items.filter(item => item.id !== id);
+        await persistItems(newItems);
     };
 
-    const toggleArchive = (id) => {
-        setItems(prev => prev.map(item =>
+    const toggleArchive = async (id) => {
+        const newItems = items.map(item =>
             item.id === id ? { ...item, archived: !item.archived } : item
-        ));
+        );
+        await persistItems(newItems);
     };
 
     const validateForNextStage = (item, nextStage) => {
-        // Validation Rule: Moving to Advanced or Commercial requires Name and Link
         if (nextStage === STAGES.ADVANCED || nextStage === STAGES.COMMERCIAL) {
             if (!item.name || !item.name.trim()) return { valid: false, message: 'Name is required to proceed.' };
             if (!item.link || !item.link.trim()) return { valid: false, message: 'Connection (Link) is required to proceed.' };
@@ -68,60 +120,43 @@ export const ProjectProvider = ({ children }) => {
         return { valid: true };
     };
 
-    const moveItemNext = (id) => {
-        setItems(prev => {
-            return prev.map(item => {
-                if (item.id !== id) return item;
+    const moveItemNext = async (id) => {
+        const item = items.find(i => i.id === id);
+        if (!item) return;
 
-                let nextStage = item.stage;
-                switch (item.stage) {
-                    case STAGES.INSPIRATION: nextStage = STAGES.PENDING; break;
-                    case STAGES.PENDING: nextStage = STAGES.EARLY; break;
-                    case STAGES.EARLY: nextStage = STAGES.GROWTH; break;
-                    case STAGES.GROWTH: nextStage = STAGES.ADVANCED; break;
-                    case STAGES.ADVANCED: nextStage = STAGES.COMMERCIAL; break;
-                    default: return item;
-                }
+        let nextStage = item.stage;
+        switch (item.stage) {
+            case STAGES.INSPIRATION: nextStage = STAGES.PENDING; break;
+            case STAGES.PENDING: nextStage = STAGES.EARLY; break;
+            case STAGES.EARLY: nextStage = STAGES.GROWTH; break;
+            case STAGES.GROWTH: nextStage = STAGES.ADVANCED; break;
+            case STAGES.ADVANCED: nextStage = STAGES.COMMERCIAL; break;
+            default: return;
+        }
 
-                const validation = validateForNextStage(item, nextStage);
-                if (!validation.valid) {
-                    // Logic to handle validation error handled by UI consumer usually, 
-                    // but here we just return strict constraint.
-                    // For now, we will throw or return early if called blindly.
-                    // Ideally, UI checks this before calling, or we return status.
-                    // Let's assume the UI handles the pre-check or we don't update if invalid.
-                    console.warn(validation.message);
-                    return item;
-                }
+        const validation = validateForNextStage(item, nextStage);
+        if (!validation.valid) {
+            console.warn(validation.message);
+            return;
+        }
 
-                return { ...item, stage: nextStage };
-            });
-        });
+        const newItems = items.map(i => i.id === id ? { ...i, stage: nextStage } : i);
+        await persistItems(newItems);
     };
 
-    // Explicit move for UI flexibility (Drag & Drop) with validation
-    const moveItemToStage = (id, newStage) => {
-        let itemToMove;
-
-        // Find the item first to validate
-        // We can't access state directly in the simpler setFn(prev => ...) for validation *return* 
-        // without a ref or finding it first. Since `items` is in scope, we can find it.
-        // Wait, `items` from `useState` might be stale in closure? 
-        // But `items` is a dependency of the context value, so this function is recreated when items change?
-        // Actually this component re-renders when items change, so `items` is fresh.
-        itemToMove = items.find(i => i.id === id);
-
+    const moveItemToStage = async (id, newStage) => {
+        const itemToMove = items.find(i => i.id === id);
         if (!itemToMove) return { success: false, message: 'Item not found' };
 
-        // Validate
         const validation = validateForNextStage(itemToMove, newStage);
         if (!validation.valid) {
             return { success: false, message: validation.message };
         }
 
-        setItems(prev => prev.map(item =>
+        const newItems = items.map(item =>
             item.id === id ? { ...item, stage: newStage } : item
-        ));
+        );
+        await persistItems(newItems);
 
         return { success: true };
     };
@@ -132,7 +167,17 @@ export const ProjectProvider = ({ children }) => {
     };
 
     return (
-        <ProjectContext.Provider value={{ items, addItem, updateItem, deleteItem, moveItemNext, validateForNextStage, moveItemToStage, toggleArchive }}>
+        <ProjectContext.Provider value={{
+            items,
+            loading,
+            addItem,
+            updateItem,
+            deleteItem,
+            moveItemNext,
+            validateForNextStage,
+            moveItemToStage,
+            toggleArchive
+        }}>
             {children}
         </ProjectContext.Provider>
     );
