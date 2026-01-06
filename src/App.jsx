@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import Dashboard from '@/pages/Dashboard';
@@ -8,6 +9,7 @@ import CommandTowerPage from '@/modules/command-tower/CommandTowerPage';
 import ArchivePage from '@/modules/archive/ArchivePage';
 
 function App() {
+  const { t } = useTranslation();
   return (
     <BrowserRouter>
       <Routes>
@@ -17,7 +19,7 @@ function App() {
           <Route path="vision-studio" element={<VisionStudioPage />} />
           <Route path="command-tower" element={<CommandTowerPage />} />
           <Route path="archive" element={<ArchivePage />} />
-          <Route path="settings" element={<div className="text-h2">Settings</div>} />
+          <Route path="settings" element={<div className="text-h2">{t('settings.title')}</div>} />
         </Route>
       </Routes>
     </BrowserRouter>

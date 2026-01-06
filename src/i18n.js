@@ -36,15 +36,15 @@ i18n
     // for all options read: https://www.i18next.com/overview/configuration-options
     .init({
         resources,
-        fallbackLng: 'en',
-        debug: import.meta.env.DEV, // Enable debug in development
+        fallbackLng: 'en', // Strict fallback to English
+        debug: import.meta.env.DEV,
 
         interpolation: {
-            escapeValue: false, // not needed for react as it escapes by default
+            escapeValue: false,
         },
 
         detection: {
-            // order and from where user language should be detected
+            // Strict order: User Preference (localStorage) > System (navigator)
             order: ['localStorage', 'navigator'],
 
             // keys or params to lookup language from
@@ -55,10 +55,6 @@ i18n
 
             // optional expire and domain for set cookie
             cookieMinutes: 10,
-            cookieDomain: 'myDomain',
-
-            // optional set cookie options, reference:[MDN Set-Cookie docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie)
-            cookieOptions: { path: '/', sameSite: 'strict' }
         },
 
         defaultNS: 'common',

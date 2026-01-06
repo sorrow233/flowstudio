@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Sparkles, Target, Zap, Archive } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -17,41 +18,43 @@ const ModuleCard = ({ title, icon: Icon, description, to, color }) => (
 );
 
 export default function Dashboard() {
+    const { t } = useTranslation();
+
     return (
         <div className="dashboard-container">
             <div className="dashboard-header">
-                <h1 className="text-h1">Flow Studio</h1>
+                <h1 className="text-h1">{t('app.title')}</h1>
                 <p className="text-body subtitle">
-                    Your AI-Driven Personal Software Arsenal.
+                    {t('dashboard.subtitle')}
                 </p>
             </div>
 
             <div className="dashboard-grid">
                 <ModuleCard
-                    title="Incubator"
+                    title={t('nav.incubator')}
                     icon={Sparkles}
-                    description="Capture and analyze new ideas with AI."
+                    description={t('dashboard.incubator_desc')}
                     to="/incubator"
                     color="var(--color-accent-vermilion)"
                 />
                 <ModuleCard
-                    title="Vision Studio"
+                    title={t('nav.vision_studio')}
                     icon={Target}
-                    description="Define project scope and milestones."
+                    description={t('dashboard.vision_studio_desc')}
                     to="/vision-studio"
                     color="var(--color-accent-teal)"
                 />
                 <ModuleCard
-                    title="Command Tower"
+                    title={t('nav.command_tower')}
                     icon={Zap}
-                    description="Execute tasks with AI Copilot."
+                    description={t('dashboard.command_tower_desc')}
                     to="/command-tower"
                     color="var(--color-accent-indigo)"
                 />
                 <ModuleCard
-                    title="Archive"
+                    title={t('nav.archive')}
                     icon={Archive}
-                    description="Reusable blocks and retrospective logs."
+                    description={t('dashboard.archive_desc')}
                     to="/archive"
                     color="var(--text-secondary)"
                 />

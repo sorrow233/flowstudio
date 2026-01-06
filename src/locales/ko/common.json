@@ -17,5 +17,39 @@
         "command_tower": "커맨드 타워",
         "archive": "아카이브",
         "settings": "설정"
+    },
+    "dashboard": {
+        "subtitle": "당신의 AI 기반 개인 소프트웨어 아스날.",
+        "incubator_desc": "AI로 새로운 아이디어를 포착하고 분석하세요.",
+        "vision_studio_desc": "프로젝트 범위와 마일스톤을 정의하세요.",
+        "command_tower_desc": "AI 코파일럿과 함께 작업을 수행하세요.",
+        "archive_desc": "재사용 가능한 블록 및 회고 로그."
+    },
+    "settings": {
+        "title": "설정"
+    },
+    "modules": {
+        "archive": {
+            "subtitle": "아는 것이 힘이다."
+        },
+        "vision_studio": {
+            "subtitle": "범위 정의: MVP, Pro 또는 Ultimate."
+        },
+        "incubator": {
+            "subtitle": "아이디어가 탄생하고 분석되는 곳.",
+            "quick_capture": "빠른 캡처",
+            "placeholder": "이런 소프트웨어를 만들고 싶습니다...",
+            "ignite": "아이디어 점화",
+            "analyzing": "분석 중...",
+            "analysis_brief": "AI 분석 브리핑",
+            "tier_opportunity": "등급 기회",
+            "monetization": "수익화",
+            "timeline": "타임라인",
+            "complexity": "복잡도",
+            "recommended_stack": "추천 스택:",
+            "next_steps": "다음 단계:",
+            "start_project": "프로젝트 시작",
+            "discard": "삭제"
+        }
     }
 }

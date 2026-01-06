@@ -17,5 +17,39 @@
         "command_tower": "Command Tower",
         "archive": "Archive",
         "settings": "Settings"
+    },
+    "dashboard": {
+        "subtitle": "Your AI-Driven Personal Software Arsenal.",
+        "incubator_desc": "Capture and analyze new ideas with AI.",
+        "vision_studio_desc": "Define project scope and milestones.",
+        "command_tower_desc": "Execute tasks with AI Copilot.",
+        "archive_desc": "Reusable blocks and retrospective logs."
+    },
+    "settings": {
+        "title": "Settings"
+    },
+    "modules": {
+        "archive": {
+            "subtitle": "Knowledge is power."
+        },
+        "vision_studio": {
+            "subtitle": "Define the scope: MVP, Pro, or Ultimate."
+        },
+        "incubator": {
+            "subtitle": "Where ideas are born and analyzed.",
+            "quick_capture": "Quick Capture",
+            "placeholder": "I want to build a software that...",
+            "ignite": "Ignite Idea",
+            "analyzing": "Analyzing...",
+            "analysis_brief": "AI Analysis Brief",
+            "tier_opportunity": "-Tier Opportunity",
+            "monetization": "Monetization",
+            "timeline": "Timeline",
+            "complexity": "Complexity",
+            "recommended_stack": "Recommended Stack:",
+            "next_steps": "Next Steps:",
+            "start_project": "Start Project",
+            "discard": "Discard"
+        }
     }
 }

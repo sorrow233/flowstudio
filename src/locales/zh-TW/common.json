@@ -17,5 +17,39 @@
         "command_tower": "指揮塔",
         "archive": "歸檔",
         "settings": "設定"
+    },
+    "dashboard": {
+        "subtitle": "您的 AI 驅動個人軟體軍火庫。",
+        "incubator_desc": "用 AI 捕捉和分析新創意。",
+        "vision_studio_desc": "定義專案範圍和里程碑。",
+        "command_tower_desc": "與 AI 副駕駛協同執行任務。",
+        "archive_desc": "可重複使用的模組與回顧日誌。"
+    },
+    "settings": {
+        "title": "設定"
+    },
+    "modules": {
+        "archive": {
+            "subtitle": "知識就是力量。"
+        },
+        "vision_studio": {
+            "subtitle": "定義範圍：MVP、專業版或旗艦版。"
+        },
+        "incubator": {
+            "subtitle": "創意誕生與分析之地。",
+            "quick_capture": "快速捕捉",
+            "placeholder": "我想開發一個軟體，它是...",
+            "ignite": "點燃創意",
+            "analyzing": "分析中...",
+            "analysis_brief": "AI 分析簡報",
+            "tier_opportunity": "級機會",
+            "monetization": "變現能力",
+            "timeline": "時間線",
+            "complexity": "複雜度",
+            "recommended_stack": "推薦技術堆疊：",
+            "next_steps": "後續步驟：",
+            "start_project": "啟動專案",
+            "discard": "丟棄"
+        }
     }
 }
