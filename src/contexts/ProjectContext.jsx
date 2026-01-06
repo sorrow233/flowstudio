@@ -1,78 +1,179 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { doc, getDoc, setDoc, onSnapshot, updateDoc, deleteDoc, collection, query, where, getDocs, writeBatch } from 'firebase/firestore';
+import {
+    doc,
+    getDoc,
+    setDoc,
+    onSnapshot,
+    collection,
+    query,
+    where,
+    getDocs,
+    writeBatch,
+    deleteDoc,
+    serverTimestamp,
+    Timestamp
+} from 'firebase/firestore';
 import { db } from '@/services/firebase';
 import { useAuth } from './AuthContext';
 
 const ProjectContext = createContext();
 
 export const STAGES = {
-    INSPIRATION: 'inspiration', // Sensitive Words / Ideas
-    PENDING: 'pending',         // Waiting for Development
-    EARLY: 'early',             // In Progress - Early Stage
-    GROWTH: 'growth',           // In Progress - Growth Stage
-    ADVANCED: 'advanced',       // Next Level
-    COMMERCIAL: 'commercial'    // Completed / Commercial
+    INSPIRATION: 'inspiration',
+    PENDING: 'pending',
+    EARLY: 'early',
+    GROWTH: 'growth',
+    ADVANCED: 'advanced',
+    COMMERCIAL: 'commercial'
 };
 
-const SYNC_KEY = 'flow_items';
+const SYNC_KEY = 'flow_items_v2'; // Bumped version for new schema
+const LEGACY_SYNC_KEY = 'flow_items';
 
 export const ProjectProvider = ({ children }) => {
     const { currentUser, isGuest } = useAuth();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Initial load from LocalStorage for immediate UI
+    // 1. Initial Load from LocalStorage for immediate UI
     useEffect(() => {
         const saved = localStorage.getItem(SYNC_KEY);
         if (saved) {
-            setItems(JSON.parse(saved));
+            try {
+                setItems(JSON.parse(saved));
+            } catch (e) {
+                console.error("Failed to parse local items", e);
+            }
+        } else {
+            // Check legacy or provide demo data
+            const legacy = localStorage.getItem(LEGACY_SYNC_KEY);
+            if (legacy) {
+                try {
+                    const legacyData = JSON.parse(legacy).map(item => ({
+                        ...item,
+                        updatedAt: item.updatedAt || new Date().toISOString()
+                    }));
+                    setItems(legacyData);
+                    localStorage.setItem(SYNC_KEY, JSON.stringify(legacyData));
+                } catch (e) { console.error(e); }
+            }
         }
         setLoading(false);
     }, []);
 
-    // Firestore Sync Logic
+    // 2. Firestore Sync & Migration Logic
     useEffect(() => {
-        if (!currentUser || isGuest) {
-            // In guest mode, we just use local storage (already handled by state updates below)
-            return;
-        }
+        if (!currentUser || isGuest) return;
 
         const userDocRef = doc(db, 'users', currentUser.uid);
+        const projectsColRef = collection(db, 'users', currentUser.uid, 'projects');
 
-        // Real-time listener for user data
-        const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
-            if (docSnap.exists()) {
-                const cloudData = docSnap.data().items || [];
-                setItems(cloudData);
-                // Also update local storage for offline fallback
-                localStorage.setItem(SYNC_KEY, JSON.stringify(cloudData));
-            } else {
-                // If it's a new user, migrate guest data if it exists
-                const saved = localStorage.getItem(SYNC_KEY);
-                const guestData = saved ? JSON.parse(saved) : [];
-                if (guestData.length > 0) {
-                    setDoc(userDocRef, { items: guestData }, { merge: true });
+        let isSubscribed = true;
+
+        const performSync = async () => {
+            try {
+                // A. Check for legacy array data in user doc
+                const legacySnap = await getDoc(userDocRef);
+                if (legacySnap.exists() && legacySnap.data().items) {
+                    console.log("Migrating legacy array data to sub-collection...");
+                    const legacyItems = legacySnap.data().items;
+                    const batch = writeBatch(db);
+                    legacyItems.forEach(item => {
+                        const itmRef = doc(projectsColRef, item.id.toString());
+                        batch.set(itmRef, {
+                            ...item,
+                            updatedAt: item.updatedAt || new Date().toISOString()
+                        }, { merge: true });
+                    });
+                    batch.update(userDocRef, { items: null });
+                    await batch.commit();
                 }
-            }
-        }, (error) => {
-            console.error("Firestore Sync Error:", error);
-        });
 
-        return () => unsubscribe();
+                // B. Real-time Subscription to Projects Collection
+                const unsubscribe = onSnapshot(projectsColRef, (snapshot) => {
+                    if (!isSubscribed) return;
+
+                    const cloudItems = snapshot.docs.map(doc => ({
+                        ...doc.data(),
+                        id: doc.id
+                    }));
+
+                    // C. Smart Merge with Local State (Newer version wins)
+                    setItems(prev => {
+                        const localMap = new Map(prev.map(i => [i.id.toString(), i]));
+                        const cloudMap = new Map(cloudItems.map(i => [i.id.toString(), i]));
+
+                        const mergedIds = new Set([...localMap.keys(), ...cloudMap.keys()]);
+                        const finalItems = Array.from(mergedIds).map(id => {
+                            const local = localMap.get(id);
+                            const cloud = cloudMap.get(id);
+
+                            if (!local) return cloud;
+                            if (!cloud) return local;
+
+                            const localTime = new Date(local.updatedAt || 0).getTime();
+                            const cloudTime = cloud.updatedAt instanceof Timestamp
+                                ? cloud.updatedAt.toMillis()
+                                : new Date(cloud.updatedAt || 0).getTime();
+
+                            return localTime > cloudTime ? local : cloud;
+                        });
+
+                        const result = finalItems.sort((a, b) =>
+                            new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+                        );
+
+                        localStorage.setItem(SYNC_KEY, JSON.stringify(result));
+                        return result;
+                    });
+                });
+
+                return unsubscribe;
+            } catch (err) {
+                console.error("Critical Sync Error:", err);
+            }
+        };
+
+        const unsubPromise = performSync();
+        return () => {
+            isSubscribed = false;
+            unsubPromise.then(unsub => unsub && unsub());
+        };
     }, [currentUser, isGuest]);
 
-    // Persistence Helper
-    const persistItems = useCallback(async (newItems) => {
-        setItems(newItems);
-        localStorage.setItem(SYNC_KEY, JSON.stringify(newItems));
+    // 3. Persistence Helper (Item-level)
+    const persistItem = useCallback(async (item, isDeletion = false) => {
+        const timestamp = new Date().toISOString();
+        const updatedItem = { ...item, updatedAt: timestamp };
+
+        setItems(prev => {
+            let next;
+            if (isDeletion) {
+                next = prev.filter(i => i.id !== item.id);
+            } else {
+                const exists = prev.find(i => i.id === item.id);
+                next = exists
+                    ? prev.map(i => i.id === item.id ? updatedItem : i)
+                    : [...prev, updatedItem];
+            }
+            localStorage.setItem(SYNC_KEY, JSON.stringify(next));
+            return next;
+        });
 
         if (currentUser && !isGuest) {
             try {
-                const userDocRef = doc(db, 'users', currentUser.uid);
-                await setDoc(userDocRef, { items: newItems }, { merge: true });
+                const itemRef = doc(db, 'users', currentUser.uid, 'projects', item.id.toString());
+                if (isDeletion) {
+                    await deleteDoc(itemRef);
+                } else {
+                    await setDoc(itemRef, {
+                        ...updatedItem,
+                        updatedAt: serverTimestamp()
+                    }, { merge: true });
+                }
             } catch (error) {
-                console.error("Failed to sync to Firestore:", error);
+                console.error("Cloud Sync Failed", error);
             }
         }
     }, [currentUser, isGuest]);
@@ -86,30 +187,26 @@ export const ProjectProvider = ({ children }) => {
             color: generatePastelColor(),
             stage: stage,
             archived: false,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
         };
-        const newItems = [...items, newItem];
-        await persistItems(newItems);
+        await persistItem(newItem);
         return newItem.id;
     };
 
     const updateItem = async (id, updates) => {
-        const newItems = items.map(item =>
-            item.id === id ? { ...item, ...updates } : item
-        );
-        await persistItems(newItems);
+        const item = items.find(i => i.id === id);
+        if (item) await persistItem({ ...item, ...updates });
     };
 
     const deleteItem = async (id) => {
-        const newItems = items.filter(item => item.id !== id);
-        await persistItems(newItems);
+        const item = items.find(i => i.id === id);
+        if (item) await persistItem(item, true);
     };
 
     const toggleArchive = async (id) => {
-        const newItems = items.map(item =>
-            item.id === id ? { ...item, archived: !item.archived } : item
-        );
-        await persistItems(newItems);
+        const item = items.find(i => i.id === id);
+        if (item) await persistItem({ ...item, archived: !item.archived });
     };
 
     const validateForNextStage = (item, nextStage) => {
@@ -135,13 +232,9 @@ export const ProjectProvider = ({ children }) => {
         }
 
         const validation = validateForNextStage(item, nextStage);
-        if (!validation.valid) {
-            console.warn(validation.message);
-            return;
-        }
+        if (!validation.valid) return;
 
-        const newItems = items.map(i => i.id === id ? { ...i, stage: nextStage } : i);
-        await persistItems(newItems);
+        await persistItem({ ...item, stage: nextStage });
     };
 
     const moveItemToStage = async (id, newStage) => {
@@ -149,15 +242,9 @@ export const ProjectProvider = ({ children }) => {
         if (!itemToMove) return { success: false, message: 'Item not found' };
 
         const validation = validateForNextStage(itemToMove, newStage);
-        if (!validation.valid) {
-            return { success: false, message: validation.message };
-        }
+        if (!validation.valid) return { success: false, message: validation.message };
 
-        const newItems = items.map(item =>
-            item.id === id ? { ...item, stage: newStage } : item
-        );
-        await persistItems(newItems);
-
+        await persistItem({ ...itemToMove, stage: newStage });
         return { success: true };
     };
 
