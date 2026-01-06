@@ -10,6 +10,10 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+if (!firebaseConfig.apiKey) {
+    console.error("Firebase API Key is missing! Please check your .env file or Cloudflare environment variables.");
+}
+
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export default app;
