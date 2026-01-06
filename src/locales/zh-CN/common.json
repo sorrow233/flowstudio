@@ -42,12 +42,22 @@
         "backlog": {
             "subtitle": "准备变现的创意库。",
             "start_sprint": "开始冲刺",
-            "priority": "优先级"
+            "priority": "优先级",
+            "sections": {
+                "inspiration": "灵感池",
+                "pending": "待开发"
+            }
         },
         "workshop": {
             "subtitle": "奇迹发生的地方。",
             "active_tasks": "活跃任务",
-            "progress": "进度"
+            "progress": "进度",
+            "stages": {
+                "early": "初级阶段",
+                "growth": "中级阶段",
+                "advanced": "高级阶段",
+                "commercial": "商业化阶段"
+            }
         },
         "incubator": {
             "subtitle": "创意诞生与分析之地。",

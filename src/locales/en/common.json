@@ -42,12 +42,22 @@
         "backlog": {
             "subtitle": "Ideas ready for realization.",
             "start_sprint": "Start Sprint",
-            "priority": "Priority"
+            "priority": "Priority",
+            "sections": {
+                "inspiration": "Inspiration",
+                "pending": "Pending"
+            }
         },
         "workshop": {
             "subtitle": "Where the magic happens.",
             "active_tasks": "Active Tasks",
-            "progress": "Progress"
+            "progress": "Progress",
+            "stages": {
+                "early": "Early Stage",
+                "growth": "Growth Stage",
+                "advanced": "Advanced Stage",
+                "commercial": "Commercial Stage"
+            }
         },
         "incubator": {
             "subtitle": "Where ideas are born and analyzed.",

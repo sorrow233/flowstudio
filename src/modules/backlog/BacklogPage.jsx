@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus } from 'lucide-react';
+import { Plus, Lightbulb, Rocket } from 'lucide-react';
 
 export default function BacklogPage() {
     const { t } = useTranslation();
 
-    // Mock projects - each with a color for now (can be replaced with images)
-    const [projects] = useState([
-        { id: 1, name: 'AI Code Reviewer', color: '#a8d5ba' },
-        { id: 2, name: 'Voice Command System', color: '#f5e6c8' },
-        { id: 3, name: 'Dashboard Analytics', color: '#d4e4f7' },
-        { id: 4, name: 'Mobile App Sync', color: '#f7d4d4' },
+    const [inspirationItems] = useState([
+        { id: 1, name: 'AI Storyteller', color: '#ffd1dc' }, // Pastel Pink
+        { id: 2, name: 'Crypto Tracker', color: '#c1e1c1' }, // Pastel Green
+    ]);
+
+    const [pendingItems] = useState([
+        { id: 3, name: 'Flow Studio Mobile', color: '#ffaaa5' }, // Red-ish
+        { id: 4, name: 'Database Optimization', color: '#a8e6cf' }, // Teal-ish
+        { id: 5, name: 'User Authentication', color: '#dcedc1' }, // Light Green
     ]);
 
     return (
@@ -20,25 +23,57 @@ export default function BacklogPage() {
                 <div className="works-divider"></div>
             </header>
 
-            <div className="works-grid">
-                {projects.map((project) => (
-                    <div
-                        key={project.id}
-                        className="works-card"
-                        style={{ backgroundColor: project.color }}
-                    >
-                        <div className="works-card-overlay">
-                            <span className="works-card-name">{project.name}</span>
-                        </div>
-                    </div>
-                ))}
-
-                {/* Add New Project Card */}
-                <div className="works-card works-card-add">
-                    <Plus size={48} strokeWidth={1} />
-                    <span>New Idea</span>
+            {/* Inspiration Pool */}
+            <section className="works-section">
+                <div className="works-section-header">
+                    <Lightbulb size={20} className="text-yellow-400" />
+                    <h2 className="works-section-title">{t('modules.backlog.sections.inspiration')}</h2>
                 </div>
-            </div>
+                <div className="works-grid-Refined">
+                    {inspirationItems.map((item) => (
+                        <div
+                            key={item.id}
+                            className="works-card edit-mode"
+                            style={{ backgroundColor: item.color }}
+                            title="Click to Edit Idea"
+                        >
+                            <div className="works-card-overlay">
+                                <span className="works-card-name">{item.name}</span>
+                            </div>
+                        </div>
+                    ))}
+                    <div className="works-card works-card-add">
+                        <Plus size={32} />
+                        <span>Add Idea</span>
+                    </div>
+                </div>
+            </section>
+
+            {/* Pending Development */}
+            <section className="works-section">
+                <div className="works-section-header">
+                    <Rocket size={20} className="text-red-400" />
+                    <h2 className="works-section-title">{t('modules.backlog.sections.pending')}</h2>
+                </div>
+                <div className="works-grid-Refined">
+                    {pendingItems.map((item) => (
+                        <div
+                            key={item.id}
+                            className="works-card"
+                            style={{ backgroundColor: item.color }}
+                            title="Click to Plan Project"
+                        >
+                            <div className="works-card-overlay">
+                                <span className="works-card-name">{item.name}</span>
+                            </div>
+                        </div>
+                    ))}
+                    <div className="works-card works-card-add">
+                        <Plus size={32} />
+                        <span>Add Project</span>
+                    </div>
+                </div>
+            </section>
         </div>
     );
 }

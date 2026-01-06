@@ -1,15 +1,51 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus } from 'lucide-react';
+import { Plus, Sprout, TrendingUp, Award, DollarSign } from 'lucide-react';
 
 export default function WorkshopPage() {
     const { t } = useTranslation();
 
-    // Mock active projects
-    const [projects] = useState([
-        { id: 101, name: 'Flow Studio v2.1', color: '#1a1a2e', textColor: '#ffffff' },
-        { id: 102, name: 'I18n System', color: '#f0f0f0', textColor: '#1a1a1a' },
+    const [earlyStage] = useState([
+        { id: 101, name: 'New UI Prototype', color: '#e0f7fa', textColor: '#006064' }
     ]);
+
+    const [growthStage] = useState([
+        { id: 102, name: 'API Integration', color: '#e1bee7', textColor: '#4a148c' }
+    ]);
+
+    const [advancedStage] = useState([
+        { id: 103, name: 'Security Audit', color: '#ffecb3', textColor: '#ff6f00' }
+    ]);
+
+    const [commercialStage] = useState([
+        { id: 104, name: 'Pro Version Launch', color: '#c8e6c9', textColor: '#1b5e20' }
+    ]);
+
+    const renderSection = (titleKey, icon, items) => (
+        <section className="works-section">
+            <div className="works-section-header">
+                {icon}
+                <h2 className="works-section-title">{t(`modules.workshop.stages.${titleKey}`)}</h2>
+            </div>
+            <div className="works-grid-Refined">
+                {items.map((item) => (
+                    <div
+                        key={item.id}
+                        className="works-card"
+                        style={{ backgroundColor: item.color }}
+                    >
+                        <div className="works-card-overlay">
+                            <span className="works-card-name" style={{ color: item.textColor || 'white' }}>{item.name}</span>
+                        </div>
+                    </div>
+                ))}
+                <div className="works-card works-card-add">
+                    <Plus size={32} />
+                    <span>Add Task</span>
+                </div>
+            </div>
+        </section>
+    );
 
     return (
         <div className="works-page">
@@ -18,25 +54,10 @@ export default function WorkshopPage() {
                 <div className="works-divider"></div>
             </header>
 
-            <div className="works-grid">
-                {projects.map((project) => (
-                    <div
-                        key={project.id}
-                        className="works-card"
-                        style={{ backgroundColor: project.color }}
-                    >
-                        <div className="works-card-overlay" style={{ color: project.textColor }}>
-                            <span className="works-card-name">{project.name}</span>
-                        </div>
-                    </div>
-                ))}
-
-                {/* Add New Project Card */}
-                <div className="works-card works-card-add">
-                    <Plus size={48} strokeWidth={1} />
-                    <span>Start Project</span>
-                </div>
-            </div>
+            {renderSection('early', <Sprout size={20} className="text-green-400" />, earlyStage)}
+            {renderSection('growth', <TrendingUp size={20} className="text-blue-400" />, growthStage)}
+            {renderSection('advanced', <Award size={20} className="text-purple-400" />, advancedStage)}
+            {renderSection('commercial', <DollarSign size={20} className="text-yellow-400" />, commercialStage)}
         </div>
     );
 }
