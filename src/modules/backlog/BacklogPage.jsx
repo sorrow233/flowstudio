@@ -1,21 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Lightbulb, Rocket } from 'lucide-react';
+import { Plus, Lightbulb, Rocket, ArrowRight } from 'lucide-react';
+import { useProject, STAGES } from '@/contexts/ProjectContext';
 
 export default function BacklogPage() {
     const { t } = useTranslation();
+    const { items, addItem, moveItemNext } = useProject();
 
-    // Static demo data - in production, these would come from a data store
-    const inspirationItems = [
-        { id: 1, name: 'AI Storyteller', color: '#ffd1dc' }, // Pastel Pink
-        { id: 2, name: 'Crypto Tracker', color: '#c1e1c1' }, // Pastel Green
-    ];
-
-    const pendingItems = [
-        { id: 3, name: 'Flow Studio Mobile', color: '#ffaaa5' }, // Red-ish
-        { id: 4, name: 'Database Optimization', color: '#a8e6cf' }, // Teal-ish
-        { id: 5, name: 'User Authentication', color: '#dcedc1' }, // Light Green
-    ];
+    const inspirationItems = items.filter(item => item.stage === STAGES.INSPIRATION);
+    const pendingItems = items.filter(item => item.stage === STAGES.PENDING);
 
     return (
         <div className="works-page">
@@ -34,16 +27,28 @@ export default function BacklogPage() {
                     {inspirationItems.map((item) => (
                         <div
                             key={item.id}
-                            className="works-card edit-mode"
+                            className="works-card edit-modegroup relative group"
                             style={{ backgroundColor: item.color }}
-                            title="Click to Edit Idea"
                         >
-                            <div className="works-card-overlay">
-                                <span className="works-card-name">{item.name}</span>
+                            <div className="works-card-overlay flex flex-col justify-between h-full p-4">
+                                <span className="works-card-name text-lg font-medium">{item.name || 'Untitled Idea'}</span>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        moveItemNext(item.id);
+                                    }}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 hover:bg-white/40 p-2 rounded-full self-end mt-2"
+                                    title={t('common.next_stage')}
+                                >
+                                    <ArrowRight size={16} />
+                                </button>
                             </div>
                         </div>
                     ))}
-                    <div className="works-card works-card-add">
+                    <div
+                        className="works-card works-card-add cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => addItem(STAGES.INSPIRATION)}
+                    >
                         <Plus size={32} />
                         <span>{t('common.add_idea')}</span>
                     </div>
@@ -60,16 +65,31 @@ export default function BacklogPage() {
                     {pendingItems.map((item) => (
                         <div
                             key={item.id}
-                            className="works-card"
+                            className="works-card group relative"
                             style={{ backgroundColor: item.color }}
-                            title="Click to Plan Project"
                         >
-                            <div className="works-card-overlay">
-                                <span className="works-card-name">{item.name}</span>
+                            <div className="works-card-overlay flex flex-col justify-between h-full p-4">
+                                <span className="works-card-name text-lg font-medium">{item.name || 'Untitled Project'}</span>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        moveItemNext(item.id);
+                                    }}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 hover:bg-white/40 p-2 rounded-full self-end mt-2"
+                                    title={t('common.start_project')}
+                                >
+                                    <ArrowRight size={16} />
+                                </button>
                             </div>
                         </div>
                     ))}
-                    <div className="works-card works-card-add">
+                    {/* Pending items usually come from Inspiration, but allowing add for flexibility if needed, or remove to enforce strict flow from top. 
+                        User said "sensitive words will enter pending", implying flow. But "add project" might be direct. Keeping it for now.
+                    */}
+                    <div
+                        className="works-card works-card-add cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => addItem(STAGES.PENDING)}
+                    >
                         <Plus size={32} />
                         <span>{t('common.add_project')}</span>
                     </div>

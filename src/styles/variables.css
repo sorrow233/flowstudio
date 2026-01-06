@@ -1,33 +1,58 @@
 :root {
-  /* Kanso (Simplicity) Color Palette */
-  /* Light Mode */
-  --color-bg-light: #f9f9f9;
-  --color-surface-light: #ffffff;
-  --color-text-main-light: #1a1a1a;
-  --color-text-muted-light: #666666;
-  --color-border-light: #e0e0e0;
+  /* --- Japan-Modern (Wa-Modern) Palette --- */
 
-  /* Dark Mode (Enso) */
-  --color-bg-dark: #0f0f0f;
-  --color-surface-dark: #1a1a1a;
-  --color-text-main-dark: #f0f0f0;
-  --color-text-muted-dark: #a0a0a0;
-  --color-border-dark: #333333;
+  /* Light Mode (Kami - Paper) */
+  --color-bg-light: #F9F9F8;
+  /* Unbleached White / Rice Paper */
+  --color-surface-light: #FFFFFF;
+  /* Pure White */
+  --color-text-main-light: #2D2D2D;
+  /* Soft Charcoal */
+  --color-text-muted-light: #737373;
+  /* Stone Gray */
+  --color-border-light: #EBEBEB;
+  /* Subtle Divider */
+  --color-border-hover-light: #D1D1D1;
 
-  /* Shared Accents */
-  --color-accent-vermilion: #e63946; /* Seal Red */
-  --color-accent-indigo: #4361ee;
-  --color-accent-teal: #2a9d8f;
-  
+  /* Dark Mode (Sumi - Ink) */
+  --color-bg-dark: #121212;
+  /* Deep Ink */
+  --color-surface-dark: #1C1C1E;
+  /* Dark Grey Stone */
+  --color-text-main-dark: #F2F2F2;
+  /* Mist White */
+  --color-text-muted-dark: #9E9E9E;
+  /* Ash */
+  --color-border-dark: #2C2C2E;
+  --color-border-hover-dark: #48484A;
+
+  /* Accents (Nature Inspired) */
+  --color-accent-vermilion: #CD3F3E;
+  /* Hanko / Seal Red */
+  --color-accent-indigo: #4A6E86;
+  /* Indigo Dye (Aizome) */
+  --color-accent-teal: #4B7F78;
+  /* Aged Pine / Matcha */
+  --color-accent-gold: #C4A05D;
+  /* Brass / Straw */
+
   /* Semantic Tokens (Default to Light) */
   --bg-app: var(--color-bg-light);
   --bg-card: var(--color-surface-light);
+  --bg-glass: rgba(255, 255, 255, 0.7);
   --text-primary: var(--color-text-main-light);
   --text-secondary: var(--color-text-muted-light);
   --border-subtle: var(--color-border-light);
+  --border-hover: var(--color-border-hover-light);
   --color-accent: var(--color-accent-vermilion);
 
-  /* Spacing */
+  /* Shadows (Soft & Atmospheric) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.08);
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+
+  /* Spacing (Ma - Negative Space) */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -35,29 +60,44 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-12: 48px;
+  --space-16: 64px;
 
   /* Typography */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Prioritize clean, legible fonts common on Mac for that "Apple/Japan" feel */
+  --font-sans: "Helvetica Neue", "Arial", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  --font-mono: "Menlo", "Monaco", "Courier New", monospace;
 
-  /* Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.04em;
+
+  /* Radius (Organic) */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 32px;
   --radius-full: 9999px;
 
   /* Transitions */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-smooth: 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-bounce: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --bg-app: var(--color-bg-dark);
     --bg-card: var(--color-surface-dark);
+    --bg-glass: rgba(28, 28, 30, 0.6);
     --text-primary: var(--color-text-main-dark);
     --text-secondary: var(--color-text-muted-dark);
     --border-subtle: var(--color-border-dark);
+    --border-hover: var(--color-border-hover-dark);
+
+    /* Dark mode shadow adjustment */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -65,8 +105,11 @@ body {
   background-color: var(--bg-app);
   color: var(--text-primary);
   font-family: var(--font-sans);
+  font-feature-settings: "palt" 1;
+  /* Proportional Alternate Widths for Japanese */
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
+  letter-spacing: var(--tracking-normal);
   transition: background-color var(--transition-smooth), color var(--transition-smooth);
 }
 
@@ -76,4 +119,5 @@ body {
 
 button {
   font-family: inherit;
+  font-feature-settings: inherit;
 }
