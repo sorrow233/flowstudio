@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { Eye, EyeOff, Loader2, Globe } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ChevronLeft, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import './Login.css';
 
 export default function Login() {
@@ -20,45 +21,27 @@ export default function Login() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // Redirect if already logged in OR is guest
     useEffect(() => {
         if (currentUser || isGuest) {
             navigate(from, { replace: true });
         }
     }, [currentUser, isGuest, navigate, from]);
 
-    // Helper to handle guest login
     const handleGuestLogin = async () => {
         await loginAsGuest();
         navigate(from, { replace: true });
     };
 
-    // Auto-redirect if guest (implicit or explicit)
-    // We remove the blocking "Configuration Error" UI entirely
     if (authError && !loading) {
-        // Optionally we could show a toast here, but user asked for seamless experience
-        // If there is an auth error (missing config), we just assume guest mode
-        // But we shouldn't automatically redirect if they are explicitly ON the login page
-        // trying to maybe fix it? 
-        // Actually, if they are on /login, and config is missing, they can't login anyway.
-        // So showing the form is useless.
-        // Let's show the form but disabled? Or just redirect?
-        // User said: "Should directly enter software... Log in when needed."
-        // So if they come to /login, they probably want to login.
-        // But if config is missing, they CAN'T. 
-        // So maybe we just redirect to /app as guest automatically?
-        // Let's do that.
         loginAsGuest().then(() => navigate('/app', { replace: true }));
-        return null; // Render nothing while redirecting
+        return null;
     }
 
     async function handleSubmit(e) {
         e.preventDefault();
         if (loading) return;
-
         setError('');
         setLoading(true);
-
         try {
             if (isLogin) {
                 await login(email, password);
@@ -68,17 +51,12 @@ export default function Login() {
             navigate(from, { replace: true });
         } catch (err) {
             console.error(err);
-            // Simplify error messages for user
             if (err.message.includes('auth/invalid-email')) {
                 setError(t('auth.error_invalid_email', 'Invalid email address'));
             } else if (err.message.includes('auth/user-not-found') || err.message.includes('auth/wrong-password') || err.message.includes('auth/invalid-credential')) {
                 setError(t('auth.error_invalid_credentials', 'Invalid email or password'));
-            } else if (err.message.includes('auth/email-already-in-use')) {
-                setError(t('auth.error_email_in_use', 'Email is already in use'));
-            } else if (err.message.includes('email provider is not supported')) {
-                setError(err.message); // Use the custom error message from context
             } else {
-                setError(t('auth.error_generic', 'Failed to authenticate. Please try again.'));
+                setError(t('auth.error_generic', 'Failed to authenticate.'));
             }
         } finally {
             setLoading(false);
@@ -95,32 +73,56 @@ export default function Login() {
         } catch (err) {
             console.error(err);
             setError(t('auth.error_google', 'Failed to sign in with Google.'));
-            setLoading(false); // Only set loading false on error, success navigates away
+            setLoading(false);
         }
     }
 
     return (
-        <div className="login-container">
-            <div className="login-language-switcher">
-                <LanguageSwitcher />
+        <div className="login-visual-container">
+            <div className="login-ambient-bg">
+                <div className="glow-sphere indigo" />
+                <div className="glow-sphere vermilion" />
             </div>
 
-            <div className="login-card">
-                <div className="login-header">
-                    <h1>Flow Studio</h1>
-                    <p className="login-subtitle">
-                        {isLogin ? t('auth.welcome_back', 'Welcome Back') : t('auth.create_account', 'Create Account')}
+            <Link to="/" className="login-back-btn">
+                <ChevronLeft size={20} />
+                <span>{t('auth.back_home', 'Back')}</span>
+            </Link>
+
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                className="login-card-zen"
+            >
+                <div className="login-header-zen">
+                    <div className="login-brand">
+                        <Sparkles size={24} className="brand-icon" />
+                        <h1>Flow Studio</h1>
+                    </div>
+                    <p className="login-subtitle-zen">
+                        {isLogin ? t('auth.welcome_back', 'Welcome back to your workshop') : t('auth.create_account', 'Begin your digital journey')}
                     </p>
                 </div>
 
-                {error && <div className="login-error" role="alert">{error}</div>}
+                <AnimatePresence mode="wait">
+                    {error && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="login-error-zen"
+                        >
+                            {error}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-                <form onSubmit={handleSubmit} className="login-form">
-                    <div className="form-group">
-                        <label htmlFor="email">{t('auth.email', 'Email')}</label>
+                <form onSubmit={handleSubmit} className="login-form-zen">
+                    <div className="form-group-zen">
+                        <label>{t('auth.email', 'Email Address')}</label>
                         <input
                             type="email"
-                            id="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
@@ -128,80 +130,55 @@ export default function Login() {
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="password">{t('auth.password', 'Password')}</label>
-                        <div className="password-input-wrapper">
+                    <div className="form-group-zen">
+                        <label>{t('auth.password', 'Password')}</label>
+                        <div className="password-wrapper-zen">
                             <input
                                 type={showPassword ? "text" : "password"}
-                                id="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                placeholder={isLogin ? "••••••••" : t('auth.password_min', 'At least 6 characters')}
+                                placeholder="••••••••"
                                 minLength={6}
                             />
                             <button
                                 type="button"
-                                className="toggle-password"
                                 onClick={() => setShowPassword(!showPassword)}
-                                aria-label={showPassword ? "Hide password" : "Show password"}
+                                className="password-toggle-zen"
                             >
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                         </div>
                     </div>
 
-                    <button type="submit" className="btn-primary" disabled={loading}>
-                        {loading ? <Loader2 className="animate-spin" size={20} /> : (isLogin ? t('auth.login', 'Log In') : t('auth.signup', 'Sign Up'))}
+                    <button type="submit" className="btn-auth-primary" disabled={loading}>
+                        {loading ? <Loader2 className="animate-spin" size={20} /> : (isLogin ? t('auth.login', 'Sign In') : t('auth.signup', 'Create Account'))}
                     </button>
                 </form>
 
-                <div style={{ marginTop: '1rem' }}>
-                    <button
-                        type="button"
-                        className="btn-google"
-                        style={{ border: 'none', background: 'transparent', color: 'var(--text-secondary)', textDecoration: 'underline' }}
-                        onClick={handleGuestLogin}
-                    >
-                        {t('auth.continue_guest', 'Continue as Guest')}
+                <div className="login-divider-zen">
+                    <span>{t('auth.or', 'or continue with')}</span>
+                </div>
+
+                <div className="login-social-grid">
+                    <button onClick={handleGoogleLogin} className="btn-social-zen" disabled={loading}>
+                        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" /><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
+                        <span>Google</span>
+                    </button>
+                    <button onClick={handleGuestLogin} className="btn-social-zen" disabled={loading}>
+                        <span>{t('auth.guest', 'Guest')}</span>
                     </button>
                 </div>
 
-                <div className="divider">
-                    <span>{t('auth.or', 'or')}</span>
-                </div>
-
-                <button
-                    type="button"
-                    className="btn-google"
-                    onClick={handleGoogleLogin}
-                    disabled={loading}
-                >
-                    <svg className="google-icon" viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-                        <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
-                            <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z" />
-                            <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z" />
-                            <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.769 -21.864 51.959 -21.864 51.129 C -21.864 50.299 -21.734 49.489 -21.484 48.729 L -21.484 45.639 L -25.464 45.639 C -26.284 47.269 -26.754 49.129 -26.754 51.129 C -26.754 53.129 -26.284 54.989 -25.464 56.619 L -21.484 53.529 Z" />
-                            <path fill="#EA4335" d="M -14.754 43.769 C -12.984 43.769 -11.404 44.369 -10.154 45.579 L -6.724 42.149 C -8.804 40.209 -11.514 39.019 -14.754 39.019 C -19.444 39.019 -23.494 41.719 -25.464 45.639 L -21.484 48.729 C -20.534 45.879 -17.884 43.769 -14.754 43.769 Z" />
-                        </g>
-                    </svg>
-                    {t('auth.continue_google', 'Continue with Google')}
-                </button>
-
-                <div className="login-footer">
+                <div className="login-footer-zen">
                     <p>
-                        {isLogin ? t('auth.no_account', "Don't have an account?") : t('auth.has_account', 'Already have an account?')}
-                        {' '}
-                        <button
-                            type="button"
-                            className="link-btn"
-                            onClick={() => setIsLogin(!isLogin)}
-                        >
-                            {isLogin ? t('auth.signup', 'Sign Up') : t('auth.login', 'Log In')}
+                        {isLogin ? t('auth.no_account', "New here?") : t('auth.has_account', 'Already have an account?')}
+                        <button onClick={() => setIsLogin(!isLogin)} className="link-toggle-zen">
+                            {isLogin ? t('auth.signup', 'Start journey') : t('auth.login', 'Sign in')}
                         </button>
                     </p>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }

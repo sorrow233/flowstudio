@@ -1,30 +1,24 @@
 :root {
-  /* --- Digital Zen & Modern Wabi-Sabi Palette --- */
+  /* --- Digital Zen & High-End Modern tokens --- */
 
   /* Light Mode (Kami - Paper) */
-  --color-bg-light: #F2F0EB;
-  /* Warm Rice Paper */
-  --color-surface-light: #EAE8E3;
-  /* Stone / Washi */
-  --color-text-main-light: #2B2B2B;
-  /* Soft Black Ink */
-  --color-text-muted-light: #6D6D65;
-  /* Aged Ink */
-  --color-border-light: #DCDAD5;
-  /* Subtle Stone Border */
-  --color-border-hover-light: #C4C2BD;
+  --color-bg-light: #F9F8F6;
+  /* Brighter, cleaner paper */
+  --color-surface-light: #FFFFFF;
+  --color-text-main-light: #1A1A1A;
+  /* Deeper black */
+  --color-text-muted-light: #666666;
+  --color-border-light: #E5E5E1;
+  --color-border-hover-light: #D1D1CB;
 
   /* Dark Mode (Sumi - Ink) */
-  --color-bg-dark: #121212;
-  /* Deep Ink */
-  --color-surface-dark: #1C1C1E;
-  /* Dark Grey Stone */
-  --color-text-main-dark: #E6E6E6;
-  /* Off-White Mist */
-  --color-text-muted-dark: #A1A1A1;
-  /* Ash */
-  --color-border-dark: #2C2C2E;
-  --color-border-hover-dark: #48484A;
+  --color-bg-dark: #0A0A0A;
+  /* Deeper black for high contrast */
+  --color-surface-dark: #141414;
+  --color-text-main-dark: #F5F5F5;
+  --color-text-muted-dark: #888888;
+  --color-border-dark: #222222;
+  --color-border-hover-dark: #333333;
 
   /* Accents (Nature Inspired - Muted) */
   --color-accent-vermilion: #B83A39;
@@ -39,24 +33,30 @@
   /* Semantic Tokens */
   --bg-app: var(--color-bg-light);
   --bg-card: var(--color-surface-light);
-  --bg-glass: rgba(242, 240, 235, 0.7);
+  --bg-glass: rgba(255, 255, 255, 0.6);
   --text-primary: var(--color-text-main-light);
   --text-secondary: var(--color-text-muted-light);
   --border-subtle: var(--color-border-light);
   --border-hover: var(--color-border-hover-light);
-  --color-accent: var(--color-accent-vermilion);
+  --color-accent: var(--color-accent-indigo);
+  /* Defaulting to Indigo for a more tech-zen feel */
+
+  /* Ethereal Glows & Gradients */
+  --glow-indigo: radial-gradient(circle at center, rgba(74, 110, 134, 0.15) 0%, transparent 70%);
+  --glow-vermilion: radial-gradient(circle at center, rgba(184, 58, 57, 0.1) 0%, transparent 70%);
+  --gradient-zen: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
 
   /* Texture */
   /* Simple noise SVG data URI */
   --bg-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
 
-  /* Shadows (Atmospheric) */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 20px -2px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 20px 40px -4px rgba(0, 0, 0, 0.08);
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+  /* Shadows (Hyper-Refined) */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 12px 32px -8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 32px 64px -16px rgba(0, 0, 0, 0.12);
+  --shadow-glass: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
 
-  /* Spacing (Ma - Negative Space) */
+  /* Spacing */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -65,13 +65,14 @@
   --space-8: 32px;
   --space-12: 48px;
   --space-16: 64px;
+  --space-20: 80px;
   --space-24: 96px;
-  /* New extra large spacing */
 
-  /* Typography */
-  --font-serif: "Playfair Display", "Times New Roman", serif;
-  --font-sans: "Inter", "Helvetica Neue", sans-serif;
-  --font-mono: "Menlo", monospace;
+  /* Typography - Modern Stack */
+  --font-display: 'Outfit', 'Inter', sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "Fira Code", monospace;
 
   --tracking-tight: -0.02em;
   --tracking-normal: 0em;
@@ -85,10 +86,11 @@
   --radius-xl: 24px;
   --radius-full: 9999px;
 
-  /* Transitions (Mindful) */
-  --transition-fast: 200ms cubic-bezier(0.2, 0.0, 0.2, 1);
-  --transition-smooth: 400ms cubic-bezier(0.2, 0.0, 0.2, 1);
-  --transition-slow: 700ms cubic-bezier(0.2, 0.0, 0.2, 1);
+  /* Transitions - High Precision */
+  --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 450ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 800ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-spring: 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @media (prefers-color-scheme: dark) {
