@@ -1,0 +1,19 @@
+.language-switcher {
+    margin-right: 1rem;
+}
+
+.language-select {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: var(--card-bg, #fff);
+    /* Fallback to white if var not defined */
+    color: var(--text-color, #333);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.language-select:focus {
+    outline: none;
+    border-color: #007bff;
+}

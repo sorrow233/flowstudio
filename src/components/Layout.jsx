@@ -1,6 +1,8 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Home, Sparkles, Target, Zap, Archive, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const NavItem = ({ to, icon: Icon, label, isActive }) => (
     <Link
@@ -14,6 +16,7 @@ const NavItem = ({ to, icon: Icon, label, isActive }) => (
 
 export default function Layout() {
     const location = useLocation();
+    const { t } = useTranslation();
 
     return (
         <div className="app-layout">
@@ -21,20 +24,23 @@ export default function Layout() {
             <aside className="app-sidebar">
                 <div className="sidebar-header">
                     <div className="logo-box"></div>
-                    <span className="app-title">Flow</span>
+                    <span className="app-title">{t('app.title')}</span>
                 </div>
 
                 <nav className="sidebar-nav">
-                    <NavItem to="/" icon={Home} label="Dashboard" isActive={location.pathname === '/'} />
+                    <NavItem to="/" icon={Home} label={t('nav.dashboard')} isActive={location.pathname === '/'} />
                     <div className="nav-divider"></div>
-                    <NavItem to="/incubator" icon={Sparkles} label="Incubator" isActive={location.pathname.startsWith('/incubator')} />
-                    <NavItem to="/vision-studio" icon={Target} label="Vision Studio" isActive={location.pathname.startsWith('/vision-studio')} />
-                    <NavItem to="/command-tower" icon={Zap} label="Command Tower" isActive={location.pathname.startsWith('/command-tower')} />
-                    <NavItem to="/archive" icon={Archive} label="Archive" isActive={location.pathname.startsWith('/archive')} />
+                    <NavItem to="/incubator" icon={Sparkles} label={t('nav.incubator')} isActive={location.pathname.startsWith('/incubator')} />
+                    <NavItem to="/vision-studio" icon={Target} label={t('nav.vision_studio')} isActive={location.pathname.startsWith('/vision-studio')} />
+                    <NavItem to="/command-tower" icon={Zap} label={t('nav.command_tower')} isActive={location.pathname.startsWith('/command-tower')} />
+                    <NavItem to="/archive" icon={Archive} label={t('nav.archive')} isActive={location.pathname.startsWith('/archive')} />
                 </nav>
 
                 <div className="sidebar-footer">
-                    <NavItem to="/settings" icon={Settings} label="Settings" isActive={location.pathname === '/settings'} />
+                    <div style={{ padding: '0 1rem 1rem 1rem' }}>
+                        <LanguageSwitcher />
+                    </div>
+                    <NavItem to="/settings" icon={Settings} label={t('nav.settings')} isActive={location.pathname === '/settings'} />
                 </div>
             </aside>
 

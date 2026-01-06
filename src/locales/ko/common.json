@@ -1,0 +1,21 @@
+{
+    "app": {
+        "title": "Flow Studio",
+        "language": "언어"
+    },
+    "languages": {
+        "en": "English",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文",
+        "ja": "日本語",
+        "ko": "한국어"
+    },
+    "nav": {
+        "dashboard": "대시보드",
+        "incubator": "인큐베이터",
+        "vision_studio": "비전 스튜디오",
+        "command_tower": "커맨드 타워",
+        "archive": "아카이브",
+        "settings": "설정"
+    }
+}
