@@ -62,8 +62,16 @@
         "add_project": "新增專案",
         "add_task": "新增任務",
         "cancel": "取消",
+        "save": "儲存",
+        "edit": "編輯",
         "delete": "刪除",
-        "click_to_copy": "點擊複製"
+        "click_to_copy": "點擊複製",
+        "copied": "已複製",
+        "next_stage": "推進階段",
+        "untitled": "未命名",
+        "project_name": "專案名稱",
+        "project_link": "專案連結",
+        "project_goal": "專案目標"
     },
     "landing": {
         "hero_title": "您的 AI 驅動個人軟體軍火庫",

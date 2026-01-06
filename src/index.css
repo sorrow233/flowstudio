@@ -612,3 +612,126 @@ input[type="text"]:focus {
     transform: translateY(0);
   }
 }
+
+/* --- Command Tower New Styles --- */
+.command-grid-new {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+
+.command-card-new {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.command-card-new:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+.command-card-header-new {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.command-card-title-new {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.command-card-actions-new {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.command-copy-icon {
+  color: var(--text-secondary);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.command-card-new:hover .command-copy-icon {
+  opacity: 0.6;
+}
+
+.command-copied-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6875rem;
+  color: var(--color-accent-teal);
+  font-weight: 500;
+}
+
+.command-delete-btn-new {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.command-card-new:hover .command-delete-btn-new {
+  opacity: 1;
+}
+
+.command-delete-btn-new:hover {
+  color: var(--color-accent-vermilion);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.command-card-code {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  background: var(--bg-app);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid var(--border-subtle);
+}
+
+.command-card-add-new {
+  border: 1px dashed var(--border-subtle);
+  background: transparent;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  min-height: 80px;
+}
+
+.command-card-add-new:hover {
+  border-color: var(--text-secondary);
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.command-card-add-new span {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}

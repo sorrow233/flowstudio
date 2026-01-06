@@ -62,8 +62,16 @@
         "add_project": "Add Project",
         "add_task": "Add Task",
         "cancel": "Cancel",
+        "save": "Save",
+        "edit": "Edit",
         "delete": "Delete",
-        "click_to_copy": "Click to copy"
+        "click_to_copy": "Click to copy",
+        "copied": "Copied",
+        "next_stage": "Next Stage",
+        "untitled": "Untitled",
+        "project_name": "Project Name",
+        "project_link": "Project Link",
+        "project_goal": "Project Goal"
     },
     "landing": {
         "hero_title": "Your AI-Driven Personal Software Arsenal",

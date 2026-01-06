@@ -62,8 +62,16 @@
         "add_project": "添加项目",
         "add_task": "添加任务",
         "cancel": "取消",
+        "save": "保存",
+        "edit": "编辑",
         "delete": "删除",
-        "click_to_copy": "点击复制"
+        "click_to_copy": "点击复制",
+        "copied": "已复制",
+        "next_stage": "推进阶段",
+        "untitled": "未命名",
+        "project_name": "项目名称",
+        "project_link": "项目链接",
+        "project_goal": "项目目标"
     },
     "landing": {
         "hero_title": "您的 AI 驱动个人软件军火库",

@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2, Lightbulb, Rocket, Sprout, TrendingUp, Award, DollarSign, X } from 'lucide-react';
+import { Plus, Trash2, Lightbulb, Rocket, Sprout, TrendingUp, Award, DollarSign, X, Copy, Check } from 'lucide-react';
+import SectionHeader from '@/components/SectionHeader';
+import '@/components/ProjectCard.css';
 
 export default function CommandTowerPage() {
     const { t } = useTranslation();
+    const [copiedId, setCopiedId] = useState(null);
 
     // Commands organized by stage with localStorage persistence
     const [commands, setCommands] = useState(() => {
@@ -46,17 +49,19 @@ export default function CommandTowerPage() {
     };
 
     const stageConfig = [
-        { key: 'inspiration', icon: <Lightbulb size={18} className="icon-yellow" />, label: t('modules.backlog.sections.inspiration') },
-        { key: 'pending', icon: <Rocket size={18} className="icon-red" />, label: t('modules.backlog.sections.pending') },
-        { key: 'early', icon: <Sprout size={18} className="icon-green" />, label: t('modules.workshop.stages.early') },
-        { key: 'growth', icon: <TrendingUp size={18} className="icon-blue" />, label: t('modules.workshop.stages.growth') },
-        { key: 'advanced', icon: <Award size={18} className="icon-purple" />, label: t('modules.workshop.stages.advanced') },
-        { key: 'commercial', icon: <DollarSign size={18} className="icon-yellow" />, label: t('modules.workshop.stages.commercial') }
+        { key: 'inspiration', icon: <Lightbulb size={18} style={{ color: 'var(--color-accent-teal)' }} />, label: t('modules.backlog.sections.inspiration') },
+        { key: 'pending', icon: <Rocket size={18} style={{ color: 'var(--color-accent-vermilion)' }} />, label: t('modules.backlog.sections.pending') },
+        { key: 'early', icon: <Sprout size={18} style={{ color: 'var(--color-accent-teal)' }} />, label: t('modules.workshop.stages.early') },
+        { key: 'growth', icon: <TrendingUp size={18} style={{ color: 'var(--color-accent-indigo)' }} />, label: t('modules.workshop.stages.growth') },
+        { key: 'advanced', icon: <Award size={18} style={{ color: '#9c27b0' }} />, label: t('modules.workshop.stages.advanced') },
+        { key: 'commercial', icon: <DollarSign size={18} style={{ color: 'var(--color-accent-vermilion)' }} />, label: t('modules.workshop.stages.commercial') }
     ];
 
-    const copyToClipboard = async (text) => {
+    const copyToClipboard = async (text, id) => {
         try {
             await navigator.clipboard.writeText(text);
+            setCopiedId(id);
+            setTimeout(() => setCopiedId(null), 2000);
         } catch (err) {
             console.error('Failed to copy:', err);
             const textArea = document.createElement('textarea');
@@ -65,6 +70,8 @@ export default function CommandTowerPage() {
             textArea.select();
             document.execCommand('copy');
             document.body.removeChild(textArea);
+            setCopiedId(id);
+            setTimeout(() => setCopiedId(null), 2000);
         }
     };
 
@@ -90,50 +97,59 @@ export default function CommandTowerPage() {
     };
 
     return (
-        <div className="works-page">
-            <header className="works-header">
-                <h1 className="works-title">{t('nav.command_tower')}</h1>
-                <div className="works-divider"></div>
+        <div className="project-page">
+            <header className="project-page-header">
+                <h1 className="project-page-title">{t('nav.command_tower')}</h1>
+                <p className="project-page-subtitle">{t('dashboard.command_tower_desc')}</p>
             </header>
 
             {stageConfig.map(({ key, icon, label }) => (
-                <section key={key} className="works-section">
-                    <div className="works-section-header">
-                        {icon}
-                        <h2 className="works-section-title">{label}</h2>
-                    </div>
-                    <div className="works-grid-Refined command-grid">
+                <section key={key} className="project-section">
+                    <SectionHeader
+                        icon={icon}
+                        title={label}
+                        count={commands[key].length}
+                    />
+                    <div className="command-grid-new">
                         {commands[key].map((cmd) => (
                             <div
                                 key={cmd.id}
-                                className="command-card"
-                                onClick={() => copyToClipboard(cmd.content)}
-                                title={t('common.click_to_copy')}
+                                className="command-card-new"
+                                onClick={() => copyToClipboard(cmd.content, cmd.id)}
                             >
-                                <div className="command-card-header">
-                                    <h3 className="command-card-title">{cmd.title}</h3>
-                                    <button
-                                        className="command-delete-btn"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeleteCommand(key, cmd.id);
-                                        }}
-                                        title={t('common.delete')}
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
+                                <div className="command-card-header-new">
+                                    <h3 className="command-card-title-new">{cmd.title}</h3>
+                                    <div className="command-card-actions-new">
+                                        {copiedId === cmd.id ? (
+                                            <span className="command-copied-badge">
+                                                <Check size={12} />
+                                                {t('common.copied')}
+                                            </span>
+                                        ) : (
+                                            <Copy size={14} className="command-copy-icon" />
+                                        )}
+                                        <button
+                                            className="command-delete-btn-new"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteCommand(key, cmd.id);
+                                            }}
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
                                 </div>
-                                <code className="command-card-content">{cmd.content}</code>
+                                <code className="command-card-code">{cmd.content}</code>
                             </div>
                         ))}
                         <div
-                            className="command-card command-card-add"
+                            className="command-card-new command-card-add-new"
                             onClick={() => {
                                 setNewCommand({ ...newCommand, stage: key });
                                 setShowAddModal(true);
                             }}
                         >
-                            <Plus size={24} />
+                            <Plus size={20} />
                             <span>{t('common.add')}</span>
                         </div>
                     </div>

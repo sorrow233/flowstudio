@@ -62,8 +62,16 @@
         "add_project": "プロジェクトを追加",
         "add_task": "タスクを追加",
         "cancel": "キャンセル",
+        "save": "保存",
+        "edit": "編集",
         "delete": "削除",
-        "click_to_copy": "クリックでコピー"
+        "click_to_copy": "クリックでコピー",
+        "copied": "コピー済み",
+        "next_stage": "次のステージへ",
+        "untitled": "無題",
+        "project_name": "プロジェクト名",
+        "project_link": "プロジェクトリンク",
+        "project_goal": "プロジェクト目標"
     },
     "landing": {
         "hero_title": "AI駆動の個人用ソフトウェア武器庫",

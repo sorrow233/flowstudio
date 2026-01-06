@@ -28,12 +28,12 @@ export const ProjectProvider = ({ children }) => {
         localStorage.setItem('flow_items', JSON.stringify(items));
     }, [items]);
 
-    const addItem = (stage = STAGES.INSPIRATION) => {
+    const addItem = (stage = STAGES.INSPIRATION, formData = {}) => {
         const newItem = {
             id: uuidv4(),
-            name: '',
-            link: '',
-            goal: '',
+            name: formData.name || '',
+            link: formData.link || '',
+            goal: formData.goal || '',
             color: generatePastelColor(),
             stage: stage,
             createdAt: new Date().toISOString()
