@@ -619,3 +619,67 @@ a {
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
+/* --- Command Tower Card Styles (Compact) --- */
+
+.command-grid {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.command-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.command-card:hover {
+  border-color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.command-card-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.command-card-content {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: monospace;
+  background: var(--bg-app);
+  padding: 0.5rem;
+  border-radius: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-card-add {
+  border: 2px dashed var(--border-subtle);
+  background: transparent;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  opacity: 0.5;
+  min-height: 80px;
+}
+
+.command-card-add:hover {
+  opacity: 1;
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
+
+.command-card-add span {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
