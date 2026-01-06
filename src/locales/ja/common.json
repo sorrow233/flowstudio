@@ -1,7 +1,7 @@
 {
     "app": {
         "title": "Flow Studio",
-        "language": "语言"
+        "language": "言語"
     },
     "languages": {
         "en": "English",
@@ -11,94 +11,110 @@
         "ko": "한국어"
     },
     "nav": {
-        "dashboard": "仪表盘",
-        "backlog": "待开发",
-        "workshop": "进行中",
-        "command_tower": "指挥塔",
-        "settings": "设置"
+        "dashboard": "ダッシュボード",
+        "backlog": "バックログ",
+        "workshop": "ワークショップ",
+        "command_tower": "コマンドタワー",
+        "settings": "設定"
     },
     "dashboard": {
-        "subtitle": "您的 AI 驱动个人软件军火库。",
-        "backlog_desc": "管理待开发的已批准创意。",
-        "workshop_desc": "追踪进行中的项目和任务。",
-        "command_tower_desc": "与 AI 副驾驶协同执行任务。"
+        "subtitle": "あなたのAI搭載パーソナルソフトウェア武器庫。",
+        "backlog_desc": "開発待ちの承認済みアイデアを管理。",
+        "workshop_desc": "進行中のプロジェクトとタスクを追跡。",
+        "command_tower_desc": "AIコパイロットとタスクを実行。"
     },
     "settings": {
-        "title": "设置"
+        "title": "設定"
     },
     "modules": {
         "backlog": {
-            "subtitle": "准备变现的创意库。",
-            "start_sprint": "开始冲刺",
-            "priority": "优先级",
+            "subtitle": "収益化準備完了のアイデア庫。",
+            "start_sprint": "スプリント開始",
+            "priority": "優先度",
             "sections": {
-                "inspiration": "灵感池",
-                "pending": "待开发"
+                "inspiration": "インスピレーションプール",
+                "pending": "開発待ち"
             }
         },
         "workshop": {
-            "subtitle": "奇迹发生的地方。",
-            "active_tasks": "活跃任务",
-            "progress": "进度",
+            "subtitle": "奇跡が起こる場所。",
+            "active_tasks": "アクティブタスク",
+            "progress": "進捗",
             "stages": {
-                "early": "初级阶段",
-                "growth": "中级阶段",
-                "advanced": "高级阶段",
-                "commercial": "商业化阶段"
+                "early": "初期段階",
+                "growth": "成長段階",
+                "advanced": "発展段階",
+                "commercial": "商業化段階"
             }
         }
     },
     "command_tower": {
-        "add_command": "添加命令",
-        "title": "标题",
-        "title_placeholder": "例如：部署脚本",
-        "command": "命令",
+        "add_command": "コマンド追加",
+        "title": "タイトル",
+        "title_placeholder": "例：デプロイスクリプト",
+        "command": "コマンド",
         "command_placeholder": "npm run deploy:main",
-        "stage": "阶段"
+        "stage": "ステージ"
     },
     "common": {
-        "add": "添加",
-        "add_idea": "添加创意",
-        "add_project": "添加项目",
-        "add_task": "添加任务",
-        "cancel": "取消",
+        "add": "追加",
+        "add_idea": "アイデアを追加",
+        "add_project": "プロジェクトを追加",
+        "add_task": "タスクを追加",
+        "cancel": "キャンセル",
         "save": "保存",
-        "edit": "编辑",
-        "delete": "删除",
-        "click_to_copy": "点击复制",
-        "copied": "已复制",
-        "next_stage": "推进阶段",
-        "untitled": "未命名",
-        "project_name": "项目名称",
-        "project_link": "项目链接",
-        "project_goal": "项目目标",
-        "search_placeholder": "搜索指令...",
-        "no_results": "没有找到匹配的指令。"
+        "edit": "編集",
+        "delete": "削除",
+        "click_to_copy": "クリックでコピー",
+        "copied": "コピーしました",
+        "next_stage": "次の段階へ",
+        "untitled": "無題",
+        "project_name": "プロジェクト名",
+        "project_link": "プロジェクトリンク",
+        "project_goal": "プロジェクト目標",
+        "search_placeholder": "コマンドを検索...",
+        "no_results": "一致するコマンドが見つかりません。",
+        "add_category": "カテゴリを追加",
+        "delete_confirm": "本当に削除しますか？",
+        "delete_stage_confirm": "このカテゴリとすべてのコマンドを削除しますか？",
+        "empty_stage_hint": "コマンドがありません",
+        "name": "名前",
+        "color": "色",
+        "archive": "アーカイブ",
+        "restore": "復元",
+        "delete_forever": "完全に削除",
+        "confirm_delete": "削除の確認",
+        "delete_warning": "このプロジェクトを削除してもよろしいですか？",
+        "delete_permanent_warning": "この操作は取り消せません。",
+        "error_title": "問題が発生しました",
+        "try_again": "再試行",
+        "offline_mode": "オフラインです。変更はローカルに保存されます。"
     },
     "landing": {
-        "hero_title": "您的 AI 驱动个人软件军火库",
-        "hero_subtitle": "从创意到实现，Flow Studio 利用 AI 赋能，全流程管理您的开发生命周期。",
-        "start_free": "免费开始",
-        "pricing": "定价",
-        "about": "关于我们",
-        "changelog": "更新日志"
+        "hero_title": "あなたのAI搭載パーソナルソフトウェア武器庫",
+        "hero_subtitle": "アイデアから実現まで、Flow StudioはAIで開発ライフサイクル全体をサポートします。",
+        "start_free": "無料で始める",
+        "pricing": "料金プラン",
+        "about": "会社概要",
+        "changelog": "更新履歴"
     },
     "auth": {
-        "welcome_back": "欢迎回来",
-        "create_account": "创建账号",
-        "login": "登录",
-        "signup": "注册",
-        "email": "邮箱",
-        "password": "密码",
-        "password_min": "至少 6 个字符",
-        "or": "或",
-        "continue_google": "通过 Google 继续",
-        "no_account": "还没有账号？",
-        "has_account": "已有账号？",
-        "error_invalid_email": "无效的邮箱地址",
-        "error_invalid_credentials": "邮箱或密码错误",
-        "error_email_in_use": "该邮箱已被注册",
-        "error_generic": "验证失败，请重试。",
-        "error_google": "Google 登录失败。"
+        "welcome_back": "おかえりなさい",
+        "create_account": "アカウント作成",
+        "login": "ログイン",
+        "logout": "ログアウト",
+        "signup": "新規登録",
+        "email": "メールアドレス",
+        "password": "パスワード",
+        "password_min": "6文字以上",
+        "or": "または",
+        "continue_google": "Googleで続ける",
+        "no_account": "アカウントをお持ちでない方",
+        "has_account": "既にアカウントをお持ちの方",
+        "error_invalid_email": "無効なメールアドレスです",
+        "error_invalid_credentials": "メールアドレスまたはパスワードが違います",
+        "error_email_in_use": "このメールアドレスは既に登録されています",
+        "error_generic": "認証に失敗しました。もう一度お試しください。",
+        "error_google": "Googleログインに失敗しました。"
     }
 }

@@ -1,7 +1,7 @@
 {
     "app": {
         "title": "Flow Studio",
-        "language": "语言"
+        "language": "Language"
     },
     "languages": {
         "en": "English",
@@ -11,100 +11,110 @@
         "ko": "한국어"
     },
     "nav": {
-        "dashboard": "仪表盘",
-        "backlog": "待开发",
-        "workshop": "进行中",
-        "command_tower": "指挥塔",
-        "settings": "设置"
+        "dashboard": "Dashboard",
+        "backlog": "Backlog",
+        "workshop": "Workshop",
+        "command_tower": "Command Tower",
+        "settings": "Settings"
     },
     "dashboard": {
-        "subtitle": "您的 AI 驱动个人软件军火库。",
-        "backlog_desc": "管理待开发的已批准创意。",
-        "workshop_desc": "追踪进行中的项目和任务。",
-        "command_tower_desc": "与 AI 副驾驶协同执行任务。"
+        "subtitle": "Your AI-Powered Personal Software Arsenal.",
+        "backlog_desc": "Manage approved ideas waiting for development.",
+        "workshop_desc": "Track projects and tasks in progress.",
+        "command_tower_desc": "Execute tasks with your AI co-pilot."
     },
     "settings": {
-        "title": "设置"
+        "title": "Settings"
     },
     "modules": {
         "backlog": {
-            "subtitle": "准备变现的创意库。",
-            "start_sprint": "开始冲刺",
-            "priority": "优先级",
+            "subtitle": "Ideas ready to monetize.",
+            "start_sprint": "Start Sprint",
+            "priority": "Priority",
             "sections": {
-                "inspiration": "灵感池",
-                "pending": "待开发"
+                "inspiration": "Inspiration Pool",
+                "pending": "Pending Development"
             }
         },
         "workshop": {
-            "subtitle": "奇迹发生的地方。",
-            "active_tasks": "活跃任务",
-            "progress": "进度",
+            "subtitle": "Where the magic happens.",
+            "active_tasks": "Active Tasks",
+            "progress": "Progress",
             "stages": {
-                "early": "初级阶段",
-                "growth": "中级阶段",
-                "advanced": "高级阶段",
-                "commercial": "商业化阶段"
+                "early": "Early Stage",
+                "growth": "Growth Stage",
+                "advanced": "Advanced Stage",
+                "commercial": "Commercial Stage"
             }
         }
     },
     "command_tower": {
-        "add_command": "添加命令",
-        "title": "标题",
-        "title_placeholder": "例如：部署脚本",
-        "command": "命令",
+        "add_command": "Add Command",
+        "title": "Title",
+        "title_placeholder": "e.g., Deploy Script",
+        "command": "Command",
         "command_placeholder": "npm run deploy:main",
-        "stage": "阶段"
+        "stage": "Stage"
     },
     "common": {
-        "add": "添加",
-        "add_idea": "添加创意",
-        "add_project": "添加项目",
-        "add_task": "添加任务",
-        "cancel": "取消",
-        "save": "保存",
-        "edit": "编辑",
-        "delete": "删除",
-        "click_to_copy": "点击复制",
-        "copied": "已复制",
-        "next_stage": "推进阶段",
-        "untitled": "未命名",
-        "project_name": "项目名称",
-        "project_link": "项目链接",
-        "project_goal": "项目目标",
+        "add": "Add",
+        "add_idea": "Add Idea",
+        "add_project": "Add Project",
+        "add_task": "Add Task",
+        "cancel": "Cancel",
+        "save": "Save",
+        "edit": "Edit",
+        "delete": "Delete",
+        "click_to_copy": "Click to copy",
+        "copied": "Copied",
+        "next_stage": "Move to Next Stage",
+        "untitled": "Untitled",
+        "project_name": "Project Name",
+        "project_link": "Project Link",
+        "project_goal": "Project Goal",
         "search_placeholder": "Search commands...",
         "no_results": "No matching commands found.",
         "add_category": "Add Category",
-        "delete_confirm": "Are you sure?",
+        "delete_confirm": "Are you sure you want to delete?",
         "delete_stage_confirm": "Delete this category and all its commands?",
         "empty_stage_hint": "No commands yet",
         "name": "Name",
-        "color": "Color"
+        "color": "Color",
+        "archive": "Archive",
+        "restore": "Restore",
+        "delete_forever": "Delete Forever",
+        "confirm_delete": "Confirm Deletion",
+        "delete_warning": "Are you sure you want to delete this project?",
+        "delete_permanent_warning": "This action cannot be undone.",
+        "error_title": "Something went wrong",
+        "try_again": "Try Again",
+        "offline_mode": "You are offline. Changes will be saved locally."
     },
     "landing": {
-        "hero_title": "您的 AI 驱动个人软件军火库",
-        "hero_subtitle": "从创意到实现，Flow Studio 利用 AI 赋能，全流程管理您的开发生命周期。",
-        "start_free": "免费开始",
-        "pricing": "定价",
-        "about": "关于我们",
-        "changelog": "更新日志"
+        "hero_title": "Your AI-Powered Personal Software Arsenal",
+        "hero_subtitle": "From idea to reality, Flow Studio empowers your entire development lifecycle with AI.",
+        "start_free": "Start Free",
+        "pricing": "Pricing",
+        "about": "About Us",
+        "changelog": "Changelog"
     },
     "auth": {
-        "welcome_back": "欢迎回来",
-        "create_account": "创建账号",
-        "login": "登录",
-        "signup": "注册",
-        "email": "邮箱",
-        "password": "密码",
-        "password_min": "至少 6 个字符",
-        "or": "或",
-        "continue_google": "通过 Google 继续",
-        "no_account": "还没有账号？",
-        "has_account": "已有账号？",
-        "error_invalid_email": "无效的邮箱地址",
-        "error_invalid_credentials": "邮箱或密码错误",
-        "error_email_in_use": "该邮箱已被注册",
-        "error_generic": "验证失败，请重试。",
-        "error_google": "Google 登录失败。"
+        "welcome_back": "Welcome Back",
+        "create_account": "Create Account",
+        "login": "Log In",
+        "logout": "Log Out",
+        "signup": "Sign Up",
+        "email": "Email",
+        "password": "Password",
+        "password_min": "At least 6 characters",
+        "or": "or",
+        "continue_google": "Continue with Google",
+        "no_account": "Don't have an account?",
+        "has_account": "Already have an account?",
+        "error_invalid_email": "Invalid email address",
+        "error_invalid_credentials": "Incorrect email or password",
+        "error_email_in_use": "This email is already registered",
+        "error_generic": "Authentication failed. Please try again.",
+        "error_google": "Google sign-in failed."
     }
 }

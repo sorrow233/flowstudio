@@ -1,7 +1,7 @@
 {
     "app": {
         "title": "Flow Studio",
-        "language": "语言"
+        "language": "언어"
     },
     "languages": {
         "en": "English",
@@ -11,94 +11,110 @@
         "ko": "한국어"
     },
     "nav": {
-        "dashboard": "仪表盘",
-        "backlog": "待开发",
-        "workshop": "进行中",
-        "command_tower": "指挥塔",
-        "settings": "设置"
+        "dashboard": "대시보드",
+        "backlog": "백로그",
+        "workshop": "작업실",
+        "command_tower": "커맨드 타워",
+        "settings": "설정"
     },
     "dashboard": {
-        "subtitle": "您的 AI 驱动个人软件军火库。",
-        "backlog_desc": "管理待开发的已批准创意。",
-        "workshop_desc": "追踪进行中的项目和任务。",
-        "command_tower_desc": "与 AI 副驾驶协同执行任务。"
+        "subtitle": "AI 기반 개인 소프트웨어 무기고.",
+        "backlog_desc": "개발 대기 중인 승인된 아이디어 관리.",
+        "workshop_desc": "진행 중인 프로젝트 및 작업 추적.",
+        "command_tower_desc": "AI 코파일럿과 함께 작업 실행."
     },
     "settings": {
-        "title": "设置"
+        "title": "설정"
     },
     "modules": {
         "backlog": {
-            "subtitle": "准备变现的创意库。",
-            "start_sprint": "开始冲刺",
-            "priority": "优先级",
+            "subtitle": "수익화 준비가 된 아이디어 창고.",
+            "start_sprint": "스프린트 시작",
+            "priority": "우선순위",
             "sections": {
-                "inspiration": "灵感池",
-                "pending": "待开发"
+                "inspiration": "영감 풀",
+                "pending": "개발 대기"
             }
         },
         "workshop": {
-            "subtitle": "奇迹发生的地方。",
-            "active_tasks": "活跃任务",
-            "progress": "进度",
+            "subtitle": "마법이 일어나는 곳.",
+            "active_tasks": "활성 작업",
+            "progress": "진행률",
             "stages": {
-                "early": "初级阶段",
-                "growth": "中级阶段",
-                "advanced": "高级阶段",
-                "commercial": "商业化阶段"
+                "early": "초기 단계",
+                "growth": "성장 단계",
+                "advanced": "고급 단계",
+                "commercial": "상용화 단계"
             }
         }
     },
     "command_tower": {
-        "add_command": "添加命令",
-        "title": "标题",
-        "title_placeholder": "例如：部署脚本",
-        "command": "命令",
+        "add_command": "명령어 추가",
+        "title": "제목",
+        "title_placeholder": "예: 배포 스크립트",
+        "command": "명령어",
         "command_placeholder": "npm run deploy:main",
-        "stage": "阶段"
+        "stage": "단계"
     },
     "common": {
-        "add": "添加",
-        "add_idea": "添加创意",
-        "add_project": "添加项目",
-        "add_task": "添加任务",
-        "cancel": "取消",
-        "save": "保存",
-        "edit": "编辑",
-        "delete": "删除",
-        "click_to_copy": "点击复制",
-        "copied": "已复制",
-        "next_stage": "推进阶段",
-        "untitled": "未命名",
-        "project_name": "项目名称",
-        "project_link": "项目链接",
-        "project_goal": "项目目标",
-        "search_placeholder": "搜索指令...",
-        "no_results": "没有找到匹配的指令。"
+        "add": "추가",
+        "add_idea": "아이디어 추가",
+        "add_project": "프로젝트 추가",
+        "add_task": "작업 추가",
+        "cancel": "취소",
+        "save": "저장",
+        "edit": "편집",
+        "delete": "삭제",
+        "click_to_copy": "클릭하여 복사",
+        "copied": "복사됨",
+        "next_stage": "다음 단계로",
+        "untitled": "제목 없음",
+        "project_name": "프로젝트 이름",
+        "project_link": "프로젝트 링크",
+        "project_goal": "프로젝트 목표",
+        "search_placeholder": "명령어 검색...",
+        "no_results": "일치하는 명령어가 없습니다.",
+        "add_category": "카테고리 추가",
+        "delete_confirm": "정말 삭제하시겠습니까?",
+        "delete_stage_confirm": "이 카테고리와 모든 명령어를 삭제하시겠습니까?",
+        "empty_stage_hint": "명령어 없음",
+        "name": "이름",
+        "color": "색상",
+        "archive": "보관",
+        "restore": "복원",
+        "delete_forever": "영구 삭제",
+        "confirm_delete": "삭제 확인",
+        "delete_warning": "이 프로젝트를 삭제하시겠습니까?",
+        "delete_permanent_warning": "이 작업은 취소할 수 없습니다.",
+        "error_title": "문제가 발생했습니다",
+        "try_again": "다시 시도",
+        "offline_mode": "오프라인 상태입니다. 변경 사항은 로컬에 저장됩니다."
     },
     "landing": {
-        "hero_title": "您的 AI 驱动个人软件军火库",
-        "hero_subtitle": "从创意到实现，Flow Studio 利用 AI 赋能，全流程管理您的开发生命周期。",
-        "start_free": "免费开始",
-        "pricing": "定价",
-        "about": "关于我们",
-        "changelog": "更新日志"
+        "hero_title": "AI 기반 개인 소프트웨어 무기고",
+        "hero_subtitle": "아이디어에서 현실까지, Flow Studio는 AI로 전체 개발 라이프사이클을 지원합니다.",
+        "start_free": "무료로 시작",
+        "pricing": "요금제",
+        "about": "회사 소개",
+        "changelog": "업데이트 로그"
     },
     "auth": {
-        "welcome_back": "欢迎回来",
-        "create_account": "创建账号",
-        "login": "登录",
-        "signup": "注册",
-        "email": "邮箱",
-        "password": "密码",
-        "password_min": "至少 6 个字符",
-        "or": "或",
-        "continue_google": "通过 Google 继续",
-        "no_account": "还没有账号？",
-        "has_account": "已有账号？",
-        "error_invalid_email": "无效的邮箱地址",
-        "error_invalid_credentials": "邮箱或密码错误",
-        "error_email_in_use": "该邮箱已被注册",
-        "error_generic": "验证失败，请重试。",
-        "error_google": "Google 登录失败。"
+        "welcome_back": "다시 오신 것을 환영합니다",
+        "create_account": "계정 만들기",
+        "login": "로그인",
+        "logout": "로그아웃",
+        "signup": "회원가입",
+        "email": "이메일",
+        "password": "비밀번호",
+        "password_min": "최소 6자",
+        "or": "또는",
+        "continue_google": "Google로 계속",
+        "no_account": "계정이 없으신가요?",
+        "has_account": "이미 계정이 있으신가요?",
+        "error_invalid_email": "유효하지 않은 이메일 주소",
+        "error_invalid_credentials": "이메일 또는 비밀번호가 잘못되었습니다",
+        "error_email_in_use": "이미 등록된 이메일입니다",
+        "error_generic": "인증에 실패했습니다. 다시 시도해 주세요.",
+        "error_google": "Google 로그인에 실패했습니다."
     }
 }
