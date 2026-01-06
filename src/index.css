@@ -471,3 +471,112 @@ a {
   flex-direction: column;
   align-items: center;
 }
+
+/* --- Works Grid Style (Japanese Portfolio) --- */
+
+.works-page {
+  padding: 3rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.works-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.works-title {
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.works-divider {
+  width: 40px;
+  height: 1px;
+  background: var(--text-secondary);
+  margin: 1rem auto 0;
+}
+
+.works-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.works-card {
+  aspect-ratio: 4 / 3;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.works-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.works-card-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0);
+  transition: background 0.3s ease;
+}
+
+.works-card:hover .works-card-overlay {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.works-card-name {
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.works-card:hover .works-card-name {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.works-card-add {
+  border: 2px dashed var(--border-subtle);
+  background: transparent !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--text-secondary);
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.works-card-add:hover {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+  transform: none;
+  box-shadow: none;
+}
+
+.works-card-add span {
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+  .works-grid {
+    grid-template-columns: 1fr;
+  }
+}
