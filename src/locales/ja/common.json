@@ -12,40 +12,28 @@
     },
     "nav": {
         "dashboard": "ダッシュボード",
-        "incubator": "インキュベーター",
-        "vision_studio": "ビジョンスタジオ",
         "backlog": "バックログ",
         "workshop": "ワークショップ",
         "command_tower": "コマンドタワー",
-        "archive": "アーカイブ",
         "settings": "設定"
     },
     "dashboard": {
-        "subtitle": "AI駆動のあなた専用ソフトウェア兵器庫。",
-        "incubator_desc": "AIで新しいアイデアを捉え、分析します。",
-        "vision_studio_desc": "プロジェクトの範囲とマイルストーンを定義します。",
-        "backlog_desc": "承認済みアイデアの開発待ち管理。",
-        "workshop_desc": "進行中のプロジェクトとタスクを追跡。",
-        "command_tower_desc": "AIコパイロットと共にタスクを実行します。",
-        "archive_desc": "再利用可能なブロックと振り返りログ。"
+        "subtitle": "AIが支援するあなた専用のソフトウェア武器庫。",
+        "backlog_desc": "承認済みのアイデアを管理します。",
+        "workshop_desc": "進行中のプロジェクトとタスクを追跡します。",
+        "command_tower_desc": "AIコパイロットとタスクを実行します。"
     },
     "settings": {
         "title": "設定"
     },
     "modules": {
-        "archive": {
-            "subtitle": "知識は力なり。"
-        },
-        "vision_studio": {
-            "subtitle": "スコープ定義：MVP、Pro、またはUltimate。"
-        },
         "backlog": {
-            "subtitle": "実現を待つアイデアたち。",
+            "subtitle": "実現を待つアイデア。",
             "start_sprint": "スプリント開始",
             "priority": "優先度",
             "sections": {
                 "inspiration": "インスピレーション",
-                "pending": "開発待ち"
+                "pending": "保留中"
             }
         },
         "workshop": {
@@ -56,30 +44,25 @@
                 "early": "初期段階",
                 "growth": "成長段階",
                 "advanced": "上級段階",
-                "commercial": "商業化段階"
+                "commercial": "商用化段階"
             }
-        },
-        "incubator": {
-            "subtitle": "アイデアが生まれ、分析される場所。",
-            "quick_capture": "クイックキャプチャ",
-            "placeholder": "こんなソフトウェアを作りたい...",
-            "ignite": "アイデア点火",
-            "analyzing": "分析中...",
-            "analysis_brief": "AI分析ブリーフ",
-            "tier_opportunity": "級の機会",
-            "monetization": "収益化",
-            "timeline": "タイムライン",
-            "complexity": "複雑さ",
-            "recommended_stack": "推奨スタック：",
-            "next_steps": "次のステップ：",
-            "start_project": "プロジェクト開始",
-            "discard": "破棄"
         }
+    },
+    "command_tower": {
+        "add_command": "コマンドを追加",
+        "title": "タイトル",
+        "title_placeholder": "例：デプロイスクリプト",
+        "command": "コマンド",
+        "command_placeholder": "npm run deploy:main",
+        "stage": "ステージ"
     },
     "common": {
         "add": "追加",
-        "add_idea": "アイデア追加",
-        "add_project": "プロジェクト追加",
-        "add_task": "タスク追加"
+        "add_idea": "アイデアを追加",
+        "add_project": "プロジェクトを追加",
+        "add_task": "タスクを追加",
+        "cancel": "キャンセル",
+        "delete": "削除",
+        "click_to_copy": "クリックでコピー"
     }
 }

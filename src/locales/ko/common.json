@@ -12,40 +12,28 @@
     },
     "nav": {
         "dashboard": "대시보드",
-        "incubator": "인큐베이터",
-        "vision_studio": "비전 스튜디오",
         "backlog": "백로그",
-        "workshop": "워크샵",
+        "workshop": "워크숍",
         "command_tower": "커맨드 타워",
-        "archive": "아카이브",
         "settings": "설정"
     },
     "dashboard": {
-        "subtitle": "당신의 AI 기반 개인 소프트웨어 아스날.",
-        "incubator_desc": "AI로 새로운 아이디어를 포착하고 분석하세요.",
-        "vision_studio_desc": "프로젝트 범위와 마일스톤을 정의하세요.",
-        "backlog_desc": "승인된 아이디어의 개발 대기 관리.",
-        "workshop_desc": "진행 중인 프로젝트와 작업 추적.",
-        "command_tower_desc": "AI 코파일럿과 함께 작업을 수행하세요.",
-        "archive_desc": "재사용 가능한 블록 및 회고 로그."
+        "subtitle": "AI 기반 개인 소프트웨어 무기고.",
+        "backlog_desc": "개발 대기 중인 승인된 아이디어를 관리합니다.",
+        "workshop_desc": "진행 중인 프로젝트와 작업을 추적합니다.",
+        "command_tower_desc": "AI 코파일럿과 함께 작업을 실행합니다."
     },
     "settings": {
         "title": "설정"
     },
     "modules": {
-        "archive": {
-            "subtitle": "아는 것이 힘이다."
-        },
-        "vision_studio": {
-            "subtitle": "범위 정의: MVP, Pro 또는 Ultimate."
-        },
         "backlog": {
-            "subtitle": "실현을 기다리는 아이디어들.",
+            "subtitle": "실현을 기다리는 아이디어.",
             "start_sprint": "스프린트 시작",
             "priority": "우선순위",
             "sections": {
                 "inspiration": "영감",
-                "pending": "개발 대기"
+                "pending": "대기 중"
             }
         },
         "workshop": {
@@ -56,30 +44,25 @@
                 "early": "초기 단계",
                 "growth": "성장 단계",
                 "advanced": "고급 단계",
-                "commercial": "상업화 단계"
+                "commercial": "상용화 단계"
             }
-        },
-        "incubator": {
-            "subtitle": "아이디어가 탄생하고 분석되는 곳.",
-            "quick_capture": "빠른 캡처",
-            "placeholder": "이런 소프트웨어를 만들고 싶습니다...",
-            "ignite": "아이디어 점화",
-            "analyzing": "분석 중...",
-            "analysis_brief": "AI 분석 브리핑",
-            "tier_opportunity": "등급 기회",
-            "monetization": "수익화",
-            "timeline": "타임라인",
-            "complexity": "복잡도",
-            "recommended_stack": "추천 스택:",
-            "next_steps": "다음 단계:",
-            "start_project": "프로젝트 시작",
-            "discard": "삭제"
         }
+    },
+    "command_tower": {
+        "add_command": "명령 추가",
+        "title": "제목",
+        "title_placeholder": "예: 배포 스크립트",
+        "command": "명령",
+        "command_placeholder": "npm run deploy:main",
+        "stage": "단계"
     },
     "common": {
         "add": "추가",
         "add_idea": "아이디어 추가",
         "add_project": "프로젝트 추가",
-        "add_task": "작업 추가"
+        "add_task": "작업 추가",
+        "cancel": "취소",
+        "delete": "삭제",
+        "click_to_copy": "클릭하여 복사"
     }
 }

@@ -12,33 +12,21 @@
     },
     "nav": {
         "dashboard": "Dashboard",
-        "incubator": "Incubator",
-        "vision_studio": "Vision Studio",
         "backlog": "Backlog",
         "workshop": "Workshop",
         "command_tower": "Command Tower",
-        "archive": "Archive",
         "settings": "Settings"
     },
     "dashboard": {
         "subtitle": "Your AI-Driven Personal Software Arsenal.",
-        "incubator_desc": "Capture and analyze new ideas with AI.",
-        "vision_studio_desc": "Define project scope and milestones.",
         "backlog_desc": "Manage approved ideas pending development.",
         "workshop_desc": "Track active projects and tasks.",
-        "command_tower_desc": "Execute tasks with AI Copilot.",
-        "archive_desc": "Reusable blocks and retrospective logs."
+        "command_tower_desc": "Execute tasks with AI Copilot."
     },
     "settings": {
         "title": "Settings"
     },
     "modules": {
-        "archive": {
-            "subtitle": "Knowledge is power."
-        },
-        "vision_studio": {
-            "subtitle": "Define the scope: MVP, Pro, or Ultimate."
-        },
         "backlog": {
             "subtitle": "Ideas ready for realization.",
             "start_sprint": "Start Sprint",
@@ -58,28 +46,23 @@
                 "advanced": "Advanced Stage",
                 "commercial": "Commercial Stage"
             }
-        },
-        "incubator": {
-            "subtitle": "Where ideas are born and analyzed.",
-            "quick_capture": "Quick Capture",
-            "placeholder": "I want to build a software that...",
-            "ignite": "Ignite Idea",
-            "analyzing": "Analyzing...",
-            "analysis_brief": "AI Analysis Brief",
-            "tier_opportunity": "-Tier Opportunity",
-            "monetization": "Monetization",
-            "timeline": "Timeline",
-            "complexity": "Complexity",
-            "recommended_stack": "Recommended Stack:",
-            "next_steps": "Next Steps:",
-            "start_project": "Start Project",
-            "discard": "Discard"
         }
+    },
+    "command_tower": {
+        "add_command": "Add Command",
+        "title": "Title",
+        "title_placeholder": "e.g. Deploy Script",
+        "command": "Command",
+        "command_placeholder": "npm run deploy:main",
+        "stage": "Stage"
     },
     "common": {
         "add": "Add",
         "add_idea": "Add Idea",
         "add_project": "Add Project",
-        "add_task": "Add Task"
+        "add_task": "Add Task",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "click_to_copy": "Click to copy"
     }
 }

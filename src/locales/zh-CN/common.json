@@ -12,33 +12,21 @@
     },
     "nav": {
         "dashboard": "仪表盘",
-        "incubator": "孵化器",
-        "vision_studio": "愿景工作室",
         "backlog": "待开发",
         "workshop": "进行中",
         "command_tower": "指挥塔",
-        "archive": "归档",
         "settings": "设置"
     },
     "dashboard": {
         "subtitle": "您的 AI 驱动个人软件军火库。",
-        "incubator_desc": "用 AI 捕捉和分析新创意。",
-        "vision_studio_desc": "定义项目范围和里程碑。",
         "backlog_desc": "管理待开发的已批准创意。",
         "workshop_desc": "追踪进行中的项目和任务。",
-        "command_tower_desc": "与 AI 副驾驶协同执行任务。",
-        "archive_desc": "可复用模块与回顾日志。"
+        "command_tower_desc": "与 AI 副驾驶协同执行任务。"
     },
     "settings": {
         "title": "设置"
     },
     "modules": {
-        "archive": {
-            "subtitle": "知识就是力量。"
-        },
-        "vision_studio": {
-            "subtitle": "定义范围：MVP、专业版或旗舰版。"
-        },
         "backlog": {
             "subtitle": "准备变现的创意库。",
             "start_sprint": "开始冲刺",
@@ -58,28 +46,23 @@
                 "advanced": "高级阶段",
                 "commercial": "商业化阶段"
             }
-        },
-        "incubator": {
-            "subtitle": "创意诞生与分析之地。",
-            "quick_capture": "快速捕捉",
-            "placeholder": "我想开发一个软件，它是...",
-            "ignite": "点燃创意",
-            "analyzing": "分析中...",
-            "analysis_brief": "AI 分析简报",
-            "tier_opportunity": "级机会",
-            "monetization": "变现能力",
-            "timeline": "时间线",
-            "complexity": "复杂度",
-            "recommended_stack": "推荐技术栈：",
-            "next_steps": "后续步骤：",
-            "start_project": "启动项目",
-            "discard": "丢弃"
         }
+    },
+    "command_tower": {
+        "add_command": "添加命令",
+        "title": "标题",
+        "title_placeholder": "例如：部署脚本",
+        "command": "命令",
+        "command_placeholder": "npm run deploy:main",
+        "stage": "阶段"
     },
     "common": {
         "add": "添加",
         "add_idea": "添加创意",
         "add_project": "添加项目",
-        "add_task": "添加任务"
+        "add_task": "添加任务",
+        "cancel": "取消",
+        "delete": "删除",
+        "click_to_copy": "点击复制"
     }
 }

@@ -12,35 +12,23 @@
     },
     "nav": {
         "dashboard": "儀表板",
-        "incubator": "孵化器",
-        "vision_studio": "願景工作室",
         "backlog": "待開發",
         "workshop": "進行中",
         "command_tower": "指揮塔",
-        "archive": "歸檔",
         "settings": "設定"
     },
     "dashboard": {
         "subtitle": "您的 AI 驅動個人軟體軍火庫。",
-        "incubator_desc": "用 AI 捕捉和分析新創意。",
-        "vision_studio_desc": "定義專案範圍和里程碑。",
         "backlog_desc": "管理待開發的已批准創意。",
         "workshop_desc": "追蹤進行中的專案和任務。",
-        "command_tower_desc": "與 AI 副駕駛協同執行任務。",
-        "archive_desc": "可重複使用的模組與回顧日誌。"
+        "command_tower_desc": "與 AI 副駕駛協同執行任務。"
     },
     "settings": {
         "title": "設定"
     },
     "modules": {
-        "archive": {
-            "subtitle": "知識就是力量。"
-        },
-        "vision_studio": {
-            "subtitle": "定義範圍：MVP、專業版或旗艦版。"
-        },
         "backlog": {
-            "subtitle": "準備實現的創意庫。",
+            "subtitle": "準備變現的創意庫。",
             "start_sprint": "開始衝刺",
             "priority": "優先級",
             "sections": {
@@ -58,28 +46,23 @@
                 "advanced": "高級階段",
                 "commercial": "商業化階段"
             }
-        },
-        "incubator": {
-            "subtitle": "創意誕生與分析之地。",
-            "quick_capture": "快速捕捉",
-            "placeholder": "我想開發一個軟體，它是...",
-            "ignite": "點燃創意",
-            "analyzing": "分析中...",
-            "analysis_brief": "AI 分析簡報",
-            "tier_opportunity": "級機會",
-            "monetization": "變現能力",
-            "timeline": "時間線",
-            "complexity": "複雜度",
-            "recommended_stack": "推薦技術堆疊：",
-            "next_steps": "後續步驟：",
-            "start_project": "啟動專案",
-            "discard": "丟棄"
         }
+    },
+    "command_tower": {
+        "add_command": "新增指令",
+        "title": "標題",
+        "title_placeholder": "例如：部署腳本",
+        "command": "指令",
+        "command_placeholder": "npm run deploy:main",
+        "stage": "階段"
     },
     "common": {
         "add": "新增",
         "add_idea": "新增創意",
         "add_project": "新增專案",
-        "add_task": "新增任務"
+        "add_task": "新增任務",
+        "cancel": "取消",
+        "delete": "刪除",
+        "click_to_copy": "點擊複製"
     }
 }
