@@ -16,23 +16,23 @@ const Hero = () => {
                 className="hero-badge"
             >
                 <Sparkles size={14} />
-                <span>{t('landing.new_era', 'QUANTUM FLUX v2.5')}</span>
+                <span>{t('landing.new_era', 'A New Era of Personal Software')}</span>
             </motion.div>
 
             <motion.h1
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="text-h1-hero"
+                className="text-h1"
             >
-                {t('landing.hero_title', 'BUILD THE IMPOSSIBLE')}
+                {t('landing.hero_title', 'Master Your Ideas in a Digital Zen')}
             </motion.h1>
 
             <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="hero-subtitle mb-12"
+                className="hero-subtitle"
             >
                 {t('landing.hero_subtitle', 'Flow Studio is where creativity meets engineering. A workspace designed for deep focus and effortless software generation.')}
             </motion.p>
@@ -50,7 +50,7 @@ const Hero = () => {
                     </div>
                 </Link>
                 <button className="btn-secondary-glass">
-                    {t('landing.watch_demo', 'System Demo')}
+                    {t('landing.watch_demo', 'Watch Process')}
                 </button>
             </motion.div>
 
@@ -58,10 +58,7 @@ const Hero = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 2, delay: 1 }}
-                className="absolute inset-0 -z-10"
-                style={{
-                    background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15), transparent 70%)'
-                }}
+                className="hero-background-glow"
             />
         </section>
     );
