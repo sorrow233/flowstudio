@@ -65,6 +65,14 @@
         "delete": "刪除",
         "click_to_copy": "點擊複製"
     },
+    "landing": {
+        "hero_title": "您的 AI 驅動個人軟體軍火庫",
+        "hero_subtitle": "從創意到實現，Flow Studio 利用 AI 賦能，全流程管理您的開發生命週期。",
+        "start_free": "免費開始",
+        "pricing": "定價",
+        "about": "關於我們",
+        "changelog": "更新日誌"
+    },
     "auth": {
         "welcome_back": "歡迎回來",
         "create_account": "建立帳號",

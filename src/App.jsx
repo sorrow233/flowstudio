@@ -1,9 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProjectProvider } from '@/contexts/ProjectContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import Login from '@/pages/Login';
+import LandingPage from '@/pages/LandingPage';
+import PricingPage from '@/pages/Pricing';
+import AboutPage from '@/pages/About';
+import ChangelogPage from '@/pages/Changelog';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Layout from '@/components/Layout';
 import Dashboard from '@/pages/Dashboard';
@@ -18,9 +22,15 @@ function App() {
       <ProjectProvider>
         <BrowserRouter>
           <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/changelog" element={<ChangelogPage />} />
 
-            <Route path="/" element={
+            {/* Protected Routes */}
+            <Route path="/app" element={
               <ProtectedRoute>
                 <Layout />
               </ProtectedRoute>
@@ -31,6 +41,9 @@ function App() {
               <Route path="command-tower" element={<CommandTowerPage />} />
               <Route path="settings" element={<div className="text-h2">{t('settings.title')}</div>} />
             </Route>
+
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
       </ProjectProvider>

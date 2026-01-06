@@ -65,6 +65,14 @@
         "delete": "削除",
         "click_to_copy": "クリックでコピー"
     },
+    "landing": {
+        "hero_title": "AI駆動の個人用ソフトウェア武器庫",
+        "hero_subtitle": "アイデアから実現まで、Flow StudioはAIを活用したツールで開発ライフサイクル全体を管理します。",
+        "start_free": "無料で始める",
+        "pricing": "料金",
+        "about": "概要",
+        "changelog": "変更履歴"
+    },
     "auth": {
         "welcome_back": "お帰りなさい",
         "create_account": "アカウント作成",

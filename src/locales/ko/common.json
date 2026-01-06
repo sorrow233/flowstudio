@@ -65,6 +65,14 @@
         "delete": "삭제",
         "click_to_copy": "클릭하여 복사"
     },
+    "landing": {
+        "hero_title": "AI 기반 개인 소프트웨어 무기고",
+        "hero_subtitle": "아이디어에서 실현까지, Flow Studio는 AI 기반 도구로 전체 개발 수명 주기를 관리합니다.",
+        "start_free": "무료로 시작하기",
+        "pricing": "가격",
+        "about": "소개",
+        "changelog": "변경 로그"
+    },
     "auth": {
         "welcome_back": "환영합니다",
         "create_account": "계정 만들기",

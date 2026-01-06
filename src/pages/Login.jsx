@@ -11,7 +11,7 @@ export default function Login() {
     const { login, signup, loginWithGoogle, authError } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const from = location.state?.from?.pathname || '/';
+    const from = location.state?.from?.pathname || '/app';
 
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');

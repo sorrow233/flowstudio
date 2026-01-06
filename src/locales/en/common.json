@@ -65,6 +65,14 @@
         "delete": "Delete",
         "click_to_copy": "Click to copy"
     },
+    "landing": {
+        "hero_title": "Your AI-Driven Personal Software Arsenal",
+        "hero_subtitle": "From idea to realization, Flow Studio manages your entire development lifecycle with AI-powered tools.",
+        "start_free": "Start for Free",
+        "pricing": "Pricing",
+        "about": "About",
+        "changelog": "Changelog"
+    },
     "auth": {
         "welcome_back": "Welcome Back",
         "create_account": "Create Account",
