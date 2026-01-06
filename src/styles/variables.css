@@ -1,62 +1,62 @@
 :root {
-  /* --- Digital Zen & High-End Modern tokens --- */
+  /* --- Japanese Fresh (日系清新) Design Tokens --- */
 
-  /* Light Mode (Kami - Paper) */
-  --color-bg-light: #F9F8F6;
-  /* Brighter, cleaner paper */
+  /* Light Mode (Washi - 和紙) */
+  --color-bg-light: #FDFCFA;
+  /* Warm, creamy paper white */
   --color-surface-light: #FFFFFF;
-  --color-text-main-light: #1A1A1A;
-  /* Deeper black */
-  --color-text-muted-light: #666666;
-  --color-border-light: #E5E5E1;
-  --color-border-hover-light: #D1D1CB;
+  --color-text-main-light: #2D2D2D;
+  /* Softer black, less harsh */
+  --color-text-muted-light: #8A8A8A;
+  /* Light gray for secondary text */
+  --color-border-light: #EBEBEB;
+  --color-border-hover-light: #D0D0D0;
 
-  /* Dark Mode (Sumi - Ink) */
-  --color-bg-dark: #0A0A0A;
-  /* Deeper black for high contrast */
-  --color-surface-dark: #141414;
-  --color-text-main-dark: #F5F5F5;
-  --color-text-muted-dark: #888888;
-  --color-border-dark: #222222;
-  --color-border-hover-dark: #333333;
+  /* Dark Mode (Yoru - 夜) - Softer, not pure black */
+  --color-bg-dark: #1A1A1C;
+  --color-surface-dark: #242426;
+  --color-text-main-dark: #F0F0F0;
+  --color-text-muted-dark: #9A9A9A;
+  --color-border-dark: #3A3A3C;
+  --color-border-hover-dark: #4A4A4C;
 
-  /* Accents (Nature Inspired - Muted) */
-  --color-accent-vermilion: #B83A39;
-  /* Deep Hanko Red */
-  --color-accent-indigo: #4A6E86;
-  /* Indigo Dye */
-  --color-accent-teal: #4B7F78;
-  /* Aged Pine */
-  --color-accent-gold: #C4A05D;
-  /* Brass */
+  /* Accents (Nature Inspired - Soft & Muted) */
+  --color-accent-sakura: #E8B4B8;
+  /* Soft Sakura Pink */
+  --color-accent-sora: #A8C8E8;
+  /* Sky Blue / Sora */
+  --color-accent-matcha: #9DC08B;
+  /* Matcha Green */
+  --color-accent-kinari: #F5F0E6;
+  /* Unbleached Cotton / Kinari */
 
   /* Semantic Tokens */
   --bg-app: var(--color-bg-light);
   --bg-card: var(--color-surface-light);
-  --bg-glass: rgba(255, 255, 255, 0.6);
+  --bg-glass: rgba(255, 255, 255, 0.7);
   --text-primary: var(--color-text-main-light);
   --text-secondary: var(--color-text-muted-light);
   --border-subtle: var(--color-border-light);
   --border-hover: var(--color-border-hover-light);
-  --color-accent: var(--color-accent-indigo);
-  /* Defaulting to Indigo for a more tech-zen feel */
+  --color-accent: var(--color-accent-sakura);
+  /* Primary accent is now Sakura */
 
-  /* Ethereal Glows & Gradients */
-  --glow-indigo: radial-gradient(circle at center, rgba(74, 110, 134, 0.15) 0%, transparent 70%);
-  --glow-vermilion: radial-gradient(circle at center, rgba(184, 58, 57, 0.1) 0%, transparent 70%);
-  --gradient-zen: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+  /* Ethereal Glows & Gradients - Very Subtle */
+  --glow-sakura: radial-gradient(circle at center, rgba(232, 180, 184, 0.1) 0%, transparent 60%);
+  --glow-sora: radial-gradient(circle at center, rgba(168, 200, 232, 0.1) 0%, transparent 60%);
+  --gradient-fresh: linear-gradient(180deg, var(--color-kinari) 0%, var(--color-bg-light) 100%);
 
-  /* Texture */
-  /* Simple noise SVG data URI */
-  --bg-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  /* Texture - Optional, very light grain */
+  --bg-noise: none;
+  /* Disabling noise for cleaner look */
 
-  /* Shadows (Hyper-Refined) */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
-  --shadow-md: 0 12px 32px -8px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 32px 64px -16px rgba(0, 0, 0, 0.12);
-  --shadow-glass: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+  /* Shadows (Ultra Soft) */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 24px 48px -12px rgba(0, 0, 0, 0.08);
+  --shadow-glass: 0 16px 32px -8px rgba(0, 0, 0, 0.04);
 
-  /* Spacing */
+  /* Spacing - Generous */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -68,59 +68,59 @@
   --space-20: 80px;
   --space-24: 96px;
 
-  /* Typography - Modern Stack */
-  --font-display: 'Outfit', 'Inter', sans-serif;
-  --font-serif: "Playfair Display", serif;
-  --font-sans: "Inter", sans-serif;
-  --font-mono: "Fira Code", monospace;
+  /* Typography - Refined Japanese-friendly stack */
+  --font-display: 'Noto Sans JP', 'Inter', system-ui, sans-serif;
+  --font-serif: 'Noto Serif JP', 'Georgia', serif;
+  --font-sans: 'Noto Sans JP', 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  --tracking-tight: -0.02em;
-  --tracking-normal: 0em;
-  --tracking-wide: 0.04em;
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0.02em;
+  /* Slightly wider for Japanese text */
+  --tracking-wide: 0.05em;
 
-  /* Radius (Organic) */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  /* Slightly sharper for zen feel */
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  /* Radius (Soft & Organic) */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
   --radius-full: 9999px;
 
-  /* Transitions - High Precision */
-  --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-smooth: 450ms cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-slow: 800ms cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-spring: 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Transitions - Gentle & Slow */
+  --transition-fast: 200ms ease-out;
+  --transition-smooth: 500ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-slow: 800ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-spring: 700ms cubic-bezier(0.34, 1.2, 0.64, 1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --bg-app: var(--color-bg-dark);
     --bg-card: var(--color-surface-dark);
-    --bg-glass: rgba(28, 28, 30, 0.6);
+    --bg-glass: rgba(36, 36, 38, 0.7);
     --text-primary: var(--color-text-main-dark);
     --text-secondary: var(--color-text-muted-dark);
     --border-subtle: var(--color-border-dark);
     --border-hover: var(--color-border-hover-dark);
 
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 20px 40px -4px rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 24px 48px -12px rgba(0, 0, 0, 0.3);
   }
 }
 
 :root.dark {
   --bg-app: var(--color-bg-dark);
   --bg-card: var(--color-surface-dark);
-  --bg-glass: rgba(28, 28, 30, 0.6);
+  --bg-glass: rgba(36, 36, 38, 0.7);
   --text-primary: var(--color-text-main-dark);
   --text-secondary: var(--color-text-muted-dark);
   --border-subtle: var(--color-border-dark);
   --border-hover: var(--color-border-hover-dark);
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 20px 40px -4px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 24px 48px -12px rgba(0, 0, 0, 0.3);
 }
 
 body {

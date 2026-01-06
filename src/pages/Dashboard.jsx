@@ -41,21 +41,21 @@ export default function Dashboard() {
             icon: IconLayers,
             description: t('dashboard.backlog_desc'),
             to: "/app/backlog",
-            color: "var(--color-accent-indigo)"
+            color: "var(--color-accent-sakura)"
         },
         {
             title: t('nav.workshop'),
             icon: IconLayout,
             description: t('dashboard.workshop_desc'),
             to: "/app/workshop",
-            color: "var(--color-accent-teal)"
+            color: "var(--color-accent-sora)"
         },
         {
             title: t('nav.command_tower'),
             icon: Zap,
             description: t('dashboard.command_tower_desc'),
             to: "/app/command-tower",
-            color: "var(--color-accent-vermilion)"
+            color: "var(--color-accent-matcha)"
         }
     ];
 
