@@ -64,5 +64,23 @@
         "cancel": "キャンセル",
         "delete": "削除",
         "click_to_copy": "クリックでコピー"
+    },
+    "auth": {
+        "welcome_back": "お帰りなさい",
+        "create_account": "アカウント作成",
+        "login": "ログイン",
+        "signup": "登録",
+        "email": "メールアドレス",
+        "password": "パスワード",
+        "password_min": "6文字以上",
+        "or": "または",
+        "continue_google": "Googleで続行",
+        "no_account": "アカウントをお持ちでないですか？",
+        "has_account": "すでにアカウントをお持ちですか？",
+        "error_invalid_email": "無効なメールアドレスです",
+        "error_invalid_credentials": "メールアドレスまたはパスワードが正しくありません",
+        "error_email_in_use": "このメールアドレスは既に使用されています",
+        "error_generic": "認証に失敗しました。もう一度お試しください。",
+        "error_google": "Googleログインに失敗しました。"
     }
 }

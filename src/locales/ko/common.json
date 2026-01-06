@@ -64,5 +64,23 @@
         "cancel": "취소",
         "delete": "삭제",
         "click_to_copy": "클릭하여 복사"
+    },
+    "auth": {
+        "welcome_back": "환영합니다",
+        "create_account": "계정 만들기",
+        "login": "로그인",
+        "signup": "회원가입",
+        "email": "이메일",
+        "password": "비밀번호",
+        "password_min": "최소 6자",
+        "or": "또는",
+        "continue_google": "Google로 계속하기",
+        "no_account": "계정이 없으신가요?",
+        "has_account": "이미 계정이 있으신가요?",
+        "error_invalid_email": "유효하지 않은 이메일 주소입니다",
+        "error_invalid_credentials": "이메일 또는 비밀번호가 올바르지 않습니다",
+        "error_email_in_use": "이미 사용 중인 이메일입니다",
+        "error_generic": "인증에 실패했습니다. 다시 시도해주세요.",
+        "error_google": "Google 로그인에 실패했습니다."
     }
 }

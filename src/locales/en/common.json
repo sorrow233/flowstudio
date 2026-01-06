@@ -64,5 +64,23 @@
         "cancel": "Cancel",
         "delete": "Delete",
         "click_to_copy": "Click to copy"
+    },
+    "auth": {
+        "welcome_back": "Welcome Back",
+        "create_account": "Create Account",
+        "login": "Log In",
+        "signup": "Sign Up",
+        "email": "Email",
+        "password": "Password",
+        "password_min": "At least 6 characters",
+        "or": "or",
+        "continue_google": "Continue with Google",
+        "no_account": "Don't have an account?",
+        "has_account": "Already have an account?",
+        "error_invalid_email": "Invalid email address",
+        "error_invalid_credentials": "Invalid email or password",
+        "error_email_in_use": "Email is already in use",
+        "error_generic": "Failed to authenticate. Please try again.",
+        "error_google": "Failed to sign in with Google."
     }
 }

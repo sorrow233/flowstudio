@@ -12,6 +12,7 @@
     "deploy:beta": "npm run build && npx wrangler pages deploy dist --project-name flow-studio --branch beta --commit-dirty=true"
   },
   "dependencies": {
+    "firebase": "^12.7.0",
     "i18next": "^25.7.3",
     "i18next-browser-languagedetector": "^8.2.0",
     "lucide-react": "^0.562.0",
