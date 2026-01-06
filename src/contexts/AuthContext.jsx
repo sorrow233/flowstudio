@@ -36,7 +36,11 @@ export function AuthProvider({ children }) {
         }
 
         if (!auth) {
-            setAuthError('Firebase configuration is missing or invalid.');
+            console.warn('Firebase configuration is missing. Defaulting to Guest Mode.');
+            // Automatically enable guest mode if config is missing
+            setIsGuest(true);
+            // We don't set authError here anymore to avoid blocking the UI
+            // setAuthError('Firebase configuration is missing or invalid.'); 
             setLoading(false);
             return;
         }
@@ -50,7 +54,9 @@ export function AuthProvider({ children }) {
             setLoading(false);
         }, (error) => {
             console.error("Auth State Check Error:", error);
-            setAuthError(error.message);
+            // If there's a real auth error (not just missing config), we might want to know,
+            // but for now let's fall back to guest to keep things usable.
+            setIsGuest(true);
             setLoading(false);
         });
 

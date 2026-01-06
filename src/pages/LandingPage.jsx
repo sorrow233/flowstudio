@@ -27,7 +27,7 @@ export default function LandingPage() {
                     {t('landing.hero_subtitle', 'From idea to realization, Flow Studio manages your entire development lifecycle with AI-powered tools.')}
                 </p>
                 <div className="hero-cta">
-                    <Link to="/login" className="btn-cta">
+                    <Link to="/app" className="btn-cta">
                         {t('landing.start_free', 'Start for Free')} <ArrowRight size={20} />
                     </Link>
                 </div>

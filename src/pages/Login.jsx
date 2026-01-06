@@ -8,7 +8,7 @@ import './Login.css';
 
 export default function Login() {
     const { t } = useTranslation();
-    const { login, signup, loginWithGoogle, loginAsGuest, authError } = useAuth();
+    const { login, signup, loginWithGoogle, loginAsGuest, authError, currentUser, isGuest } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from?.pathname || '/app';
@@ -20,38 +20,36 @@ export default function Login() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    // Redirect if already logged in OR is guest
+    useEffect(() => {
+        if (currentUser || isGuest) {
+            navigate(from, { replace: true });
+        }
+    }, [currentUser, isGuest, navigate, from]);
+
     // Helper to handle guest login
     const handleGuestLogin = async () => {
         await loginAsGuest();
         navigate(from, { replace: true });
     };
 
-    // If there's a critical auth error (like missing config), show it BUT allow guest access
-    if (authError) {
-        return (
-            <div className="login-container">
-                <div className="login-card" style={{ maxWidth: '500px', textAlign: 'center' }}>
-                    <h1 style={{ color: 'var(--color-accent)', marginBottom: '1rem' }}>Configuration Error</h1>
-                    <p style={{ marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>
-                        {authError}
-                    </p>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '2rem' }}>
-                        Please check your <code>.env</code> file or environment variables.
-                    </p>
-
-                    <button
-                        onClick={handleGuestLogin}
-                        className="btn-primary"
-                        style={{ backgroundColor: 'var(--text-secondary)', width: 'auto', padding: '0.5rem 2rem', margin: '0 auto' }}
-                    >
-                        {t('auth.continue_guest', 'Continue as Guest')}
-                    </button>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '1rem' }}>
-                        You can use the app offline with local storage.
-                    </p>
-                </div>
-            </div>
-        );
+    // Auto-redirect if guest (implicit or explicit)
+    // We remove the blocking "Configuration Error" UI entirely
+    if (authError && !loading) {
+        // Optionally we could show a toast here, but user asked for seamless experience
+        // If there is an auth error (missing config), we just assume guest mode
+        // But we shouldn't automatically redirect if they are explicitly ON the login page
+        // trying to maybe fix it? 
+        // Actually, if they are on /login, and config is missing, they can't login anyway.
+        // So showing the form is useless.
+        // Let's show the form but disabled? Or just redirect?
+        // User said: "Should directly enter software... Log in when needed."
+        // So if they come to /login, they probably want to login.
+        // But if config is missing, they CAN'T. 
+        // So maybe we just redirect to /app as guest automatically?
+        // Let's do that.
+        loginAsGuest().then(() => navigate('/app', { replace: true }));
+        return null; // Render nothing while redirecting
     }
 
     async function handleSubmit(e) {
