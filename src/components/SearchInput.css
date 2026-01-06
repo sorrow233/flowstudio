@@ -3,31 +3,37 @@
     display: flex;
     align-items: center;
     width: 100%;
-    max-width: 300px;
+    max-width: 280px;
 }
 
 .search-icon {
     position: absolute;
-    left: 10px;
+    left: 12px;
     color: var(--text-secondary, #888);
     pointer-events: none;
+    z-index: 1;
 }
 
 .search-input {
     width: 100%;
-    padding: 8px 32px 8px 34px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color, #ddd);
-    background-color: var(--bg-primary, #fff);
+    padding: 10px 36px 10px 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
+    background-color: var(--bg-card, #fff);
     color: var(--text-primary, #000);
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     transition: all 0.2s;
+}
+
+.search-input::placeholder {
+    color: var(--text-secondary, #888);
+    opacity: 0.7;
 }
 
 .search-input:focus {
     outline: none;
     border-color: var(--color-accent, #646cff);
-    box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
 }
 
 .search-clear-btn {

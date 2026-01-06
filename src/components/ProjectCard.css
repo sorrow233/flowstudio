@@ -299,19 +299,22 @@
 
 /* === Add Card === */
 .project-card-add {
-    min-height: 140px;
-    border: 2px dashed rgba(0, 0, 0, 0.15);
-    background: transparent;
-    backdrop-filter: none;
+    min-height: 120px;
+    max-height: 140px;
+    width: 100%;
+    border: 2px dashed rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
+    gap: 8px;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
     box-shadow: none;
+    border-radius: 12px;
 }
 
 .project-card-add::before {
@@ -389,8 +392,9 @@
 /* === Grid === */
 .project-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 320px);
-    gap: var(--space-5);
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    max-width: 100%;
 }
 
 /* === Page Styles === */
