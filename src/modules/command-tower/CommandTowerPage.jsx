@@ -269,18 +269,16 @@ export default function CommandTowerPage() {
                         alignItems: 'center',
                         cursor: 'pointer',
                         opacity: 0.7,
-                        minWidth: '100px', /* Smaller width for the add button */
-                        maxWidth: '100px',
+                        width: '100%',
+                        minHeight: '100px',
                         background: 'transparent'
                     }}
                     onClick={() => setShowAddStageModal(true)}
                 >
                     <Plus size={32} color="#64748b" />
                     <span style={{
-                        marginTop: '1rem',
+                        marginTop: '0.5rem',
                         color: '#94a3b8',
-                        writingMode: 'vertical-rl',
-                        textOrientation: 'mixed',
                         fontSize: '0.9rem'
                     }}>
                         {t('common.add_category') || "Add Category"}

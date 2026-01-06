@@ -4,7 +4,7 @@ import { RotateCcw, Archive, Lightbulb, Rocket, Play } from 'lucide-react';
 import { useBacklogItems, BACKLOG_STAGES } from './hooks/useBacklogItems';
 
 import ProjectCard from '@/components/ProjectCard';
-import AddProjectCard from '@/components/AddProjectCard';
+import AddBacklogItem from './components/AddBacklogItem';
 import SectionHeader from '@/components/SectionHeader';
 import SearchInput from '@/components/SearchInput';
 import {
@@ -185,7 +185,7 @@ export default function BacklogPage() {
                                         />
                                     </DraggableCard>
                                 ))}
-                                <AddProjectCard
+                                <AddBacklogItem
                                     onAdd={handleAddItem(STAGES.INSPIRATION)}
                                     accentColor="var(--color-accent-matcha)"
                                     addLabel={t('common.add_idea')}
@@ -215,7 +215,7 @@ export default function BacklogPage() {
                                         />
                                     </DraggableCard>
                                 ))}
-                                <AddProjectCard
+                                <AddBacklogItem
                                     onAdd={handleAddItem(STAGES.PENDING)}
                                     accentColor="var(--color-accent-sakura)"
                                     addLabel={t('common.add_project')}
