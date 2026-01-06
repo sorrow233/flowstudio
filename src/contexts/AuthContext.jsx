@@ -25,8 +25,33 @@ const ALLOWED_DOMAINS = [
 export function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [authError, setAuthError] = useState(null);
+
+    useEffect(() => {
+        if (!auth) {
+            setAuthError('Firebase configuration is missing or invalid.');
+            setLoading(false);
+            return;
+        }
+
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setCurrentUser(user);
+            setLoading(false);
+        }, (error) => {
+            console.error("Auth State Check Error:", error);
+            setAuthError(error.message);
+            setLoading(false);
+        });
+
+        return unsubscribe;
+    }, []);
+
+    function checkAuth() {
+        if (!auth) throw new Error("Authentication service is unavailable. Please check configuration.");
+    }
 
     function signup(email, password) {
+        checkAuth();
         const domain = email.split('@')[1];
         if (!ALLOWED_DOMAINS.includes(domain)) {
             return Promise.reject(new Error('This email provider is not supported. Please use a common provider (Gmail, Outlook, Yahoo, etc.).'));
@@ -35,33 +60,28 @@ export function AuthProvider({ children }) {
     }
 
     function login(email, password) {
+        checkAuth();
         return signInWithEmailAndPassword(auth, email, password);
     }
 
     function loginWithGoogle() {
+        checkAuth();
         const provider = new GoogleAuthProvider();
         return signInWithPopup(auth, provider);
     }
 
     function logout() {
+        if (!auth) return Promise.resolve();
         return signOut(auth);
     }
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setCurrentUser(user);
-            setLoading(false);
-        });
-
-        return unsubscribe;
-    }, []);
 
     const value = {
         currentUser,
         signup,
         login,
         loginWithGoogle,
-        logout
+        logout,
+        authError // Expose error so UI can show it
     };
 
     return (

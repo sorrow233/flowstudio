@@ -8,7 +8,7 @@ import './Login.css';
 
 export default function Login() {
     const { t } = useTranslation();
-    const { login, signup, loginWithGoogle } = useAuth();
+    const { login, signup, loginWithGoogle, authError } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from?.pathname || '/';
@@ -19,6 +19,23 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    // If there's a critical auth error (like missing config), show it
+    if (authError) {
+        return (
+            <div className="login-container">
+                <div className="login-card" style={{ maxWidth: '500px', textAlign: 'center' }}>
+                    <h1 style={{ color: 'var(--color-accent)', marginBottom: '1rem' }}>Configuration Error</h1>
+                    <p style={{ marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>
+                        {authError}
+                    </p>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                        Please check your <code>.env</code> file or environment variables.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     async function handleSubmit(e) {
         e.preventDefault();
