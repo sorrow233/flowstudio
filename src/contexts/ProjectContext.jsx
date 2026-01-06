@@ -36,6 +36,7 @@ export const ProjectProvider = ({ children }) => {
             goal: formData.goal || '',
             color: generatePastelColor(),
             stage: stage,
+            archived: false,
             createdAt: new Date().toISOString()
         };
         setItems(prev => [...prev, newItem]);
@@ -50,6 +51,12 @@ export const ProjectProvider = ({ children }) => {
 
     const deleteItem = (id) => {
         setItems(prev => prev.filter(item => item.id !== id));
+    };
+
+    const toggleArchive = (id) => {
+        setItems(prev => prev.map(item =>
+            item.id === id ? { ...item, archived: !item.archived } : item
+        ));
     };
 
     const validateForNextStage = (item, nextStage) => {
@@ -125,7 +132,7 @@ export const ProjectProvider = ({ children }) => {
     };
 
     return (
-        <ProjectContext.Provider value={{ items, addItem, updateItem, deleteItem, moveItemNext, validateForNextStage, moveItemToStage }}>
+        <ProjectContext.Provider value={{ items, addItem, updateItem, deleteItem, moveItemNext, validateForNextStage, moveItemToStage, toggleArchive }}>
             {children}
         </ProjectContext.Provider>
     );

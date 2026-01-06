@@ -23,6 +23,7 @@ export default function CommandTowerPage() {
 
     const [newCommand, setNewCommand] = useState({ title: '', content: '', stage: 'inspiration' });
     const [searchQuery, setSearchQuery] = useState('');
+    const [showAddModal, setShowAddModal] = useState(false);
 
     const highlightText = (text, query) => {
         if (!query) return text;

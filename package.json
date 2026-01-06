@@ -1,7 +1,7 @@
 {
   "name": "flow-studio",
   "private": true,
-  "version": "2.2.0",
+  "version": "2.2.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -21,8 +21,11 @@
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-error-boundary": "^6.0.2",
     "react-i18next": "^16.5.1",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.11.0",
+    "remark-gfm": "^4.0.1",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
