@@ -151,3 +151,156 @@ export const useYMap = (doc) => {
 
     return data;
 };
+
+// --- CRDT Array Hook (for Projects) ---
+export const useSyncedProjects = (doc, arrayName) => {
+    const [projects, setProjects] = useState([]);
+
+    useEffect(() => {
+        if (!doc) return;
+
+        const yArray = doc.getArray(arrayName);
+
+        const handleChange = () => {
+            setProjects(yArray.toArray());
+        };
+
+        // Initial load
+        handleChange();
+
+        // Observe
+        yArray.observeDeep(handleChange);
+
+        return () => {
+            yArray.unobserveDeep(handleChange);
+        };
+    }, [doc, arrayName]);
+
+    const addProject = (project) => {
+        if (!doc) return;
+        const yArray = doc.getArray(arrayName);
+        yArray.push([project]);
+    };
+
+    const removeProject = (id) => {
+        if (!doc) return;
+        const yArray = doc.getArray(arrayName);
+        // Find index (naive approach, for production usage with large lists consider Y.Map keyed by ID)
+        // But for <100 items array is fine and preserves order easily.
+        let index = -1;
+        const arr = yArray.toArray();
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].id === id) {
+                index = i;
+                break;
+            }
+        }
+        if (index !== -1) {
+            yArray.delete(index, 1);
+        }
+    };
+
+    const updateProject = (id, updates) => {
+        if (!doc) return;
+        doc.transact(() => {
+            const yArray = doc.getArray(arrayName);
+            const arr = yArray.toArray();
+            let index = -1;
+            for (let i = 0; i < arr.length; i++) {
+                if (arr[i].id === id) {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index !== -1) {
+                // To update an object in Y.Array, we actually have to replace it or use a nested Y.Map.
+                // For simplicity and since we are using JSON objects in Y.Array, we replace the item.
+                // A better CRDT approach is to use Y.Map for each project, but that requires changing the data structure.
+                // To support field-level granularity without full refactor:
+                // We'll read the current, merge, delete, and insert at same position.
+                // NOTE: This is "Last Write Wins" for the object. To do property merging properly with Y.Array of JSONs:
+                // We should really be using Y.Array of Y.Maps.
+                // But for now to fix the crash and support basic sync:
+
+                const current = arr[index];
+                const updated = { ...current, ...updates };
+
+                yArray.delete(index, 1);
+                yArray.insert(index, [updated]);
+            }
+        });
+    };
+
+    return { projects, addProject, removeProject, updateProject };
+};
+
+
+// --- Data Migration Hook ---
+// Safely migrates data from localStorage to Y.Doc only once.
+export const useDataMigration = (doc) => {
+    useEffect(() => {
+        if (!doc) return;
+
+        const MIGRATION_KEY = 'flowstudio_migration_v1_completed';
+
+        const migrate = () => {
+            // 1. Check if migration already ran
+            if (localStorage.getItem(MIGRATION_KEY)) {
+                console.log("[Migration] Migration previously completed. Skipping.");
+                return;
+            }
+
+            console.log("[Migration] Starting one-time migration from LocalStorage...");
+            let hasMigrated = false;
+
+            // 2. Pending Projects
+            try {
+                const yPending = doc.getArray('pending_projects');
+                const localPending = localStorage.getItem('pending_projects');
+                if (localPending) {
+                    const parsed = JSON.parse(localPending);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        console.log(`[Migration] Migrating ${parsed.length} pending projects`);
+                        doc.transact(() => {
+                            yPending.push(parsed);
+                        });
+                        hasMigrated = true;
+                    }
+                }
+            } catch (e) {
+                console.error("[Migration] Failed to migrate pending:", e);
+            }
+
+            // 3. Primary Projects
+            try {
+                const yPrimary = doc.getArray('primary_projects');
+                const localPrimary = localStorage.getItem('primary_projects');
+                if (localPrimary) {
+                    const parsed = JSON.parse(localPrimary);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        console.log(`[Migration] Migrating ${parsed.length} primary projects`);
+                        doc.transact(() => {
+                            yPrimary.push(parsed);
+                        });
+                        hasMigrated = true;
+                    }
+                }
+            } catch (e) {
+                console.error("[Migration] Failed to migrate primary:", e);
+            }
+
+            // 4. Mark as completed
+            localStorage.setItem(MIGRATION_KEY, 'true');
+            if (hasMigrated) {
+                console.log("[Migration] Completed successfully.");
+            } else {
+                console.log("[Migration] No local data found to migrate. Marked as completed.");
+            }
+        };
+
+        // Run immediately.
+        migrate();
+
+    }, [doc]);
+};
