@@ -30,29 +30,38 @@ const PrimaryDevModule = () => {
     const [recentlyDeleted, setRecentlyDeleted] = useState(null);
 
     // --- Data Persistence ---
+    const [isLoaded, setIsLoaded] = useState(false);
+
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEYS.PRIMARY);
         if (saved) {
-            const parsed = JSON.parse(saved);
-            // Ensure migration for stages
-            const migrated = parsed.map(p => {
-                const currentStage = p.subStage || 1;
-                return {
-                    ...p,
-                    subStage: currentStage,
-                    tasks: (p.tasks || []).map(t => ({
-                        ...t,
-                        stage: t.stage || currentStage
-                    }))
-                };
-            });
-            setProjects(migrated);
+            try {
+                const parsed = JSON.parse(saved);
+                // Ensure migration for stages
+                const migrated = parsed.map(p => {
+                    const currentStage = p.subStage || 1;
+                    return {
+                        ...p,
+                        subStage: currentStage,
+                        tasks: (p.tasks || []).map(t => ({
+                            ...t,
+                            stage: t.stage || currentStage
+                        }))
+                    };
+                });
+                setProjects(migrated);
+            } catch (e) {
+                console.error("Failed to load projects", e);
+            }
         }
+        setIsLoaded(true);
     }, []);
 
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEYS.PRIMARY, JSON.stringify(projects));
-    }, [projects]);
+        if (isLoaded) {
+            localStorage.setItem(STORAGE_KEYS.PRIMARY, JSON.stringify(projects));
+        }
+    }, [projects, isLoaded]);
 
     // --- Project Handlers ---
     const handleDeleteProject = (e, id) => {
@@ -187,7 +196,7 @@ const PrimaryDevModule = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {projects.map((project) => (
                     <motion.div
-                        layoutId={`card-${project.id}`}
+                        layoutId={`primary-card-${project.id}`}
                         key={project.id}
                         onClick={() => setSelectedProject(project)}
                         className="group bg-white border border-gray-100 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-gray-200/50 transition-all cursor-pointer relative h-[360px] flex flex-col ring-1 ring-transparent hover:ring-gray-100"
@@ -265,7 +274,7 @@ const PrimaryDevModule = () => {
                             onClick={() => { setSelectedProject(null); setIsEditingProject(false); }}
                         />
                         <motion.div
-                            layoutId={`card-${selectedProject.id}`}
+                            layoutId={`primary-card-${selectedProject.id}`}
                             className="w-full max-w-6xl bg-white rounded-[3rem] shadow-2xl overflow-hidden relative pointer-events-auto h-[90vh] flex flex-col ring-1 ring-gray-100"
                         >
                             <ProjectWorkspaceHeader
