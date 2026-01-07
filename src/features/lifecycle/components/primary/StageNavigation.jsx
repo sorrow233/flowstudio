@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, MonitorPlay, Container, Sparkles, Flag, Check, Circle, Lock } from 'lucide-react';
+import { Layers, MonitorPlay, Container, Sparkles, Flag, Check, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { DEV_STAGES } from '../../../../utils/constants';
 
@@ -22,7 +22,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                     {/* Progress Line - Based on Actual Progress, not View */}
                     <div
                         className="w-full bg-emerald-500/30 transition-all duration-700 ease-in-out absolute top-0"
-                        style={{ height: `${((currentProgress - 1) / 4) * 100}%` }}
+                        style={{ height: `${Math.min(((currentProgress - 1) / 5) * 100, 100)}%` }}
                     />
                 </div>
 
@@ -128,7 +128,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
 
             {/* Legend / Tip */}
             <div className="mt-8 px-4 py-3 bg-gray-50 rounded-xl text-[10px] text-gray-400 leading-relaxed border border-gray-100">
-                <p><strong>Note:</strong> View stages freely. Use the <span className="inline-block w-6 h-3 bg-gray-200 rounded-full align-middle mx-1"></span> switch to manually mark a phase as complete.</p>
+                <p><strong>提示:</strong> 自由查看各阶段。使用 <span className="inline-block w-6 h-3 bg-gray-200 rounded-full align-middle mx-1"></span> 开关手动标记阶段完成。</p>
             </div>
         </div>
     );

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus, TreeDeciduous, TreePine, Image as ImageIcon, Sparkles, RefreshCw, Feather, Scroll } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { STORAGE_KEYS } from '../../utils/constants';
+import { STORAGE_KEYS, getRandomProjectImage } from '../../utils/constants';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 
@@ -94,7 +94,8 @@ const PendingModule = () => {
                 subStage: 1,
                 progress: 0,
                 tasks: [],
-                hasHolyGlow: hasReason
+                hasHolyGlow: hasReason,
+                bgImage: project.bgImage || getRandomProjectImage()
             };
             primaryList.unshift([newPrimary]);
         }

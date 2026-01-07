@@ -121,7 +121,7 @@ const PrimaryDevModule = () => {
             text: newTaskInput,
             done: false,
             category: newTaskCategory,
-            stage: project.subStage || 1
+            stage: viewStage
         }];
         handleUpdateProject(projectId, { tasks: newTasks });
         setNewTaskInput('');
