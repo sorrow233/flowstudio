@@ -1,0 +1,72 @@
+.command-selector-container {
+    display: flex;
+    flex-direction: column;
+    height: 60vh;
+    max-height: 500px;
+}
+
+.command-selector-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.command-selector-stage {
+    margin-bottom: 1.5rem;
+}
+
+.stage-header {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.stage-commands-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.8rem;
+}
+
+.command-selector-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.command-selector-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.command-selector-item.selected {
+    background: var(--bg-active);
+    box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.cmd-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.cmd-content {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: var(--bg-secondary);
+    padding: 4px 6px;
+    border-radius: 4px;
+    margin-top: auto;
+}

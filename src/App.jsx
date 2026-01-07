@@ -19,6 +19,7 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const BacklogPage = lazy(() => import('@/modules/backlog/BacklogPage'));
 const WorkshopPage = lazy(() => import('@/modules/workshop/WorkshopPage'));
 const CommandTowerPage = lazy(() => import('@/modules/command-tower/CommandTowerPage'));
+const ProjectDetailsPage = lazy(() => import('@/pages/ProjectDetailsPage'));
 
 import LoadingFallback from '@/components/LoadingFallback';
 
@@ -84,6 +85,7 @@ function AppRoutes() {
         <Route path="backlog" element={<BacklogPage />} />
         <Route path="workshop" element={<WorkshopPage />} />
         <Route path="command-tower" element={<CommandTowerPage />} />
+        <Route path="project/:id" element={<ProjectDetailsPage />} />
         <Route path="settings" element={<div className="text-h2">{t('settings.title')}</div>} />
       </Route>
 
