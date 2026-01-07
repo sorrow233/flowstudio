@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Network, Sparkles, Activity, Zap, CheckCircle2, X, Plus } from 'lucide-react';
+import { Network, Sparkles, Activity, Zap, CheckCircle2, X, Plus, Box, AlignJustify, Grid } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import ModuleGrid from './ModuleGrid';
+import ModuleList from './ModuleList';
 import ArchitectureImportModal from './ArchitectureImportModal';
 import ModuleDetailModal from './ModuleDetailModal';
+import ModuleLibraryModal from './ModuleLibraryModal';
 
 const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
     const [isImportOpen, setIsImportOpen] = useState(false);
+    const [isLibraryOpen, setIsLibraryOpen] = useState(false);
     const [editingModule, setEditingModule] = useState(null);
+    const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
     const modules = project.modules || [];
 
@@ -27,6 +31,12 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
         const currentModules = project.modules || [];
         // Append
         const updatedModules = [...currentModules, ...enhancedModules];
+        updateProject(project.id, { modules: updatedModules });
+    };
+
+    const handleAddFromLibrary = (newModules) => {
+        const currentModules = project.modules || [];
+        const updatedModules = [...currentModules, ...newModules];
         updateProject(project.id, { modules: updatedModules });
     };
 
@@ -96,15 +106,21 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-12">
 
                     {/* Header & Dashboard */}
-                    <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10 mb-16">
-                        {/* Close Button MOVED OUT to absolute in container */}
+                    <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10 mb-16 relative">
+                        {/* Close Button */}
+                        <button
+                            onClick={onClose}
+                            className="absolute -top-4 -right-4 md:static md:order-last p-3 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-900"
+                        >
+                            <X size={24} />
+                        </button>
 
                         <div className="flex-1">
                             <div className="flex items-center gap-3 text-emerald-600 mb-2">
                                 <div className="p-2 bg-emerald-50 rounded-lg">
                                     <Network size={20} />
                                 </div>
-                                <span className="text-xs font-bold uppercase tracking-widest">System Architecture</span>
+                                <span className="text-xs font-bold uppercase tracking-widest">Rapid Iteration</span>
                             </div>
                             <h2 className="text-4xl md:text-5xl font-thin text-gray-900 tracking-tight mb-6">
                                 {project.title}
@@ -142,32 +158,68 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
                             </div>
                         </div>
 
-                        <div className="flex gap-3 mt-6 xl:mt-0">
+                        {/* Controls */}
+                        <div className="flex flex-wrap gap-2 mt-6 xl:mt-0 items-center bg-white p-2 rounded-[2rem] shadow-sm border border-gray-100 backdrop-blur-md">
+                            {/* View Toggle */}
+                            <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-3xl mr-2">
+                                <button
+                                    onClick={() => setViewMode('grid')}
+                                    className={`p-2 rounded-full transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+                                >
+                                    <Grid size={16} />
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('list')}
+                                    className={`p-2 rounded-full transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+                                >
+                                    <AlignJustify size={16} />
+                                </button>
+                            </div>
+
                             <button
                                 onClick={handleCreateModule}
-                                className="group flex items-center gap-2 px-6 py-4 bg-white border border-gray-200 text-gray-900 rounded-[2rem] hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm hover:shadow-md"
+                                className="group flex items-center gap-2 px-5 py-3 bg-white border border-gray-200 text-gray-900 rounded-[2rem] hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm hover:shadow-md"
                             >
                                 <div className="p-1 bg-gray-100 rounded-full group-hover:bg-gray-200 transition-colors">
-                                    <Plus size={16} strokeWidth={2} />
+                                    <Plus size={14} strokeWidth={2} />
                                 </div>
-                                <span className="font-medium tracking-wide text-sm">Add Module</span>
+                                <span className="font-medium tracking-wide text-xs">Add</span>
                             </button>
+
+                            <button
+                                onClick={() => setIsLibraryOpen(true)}
+                                className="group flex items-center gap-2 px-5 py-3 bg-blue-50 text-blue-600 rounded-[2rem] hover:bg-blue-100 transition-all shadow-sm hover:shadow-md border border-blue-100"
+                            >
+                                <div className="p-1 bg-white rounded-full transition-colors">
+                                    <Box size={14} strokeWidth={2} />
+                                </div>
+                                <span className="font-medium tracking-wide text-xs">Library</span>
+                            </button>
+
                             <button
                                 onClick={() => setIsImportOpen(true)}
-                                className="group flex items-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-[2rem] hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                                className="group flex items-center justify-center w-12 h-12 bg-gray-900 text-white rounded-full hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                                title="AI Architect Import"
                             >
                                 <Sparkles size={18} className="text-emerald-400 group-hover:rotate-12 transition-transform" />
-                                <span className="font-medium tracking-wide">AI Architect Import</span>
                             </button>
                         </div>
                     </div>
 
-                    {/* Main Grid Content */}
+                    {/* Main Content */}
                     <div className="min-h-[500px]">
-                        <ModuleGrid
-                            modules={modules}
-                            onModuleClick={handleModuleClick}
-                        />
+                        {viewMode === 'grid' ? (
+                            <ModuleGrid
+                                modules={modules}
+                                onModuleClick={handleModuleClick}
+                            />
+                        ) : (
+                            <ModuleList
+                                modules={modules}
+                                onModuleClick={handleModuleClick}
+                                onDeleteModule={handleDeleteModule}
+                            />
+                        )}
                     </div>
                 </div>
 
@@ -176,6 +228,12 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
                     isOpen={isImportOpen}
                     onClose={() => setIsImportOpen(false)}
                     onImport={handleImportModules}
+                />
+
+                <ModuleLibraryModal
+                    isOpen={isLibraryOpen}
+                    onClose={() => setIsLibraryOpen(false)}
+                    onAddModule={handleAddFromLibrary}
                 />
 
                 <ModuleDetailModal

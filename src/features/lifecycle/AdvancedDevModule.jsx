@@ -36,8 +36,8 @@ const AdvancedDevModule = () => {
             {/* Header */}
             <div className="mb-12 flex justify-between items-end">
                 <div>
-                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">Advanced Development</h2>
-                    <p className="text-gray-400 text-sm font-light tracking-wide">System Architecture & Module Management</p>
+                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">Rapid Iteration</h2>
+                    <p className="text-gray-400 text-sm font-light tracking-wide">Accelerate development with modular workflows</p>
                 </div>
                 <div className="text-right">
                     <span className="text-3xl font-thin text-gray-900">{advancedProjects.length}</span>
