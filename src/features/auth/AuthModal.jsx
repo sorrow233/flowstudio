@@ -11,6 +11,25 @@ const AuthModal = ({ isOpen, onClose }) => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    // Allowed Email Domains (Mainstream & Modern)
+    const ALLOWED_DOMAINS = [
+        'gmail.com', 'googlemail.com',
+        'outlook.com', 'hotmail.com', 'live.com', 'msn.com',
+        'yahoo.com', 'ymail.com',
+        'icloud.com', 'me.com', 'mac.com',
+        'proton.me', 'protonmail.com',
+        'qq.com', 'foxmail.com',
+        '163.com', '126.com', 'yeah.net',
+        'sina.com', 'sohu.com',
+        'naver.com'
+    ];
+
+    const validateEmailDomain = (email) => {
+        const domain = email.split('@')[1]?.toLowerCase();
+        if (!domain) return false;
+        return ALLOWED_DOMAINS.includes(domain);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -19,6 +38,10 @@ const AuthModal = ({ isOpen, onClose }) => {
             if (isLogin) {
                 await login(email, password);
             } else {
+                // Registration Security Check
+                if (!validateEmailDomain(email)) {
+                    throw new Error("Registration is restricted to mainstream email providers (e.g., Gmail, Outlook, Proton, QQ, iCloud). Please use a standard email address.");
+                }
                 await register(email, password);
             }
             onClose();
