@@ -184,6 +184,19 @@
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.ct-command-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--cmd-color, #3ECFB2);
+    opacity: 0.8;
 }
 
 .ct-command-item:hover {
@@ -345,4 +358,43 @@
 .ct-delete-btn:hover {
     color: #ef4444;
     background: rgba(239, 68, 68, 0.1);
+}
+
+/* Color Picker for Commands */
+.ct-color-picker {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 8px 0;
+}
+
+.ct-color-option {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ct-color-option:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ct-color-option.selected {
+    border-color: var(--text-primary);
+    transform: scale(1.1);
+    box-shadow: 0 0 0 3px var(--bg-card), 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Command Color Indicator Dot */
+.ct-command-color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-right: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }

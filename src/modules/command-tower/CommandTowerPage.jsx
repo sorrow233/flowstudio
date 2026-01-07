@@ -41,7 +41,19 @@ export default function CommandTowerPage() {
         return saved ? JSON.parse(saved) : getDefaultCommands();
     });
 
-    const [newCommand, setNewCommand] = useState({ title: '', content: '', stage: '' });
+    // 清新颜色选择 (8个清新明亮的颜色)
+    const freshColors = [
+        { color: '#3ECFB2', name: '薄荷绿' },   // Mint Green
+        { color: '#FFB5C5', name: '樱花粉' },   // Sakura Pink
+        { color: '#87CEEB', name: '天空蓝' },   // Sky Blue
+        { color: '#FFEAA7', name: '柠檬黄' },   // Lemon Yellow
+        { color: '#C3AED6', name: '薰衣草紫' }, // Lavender Purple
+        { color: '#FFCCBC', name: '蜜桃橙' },   // Peach Orange
+        { color: '#B2DFDB', name: '青瓷绿' },   // Celadon Green
+        { color: '#F8BBD9', name: '玫瑰粉' },   // Rose Pink
+    ];
+
+    const [newCommand, setNewCommand] = useState({ title: '', content: '', stage: '', color: freshColors[0].color });
     const [newStage, setNewStage] = useState({ key: '', label: '', icon: 'Layers', color: '#6366f1' });
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -110,11 +122,12 @@ export default function CommandTowerPage() {
             [newCommand.stage]: [...(prev[newCommand.stage] || []), {
                 id: newId,
                 title: newCommand.title,
-                content: newCommand.content
+                content: newCommand.content,
+                color: newCommand.color || freshColors[0].color
             }]
         }));
 
-        setNewCommand({ title: '', content: '', stage: '' });
+        setNewCommand({ title: '', content: '', stage: '', color: freshColors[0].color });
         setShowAddCommandModal(false);
     };
 
@@ -240,7 +253,15 @@ export default function CommandTowerPage() {
                                         <div
                                             key={cmd.id}
                                             className="ct-command-item"
+                                            style={{
+                                                '--cmd-color': cmd.color || freshColors[0].color,
+                                                borderLeft: `3px solid ${cmd.color || freshColors[0].color}`
+                                            }}
                                         >
+                                            <div
+                                                className="ct-command-color-dot"
+                                                style={{ backgroundColor: cmd.color || freshColors[0].color }}
+                                            />
                                             <div
                                                 className="ct-command-main"
                                                 onClick={() => copyToClipboard(cmd.content, cmd.id)}
@@ -369,6 +390,20 @@ export default function CommandTowerPage() {
                         ))}
                     </select>
                 </div>
+                <div className="form-group">
+                    <label>{t('common.color') || "颜色"}</label>
+                    <div className="ct-color-picker">
+                        {freshColors.map(c => (
+                            <div
+                                key={c.color}
+                                className={`ct-color-option ${newCommand.color === c.color ? 'selected' : ''}`}
+                                onClick={() => setNewCommand({ ...newCommand, color: c.color })}
+                                style={{ backgroundColor: c.color }}
+                                title={c.name}
+                            />
+                        ))}
+                    </div>
+                </div>
             </Modal>
 
             {/* Add Stage Modal */}
@@ -456,6 +491,23 @@ export default function CommandTowerPage() {
                                 rows={3}
                                 className="project-input"
                             />
+                        </div>
+                        <div className="form-group">
+                            <label>{t('common.color') || "颜色"}</label>
+                            <div className="ct-color-picker">
+                                {freshColors.map(c => (
+                                    <div
+                                        key={c.color}
+                                        className={`ct-color-option ${editingCommand.command.color === c.color ? 'selected' : ''}`}
+                                        onClick={() => setEditingCommand({
+                                            ...editingCommand,
+                                            command: { ...editingCommand.command, color: c.color }
+                                        })}
+                                        style={{ backgroundColor: c.color }}
+                                        title={c.name}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </>
                 )}
