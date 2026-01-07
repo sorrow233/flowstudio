@@ -41,7 +41,7 @@ const CommandForm = ({
                     initial={{ opacity: 0, scale: 0.95, y: -20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                    className="bg-white border border-emerald-100 rounded-3xl p-8 mb-8 shadow-xl shadow-emerald-500/5 relative overflow-hidden"
+                    className="bg-white border border-emerald-100 rounded-3xl p-8 mb-8 shadow-xl shadow-emerald-500/5 relative overflow-hidden max-h-[80vh] overflow-y-auto custom-scrollbar"
                 >
                     <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-full -z-10 opacity-50" />
 
