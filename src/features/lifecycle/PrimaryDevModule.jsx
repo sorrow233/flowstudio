@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Code2, GitBranch, Layers, PlayCircle, Plus, CheckSquare,
     Square, Trash2, ExternalLink, X, ChevronRight, CheckCircle2,
-    MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command, Check, Rocket, Globe, Pencil, Save, Image as ImageIcon
+    MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command, Check, Rocket, Globe, Pencil, Save, Image as ImageIcon,
+    Tag
 } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
 
@@ -111,17 +112,20 @@ const PrimaryDevModule = () => {
         setNewTaskInput('');
     };
 
-    const handleLinkCommand = (command) => {
+    const handleLinkCommand = (command, tag = null) => {
         const project = projects.find(p => p.id === selectedProject.id);
+        const taskText = tag ? `${command.title} [${tag.label}]` : command.title;
+        const taskContent = tag ? (tag.value || command.content) : command.content;
+
         const newTasks = [...(project.tasks || []), {
             id: Date.now(),
-            text: command.title, // Use command title as task text
+            text: taskText,
             done: false,
             isCommand: true,
-            commandContent: command.content,
+            commandContent: taskContent,
             commandUrl: command.url,
             commandId: command.id,
-            commandType: command.type || 'utility' // Default to utility if undefined
+            commandType: command.type || 'utility'
         }];
         handleUpdateProject(selectedProject.id, { tasks: newTasks });
         setCommandModalOpen(false);
@@ -707,6 +711,29 @@ const PrimaryDevModule = () => {
                                                             ${cmd.type === 'mandatory' ? 'bg-red-50/30 group-hover:border-red-100 group-hover:bg-red-50/50' : cmd.type === 'link' ? 'bg-blue-50/30 group-hover:border-blue-100 group-hover:bg-blue-50/50' : 'bg-gray-50 group-hover:border-emerald-100 group-hover:bg-emerald-50/30'}`}>
                                                             {cmd.type === 'link' ? cmd.url : cmd.content}
                                                         </div>
+
+                                                        {/* Tags Display */}
+                                                        {(cmd.tags && cmd.tags.length > 0) && (
+                                                            <div className="flex flex-wrap gap-2 mt-3">
+                                                                {cmd.tags.map(tag => (
+                                                                    <button
+                                                                        key={tag.id}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation(); // Prevent parent click (which imports default)
+                                                                            handleLinkCommand(cmd, tag);
+                                                                        }}
+                                                                        className="group/tag flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg text-[11px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden shadow-sm hover:shadow-md"
+                                                                        title={`Import variant: ${tag.value || cmd.content}`}
+                                                                    >
+                                                                        <Tag size={10} className="opacity-60 group-hover/tag:opacity-100" />
+                                                                        {tag.label}
+                                                                        <span className="opacity-0 group-hover/tag:opacity-100 transition-opacity ml-1">
+                                                                            <ArrowUpRight size={10} />
+                                                                        </span>
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </motion.div>
                                             ))}

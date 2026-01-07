@@ -689,7 +689,7 @@ const CommandCenterModule = () => {
 
                                         {/* Tags Display */}
                                         {(cmd.tags && cmd.tags.length > 0) && (
-                                            <div className="flex flex-wrap gap-2 pl-[4.5rem] mt-3 mb-1">
+                                            <div className="flex flex-wrap gap-2 pl-[4.5rem] mt-3">
                                                 {cmd.tags.map(tag => (
                                                     <button
                                                         key={tag.id}
