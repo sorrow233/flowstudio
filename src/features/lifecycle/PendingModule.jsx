@@ -6,27 +6,27 @@ import { STORAGE_KEYS } from '../../utils/constants';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 
-// 恢复中文文案 (Restored Chinese Questions)
+// 深度创始人问答 (VC/Zero-to-One Style)
 const QUESTIONS = [
     {
         id: 'clarity',
-        text: '能否用一句话描述那个“灵光乍现”的瞬间？',
-        sub: '极致清晰'
+        text: '你能用一句通俗的话，直击用户的核心痛点吗？',
+        sub: '极致清晰' // Radical Clarity
     },
     {
         id: 'obsession',
-        text: '这个问题会让你彻夜难眠吗？（请诚实回答）',
-        sub: '创始人的执念'
+        text: '如果不做这件事，这会成为你一生的遗憾吗？',
+        sub: '精神信条' // Founder's Conviction
     },
     {
         id: 'market',
-        text: '是否有一群渴求解决方案的人在等待？',
-        sub: '市场需求'
+        text: '你的产品是用户的“止痛药”（刚需）而非“维生素”吗？',
+        sub: '致命需求' // Painkiller vs Vitamin
     },
     {
         id: 'moat',
-        text: '你在构建这个产品时是否拥有独特优势？',
-        sub: '防御壁垒'
+        text: '为什么这件事非你不可，且巨头无法轻易复制？',
+        sub: '核心壁垒' // Unfair Advantage
     },
 ];
 
@@ -43,7 +43,7 @@ const PendingModule = () => {
 
     // Explicit Version Log
     useEffect(() => {
-        console.log("PendingModule v1.4 Loaded (Chinese Restored)");
+        console.log("PendingModule v1.5 Loaded (New Copy)");
     }, []);
 
     const {
@@ -103,7 +103,7 @@ const PendingModule = () => {
 
     const handleDelete = (e, id) => {
         e.stopPropagation();
-        if (confirm('确定要删除这个想法吗？')) {
+        if (confirm('确定要放弃这颗种子吗？')) {
             deleteProject(id);
         }
     }
@@ -174,14 +174,14 @@ const PendingModule = () => {
                                 </div>
                                 <input
                                     type="text"
-                                    placeholder="Plant a new seed..."
+                                    placeholder="播种一个新的想法..."
                                     className="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder:text-gray-400 font-light h-full"
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && e.target.value.trim()) {
                                             const newP = {
                                                 id: uuidv4(),
                                                 title: e.target.value.trim(),
-                                                desc: '新的想法...',
+                                                desc: '一句话描述这个创想...',
                                                 score: 0,
                                                 answers: {}
                                             };
@@ -212,7 +212,6 @@ const PendingModule = () => {
                                             layoutId={`nursery-${p.id}`}
                                             className="min-w-[140px] snap-start bg-gradient-to-b from-emerald-50/50 to-white border border-emerald-100 rounded-2xl p-4 flex flex-col items-center justify-between text-center hover:shadow-sm transition-all cursor-default h-[160px]"
                                         >
-                                            {/* ... Tree Visual ... */}
                                             <div className="flex-1 flex items-center justify-center w-full relative">
                                                 <motion.div className={`relative z-10 ${visual.color}`} animate={{ scale: visual.scale }}>
                                                     <visual.icon size={32} strokeWidth={1.5} />
@@ -244,11 +243,11 @@ const PendingModule = () => {
                         initial={{ opacity: 0, x: 50 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 50 }}
-                        className="flex-1 bg-white border border-gray-100 rounded-[2.5rem] p-10 shadow-2xl shadow-gray-200/50 overflow-y-auto no-scrollbar relative flex flex-col z-10" // Added z-10 here
+                        className="flex-1 bg-white border border-gray-100 rounded-[2.5rem] p-10 shadow-2xl shadow-gray-200/50 overflow-y-auto no-scrollbar relative flex flex-col z-10"
                     >
                         <button
                             onClick={() => setSelectedProject(null)}
-                            className="absolute top-8 right-8 p-3 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors z-30" // Increased Z
+                            className="absolute top-8 right-8 p-3 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors z-30"
                         >
                             <X size={20} className="text-gray-400" />
                         </button>
@@ -278,7 +277,7 @@ const PendingModule = () => {
                                     value={selectedProject.title}
                                     onChange={(e) => handleUpdateProject(selectedProject.id, 'title', e.target.value)}
                                     className="w-full text-4xl md:text-5xl font-thin text-gray-900 text-center bg-transparent border-none focus:ring-0 placeholder:text-gray-300 mb-2"
-                                    placeholder="Untitled Project"
+                                    placeholder="无名项目"
                                 />
                                 <textarea
                                     value={selectedProject.desc}
@@ -297,7 +296,7 @@ const PendingModule = () => {
                                     {/* ... Vibe Selector ... */}
                                     <div className="flex items-center gap-2 bg-white border rounded-full px-4 py-1.5 shadow-sm">
                                         <Sparkles size={12} className="text-gray-400" />
-                                        <input value={selectedProject.link || ''} onChange={(e) => handleUpdateProject(selectedProject.id, 'link', e.target.value)} placeholder="Link" className="w-40 text-xs border-none p-0 focus:ring-0" />
+                                        <input value={selectedProject.link || ''} onChange={(e) => handleUpdateProject(selectedProject.id, 'link', e.target.value)} placeholder="项目链接" className="w-40 text-xs border-none p-0 focus:ring-0" />
                                     </div>
                                 </div>
                             </div>
@@ -363,8 +362,9 @@ const PendingModule = () => {
                         {/* Graduate Button */}
                         <div className="max-w-2xl mx-auto mt-12 pb-10 w-full relative z-30">
                             {selectedProject.score === 4 && (
-                                <button onClick={() => handleGraduate(selectedProject)} className="w-full py-5 bg-gray-900 text-white rounded-2xl flex justify-center gap-3">
-                                    <span>Graduate</span> <ArrowRight />
+                                <button onClick={() => handleGraduate(selectedProject)} className="group w-full py-5 bg-gray-900 text-white rounded-2xl flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl hover:-translate-y-1">
+                                    <span className="text-lg font-light tracking-wide">晋升至 Primary Dev</span>
+                                    <ArrowRight size={20} className="group-hover:translate-x-1" />
                                 </button>
                             )}
                         </div>
@@ -375,7 +375,7 @@ const PendingModule = () => {
 
             {!selectedProject && (
                 <div className="flex-1 flex flex-col items-center justify-center text-gray-300">
-                    <p>Select a seed</p>
+                    <p>选择一颗种子</p>
                 </div>
             )}
         </div>
