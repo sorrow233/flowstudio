@@ -40,11 +40,16 @@ const PrimaryDevModule = () => {
 
     // Edit Project State
     const [isEditingProject, setIsEditingProject] = useState(false);
-    const [editForm, setEditForm] = useState({});
-
-    // Command Modal State
     const [commandModalOpen, setCommandModalOpen] = useState(false);
-    const [commands, setCommands] = useState([]);
+
+    // Import Modal State
+    const [importCategory, setImportCategory] = useState('all');
+    const [importSearch, setImportSearch] = useState('');
+
+    // Undo State
+    const [recentlyDeleted, setRecentlyDeleted] = useState(null);
+
+    const [editForm, setEditForm] = useState({});
     const [copiedTaskId, setCopiedTaskId] = useState(null);
 
     useEffect(() => {
@@ -165,8 +170,33 @@ const PrimaryDevModule = () => {
         const project = projects.find(p => p.id === projectId);
         if (!project) return;
 
+        const taskIndex = project.tasks.findIndex(t => t.id === taskId);
+        const task = project.tasks[taskIndex];
+
+        // Save for undo
+        setRecentlyDeleted({ projectId, task, index: taskIndex });
+
         const updatedTasks = project.tasks.filter(t => t.id !== taskId);
         handleUpdateProject(projectId, { tasks: updatedTasks });
+
+        // Auto-clear undo after 4 seconds
+        setTimeout(() => {
+            setRecentlyDeleted(prev => (prev && prev.task.id === task.id ? null : prev));
+        }, 4000);
+    };
+
+    const handleUndoDelete = () => {
+        if (!recentlyDeleted) return;
+        const { projectId, task, index } = recentlyDeleted;
+        const project = projects.find(p => p.id === projectId);
+        if (!project) return;
+
+        // Re-insert at original index
+        const newTasks = [...project.tasks];
+        newTasks.splice(index, 0, task);
+
+        handleUpdateProject(projectId, { tasks: newTasks });
+        setRecentlyDeleted(null);
     };
 
     const toggleTask = (projectId, taskId, specificContent = null, subId = null) => {
@@ -716,6 +746,32 @@ const PrimaryDevModule = () => {
                 )}
             </AnimatePresence>
 
+            {/* Undo Toast */}
+            <AnimatePresence>
+                {recentlyDeleted && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 50 }}
+                        className="fixed bottom-8 right-8 z-[70] flex items-center gap-4 bg-gray-900 text-white pl-4 pr-2 py-2 rounded-xl shadow-2xl shadow-gray-900/40"
+                    >
+                        <span className="text-sm font-medium">Task deleted</span>
+                        <button
+                            onClick={handleUndoDelete}
+                            className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
+                        >
+                            Undo
+                        </button>
+                        <button
+                            onClick={() => setRecentlyDeleted(null)}
+                            className="p-1 hover:bg-gray-800 rounded-full text-gray-500 hover:text-white transition-colors"
+                        >
+                            <X size={14} />
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Command Selector Modal */}
             <AnimatePresence>
                 {commandModalOpen && (
@@ -731,33 +787,83 @@ const PrimaryDevModule = () => {
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
                             className="w-full max-w-2xl bg-white/90 backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden pointer-events-auto flex flex-col max-h-[75vh] ring-1 ring-white/50"
                         >
-                            <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-gray-50/50 to-white/50">
-                                <div>
-                                    <h3 className="text-xl font-light text-gray-900 flex items-center gap-3">
-                                        <div className="p-2 bg-gray-900 text-white rounded-lg shadow-lg shadow-gray-200">
-                                            <Terminal size={18} />
-                                        </div>
-                                        Import Command
-                                    </h3>
-                                    <p className="text-xs text-gray-400 mt-2 ml-1">
-                                        Inject pre-configured AI prompts into your workflow
-                                    </p>
+                            <div className="p-8 border-b border-gray-100 bg-white/50 backdrop-blur-xl">
+                                <div className="flex justify-between items-start mb-6">
+                                    <div>
+                                        <h3 className="text-2xl font-light text-gray-900 flex items-center gap-3">
+                                            Import Command
+                                        </h3>
+                                        <p className="text-sm text-gray-400 mt-1">
+                                            Inject pre-configured AI prompts into your workflow
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => setCommandModalOpen(false)}
+                                        className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-900"
+                                    >
+                                        <X size={20} />
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => setCommandModalOpen(false)}
-                                    className="p-2 hover:bg-gray-100/50 rounded-full transition-colors text-gray-400 hover:text-gray-900"
-                                >
-                                    <X size={20} />
-                                </button>
+
+                                {/* Search and Filter Toolbar */}
+                                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                                    {/* Category Filter Pills */}
+                                    <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl overflow-x-auto no-scrollbar max-w-full">
+                                        <button
+                                            onClick={() => setImportCategory('all')}
+                                            className={`
+                                                px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0
+                                                ${importCategory === 'all'
+                                                    ? 'bg-white text-gray-900 shadow-sm'
+                                                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-200/50'}
+                                            `}
+                                        >
+                                            All
+                                        </button>
+                                        {COMMAND_CATEGORIES.map(cat => (
+                                            <button
+                                                key={cat.id}
+                                                onClick={() => setImportCategory(cat.id)}
+                                                className={`
+                                                    w-8 h-8 flex items-center justify-center rounded-lg transition-all shrink-0 relative
+                                                    ${importCategory === cat.id
+                                                        ? 'bg-white shadow-md text-gray-900 scale-105 z-10'
+                                                        : 'text-gray-400 hover:bg-white/50 hover:text-gray-600'}
+                                                `}
+                                                title={cat.label}
+                                            >
+                                                <div className={`w-2.5 h-2.5 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')} ${importCategory === cat.id ? 'ring-2 ring-offset-1 ring-gray-100' : ''}`} />
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* Search Input */}
+                                    <div className="relative w-full sm:w-64 group">
+                                        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
+                                        <input
+                                            value={importSearch}
+                                            onChange={(e) => setImportSearch(e.target.value)}
+                                            placeholder="Search commands..."
+                                            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 hover:bg-white focus:bg-white rounded-xl text-sm border border-transparent hover:border-gray-200 focus:border-emerald-200 outline-none transition-all shadow-inner focus:shadow-sm"
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="p-6 overflow-y-auto bg-gray-50/30 custom-scrollbar flex-1">
                                 {commands.filter(c => c.stageIds?.includes(selectedProject?.subStage || 1)).length > 0 ? (
                                     <div className="space-y-6">
                                         {COMMAND_CATEGORIES.map(cat => {
+                                            if (importCategory !== 'all' && importCategory !== cat.id) return null;
+
                                             const catCommands = commands
                                                 .filter(c => c.stageIds?.includes(selectedProject?.subStage || 1))
-                                                .filter(c => (c.category || 'general') === cat.id);
+                                                .filter(c => (c.category || 'general') === cat.id)
+                                                .filter(c =>
+                                                    !importSearch.trim() ||
+                                                    c.title.toLowerCase().includes(importSearch.toLowerCase()) ||
+                                                    c.content.toLowerCase().includes(importSearch.toLowerCase())
+                                                );
 
                                             if (catCommands.length === 0) return null;
 
