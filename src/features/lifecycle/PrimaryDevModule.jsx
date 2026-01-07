@@ -281,6 +281,7 @@ const PrimaryDevModule = () => {
                                 onClose={() => setSelectedProject(null)}
                                 onDelete={(e) => handleDeleteProject(e, selectedProject.id)}
                                 onImportCommand={() => setCommandModalOpen(true)}
+                                onToggleCollapse={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
                             />
 
                             <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30">

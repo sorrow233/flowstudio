@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ExternalLink, Terminal, Pencil, Save, X, Trash2, ArrowLeft, Image as ImageIcon } from 'lucide-react';
+import { ExternalLink, Terminal, Pencil, Save, X, Trash2, ArrowLeft, Image as ImageIcon, ChevronDown } from 'lucide-react';
 import { DEV_STAGES } from '../../../../utils/constants';
 
 const VISUAL_VIBES = [
@@ -13,7 +13,7 @@ const VISUAL_VIBES = [
 
 const ProjectWorkspaceHeader = ({
     project, activeStage, isCollapsed, isEditing, editForm,
-    setEditForm, onSaveEdit, onCancelEdit, onStartEdit, onClose, onDelete, onImportCommand
+    setEditForm, onSaveEdit, onCancelEdit, onStartEdit, onClose, onDelete, onImportCommand, onToggleCollapse
 }) => {
 
     // Get info for current stage to show in header title if needed, 
@@ -160,6 +160,16 @@ const ProjectWorkspaceHeader = ({
                     )}
                 </div>
             </div>
+            {/* Manual Toggle Handle */}
+            <div className="absolute bottom-0 left-0 right-0 flex justify-center z-40 pb-2 pointer-events-none">
+                <button
+                    onClick={(e) => { e.stopPropagation(); onToggleCollapse(); }}
+                    className="p-1 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full text-white/50 hover:text-white transition-all cursor-pointer pointer-events-auto border border-white/5 group/toggle"
+                >
+                    <ChevronDown size={14} className={`transition-transform duration-500 ${isCollapsed ? 'rotate-0' : 'rotate-180'}`} />
+                </button>
+            </div>
+
         </motion.div>
     );
 };
