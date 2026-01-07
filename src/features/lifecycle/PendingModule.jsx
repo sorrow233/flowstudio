@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sprout, X, ArrowRight, Sun, CloudRain, Droplets, CheckCircle2 } from 'lucide-react';
+import { Sprout, X, ArrowRight, Sun, CloudRain, Droplets, CheckCircle2, Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { STORAGE_KEYS } from '../../utils/constants';
 
@@ -143,23 +143,34 @@ const PendingModule = () => {
                         </motion.div>
                     ))}
 
-                    <button
-                        onClick={() => {
-                            const title = prompt("Project Name?");
-                            if (title) {
-                                setProjects([{
-                                    id: uuidv4(),
-                                    title,
-                                    desc: 'New Concept awaiting assessment...',
-                                    score: 0,
-                                    answers: {}
-                                }, ...projects]);
-                            }
-                        }}
-                        className="w-full py-4 border border-dashed border-gray-200 rounded-xl text-gray-400 text-sm font-light hover:border-gray-400 hover:text-gray-600 transition-all flex items-center justify-center gap-2"
-                    >
-                        <span className="text-lg">+</span> Add Concept
-                    </button>
+                    {/* Add Project Input */}
+                    <div className="relative group">
+                        <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-50 rounded-xl blur opacity-25 group-hover:opacity-50 transition-opacity" />
+                        <div className="relative bg-white border border-dashed border-gray-300 rounded-xl p-2 flex items-center gap-3 hover:border-gray-400 transition-colors">
+                            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+                                <Plus size={20} strokeWidth={1.5} />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Plant a new seed..."
+                                className="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder:text-gray-400 font-light h-full"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && e.target.value.trim()) {
+                                        const newP = {
+                                            id: uuidv4(),
+                                            title: e.target.value.trim(),
+                                            desc: 'A new beginning...',
+                                            score: 0,
+                                            answers: {}
+                                        };
+                                        setProjects([newP, ...projects]);
+                                        setSelectedProject(newP);
+                                        e.target.value = '';
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -203,19 +214,41 @@ const PendingModule = () => {
                                 className="text-4xl font-thin text-gray-900 mb-2 text-center bg-transparent border-b border-transparent hover:border-gray-200 focus:border-gray-900 focus:outline-none transition-all w-full"
                             />
 
-                            <div className="flex flex-col gap-2 w-full max-w-md mt-4">
+                            <div className="flex flex-col gap-4 w-full max-w-md mt-6">
                                 <input
-                                    placeholder="Website Link (Optional)"
+                                    placeholder="Project Website Link (Optional)"
                                     value={selectedProject.link || ''}
                                     onChange={(e) => handleUpdateProject(selectedProject.id, 'link', e.target.value)}
-                                    className="text-sm font-light text-center bg-gray-50 rounded-lg py-2 px-4 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                                    className="text-sm font-light text-center bg-gray-50 rounded-xl py-3 px-4 focus:outline-none focus:ring-1 focus:ring-gray-900 transition-shadow hover:bg-gray-100"
                                 />
-                                <input
-                                    placeholder="Background Image URL (Optional)"
-                                    value={selectedProject.bgImage || ''}
-                                    onChange={(e) => handleUpdateProject(selectedProject.id, 'bgImage', e.target.value)}
-                                    className="text-xs font-light text-center text-gray-400 bg-transparent py-1 hover:text-gray-600 focus:outline-none"
-                                />
+
+                                {/* Visual Vibe Selector */}
+                                <div className="flex flex-col items-center gap-2">
+                                    <span className="text-xs text-gray-400 uppercase tracking-widest font-medium">Select Visual Vibe</span>
+                                    <div className="flex gap-3">
+                                        {[
+                                            'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1000&q=80', // Gradient 1
+                                            'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1000&q=80', // Gradient 2
+                                            'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1000&q=80', // Abstract
+                                            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80', // Landscape
+                                            'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1000&q=80', // Tech
+                                            '' // None
+                                        ].map((imgUrl, idx) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => handleUpdateProject(selectedProject.id, 'bgImage', imgUrl)}
+                                                className={`
+                                          w-8 h-8 rounded-full border-2 overflow-hidden transition-all hover:scale-110
+                                          ${selectedProject.bgImage === imgUrl ? 'border-gray-900 scale-110' : 'border-transparent'}
+                                          ${!imgUrl ? 'bg-gray-100 border-gray-200' : ''}
+                                        `}
+                                            >
+                                                {imgUrl && <img src={imgUrl} className="w-full h-full object-cover" alt="vibe" />}
+                                                {!imgUrl && <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">×</div>}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="flex gap-6 mt-6 text-xs font-medium tracking-widest uppercase text-gray-400">
