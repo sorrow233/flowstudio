@@ -11,7 +11,7 @@ import { STORAGE_KEYS, DEV_STAGES, COMMAND_CATEGORIES } from '../../utils/consta
 const STAGE_ICONS = {
     1: Layers,
     2: MonitorPlay,
-    3: Bug,
+    3: Container,
     4: Sparkles,
     5: Flag
 };

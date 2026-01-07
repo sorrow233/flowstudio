@@ -22,15 +22,15 @@ export const DEV_STAGES = [
     },
     {
         id: 3,
-        label: 'Stability',
-        title: 'No Major Bugs',
-        desc: 'Rigorous testing of core flows. Zero critical issues allowed.',
+        label: 'Modules',
+        title: 'Module Expansion',
+        desc: 'Implement Login, Binding, and Sync features to complete the ecosystem.',
     },
     {
         id: 4,
         label: 'Optimization',
-        title: 'Optimization & Polish',
-        desc: 'Refine UI/UX, improve performance, and clean up code.',
+        title: 'Optimization & Stability',
+        desc: 'Reduce bugs, improve stability, refine UI/UX, and polish.',
     },
     {
         id: 5,
