@@ -83,7 +83,7 @@ const TaskList = ({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask
                 className="flex-1 overflow-y-auto px-8 pb-4 custom-scrollbar"
                 onScroll={onScroll}
             >
-                <div className="min-h-[101%] flex flex-col">
+                <div className="min-h-[calc(100%+200px)] flex flex-col">
                     <AnimatePresence mode="popLayout">
                         {localTasks.length > 0 ? (
                             <Reorder.Group
