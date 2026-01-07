@@ -108,6 +108,10 @@ export const useSyncStore = (docId, initialData = {}) => {
 
             doc.on('update', handleUpdate);
 
+            // CRITICAL: Set doc in state BEFORE cleanup return
+            setSyncedDoc(doc);
+            setSharedType(doc.getMap('data'));
+
             // Cleanup
             return () => {
                 doc.off('update', handleUpdate);
@@ -116,10 +120,10 @@ export const useSyncStore = (docId, initialData = {}) => {
             };
         } else {
             setStatus('offline');
+            // Also set doc for offline/logged-out users so local persistence works
+            setSyncedDoc(doc);
+            setSharedType(doc.getMap('data'));
         }
-
-        setSyncedDoc(doc);
-        setSharedType(doc.getMap('data'));
 
     }, [docId, user]);
 
