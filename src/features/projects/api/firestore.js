@@ -20,12 +20,14 @@ const COLLECTION = 'projects';
 export const fetchProjects = async (userId) => {
     if (!userId) throw new Error("User ID required");
 
+    console.log('[Firestore] fetchProjects for user:', userId);
     // We fetch from users/{userId}/projects
     const projectsRef = collection(db, 'users', userId, COLLECTION);
     // Determine sort order if needed, otherwise client-side sort
     const q = query(projectsRef); // can add orderBy('createdAt') if indexed
 
     const snapshot = await getDocs(q);
+    console.log(`[Firestore] Retrieved ${snapshot.size} projects`);
     return snapshot.docs.map(doc => ({
         ...doc.data(),
         id: doc.id,
@@ -45,6 +47,7 @@ export const fetchProjects = async (userId) => {
 export const addProject = async (userId, project) => {
     if (!userId) throw new Error("User ID required");
 
+    console.log('[Firestore] addProject:', project.id);
     const projectRef = doc(db, 'users', userId, COLLECTION, project.id);
     await setDoc(projectRef, {
         ...project,
@@ -52,6 +55,7 @@ export const addProject = async (userId, project) => {
         createdAt: project.createdAt || new Date().toISOString()
     });
 
+    console.log('[Firestore] addProject success');
     return project;
 };
 
@@ -64,11 +68,13 @@ export const addProject = async (userId, project) => {
 export const updateProject = async (userId, projectId, updates) => {
     if (!userId) throw new Error("User ID required");
 
+    console.log('[Firestore] updateProject:', projectId, updates);
     const projectRef = doc(db, 'users', userId, COLLECTION, projectId);
     await setDoc(projectRef, {
         ...updates,
         updatedAt: serverTimestamp()
     }, { merge: true });
+    console.log('[Firestore] updateProject success');
 };
 
 /**
@@ -79,6 +85,8 @@ export const updateProject = async (userId, projectId, updates) => {
 export const deleteProject = async (userId, projectId) => {
     if (!userId) throw new Error("User ID required");
 
+    console.log('[Firestore] deleteProject:', projectId);
     const projectRef = doc(db, 'users', userId, COLLECTION, projectId);
     await deleteDoc(projectRef);
+    console.log('[Firestore] deleteProject success');
 };

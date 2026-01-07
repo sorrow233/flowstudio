@@ -56,6 +56,7 @@ export default function WorkshopPage() {
     };
 
     const handleMoveNext = (item) => {
+        console.log('[WorkshopPage] handleMoveNext:', item.id);
         moveItemNext(item.id);
     };
 
@@ -101,6 +102,7 @@ export default function WorkshopPage() {
     );
 
     const handleDragStart = (event) => {
+        console.log('[WorkshopPage] Drag start:', event.active.id);
         setActiveId(event.active.id);
     };
 
@@ -109,12 +111,16 @@ export default function WorkshopPage() {
 
         if (over && active.id !== over.id) {
             const overStage = over.id;
+            console.log('[WorkshopPage] Drag end:', active.id, 'over', overStage);
 
             const validStages = Object.values(STAGES);
             if (validStages.includes(overStage) && !showArchived) {
                 const result = moveItemToStage(active.id, overStage);
                 if (!result.success) {
+                    console.warn('[WorkshopPage] Move failed:', result.message);
                     alert(result.message);
+                } else {
+                    console.log('[WorkshopPage] Move success');
                 }
             }
         }

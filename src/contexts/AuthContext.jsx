@@ -59,6 +59,7 @@ export function AuthProvider({ children }) {
             });
 
         const unsubscribe = onAuthStateChanged(auth, (user) => {
+            console.log('[AuthContext] Auth state changed:', user ? `User ${user.uid} logged in` : 'No user');
             setCurrentUser(user);
             if (user) {
                 setIsGuest(false);
@@ -66,7 +67,7 @@ export function AuthProvider({ children }) {
             }
             setLoading(false);
         }, (error) => {
-            console.error("Auth State Check Error:", error);
+            console.error("[AuthContext] Auth State Check Error:", error);
             // If there's a real auth error (not just missing config), we might want to know,
             // but for now let's fall back to guest to keep things usable.
             setIsGuest(true);
@@ -81,26 +82,47 @@ export function AuthProvider({ children }) {
     }
 
     function loginAsGuest() {
+        console.log('[AuthContext] Logging in as guest');
         setIsGuest(true);
         localStorage.setItem('isGuest', 'true');
         return Promise.resolve();
     }
 
     function signup(email, password) {
+        console.log('[AuthContext] Signup attempt for:', email);
         checkAuth();
         const domain = email.split('@')[1];
         if (!ALLOWED_DOMAINS.includes(domain)) {
+            console.warn('[AuthContext] Signup rejected - Unsupported domain:', domain);
             return Promise.reject(new Error('This email provider is not supported. Please use a common provider (Gmail, Outlook, Yahoo, etc.).'));
         }
-        return createUserWithEmailAndPassword(auth, email, password);
+        return createUserWithEmailAndPassword(auth, email, password)
+            .then(res => {
+                console.log('[AuthContext] Signup successful:', res.user.uid);
+                return res;
+            })
+            .catch(err => {
+                console.error('[AuthContext] Signup error:', err);
+                throw err;
+            });
     }
 
     function login(email, password) {
+        console.log('[AuthContext] Login attempt for:', email);
         checkAuth();
-        return signInWithEmailAndPassword(auth, email, password);
+        return signInWithEmailAndPassword(auth, email, password)
+            .then(res => {
+                console.log('[AuthContext] Login successful:', res.user.uid);
+                return res;
+            })
+            .catch(err => {
+                console.error('[AuthContext] Login error:', err);
+                throw err;
+            });
     }
 
     function loginWithGoogle() {
+        console.log('[AuthContext] Initiating Google login redirect');
         checkAuth();
         const provider = new GoogleAuthProvider();
         // Use redirect instead of popup to avoid COOP issues
@@ -108,13 +130,15 @@ export function AuthProvider({ children }) {
     }
 
     function logout() {
+        console.log('[AuthContext] Logout called');
         if (isGuest) {
+            console.log('[AuthContext] Clearing guest session');
             setIsGuest(false);
             localStorage.removeItem('isGuest');
             return Promise.resolve();
         }
         if (!auth) return Promise.resolve();
-        return signOut(auth);
+        return signOut(auth).then(() => console.log('[AuthContext] SignOut complete'));
     }
 
     const value = {

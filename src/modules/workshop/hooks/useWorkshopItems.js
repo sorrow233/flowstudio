@@ -91,6 +91,7 @@ export function useWorkshopItems() {
     });
 
     const addProject = async (stage = WORKSHOP_STAGES.EARLY, formData = {}) => {
+        console.log('[useWorkshopItems] addProject:', stage, formData);
         const gradientBg = getRandomGradientBackground();
         const newItem = {
             name: formData.name || '',
@@ -104,15 +105,25 @@ export function useWorkshopItems() {
             archived: false,
         };
         const result = await addMutation.mutateAsync(newItem);
+        console.log('[useWorkshopItems] Added item:', result.id);
         return result.id;
     };
 
-    const updateProject = (id, updates) => updateMutation.mutateAsync({ id, updates });
-    const deleteProject = (id) => deleteMutation.mutateAsync(id);
+    const updateProject = (id, updates) => {
+        console.log('[useWorkshopItems] updateProject:', id, updates);
+        return updateMutation.mutateAsync({ id, updates });
+    };
+    const deleteProject = (id) => {
+        console.log('[useWorkshopItems] deleteProject:', id);
+        return deleteMutation.mutateAsync(id);
+    };
 
     const toggleArchive = (id) => {
         const item = items.find(i => i.id === id);
-        if (item) updateProject(id, { archived: !item.archived });
+        if (item) {
+            console.log('[useWorkshopItems] toggleArchive:', id, !item.archived);
+            updateProject(id, { archived: !item.archived });
+        }
     };
 
     // Stage validation for advanced stages
@@ -125,14 +136,19 @@ export function useWorkshopItems() {
     };
 
     const moveItemToStage = async (id, newStage) => {
+        console.log('[useWorkshopItems] moveItemToStage:', id, newStage);
         if (!Object.values(WORKSHOP_STAGES).includes(newStage)) {
+            console.warn('[useWorkshopItems] Invalid stage:', newStage);
             return { success: false, message: 'Invalid stage for Workshop' };
         }
         const item = items.find(i => i.id === id);
         if (!item) return { success: false, message: 'Item not found' };
 
         const validation = validateForNextStage(item, newStage);
-        if (!validation.valid) return { success: false, message: validation.message };
+        if (!validation.valid) {
+            console.warn('[useWorkshopItems] Validation failed:', validation.message);
+            return { success: false, message: validation.message };
+        }
 
         await updateProject(id, { stage: newStage });
         return { success: true };
@@ -150,8 +166,13 @@ export function useWorkshopItems() {
             default: return; // commercial 没有下一阶段
         }
 
+        console.log('[useWorkshopItems] moveItemNext:', id, item.stage, '->', nextStage);
+
         const validation = validateForNextStage(item, nextStage);
-        if (!validation.valid) return;
+        if (!validation.valid) {
+            console.warn('[useWorkshopItems] Validation failed:', validation.message);
+            return;
+        }
 
         await updateProject(id, { stage: nextStage });
     };

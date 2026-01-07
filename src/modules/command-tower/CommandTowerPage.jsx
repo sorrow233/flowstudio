@@ -100,11 +100,14 @@ export default function CommandTowerPage() {
     };
 
     const copyToClipboard = async (text, id) => {
+        console.log('[CommandTower] Copying to clipboard:', id);
         try {
             await navigator.clipboard.writeText(text);
             setCopiedId(id);
             setTimeout(() => setCopiedId(null), 2000);
+            console.log('[CommandTower] Copy success');
         } catch (err) {
+            console.error('[CommandTower] Copy failed, using fallback', err);
             // Fallback
             const textArea = document.createElement('textarea');
             textArea.value = text;
@@ -121,6 +124,7 @@ export default function CommandTowerPage() {
 
     const handleAddCommand = () => {
         if (!newCommand.title.trim() || !newCommand.content.trim() || !newCommand.stage) return;
+        console.log('[CommandTower] Adding new command:', newCommand);
         const newId = Date.now();
         // 使用用户选择的颜色，如果没选则使用指令库默认颜色
         const commandColor = newCommand.color || getStageDefaultColor(newCommand.stage);
@@ -141,6 +145,7 @@ export default function CommandTowerPage() {
 
     const handleDeleteCommand = (stageKey, id) => {
         if (confirm(t('common.delete_confirm') || "Are you sure?")) {
+            console.log('[CommandTower] Deleting command:', stageKey, id);
             setCommands(prev => ({
                 ...prev,
                 [stageKey]: prev[stageKey].filter(cmd => cmd.id !== id)
@@ -178,10 +183,12 @@ export default function CommandTowerPage() {
         setCommands(prev => ({ ...prev, [key]: [] }));
         setNewStage({ key: '', label: '', icon: 'Layers', color: '#6366f1' });
         setShowAddStageModal(false);
+        console.log('[CommandTower] Added new stage:', newStageObj);
     };
 
     const handleDeleteStage = (stageKey) => {
         if (confirm(t('common.delete_stage_confirm') || "Delete this category and all its commands?")) {
+            console.log('[CommandTower] Deleting stage:', stageKey);
             setStages(prev => prev.filter(s => s.key !== stageKey));
             setCommands(prev => {
                 const newCmds = { ...prev };

@@ -43,7 +43,7 @@ const Hero = () => {
                 transition={{ duration: 1, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 className="hero-cta"
             >
-                <Link to="/app" className="btn-cta-premium">
+                <Link to="/app" className="btn-cta-premium" onClick={() => console.log('[Hero] "Explore the Workshop" clicked')}>
                     {t('landing.get_started', 'Explore the Workshop')}
                     <div className="btn-arrow">
                         <ArrowRight size={18} />

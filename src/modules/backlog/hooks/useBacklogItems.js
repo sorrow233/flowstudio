@@ -90,6 +90,7 @@ export function useBacklogItems() {
     });
 
     const addProject = async (stage = BACKLOG_STAGES.INSPIRATION, formData = {}) => {
+        console.log('[useBacklogItems] addProject:', stage, formData);
         const gradientBg = getRandomGradientBackground();
         const newItem = {
             name: formData.name || '',
@@ -103,19 +104,31 @@ export function useBacklogItems() {
             archived: false,
         };
         const result = await addMutation.mutateAsync(newItem);
+        console.log('[useBacklogItems] Added item:', result.id);
         return result.id;
     };
 
-    const updateProject = (id, updates) => updateMutation.mutateAsync({ id, updates });
-    const deleteProject = (id) => deleteMutation.mutateAsync(id);
+    const updateProject = (id, updates) => {
+        console.log('[useBacklogItems] updateProject:', id, updates);
+        return updateMutation.mutateAsync({ id, updates });
+    };
+    const deleteProject = (id) => {
+        console.log('[useBacklogItems] deleteProject:', id);
+        return deleteMutation.mutateAsync(id);
+    };
 
     const toggleArchive = (id) => {
         const item = items.find(i => i.id === id);
-        if (item) updateProject(id, { archived: !item.archived });
+        if (item) {
+            console.log('[useBacklogItems] toggleArchive:', id, !item.archived);
+            updateProject(id, { archived: !item.archived });
+        }
     };
 
     const moveItemToStage = async (id, newStage) => {
+        console.log('[useBacklogItems] moveItemToStage:', id, newStage);
         if (!Object.values(BACKLOG_STAGES).includes(newStage)) {
+            console.warn('[useBacklogItems] Invalid stage:', newStage);
             return { success: false, message: 'Invalid stage for Backlog' };
         }
         await updateProject(id, { stage: newStage });
@@ -126,6 +139,7 @@ export function useBacklogItems() {
         const item = items.find(i => i.id === id);
         if (!item) return;
 
+        console.log('[useBacklogItems] moveItemNext:', id, item.stage);
         if (item.stage === BACKLOG_STAGES.INSPIRATION) {
             await updateProject(id, { stage: BACKLOG_STAGES.PENDING });
         }
@@ -134,9 +148,11 @@ export function useBacklogItems() {
 
     // 跨模块转移：将项目从 Backlog 转入 Workshop
     const transferToWorkshop = useCallback(async (id) => {
+        console.log('[useBacklogItems] transferToWorkshop called for:', id);
         const item = items.find(i => i.id === id);
         if (!item) return { success: false, message: 'Item not found' };
         if (item.stage !== BACKLOG_STAGES.PENDING) {
+            console.warn('[useBacklogItems] Transfer failed: item not in Pending');
             return { success: false, message: 'Only pending items can be transferred to Workshop' };
         }
 
@@ -147,6 +163,7 @@ export function useBacklogItems() {
             const raw = localStorage.getItem(workshopKey);
             workshopItems = raw ? JSON.parse(raw) : [];
         } catch (e) {
+            console.error('[useBacklogItems] Failed to read workshop items during transfer', e);
             workshopItems = [];
         }
 
@@ -159,11 +176,14 @@ export function useBacklogItems() {
             sourceBacklogId: item.id,
         };
 
+        console.log('[useBacklogItems] Creating new workshop item:', workshopItem.id);
+
         // 3. 写入 Workshop
         localStorage.setItem(workshopKey, JSON.stringify([...workshopItems, workshopItem]));
 
         // 4. 从 Backlog 删除
         await deleteProject(id);
+        console.log('[useBacklogItems] Item transferred and deleted from Backlog');
 
         // 5. 通知 Workshop 刷新（通过 invalidate 其 queryKey）
         queryClient.invalidateQueries({ queryKey: ['workshop-items'] });

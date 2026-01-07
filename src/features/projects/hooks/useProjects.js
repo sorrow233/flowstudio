@@ -45,6 +45,7 @@ export function useProjects() {
 
     // Helper functions to match legacy context API where possible
     const addProject = async (stage = STAGES.INSPIRATION, formData = {}) => {
+        console.log('[useProjects] addProject called:', stage, formData);
         const newItem = {
             name: formData.name || '',
             link: formData.link || '',
@@ -56,19 +57,32 @@ export function useProjects() {
             archived: false,
         };
         const result = await addMutation.mutateAsync(newItem);
+        console.log('[useProjects] Project added:', result.id);
         return result.id;
     };
 
-    const updateProject = (id, updates) => updateMutation.mutateAsync({ id, updates });
-    const deleteProject = (id) => deleteMutation.mutateAsync(id);
+    const updateProject = (id, updates) => {
+        console.log('[useProjects] updateProject:', id, updates);
+        return updateMutation.mutateAsync({ id, updates });
+    };
+    const deleteProject = (id) => {
+        console.log('[useProjects] deleteProject:', id);
+        return deleteMutation.mutateAsync(id);
+    };
     const toggleArchive = (id) => {
         const item = projects.find(i => i.id === id);
-        if (item) updateProject(id, { archived: !item.archived });
+        if (item) {
+            console.log('[useProjects] toggleArchive:', id, '->', !item.archived);
+            updateProject(id, { archived: !item.archived });
+        }
     };
 
     const moveItemNext = async (id) => {
         const item = projects.find(i => i.id === id);
-        if (!item) return;
+        if (!item) {
+            console.warn('[useProjects] moveItemNext: Item not found', id);
+            return;
+        }
 
         let nextStage = item.stage;
         switch (item.stage) {
@@ -80,8 +94,13 @@ export function useProjects() {
             default: return;
         }
 
+        console.log('[useProjects] moveItemNext:', id, item.stage, '->', nextStage);
+
         const validation = validateForNextStage(item, nextStage);
-        if (!validation.valid) return;
+        if (!validation.valid) {
+            console.warn('[useProjects] Validation failed:', validation.message);
+            return;
+        }
 
         await updateProject(id, { stage: nextStage });
     };
@@ -90,8 +109,13 @@ export function useProjects() {
         const itemToMove = projects.find(i => i.id === id);
         if (!itemToMove) return { success: false, message: 'Item not found' };
 
+        console.log('[useProjects] moveItemToStage:', id, newStage);
+
         const validation = validateForNextStage(itemToMove, newStage);
-        if (!validation.valid) return { success: false, message: validation.message };
+        if (!validation.valid) {
+            console.warn('[useProjects] moveItemToStage validation failed:', validation.message);
+            return { success: false, message: validation.message };
+        }
 
         await updateProject(id, { stage: newStage });
         return { success: true };

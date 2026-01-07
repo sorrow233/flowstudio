@@ -12,18 +12,21 @@ class LocalDataService {
     async init() {
         if (this._initialized) return this.items;
 
+        console.log('[LocalDataService] Initializing...');
         const saved = localStorage.getItem(SYNC_KEY);
         if (saved) {
             try {
                 this.items = JSON.parse(saved);
+                console.log(`[LocalDataService] Loaded ${this.items.length} items from ${SYNC_KEY}`);
             } catch (e) {
-                console.error("Failed to parse local items", e);
+                console.error("[LocalDataService] Failed to parse local items", e);
                 this.items = [];
             }
         } else {
             // Check legacy
             const legacy = localStorage.getItem(LEGACY_SYNC_KEY);
             if (legacy) {
+                console.log('[LocalDataService] Found legacy items, migrating...');
                 try {
                     const legacyData = JSON.parse(legacy).map(item => ({
                         ...item,
@@ -31,10 +34,13 @@ class LocalDataService {
                     }));
                     this.items = legacyData;
                     this._persist();
+                    console.log(`[LocalDataService] Migrated ${legacyData.length} items`);
                 } catch (e) {
                     console.error(e);
                     this.items = [];
                 }
+            } else {
+                console.log('[LocalDataService] No existing data found');
             }
         }
         this._initialized = true;
@@ -49,6 +55,7 @@ class LocalDataService {
     }
 
     async addItem(item) {
+        console.log('[LocalDataService] Adding item:', item);
         const newItem = {
             ...item,
             id: item.id || uuidv4(),
@@ -61,6 +68,7 @@ class LocalDataService {
     }
 
     async updateItem(id, updates) {
+        console.log('[LocalDataService] Updating item:', id, updates);
         const timestamp = new Date().toISOString();
         this.items = this.items.map(i =>
             i.id === id ? { ...i, ...updates, updatedAt: timestamp } : i
@@ -70,6 +78,7 @@ class LocalDataService {
     }
 
     async deleteItem(id) {
+        console.log('[LocalDataService] Deleting item:', id);
         this.items = this.items.filter(i => i.id !== id);
         this._persist();
     }

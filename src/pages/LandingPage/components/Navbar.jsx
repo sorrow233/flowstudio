@@ -17,20 +17,18 @@ const Navbar = () => {
             className="landing-nav-floating"
         >
             <div className="nav-content">
-                <Link to="/" className="landing-logo">
+                <Link to="/" className="landing-logo" onClick={() => console.log('[Navbar] "Flow Studio Logo" clicked')}>
                     <div className="logo-dot" />
                     <span>Flow Studio</span>
                 </Link>
 
                 <div className="landing-links">
-                    <Link to="/pricing" className="nav-link">{t('landing.pricing', 'Pricing')}</Link>
-                    <Link to="/about" className="nav-link">{t('landing.about', 'About')}</Link>
                     <Link to="/changelog" className="nav-link">{t('landing.changelog', 'Changelog')}</Link>
                     <div className="nav-divider" />
                     <LanguageSwitcher />
 
                     {currentUser ? (
-                        <Link to="/app" className="btn-dashboard-mini">
+                        <Link to="/app" className="btn-dashboard-mini" onClick={() => console.log('[Navbar] "Go to Workshop" clicked')}>
                             <div className="user-avatar-mini">
                                 {currentUser.photoURL ? (
                                     <img src={currentUser.photoURL} alt="User" />
@@ -41,7 +39,7 @@ const Navbar = () => {
                             <span>{t('landing.dashboard', 'Go to Workshop')}</span>
                         </Link>
                     ) : (
-                        <Link to="/login" className="btn-login-zen">
+                        <Link to="/login" className="btn-login-zen" onClick={() => console.log('[Navbar] "Sign In" clicked')}>
                             {t('auth.login', 'Sign In')}
                         </Link>
                     )}
