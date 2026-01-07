@@ -29,16 +29,26 @@ const QUESTIONS = [
 ];
 
 const PendingModule = () => {
-    const [projects, setProjects] = useState([]);
-    const [selectedProject, setSelectedProject] = useState(null);
+    const [primaryProjects, setPrimaryProjects] = useState([]);
 
     // Load projects
     useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEYS.PENDING);
-        if (saved) setProjects(JSON.parse(saved));
+        const loadData = () => {
+            const savedPending = localStorage.getItem(STORAGE_KEYS.PENDING);
+            if (savedPending) setProjects(JSON.parse(savedPending));
+
+            const savedPrimary = localStorage.getItem(STORAGE_KEYS.PRIMARY);
+            if (savedPrimary) setPrimaryProjects(JSON.parse(savedPrimary));
+        };
+
+        loadData();
+
+        // Listen for storage events to sync across tabs/updates
+        window.addEventListener('storage', loadData);
+        return () => window.removeEventListener('storage', loadData);
     }, []);
 
-    // Save projects
+    // Save projects (Pending only)
     useEffect(() => {
         localStorage.setItem(STORAGE_KEYS.PENDING, JSON.stringify(projects));
     }, [projects]);
@@ -76,7 +86,7 @@ const PendingModule = () => {
         setSelectedProject(null);
 
         // 2. Add to Primary Dev
-        const primaryProjects = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRIMARY) || '[]');
+        const currentPrimary = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRIMARY) || '[]');
         const newPrimary = {
             ...project,
             graduatedAt: Date.now(),
@@ -84,7 +94,9 @@ const PendingModule = () => {
             progress: 0,
             tasks: []
         };
-        localStorage.setItem(STORAGE_KEYS.PRIMARY, JSON.stringify([newPrimary, ...primaryProjects]));
+        const updatedPrimary = [newPrimary, ...currentPrimary];
+        localStorage.setItem(STORAGE_KEYS.PRIMARY, JSON.stringify(updatedPrimary));
+        setPrimaryProjects(updatedPrimary); // Update local state immediately
     };
 
     const handleDelete = (e, id) => {
@@ -101,77 +113,129 @@ const PendingModule = () => {
         return { scale: 1.1, opacity: 1, color: 'text-emerald-600' }; // Tree
     };
 
+    // Tree Growth Visualization Helper
+    const getTreeVisual = (stage = 1) => {
+        const stages = [
+            { color: 'text-emerald-200', scale: 0.8, icon: Sprout }, // 1: Seedling
+            { color: 'text-emerald-300', scale: 0.9, icon: Sprout }, // 2: Sapling
+            { color: 'text-emerald-400', scale: 1.0, icon: Sprout }, // 3: Young Tree
+            { color: 'text-emerald-500', scale: 1.1, icon: Sprout }, // 4: Mature Tree
+            { color: 'text-emerald-600', scale: 1.2, icon: Sprout }, // 5: Grand Tree
+        ];
+        return stages[stage - 1] || stages[0];
+    };
+
     return (
         <div className="max-w-7xl mx-auto pt-8 px-6 h-full flex gap-10">
 
             {/* Stream (Left) */}
-            <div className={`transition-all duration-500 flex flex-col ${selectedProject ? 'w-[350px] opacity-40 hover:opacity-100' : 'w-full'}`}>
+            <div className={`transition-all duration-500 flex flex-col ${selectedProject ? 'w-[350px] opacity-100' : 'w-full'}`}>
+
+                {/* Header */}
                 <div className="mb-8">
                     <h2 className="text-2xl font-light tracking-wide text-gray-900">Pending Stream</h2>
                     <p className="text-xs font-mono text-gray-400 mt-1 uppercase tracking-widest">Assessment Queue</p>
                 </div>
 
-                <div className="space-y-4 overflow-y-auto pb-20 no-scrollbar">
-                    {projects.map(project => (
-                        <motion.div
-                            layoutId={project.id}
-                            key={project.id}
-                            onClick={() => setSelectedProject(project)}
-                            className={`
-                group cursor-pointer bg-white border rounded-xl p-5 relative transition-all duration-300
-                ${selectedProject?.id === project.id ? 'border-gray-900 shadow-md ring-1 ring-gray-900' : 'border-gray-100 hover:border-gray-300'}
-              `}
-                        >
-                            <div className="flex justify-between items-start mb-3">
-                                <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
-                                    <Sprout size={18} className={project.score === 4 ? 'text-emerald-500' : ''} />
+                {/* Main Content Area - Split between Pending and Garden */}
+                <div className="flex-1 flex flex-col gap-8 overflow-y-auto no-scrollbar pb-20">
+
+                    {/* 1. Pending List */}
+                    <div className="space-y-4">
+                        {projects.map(project => (
+                            <motion.div
+                                layoutId={project.id}
+                                key={project.id}
+                                onClick={() => setSelectedProject(project)}
+                                className={`
+                                    group cursor-pointer bg-white border rounded-xl p-5 relative transition-all duration-300
+                                    ${selectedProject?.id === project.id ? 'border-gray-900 shadow-md ring-1 ring-gray-900' : 'border-gray-100 hover:border-gray-300'}
+                                `}
+                            >
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+                                        <Sprout size={18} className={project.score === 4 ? 'text-emerald-500' : ''} />
+                                    </div>
+                                    <button
+                                        onClick={(e) => handleDelete(e, project.id)}
+                                        className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 transition-all"
+                                    >
+                                        <X size={14} />
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={(e) => handleDelete(e, project.id)}
-                                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 transition-all"
-                                >
-                                    <X size={14} />
-                                </button>
-                            </div>
-                            <h3 className="text-gray-900 font-medium mb-1">{project.title}</h3>
-                            <p className="text-gray-400 text-xs font-light line-clamp-2">{project.desc}</p>
+                                <h3 className="text-gray-900 font-medium mb-1">{project.title}</h3>
+                                <p className="text-gray-400 text-xs font-light line-clamp-2">{project.desc}</p>
+                            </motion.div>
+                        ))}
 
-                            <div className="mt-4 flex gap-1 h-1">
-                                {QUESTIONS.map((q, i) => (
-                                    <div key={i} className={`flex-1 rounded-full ${project.answers[q.id] ? 'bg-emerald-500' : project.answers[q.id] === false ? 'bg-red-200' : 'bg-gray-100'}`} />
-                                ))}
+                        {/* Add Project Input */}
+                        <div className="relative group">
+                            <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-50 rounded-xl blur opacity-25 group-hover:opacity-50 transition-opacity" />
+                            <div className="relative bg-white border border-dashed border-gray-300 rounded-xl p-2 flex items-center gap-3 hover:border-gray-400 transition-colors">
+                                <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+                                    <Plus size={20} strokeWidth={1.5} />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Plant a new seed..."
+                                    className="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder:text-gray-400 font-light h-full"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && e.target.value.trim()) {
+                                            const newP = {
+                                                id: uuidv4(),
+                                                title: e.target.value.trim(),
+                                                desc: 'A new beginning...',
+                                                score: 0,
+                                                answers: {}
+                                            };
+                                            setProjects([newP, ...projects]);
+                                            setSelectedProject(newP);
+                                            e.target.value = '';
+                                        }
+                                    }}
+                                />
                             </div>
-                        </motion.div>
-                    ))}
-
-                    {/* Add Project Input */}
-                    <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-50 rounded-xl blur opacity-25 group-hover:opacity-50 transition-opacity" />
-                        <div className="relative bg-white border border-dashed border-gray-300 rounded-xl p-2 flex items-center gap-3 hover:border-gray-400 transition-colors">
-                            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
-                                <Plus size={20} strokeWidth={1.5} />
-                            </div>
-                            <input
-                                type="text"
-                                placeholder="Plant a new seed..."
-                                className="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder:text-gray-400 font-light h-full"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && e.target.value.trim()) {
-                                        const newP = {
-                                            id: uuidv4(),
-                                            title: e.target.value.trim(),
-                                            desc: 'A new beginning...',
-                                            score: 0,
-                                            answers: {}
-                                        };
-                                        setProjects([newP, ...projects]);
-                                        setSelectedProject(newP);
-                                        e.target.value = '';
-                                    }
-                                }}
-                            />
                         </div>
                     </div>
+
+                    {/* 2. The Nursery / Garden of Growth */}
+                    {primaryProjects.length > 0 && (
+                        <div className="pt-8 border-t border-gray-100">
+                            <div className="mb-4 flex items-center gap-2">
+                                <Sun size={16} className="text-amber-400" />
+                                <h3 className="text-sm font-medium text-gray-900 uppercase tracking-widest">Nursery</h3>
+                                <span className="text-xs text-gray-400 font-mono">({primaryProjects.length} Growing)</span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                {primaryProjects.map(p => {
+                                    const visual = getTreeVisual(p.subStage || 1);
+                                    return (
+                                        <motion.div
+                                            key={p.id}
+                                            layoutId={`nursery-${p.id}`}
+                                            className="bg-emerald-50/30 border border-emerald-100/50 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:bg-emerald-50 transition-colors cursor-default"
+                                        >
+                                            <motion.div
+                                                className={`mb-2 ${visual.color}`}
+                                                animate={{ scale: visual.scale }}
+                                            >
+                                                <visual.icon size={24} />
+                                            </motion.div>
+                                            <h4 className="text-xs font-medium text-gray-800 line-clamp-1 w-full">{p.title}</h4>
+                                            <div className="w-full bg-gray-200 h-1 rounded-full mt-2 overflow-hidden">
+                                                <div
+                                                    className="h-full bg-emerald-400"
+                                                    style={{ width: `${((p.subStage || 1) / 5) * 100}%` }}
+                                                />
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             </div>
 

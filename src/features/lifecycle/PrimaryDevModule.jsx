@@ -3,52 +3,27 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Code2, GitBranch, Layers, PlayCircle, Plus, CheckSquare,
     Square, Trash2, ExternalLink, X, ChevronRight, CheckCircle2,
-    MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight
+    MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command
 } from 'lucide-react';
-import { STORAGE_KEYS } from '../../utils/constants';
+import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
 
-const DEV_STAGES = [
-    {
-        id: 1,
-        label: 'Skeleton',
-        title: 'Core Skeleton Implementation',
-        desc: 'Build the fundamental structure, routing, and component architecture.',
-        icon: Layers
-    },
-    {
-        id: 2,
-        label: 'Functionality',
-        title: 'Core Functions Running',
-        desc: 'Implement main features and ensure critical paths are working.',
-        icon: MonitorPlay
-    },
-    {
-        id: 3,
-        label: 'Stability',
-        title: 'No Major Bugs',
-        desc: 'Rigorous testing of core flows. Zero critical issues allowed.',
-        icon: Bug
-    },
-    {
-        id: 4,
-        label: 'Optimization',
-        title: 'Optimization & Polish',
-        desc: 'Refine UI/UX, improve performance, and clean up code.',
-        icon: Sparkles
-    },
-    {
-        id: 5,
-        label: 'Completion',
-        title: 'Original Intent Met',
-        desc: 'Project fulfills its original vision and is ready for next steps.',
-        icon: Flag
-    }
-];
+const STAGE_ICONS = {
+    1: Layers,
+    2: MonitorPlay,
+    3: Bug,
+    4: Sparkles,
+    5: Flag
+};
 
 const PrimaryDevModule = () => {
     const [projects, setProjects] = useState([]);
     const [selectedProject, setSelectedProject] = useState(null);
     const [newTaskInput, setNewTaskInput] = useState('');
+
+    // Command Modal State
+    const [commandModalOpen, setCommandModalOpen] = useState(false);
+    const [commands, setCommands] = useState([]);
+    const [copiedTaskId, setCopiedTaskId] = useState(null);
 
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEYS.PRIMARY);
@@ -58,6 +33,14 @@ const PrimaryDevModule = () => {
             setProjects(migrated);
         }
     }, []);
+
+    // Load commands when modal opens
+    useEffect(() => {
+        if (commandModalOpen) {
+            const savedCmds = localStorage.getItem(STORAGE_KEYS.COMMANDS);
+            if (savedCmds) setCommands(JSON.parse(savedCmds));
+        }
+    }, [commandModalOpen]);
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEYS.PRIMARY, JSON.stringify(projects));
@@ -83,12 +66,54 @@ const PrimaryDevModule = () => {
         if (!newTaskInput.trim()) return;
 
         const project = projects.find(p => p.id === projectId);
-        const newTasks = [...(project.tasks || []), { id: Date.now(), text: newTaskInput, done: false }];
+        const newTasks = [...(project.tasks || []), {
+            id: Date.now(),
+            text: newTaskInput,
+            done: false,
+            // optional: command linkage
+        }];
         handleUpdateProject(projectId, { tasks: newTasks });
         setNewTaskInput('');
     };
 
+    const handleLinkCommand = (command) => {
+        const project = projects.find(p => p.id === selectedProject.id);
+        const newTasks = [...(project.tasks || []), {
+            id: Date.now(),
+            text: command.title, // Use command title as task text
+            done: false,
+            isCommand: true,
+            commandContent: command.content,
+            commandId: command.id
+        }];
+        handleUpdateProject(selectedProject.id, { tasks: newTasks });
+        setCommandModalOpen(false);
+    };
+
     const toggleTask = (projectId, taskId) => {
+        const project = projects.find(p => p.id === projectId);
+        const task = project.tasks.find(t => t.id === taskId);
+
+        // If it's a command task, copy and don't toggle immediately (or maybe toggle too?)
+        // Let's copy first.
+        if (task.isCommand) {
+            navigator.clipboard.writeText(task.commandContent);
+            setCopiedTaskId(taskId);
+            setTimeout(() => setCopiedTaskId(null), 2000);
+            return; // Don't toggle completion on copy? Or maybe we should?
+            // User said: "clicking... will copy... to my mouse"
+            // User didn't say it marks done. Let's keep separate.
+            // Maybe a separate checkbox for done?
+        }
+
+        const updatedTasks = project.tasks.map(t =>
+            t.id === taskId ? { ...t, done: !t.done } : t
+        );
+        handleUpdateProject(projectId, { tasks: updatedTasks });
+    };
+
+    const markTaskDone = (e, projectId, taskId) => {
+        e.stopPropagation();
         const project = projects.find(p => p.id === projectId);
         const updatedTasks = project.tasks.map(t =>
             t.id === taskId ? { ...t, done: !t.done } : t
@@ -208,7 +233,7 @@ const PrimaryDevModule = () => {
                                     <div>
                                         <div className="flex items-center gap-3 mb-2 opacity-80">
                                             <span className="px-3 py-1 rounded-full border border-white/20 bg-white/10 text-xs font-mono backdrop-blur-sm">
-                                                v4.1.0
+                                                v4.2.0
                                             </span>
                                             {selectedProject.link && (
                                                 <a href={selectedProject.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs hover:text-emerald-400 transition-colors">
@@ -240,7 +265,7 @@ const PrimaryDevModule = () => {
                                         {DEV_STAGES.map((stage) => {
                                             const isActive = (selectedProject.subStage || 1) === stage.id;
                                             const isDone = (selectedProject.subStage || 1) > stage.id;
-                                            const Icon = stage.icon;
+                                            const Icon = STAGE_ICONS[stage.id];
 
                                             return (
                                                 <div
@@ -289,9 +314,20 @@ const PrimaryDevModule = () => {
 
                                     {/* Task List */}
                                     <div className="flex-1 flex flex-col min-h-0">
-                                        <h4 className="text-sm font-medium text-gray-900 mb-4 flex items-center gap-2">
-                                            <CheckSquare size={16} /> Mission Log
-                                        </h4>
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                                                <CheckSquare size={16} /> Mission Log
+                                            </h4>
+
+                                            {/* Import Command Button */}
+                                            <button
+                                                onClick={() => setCommandModalOpen(true)}
+                                                className="text-xs flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
+                                            >
+                                                <Terminal size={12} />
+                                                <span>Import Command</span>
+                                            </button>
+                                        </div>
 
                                         <div className="flex-1 overflow-y-auto space-y-2 mb-4 -mx-2 px-2">
                                             {selectedProject.tasks?.map(task => (
@@ -300,17 +336,36 @@ const PrimaryDevModule = () => {
                                                     animate={{ opacity: 1, y: 0 }}
                                                     key={task.id}
                                                     onClick={() => toggleTask(selectedProject.id, task.id)}
-                                                    className="group flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl transition-all cursor-pointer border border-transparent hover:border-gray-100"
+                                                    className={`
+                                                        group flex items-center gap-4 p-4 rounded-xl transition-all cursor-pointer border border-transparent
+                                                        ${task.isCommand ? 'bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200' : 'hover:bg-gray-50 hover:border-gray-100'}
+                                                    `}
                                                 >
-                                                    <div className={`
-                                                        w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-300
-                                                        ${task.done ? 'bg-emerald-500 border-emerald-500 text-white scale-110' : 'border-gray-300 text-transparent group-hover:border-gray-400'}
-                                                    `}>
+                                                    <button
+                                                        onClick={(e) => markTaskDone(e, selectedProject.id, task.id)}
+                                                        className={`
+                                                            w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-300 shrink-0
+                                                            ${task.done
+                                                                ? 'bg-emerald-500 border-emerald-500 text-white'
+                                                                : task.isCommand ? 'border-gray-600 text-transparent hover:border-gray-400' : 'border-gray-300 text-transparent group-hover:border-gray-400'}
+                                                        `}
+                                                    >
                                                         <CheckCircle2 size={14} />
-                                                    </div>
-                                                    <span className={`flex-1 text-sm transition-colors ${task.done ? 'text-gray-400 line-through decoration-gray-200' : 'text-gray-700'}`}>
+                                                    </button>
+
+                                                    <span className={`flex-1 text-sm font-medium transition-colors ${task.done ? 'opacity-50 line-through' : ''}`}>
                                                         {task.text}
                                                     </span>
+
+                                                    {task.isCommand && (
+                                                        <div className="flex items-center gap-2">
+                                                            {copiedTaskId === task.id ? (
+                                                                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">COPIED</span>
+                                                            ) : (
+                                                                <Terminal size={14} className="opacity-50" />
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </motion.div>
                                             ))}
                                             {(!selectedProject.tasks || selectedProject.tasks.length === 0) && (
@@ -344,6 +399,60 @@ const PrimaryDevModule = () => {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Command Selector Modal */}
+            <AnimatePresence>
+                {commandModalOpen && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none">
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/20 backdrop-blur-sm pointer-events-auto"
+                            onClick={() => setCommandModalOpen(false)}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+                            className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col max-h-[70vh]"
+                        >
+                            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                                <h3 className="font-medium text-gray-900 flex items-center gap-2">
+                                    <Terminal size={18} />
+                                    Import Command
+                                </h3>
+                                <button onClick={() => setCommandModalOpen(false)} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            <div className="p-2 overflow-y-auto bg-gray-50">
+                                {commands.filter(c => c.stageId === (selectedProject?.subStage || 1)).length > 0 ? (
+                                    <div className="space-y-2">
+                                        {commands
+                                            .filter(c => c.stageId === (selectedProject?.subStage || 1))
+                                            .map(cmd => (
+                                                <div
+                                                    key={cmd.id}
+                                                    onClick={() => handleLinkCommand(cmd)}
+                                                    className="bg-white p-4 rounded-xl border border-gray-100 hover:border-emerald-500 hover:shadow-md transition-all cursor-pointer group"
+                                                >
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <span className="font-medium text-gray-900">{cmd.title}</span>
+                                                        <Plus size={16} className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                    </div>
+                                                    <p className="text-xs text-gray-500 line-clamp-2 font-mono bg-gray-50 p-2 rounded">{cmd.content}</p>
+                                                </div>
+                                            ))}
+                                    </div>
+                                ) : (
+                                    <div className="py-12 text-center text-gray-400">
+                                        <p>No commands configured for this stage.</p>
+                                        <p className="text-xs mt-2">Go to Command Center to add some.</p>
+                                    </div>
+                                )}
                             </div>
                         </motion.div>
                     </div>
