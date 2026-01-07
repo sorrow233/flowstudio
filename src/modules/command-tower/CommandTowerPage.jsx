@@ -255,13 +255,9 @@ export default function CommandTowerPage() {
                                             className="ct-command-item"
                                             style={{
                                                 '--cmd-color': cmd.color || freshColors[0].color,
-                                                borderLeft: `3px solid ${cmd.color || freshColors[0].color}`
+                                                backgroundColor: cmd.color || freshColors[0].color
                                             }}
                                         >
-                                            <div
-                                                className="ct-command-color-dot"
-                                                style={{ backgroundColor: cmd.color || freshColors[0].color }}
-                                            />
                                             <div
                                                 className="ct-command-main"
                                                 onClick={() => copyToClipboard(cmd.content, cmd.id)}
