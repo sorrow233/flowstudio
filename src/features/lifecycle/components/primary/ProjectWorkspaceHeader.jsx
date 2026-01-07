@@ -55,7 +55,9 @@ const ProjectWorkspaceHeader = ({
             </div>
 
             {/* Top Toolbar */}
-            <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-30">
+            <div
+                className={`absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-30 transition-all duration-300 ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            >
                 <button
                     onClick={onClose}
                     className="flex items-center gap-2 text-white/50 hover:text-white transition-colors bg-black/20 hover:bg-black/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/5"
