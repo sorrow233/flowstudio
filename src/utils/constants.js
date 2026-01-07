@@ -71,8 +71,12 @@ export const formatDate = (timestamp) => {
 };
 
 export const COMMAND_CATEGORIES = [
-    { id: 'utility', label: 'Utility', color: 'bg-gray-500', icon: 'Settings' },
-    { id: 'link', label: 'Reference', color: 'bg-blue-500', icon: 'Link' }
+    { id: 'general', label: 'General', color: 'bg-slate-400 text-white', icon: 'LayoutGrid' },
+    { id: 'frontend', label: 'Frontend', color: 'bg-blue-400 text-white', icon: 'Monitor' },
+    { id: 'backend', label: 'Backend', color: 'bg-emerald-400 text-white', icon: 'Server' },
+    { id: 'database', label: 'Database', color: 'bg-amber-400 text-white', icon: 'Database' },
+    { id: 'devops', label: 'DevOps', color: 'bg-violet-400 text-white', icon: 'Container' },
+    { id: 'testing', label: 'Testing', color: 'bg-rose-400 text-white', icon: 'Beaker' },
 ];
 
 export const DEFAULT_PROJECT_IMAGES = [
