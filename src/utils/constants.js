@@ -42,28 +42,23 @@ export const DEV_STAGES = [
 export const STAGE_EMPTY_STATES = {
     1: {
         title: 'Architect\'s Blank Canvas',
-        desc: 'Begin by defining the core routes and layout components. A strong foundation prevents future debt.',
-        tips: ['Create the main AppRouter.', 'Set up the global Layout component.', 'Define the folder structure in /src.']
+        desc: 'Begin by defining the core routes and layout components. A strong foundation prevents future debt.'
     },
     2: {
         title: 'Engine Not Started',
-        desc: 'The structure is ready. Now, breathe life into it with logic and interactions.',
-        tips: ['Connect the navigation links.', 'Implement local state for forms.', 'Mock API calls for UI testing.']
+        desc: 'The structure is ready. Now, breathe life into it with logic and interactions.'
     },
     3: {
         title: 'Systems Offline',
-        desc: 'It is time to connect the isolated modules into a cohesive ecosystem.',
-        tips: ['Integrate Supabase/Firebase Auth.', 'Set up React Query for data fetching.', 'Connect third-party webhooks.']
+        desc: 'It is time to connect the isolated modules into a cohesive ecosystem.'
     },
     4: {
         title: 'Rough Around the Edges',
-        desc: 'The app works, but it needs that "premium" feel. Focus on details.',
-        tips: ['Add Framer Motion transitions.', 'Optimize image loading (lazy load).', 'Check for unnecessary re-renders.']
+        desc: 'The app works, but it needs that "premium" feel. Focus on details.'
     },
     5: {
         title: 'Pre-Flight Checklist',
-        desc: 'You are almost there. Ensure systems are go for launch.',
-        tips: ['Run the full build command.', 'Check browser console for warnings.', 'Verify environment variables.']
+        desc: 'You are almost there. Ensure systems are go for launch.'
     }
 };
 
