@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import ErrorBoundary from './components/ErrorBoundary';
 import InspirationModule from './features/lifecycle/InspirationModule';
 import PendingModule from './features/lifecycle/PendingModule';
 import PrimaryDevModule from './features/lifecycle/PrimaryDevModule';
@@ -25,19 +26,21 @@ function App() {
 
             <main className="flex-1 overflow-y-auto w-full no-scrollbar">
                 <div className="max-w-7xl mx-auto h-full px-4 md:px-6 pb-20">
-                    <AnimatePresence mode="wait">
-                        <Routes location={location} key={location.pathname}>
-                            <Route path="/" element={<Navigate to="/inspiration" replace />} />
-                            <Route path="/inspiration" element={<PageWrapper><InspirationModule /></PageWrapper>} />
-                            <Route path="/pending" element={<PageWrapper><PendingModule /></PageWrapper>} />
-                            <Route path="/primary" element={<PageWrapper><PrimaryDevModule /></PageWrapper>} />
-                            <Route path="/final" element={<PageWrapper><FinalDevModule /></PageWrapper>} />
-                            <Route path="/advanced" element={<PageWrapper><AdvancedDevModule /></PageWrapper>} />
-                            <Route path="/commercial" element={<PageWrapper><CommercialModule /></PageWrapper>} />
-                            <Route path="/commands" element={<PageWrapper><CommandCenterModule /></PageWrapper>} />
-                            <Route path="*" element={<Navigate to="/" replace />} />
-                        </Routes>
-                    </AnimatePresence>
+                    <ErrorBoundary>
+                        <AnimatePresence mode="wait">
+                            <Routes location={location} key={location.pathname}>
+                                <Route path="/" element={<Navigate to="/inspiration" replace />} />
+                                <Route path="/inspiration" element={<PageWrapper><InspirationModule /></PageWrapper>} />
+                                <Route path="/pending" element={<PageWrapper><PendingModule /></PageWrapper>} />
+                                <Route path="/primary" element={<PageWrapper><PrimaryDevModule /></PageWrapper>} />
+                                <Route path="/final" element={<PageWrapper><FinalDevModule /></PageWrapper>} />
+                                <Route path="/advanced" element={<PageWrapper><AdvancedDevModule /></PageWrapper>} />
+                                <Route path="/commercial" element={<PageWrapper><CommercialModule /></PageWrapper>} />
+                                <Route path="/commands" element={<PageWrapper><CommandCenterModule /></PageWrapper>} />
+                                <Route path="*" element={<Navigate to="/" replace />} />
+                            </Routes>
+                        </AnimatePresence>
+                    </ErrorBoundary>
                 </div>
             </main>
         </div>
