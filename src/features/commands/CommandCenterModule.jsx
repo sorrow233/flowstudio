@@ -3,7 +3,8 @@ import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import {
     Terminal, Plus, Trash2, Copy, Check, Search,
     Layers, MonitorPlay, Bug, Sparkles, Flag, Command,
-    ChevronRight, Sparkle, Link as LinkIcon, GripVertical, FileText, Globe, Library, Download, X, Tag
+    ChevronRight, Sparkle, Link as LinkIcon, GripVertical, FileText, Globe, Library, Download, X, Tag,
+    LayoutGrid, Monitor, Server, Database, Container, Beaker, Filter
 } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES, COMMAND_CATEGORIES } from '../../utils/constants';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,9 +17,19 @@ const STAGE_ICONS = {
     5: Flag
 };
 
+const CATEGORY_ICONS = {
+    'LayoutGrid': LayoutGrid,
+    'Monitor': Monitor,
+    'Server': Server,
+    'Database': Database,
+    'Container': Container,
+    'Beaker': Beaker
+};
+
 const CommandCenterModule = () => {
     const [commands, setCommands] = useState([]);
     const [activeStage, setActiveStage] = useState(1);
+    const [selectedCategory, setSelectedCategory] = useState('all'); // Category Filter
     const [isAdding, setIsAdding] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
     const [search, setSearch] = useState('');
@@ -239,12 +250,15 @@ const CommandCenterModule = () => {
 
     // Search filtering
     const isSearching = search.trim().length > 0;
-    const visibleCommands = isSearching
-        ? stageCommands.filter(c =>
+    const visibleCommands = stageCommands.filter(c => {
+        const matchesSearch = !isSearching ||
             c.title.toLowerCase().includes(search.toLowerCase()) ||
-            c.content.toLowerCase().includes(search.toLowerCase())
-        )
-        : stageCommands;
+            c.content.toLowerCase().includes(search.toLowerCase());
+
+        const matchesCategory = selectedCategory === 'all' || (c.category || 'general') === selectedCategory;
+
+        return matchesSearch && matchesCategory;
+    });
 
     return (
         <div className="max-w-7xl mx-auto pt-8 px-6 h-[calc(100vh-4rem)] flex gap-8">
@@ -332,6 +346,19 @@ const CommandCenterModule = () => {
                             <span className="px-2 py-1 rounded-md bg-gray-100 text-[10px] font-bold tracking-widest uppercase text-gray-500">
                                 Stage 0{activeStage}
                             </span>
+                            <span className="text-gray-300">/</span>
+                            <div className="flex items-center gap-1">
+                                {selectedCategory === 'all' ? (
+                                    <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">All Categories</span>
+                                ) : (
+                                    <>
+                                        <span className={`w-2 h-2 rounded-full ${COMMAND_CATEGORIES.find(c => c.id === selectedCategory)?.color.split(' ')[0].replace('bg-', 'bg-')}`}></span>
+                                        <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">
+                                            {COMMAND_CATEGORIES.find(c => c.id === selectedCategory)?.label}
+                                        </span>
+                                    </>
+                                )}
+                            </div>
                         </div>
                         <h3 className="text-4xl font-thin text-gray-900 mb-2">{DEV_STAGES[activeStage - 1].title}</h3>
                         <p className="text-gray-400 font-light max-w-lg leading-relaxed">
@@ -353,7 +380,7 @@ const CommandCenterModule = () => {
                             {/* New Command Button */}
                             <button
                                 onClick={() => {
-                                    setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [] }); // Clear for new
+                                    setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [], category: 'general' }); // Clear for new
                                     setNewTag({ label: '', value: '' });
                                     setEditingTagId(null);
                                     setIsAdding(true);
@@ -365,14 +392,52 @@ const CommandCenterModule = () => {
                             </button>
                         </div>
 
-                        <div className="relative group">
-                            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
-                            <input
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search commands..."
-                                className="pl-10 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white rounded-xl text-sm border border-transparent hover:border-gray-200 focus:border-emerald-200 outline-none w-64 transition-all focus:w-80 shadow-inner"
-                            />
+                        <div className="flex gap-2">
+                            {/* Category Filter Pills - Compact & Scrollable */}
+                            <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl overflow-x-auto no-scrollbar max-w-[300px] xl:max-w-none">
+                                <button
+                                    onClick={() => setSelectedCategory('all')}
+                                    className={`
+                                        px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0
+                                        ${selectedCategory === 'all'
+                                            ? 'bg-white text-gray-900 shadow-sm'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-gray-200/50'}
+                                    `}
+                                >
+                                    All
+                                </button>
+                                {COMMAND_CATEGORIES.map(cat => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setSelectedCategory(cat.id)}
+                                        className={`
+                                            w-8 h-8 flex items-center justify-center rounded-lg transition-all shrink-0 relative
+                                            ${selectedCategory === cat.id
+                                                ? 'bg-white shadow-md text-gray-900 scale-105 z-10'
+                                                : 'text-gray-400 hover:bg-white/50 hover:text-gray-600'}
+                                        `}
+                                        title={cat.label}
+                                    >
+                                        <div className={`w-2.5 h-2.5 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')} ${selectedCategory === cat.id ? 'ring-2 ring-offset-1 ring-gray-100' : ''}`} />
+                                        {selectedCategory === cat.id && (
+                                            <motion.div
+                                                layoutId="activeCategory"
+                                                className="absolute inset-0 rounded-lg ring-1 ring-black/5"
+                                            />
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="relative group">
+                                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
+                                <input
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Filter..."
+                                    className="pl-10 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white rounded-xl text-sm border border-transparent hover:border-gray-200 focus:border-emerald-200 outline-none w-40 transition-all focus:w-60 shadow-inner"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -416,22 +481,45 @@ const CommandCenterModule = () => {
                                         </div>
                                     </div>
 
-                                    {/* Category Selector */}
-                                    <div className="flex flex-wrap gap-2">
-                                        {COMMAND_CATEGORIES.map(cat => (
-                                            <button
-                                                key={cat.id}
-                                                onClick={() => setNewCmd({ ...newCmd, category: cat.id })}
-                                                className={`
-                                                    px-3 py-1.5 rounded-lg text-xs font-medium transition-all border
-                                                    ${newCmd.category === cat.id
-                                                        ? `${cat.color} border-transparent ring-2 ring-offset-1 ring-gray-100`
-                                                        : 'bg-white text-gray-500 border-gray-100 hover:border-gray-200'}
-                                                `}
-                                            >
-                                                {cat.label}
-                                            </button>
-                                        ))}
+                                    {/* Category Selector (Enhanced) */}
+                                    <div>
+                                        <div className="flex justify-between items-center mb-3">
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Category</span>
+                                            {newCmd.category && newCmd.category !== 'general' && (
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${COMMAND_CATEGORIES.find(c => c.id === newCmd.category)?.color.replace('text-', 'bg-').replace('bg-', 'text-opacity-80 text-') || 'bg-gray-100 text-gray-500'}`}>
+                                                    {COMMAND_CATEGORIES.find(c => c.id === newCmd.category)?.label}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                            {COMMAND_CATEGORIES.map(cat => {
+                                                const CatIcon = CATEGORY_ICONS[cat.icon] || LayoutGrid;
+                                                const isSelected = newCmd.category === cat.id;
+                                                return (
+                                                    <button
+                                                        key={cat.id}
+                                                        onClick={() => setNewCmd({ ...newCmd, category: cat.id })}
+                                                        className={`
+                                                            flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-medium transition-all border group
+                                                            ${isSelected
+                                                                ? `bg-gray-50 border-${cat.color.split('-')[1]}-200 ring-1 ring-${cat.color.split('-')[1]}-200`
+                                                                : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50/50'}
+                                                        `}
+                                                    >
+                                                        <div className={`
+                                                            w-8 h-8 rounded-lg flex items-center justify-center transition-colors
+                                                            ${isSelected ? 'bg-white shadow-sm' : 'bg-gray-50 group-hover:bg-white'}
+                                                        `}>
+                                                            <div className={`w-2 h-2 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')}`} />
+                                                        </div>
+                                                        <span className={isSelected ? 'text-gray-900' : 'text-gray-500'}>
+                                                            {cat.label}
+                                                        </span>
+                                                        {isSelected && <CheckCircle2 size={14} className="ml-auto text-emerald-500" />}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
 
                                     {/* Title Input */}
@@ -643,6 +731,16 @@ const CommandCenterModule = () => {
                                             {!isSearching && (
                                                 <div className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-400 p-2 -ml-2">
                                                     <GripVertical size={16} />
+                                                </div>
+                                            )}
+
+                                            {/* Category Badge */}
+                                            {cmd.category && cmd.category !== 'general' && (
+                                                <div className={`
+                                                    absolute top-3 right-10 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide opacity-50 group-hover:opacity-100 transition-opacity
+                                                    ${COMMAND_CATEGORIES.find(cat => cat.id === cmd.category)?.color || 'bg-gray-100 text-gray-500'}
+                                                `}>
+                                                    {COMMAND_CATEGORIES.find(cat => cat.id === cmd.category)?.label}
                                                 </div>
                                             )}
 

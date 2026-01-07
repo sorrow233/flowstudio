@@ -4,7 +4,7 @@ import {
     Code2, GitBranch, Layers, PlayCircle, Plus, CheckSquare,
     Square, Trash2, ExternalLink, X, ChevronRight, CheckCircle2,
     MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command, Check, Rocket, Globe, Pencil, Save, Image as ImageIcon,
-    Tag
+    Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker
 } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES, COMMAND_CATEGORIES } from '../../utils/constants';
 
@@ -14,6 +14,15 @@ const STAGE_ICONS = {
     3: Bug,
     4: Sparkles,
     5: Flag
+};
+
+const CATEGORY_ICONS = {
+    'LayoutGrid': LayoutGrid,
+    'Monitor': Monitor,
+    'Server': Server,
+    'Database': Database,
+    'Container': Container,
+    'Beaker': Beaker
 };
 
 const VISUAL_VIBES = [
@@ -745,10 +754,14 @@ const PrimaryDevModule = () => {
 
                                             if (catCommands.length === 0) return null;
 
+                                            const CatIcon = CATEGORY_ICONS[cat.icon] || LayoutGrid;
+
                                             return (
                                                 <div key={cat.id}>
                                                     <div className="sticky top-0 z-20 bg-white/95 backdrop-blur py-2 mb-2 border-b border-gray-100 flex items-center gap-2">
-                                                        <span className={`w-2 h-2 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')}`}></span>
+                                                        <span className={`w-6 h-6 rounded-lg flex items-center justify-center ${cat.color.split(' ')[0].replace('bg-', 'bg-')} bg-opacity-20`}>
+                                                            <CatIcon size={12} className={cat.color.split(' ')[1]} />
+                                                        </span>
                                                         <h4 className="text-xs font-bold uppercase tracking-widest text-gray-500">
                                                             {cat.label}
                                                         </h4>
