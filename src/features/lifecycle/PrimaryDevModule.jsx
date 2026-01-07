@@ -284,7 +284,10 @@ const PrimaryDevModule = () => {
                                 onToggleCollapse={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
                             />
 
-                            <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30">
+                            <div
+                                className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30"
+                                onClick={() => !isHeaderCollapsed && setIsHeaderCollapsed(true)}
+                            >
                                 {/* Left Sidebar: Stage Navigation */}
                                 <StageNavigation
                                     activeStage={selectedProject.subStage || 1}
