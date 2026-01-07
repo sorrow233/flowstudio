@@ -1,32 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus, TreeDeciduous, TreePine, Image as ImageIcon, Sparkles, RefreshCw } from 'lucide-react';
+import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus, TreeDeciduous, TreePine, Image as ImageIcon, Sparkles, RefreshCw, Feather } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { STORAGE_KEYS } from '../../utils/constants';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 
-// 朴素客观的灵魂拷问 (Simple & Objective Questions)
+// 初始构想的灵魂四问 (Original Vision Questions)
 const QUESTIONS = [
     {
         id: 'clarity',
-        text: '这个想法解决了什么实际问题？',
-        sub: '核心价值' // Core Value
+        text: '你是否能够清晰地表达自己究竟想要什么？',
+        sub: '清晰度'
     },
     {
-        id: 'obsession',
-        text: '为什么值得你花时间去实现它？', // User explicitly asked for this angle
-        sub: '行动初衷' // Motivation
+        id: 'dogfood',
+        text: '开发出来之后，你自己也会经常用它吗？',
+        sub: '自用需求'
     },
     {
-        id: 'market',
-        text: '谁会真的需要并使用这个东西？',
-        sub: '目标用户' // Target User
+        id: 'impact',
+        text: '它能在未来长期改变你的生活吗？（否则是浪费时间）',
+        sub: '长期价值'
     },
     {
-        id: 'moat',
-        text: '你打算如何迈出第一步？',
-        sub: '落地计划' // Execution
+        id: 'value',
+        text: '你是否相信这个项目能够真正帮助到大家？',
+        sub: '利他之心'
     },
 ];
 
@@ -41,9 +41,8 @@ const VISUAL_VIBES = [
 const PendingModule = () => {
     const { doc } = useSync();
 
-    // Explicit Version Log
     useEffect(() => {
-        console.log("PendingModule v1.6 Loaded (Simple Copy)");
+        console.log("PendingModule v1.7 Loaded (Visionary Edition)");
     }, []);
 
     const {
@@ -59,6 +58,7 @@ const PendingModule = () => {
 
     const [selectedProject, setSelectedProject] = useState(null);
 
+    // Keep detail view in sync
     useEffect(() => {
         if (selectedProject) {
             const current = projects.find(p => p.id === selectedProject.id);
@@ -77,10 +77,8 @@ const PendingModule = () => {
     const handleAnswer = (projectId, questionId, value) => {
         const project = projects.find(p => p.id === projectId);
         if (!project) return;
-
         const newAnswers = { ...project.answers, [questionId]: value };
         const yesCount = Object.values(newAnswers).filter(v => v === true).length;
-
         updateProject(projectId, { answers: newAnswers, score: yesCount });
     };
 
@@ -90,12 +88,16 @@ const PendingModule = () => {
 
         if (doc) {
             const primaryList = doc.getArray('primary_projects');
+            // Check if "Sacred Reason" is filled
+            const hasReason = project.foundingReason && project.foundingReason.trim().length > 0;
+
             const newPrimary = {
                 ...project,
                 graduatedAt: Date.now(),
                 subStage: 1,
                 progress: 0,
-                tasks: []
+                tasks: [],
+                hasHolyGlow: hasReason // Flag for the visual effect
             };
             primaryList.unshift([newPrimary]);
         }
@@ -128,15 +130,13 @@ const PendingModule = () => {
 
     return (
         <div className="max-w-7xl mx-auto pt-8 px-6 h-full flex gap-10">
-            {/* Stream (Left) */}
+            {/* Left Column: Stream & Nursery */}
             <div className={`transition-all duration-500 flex flex-col ${selectedProject ? 'w-[350px] opacity-100' : 'w-full'}`}>
-                {/* Header */}
                 <div className="mb-8">
                     <h2 className="text-2xl font-light tracking-wide text-gray-900">Idea Staging</h2>
                     <p className="text-xs font-mono text-gray-400 mt-1 uppercase tracking-widest">Validate before you build</p>
                 </div>
 
-                {/* Main Content Area */}
                 <div className="flex-1 flex flex-col gap-8 overflow-y-auto no-scrollbar pb-20">
                     <div className="space-y-4">
                         {projects.map(project => (
@@ -165,7 +165,7 @@ const PendingModule = () => {
                             </motion.div>
                         ))}
 
-                        {/* Add Project */}
+                        {/* Add Input */}
                         <div className="relative group">
                             <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-50 rounded-xl blur opacity-25 group-hover:opacity-50 transition-opacity" />
                             <div className="relative bg-white border border-dashed border-gray-300 rounded-xl p-2 flex items-center gap-3 hover:border-gray-400 transition-colors">
@@ -174,7 +174,7 @@ const PendingModule = () => {
                                 </div>
                                 <input
                                     type="text"
-                                    placeholder="播种一个新的想法..."
+                                    placeholder="Plant a new seed..."
                                     className="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder:text-gray-400 font-light h-full"
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && e.target.value.trim()) {
@@ -195,7 +195,7 @@ const PendingModule = () => {
                         </div>
                     </div>
 
-                    {/* Nursery */}
+                    {/* Nursery (Primary Projects) */}
                     {primaryProjects.length > 0 && (
                         <div className="pt-8 border-t border-gray-100">
                             <div className="mb-4 flex items-center gap-2">
@@ -206,19 +206,32 @@ const PendingModule = () => {
                             <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 no-scrollbar snap-x">
                                 {primaryProjects.map(p => {
                                     const visual = getTreeVisual(p.subStage || 1);
+                                    // Holy Glow Effect Check
+                                    const isHoly = p.hasHolyGlow;
+
                                     return (
                                         <motion.div
                                             key={p.id}
                                             layoutId={`nursery-${p.id}`}
-                                            className="min-w-[140px] snap-start bg-gradient-to-b from-emerald-50/50 to-white border border-emerald-100 rounded-2xl p-4 flex flex-col items-center justify-between text-center hover:shadow-sm transition-all cursor-default h-[160px]"
+                                            className={`
+                                                min-w-[140px] snap-start bg-gradient-to-b from-emerald-50/50 to-white 
+                                                border rounded-2xl p-4 flex flex-col items-center justify-between text-center 
+                                                hover:shadow-sm transition-all cursor-default h-[160px] relative overflow-hidden
+                                                ${isHoly ? 'border-emerald-200 ring-4 ring-emerald-50/50 shadow-[0_0_20px_rgba(16,185,129,0.15)]' : 'border-emerald-100'}
+                                            `}
                                         >
+                                            {isHoly && <div className="absolute inset-0 bg-gradient-to-t from-emerald-100/30 to-transparent pointer-events-none" />}
+
                                             <div className="flex-1 flex items-center justify-center w-full relative">
-                                                <motion.div className={`relative z-10 ${visual.color}`} animate={{ scale: visual.scale }}>
+                                                <motion.div
+                                                    className={`relative z-10 ${visual.color} ${isHoly ? 'drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]' : ''}`}
+                                                    animate={{ scale: visual.scale }}
+                                                >
                                                     <visual.icon size={32} strokeWidth={1.5} />
                                                 </motion.div>
                                                 <div className="absolute bottom-2 w-8 h-1 bg-emerald-900/10 rounded-full blur-sm" />
                                             </div>
-                                            <div className="w-full">
+                                            <div className="w-full relative z-10">
                                                 <h4 className="text-xs font-medium text-gray-700 line-clamp-1 w-full mb-2">{p.title}</h4>
                                                 <div className="flex items-center gap-1.5 justify-center">
                                                     <div className="w-full bg-gray-100 h-1 rounded-full overflow-hidden">
@@ -235,7 +248,7 @@ const PendingModule = () => {
                 </div>
             </div>
 
-            {/* Assessment (Right) */}
+            {/* Right Column: Detail View */}
             <AnimatePresence mode="wait">
                 {selectedProject && (
                     <motion.div
@@ -252,7 +265,6 @@ const PendingModule = () => {
                             <X size={20} className="text-gray-400" />
                         </button>
 
-                        {/* Background */}
                         <div className="absolute top-0 left-0 right-0 h-48 bg-gray-50 overflow-hidden rounded-t-[2.5rem] z-0">
                             {selectedProject.bgImage ? (
                                 <>
@@ -264,9 +276,7 @@ const PendingModule = () => {
                             )}
                         </div>
 
-                        {/* Content */}
                         <div className="relative z-20 flex flex-col items-center mb-10 w-full mt-10">
-                            {/* ... Title/Inputs ... */}
                             <motion.div animate={getSaplingState(selectedProject.score)} className="mb-6 relative">
                                 <Sprout size={80} strokeWidth={1} />
                                 {selectedProject.score === 4 && <div className="absolute -top-1 -right-1 text-yellow-500"><Sun size={28} fill="currentColor" /></div>}
@@ -290,19 +300,16 @@ const PendingModule = () => {
                                     placeholder="这个想法的原动力是什么？"
                                 />
 
-                                {/* Link & Vibe */}
                                 <div className="flex gap-2 justify-center mt-6">
-                                    {/* ... Link Input ... */}
-                                    {/* ... Vibe Selector ... */}
                                     <div className="flex items-center gap-2 bg-white border rounded-full px-4 py-1.5 shadow-sm">
                                         <Sparkles size={12} className="text-gray-400" />
-                                        <input value={selectedProject.link || ''} onChange={(e) => handleUpdateProject(selectedProject.id, 'link', e.target.value)} placeholder="项目链接" className="w-40 text-xs border-none p-0 focus:ring-0" />
+                                        <input value={selectedProject.link || ''} onChange={(e) => handleUpdateProject(selectedProject.id, 'link', e.target.value)} placeholder="链接" className="w-40 text-xs border-none p-0 focus:ring-0" />
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* QUESTIONS */}
+                        {/* Questions List */}
                         <div className="space-y-4 max-w-2xl mx-auto w-full relative z-20">
                             {QUESTIONS.map((q, i) => {
                                 const ans = selectedProject.answers[q.id];
@@ -331,40 +338,49 @@ const PendingModule = () => {
                                         </div>
 
                                         <div className="relative z-30 flex gap-3">
-                                            <button
-                                                onClick={() => handleAnswer(selectedProject.id, q.id, true)}
-                                                className={`
-                                                  cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all hover:scale-[1.01] active:scale-[0.98]
-                                                  ${ans === true
-                                                        ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20'
-                                                        : 'bg-white border-gray-200 text-gray-400 hover:border-emerald-300 hover:text-emerald-600'}
-                                                `}
-                                            >
-                                                YES
-                                            </button>
-                                            <button
-                                                onClick={() => handleAnswer(selectedProject.id, q.id, false)}
-                                                className={`
-                                                  cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all hover:scale-[1.01] active:scale-[0.98]
-                                                  ${ans === false
-                                                        ? 'bg-red-500 border-red-500 text-white shadow-lg shadow-red-500/20'
-                                                        : 'bg-white border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-500'}
-                                                `}
-                                            >
-                                                NO
-                                            </button>
+                                            <button onClick={() => handleAnswer(selectedProject.id, q.id, true)} className={`cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all ${ans === true ? 'bg-emerald-500 text-white border-emerald-500' : 'hover:bg-gray-50 bg-white'}`}>YES</button>
+                                            <button onClick={() => handleAnswer(selectedProject.id, q.id, false)} className={`cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all ${ans === false ? 'bg-red-500 text-white border-red-500' : 'hover:bg-gray-50 bg-white'}`}>NO</button>
                                         </div>
                                     </motion.div>
                                 );
                             })}
                         </div>
 
+                        {/* Sacred Reason Input */}
+                        <div className="max-w-2xl mx-auto w-full relative z-20 mt-10">
+                            <div className="mb-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Feather size={16} className="text-purple-400" />
+                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">创始人誓言 (可选)</h4>
+                                </div>
+                                <p className="text-sm text-gray-500 font-light mb-3">
+                                    请认真思考：你是否有十分充分的理由去开发这个项目？无论什么理由，请写下来告诉自己。
+                                    <span className="block text-xs mt-1 text-purple-400/70">* 哪怕不写，你依然可以继续。但写下的承诺，由于“本初的感动”，将赋予它特殊的光芒。</span>
+                                </p>
+                                <textarea
+                                    value={selectedProject.foundingReason || ''}
+                                    onChange={(e) => handleUpdateProject(selectedProject.id, 'foundingReason', e.target.value)}
+                                    className="w-full p-4 bg-purple-50/30 border border-purple-100 rounded-2xl text-gray-700 placeholder:text-gray-400 focus:bg-white focus:border-purple-300 focus:ring-4 focus:ring-purple-100 transition-all text-sm leading-relaxed min-h-[100px]"
+                                    placeholder="我为什么要开发它？最本初的渴望是..."
+                                />
+                            </div>
+                        </div>
+
                         {/* Graduate Button */}
-                        <div className="max-w-2xl mx-auto mt-12 pb-10 w-full relative z-30">
+                        <div className="max-w-2xl mx-auto mt-6 pb-10 w-full relative z-30">
                             {selectedProject.score === 4 && (
-                                <button onClick={() => handleGraduate(selectedProject)} className="group w-full py-5 bg-gray-900 text-white rounded-2xl flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl hover:-translate-y-1">
-                                    <span className="text-lg font-light tracking-wide">晋升至 Primary Dev</span>
-                                    <ArrowRight size={20} className="group-hover:translate-x-1" />
+                                <button
+                                    onClick={() => handleGraduate(selectedProject)}
+                                    className={`
+                                        group w-full py-5 text-white rounded-2xl flex items-center justify-center gap-3 hover:translate-y-[-2px] transition-all shadow-xl
+                                        ${selectedProject.foundingReason ? 'bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 shadow-purple-900/20' : 'bg-gray-900 shadow-gray-900/10'}
+                                    `}
+                                >
+                                    <span className="text-lg font-light tracking-wide">
+                                        {selectedProject.foundingReason ? '立下誓言并启程 (Primary Dev)' : '直接启程 (Primary Dev)'}
+                                    </span>
+                                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                    {selectedProject.foundingReason && <Sparkles size={16} className="text-purple-300 animate-pulse" />}
                                 </button>
                             )}
                         </div>
