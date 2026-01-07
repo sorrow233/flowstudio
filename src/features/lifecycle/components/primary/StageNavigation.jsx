@@ -77,48 +77,46 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                 </div>
                             </div>
 
-                            {/* Manual Completion Switch */}
+                            {/* Manual Completion Dot - Double Click to Toggle */}
                             {/* Only show for current or completed stages (allow undo) */}
                             {(!isLocked) && (
-                                <div className="pl-2 border-l border-gray-100/10 ml-2">
-                                    <button
-                                        onClick={(e) => {
+                                <div className="pl-2 border-l border-gray-100/10 ml-2 group/dot relative">
+                                    <motion.button
+                                        whileHover={{ scale: 1.3 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onDoubleClick={(e) => {
                                             e.stopPropagation();
-                                            // Toggle: If completed (isCompleted is true), mark false (undo). 
-                                            // If current (isCompleted is false), mark true (complete).
-                                            // Wait, logic check: 
-                                            // If I am at Stage 3. Stage 1 and 2 are < 3 (Completed).
-                                            // If I click Stage 1 toggle -> Undo?
-                                            // If I undo Stage 1, Stage 2 also becomes invalid/locked effectively.
-                                            // Handling pure standard logic:
-                                            // If isCompleted -> Undo this stage means setting progress TO this stage.
-                                            // If isCurrent -> Complete this stage means setting progress TO Next stage.
-
                                             if (isCompleted) {
-                                                // Undo: Set progress back to THIS stage
                                                 onToggleComplete(stage.id, false);
                                             } else {
-                                                // Complete: Set progress to NEXT stage (stage.id + 1)
-                                                // BUT, user said "5 switches". 
-                                                // If I complete Stage 5 -> Progress 6.
                                                 onToggleComplete(stage.id, true);
                                             }
                                         }}
                                         className={`
-                                            w-10 h-6 rounded-full flex items-center transition-colors duration-300 relative
-                                            ${isCompleted || (isCurrentProgress && false) // Logic fix: Switch is ON if isCompleted
-                                                ? 'bg-emerald-500 justify-end'
-                                                : 'bg-gray-200 justify-start hover:bg-gray-300'
+                                            w-4 h-4 rounded-full transition-all duration-300 shadow-sm
+                                            ${isCompleted
+                                                ? 'bg-emerald-500 shadow-emerald-200'
+                                                : (() => {
+                                                    // Different colors for each stage
+                                                    const stageColors = {
+                                                        1: 'bg-slate-400',
+                                                        2: 'bg-blue-400',
+                                                        3: 'bg-violet-400',
+                                                        4: 'bg-amber-400',
+                                                        5: 'bg-rose-400'
+                                                    };
+                                                    return stageColors[stage.id] || 'bg-gray-300';
+                                                })()
                                             }
-                                            ${isViewActive ? 'ring-1 ring-white/20' : ''}
                                         `}
-                                        title={isCompleted ? "Mark Incomplete" : "Mark Complete"}
-                                    >
-                                        <motion.div
-                                            layout
-                                            className="w-4 h-4 bg-white rounded-full shadow-sm mx-1"
-                                        />
-                                    </button>
+                                        title={isCompleted ? "Double click to undo" : "Double click to complete"}
+                                    />
+                                    {/* Hover Hint Tooltip */}
+                                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 opacity-0 group-hover/dot:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
+                                        <span className="bg-gray-900 text-white text-[9px] px-2 py-1 rounded shadow-lg font-medium">
+                                            Double click to {isCompleted ? 'undo' : 'complete'}
+                                        </span>
+                                    </div>
                                 </div>
                             )}
                         </div>

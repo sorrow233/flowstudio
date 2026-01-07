@@ -75,32 +75,20 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                         {copiedTaskId === task.id ? <Check size={20} className="animate-bounce" /> : (isLink ? <Globe size={20} /> : <Terminal size={20} />)}
                     </div>
                 ) : (
-                    <div className="relative group/check flex items-center justify-center w-6 h-6 shrink-0">
-                        {/* Status Dot */}
-                        <motion.button
-                            whileHover={{ scale: 1.2 }}
-                            whileTap={{ scale: 0.9 }}
-                            onDoubleClick={(e) => { e.stopPropagation(); onToggle(projectId, task.id); }}
-                            className={`
-                                w-4 h-4 rounded-full transition-all duration-300 shadow-sm
-                                ${task.done
-                                    ? 'bg-emerald-500 shadow-emerald-200'
-                                    : (() => {
-                                        if (isMandatory) return 'bg-red-400 shadow-red-200';
-                                        const cat = COMMAND_CATEGORIES.find(c => c.id === task.category);
-                                        // Extract background color class or default to gray
-                                        return cat ? cat.color.replace('text-white', '').trim() : 'bg-gray-300';
-                                    })()
-                                }
-                            `}
-                        />
-                        {/* Hover Hint */}
-                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 opacity-0 group-hover/check:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                            <span className="bg-gray-900 text-white text-[10px] px-2 py-1 rounded shadow-lg font-medium">
-                                Double click to {task.done ? 'undo' : 'complete'}
-                            </span>
-                        </div>
-                    </div>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onToggle(projectId, task.id); }}
+                        className={`
+                            w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 shrink-0
+                            ${task.done
+                                ? 'bg-emerald-500 border-emerald-500 text-white scale-110'
+                                : isMandatory
+                                    ? 'border-red-200 text-transparent hover:border-red-400 bg-red-50 hover:bg-red-100'
+                                    : 'border-gray-200 text-transparent group-hover:border-gray-400 hover:bg-gray-50'
+                            }
+                        `}
+                    >
+                        <Check size={14} strokeWidth={3} />
+                    </button>
                 )}
 
                 {/* Content */}
