@@ -53,11 +53,25 @@ const PrimaryDevModule = () => {
     const [editForm, setEditForm] = useState({});
     const [copiedTaskId, setCopiedTaskId] = useState(null);
 
+    // Header State
+    const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
+
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEYS.PRIMARY);
         if (saved) {
             const parsed = JSON.parse(saved);
-            const migrated = parsed.map(p => ({ ...p, subStage: p.subStage || 1 }));
+            // Migration: Ensure subStage exists AND assign existing tasks to the current stage if they don't have one
+            const migrated = parsed.map(p => {
+                const currentStage = p.subStage || 1;
+                return {
+                    ...p,
+                    subStage: currentStage,
+                    tasks: (p.tasks || []).map(t => ({
+                        ...t,
+                        stage: t.stage || currentStage // Lock existing tasks to the current stage they are found in
+                    }))
+                };
+            });
             setProjects(migrated);
         }
     }, []);
@@ -113,6 +127,9 @@ const PrimaryDevModule = () => {
         setIsEditingProject(false);
     };
 
+    const [newTaskCategory, setNewTaskCategory] = useState('general');
+    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+
     const handleAddTask = (projectId) => {
         if (!newTaskInput.trim()) return;
 
@@ -121,7 +138,8 @@ const PrimaryDevModule = () => {
             id: Date.now(),
             text: newTaskInput,
             done: false,
-            // optional: command linkage
+            category: newTaskCategory,
+            stage: project.subStage || 1 // Bind to current stage
         }];
         handleUpdateProject(projectId, { tasks: newTasks });
         setNewTaskInput('');
@@ -153,7 +171,8 @@ const PrimaryDevModule = () => {
             commandType: command.type || 'utility',
 
             // KEY CHANGE: Store the tags!
-            commandTags: command.tags || []
+            commandTags: command.tags || [],
+            stage: project.subStage || 1 // Bind to current stage
         }];
 
         handleUpdateProject(selectedProject.id, { tasks: newTasks });
@@ -346,7 +365,14 @@ const PrimaryDevModule = () => {
                             className="w-full max-w-6xl bg-white rounded-[3rem] shadow-2xl overflow-hidden relative pointer-events-auto h-[90vh] flex flex-col ring-1 ring-gray-100"
                         >
                             {/* Rich Hero Header with Parallax-like effect */}
-                            <div className="relative shrink-0 h-72 bg-gray-900 flex items-end p-10 overflow-hidden group">
+                            {/* Rich Hero Header with Parallax-like effect */}
+                            <motion.div
+                                animate={{
+                                    height: isHeaderCollapsed && !isEditingProject ? 120 : 288,
+                                }}
+                                transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+                                className="relative shrink-0 bg-gray-900 flex items-end p-10 overflow-hidden group"
+                            >
                                 {isEditingProject ? (
                                     // EDIT MODE HERO BACKGROUND
                                     <div className="absolute inset-0 z-0 bg-gray-900">
@@ -466,18 +492,35 @@ const PrimaryDevModule = () => {
                                         ) : (
                                             // VIEW MODE
                                             <>
-                                                <div className="flex items-center gap-3 mb-4 opacity-80">
-                                                    <span className="px-3 py-1 rounded-full border border-white/20 bg-white/10 text-xs font-mono backdrop-blur-sm">
-                                                        Active Development
-                                                    </span>
-                                                    {selectedProject.link && (
-                                                        <a href={selectedProject.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs hover:text-emerald-400 transition-colors px-3 py-1 rounded-full hover:bg-white/10">
-                                                            <ExternalLink size={12} /> {selectedProject.link.replace('https://', '')}
-                                                        </a>
-                                                    )}
-                                                </div>
-                                                <h2 className="text-6xl font-thin tracking-tighter mb-4 text-shadow-lg">{selectedProject.title}</h2>
-                                                <p className="text-xl font-light opacity-80 leading-relaxed text-shadow-sm">{selectedProject.desc}</p>
+                                                <motion.div
+                                                    animate={{ opacity: isHeaderCollapsed ? 0 : 1, height: isHeaderCollapsed ? 0 : 'auto' }}
+                                                    className="overflow-hidden"
+                                                >
+                                                    <div className="flex items-center gap-3 mb-4 opacity-80">
+                                                        <span className="px-3 py-1 rounded-full border border-white/20 bg-white/10 text-xs font-mono backdrop-blur-sm">
+                                                            Active Development
+                                                        </span>
+                                                        {selectedProject.link && (
+                                                            <a href={selectedProject.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs hover:text-emerald-400 transition-colors px-3 py-1 rounded-full hover:bg-white/10">
+                                                                <ExternalLink size={12} /> {selectedProject.link.replace('https://', '')}
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                </motion.div>
+
+                                                <motion.h2
+                                                    layout
+                                                    className={`font-thin tracking-tighter mb-4 text-shadow-lg transition-all ${isHeaderCollapsed ? 'text-4xl' : 'text-6xl'}`}
+                                                >
+                                                    {selectedProject.title}
+                                                </motion.h2>
+
+                                                <motion.p
+                                                    animate={{ opacity: isHeaderCollapsed ? 0 : 0.8, height: isHeaderCollapsed ? 0 : 'auto' }}
+                                                    className="text-xl font-light leading-relaxed text-shadow-sm overflow-hidden"
+                                                >
+                                                    {selectedProject.desc}
+                                                </motion.p>
                                             </>
                                         )}
                                     </div>
@@ -490,7 +533,7 @@ const PrimaryDevModule = () => {
                                         </button>
                                     )}
                                 </div>
-                            </div>
+                            </motion.div>
 
                             <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/50">
                                 {/* Left: Stage Controller */}
@@ -509,7 +552,10 @@ const PrimaryDevModule = () => {
                                             return (
                                                 <div
                                                     key={stage.id}
-                                                    onClick={() => handleUpdateProject(selectedProject.id, { subStage: stage.id })}
+                                                    onClick={() => {
+                                                        handleUpdateProject(selectedProject.id, { subStage: stage.id });
+                                                        setIsHeaderCollapsed(true); // Auto-focus on content
+                                                    }}
                                                     className={`
                                                         relative z-10 flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-300 group
                                                         ${isActive
@@ -536,206 +582,285 @@ const PrimaryDevModule = () => {
 
                                 {/* Right: Tasks & Details */}
                                 <div className="flex-1 p-8 md:p-12 overflow-y-auto flex flex-col relative custom-scrollbar">
-                                    {/* Active Stage Info */}
-                                    <div className="mb-12">
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
-                                                <Sparkles size={20} />
+                                    <div className="flex-1 flex flex-col h-full overflow-hidden">
+                                        {/* Header (Static) */}
+                                        <div className="p-8 pb-4 flex justify-between items-start shrink-0">
+                                            <div>
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                                        <StageIcon size={18} />
+                                                    </div>
+                                                    <span className="text-xs font-bold uppercase tracking-widest text-emerald-500">
+                                                        当前阶段 {selectedProject.subStage}
+                                                    </span>
+                                                </div>
+                                                <h2 className="text-3xl font-light text-gray-900">{stageInfo.title}</h2>
+                                                <p className="text-gray-400 mt-2 max-w-md">{stageInfo.desc}</p>
                                             </div>
-                                            <span className="text-xs font-bold tracking-widest uppercase text-emerald-600">Current Phase</span>
-                                        </div>
-                                        <h3 className="text-3xl font-light text-gray-900 mb-4">
-                                            {DEV_STAGES[(selectedProject.subStage || 1) - 1].title}
-                                        </h3>
-                                        <p className="text-gray-500 font-light leading-relaxed max-w-3xl text-lg">
-                                            {DEV_STAGES[(selectedProject.subStage || 1) - 1].desc}
-                                        </p>
-                                    </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        const link = projects.find(p => p.id === selectedProject.id).link;
+                                                        if (link) window.open(link, '_blank');
+                                                    }}
+                                                    className="text-xs flex items-center gap-2 px-4 py-2 bg-white text-gray-600 rounded-xl hover:bg-gray-50 transition-all border border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                                                >
+                                                    <ExternalLink size={14} />
+                                                    <span>Visit</span>
+                                                </button>
 
-                                    {/* Task List */}
-                                    <div className="flex-1 flex flex-col min-h-0 pb-24">
-                                        <div className="flex justify-between items-center mb-6">
-                                            <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                                                <CheckSquare size={16} /> Mission Log
-                                            </h4>
-
-                                            {/* Import Command Button */}
-                                            <button
-                                                onClick={() => setCommandModalOpen(true)}
-                                                className="text-xs flex items-center gap-2 px-4 py-2 bg-white text-gray-600 rounded-xl hover:bg-gray-50 transition-all border border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                                            >
-                                                <Terminal size={14} />
-                                                <span>Import Command</span>
-                                            </button>
+                                                {/* Import Command Button */}
+                                                <button
+                                                    onClick={() => setCommandModalOpen(true)}
+                                                    className="text-xs flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl hover:bg-black transition-all shadow-lg shadow-gray-900/10 hover:shadow-gray-900/20"
+                                                >
+                                                    <Terminal size={14} />
+                                                    <span>Import Command</span>
+                                                </button>
+                                            </div>
                                         </div>
 
-                                        <div className="flex-1 space-y-3">
-                                            {selectedProject.tasks?.map(task => {
-                                                const isMandatory = task.isCommand && task.commandType === 'mandatory';
-                                                const isLink = task.isCommand && task.commandType === 'link';
-                                                const isUtility = task.isCommand && task.commandType === 'utility';
+                                        {/* Task List (Scrollable Area) */}
+                                        <div
+                                            className="flex-1 overflow-y-auto px-8 pb-4 custom-scrollbar"
+                                            onScroll={(e) => {
+                                                const scrollTop = e.currentTarget.scrollTop;
+                                                // Trigger collapse on scroll down
+                                                if (scrollTop > 20 && !isHeaderCollapsed) {
+                                                    setIsHeaderCollapsed(true);
+                                                }
+                                                // Trigger expand only at the very top
+                                                else if (scrollTop === 0 && isHeaderCollapsed) {
+                                                    setIsHeaderCollapsed(false);
+                                                }
+                                            }}
+                                        >
+                                            <div className="space-y-3 min-h-[100px]">
+                                                {selectedProject.tasks?.map(task => {
+                                                    const isMandatory = task.isCommand && task.commandType === 'mandatory';
+                                                    const isLink = task.isCommand && task.commandType === 'link';
+                                                    const isUtility = task.isCommand && task.commandType === 'utility';
 
-                                                return (
-                                                    <motion.div
-                                                        layout // Animate layout changes when items are deleted
-                                                        initial={{ opacity: 0, y: 10 }}
-                                                        animate={{ opacity: 1, y: 0, x: 0 }}
-                                                        exit={{ opacity: 0, x: -200, transition: { duration: 0.2 } }} // Fly out to LEFT
-                                                        key={task.id}
+                                                    // Determine Category Icon
+                                                    const taskCat = COMMAND_CATEGORIES.find(c => c.id === (task.category || 'general'));
+                                                    const TaskCatIcon = CATEGORY_ICONS[taskCat?.icon] || LayoutGrid;
 
-                                                        // Drag to Delete Props
-                                                        drag="x"
-                                                        dragConstraints={{ left: 0, right: 0 }} // Elastic resistance
-                                                        dragElastic={{ right: 0.05, left: 0.5 }} // Allow dragging LEFT (delete), resist RIGHT
-                                                        onDragEnd={(e, info) => {
-                                                            const swipeThreshold = -100; // px
-                                                            const velocityThreshold = -500; // px/s
+                                                    return (
+                                                        <motion.div
+                                                            layout // Animate layout changes when items are deleted
+                                                            initial={{ opacity: 0, y: 10 }}
+                                                            animate={{ opacity: 1, y: 0, x: 0 }}
+                                                            exit={{ opacity: 0, x: -200, transition: { duration: 0.2 } }} // Fly out to LEFT
+                                                            key={task.id}
 
-                                                            // If swiped fast enough OR far enough to the right
-                                                            if (info.offset.x < swipeThreshold || info.velocity.x < velocityThreshold) {
-                                                                handleDeleteTask(selectedProject.id, task.id);
-                                                            }
-                                                        }}
-                                                        whileDrag={{ scale: 1.02, cursor: 'grabbing', zIndex: 50 }}
-                                                        onClick={() => toggleTask(selectedProject.id, task.id)}
-                                                        className={`
+                                                            // Drag to Delete Props
+                                                            drag="x"
+                                                            dragConstraints={{ left: 0, right: 0 }} // Elastic resistance
+                                                            dragElastic={{ right: 0.05, left: 0.5 }} // Allow dragging LEFT (delete), resist RIGHT
+                                                            onDragEnd={(e, info) => {
+                                                                const swipeThreshold = -100; // px
+                                                                const velocityThreshold = -500; // px/s
+
+                                                                // If swiped fast enough OR far enough to the right
+                                                                if (info.offset.x < swipeThreshold || info.velocity.x < velocityThreshold) {
+                                                                    handleDeleteTask(selectedProject.id, task.id);
+                                                                }
+                                                            }}
+                                                            whileDrag={{ scale: 1.02, cursor: 'grabbing', zIndex: 50 }}
+                                                            onClick={() => toggleTask(selectedProject.id, task.id)}
+                                                            className={`
                                                             group flex items-center gap-5 p-5 rounded-2xl transition-all cursor-pointer border relative overflow-hidden select-none touch-pan-y
                                                             ${isMandatory && !task.done
-                                                                ? 'bg-white border-red-100 shadow-sm shadow-red-100 hover:border-red-200'
-                                                                : isMandatory && task.done
-                                                                    ? 'bg-emerald-50/30 border-emerald-100 opacity-75 hover:opacity-100'
-                                                                    : isLink
-                                                                        ? 'bg-white border-blue-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5'
-                                                                        : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5'
-                                                            }
+                                                                    ? 'bg-white border-red-100 shadow-sm shadow-red-100 hover:border-red-200'
+                                                                    : isMandatory && task.done
+                                                                        ? 'bg-emerald-50/30 border-emerald-100 opacity-75 hover:opacity-100'
+                                                                        : isLink
+                                                                            ? 'bg-white border-blue-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5'
+                                                                            : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5'
+                                                                }
                                                         `}
-                                                        style={{ x: 0 }} // Ensure it starts at x:0
-                                                    >
-                                                        {/* Visual Indicator for "Slide to Delete" (Behind content, visible when dragging LEFT) */}
-                                                        <motion.div
-                                                            className="absolute inset-y-0 right-0 bg-red-500 -z-10 flex items-center justify-end pr-5 text-white font-bold uppercase tracking-wider text-xs pointer-events-none"
-                                                            style={{ width: '100%', x: '100%' }}
+                                                            style={{ x: 0 }} // Ensure it starts at x:0
                                                         >
-                                                            Slide Left to Delete
-                                                        </motion.div>
-                                                        {/* Icon based on type */}
-                                                        {isUtility || isLink ? (
-                                                            <div className={`
+                                                            {/* Visual Indicator for "Slide to Delete" (Behind content, visible when dragging LEFT) */}
+                                                            <motion.div
+                                                                className="absolute inset-y-0 right-0 bg-red-500 -z-10 flex items-center justify-end pr-5 text-white font-bold uppercase tracking-wider text-xs pointer-events-none"
+                                                                style={{ width: '100%', x: '100%' }}
+                                                            >
+                                                                Slide Left to Delete
+                                                            </motion.div>
+                                                            {/* Icon based on type */}
+                                                            {isUtility || isLink ? (
+                                                                <div className={`
                                                                 w-6 h-6 flex items-center justify-center transition-colors rounded-lg 
                                                                 ${isLink
-                                                                    ? 'bg-blue-50 text-blue-500 group-hover:bg-blue-100'
-                                                                    : 'bg-gray-50 text-gray-400 group-hover:text-emerald-500 group-hover:bg-emerald-50'}
+                                                                        ? 'bg-blue-50 text-blue-500 group-hover:bg-blue-100'
+                                                                        : 'bg-gray-50 text-gray-400 group-hover:text-emerald-500 group-hover:bg-emerald-50'}
                                                             `}>
-                                                                {copiedTaskId === task.id ? <Check size={16} /> : (isLink ? <Globe size={16} /> : <Terminal size={16} />)}
-                                                            </div>
-                                                        ) : (
-                                                            <button
-                                                                onClick={(e) => markTaskDone(e, selectedProject.id, task.id)}
-                                                                className={`
+                                                                    {copiedTaskId === task.id ? <Check size={16} /> : (isLink ? <Globe size={16} /> : <Terminal size={16} />)}
+                                                                </div>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={(e) => markTaskDone(e, selectedProject.id, task.id)}
+                                                                    className={`
                                                                     w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 shrink-0
                                                                     ${task.done
-                                                                        ? 'bg-emerald-500 border-emerald-500 text-white scale-110'
-                                                                        : isMandatory
-                                                                            ? 'border-red-200 text-transparent hover:border-red-400 bg-red-50 hover:bg-red-100'
-                                                                            : 'border-gray-200 text-transparent group-hover:border-gray-400 hover:bg-gray-50'
-                                                                    }
+                                                                            ? 'bg-emerald-500 border-emerald-500 text-white scale-110'
+                                                                            : isMandatory
+                                                                                ? 'border-red-200 text-transparent hover:border-red-400 bg-red-50 hover:bg-red-100'
+                                                                                : 'border-gray-200 text-transparent group-hover:border-gray-400 hover:bg-gray-50'
+                                                                        }
                                                                 `}
-                                                            >
-                                                                <Check size={14} strokeWidth={3} />
-                                                            </button>
-                                                        )}
+                                                                >
+                                                                    <Check size={14} strokeWidth={3} />
+                                                                </button>
+                                                            )}
 
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex flex-wrap items-center gap-2">
-                                                                <span className={`text-base font-medium transition-colors ${task.done ? 'opacity-40 line-through decoration-emerald-500/50' : 'text-gray-700'}`}>
-                                                                    {task.text}
-                                                                </span>
-
-                                                                {/* Helper Badges */}
-                                                                {isMandatory && (
-                                                                    <span className="text-[10px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-red-100">
-                                                                        Mandatory
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex flex-wrap items-center gap-2">
+                                                                    <span className={`text-base font-medium transition-colors ${task.done ? 'opacity-40 line-through decoration-emerald-500/50' : 'text-gray-700'}`}>
+                                                                        {task.text}
                                                                     </span>
-                                                                )}
-                                                                {isLink && (
-                                                                    <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-blue-100 flex items-center gap-1">
-                                                                        <ExternalLink size={8} /> Link
-                                                                    </span>
-                                                                )}
 
-                                                                {/* INLINE TAGS IN LIST */}
-                                                                {(task.commandTags && task.commandTags.length > 0) && (
-                                                                    <div className="flex flex-wrap gap-1.5 ml-1">
-                                                                        {task.commandTags.map(tag => (
-                                                                            <button
-                                                                                key={tag.id}
-                                                                                onClick={(e) => {
-                                                                                    e.stopPropagation();
-                                                                                    toggleTask(selectedProject.id, task.id, tag.value, `${task.id}-${tag.id}`);
-                                                                                }}
-                                                                                className="group/tag flex items-center gap-1 px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded text-[10px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden select-none hover:shadow-sm"
-                                                                                title={`Copy: ${tag.value || task.commandContent}`}
-                                                                            >
-                                                                                <Tag size={8} className="opacity-60 group-hover/tag:opacity-100" />
-                                                                                {tag.label}
-                                                                                {copiedTaskId === `${task.id}-${tag.id}` && (
-                                                                                    <motion.div
-                                                                                        initial={{ opacity: 0, y: 10 }}
-                                                                                        animate={{ opacity: 1, y: 0 }}
-                                                                                        className="absolute inset-0 bg-emerald-600 text-white flex items-center justify-center font-bold"
-                                                                                    >
-                                                                                        <Check size={10} strokeWidth={3} />
-                                                                                    </motion.div>
-                                                                                )}
-                                                                            </button>
-                                                                        ))}
-                                                                    </div>
-                                                                )}
+                                                                    {/* Helper Badges */}
+                                                                    {isMandatory && (
+                                                                        <span className="text-[10px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-red-100">
+                                                                            Mandatory
+                                                                        </span>
+                                                                    )}
+                                                                    {isLink && (
+                                                                        <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-blue-100 flex items-center gap-1">
+                                                                            <ExternalLink size={8} /> Link
+                                                                        </span>
+                                                                    )}
+
+                                                                    {/* INLINE TAGS IN LIST */}
+                                                                    {(task.commandTags && task.commandTags.length > 0) && (
+                                                                        <div className="flex flex-wrap gap-1.5 ml-1">
+                                                                            {task.commandTags.map(tag => (
+                                                                                <button
+                                                                                    key={tag.id}
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        toggleTask(selectedProject.id, task.id, tag.value, `${task.id}-${tag.id}`);
+                                                                                    }}
+                                                                                    className="group/tag flex items-center gap-1 px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded text-[10px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden select-none hover:shadow-sm"
+                                                                                    title={`Copy: ${tag.value || task.commandContent}`}
+                                                                                >
+                                                                                    <Tag size={8} className="opacity-60 group-hover/tag:opacity-100" />
+                                                                                    {tag.label}
+                                                                                    {copiedTaskId === `${task.id}-${tag.id}` && (
+                                                                                        <motion.div
+                                                                                            initial={{ opacity: 0, y: 10 }}
+                                                                                            animate={{ opacity: 1, y: 0 }}
+                                                                                            className="absolute inset-0 bg-emerald-600 text-white flex items-center justify-center font-bold"
+                                                                                        >
+                                                                                            <Check size={10} strokeWidth={3} />
+                                                                                        </motion.div>
+                                                                                    )}
+                                                                                </button>
+                                                                            ))}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
                                                             </div>
+
+                                                            {task.isCommand && copiedTaskId === task.id && (
+                                                                <span className="text-[10px] uppercase font-bold text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full animate-pulse transition-all">
+                                                                    Copied
+                                                                </span>
+                                                            )}
+                                                        </motion.div>
+                                                    );
+                                                })}
+                                                {(!selectedProject.tasks || selectedProject.tasks.length === 0) && (
+                                                    <div className="flex flex-col items-center justify-center py-20 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100 text-center">
+                                                        <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4 text-gray-300">
+                                                            <CheckSquare size={24} />
                                                         </div>
-
-                                                        {task.isCommand && copiedTaskId === task.id && (
-                                                            <span className="text-[10px] uppercase font-bold text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full animate-pulse transition-all">
-                                                                Copied
-                                                            </span>
-                                                        )}
-                                                    </motion.div>
-                                                );
-                                            })}
-                                            {(!selectedProject.tasks || selectedProject.tasks.length === 0) && (
-                                                <div className="flex flex-col items-center justify-center py-20 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100 text-center">
-                                                    <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4 text-gray-300">
-                                                        <CheckSquare size={24} />
+                                                        <p className="text-gray-900 font-medium">Quiet on the Front</p>
+                                                        <p className="text-gray-400 text-sm mt-1">No active missions. Add a task or import a command to begin.</p>
                                                     </div>
-                                                    <p className="text-gray-900 font-medium">Quiet on the Front</p>
-                                                    <p className="text-gray-400 text-sm mt-1">No active missions. Add a task or import a command to begin.</p>
-                                                </div>
-                                            )}
-                                        </div>
+                                                )}
+                                            </div>
 
-                                        {/* Floating Action Bar */}
-                                        <div className="absolute bottom-8 left-8 right-8 md:left-12 md:right-12">
-                                            <div className="relative group shadow-2xl shadow-gray-200/50 rounded-2xl bg-white">
-                                                <input
-                                                    type="text"
-                                                    value={newTaskInput}
-                                                    onChange={(e) => setNewTaskInput(e.target.value)}
-                                                    onKeyDown={(e) => e.key === 'Enter' && handleAddTask(selectedProject.id)}
-                                                    placeholder="Type a new mission..."
-                                                    className="w-full bg-white hover:bg-gray-50/50 focus:bg-white border-0 rounded-2xl py-5 pl-14 pr-16 transition-all outline-none ring-1 ring-gray-100 focus:ring-2 focus:ring-gray-900 placeholder:text-gray-400 text-lg font-light"
-                                                    autoFocus
-                                                />
-                                                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-emerald-500 transition-colors">
-                                                    <Plus size={24} />
-                                                </div>
-                                                <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                                                    <button
-                                                        onClick={() => handleAddTask(selectedProject.id)}
-                                                        disabled={!newTaskInput.trim()}
-                                                        className="p-2 bg-gray-900 text-white rounded-xl hover:bg-black transition-all disabled:opacity-0 disabled:pointer-events-none shadow-lg shadow-gray-900/20"
-                                                    >
-                                                        <ArrowUpRight size={20} />
-                                                    </button>
+                                            {/* Static Action Bar (Footer) */}
+                                            <div className="p-8 pt-4 bg-white/80 backdrop-blur-sm shrink-0 border-t border-gray-100">
+                                                <div className="relative group shadow-2xl shadow-gray-200/50 rounded-2xl bg-white ring-1 ring-gray-100 focus-within:ring-2 focus-within:ring-gray-900 transition-all">
+                                                    <input
+                                                        type="text"
+                                                        value={newTaskInput}
+                                                        onChange={(e) => setNewTaskInput(e.target.value)}
+                                                        onKeyDown={(e) => e.key === 'Enter' && handleAddTask(selectedProject.id)}
+                                                        onFocus={() => setIsHeaderCollapsed(true)} // Focus mode
+                                                        placeholder="Type a new mission..."
+                                                        className="w-full bg-transparent border-0 rounded-2xl py-5 pl-16 pr-16 transition-all outline-none placeholder:text-gray-400 text-lg font-light"
+                                                        autoFocus
+                                                    />
+
+                                                    {/* Category Trigger (Left) */}
+                                                    <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                                                        <button
+                                                            onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                                                            className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-50 text-gray-400 hover:text-gray-900 transition-colors"
+                                                        >
+                                                            {(() => {
+                                                                const activeCat = COMMAND_CATEGORIES.find(c => c.id === newTaskCategory);
+                                                                const ActiveIcon = CATEGORY_ICONS[activeCat?.icon] || LayoutGrid;
+                                                                return <ActiveIcon size={20} className={activeCat?.color.split(' ')[1]} />
+                                                            })()}
+                                                        </button>
+
+                                                        {/* Category Popover */}
+                                                        <AnimatePresence>
+                                                            {isCategoryOpen && (
+                                                                <>
+                                                                    <div
+                                                                        className="fixed inset-0 z-40"
+                                                                        onClick={() => setIsCategoryOpen(false)}
+                                                                    />
+                                                                    <motion.div
+                                                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                                        className="absolute bottom-full left-0 mb-2 p-2 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 flex gap-1 min-w-[280px]"
+                                                                    >
+                                                                        {COMMAND_CATEGORIES.map(cat => {
+                                                                            const Icon = CATEGORY_ICONS[cat.icon] || LayoutGrid;
+                                                                            return (
+                                                                                <button
+                                                                                    key={cat.id}
+                                                                                    onClick={() => {
+                                                                                        setNewTaskCategory(cat.id);
+                                                                                        setIsCategoryOpen(false);
+                                                                                    }}
+                                                                                    className={`
+                                                                            p-2 rounded-xl transition-all flex flex-col items-center gap-1 flex-1
+                                                                            ${newTaskCategory === cat.id
+                                                                                            ? 'bg-gray-900 text-white shadow-lg'
+                                                                                            : 'hover:bg-gray-50 text-gray-500 hover:text-gray-900'}
+                                                                        `}
+                                                                                    title={cat.label}
+                                                                                >
+                                                                                    <Icon size={18} />
+                                                                                    <span className="text-[9px] font-bold uppercase">{cat.label.slice(0, 3)}</span>
+                                                                                </button>
+                                                                            )
+                                                                        })}
+                                                                    </motion.div>
+                                                                </>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
+
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                        <button
+                                                            onClick={() => handleAddTask(selectedProject.id)}
+                                                            disabled={!newTaskInput.trim()}
+                                                            className="p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all disabled:opacity-0 disabled:pointer-events-none shadow-lg shadow-gray-900/20"
+                                                        >
+                                                            <ArrowUpRight size={20} />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
