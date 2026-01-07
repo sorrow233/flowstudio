@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus, TreeDeciduous, TreePine, Image as ImageIcon, Sparkles, RefreshCw } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { STORAGE_KEYS } from '../../utils/constants';
-import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
+import { useSync } from '../sync/SyncContext';
+import { useSyncedProjects } from '../sync/useSyncStore';
 
 // Refined Founder-Focused Questions
 const QUESTIONS = [
@@ -39,8 +40,11 @@ const VISUAL_VIBES = [
 ];
 
 const PendingModule = () => {
-    // Sync Store Integration
-    const { doc } = useSyncStore('flowstudio_v1');
+    // Sync Store Integration (Context)
+    const { doc } = useSync();
+
+    // Note: useSyncedProjects is still a hook that takes 'doc'. 
+    // Since doc is stable from Context, this works perfectly.
     const {
         projects,
         addProject,
@@ -128,19 +132,15 @@ const PendingModule = () => {
 
     return (
         <div className="max-w-7xl mx-auto pt-8 px-6 h-full flex gap-10">
-
             {/* Stream (Left) */}
             <div className={`transition-all duration-500 flex flex-col ${selectedProject ? 'w-[350px] opacity-100' : 'w-full'}`}>
-
                 {/* Header */}
                 <div className="mb-8">
                     <h2 className="text-2xl font-light tracking-wide text-gray-900">Idea Staging</h2>
                     <p className="text-xs font-mono text-gray-400 mt-1 uppercase tracking-widest">Validate before you build</p>
                 </div>
-
                 {/* Main Content Area - Split between Pending and Garden */}
                 <div className="flex-1 flex flex-col gap-8 overflow-y-auto no-scrollbar pb-20">
-
                     {/* 1. Pending List */}
                     <div className="space-y-4">
                         {projects.map(project => (
@@ -168,7 +168,6 @@ const PendingModule = () => {
                                 <p className="text-gray-400 text-xs font-light line-clamp-2">{project.desc}</p>
                             </motion.div>
                         ))}
-
                         {/* Add Project Input */}
                         <div className="relative group">
                             <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-50 rounded-xl blur opacity-25 group-hover:opacity-50 transition-opacity" />
@@ -189,7 +188,7 @@ const PendingModule = () => {
                                                 score: 0,
                                                 answers: {}
                                             };
-                                            addProject(newP); // FIX: Use addProject hook instead of setProjects (ReferenceError)
+                                            addProject(newP);
                                             setSelectedProject(newP);
                                             e.target.value = '';
                                         }
@@ -198,7 +197,6 @@ const PendingModule = () => {
                             </div>
                         </div>
                     </div>
-
                     {/* 2. The Nursery / Garden of Growth */}
                     {primaryProjects.length > 0 && (
                         <div className="pt-8 border-t border-gray-100">
@@ -207,7 +205,6 @@ const PendingModule = () => {
                                 <h3 className="text-sm font-medium text-gray-900 uppercase tracking-widest">Nursery</h3>
                                 <span className="text-xs text-gray-400 font-mono hidden sm:inline-block">({primaryProjects.length} Growing)</span>
                             </div>
-
                             <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 no-scrollbar snap-x">
                                 {primaryProjects.map(p => {
                                     const visual = getTreeVisual(p.subStage || 1);
@@ -228,7 +225,6 @@ const PendingModule = () => {
                                                 {/* Ground shadow */}
                                                 <div className="absolute bottom-2 w-8 h-1 bg-emerald-900/10 rounded-full blur-sm" />
                                             </div>
-
                                             <div className="w-full">
                                                 <h4 className="text-xs font-medium text-gray-700 line-clamp-1 w-full mb-2" title={p.title}>{p.title}</h4>
                                                 <div className="flex items-center gap-1.5 justify-center">
@@ -246,10 +242,8 @@ const PendingModule = () => {
                             </div>
                         </div>
                     )}
-
                 </div>
             </div>
-
             {/* Assessment (Right) */}
             <AnimatePresence mode="wait">
                 {selectedProject && (
@@ -266,7 +260,6 @@ const PendingModule = () => {
                         >
                             <X size={20} className="text-gray-400" />
                         </button>
-
                         {/* Background Visual Vibe */}
                         <div className="absolute top-0 left-0 right-0 h-48 bg-gray-50 overflow-hidden rounded-t-[2.5rem] -z-0">
                             {selectedProject.bgImage ? (
@@ -278,8 +271,6 @@ const PendingModule = () => {
                                 <div className="w-full h-full bg-gradient-to-br from-gray-50 to-white" />
                             )}
                         </div>
-
-
                         {/* Header / Visualization */}
                         <div className="relative z-10 flex flex-col items-center mb-10 w-full transition-all duration-500 mt-10">
                             <motion.div
@@ -296,7 +287,6 @@ const PendingModule = () => {
                                     </motion.div>
                                 )}
                             </motion.div>
-
                             <div className="w-full max-w-lg text-center">
                                 {/* Auto-expanding Title */}
                                 <input
@@ -305,7 +295,6 @@ const PendingModule = () => {
                                     className="w-full text-4xl md:text-5xl font-thin text-gray-900 text-center bg-transparent border-none focus:ring-0 placeholder:text-gray-300 mb-2 transition-all p-0"
                                     placeholder="Untitled Project"
                                 />
-
                                 {/* Auto-expanding Manifesto */}
                                 <textarea
                                     value={selectedProject.desc}
@@ -317,7 +306,6 @@ const PendingModule = () => {
                                     className="w-full text-base font-light text-center text-gray-500 bg-transparent resize-none border-none focus:ring-0 placeholder:text-gray-300 min-h-[3em] overflow-hidden leading-relaxed"
                                     placeholder="What is the driving force behind this idea?"
                                 />
-
                                 {/* Controls: Link & Visual Vibe */}
                                 <div className="flex gap-2 justify-center mt-6">
                                     <div className="relative group">
@@ -332,7 +320,6 @@ const PendingModule = () => {
                                             />
                                         </div>
                                     </div>
-
                                     {/* Visual Vibe Selector */}
                                     <div className="relative group">
                                         <div className="absolute inset-0 bg-gray-200 rounded-full blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -341,7 +328,6 @@ const PendingModule = () => {
                                             <span className="text-xs font-mono text-gray-600 truncate max-w-[100px]">
                                                 {VISUAL_VIBES.find(v => v.url === selectedProject.bgImage)?.label || 'Select Vibe'}
                                             </span>
-
                                             {/* Dropdown for Vibes */}
                                             <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl p-2 opacity-0 group-hover/vibe:opacity-100 pointer-events-none group-hover/vibe:pointer-events-auto transition-all z-50">
                                                 <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-2 pt-1">Visual Theme</div>
@@ -368,7 +354,6 @@ const PendingModule = () => {
                                 </div>
                             </div>
                         </div>
-
                         {/* Questions Flow */}
                         <div className="space-y-4 max-w-2xl mx-auto w-full">
                             {QUESTIONS.map((q, i) => {
@@ -396,7 +381,6 @@ const PendingModule = () => {
                                                 {ans === false && <X className="text-red-400" size={20} />}
                                             </div>
                                         </div>
-
                                         <div className="relative z-10 flex gap-3">
                                             <button
                                                 onClick={() => handleAnswer(selectedProject.id, q.id, true)}
@@ -425,7 +409,6 @@ const PendingModule = () => {
                                 );
                             })}
                         </div>
-
                         {/* Graduation */}
                         <div className="max-w-2xl mx-auto mt-12 pb-10 w-full">
                             <AnimatePresence>
@@ -453,18 +436,15 @@ const PendingModule = () => {
                                 )}
                             </AnimatePresence>
                         </div>
-
                     </motion.div>
                 )}
             </AnimatePresence>
-
             {!selectedProject && projects.length > 0 && (
                 <div className="flex-1 flex flex-col items-center justify-center text-gray-200">
                     <Sprout size={64} strokeWidth={0.5} />
                     <p className="mt-4 font-light">Select a seed to assess</p>
                 </div>
             )}
-
             {!selectedProject && projects.length === 0 && (
                 <div className="flex-1 flex flex-col items-center justify-center text-gray-300">
                     <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6 animate-pulse">
