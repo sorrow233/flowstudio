@@ -255,175 +255,13 @@ const PendingModule = () => {
             {/* Right Column: Detail View */}
             <AnimatePresence mode="wait">
                 {selectedProject && (
-                    <motion.div
-                        key="detail"
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 50 }}
-                        className="flex-1 bg-white border border-gray-100 rounded-[2.5rem] p-10 shadow-2xl shadow-gray-200/50 overflow-y-auto no-scrollbar relative flex flex-col z-10"
-                    >
-                        <button
-                            onClick={() => setSelectedProject(null)}
-                            className="absolute top-8 right-8 p-3 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors z-30"
-                        >
-                            <X size={20} className="text-gray-400" />
-                        </button>
-
-                        <div className="absolute top-0 left-0 right-0 h-48 bg-gray-50 overflow-hidden rounded-t-[2.5rem] z-0">
-                            {selectedProject.bgImage ? (
-                                <>
-                                    <img src={selectedProject.bgImage} className="w-full h-full object-cover opacity-50" />
-                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white" />
-                                </>
-                            ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-gray-50 to-white" />
-                            )}
-                        </div>
-
-                        <div className="relative z-20 flex flex-col items-center mb-10 w-full mt-10">
-                            <motion.div animate={getSaplingState(selectedProject.score)} className="mb-6 relative">
-                                <Sprout size={80} strokeWidth={1} />
-                                {selectedProject.score === 4 && <div className="absolute -top-1 -right-1 text-yellow-500"><Sun size={28} fill="currentColor" /></div>}
-                            </motion.div>
-
-                            <div className="w-full max-w-lg text-center">
-                                <input
-                                    value={selectedProject.title}
-                                    onChange={(e) => handleUpdateProject(selectedProject.id, 'title', e.target.value)}
-                                    className="w-full text-4xl md:text-5xl font-thin text-gray-900 text-center bg-transparent border-none focus:ring-0 placeholder:text-gray-300 mb-2"
-                                    placeholder="无名项目"
-                                />
-                                <textarea
-                                    value={selectedProject.desc}
-                                    onChange={(e) => {
-                                        handleUpdateProject(selectedProject.id, 'desc', e.target.value);
-                                        e.target.style.height = 'auto';
-                                        e.target.style.height = e.target.scrollHeight + 'px';
-                                    }}
-                                    className="w-full text-base font-light text-center text-gray-500 bg-transparent resize-none border-none focus:ring-0 min-h-[3em]"
-                                    placeholder="这个想法的原动力是什么？"
-                                />
-
-                                <div className="flex gap-2 justify-center mt-6">
-                                    <div className="flex items-center gap-2 bg-white border rounded-full px-4 py-1.5 shadow-sm">
-                                        <Sparkles size={12} className="text-gray-400" />
-                                        <input value={selectedProject.link || ''} onChange={(e) => handleUpdateProject(selectedProject.id, 'link', e.target.value)} placeholder="链接" className="w-40 text-xs border-none p-0 focus:ring-0" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Questions List */}
-                        <div className="space-y-4 max-w-2xl mx-auto w-full relative z-20">
-                            {QUESTIONS.map((q, i) => {
-                                const ans = selectedProject.answers[q.id];
-                                return (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: i * 0.1 }}
-                                        key={q.id}
-                                        className={`
-                                          relative p-6 rounded-2xl border transition-all duration-500 overflow-hidden
-                                          ${ans === true ? 'bg-emerald-50/50 border-emerald-100' : ''}
-                                          ${ans === false ? 'bg-red-50/50 border-red-100' : ''}
-                                          ${ans === undefined ? 'bg-white border-gray-100' : ''}
-                                        `}
-                                    >
-                                        <div className="relative z-30 flex justify-between items-center mb-4">
-                                            <div>
-                                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{q.sub}</h4>
-                                                <p className="text-lg text-gray-800 font-light">{q.text}</p>
-                                            </div>
-                                            <div className="w-8 h-8 flex items-center justify-center">
-                                                {ans === true && <CheckCircle2 className="text-emerald-500" size={20} />}
-                                                {ans === false && <X className="text-red-400" size={20} />}
-                                            </div>
-                                        </div>
-
-                                        <div className="relative z-30 flex gap-3">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleAnswer(selectedProject.id, q.id, true);
-                                                }}
-                                                className={`
-                                                    relative z-50 cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all active:scale-95
-                                                    ${ans === true ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-200' : 'hover:bg-gray-50 bg-white hover:border-gray-300'}
-                                                `}
-                                            >
-                                                YES
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleAnswer(selectedProject.id, q.id, false);
-                                                }}
-                                                className={`
-                                                    relative z-50 cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all active:scale-95
-                                                    ${ans === false ? 'bg-red-500 text-white border-red-500 shadow-md shadow-red-200' : 'hover:bg-gray-50 bg-white hover:border-gray-300'}
-                                                `}
-                                            >
-                                                NO
-                                            </button>
-                                        </div>
-                                    </motion.div>
-                                );
-                            })}
-                        </div>
-
-                        {/* Sacred Reason Input (Premium Design) */}
-                        <div className="max-w-2xl mx-auto w-full relative z-20 mt-12 bg-gray-50/50 rounded-3xl p-6 border border-gray-100">
-                            <div className="mb-4 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Scroll size={16} className="text-violet-400" />
-                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">创始人誓言 (Founder's Vow)</h4>
-                                </div>
-                                {selectedProject.foundingReason && (
-                                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-1 text-[10px] text-violet-500 font-medium bg-violet-50 px-2 py-1 rounded-full">
-                                        <Sparkles size={10} />
-                                        <span>誓言已立</span>
-                                    </motion.div>
-                                )}
-                            </div>
-
-                            <div className="relative group">
-                                <textarea
-                                    value={selectedProject.foundingReason || ''}
-                                    onChange={(e) => handleUpdateProject(selectedProject.id, 'foundingReason', e.target.value)}
-                                    className="w-full p-5 bg-white border border-gray-200 rounded-2xl text-gray-700 placeholder:text-gray-300 focus:bg-white focus:border-violet-300 focus:ring-4 focus:ring-violet-50 transition-all text-sm leading-relaxed min-h-[120px] resize-none"
-                                    placeholder="为了这颗种子，我愿意付出什么？为何它值得我投入生命中的这段时光？（写下你的理由，赋予它生长的力量）"
-                                />
-                                <div className="absolute bottom-4 right-4 text-violet-200 pointer-events-none">
-                                    <Feather size={20} />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Graduate Button */}
-                        <div className="max-w-2xl mx-auto mt-8 pb-10 w-full relative z-30">
-                            {selectedProject.score === 4 && (
-                                <button
-                                    onClick={() => handleGraduate(selectedProject)}
-                                    className={`
-                                        relative overflow-hidden group w-full py-5 text-white rounded-2xl flex items-center justify-center gap-3 hover:translate-y-[-2px] transition-all shadow-xl
-                                        ${selectedProject.foundingReason ? 'bg-gradient-to-r from-gray-900 via-violet-900 to-gray-900 shadow-violet-900/20' : 'bg-gray-900 shadow-gray-900/10'}
-                                    `}
-                                >
-                                    {selectedProject.foundingReason && (
-                                        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
-                                    )}
-
-                                    <span className="text-lg font-light tracking-wide relative z-10">
-                                        {selectedProject.foundingReason ? '立誓启程 (Primary Dev)' : '开启开发 (Primary Dev)'}
-                                    </span>
-                                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform relative z-10" />
-                                    {selectedProject.foundingReason && <Sparkles size={16} className="text-violet-300 animate-pulse relative z-10" />}
-                                </button>
-                            )}
-                        </div>
-
-                    </motion.div>
+                    <ProjectDetailModal
+                        project={selectedProject}
+                        onUpdate={handleUpdateProject}
+                        onAnswer={handleAnswer}
+                        onGraduate={handleGraduate}
+                        onClose={() => setSelectedProject(null)}
+                    />
                 )}
             </AnimatePresence>
 
@@ -433,6 +271,184 @@ const PendingModule = () => {
                 </div>
             )}
         </div>
+    );
+};
+
+const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }) => {
+    return (
+        <motion.div
+            key="detail"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            className="flex-1 bg-white border border-gray-100 rounded-[2.5rem] p-10 shadow-2xl shadow-gray-200/50 overflow-y-auto no-scrollbar relative flex flex-col z-10"
+        >
+            <button
+                onClick={onClose}
+                className="absolute top-8 right-8 p-3 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors z-30"
+            >
+                <X size={20} className="text-gray-400" />
+            </button>
+
+            <div className="absolute top-0 left-0 right-0 h-48 bg-gray-50 overflow-hidden rounded-t-[2.5rem] z-0">
+                {project.bgImage ? (
+                    <>
+                        <img src={project.bgImage} className="w-full h-full object-cover opacity-50" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white" />
+                    </>
+                ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-gray-50 to-white" />
+                )}
+            </div>
+
+            <div className="relative z-20 flex flex-col items-center mb-10 w-full mt-10">
+                <div className="mb-6 relative">
+                    <Sprout size={80} strokeWidth={1} className={
+                        project.score === 0 ? 'text-gray-300' :
+                            project.score <= 2 ? 'text-yellow-500' :
+                                project.score < 4 ? 'text-lime-500' : 'text-emerald-600'
+                    } />
+                    {project.score === 4 && <div className="absolute -top-1 -right-1 text-yellow-500"><Sun size={28} fill="currentColor" /></div>}
+                </div>
+
+                <div className="w-full max-w-lg text-center">
+                    <input
+                        value={project.title}
+                        onChange={(e) => onUpdate(project.id, 'title', e.target.value)}
+                        className="w-full text-4xl md:text-5xl font-thin text-gray-900 text-center bg-transparent border-none focus:ring-0 placeholder:text-gray-300 mb-2"
+                        placeholder="无名项目"
+                    />
+                    <textarea
+                        value={project.desc}
+                        onChange={(e) => {
+                            onUpdate(project.id, 'desc', e.target.value);
+                            e.target.style.height = 'auto';
+                            e.target.style.height = e.target.scrollHeight + 'px';
+                        }}
+                        className="w-full text-base font-light text-center text-gray-500 bg-transparent resize-none border-none focus:ring-0 min-h-[3em]"
+                        placeholder="这个想法的原动力是什么？"
+                    />
+
+                    <div className="flex gap-2 justify-center mt-6">
+                        <div className="flex items-center gap-2 bg-white border rounded-full px-4 py-1.5 shadow-sm">
+                            <Sparkles size={12} className="text-gray-400" />
+                            <input value={project.link || ''} onChange={(e) => onUpdate(project.id, 'link', e.target.value)} placeholder="链接" className="w-40 text-xs border-none p-0 focus:ring-0" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Questions List */}
+            <div className="space-y-4 max-w-2xl mx-auto w-full relative z-20">
+                {QUESTIONS.map((q, i) => {
+                    const ans = project.answers[q.id];
+                    return (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            key={q.id}
+                            className={`
+                            relative p-6 rounded-2xl border transition-all duration-500 overflow-hidden
+                            ${ans === true ? 'bg-emerald-50/50 border-emerald-100' : ''}
+                            ${ans === false ? 'bg-red-50/50 border-red-100' : ''}
+                            ${ans === undefined ? 'bg-white border-gray-100' : ''}
+                        `}
+                        >
+                            <div className="relative z-30 flex justify-between items-center mb-4">
+                                <div>
+                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{q.sub}</h4>
+                                    <p className="text-lg text-gray-800 font-light">{q.text}</p>
+                                </div>
+                                <div className="w-8 h-8 flex items-center justify-center">
+                                    {ans === true && <CheckCircle2 className="text-emerald-500" size={20} />}
+                                    {ans === false && <X className="text-red-400" size={20} />}
+                                </div>
+                            </div>
+
+                            <div className="relative z-30 flex gap-3">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onAnswer(project.id, q.id, true);
+                                    }}
+                                    className={`
+                                    relative z-50 cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all active:scale-95
+                                    ${ans === true ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-200' : 'hover:bg-gray-50 bg-white hover:border-gray-300'}
+                                `}
+                                >
+                                    YES
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onAnswer(project.id, q.id, false);
+                                    }}
+                                    className={`
+                                    relative z-50 cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all active:scale-95
+                                    ${ans === false ? 'bg-red-500 text-white border-red-500 shadow-md shadow-red-200' : 'hover:bg-gray-50 bg-white hover:border-gray-300'}
+                                `}
+                                >
+                                    NO
+                                </button>
+                            </div>
+                        </motion.div>
+                    );
+                })}
+            </div>
+
+            {/* Sacred Reason Input (Premium Design) */}
+            <div className="max-w-2xl mx-auto w-full relative z-20 mt-12 bg-gray-50/50 rounded-3xl p-6 border border-gray-100">
+                <div className="mb-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Scroll size={16} className="text-violet-400" />
+                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">创始人誓言 (Founder's Vow)</h4>
+                    </div>
+                    {project.foundingReason && (
+                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-1 text-[10px] text-violet-500 font-medium bg-violet-50 px-2 py-1 rounded-full">
+                            <Sparkles size={10} />
+                            <span>誓言已立</span>
+                        </motion.div>
+                    )}
+                </div>
+
+                <div className="relative group">
+                    <textarea
+                        value={project.foundingReason || ''}
+                        onChange={(e) => onUpdate(project.id, 'foundingReason', e.target.value)}
+                        className="w-full p-5 bg-white border border-gray-200 rounded-2xl text-gray-700 placeholder:text-gray-300 focus:bg-white focus:border-violet-300 focus:ring-4 focus:ring-violet-50 transition-all text-sm leading-relaxed min-h-[120px] resize-none"
+                        placeholder="为了这颗种子，我愿意付出什么？为何它值得我投入生命中的这段时光？（写下你的理由，赋予它生长的力量）"
+                    />
+                    <div className="absolute bottom-4 right-4 text-violet-200 pointer-events-none">
+                        <Feather size={20} />
+                    </div>
+                </div>
+            </div>
+
+            {/* Graduate Button */}
+            <div className="max-w-2xl mx-auto mt-8 pb-10 w-full relative z-30">
+                {project.score === 4 && (
+                    <button
+                        onClick={() => onGraduate(project)}
+                        className={`
+                        relative overflow-hidden group w-full py-5 text-white rounded-2xl flex items-center justify-center gap-3 hover:translate-y-[-2px] transition-all shadow-xl
+                        ${project.foundingReason ? 'bg-gradient-to-r from-gray-900 via-violet-900 to-gray-900 shadow-violet-900/20' : 'bg-gray-900 shadow-gray-900/10'}
+                    `}
+                    >
+                        {project.foundingReason && (
+                            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+                        )}
+
+                        <span className="text-lg font-light tracking-wide relative z-10">
+                            {project.foundingReason ? '立誓启程 (Primary Dev)' : '开启开发 (Primary Dev)'}
+                        </span>
+                        <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform relative z-10" />
+                        {project.foundingReason && <Sparkles size={16} className="text-violet-300 animate-pulse relative z-10" />}
+                    </button>
+                )}
+            </div>
+
+        </motion.div>
     );
 };
 
