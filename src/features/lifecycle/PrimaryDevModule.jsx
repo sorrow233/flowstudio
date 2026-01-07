@@ -416,12 +416,14 @@ const PrimaryDevModule = () => {
 
 
                             {/* Graduation Checklist Overlay (The Ascension Ritual) */}
-                            <AnimatePresence>
+                            <AnimatePresence mode="wait">
                                 {showGraduationChecklist && (
                                     <motion.div
+                                        key="graduation-ritual"
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.2 }}
                                         className="absolute inset-0 z-50 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center p-8"
                                     >
                                         <div className="max-w-xl w-full text-center relative">
