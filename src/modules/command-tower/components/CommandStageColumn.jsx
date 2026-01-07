@@ -22,7 +22,10 @@ export default function CommandStageColumn({
     onEditCommand,
     onDeleteCommand,
     onCopyCommand,
-    copiedId
+    copiedId,
+    // New props
+    selectedCommands = [],
+    onToggleSelect
 }) {
     const { t } = useTranslation();
     const [isRenaming, setIsRenaming] = useState(false);
@@ -104,6 +107,8 @@ export default function CommandStageColumn({
                             onEdit={onEditCommand}
                             onDelete={(id) => onDeleteCommand(stage.key, id)}
                             isCopied={copiedId === cmd.id}
+                            isSelected={selectedCommands.some(c => c.id === cmd.id)}
+                            onToggleSelect={onToggleSelect}
                         />
                     ))
                 ) : (

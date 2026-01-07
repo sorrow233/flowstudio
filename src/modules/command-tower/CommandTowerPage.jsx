@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import SearchInput from '@/components/SearchInput';
 import Modal from '@/components/Modal';
 import { Logger } from '@/utils/logger';
+import { Copy, Check, Trash2 } from 'lucide-react'; // Import icons for Floating Bar
 import CommandStageColumn from './components/CommandStageColumn';
 import { generateId } from '@/features/command-tower/api/local';
 import './CommandTowerPage.css';
@@ -16,6 +17,7 @@ export default function CommandTowerPage() {
     const [showAddStageModal, setShowAddStageModal] = useState(false);
     const [editingCommand, setEditingCommand] = useState(null); // { stageKey, command }
     const [editingStage, setEditingStage] = useState(null); // { key, label }
+    const [selectedCommands, setSelectedCommands] = useState([]); // Array to store selected commands in order
 
     // --- State Management ---
     const {
@@ -63,11 +65,42 @@ export default function CommandTowerPage() {
         return freshColors[0].color;
     };
 
-    const [newCommand, setNewCommand] = useState({ title: '', content: '', stage: '', color: '' });
+    const [newCommand, setNewCommand] = useState({ title: '', content: '', stage: '', color: '', tags: '' });
     const [newStage, setNewStage] = useState({ key: '', label: '', icon: 'Layers', color: defaultStageColors[0] });
     const [searchQuery, setSearchQuery] = useState('');
 
 
+
+    // --- Batch Selection Helpers ---
+    const handleToggleSelect = (command) => {
+        setSelectedCommands(prev => {
+            const isSelected = prev.some(c => c.id === command.id);
+            if (isSelected) {
+                // Remove if already selected
+                return prev.filter(c => c.id !== command.id);
+            } else {
+                // Add to end if not selected
+                return [...prev, command];
+            }
+        });
+    };
+
+    const handleBatchCopy = async () => {
+        if (selectedCommands.length === 0) return;
+
+        const batchContent = selectedCommands.map((cmd, index) => {
+            return `
+### 第 ${index + 1} 步：${cmd.title}
+${cmd.content}
+`;
+        }).join('\n----------------------------------------\n');
+
+        const finalPrompt = `请按照以下 ${selectedCommands.length} 个步骤依次执行任务：\n${batchContent}`;
+
+        await copyToClipboard(finalPrompt, 'batch_copy');
+        // Optional: clear selection after copy?
+        // setSelectedCommands([]); 
+    };
 
     // --- Helpers ---
     const copyToClipboard = async (text, id) => {
@@ -105,11 +138,12 @@ export default function CommandTowerPage() {
             command: {
                 title: newCommand.title,
                 content: newCommand.content,
-                color: commandColor
+                color: commandColor,
+                tags: newCommand.tags ? newCommand.tags.split(',').map(t => t.trim()).filter(Boolean) : []
             }
         });
 
-        setNewCommand({ title: '', content: '', stage: '', color: freshColors[0].color });
+        setNewCommand({ title: '', content: '', stage: '', color: freshColors[0].color, tags: '' });
         setShowAddCommandModal(false);
     };
 
@@ -121,14 +155,23 @@ export default function CommandTowerPage() {
     };
 
     const handleEditCommand = (stageKey, command) => {
-        setEditingCommand({ stageKey, command: { ...command } });
+        // Flatten tags array to string for editing
+        const tagsStr = command.tags ? command.tags.join(', ') : '';
+        setEditingCommand({
+            stageKey,
+            command: { ...command },
+            tagsStr
+        });
     };
 
     const handleSaveEdit = () => {
         if (!editingCommand || !editingCommand.command.title?.trim()) return;
         updateCommand({
             stageKey: editingCommand.stageKey,
-            command: editingCommand.command
+            command: {
+                ...editingCommand.command,
+                tags: editingCommand.tagsStr ? editingCommand.tagsStr.split(',').map(t => t.trim()).filter(Boolean) : []
+            }
         });
         setEditingCommand(null);
     };
@@ -214,13 +257,16 @@ export default function CommandTowerPage() {
                             onDeleteStage={handleDeleteStage}
                             // Command Props
                             onAddCommand={(stageKey) => {
-                                setNewCommand({ title: '', content: '', stage: stageKey, color: getStageDefaultColor(stageKey) });
+                                setNewCommand({ title: '', content: '', stage: stageKey, color: getStageDefaultColor(stageKey), tags: '' });
                                 setShowAddCommandModal(true);
                             }}
                             onCopy={copyToClipboard}
                             onEditCommand={handleEditCommand}
                             onDeleteCommand={handleDeleteCommand}
                             copiedId={copiedId}
+                            // Selection Props
+                            selectedCommands={selectedCommands}
+                            onToggleSelect={handleToggleSelect}
                         />
                     );
                 })}
@@ -255,7 +301,7 @@ export default function CommandTowerPage() {
             {/* Floating Action Button (Alternative Add) */}
             <button className="ct-fab" onClick={() => {
                 const firstStageKey = stages[0]?.key || '';
-                setNewCommand({ title: '', content: '', stage: firstStageKey, color: getStageDefaultColor(firstStageKey) });
+                setNewCommand({ title: '', content: '', stage: firstStageKey, color: getStageDefaultColor(firstStageKey), tags: '' });
                 setShowAddCommandModal(true);
             }}>
                 <Plus size={24} />
@@ -292,6 +338,16 @@ export default function CommandTowerPage() {
                         onChange={e => setNewCommand({ ...newCommand, content: e.target.value })}
                         placeholder={t('command_tower.command_placeholder')}
                         rows={3}
+                        className="project-input"
+                    />
+                </div>
+                <div className="form-group">
+                    <label>{t('common.tags') || "Tags (comma separated)"}</label>
+                    <input
+                        type="text"
+                        value={newCommand.tags}
+                        onChange={e => setNewCommand({ ...newCommand, tags: e.target.value })}
+                        placeholder="react, git, deploy"
                         className="project-input"
                     />
                 </div>
@@ -410,6 +466,19 @@ export default function CommandTowerPage() {
                             />
                         </div>
                         <div className="form-group">
+                            <label>{t('common.tags') || "Tags (comma separated)"}</label>
+                            <input
+                                type="text"
+                                value={editingCommand.tagsStr}
+                                onChange={e => setEditingCommand({
+                                    ...editingCommand,
+                                    tagsStr: e.target.value
+                                })}
+                                placeholder="react, git, deploy"
+                                className="project-input"
+                            />
+                        </div>
+                        <div className="form-group">
                             <label>{t('common.color') || "颜色"}</label>
                             <div className="ct-color-picker">
                                 {freshColors.map(c => (
@@ -429,6 +498,80 @@ export default function CommandTowerPage() {
                     </>
                 )}
             </Modal>
+
+            {/* --- Floating Batch Action Bar --- */}
+            {selectedCommands.length > 0 && (
+                <div className="ct-batch-bar" style={{
+                    position: 'fixed',
+                    bottom: '30px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    backgroundColor: 'var(--bg-card)',
+                    padding: '12px 24px',
+                    borderRadius: '50px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    zIndex: 100,
+                    border: '1px solid var(--border-color)',
+                    animation: 'slideUp 0.3s ease-out'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
+                            已选择 {selectedCommands.length} 个指令
+                        </span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                            (按勾选顺序执行)
+                        </span>
+                    </div>
+
+                    {/* Preview Bubbles */}
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                        {selectedCommands.map((c, i) => (
+                            <div key={c.id} style={{
+                                width: '20px', height: '20px',
+                                borderRadius: '50%',
+                                backgroundColor: c.color,
+                                fontSize: '10px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                color: '#fff', fontWeight: 'bold'
+                            }}>
+                                {i + 1}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--border-color)' }}></div>
+
+                    <button
+                        className="btn btn-primary"
+                        onClick={handleBatchCopy}
+                        style={{ borderRadius: '20px', padding: '6px 16px' }}
+                    >
+                        {copiedId === 'batch_copy' ? (
+                            <>
+                                <Check size={16} style={{ marginRight: '6px' }} />
+                                已复制拼盘
+                            </>
+                        ) : (
+                            <>
+                                <Copy size={16} style={{ marginRight: '6px' }} />
+                                生成执行流
+                            </>
+                        )}
+                    </button>
+
+                    <button
+                        className="btn-icon"
+                        onClick={() => setSelectedCommands([])}
+                        title="清空选择"
+                        style={{ marginLeft: '4px', color: 'var(--text-secondary)' }}
+                    >
+                        <Trash2 size={16} />
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
