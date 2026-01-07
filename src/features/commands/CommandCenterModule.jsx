@@ -588,143 +588,213 @@ const CommandCenterModule = () => {
                                         whileHover={{ y: -2, scale: 1.005, boxShadow: "0 10px 20px -5px rgba(0, 0, 0, 0.05)" }}
                                         onDoubleClick={() => handleEdit(cmd)}
                                         className={`
-                                            group bg-white border rounded-2xl p-4 transition-all duration-300 flex items-center gap-4 relative overflow-hidden select-none
+                                            group bg-white border rounded-2xl p-4 transition-all duration-300 flex flex-col relative overflow-hidden select-none
                                             ${cmd.type === 'mandatory' ? 'border-red-100 hover:border-red-200' : ''}
                                             ${cmd.type === 'link' ? 'border-blue-100 hover:border-blue-200' : ''}
                                             ${cmd.type === 'utility' ? 'border-gray-100 hover:border-emerald-100' : ''}
                                         `}
                                     >
-                                        {/* Drag Handle */}
-                                        {!isSearching && (
-                                            <div className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-400 p-2 -ml-2">
-                                                <GripVertical size={16} />
+                                        <div className="flex items-center gap-4 z-10">
+                                            {/* Drag Handle */}
+                                            {!isSearching && (
+                                                <div className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-400 p-2 -ml-2">
+                                                    <GripVertical size={16} />
+                                                </div>
+                                            )}
+
+                                            {/* Icon Box */}
+                                            <div className={`
+                                                w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-500
+                                                ${cmd.type === 'mandatory' ? 'bg-red-50 text-red-500 group-hover:bg-red-100' : ''}
+                                                ${cmd.type === 'link' ? 'bg-blue-50 text-blue-500 group-hover:bg-blue-100' : ''}
+                                                ${cmd.type === 'utility' ? 'bg-gray-50 text-gray-400 group-hover:bg-emerald-50 group-hover:text-emerald-600' : ''}
+                                            `}>
+                                                {cmd.type === 'link' ? <LinkIcon size={20} /> : <Command size={20} />}
+                                            </div>
+
+                                            {/* Text Content */}
+                                            <div className="flex-1 min-w-0 py-1">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <h4 className="font-medium text-gray-900 truncate">{cmd.title}</h4>
+                                                    {cmd.type === 'mandatory' && (
+                                                        <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase tracking-wider">MANDATORY</span>
+                                                    )}
+                                                    {cmd.type === 'link' && (
+                                                        <span className="text-[10px] font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full uppercase tracking-wider">LINK</span>
+                                                    )}
+                                                    {(cmd.stageIds && cmd.stageIds.length > 1) && (
+                                                        <span className="text-[10px] font-bold bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                                                            <Globe size={8} /> SHARED
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="text-xs text-gray-400 font-mono truncate flex items-center gap-2">
+                                                    {cmd.type === 'link' ? (
+                                                        <>
+                                                            <Globe size={10} /> {cmd.url}
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <FileText size={10} /> {cmd.content}
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Actions */}
+                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleEdit(cmd); }}
+                                                    className="p-2 hover:bg-gray-100 rounded-xl text-gray-400 hover:text-gray-900 transition-colors"
+                                                    title="Edit"
+                                                >
+                                                    <Sparkles size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleCopy(cmd.id, cmd.content || cmd.url); }}
+                                                    className="p-2 hover:bg-emerald-50 rounded-xl text-gray-400 hover:text-emerald-600 transition-colors relative"
+                                                    title="Copy Content"
+                                                >
+                                                    {copiedId === cmd.id ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} />}
+                                                </button>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleRemove(cmd.id); }}
+                                                    className="p-2 hover:bg-red-50 rounded-xl text-gray-400 hover:text-red-500 transition-colors"
+                                                    title="Remove"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Tags Display */}
+                                        {(cmd.tags && cmd.tags.length > 0) && (
+                                            <div className="flex flex-wrap gap-2 pl-[4.5rem] mt-2">
+                                                {cmd.tags.map(tag => (
+                                                    <button
+                                                        key={tag.id}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleCopy(`${cmd.id}-${tag.id}`, tag.value || cmd.content);
+                                                        }}
+                                                        className="group/tag flex items-center gap-2 px-3 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-500 hover:text-emerald-600 rounded-lg text-[10px] font-medium border border-gray-100 hover:border-emerald-200 transition-all relative overflow-hidden"
+                                                        title={tag.value}
+                                                    >
+                                                        <Tag size={10} className="opacity-70" />
+                                                        {tag.label}
+                                                        {copiedId === `${cmd.id}-${tag.id}` && (
+                                                            <motion.div
+                                                                initial={{ opacity: 0, y: 10 }}
+                                                                animate={{ opacity: 1, y: 0 }}
+                                                                className="absolute inset-0 bg-emerald-500 text-white flex items-center justify-center font-bold"
+                                                            >
+                                                                <Check size={10} />
+                                                            </motion.div>
+                                                        )}
+                                                    </button>
+                                                ))}
                                             </div>
                                         )}
-
-                                        {/* Icon Box */}
-                                        <div className={`
-                                            w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-500
-                                            ${cmd.type === 'mandatory' ? 'bg-red-50 text-red-500 group-hover:bg-red-100' : ''}
-                                            ${cmd.type === 'link' ? 'bg-blue-50 text-blue-500 group-hover:bg-blue-100' : ''}
-                                            ${cmd.type === 'utility' ? 'bg-gray-50 text-gray-400 group-hover:bg-emerald-50 group-hover:text-emerald-600' : ''}
-                                        `}>
-                                            <Sparkles size={18} />
-                                        </button>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); handleCopy(cmd.id, cmd.content || cmd.url); }}
-                                            className="p-2 hover:bg-emerald-50 rounded-xl text-gray-400 hover:text-emerald-600 transition-colors relative"
-                                            title="Copy Content"
-                                        >
-                                            {copiedId === cmd.id ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} />}
-                                        </button>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); handleRemove(cmd.id); }}
-                                            className="p-2 hover:bg-red-50 rounded-xl text-gray-400 hover:text-red-500 transition-colors"
-                                            title="Remove"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
-                                    </div>
-                                </motion.div>
-                        </Reorder.Item>
-                    ))}
-                </Reorder.Group>
-                ) : (
-                !isAdding && !isImporting && (
-                <div className="flex flex-col items-center justify-center py-32 text-center select-none">
-                    <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 animate-pulse">
-                        <Terminal size={32} className="text-gray-300" />
-                    </div>
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">No Commands Configured</h4>
-                    <p className="text-gray-400 max-w-sm mx-auto mb-8">
-                        Stage {activeStage} is waiting for orders.
-                    </p>
-                    <div className="flex gap-4">
-                        <button
-                            onClick={() => setIsImporting(true)}
-                            className="text-gray-500 font-medium hover:text-gray-700 flex items-center gap-2 hover:gap-3 transition-all"
-                        >
-                            <Library size={16} /> Open Library
-                        </button>
-                        <button
-                            onClick={() => {
-                                setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [] });
-                                setIsAdding(true);
-                            }}
-                            className="text-emerald-600 font-medium hover:text-emerald-700 flex items-center gap-2 hover:gap-3 transition-all"
-                        >
-                            Create Command <ChevronRight size={16} />
-                        </button>
-                    </div>
+                                    </motion.div>
+                                </Reorder.Item>
+                            ))}
+                        </Reorder.Group>
+                    ) : (
+                        !isAdding && !isImporting && (
+                            <div className="flex flex-col items-center justify-center py-32 text-center select-none">
+                                <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                                    <Terminal size={32} className="text-gray-300" />
+                                </div>
+                                <h4 className="text-lg font-medium text-gray-900 mb-2">No Commands Configured</h4>
+                                <p className="text-gray-400 max-w-sm mx-auto mb-8">
+                                    Stage {activeStage} is waiting for orders.
+                                </p>
+                                <div className="flex gap-4">
+                                    <button
+                                        onClick={() => setIsImporting(true)}
+                                        className="text-gray-500 font-medium hover:text-gray-700 flex items-center gap-2 hover:gap-3 transition-all"
+                                    >
+                                        <Library size={16} /> Open Library
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [] });
+                                            setIsAdding(true);
+                                        }}
+                                        className="text-emerald-600 font-medium hover:text-emerald-700 flex items-center gap-2 hover:gap-3 transition-all"
+                                    >
+                                        Create Command <ChevronRight size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        )
+                    )}
                 </div>
-                )
-            )}
             </div>
-        </div>
 
-            {/* Import Library Modal */ }
-    <AnimatePresence>
-        {isImporting && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                <motion.div
-                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                    onClick={() => setIsImporting(false)}
-                />
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                    className="bg-white rounded-[2rem] shadow-2xl p-8 max-w-2xl w-full max-h-[80vh] flex flex-col relative z-50"
-                >
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                            <h3 className="text-xl font-light text-gray-900 flex items-center gap-2">
-                                <Library size={20} /> Global Command Library
-                            </h3>
-                            <p className="text-xs text-gray-400 mt-1">Import commands from other stages</p>
-                        </div>
-                        <button onClick={() => setIsImporting(false)} className="p-2 hover:bg-gray-100 rounded-full">
-                            <X size={20} className="text-gray-400" />
-                        </button>
-                    </div>
+            {/* Import Library Modal */}
+            <AnimatePresence>
+                {isImporting && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                            onClick={() => setIsImporting(false)}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="bg-white rounded-[2rem] shadow-2xl p-8 max-w-2xl w-full max-h-[80vh] flex flex-col relative z-50"
+                        >
+                            <div className="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 className="text-xl font-light text-gray-900 flex items-center gap-2">
+                                        <Library size={20} /> Global Command Library
+                                    </h3>
+                                    <p className="text-xs text-gray-400 mt-1">Import commands from other stages</p>
+                                </div>
+                                <button onClick={() => setIsImporting(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                                    <X size={20} className="text-gray-400" />
+                                </button>
+                            </div>
 
-                    <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
-                        {importableCommands.length > 0 ? (
-                            importableCommands.map(cmd => (
-                                <div key={cmd.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:border-emerald-200 hover:shadow-md transition-all group">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`
+                            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
+                                {importableCommands.length > 0 ? (
+                                    importableCommands.map(cmd => (
+                                        <div key={cmd.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:border-emerald-200 hover:shadow-md transition-all group">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`
                                                     w-10 h-10 rounded-lg flex items-center justify-center shrink-0
                                                     ${cmd.type === 'link' ? 'bg-blue-50 text-blue-500' : 'bg-gray-50 text-gray-400'}
                                                 `}>
-                                            {cmd.type === 'link' ? <LinkIcon size={18} /> : <Command size={18} />}
+                                                    {cmd.type === 'link' ? <LinkIcon size={18} /> : <Command size={18} />}
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-medium text-gray-900">{cmd.title}</h4>
+                                                    <p className="text-xs text-gray-400 font-mono line-clamp-1 max-w-xs">{cmd.url || cmd.content}</p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => handleImport(cmd)}
+                                                className="px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-emerald-500 hover:text-white transition-colors flex items-center gap-2"
+                                            >
+                                                <Download size={14} /> Import
+                                            </button>
                                         </div>
-                                        <div>
-                                            <h4 className="font-medium text-gray-900">{cmd.title}</h4>
-                                            <p className="text-xs text-gray-400 font-mono line-clamp-1 max-w-xs">{cmd.url || cmd.content}</p>
-                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-12 text-gray-400">
+                                        <Library size={48} className="mx-auto mb-4 opacity-20" />
+                                        <p>No other commands available to import.</p>
+                                        <p className="text-xs mt-2">Only 'Utility' and 'Link' types are shared globally.</p>
                                     </div>
-                                    <button
-                                        onClick={() => handleImport(cmd)}
-                                        className="px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-emerald-500 hover:text-white transition-colors flex items-center gap-2"
-                                    >
-                                        <Download size={14} /> Import
-                                    </button>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="text-center py-12 text-gray-400">
-                                <Library size={48} className="mx-auto mb-4 opacity-20" />
-                                <p>No other commands available to import.</p>
-                                <p className="text-xs mt-2">Only 'Utility' and 'Link' types are shared globally.</p>
+                                )}
                             </div>
-                        )}
+                        </motion.div>
                     </div>
-                </motion.div>
-            </div>
-        )}
-    </AnimatePresence>
+                )}
+            </AnimatePresence>
         </div >
     );
 };
