@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Code2, GitBranch, Layers, PlayCircle, Plus, CheckSquare,
     Square, Trash2, ExternalLink, X, ChevronRight, CheckCircle2,
-    MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command, Check, Rocket, Globe
+    MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command, Check, Rocket, Globe, Pencil, Save, Image as ImageIcon
 } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
 
@@ -15,10 +15,22 @@ const STAGE_ICONS = {
     5: Flag
 };
 
+const VISUAL_VIBES = [
+    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop', // Tech Dark
+    'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop', // Circuit
+    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop', // Cyberpunk
+    'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?q=80&w=2076&auto=format&fit=crop', // Mountain
+    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop'  // Nature
+];
+
 const PrimaryDevModule = () => {
     const [projects, setProjects] = useState([]);
     const [selectedProject, setSelectedProject] = useState(null);
     const [newTaskInput, setNewTaskInput] = useState('');
+
+    // Edit Project State
+    const [isEditingProject, setIsEditingProject] = useState(false);
+    const [editForm, setEditForm] = useState({});
 
     // Command Modal State
     const [commandModalOpen, setCommandModalOpen] = useState(false);
@@ -57,9 +69,32 @@ const PrimaryDevModule = () => {
     const handleUpdateProject = (id, updates) => {
         const updated = projects.map(p => p.id === id ? { ...p, ...updates } : p);
         setProjects(updated);
+        // If updating the currently selected project, update it too
         if (selectedProject?.id === id) {
+            // Careful not to overwrite if we are just closing the modal or similar, 
+            // but here we want to reflect changes immediately.
             setSelectedProject(prev => ({ ...prev, ...updates }));
         }
+    };
+
+    // Edit Handlers
+    const startEditing = () => {
+        setEditForm({
+            title: selectedProject.title,
+            desc: selectedProject.desc,
+            link: selectedProject.link || '',
+            bgImage: selectedProject.bgImage || ''
+        });
+        setIsEditingProject(true);
+    };
+
+    const saveEditing = () => {
+        handleUpdateProject(selectedProject.id, editForm);
+        setIsEditingProject(false);
+    };
+
+    const cancelEditing = () => {
+        setIsEditingProject(false);
     };
 
     const handleAddTask = (projectId) => {
@@ -80,13 +115,13 @@ const PrimaryDevModule = () => {
         const project = projects.find(p => p.id === selectedProject.id);
         const newTasks = [...(project.tasks || []), {
             id: Date.now(),
-            text: command.title,
+            text: command.title, // Use command title as task text
             done: false,
             isCommand: true,
             commandContent: command.content,
             commandUrl: command.url,
             commandId: command.id,
-            commandType: command.type || 'utility'
+            commandType: command.type || 'utility' // Default to utility if undefined
         }];
         handleUpdateProject(selectedProject.id, { tasks: newTasks });
         setCommandModalOpen(false);
@@ -233,7 +268,10 @@ const PrimaryDevModule = () => {
                         <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             className="absolute inset-0 bg-white/80 backdrop-blur-md pointer-events-auto"
-                            onClick={() => setSelectedProject(null)}
+                            onClick={() => {
+                                setSelectedProject(null);
+                                setIsEditingProject(false); // Reset edit mode on close
+                            }}
                         />
                         <motion.div
                             layoutId={`card-${selectedProject.id}`}
@@ -241,43 +279,148 @@ const PrimaryDevModule = () => {
                         >
                             {/* Rich Hero Header with Parallax-like effect */}
                             <div className="relative shrink-0 h-72 bg-gray-900 flex items-end p-10 overflow-hidden group">
-                                {selectedProject.bgImage ? (
-                                    <motion.div className="absolute inset-0 z-0">
-                                        <img src={selectedProject.bgImage} alt="" className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-1000" />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
-                                    </motion.div>
+                                {isEditingProject ? (
+                                    // EDIT MODE HERO BACKGROUND
+                                    <div className="absolute inset-0 z-0 bg-gray-900">
+                                        {editForm.bgImage ? (
+                                            <>
+                                                <img src={editForm.bgImage} alt="" className="w-full h-full object-cover opacity-50 blur-sm" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
+                                            </>
+                                        ) : (
+                                            <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black" />
+                                        )}
+                                    </div>
                                 ) : (
-                                    <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black" />
+                                    // VIEW MODE HERO BACKGROUND
+                                    selectedProject.bgImage ? (
+                                        <motion.div className="absolute inset-0 z-0">
+                                            <img src={selectedProject.bgImage} alt="" className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-1000" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
+                                        </motion.div>
+                                    ) : (
+                                        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black" />
+                                    )
                                 )}
 
-                                <button
-                                    onClick={() => setSelectedProject(null)}
-                                    className="absolute top-8 right-8 p-3 bg-black/20 hover:bg-black/40 text-white rounded-full transition-colors backdrop-blur-md z-20 border border-white/10"
-                                >
-                                    <X size={20} />
-                                </button>
+                                {/* Top Actions */}
+                                <div className="absolute top-8 right-8 flex gap-3 z-20">
+                                    {isEditingProject ? (
+                                        <>
+                                            <button
+                                                onClick={cancelEditing}
+                                                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md transition-colors text-sm font-medium"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                onClick={saveEditing}
+                                                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl shadow-lg transition-colors flex items-center gap-2 text-sm font-medium"
+                                            >
+                                                <Save size={16} /> Save Changes
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button
+                                                onClick={startEditing}
+                                                className="p-3 bg-black/20 hover:bg-black/40 text-white rounded-full transition-colors backdrop-blur-md border border-white/10"
+                                                title="Edit Settings"
+                                            >
+                                                <Pencil size={20} />
+                                            </button>
+                                            <button
+                                                onClick={() => setSelectedProject(null)}
+                                                className="p-3 bg-black/20 hover:bg-black/40 text-white rounded-full transition-colors backdrop-blur-md border border-white/10"
+                                            >
+                                                <X size={20} />
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+
 
                                 <div className="relative z-10 w-full flex justify-between items-end text-white">
-                                    <div className="max-w-3xl">
-                                        <div className="flex items-center gap-3 mb-4 opacity-80">
-                                            <span className="px-3 py-1 rounded-full border border-white/20 bg-white/10 text-xs font-mono backdrop-blur-sm">
-                                                Active Development
-                                            </span>
-                                            {selectedProject.link && (
-                                                <a href={selectedProject.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs hover:text-emerald-400 transition-colors px-3 py-1 rounded-full hover:bg-white/10">
-                                                    <ExternalLink size={12} /> {selectedProject.link.replace('https://', '')}
-                                                </a>
-                                            )}
-                                        </div>
-                                        <h2 className="text-6xl font-thin tracking-tighter mb-4 text-shadow-lg">{selectedProject.title}</h2>
-                                        <p className="text-xl font-light opacity-80 leading-relaxed text-shadow-sm">{selectedProject.desc}</p>
+                                    <div className="max-w-3xl w-full">
+                                        {isEditingProject ? (
+                                            // EDIT FORM
+                                            <div className="space-y-4 w-full bg-black/40 backdrop-blur-xl p-6 rounded-3xl border border-white/10">
+                                                <input
+                                                    value={editForm.title}
+                                                    onChange={e => setEditForm({ ...editForm, title: e.target.value })}
+                                                    className="w-full bg-transparent text-4xl font-thin tracking-tighter text-white placeholder:text-white/30 outline-none border-b border-white/20 focus:border-emerald-400/50 pb-2 transition-colors"
+                                                    placeholder="Project Title"
+                                                />
+                                                <textarea
+                                                    value={editForm.desc}
+                                                    onChange={e => setEditForm({ ...editForm, desc: e.target.value })}
+                                                    className="w-full bg-transparent text-lg font-light text-white/90 placeholder:text-white/30 outline-none resize-none h-20"
+                                                    placeholder="Brief mission manifesto..."
+                                                />
+                                                <div className="flex gap-4">
+                                                    <div className="flex-1">
+                                                        <label className="text-xs uppercase tracking-widest text-white/50 mb-1 block">External Link</label>
+                                                        <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2 border border-white/10 focus-within:border-emerald-500/50 transition-colors">
+                                                            <ExternalLink size={14} className="text-white/50" />
+                                                            <input
+                                                                value={editForm.link}
+                                                                onChange={e => setEditForm({ ...editForm, link: e.target.value })}
+                                                                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/20"
+                                                                placeholder="https://..."
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <label className="text-xs uppercase tracking-widest text-white/50 mb-1 block">Visual Vibe</label>
+                                                        <div className="flex items-center gap-2">
+                                                            {VISUAL_VIBES.map((vibe, i) => (
+                                                                <button
+                                                                    key={i}
+                                                                    onClick={() => setEditForm({ ...editForm, bgImage: vibe })}
+                                                                    className={`w-8 h-8 rounded-full border-2 overflow-hidden transition-all ${editForm.bgImage === vibe ? 'border-emerald-500 scale-110' : 'border-transparent opacity-50 hover:opacity-100'}`}
+                                                                >
+                                                                    <img src={vibe} className="w-full h-full object-cover" />
+                                                                </button>
+                                                            ))}
+                                                            <button
+                                                                onClick={() => {
+                                                                    const url = prompt("Enter custom image URL:", editForm.bgImage);
+                                                                    if (url) setEditForm({ ...editForm, bgImage: url });
+                                                                }}
+                                                                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-colors"
+                                                            >
+                                                                <ImageIcon size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            // VIEW MODE
+                                            <>
+                                                <div className="flex items-center gap-3 mb-4 opacity-80">
+                                                    <span className="px-3 py-1 rounded-full border border-white/20 bg-white/10 text-xs font-mono backdrop-blur-sm">
+                                                        Active Development
+                                                    </span>
+                                                    {selectedProject.link && (
+                                                        <a href={selectedProject.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs hover:text-emerald-400 transition-colors px-3 py-1 rounded-full hover:bg-white/10">
+                                                            <ExternalLink size={12} /> {selectedProject.link.replace('https://', '')}
+                                                        </a>
+                                                    )}
+                                                </div>
+                                                <h2 className="text-6xl font-thin tracking-tighter mb-4 text-shadow-lg">{selectedProject.title}</h2>
+                                                <p className="text-xl font-light opacity-80 leading-relaxed text-shadow-sm">{selectedProject.desc}</p>
+                                            </>
+                                        )}
                                     </div>
-                                    <button
-                                        onClick={(e) => handleDelete(e, selectedProject.id)}
-                                        className="text-white/30 hover:text-red-400 transition-colors p-4 hover:bg-white/5 rounded-2xl"
-                                    >
-                                        <Trash2 size={24} strokeWidth={1.5} />
-                                    </button>
+                                    {!isEditingProject && (
+                                        <button
+                                            onClick={(e) => handleDelete(e, selectedProject.id)}
+                                            className="text-white/30 hover:text-red-400 transition-colors p-4 hover:bg-white/5 rounded-2xl"
+                                        >
+                                            <Trash2 size={24} strokeWidth={1.5} />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 

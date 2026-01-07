@@ -42,19 +42,43 @@ const CommandCenterModule = () => {
         if (newCmd.type === 'link' && !newCmd.url.trim()) return;
         if (newCmd.type !== 'link' && !newCmd.content.trim()) return;
 
-        const command = {
-            id: uuidv4(),
-            title: newCmd.title.trim(),
-            content: newCmd.content.trim(), // Optional for Link type
-            url: newCmd.url.trim(),
-            type: newCmd.type,
-            stageId: activeStage,
-            createdAt: Date.now()
-        };
+        if (newCmd.id) {
+            // Update existing
+            setCommands(commands.map(c => c.id === newCmd.id ? {
+                ...c,
+                title: newCmd.title.trim(),
+                content: newCmd.content.trim(),
+                url: newCmd.url.trim(),
+                type: newCmd.type,
+                stageId: activeStage
+            } : c));
+        } else {
+            // Create New
+            const command = {
+                id: uuidv4(),
+                title: newCmd.title.trim(),
+                content: newCmd.content.trim(),
+                url: newCmd.url.trim(),
+                type: newCmd.type,
+                stageId: activeStage,
+                createdAt: Date.now()
+            };
+            setCommands([command, ...commands]);
+        }
 
-        setCommands([command, ...commands]);
         setNewCmd({ title: '', content: '', type: 'utility', url: '' });
         setIsAdding(false);
+    };
+
+    const handleEdit = (cmd) => {
+        setNewCmd({
+            id: cmd.id,
+            title: cmd.title,
+            content: cmd.content || '',
+            url: cmd.url || '',
+            type: cmd.type
+        });
+        setIsAdding(true);
     };
 
     const handleDelete = (id) => {
@@ -70,28 +94,14 @@ const CommandCenterModule = () => {
     };
 
     // Reorder Handlers
-    // We only reorder within the current stage view, but updating the main array
     const handleReorder = (reorderedStageCommands) => {
-        // 1. Get commands NOT in this stage
         const otherCommands = commands.filter(c => c.stageId !== activeStage);
-
-        // 2. Combine others + new ordered stage commands
-        // Note: We might want to preserve the relative position of other stage items, 
-        // but typically simply concatenating is fine as long as stability is maintained by ID.
-        // However, a safer bet for "global state" is to map the new order.
-
-        // Actually, Reorder.Group expects the full state it controls to be passed back.
-        // Since we are filtering, we need to be careful.
-        // Strategy: We won't use Reorder.Group on the *filtered* list directly to set state if it conflicts with the global list.
-        // Instead, we update the global list by stitching.
-
         setCommands([...reorderedStageCommands, ...otherCommands]);
     };
 
-    // Derived state for the current stage (needs to be stable for Reorder)
     const stageCommands = commands.filter(c => c.stageId === activeStage);
 
-    // Search filtering applies visually but might disable reordering if active
+    // Search filtering
     const isSearching = search.trim().length > 0;
     const visibleCommands = isSearching
         ? stageCommands.filter(c =>
@@ -193,7 +203,10 @@ const CommandCenterModule = () => {
                     </div>
                     <div className="flex flex-col items-end gap-4">
                         <button
-                            onClick={() => setIsAdding(true)}
+                            onClick={() => {
+                                setNewCmd({ title: '', content: '', type: 'utility', url: '' }); // Clear for new
+                                setIsAdding(true);
+                            }}
                             className="group flex items-center gap-3 px-6 py-3 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                         >
                             <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
@@ -224,34 +237,37 @@ const CommandCenterModule = () => {
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-full -z-10 opacity-50" />
 
                                 <div className="flex flex-col gap-6">
-                                    {/* Type Selector */}
-                                    <div className="flex gap-2 p-1 bg-gray-100 rounded-xl w-fit">
-                                        {[
-                                            { id: 'utility', label: 'Utility (Copy)', icon: Copy },
-                                            { id: 'mandatory', label: 'Mandatory (Task)', icon: Check },
-                                            { id: 'link', label: 'Link (URL)', icon: LinkIcon }
-                                        ].map(type => (
-                                            <button
-                                                key={type.id}
-                                                onClick={() => setNewCmd({ ...newCmd, type: type.id })}
-                                                className={`
-                                                    flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all
-                                                    ${newCmd.type === type.id
-                                                        ? 'bg-white shadow-sm text-gray-900'
-                                                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}
-                                                `}
-                                            >
-                                                <type.icon size={14} />
-                                                {type.label}
-                                            </button>
-                                        ))}
+                                    <div className="flex justify-between items-center">
+                                        <h4 className="text-lg font-light text-gray-900">{newCmd.id ? 'Edit Command' : 'Create New Command'}</h4>
+                                        {/* Type Selector */}
+                                        <div className="flex gap-2 p-1 bg-gray-100 rounded-xl w-fit">
+                                            {[
+                                                { id: 'utility', label: 'Utility (Copy)', icon: Copy },
+                                                { id: 'mandatory', label: 'Mandatory (Task)', icon: Check },
+                                                { id: 'link', label: 'Link (URL)', icon: LinkIcon }
+                                            ].map(type => (
+                                                <button
+                                                    key={type.id}
+                                                    onClick={() => setNewCmd({ ...newCmd, type: type.id })}
+                                                    className={`
+                                                        flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all
+                                                        ${newCmd.type === type.id
+                                                            ? 'bg-white shadow-sm text-gray-900'
+                                                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}
+                                                    `}
+                                                >
+                                                    <type.icon size={14} />
+                                                    {type.label}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
 
                                     {/* Title Input */}
                                     <input
                                         className="w-full bg-transparent text-2xl font-light outline-none placeholder:text-gray-300 border-b border-transparent focus:border-gray-100 pb-2 transition-colors"
                                         placeholder="Command Title..."
-                                        autoFocus
+                                        autoFocus={!newCmd.id}
                                         value={newCmd.title}
                                         onChange={e => setNewCmd({ ...newCmd, title: e.target.value })}
                                     />
@@ -298,7 +314,7 @@ const CommandCenterModule = () => {
                                         disabled={!newCmd.title.trim() || (newCmd.type === 'link' ? !newCmd.url.trim() : !newCmd.content.trim())}
                                         className="px-8 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-medium hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-200 transition-all disabled:opacity-50 disabled:shadow-none"
                                     >
-                                        Create Command
+                                        {newCmd.id ? 'Save Changes' : 'Create Command'}
                                     </button>
                                 </div>
                             </motion.div>
@@ -317,7 +333,7 @@ const CommandCenterModule = () => {
                                 <Reorder.Item
                                     key={cmd.id}
                                     value={cmd}
-                                    dragListener={!isSearching} // Disable drag when searching
+                                    dragListener={!isSearching}
                                     className="relative"
                                 >
                                     <motion.div
@@ -326,6 +342,7 @@ const CommandCenterModule = () => {
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 0.9 }}
                                         whileHover={{ y: -2, scale: 1.005, boxShadow: "0 10px 20px -5px rgba(0, 0, 0, 0.05)" }}
+                                        onDoubleClick={() => handleEdit(cmd)}
                                         className={`
                                             group bg-white border rounded-2xl p-4 transition-all duration-300 flex items-center gap-4 relative overflow-hidden select-none
                                             ${cmd.type === 'mandatory' ? 'border-red-100 hover:border-red-200' : ''}
@@ -377,14 +394,21 @@ const CommandCenterModule = () => {
                                         {/* Actions */}
                                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                             <button
-                                                onClick={() => handleCopy(cmd.id, cmd.content || cmd.url)}
+                                                onClick={(e) => { e.stopPropagation(); handleEdit(cmd); }}
+                                                className="p-2 hover:bg-gray-100 rounded-xl text-gray-400 hover:text-gray-900 transition-colors"
+                                                title="Edit"
+                                            >
+                                                <Sparkles size={18} />
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleCopy(cmd.id, cmd.content || cmd.url); }}
                                                 className="p-2 hover:bg-emerald-50 rounded-xl text-gray-400 hover:text-emerald-600 transition-colors relative"
                                                 title="Copy Content"
                                             >
                                                 {copiedId === cmd.id ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} />}
                                             </button>
                                             <button
-                                                onClick={() => handleDelete(cmd.id)}
+                                                onClick={(e) => { e.stopPropagation(); handleDelete(cmd.id); }}
                                                 className="p-2 hover:bg-red-50 rounded-xl text-gray-400 hover:text-red-500 transition-colors"
                                                 title="Delete"
                                             >
@@ -406,7 +430,10 @@ const CommandCenterModule = () => {
                                     Stage {activeStage} is waiting for orders.
                                 </p>
                                 <button
-                                    onClick={() => setIsAdding(true)}
+                                    onClick={() => {
+                                        setNewCmd({ title: '', content: '', type: 'utility', url: '' });
+                                        setIsAdding(true);
+                                    }}
                                     className="text-emerald-600 font-medium hover:text-emerald-700 flex items-center gap-2 hover:gap-3 transition-all"
                                 >
                                     Create First Command <ChevronRight size={16} />
