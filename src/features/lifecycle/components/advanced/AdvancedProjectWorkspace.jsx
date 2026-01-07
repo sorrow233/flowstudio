@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Network, Sparkles, Activity, Zap, CheckCircle2, X, Plus, Box, AlignJustify, Grid } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
@@ -253,8 +253,8 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
 
                                         <div className="flex justify-between items-start mb-4">
                                             <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${module.priority === 'High' ? 'bg-red-50 text-red-500' :
-                                                    module.priority === 'Low' ? 'bg-gray-100 text-gray-500' :
-                                                        'bg-blue-50 text-blue-500' // Medium default
+                                                module.priority === 'Low' ? 'bg-gray-100 text-gray-500' :
+                                                    'bg-blue-50 text-blue-500' // Medium default
                                                 }`}>
                                                 {module.category}
                                             </span>
