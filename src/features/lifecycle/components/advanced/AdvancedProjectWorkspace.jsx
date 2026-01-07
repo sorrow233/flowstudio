@@ -14,13 +14,22 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
     const [editingModule, setEditingModule] = useState(null);
     const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
-    // Undo State
-    const [prevModules, setPrevModules] = useState(null);
+    // Undo History Stack (Max 20 steps, session only)
+    const [history, setHistory] = useState([]);
     const [showUndo, setShowUndo] = useState(false);
 
     const modules = project.modules || [];
 
     // --- Actions ---
+
+    const pushSnapshot = () => {
+        const currentModules = project.modules || [];
+        setHistory(prev => {
+            const newHistory = [...prev, currentModules];
+            return newHistory.slice(-20); // Keep max 20 snapshots
+        });
+        setShowUndo(true);
+    };
 
     const handleImportModules = (newModules) => {
         // Enhance modules with IDs and initial state
@@ -32,39 +41,40 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
             tasks: []
         }));
 
+        pushSnapshot();
+
         const currentModules = project.modules || [];
-
-        // Save history for Undo
-        setPrevModules(currentModules);
-        setShowUndo(true);
-        setTimeout(() => setShowUndo(false), 5000);
-
         // Append
         const updatedModules = [...currentModules, ...enhancedModules];
         updateProject(project.id, { modules: updatedModules });
     };
 
     const handleAddFromLibrary = (newModules) => {
+        pushSnapshot();
         const currentModules = project.modules || [];
-
-        // Save history for Undo
-        setPrevModules(currentModules);
-        setShowUndo(true);
-        setTimeout(() => setShowUndo(false), 5000);
-
         const updatedModules = [...currentModules, ...newModules];
         updateProject(project.id, { modules: updatedModules });
     };
 
     const handleUndo = () => {
-        if (prevModules) {
-            updateProject(project.id, { modules: prevModules });
-            setPrevModules(null);
-            setShowUndo(false);
+        if (history.length > 0) {
+            const previousState = history[history.length - 1];
+            const newHistory = history.slice(0, -1);
+
+            updateProject(project.id, { modules: previousState });
+            setHistory(newHistory);
+
+            if (newHistory.length === 0) setShowUndo(false);
         }
     };
 
     const handleUpdateModule = (moduleId, updates) => {
+        // Only snapshot for significant changes if desired, but for now snapshot everything
+        // Note: For frequent text updates, this might be too aggressive. 
+        // We generally snapshot on 'Save' or 'Delete' rather than every keystroke if it was real-time.
+        // But since this is passed to a modal 'onUpdate', it happens on Save.
+        pushSnapshot();
+
         const currentModules = project.modules || [];
         const exists = currentModules.find(m => m.id === moduleId);
 
@@ -81,6 +91,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
     };
 
     const handleCreateModule = () => {
+        pushSnapshot();
         const newModule = {
             id: uuidv4(),
             name: 'New Module',
@@ -94,6 +105,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
     };
 
     const handleDeleteModule = (moduleId) => {
+        pushSnapshot();
         const currentModules = project.modules || [];
         const updatedModules = currentModules.filter(m => m.id !== moduleId);
         updateProject(project.id, { modules: updatedModules });
@@ -264,12 +276,14 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
                             exit={{ opacity: 0, y: 20 }}
                             className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-2xl"
                         >
-                            <span className="text-sm">Modules added.</span>
+                            <span className="text-sm">
+                                {history.length > 0 ? `Change applied (${history.length} in stack)` : 'Modules updated.'}
+                            </span>
                             <button
                                 onClick={handleUndo}
                                 className="text-sm font-bold text-blue-400 hover:text-blue-300 transition-colors"
                             >
-                                Undo
+                                Undo {history.length > 1 && `(${history.length})`}
                             </button>
                             <button onClick={() => setShowUndo(false)} className="text-gray-500 hover:text-white">
                                 <X size={14} />
