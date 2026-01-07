@@ -6,27 +6,27 @@ import { STORAGE_KEYS } from '../../utils/constants';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 
-// 深度创始人问答 (VC/Zero-to-One Style)
+// 朴素客观的灵魂拷问 (Simple & Objective Questions)
 const QUESTIONS = [
     {
         id: 'clarity',
-        text: '你能用一句通俗的话，直击用户的核心痛点吗？',
-        sub: '极致清晰' // Radical Clarity
+        text: '这个想法解决了什么实际问题？',
+        sub: '核心价值' // Core Value
     },
     {
         id: 'obsession',
-        text: '如果不做这件事，这会成为你一生的遗憾吗？',
-        sub: '精神信条' // Founder's Conviction
+        text: '为什么值得你花时间去实现它？', // User explicitly asked for this angle
+        sub: '行动初衷' // Motivation
     },
     {
         id: 'market',
-        text: '你的产品是用户的“止痛药”（刚需）而非“维生素”吗？',
-        sub: '致命需求' // Painkiller vs Vitamin
+        text: '谁会真的需要并使用这个东西？',
+        sub: '目标用户' // Target User
     },
     {
         id: 'moat',
-        text: '为什么这件事非你不可，且巨头无法轻易复制？',
-        sub: '核心壁垒' // Unfair Advantage
+        text: '你打算如何迈出第一步？',
+        sub: '落地计划' // Execution
     },
 ];
 
@@ -43,7 +43,7 @@ const PendingModule = () => {
 
     // Explicit Version Log
     useEffect(() => {
-        console.log("PendingModule v1.5 Loaded (New Copy)");
+        console.log("PendingModule v1.6 Loaded (Simple Copy)");
     }, []);
 
     const {
