@@ -17,6 +17,7 @@ import {
 import DraggableCard from '@/components/DraggableCard';
 import DroppableSection from '@/components/DroppableSection';
 import DragOverlayCard from '@/components/DragOverlayCard';
+import { Logger } from '@/utils/logger';
 
 export default function BacklogPage() {
     const { t } = useTranslation();
@@ -55,18 +56,18 @@ export default function BacklogPage() {
     };
 
     const handleMoveNext = (item) => {
-        console.log('[BacklogPage] handleMoveNext:', item.id);
+        Logger.info('BacklogPage', 'handleMoveNext:', item.id);
         moveItemNext(item.id);
     };
 
     const handleTransferToWorkshop = async (item) => {
-        console.log('[BacklogPage] handleTransferToWorkshop:', item.id);
+        Logger.info('BacklogPage', 'handleTransferToWorkshop:', item.id);
         const result = await transferToWorkshop(item.id);
         if (!result.success) {
-            console.warn('[BacklogPage] Transfer failed:', result.message);
+            Logger.warn('BacklogPage', 'Transfer failed:', result.message);
             alert(result.message);
         } else {
-            console.log('[BacklogPage] Transfer success');
+            Logger.info('BacklogPage', 'Transfer success');
         }
     };
 
@@ -80,19 +81,19 @@ export default function BacklogPage() {
     );
 
     const handleDragStart = (event) => {
-        console.log('[BacklogPage] Drag start:', event.active.id);
+        Logger.info('BacklogPage', 'Drag start:', event.active.id);
         setActiveId(event.active.id);
     };
 
     const handleDragEnd = (event) => {
         const { active, over } = event;
-        console.log('[BacklogPage] Drag end:', active.id, 'over', over?.id);
+        Logger.info('BacklogPage', 'Drag end:', active.id, 'over', over?.id);
 
         if (over && active.id !== over.id) {
             const overStage = over.id;
 
             if ((overStage === STAGES.INSPIRATION || overStage === STAGES.PENDING) && !showArchived) {
-                console.log('[BacklogPage] Moving item to stage:', overStage);
+                Logger.info('BacklogPage', 'Moving item to stage:', overStage);
                 moveItemToStage(active.id, overStage);
             }
         }

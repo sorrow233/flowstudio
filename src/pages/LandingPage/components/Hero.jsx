@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Logger } from '@/utils/logger';
 
 const Hero = () => {
     const { t } = useTranslation();
@@ -43,7 +44,7 @@ const Hero = () => {
                 transition={{ duration: 1, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 className="hero-cta"
             >
-                <Link to="/app" className="btn-cta-premium" onClick={() => console.log('[Hero] "Explore the Workshop" clicked')}>
+                <Link to="/app" className="btn-cta-premium" onClick={() => Logger.info('Hero', '"Explore the Workshop" clicked')}>
                     {t('landing.get_started', 'Explore the Workshop')}
                     <div className="btn-arrow">
                         <ArrowRight size={18} />

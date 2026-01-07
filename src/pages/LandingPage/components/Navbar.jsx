@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
+import { Logger } from '@/utils/logger';
 
 const Navbar = () => {
     const { t } = useTranslation();
@@ -17,7 +18,7 @@ const Navbar = () => {
             className="landing-nav-floating"
         >
             <div className="nav-content">
-                <Link to="/" className="landing-logo" onClick={() => console.log('[Navbar] "Flow Studio Logo" clicked')}>
+                <Link to="/" className="landing-logo" onClick={() => Logger.info('Navbar', '"Flow Studio Logo" clicked')}>
                     <div className="logo-dot" />
                     <span>Flow Studio</span>
                 </Link>
@@ -28,7 +29,7 @@ const Navbar = () => {
                     <LanguageSwitcher />
 
                     {currentUser ? (
-                        <Link to="/app" className="btn-dashboard-mini" onClick={() => console.log('[Navbar] "Go to Workshop" clicked')}>
+                        <Link to="/app" className="btn-dashboard-mini" onClick={() => Logger.info('Navbar', '"Go to Workshop" clicked')}>
                             <div className="user-avatar-mini">
                                 {currentUser.photoURL ? (
                                     <img src={currentUser.photoURL} alt="User" />
@@ -39,7 +40,7 @@ const Navbar = () => {
                             <span>{t('landing.dashboard', 'Go to Workshop')}</span>
                         </Link>
                     ) : (
-                        <Link to="/login" className="btn-login-zen" onClick={() => console.log('[Navbar] "Sign In" clicked')}>
+                        <Link to="/login" className="btn-login-zen" onClick={() => Logger.info('Navbar', '"Sign In" clicked')}>
                             {t('auth.login', 'Sign In')}
                         </Link>
                     )}

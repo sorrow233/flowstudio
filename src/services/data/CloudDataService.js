@@ -10,6 +10,7 @@ import {
     Timestamp
 } from 'firebase/firestore';
 import { db, auth } from '@/services/firebase';
+import { Logger } from '@/utils/logger';
 
 class CloudDataService {
     constructor() {
@@ -35,9 +36,9 @@ class CloudDataService {
         try {
             const legacySnap = await getDoc(userDocRef);
             if (legacySnap.exists() && legacySnap.data().items) {
-                console.log("[CloudDataService] Migrating legacy array data to sub-collection...");
+                Logger.info('CloudDataService', 'Migrating legacy array data to sub-collection...');
                 const legacyItems = legacySnap.data().items;
-                console.log(`[CloudDataService] Found ${legacyItems.length} legacy items`);
+                Logger.info('CloudDataService', `Found ${legacyItems.length} legacy items`);
                 const batch = writeBatch(db);
                 const projectsColRef = this._getCollectionRef();
 
@@ -51,18 +52,18 @@ class CloudDataService {
                 // Clear legacy items field
                 batch.update(userDocRef, { items: null });
                 await batch.commit();
-                console.log("[CloudDataService] Migration complete.");
+                Logger.info('CloudDataService', 'Migration complete.');
             }
         } catch (e) {
-            console.error("[CloudDataService] Migration failed", e);
+            Logger.error('CloudDataService', 'Migration failed', e);
         }
     }
 
     async getItems() {
-        console.log('[CloudDataService] Fetching items...');
+        Logger.info('CloudDataService', 'Fetching items...');
         const colRef = this._getCollectionRef();
         const snapshot = await getDocs(colRef);
-        console.log(`[CloudDataService] Fetched ${snapshot.docs.length} items`);
+        Logger.info('CloudDataService', `Fetched ${snapshot.docs.length} items`);
         const items = snapshot.docs.map(doc => {
             const data = doc.data();
             return {
@@ -81,7 +82,7 @@ class CloudDataService {
     }
 
     async addItem(item) {
-        console.log('[CloudDataService] Adding item:', item);
+        Logger.info('CloudDataService', 'Adding item:', item);
         const colRef = this._getCollectionRef();
         // Use provided ID or generate one. ProjectContext used uuidv4(), let's respect that if passed.
         // If not passed, use doc().id
@@ -105,7 +106,7 @@ class CloudDataService {
     }
 
     async updateItem(id, updates) {
-        console.log('[CloudDataService] Updating item:', id, updates);
+        Logger.info('CloudDataService', 'Updating item:', id, updates);
         const colRef = this._getCollectionRef();
         const docRef = doc(colRef, id.toString());
 
@@ -119,7 +120,7 @@ class CloudDataService {
     }
 
     async deleteItem(id) {
-        console.log('[CloudDataService] Deleting item:', id);
+        Logger.info('CloudDataService', 'Deleting item:', id);
         const colRef = this._getCollectionRef();
         const docRef = doc(colRef, id.toString());
         await deleteDoc(docRef);

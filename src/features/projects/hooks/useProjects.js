@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { DataServiceFactory } from '@/services/data/DataServiceFactory';
 import { useEffect } from 'react';
 import { STAGES, generatePastelColor, validateForNextStage } from '../domain';
+import { Logger } from '@/utils/logger';
 
 export function useProjects() {
     const { currentUser, isGuest } = useAuth();
@@ -45,7 +46,7 @@ export function useProjects() {
 
     // Helper functions to match legacy context API where possible
     const addProject = async (stage = STAGES.INSPIRATION, formData = {}) => {
-        console.log('[useProjects] addProject called:', stage, formData);
+        Logger.info('useProjects', 'addProject called:', stage, formData);
         const newItem = {
             name: formData.name || '',
             link: formData.link || '',
@@ -57,22 +58,22 @@ export function useProjects() {
             archived: false,
         };
         const result = await addMutation.mutateAsync(newItem);
-        console.log('[useProjects] Project added:', result.id);
+        Logger.info('useProjects', 'Project added:', result.id);
         return result.id;
     };
 
     const updateProject = (id, updates) => {
-        console.log('[useProjects] updateProject:', id, updates);
+        Logger.info('useProjects', 'updateProject:', id, updates);
         return updateMutation.mutateAsync({ id, updates });
     };
     const deleteProject = (id) => {
-        console.log('[useProjects] deleteProject:', id);
+        Logger.info('useProjects', 'deleteProject:', id);
         return deleteMutation.mutateAsync(id);
     };
     const toggleArchive = (id) => {
         const item = projects.find(i => i.id === id);
         if (item) {
-            console.log('[useProjects] toggleArchive:', id, '->', !item.archived);
+            Logger.info('useProjects', 'toggleArchive:', id, '->', !item.archived);
             updateProject(id, { archived: !item.archived });
         }
     };
@@ -80,7 +81,7 @@ export function useProjects() {
     const moveItemNext = async (id) => {
         const item = projects.find(i => i.id === id);
         if (!item) {
-            console.warn('[useProjects] moveItemNext: Item not found', id);
+            Logger.warn('useProjects', 'moveItemNext: Item not found', id);
             return;
         }
 
@@ -94,11 +95,11 @@ export function useProjects() {
             default: return;
         }
 
-        console.log('[useProjects] moveItemNext:', id, item.stage, '->', nextStage);
+        Logger.info('useProjects', 'moveItemNext:', id, item.stage, '->', nextStage);
 
         const validation = validateForNextStage(item, nextStage);
         if (!validation.valid) {
-            console.warn('[useProjects] Validation failed:', validation.message);
+            Logger.warn('useProjects', 'Validation failed:', validation.message);
             return;
         }
 
@@ -109,11 +110,11 @@ export function useProjects() {
         const itemToMove = projects.find(i => i.id === id);
         if (!itemToMove) return { success: false, message: 'Item not found' };
 
-        console.log('[useProjects] moveItemToStage:', id, newStage);
+        Logger.info('useProjects', 'moveItemToStage:', id, newStage);
 
         const validation = validateForNextStage(itemToMove, newStage);
         if (!validation.valid) {
-            console.warn('[useProjects] moveItemToStage validation failed:', validation.message);
+            Logger.warn('useProjects', 'moveItemToStage validation failed:', validation.message);
             return { success: false, message: validation.message };
         }
 

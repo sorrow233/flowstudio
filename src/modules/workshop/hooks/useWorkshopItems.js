@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
+import { Logger } from '@/utils/logger';
 
 export const WORKSHOP_STAGES = {
     EARLY: 'early',
@@ -15,7 +16,7 @@ const getLocalItems = () => {
         const item = localStorage.getItem(STORAGE_KEY);
         return item ? JSON.parse(item) : [];
     } catch (e) {
-        console.error("Error reading workshop items from localStorage", e);
+        Logger.error('useWorkshopItems', 'Error reading workshop items from localStorage', e);
         return [];
     }
 };
@@ -91,7 +92,7 @@ export function useWorkshopItems() {
     });
 
     const addProject = async (stage = WORKSHOP_STAGES.EARLY, formData = {}) => {
-        console.log('[useWorkshopItems] addProject:', stage, formData);
+        Logger.info('useWorkshopItems', 'addProject:', stage, formData);
         const gradientBg = getRandomGradientBackground();
         const newItem = {
             name: formData.name || '',
@@ -105,23 +106,23 @@ export function useWorkshopItems() {
             archived: false,
         };
         const result = await addMutation.mutateAsync(newItem);
-        console.log('[useWorkshopItems] Added item:', result.id);
+        Logger.info('useWorkshopItems', 'Added item:', result.id);
         return result.id;
     };
 
     const updateProject = (id, updates) => {
-        console.log('[useWorkshopItems] updateProject:', id, updates);
+        Logger.info('useWorkshopItems', 'updateProject:', id, updates);
         return updateMutation.mutateAsync({ id, updates });
     };
     const deleteProject = (id) => {
-        console.log('[useWorkshopItems] deleteProject:', id);
+        Logger.info('useWorkshopItems', 'deleteProject:', id);
         return deleteMutation.mutateAsync(id);
     };
 
     const toggleArchive = (id) => {
         const item = items.find(i => i.id === id);
         if (item) {
-            console.log('[useWorkshopItems] toggleArchive:', id, !item.archived);
+            Logger.info('useWorkshopItems', 'toggleArchive:', id, !item.archived);
             updateProject(id, { archived: !item.archived });
         }
     };
@@ -136,9 +137,9 @@ export function useWorkshopItems() {
     };
 
     const moveItemToStage = async (id, newStage) => {
-        console.log('[useWorkshopItems] moveItemToStage:', id, newStage);
+        Logger.info('useWorkshopItems', 'moveItemToStage:', id, newStage);
         if (!Object.values(WORKSHOP_STAGES).includes(newStage)) {
-            console.warn('[useWorkshopItems] Invalid stage:', newStage);
+            Logger.warn('useWorkshopItems', 'Invalid stage:', newStage);
             return { success: false, message: 'Invalid stage for Workshop' };
         }
         const item = items.find(i => i.id === id);
@@ -146,7 +147,7 @@ export function useWorkshopItems() {
 
         const validation = validateForNextStage(item, newStage);
         if (!validation.valid) {
-            console.warn('[useWorkshopItems] Validation failed:', validation.message);
+            Logger.warn('useWorkshopItems', 'Validation failed:', validation.message);
             return { success: false, message: validation.message };
         }
 
@@ -166,11 +167,11 @@ export function useWorkshopItems() {
             default: return; // commercial 没有下一阶段
         }
 
-        console.log('[useWorkshopItems] moveItemNext:', id, item.stage, '->', nextStage);
+        Logger.info('useWorkshopItems', 'moveItemNext:', id, item.stage, '->', nextStage);
 
         const validation = validateForNextStage(item, nextStage);
         if (!validation.valid) {
-            console.warn('[useWorkshopItems] Validation failed:', validation.message);
+            Logger.warn('useWorkshopItems', 'Validation failed:', validation.message);
             return;
         }
 

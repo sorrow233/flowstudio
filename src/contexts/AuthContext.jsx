@@ -10,6 +10,7 @@ import {
     signOut
 } from 'firebase/auth';
 import { auth } from '@/services/firebase';
+import { Logger } from '@/utils/logger';
 
 const AuthContext = createContext();
 
@@ -59,7 +60,7 @@ export function AuthProvider({ children }) {
             });
 
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            console.log('[AuthContext] Auth state changed:', user ? `User ${user.uid} logged in` : 'No user');
+            Logger.info('AuthContext', 'Auth state changed:', user ? `User ${user.uid} logged in` : 'No user');
             setCurrentUser(user);
             if (user) {
                 setIsGuest(false);
@@ -67,7 +68,7 @@ export function AuthProvider({ children }) {
             }
             setLoading(false);
         }, (error) => {
-            console.error("[AuthContext] Auth State Check Error:", error);
+            Logger.error('AuthContext', 'Auth State Check Error:', error);
             // If there's a real auth error (not just missing config), we might want to know,
             // but for now let's fall back to guest to keep things usable.
             setIsGuest(true);
@@ -82,47 +83,47 @@ export function AuthProvider({ children }) {
     }
 
     function loginAsGuest() {
-        console.log('[AuthContext] Logging in as guest');
+        Logger.info('AuthContext', 'Logging in as guest');
         setIsGuest(true);
         localStorage.setItem('isGuest', 'true');
         return Promise.resolve();
     }
 
     function signup(email, password) {
-        console.log('[AuthContext] Signup attempt for:', email);
+        Logger.info('AuthContext', 'Signup attempt for:', Logger.maskEmail(email));
         checkAuth();
         const domain = email.split('@')[1];
         if (!ALLOWED_DOMAINS.includes(domain)) {
-            console.warn('[AuthContext] Signup rejected - Unsupported domain:', domain);
+            Logger.warn('AuthContext', 'Signup rejected - Unsupported domain:', domain);
             return Promise.reject(new Error('This email provider is not supported. Please use a common provider (Gmail, Outlook, Yahoo, etc.).'));
         }
         return createUserWithEmailAndPassword(auth, email, password)
             .then(res => {
-                console.log('[AuthContext] Signup successful:', res.user.uid);
+                Logger.info('AuthContext', 'Signup successful:', res.user.uid);
                 return res;
             })
             .catch(err => {
-                console.error('[AuthContext] Signup error:', err);
+                Logger.error('AuthContext', 'Signup error:', err);
                 throw err;
             });
     }
 
     function login(email, password) {
-        console.log('[AuthContext] Login attempt for:', email);
+        Logger.info('AuthContext', 'Login attempt for:', Logger.maskEmail(email));
         checkAuth();
         return signInWithEmailAndPassword(auth, email, password)
             .then(res => {
-                console.log('[AuthContext] Login successful:', res.user.uid);
+                Logger.info('AuthContext', 'Login successful:', res.user.uid);
                 return res;
             })
             .catch(err => {
-                console.error('[AuthContext] Login error:', err);
+                Logger.error('AuthContext', 'Login error:', err);
                 throw err;
             });
     }
 
     function loginWithGoogle() {
-        console.log('[AuthContext] Initiating Google login redirect');
+        Logger.info('AuthContext', 'Initiating Google login redirect');
         checkAuth();
         const provider = new GoogleAuthProvider();
         // Use redirect instead of popup to avoid COOP issues
@@ -130,15 +131,15 @@ export function AuthProvider({ children }) {
     }
 
     function logout() {
-        console.log('[AuthContext] Logout called');
+        Logger.info('AuthContext', 'Logout called');
         if (isGuest) {
-            console.log('[AuthContext] Clearing guest session');
+            Logger.info('AuthContext', 'Clearing guest session');
             setIsGuest(false);
             localStorage.removeItem('isGuest');
             return Promise.resolve();
         }
         if (!auth) return Promise.resolve();
-        return signOut(auth).then(() => console.log('[AuthContext] SignOut complete'));
+        return signOut(auth).then(() => Logger.info('AuthContext', 'SignOut complete'));
     }
 
     const value = {
