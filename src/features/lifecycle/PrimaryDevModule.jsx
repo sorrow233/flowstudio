@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Code2, ExternalLink, Trash2, Check, Rocket } from 'lucide-react';
+import { Code2, ExternalLink, Trash2, Check, Rocket, Sparkles, Trophy, Star } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
 
 // Import New Modular Components
@@ -9,6 +9,7 @@ import TaskList from './components/primary/TaskList';
 import ProjectWorkspaceHeader from './components/primary/ProjectWorkspaceHeader';
 import ImportCommandModal from './components/primary/ImportCommandModal';
 import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
+import confetti from 'canvas-confetti';
 
 const PrimaryDevModule = () => {
     // --- Sync Integration ---
@@ -20,7 +21,6 @@ const PrimaryDevModule = () => {
     } = useSyncedProjects(doc, 'primary_projects');
 
     // --- Global State ---
-    // const [projects, setProjects] = useState([]); // Replaced by hook
     const [selectedProject, setSelectedProject] = useState(null);
 
     // Sync selectedProject with latest data
@@ -47,8 +47,13 @@ const PrimaryDevModule = () => {
     const [newTaskCategory, setNewTaskCategory] = useState('general');
     const [commandModalOpen, setCommandModalOpen] = useState(false);
 
-    // --- Undo State (Optional Enhancement) ---
-    const [recentlyDeleted, setRecentlyDeleted] = useState(null);
+    // --- Graduation State ---
+    const [showGraduationChecklist, setShowGraduationChecklist] = useState(false);
+
+
+    // --- Project Filtering ---
+    const activeProjects = projects.filter(p => (p.subStage || 1) < 6);
+    const advancedProjects = projects.filter(p => (p.subStage || 1) >= 6);
 
 
     // --- Project Handlers ---
@@ -62,7 +67,6 @@ const PrimaryDevModule = () => {
 
     const handleUpdateProject = (id, updates) => {
         updateProject(id, updates);
-        // Selection sync is handled by useEffect
     };
 
     // --- Edit Handlers ---
@@ -159,8 +163,31 @@ const PrimaryDevModule = () => {
 
     // --- Stage Handler ---
     const handleStageSelect = (stageId) => {
+        // If selecting specific stage logic is needed
         handleUpdateProject(selectedProject.id, { subStage: stageId });
     };
+
+    // --- Graduation Logic ---
+    const handleGraduateToAdvanced = () => {
+        // Trigger Confetti
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#10B981', '#34D399', '#FCD34D']
+        });
+
+        // Update Project Stage to 6 (Advanced)
+        handleUpdateProject(selectedProject.id, { subStage: 6 });
+
+        // Close modal after delay? Or keep it open in "Advanced" mode.
+        // For now, let's keep it open but it will visually update.
+        setTimeout(() => {
+            // Optional: Close modal to show the move
+            setSelectedProject(null);
+        }, 1500);
+    };
+
 
     return (
         <div className="max-w-7xl mx-auto pt-10 px-6 pb-20">
@@ -171,14 +198,14 @@ const PrimaryDevModule = () => {
                     <p className="text-gray-400 text-sm font-light tracking-wide">Execution & Engineering</p>
                 </div>
                 <div className="text-right">
-                    <span className="text-3xl font-thin text-gray-900">{projects.length}</span>
+                    <span className="text-3xl font-thin text-gray-900">{activeProjects.length}</span>
                     <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">Active</span>
                 </div>
             </div>
 
-            {/* Project Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {projects.map((project) => (
+            {/* Active Project Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
+                {activeProjects.map((project) => (
                     <motion.div
                         layoutId={`primary-card-${project.id}`}
                         key={project.id}
@@ -237,7 +264,7 @@ const PrimaryDevModule = () => {
                 ))}
 
                 {/* Empty State */}
-                {projects.length === 0 && (
+                {activeProjects.length === 0 && (
                     <div className="col-span-full border-2 border-dashed border-gray-100 rounded-[2rem] p-12 flex flex-col items-center justify-center text-gray-300 min-h-[400px]">
                         <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 opacity-50 animate-pulse">
                             <Rocket size={40} className="text-gray-400" strokeWidth={1} />
@@ -248,18 +275,57 @@ const PrimaryDevModule = () => {
                 )}
             </div>
 
+
+            {/* Advanced / Graduated Section */}
+            {advancedProjects.length > 0 && (
+                <div className="mt-20 border-t border-gray-100 pt-10">
+                    <div className="mb-8 flex items-center gap-3">
+                        <div className="p-2 bg-amber-50 rounded-lg text-amber-500">
+                            <Trophy size={20} />
+                        </div>
+                        <h3 className="text-xl font-light text-gray-900 tracking-tight">Advanced Development</h3>
+                        <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">{advancedProjects.length}</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {advancedProjects.map((project) => (
+                            <motion.div
+                                key={project.id}
+                                layoutId={`primary-card-${project.id}`} // Keep animation
+                                onClick={() => setSelectedProject(project)}
+                                className="group bg-white border border-amber-100/50 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-amber-100/50 transition-all cursor-pointer relative h-[300px] flex flex-col opacity-80 hover:opacity-100"
+                            >
+                                <div className="absolute inset-0 z-0 h-32 bg-amber-50/30">
+                                    {project.bgImage && <img src={project.bgImage} className="w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 transition-all" />}
+                                </div>
+                                <div className="p-8 relative z-10 flex flex-col h-full mt-16">
+                                    <h3 className="text-xl font-medium text-gray-900 mb-1">{project.title}</h3>
+                                    <div className="flex items-center gap-2 text-amber-600 text-xs font-bold uppercase tracking-widest mb-4">
+                                        <Star size={12} fill="currentColor" />
+                                        <span>Advanced Phase</span>
+                                    </div>
+                                    <p className="text-sm text-gray-400 line-clamp-2">{project.desc}</p>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+
             {/* Project Workspace Modal */}
             <AnimatePresence>
                 {selectedProject && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-10 pointer-events-none">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-10 pointer-events-auto">
                         <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-white/80 backdrop-blur-md pointer-events-auto"
+                            className="absolute inset-0 bg-white/80 backdrop-blur-md"
                             onClick={() => { setSelectedProject(null); setIsEditingProject(false); }}
                         />
                         <motion.div
                             layoutId={`primary-card-${selectedProject.id}`}
-                            className="w-full max-w-6xl bg-white rounded-[3rem] shadow-2xl overflow-hidden relative pointer-events-auto h-[90vh] flex flex-col ring-1 ring-gray-100"
+                            className="w-full max-w-6xl bg-white rounded-[3rem] shadow-2xl overflow-hidden relative z-10 h-[90vh] flex flex-col ring-1 ring-gray-100"
+                            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
                         >
                             <ProjectWorkspaceHeader
                                 project={selectedProject}
@@ -286,10 +352,24 @@ const PrimaryDevModule = () => {
                                     activeStage={selectedProject.subStage || 1}
                                     currentStage={selectedProject.subStage || 1}
                                     onStageSelect={handleStageSelect}
+                                // Pass 'onGraduate' if in stage 5 to show visual cue?
+                                // For now StageNavigation just shows steps.
                                 />
 
                                 {/* Right Content: Task List */}
                                 <div className="flex-1 flex flex-col relative w-full overflow-hidden">
+                                    {/* Graduation Call To Action if Stage 5 */}
+                                    {(selectedProject.subStage || 1) === 5 && (
+                                        <div className="px-6 pt-6 -mb-4">
+                                            <button
+                                                onClick={() => setShowGraduationChecklist(true)}
+                                                className="w-full py-3 bg-gradient-to-r from-amber-200 to-yellow-100 rounded-xl text-amber-800 font-bold uppercase tracking-widest text-xs shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Trophy size={16} /> Ready for Advanced Development?
+                                            </button>
+                                        </div>
+                                    )}
+
                                     <TaskList
                                         tasks={selectedProject.tasks}
                                         projectId={selectedProject.id}
@@ -305,7 +385,6 @@ const PrimaryDevModule = () => {
                                         setNewTaskCategory={setNewTaskCategory}
                                         onScroll={(e) => {
                                             const scrollTop = e.currentTarget.scrollTop;
-                                            // Reduced threshold from 50 to 10 for snappier response, especially on Stage 1
                                             if (scrollTop > 10 && !isHeaderCollapsed) {
                                                 setIsHeaderCollapsed(true);
                                             } else if (scrollTop === 0 && isHeaderCollapsed) {
@@ -315,6 +394,54 @@ const PrimaryDevModule = () => {
                                     />
                                 </div>
                             </div>
+
+
+                            {/* Graduation Checklist Overlay (Inner Modal) */}
+                            <AnimatePresence>
+                                {showGraduationChecklist && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        className="absolute inset-0 z-50 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center p-10"
+                                    >
+                                        <div className="max-w-lg w-full text-center slide-in-from-bottom-10 animate-in fade-in duration-500">
+                                            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
+                                                <Sparkles size={40} />
+                                            </div>
+                                            <h2 className="text-3xl font-light text-gray-900 mb-2">Graduation Criteria</h2>
+                                            <p className="text-gray-500 mb-10">Confirm the 4 Sacred Pillars before proceeding.</p>
+
+                                            <div className="space-y-4 text-left mb-10">
+                                                {['Target Audience Validated', 'Core Value Proposition Clear', 'Technical Feasibility Confirmed', 'Founder\'s Vow Intact'].map((item, i) => (
+                                                    <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                                        <div className="w-6 h-6 rounded-full border-2 border-emerald-500 flex items-center justify-center">
+                                                            <Check size={14} className="text-emerald-500" />
+                                                        </div>
+                                                        <span className="text-gray-700 font-medium">{item}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="flex gap-4">
+                                                <button
+                                                    onClick={() => setShowGraduationChecklist(false)}
+                                                    className="flex-1 py-4 text-gray-400 font-medium hover:text-gray-600"
+                                                >
+                                                    Not Yet
+                                                </button>
+                                                <button
+                                                    onClick={handleGraduateToAdvanced}
+                                                    className="flex-1 py-4 bg-emerald-500 text-white rounded-xl shadow-xl shadow-emerald-200 hover:scale-105 transition-transform font-bold uppercase tracking-widest"
+                                                >
+                                                    Graduate Project
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
                         </motion.div>
                     </div>
                 )}

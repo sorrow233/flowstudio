@@ -71,10 +71,20 @@ export const formatDate = (timestamp) => {
 };
 
 export const COMMAND_CATEGORIES = [
-    { id: 'general', label: 'General', color: 'bg-slate-400 text-white', icon: 'LayoutGrid' },
-    { id: 'frontend', label: 'Frontend', color: 'bg-blue-400 text-white', icon: 'Monitor' },
-    { id: 'backend', label: 'Backend', color: 'bg-emerald-400 text-white', icon: 'Server' },
-    { id: 'database', label: 'Database', color: 'bg-amber-400 text-white', icon: 'Database' },
-    { id: 'devops', label: 'DevOps', color: 'bg-violet-400 text-white', icon: 'Container' },
-    { id: 'testing', label: 'Testing', color: 'bg-rose-400 text-white', icon: 'Beaker' },
+    { id: 'utility', label: 'Utility', color: 'bg-gray-500', icon: 'Settings' },
+    { id: 'link', label: 'Reference', color: 'bg-blue-500', icon: 'Link' }
 ];
+
+export const DEFAULT_PROJECT_IMAGES = [
+    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop', // Tech Dark
+    'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop', // Circuit
+    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop', // Cyberpunk
+    'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?q=80&w=2076&auto=format&fit=crop', // Mountain
+    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop',  // Nature
+    'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop', // Mountains Basic
+    'https://images.unsplash.com/photo-1534224039826-c7a0eda0e6b3?q=80&w=2070&auto=format&fit=crop'  // Abstract
+];
+
+export const getRandomProjectImage = () => {
+    return DEFAULT_PROJECT_IMAGES[Math.floor(Math.random() * DEFAULT_PROJECT_IMAGES.length)];
+};
