@@ -78,11 +78,10 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                             </div>
 
                             {/* Manual Completion Dot - Double Click to Toggle */}
-                            {/* Only show for current or completed stages (allow undo) */}
                             {(!isLocked) && (
-                                <div className="pl-2 border-l border-gray-100/10 ml-2 group/dot relative">
+                                <div className="ml-3 group/dot relative flex items-center justify-center">
                                     <motion.button
-                                        whileHover={{ scale: 1.3 }}
+                                        whileHover={{ scale: 1.5 }}
                                         whileTap={{ scale: 0.9 }}
                                         onDoubleClick={(e) => {
                                             e.stopPropagation();
@@ -93,17 +92,16 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                             }
                                         }}
                                         className={`
-                                            w-4 h-4 rounded-full transition-all duration-300 shadow-sm
+                                            w-2.5 h-2.5 rounded-full transition-all duration-300 shadow-sm
                                             ${isCompleted
-                                                ? 'bg-emerald-500 shadow-emerald-200'
+                                                ? 'bg-emerald-500 shadow-emerald-200 ring-2 ring-emerald-100'
                                                 : (() => {
-                                                    // Different colors for each stage
                                                     const stageColors = {
-                                                        1: 'bg-slate-400',
-                                                        2: 'bg-blue-400',
-                                                        3: 'bg-violet-400',
-                                                        4: 'bg-amber-400',
-                                                        5: 'bg-rose-400'
+                                                        1: 'bg-slate-300',
+                                                        2: 'bg-blue-300',
+                                                        3: 'bg-violet-300',
+                                                        4: 'bg-amber-300',
+                                                        5: 'bg-rose-300'
                                                     };
                                                     return stageColors[stage.id] || 'bg-gray-300';
                                                 })()
@@ -111,10 +109,10 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                         `}
                                         title={isCompleted ? "Double click to undo" : "Double click to complete"}
                                     />
-                                    {/* Hover Hint Tooltip */}
-                                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 opacity-0 group-hover/dot:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
-                                        <span className="bg-gray-900 text-white text-[9px] px-2 py-1 rounded shadow-lg font-medium">
-                                            Double click to {isCompleted ? 'undo' : 'complete'}
+                                    {/* Minimal Hover Hint */}
+                                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 opacity-0 group-hover/dot:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
+                                        <span className="bg-gray-900 text-white text-[8px] px-1.5 py-0.5 rounded shadow-lg">
+                                            Double Click
                                         </span>
                                     </div>
                                 </div>
