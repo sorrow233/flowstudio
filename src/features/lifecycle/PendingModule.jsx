@@ -396,53 +396,72 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                 })}
             </div>
 
-            {/* Sacred Reason Input (Premium Design) */}
-            <div className="max-w-2xl mx-auto w-full relative z-20 mt-12 bg-gray-50/50 rounded-3xl p-6 border border-gray-100">
-                <div className="mb-4 flex items-center justify-between">
+            {/* Sacred Reason Input (Fresh & Sacred Design) */}
+            <div className="max-w-2xl mx-auto w-full relative z-20 mt-12 bg-white rounded-3xl p-1">
+                <div className="mb-4 flex items-center justify-between px-2">
                     <div className="flex items-center gap-2">
-                        <Scroll size={16} className="text-violet-400" />
-                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">创始人誓言 (Founder's Vow)</h4>
+                        <Scroll size={16} className="text-violet-300" />
+                        <h4 className="text-xs font-medium text-violet-300 tracking-widest uppercase">My Vow</h4>
                     </div>
-                    {project.foundingReason && (
-                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-1 text-[10px] text-violet-500 font-medium bg-violet-50 px-2 py-1 rounded-full">
-                            <Sparkles size={10} />
-                            <span>誓言已立</span>
-                        </motion.div>
-                    )}
                 </div>
 
                 <div className="relative group">
+                    <div className={`
+                        absolute -inset-0.5 bg-gradient-to-r from-violet-200 to-fuchsia-200 rounded-2xl opacity-0 transition duration-1000 group-hover:duration-200
+                        ${project.foundingReason ? 'opacity-30 blur' : 'opacity-0'}
+                    `}></div>
+
                     <textarea
                         value={project.foundingReason || ''}
                         onChange={(e) => onUpdate(project.id, 'foundingReason', e.target.value)}
-                        className="w-full p-5 bg-white border border-gray-200 rounded-2xl text-gray-700 placeholder:text-gray-300 focus:bg-white focus:border-violet-300 focus:ring-4 focus:ring-violet-50 transition-all text-sm leading-relaxed min-h-[120px] resize-none"
-                        placeholder="为了这颗种子，我愿意付出什么？为何它值得我投入生命中的这段时光？（写下你的理由，赋予它生长的力量）"
+                        className={`
+                            relative w-full p-6 bg-white border rounded-2xl text-gray-700 placeholder:text-gray-300 
+                            text-sm leading-relaxed min-h-[120px] resize-none transition-all duration-500 ease-out
+                            ${project.foundingReason
+                                ? 'border-violet-200 shadow-[0_0_40px_-10px_rgba(167,139,250,0.3)] focus:border-violet-300 focus:shadow-[0_0_50px_-10px_rgba(139,92,246,0.4)]'
+                                : 'border-gray-100 focus:border-violet-200 focus:shadow-[0_0_30px_-10px_rgba(167,139,250,0.3)]'
+                            }
+                            outline-none
+                        `}
+                        placeholder="在此刻写下你的初心..."
                     />
-                    <div className="absolute bottom-4 right-4 text-violet-200 pointer-events-none">
-                        <Feather size={20} />
+                    <div className="absolute bottom-4 right-4 text-violet-200 pointer-events-none transition-colors duration-300 group-focus-within:text-violet-400">
+                        <Feather size={18} />
                     </div>
                 </div>
+
+                {project.foundingReason && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex justify-end mt-2 px-2"
+                    >
+                        <span className="text-[10px] text-violet-300 font-mono tracking-wider flex items-center gap-1">
+                            <Sparkles size={10} />
+                            VOW ESTABLISHED
+                        </span>
+                    </motion.div>
+                )}
             </div>
 
-            {/* Graduate Button */}
-            <div className="max-w-2xl mx-auto mt-8 pb-10 w-full relative z-30">
+            {/* Graduate Button (Fresh Light Style) */}
+            <div className="max-w-2xl mx-auto mt-6 pb-10 w-full relative z-30">
                 {project.score === 4 && (
                     <button
                         onClick={() => onGraduate(project)}
                         className={`
-                        relative overflow-hidden group w-full py-5 text-white rounded-2xl flex items-center justify-center gap-3 hover:translate-y-[-2px] transition-all shadow-xl
-                        ${project.foundingReason ? 'bg-gradient-to-r from-gray-900 via-violet-900 to-gray-900 shadow-violet-900/20' : 'bg-gray-900 shadow-gray-900/10'}
+                        w-full py-5 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500
+                        ${project.foundingReason
+                                ? 'bg-white border border-violet-100 text-violet-600 shadow-[0_10px_40px_-10px_rgba(139,92,246,0.3)] hover:shadow-[0_15px_50px_-10px_rgba(139,92,246,0.4)] hover:-translate-y-0.5'
+                                : 'bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed' // Actually previously we hid it or handled it. Let's keep it clickable but distinct.
+                            }
+                        ${!project.foundingReason && 'hover:bg-gray-100 hover:text-gray-500'}
                     `}
                     >
-                        {project.foundingReason && (
-                            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
-                        )}
-
-                        <span className="text-lg font-light tracking-wide relative z-10">
-                            {project.foundingReason ? '立誓启程 (Primary Dev)' : '开启开发 (Primary Dev)'}
+                        <span className="text-base font-light tracking-widest relative z-10 uppercase">
+                            {project.foundingReason ? 'Begin Journey' : 'Begin Journey'}
                         </span>
-                        <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform relative z-10" />
-                        {project.foundingReason && <Sparkles size={16} className="text-violet-300 animate-pulse relative z-10" />}
+                        <ArrowRight size={18} className={`transition-transform duration-300 ${project.foundingReason ? 'group-hover:translate-x-1' : ''}`} />
                     </button>
                 )}
             </div>
