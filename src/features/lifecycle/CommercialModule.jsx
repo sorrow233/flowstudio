@@ -1,18 +1,233 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Coins, TrendingUp, ShieldCheck, Rocket, Check, CreditCard, Globe, Zap, BarChart3, Lock, RefreshCw } from 'lucide-react';
+import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
+
+// Revenue Models
+const REVENUE_MODELS = [
+    { id: 'subscription', title: 'Subscription (SaaS)', icon: RefreshCw, desc: 'Recurring revenue via monthly/yearly plans.' },
+    { id: 'one_time', title: 'One-Time Purchase', icon: CreditCard, desc: 'Single payment for lifetime access.' },
+    { id: 'freemium', title: 'Freemium', icon: Zap, desc: 'Free core features, paid upgrades.' },
+    { id: 'ads', title: 'Ad-Supported', icon: Globe, desc: 'Free for users, monetized via advertisements.' },
+];
 
 const CommercialModule = () => {
-    return (
-        <div className="max-w-3xl mx-auto pt-10 px-6">
-            <div className="mb-12">
-                <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">
-                    Commercial
-                </h2>
-                <p className="text-gray-400 text-sm font-light tracking-wide">
-                    商业化与变现
-                </p>
+    // Sync Integration
+    const { doc } = useSyncStore('flowstudio_v1');
+    const {
+        projects,
+        updateProject
+    } = useSyncedProjects(doc, 'primary_projects');
+
+    // UI State
+    const [selectedProject, setSelectedProject] = useState(null);
+
+    // Sync Helper
+    useEffect(() => {
+        if (projects.length > 0 && !selectedProject) {
+            setSelectedProject(projects[0]); // Default to first project
+        } else if (selectedProject) {
+            const current = projects.find(p => p.id === selectedProject.id);
+            if (current) setSelectedProject(current);
+        }
+    }, [projects]);
+
+    const handleUpdate = (updates) => {
+        if (selectedProject) {
+            updateProject(selectedProject.id, { commercial: { ...(selectedProject.commercial || {}), ...updates } });
+        }
+    };
+
+    if (!selectedProject) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[60vh] text-center">
+                <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                    <Coins size={32} className="text-amber-400" />
+                </div>
+                <h2 className="text-2xl font-light text-gray-900">No Commercial Projects</h2>
+                <p className="text-gray-400 mt-2">Graduate a project to primary development to unlock monetization planning.</p>
             </div>
-            <div className="flex flex-col items-center justify-center py-20 border border-dashed border-gray-200 rounded-lg">
-                <p className="text-gray-300 font-light text-sm">准备中</p>
+        );
+    }
+
+    const data = selectedProject.commercial || {};
+
+    return (
+        <div className="max-w-7xl mx-auto pt-10 px-6 pb-24">
+            {/* Header */}
+            <div className="mb-12 flex justify-between items-end border-b border-gray-100 pb-8">
+                <div>
+                    <h2 className="text-3xl font-thin text-gray-900 mb-2 tracking-tight flex items-center gap-3">
+                        <span className="text-amber-500"><Coins size={28} strokeWidth={1.5} /></span>
+                        Commercial Strategy
+                    </h2>
+                    <p className="text-gray-400 text-sm font-light tracking-wide max-w-xl leading-relaxed">
+                        Design the economic engine of your application. How will this project generate value and sustain itself?
+                    </p>
+                </div>
+
+                {/* Project Selector (if multiple) */}
+                {projects.length > 1 && (
+                    <div className="flex gap-2">
+                        {projects.map(p => (
+                            <button
+                                key={p.id}
+                                onClick={() => setSelectedProject(p)}
+                                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${selectedProject.id === p.id ? 'bg-amber-100 text-amber-800 ring-2 ring-amber-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
+                            >
+                                {p.title}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                {/* Left Column: Revenue Model */}
+                <div className="lg:col-span-2 space-y-10">
+
+                    {/* 1. Revenue Model */}
+                    <section>
+                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <TrendingUp size={16} /> Revenue Model
+                        </h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {REVENUE_MODELS.map(model => (
+                                <button
+                                    key={model.id}
+                                    onClick={() => handleUpdate({ model: model.id })}
+                                    className={`
+                                        group relative overflow-hidden p-6 rounded-2xl border text-left transition-all duration-300
+                                        ${data.model === model.id
+                                            ? 'bg-amber-50 border-amber-200 ring-1 ring-amber-200 shadow-xl shadow-amber-100/50'
+                                            : 'bg-white border-gray-100 hover:border-amber-200 hover:shadow-md'}
+                                    `}
+                                >
+                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors ${data.model === model.id ? 'bg-amber-500 text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-amber-100 group-hover:text-amber-600'}`}>
+                                        <model.icon size={24} />
+                                    </div>
+                                    <h4 className={`font-medium text-lg mb-1 transition-colors ${data.model === model.id ? 'text-gray-900' : 'text-gray-700'}`}>{model.title}</h4>
+                                    <p className="text-xs text-gray-400 leading-relaxed font-light">{model.desc}</p>
+
+                                    {data.model === model.id && (
+                                        <div className="absolute top-4 right-4 text-amber-500">
+                                            <Check size={20} />
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* 2. Pricing Tiers */}
+                    <section>
+                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <BarChart3 size={16} /> Pricing Structure
+                        </h3>
+                        <div className="bg-white border border-gray-100 rounded-[2rem] p-8 shadow-sm relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-50 rounded-bl-full -z-0 opacity-50" />
+
+                            <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {/* Free Tier */}
+                                <div className="border border-gray-100 bg-white/50 backdrop-blur rounded-2xl p-6 flex flex-col">
+                                    <div className="mb-4">
+                                        <h4 className="font-bold text-gray-900">Personal</h4>
+                                        <div className="text-3xl font-light text-gray-900 mt-2">$0</div>
+                                    </div>
+                                    <ul className="space-y-3 mb-6 flex-1">
+                                        <li className="text-xs text-gray-500 flex items-center gap-2"><Check size={12} className="text-emerald-500" /> Core Features</li>
+                                        <li className="text-xs text-gray-500 flex items-center gap-2"><Check size={12} className="text-emerald-500" /> Community Support</li>
+                                    </ul>
+                                </div>
+
+                                {/* Pro Tier */}
+                                <div className="border border-amber-200 bg-amber-50/50 backdrop-blur rounded-2xl p-6 flex flex-col relative transform md:-translate-y-4 shadow-xl shadow-amber-100/50">
+                                    <div className="absolute top-0 inset-x-0 h-1 bg-amber-500" />
+                                    <div className="mb-4">
+                                        <h4 className="font-bold text-amber-900">Pro</h4>
+                                        <div className="relative mt-2">
+                                            <span className="text-3xl font-light text-gray-900">$</span>
+                                            <input
+                                                type="number"
+                                                placeholder="19"
+                                                value={data.proPrice || ''}
+                                                onChange={(e) => handleUpdate({ proPrice: e.target.value })}
+                                                className="w-20 text-3xl font-light bg-transparent border-b border-amber-300 focus:border-amber-500 outline-none text-gray-900 placeholder:text-gray-300 inline-block"
+                                            />
+                                            <span className="text-xs text-gray-400"> /mo</span>
+                                        </div>
+                                    </div>
+                                    <ul className="space-y-3 mb-6 flex-1">
+                                        <li className="text-xs text-gray-600 flex items-center gap-2"><Check size={12} className="text-amber-500" /> Everything in Free</li>
+                                        <li className="text-xs text-gray-600 flex items-center gap-2"><Check size={12} className="text-amber-500" /> Priority Support</li>
+                                        <li className="text-xs text-gray-600 flex items-center gap-2"><Check size={12} className="text-amber-500" /> Advanced Analytics</li>
+                                    </ul>
+                                </div>
+
+                                {/* Enterprise Tier */}
+                                <div className="border border-gray-100 bg-white/50 backdrop-blur rounded-2xl p-6 flex flex-col opacity-60 hover:opacity-100 transition-opacity">
+                                    <div className="mb-4">
+                                        <h4 className="font-bold text-gray-900">Enterprise</h4>
+                                        <div className="text-xl font-light text-gray-500 mt-2 pt-2">Custom</div>
+                                    </div>
+                                    <ul className="space-y-3 mb-6 flex-1">
+                                        <li className="text-xs text-gray-500 flex items-center gap-2"><Check size={12} className="text-gray-400" /> SSO & Security</li>
+                                        <li className="text-xs text-gray-500 flex items-center gap-2"><Check size={12} className="text-gray-400" /> Dedicated Manager</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                {/* Right Column: Launch Checklist */}
+                <div className="space-y-8">
+                    <section className="bg-gray-900 text-white rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gray-800 rounded-bl-full opacity-50 -z-0" />
+
+                        <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-6 relative z-10 flex items-center gap-2">
+                            <Rocket size={16} /> Go-To-Market
+                        </h3>
+
+                        <div className="space-y-4 relative z-10">
+                            {[
+                                { id: 'market_fit', label: 'Problem-Solution Fit Confirmed' },
+                                { id: 'waitlist', label: 'Waitlist Landing Page Live' },
+                                { id: 'pricing', label: 'Pricing Model Finalized' },
+                                { id: 'legal', label: 'Terms & Privacy Policy' },
+                                { id: 'analytics', label: 'Analytics & Tracking Setup' },
+                                { id: 'payments', label: 'Payment Gateway Connected' },
+                            ].map(item => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => {
+                                        const current = data.checklist || {};
+                                        handleUpdate({ checklist: { ...current, [item.id]: !current[item.id] } });
+                                    }}
+                                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-800 transition-colors text-left group"
+                                >
+                                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${data.checklist?.[item.id] ? 'bg-amber-500 border-amber-500 text-black' : 'border-gray-600 text-transparent group-hover:border-gray-500'}`}>
+                                        <Check size={12} strokeWidth={3} />
+                                    </div>
+                                    <span className={`text-sm font-light transition-colors ${data.checklist?.[item.id] ? 'text-gray-200 decoration-amber-500/50' : 'text-gray-400'}`}>{item.label}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="mt-8 pt-8 border-t border-gray-800">
+                            <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                                <span>Readiness</span>
+                                <span>{Object.values(data.checklist || {}).filter(Boolean).length} / 6</span>
+                            </div>
+                            <div className="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-amber-500 transition-all duration-500"
+                                    style={{ width: `${(Object.values(data.checklist || {}).filter(Boolean).length / 6) * 100}%` }}
+                                />
+                            </div>
+                        </div>
+                    </section>
+                </div>
             </div>
         </div>
     );

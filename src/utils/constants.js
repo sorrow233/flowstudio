@@ -71,10 +71,10 @@ export const formatDate = (timestamp) => {
 };
 
 export const COMMAND_CATEGORIES = [
-    { id: 'general', label: 'General', color: 'bg-gray-100 text-gray-600', icon: 'LayoutGrid' },
-    { id: 'frontend', label: 'Frontend', color: 'bg-blue-50 text-blue-600', icon: 'Monitor' },
-    { id: 'backend', label: 'Backend', color: 'bg-emerald-50 text-emerald-600', icon: 'Server' },
-    { id: 'database', label: 'Database', color: 'bg-amber-50 text-amber-600', icon: 'Database' },
-    { id: 'devops', label: 'DevOps', color: 'bg-purple-50 text-purple-600', icon: 'Container' },
-    { id: 'testing', label: 'Testing', color: 'bg-rose-50 text-rose-600', icon: 'Beaker' },
+    { id: 'general', label: 'General', color: 'bg-slate-400 text-white', icon: 'LayoutGrid' },
+    { id: 'frontend', label: 'Frontend', color: 'bg-blue-400 text-white', icon: 'Monitor' },
+    { id: 'backend', label: 'Backend', color: 'bg-emerald-400 text-white', icon: 'Server' },
+    { id: 'database', label: 'Database', color: 'bg-amber-400 text-white', icon: 'Database' },
+    { id: 'devops', label: 'DevOps', color: 'bg-violet-400 text-white', icon: 'Container' },
+    { id: 'testing', label: 'Testing', color: 'bg-rose-400 text-white', icon: 'Beaker' },
 ];

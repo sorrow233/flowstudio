@@ -167,8 +167,8 @@ const PrimaryDevModule = () => {
             {/* Dashboard Header */}
             <div className="mb-12 flex justify-between items-end">
                 <div>
-                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">Active Projects</h2>
-                    <p className="text-gray-400 text-sm font-light tracking-wide">Primary Development Phase</p>
+                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">Production Pipeline</h2>
+                    <p className="text-gray-400 text-sm font-light tracking-wide">Execution & Engineering</p>
                 </div>
                 <div className="text-right">
                     <span className="text-3xl font-thin text-gray-900">{projects.length}</span>
@@ -242,8 +242,8 @@ const PrimaryDevModule = () => {
                         <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 opacity-50 animate-pulse">
                             <Rocket size={40} className="text-gray-400" strokeWidth={1} />
                         </div>
-                        <span className="text-xl font-light text-gray-900 mb-2">Ready for Liftoff?</span>
-                        <span className="text-sm text-gray-400 max-w-sm text-center leading-relaxed">Your primary command center is waiting. Graduate a project from the 'Pending' phase to begin development.</span>
+                        <span className="text-xl font-light text-gray-900 mb-2">The Workshop is Clear</span>
+                        <span className="text-sm text-gray-400 max-w-sm text-center leading-relaxed">Great products require validation first. Graduate a project from 'Idea Staging' to begin engineering.</span>
                     </div>
                 )}
             </div>

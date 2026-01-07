@@ -40,6 +40,33 @@ const CommandCenterModule = () => {
     const [newTag, setNewTag] = useState({ label: '', value: '' });
     const [editingTagId, setEditingTagId] = useState(null); // Track which tag is being edited
 
+    // Category State (with custom names)
+    const [categories, setCategories] = useState(COMMAND_CATEGORIES);
+    // Custom Rename Modal State
+    const [renamingCategory, setRenamingCategory] = useState(null); // { id, currentName, color }
+    const [renameValue, setRenameValue] = useState('');
+
+    // Initial Load of Categories from localStorage
+    useEffect(() => {
+        const savedCats = localStorage.getItem('flowstudio_categories_custom');
+        if (savedCats) {
+            const parsedCats = JSON.parse(savedCats);
+            // MERGE LOGIC: Keep custom labels, but enforce new system colors/icons
+            const mergedCats = COMMAND_CATEGORIES.map(defaultCat => {
+                const userCat = parsedCats.find(pc => pc.id === defaultCat.id);
+                return userCat ? { ...defaultCat, label: userCat.label } : defaultCat;
+            });
+            setCategories(mergedCats);
+        }
+    }, []);
+
+    // Save Categories when changed
+    const updateCategoryName = (id, newName) => {
+        const updated = categories.map(c => c.id === id ? { ...c, label: newName } : c);
+        setCategories(updated);
+        localStorage.setItem('flowstudio_categories_custom', JSON.stringify(updated));
+    };
+
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEYS.COMMANDS);
         if (saved) {
@@ -260,6 +287,14 @@ const CommandCenterModule = () => {
         return matchesSearch && matchesCategory;
     });
 
+    const handleSaveRename = () => {
+        if (renamingCategory && renameValue.trim()) {
+            updateCategoryName(renamingCategory.id, renameValue.trim());
+            setRenamingCategory(null);
+            setRenameValue('');
+        }
+    };
+
     return (
         <div className="max-w-7xl mx-auto pt-8 px-6 h-[calc(100vh-4rem)] flex gap-8">
             {/* Ambient Background */}
@@ -352,9 +387,9 @@ const CommandCenterModule = () => {
                                     <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">All Categories</span>
                                 ) : (
                                     <>
-                                        <span className={`w-2 h-2 rounded-full ${COMMAND_CATEGORIES.find(c => c.id === selectedCategory)?.color.split(' ')[0].replace('bg-', 'bg-')}`}></span>
+                                        <span className={`w-2 h-2 rounded-full ${categories.find(c => c.id === selectedCategory)?.color.split(' ')[0].replace('bg-', 'bg-')}`}></span>
                                         <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">
-                                            {COMMAND_CATEGORIES.find(c => c.id === selectedCategory)?.label}
+                                            {categories.find(c => c.id === selectedCategory)?.label}
                                         </span>
                                     </>
                                 )}
@@ -393,50 +428,58 @@ const CommandCenterModule = () => {
                         </div>
 
                         <div className="flex gap-2">
-                            {/* Category Filter Pills - Compact & Scrollable */}
-                            <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl overflow-x-auto no-scrollbar max-w-[300px] xl:max-w-none">
-                                <button
-                                    onClick={() => setSelectedCategory('all')}
-                                    className={`
-                                        px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0
-                                        ${selectedCategory === 'all'
-                                            ? 'bg-white text-gray-900 shadow-sm'
-                                            : 'text-gray-400 hover:text-gray-600 hover:bg-gray-200/50'}
-                                    `}
-                                >
-                                    All
-                                </button>
-                                {COMMAND_CATEGORIES.map(cat => (
+                            <div className="flex gap-2">
+                                {/* Category Filter Pills - Dot Ribbon */}
+                                <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full overflow-x-auto no-scrollbar max-w-[300px] xl:max-w-none shadow-inner border border-gray-200/50">
                                     <button
-                                        key={cat.id}
-                                        onClick={() => setSelectedCategory(cat.id)}
+                                        onClick={() => setSelectedCategory('all')}
                                         className={`
-                                            w-8 h-8 flex items-center justify-center rounded-lg transition-all shrink-0 relative
-                                            ${selectedCategory === cat.id
-                                                ? 'bg-white shadow-md text-gray-900 scale-105 z-10'
-                                                : 'text-gray-400 hover:bg-white/50 hover:text-gray-600'}
-                                        `}
-                                        title={cat.label}
+                                        w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold transition-all shrink-0
+                                        ${selectedCategory === 'all'
+                                                ? 'bg-white text-gray-900 shadow-md scale-110 z-10'
+                                                : 'text-gray-400 hover:text-gray-600 hover:bg-white/50'}
+                                    `}
+                                        title="All Commands"
                                     >
-                                        <div className={`w-2.5 h-2.5 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')} ${selectedCategory === cat.id ? 'ring-2 ring-offset-1 ring-gray-100' : ''}`} />
-                                        {selectedCategory === cat.id && (
-                                            <motion.div
-                                                layoutId="activeCategory"
-                                                className="absolute inset-0 rounded-lg ring-1 ring-black/5"
-                                            />
-                                        )}
+                                        ALL
                                     </button>
-                                ))}
-                            </div>
+                                    <div className="w-px h-4 bg-gray-300/50 mx-1" />
+                                    {categories.map(cat => (
+                                        <div key={cat.id} className="relative group/cat">
+                                            <button
+                                                onClick={() => setSelectedCategory(cat.id)}
+                                                onContextMenu={(e) => {
+                                                    e.preventDefault();
+                                                    setRenamingCategory({ id: cat.id, currentName: cat.label, color: cat.color });
+                                                    setRenameValue(cat.label);
+                                                }}
+                                                className={`
+                                                w-8 h-8 flex items-center justify-center rounded-full transition-all shrink-0 relative
+                                                ${selectedCategory === cat.id
+                                                        ? 'bg-white shadow-md scale-110 z-10 ring-2 ring-gray-100'
+                                                        : 'hover:bg-white/50 hover:scale-105'}
+                                            `}
+                                            >
+                                                <div className={`w-3 h-3 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')} ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-transparent' : ''}`} />
+                                            </button>
 
-                            <div className="relative group">
-                                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
-                                <input
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="Filter..."
-                                    className="pl-10 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white rounded-xl text-sm border border-transparent hover:border-gray-200 focus:border-emerald-200 outline-none w-40 transition-all focus:w-60 shadow-inner"
-                                />
+                                            {/* Tooltip */}
+                                            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] rounded opacity-0 group-hover/cat:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 font-medium tracking-wide">
+                                                {cat.label}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="relative group">
+                                    <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
+                                    <input
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        placeholder="Search..."
+                                        className="pl-10 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white rounded-full text-sm border border-transparent hover:border-gray-200 focus:border-emerald-200 outline-none w-10 focus:w-60 transition-all shadow-inner placeholder:text-transparent focus:placeholder:text-gray-300 cursor-pointer focus:cursor-text"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -481,42 +524,41 @@ const CommandCenterModule = () => {
                                         </div>
                                     </div>
 
-                                    {/* Category Selector (Enhanced) */}
+                                    {/* Category Selector (Enhanced Dots) */}
                                     <div>
                                         <div className="flex justify-between items-center mb-3">
                                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Category</span>
                                             {newCmd.category && newCmd.category !== 'general' && (
-                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${COMMAND_CATEGORIES.find(c => c.id === newCmd.category)?.color.replace('text-', 'bg-').replace('bg-', 'text-opacity-80 text-') || 'bg-gray-100 text-gray-500'}`}>
-                                                    {COMMAND_CATEGORIES.find(c => c.id === newCmd.category)?.label}
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${categories.find(c => c.id === newCmd.category)?.color.replace('text-', 'bg-').replace('bg-', 'text-opacity-80 text-') || 'bg-gray-100 text-gray-500'}`}>
+                                                    {categories.find(c => c.id === newCmd.category)?.label}
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                            {COMMAND_CATEGORIES.map(cat => {
-                                                const CatIcon = CATEGORY_ICONS[cat.icon] || LayoutGrid;
+                                        <div className="flex gap-3">
+                                            {categories.map(cat => {
                                                 const isSelected = newCmd.category === cat.id;
+                                                // Extract color name (e.g., 'blue', 'emerald') from 'bg-blue-400'
+                                                const colorName = cat.color.split(' ')[0].split('-')[1];
+
                                                 return (
-                                                    <button
-                                                        key={cat.id}
-                                                        onClick={() => setNewCmd({ ...newCmd, category: cat.id })}
-                                                        className={`
-                                                            flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-medium transition-all border group
-                                                            ${isSelected
-                                                                ? `bg-gray-50 border-${cat.color.split('-')[1]}-200 ring-1 ring-${cat.color.split('-')[1]}-200`
-                                                                : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50/50'}
-                                                        `}
-                                                    >
-                                                        <div className={`
-                                                            w-8 h-8 rounded-lg flex items-center justify-center transition-colors
-                                                            ${isSelected ? 'bg-white shadow-sm' : 'bg-gray-50 group-hover:bg-white'}
-                                                        `}>
-                                                            <div className={`w-2 h-2 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')}`} />
-                                                        </div>
-                                                        <span className={isSelected ? 'text-gray-900' : 'text-gray-500'}>
+                                                    <div key={cat.id} className="relative group/formcat">
+                                                        <button
+                                                            onClick={() => setNewCmd({ ...newCmd, category: cat.id })}
+                                                            className={`
+                                                                w-6 h-6 flex items-center justify-center rounded-full transition-all
+                                                                ${isSelected
+                                                                    ? `scale-110 ring-2 ring-offset-2 ring-${colorName}-400`
+                                                                    : 'hover:scale-110 opacity-40 hover:opacity-100'}
+                                                            `}
+                                                        >
+                                                            <div className={`w-3 h-3 rounded-full ${cat.color.split(' ')[0]}`} />
+                                                        </button>
+
+                                                        {/* Tooltip */}
+                                                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] rounded opacity-0 group-hover/formcat:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 font-medium tracking-wide">
                                                             {cat.label}
-                                                        </span>
-                                                        {isSelected && <CheckCircle2 size={14} className="ml-auto text-emerald-500" />}
-                                                    </button>
+                                                        </div>
+                                                    </div>
                                                 );
                                             })}
                                         </div>
@@ -738,9 +780,9 @@ const CommandCenterModule = () => {
                                             {cmd.category && cmd.category !== 'general' && (
                                                 <div className={`
                                                     absolute top-3 right-10 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide opacity-50 group-hover:opacity-100 transition-opacity
-                                                    ${COMMAND_CATEGORIES.find(cat => cat.id === cmd.category)?.color || 'bg-gray-100 text-gray-500'}
+                                                    ${categories.find(cat => cat.id === cmd.category)?.color || 'bg-gray-100 text-gray-500'}
                                                 `}>
-                                                    {COMMAND_CATEGORIES.find(cat => cat.id === cmd.category)?.label}
+                                                    {categories.find(cat => cat.id === cmd.category)?.label}
                                                 </div>
                                             )}
 
@@ -874,6 +916,56 @@ const CommandCenterModule = () => {
                     )}
                 </div>
             </div>
+
+            {/* Rename Category Modal */}
+            <AnimatePresence>
+                {renamingCategory && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setRenamingCategory(null)}
+                            className="absolute inset-0 bg-white/60 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm ring-1 ring-gray-100"
+                        >
+                            <h3 className="text-lg font-light text-gray-900 mb-4">Rename Category</h3>
+
+                            <div className="flex items-center gap-3 mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                <div className={`w-8 h-8 rounded-full flex-shrink-0 ${renamingCategory.color.split(' ')[0].replace('bg-', 'bg-')}`} />
+                                <input
+                                    autoFocus
+                                    value={renameValue}
+                                    onChange={(e) => setRenameValue(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSaveRename()}
+                                    className="bg-transparent text-lg font-medium text-gray-900 outline-none w-full placeholder:text-gray-300"
+                                    placeholder="Category Name"
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={() => setRenamingCategory(null)}
+                                    className="px-4 py-2 text-sm text-gray-500 hover:text-gray-900 font-medium transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSaveRename}
+                                    className="px-6 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-black transition-all shadow-lg shadow-gray-200"
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Import Library Modal */}
             <AnimatePresence>

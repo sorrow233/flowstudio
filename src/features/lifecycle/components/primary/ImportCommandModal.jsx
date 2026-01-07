@@ -13,15 +13,26 @@ const CATEGORY_ICONS = {
 };
 
 const ImportCommandModal = ({ isOpen, onClose, onImport }) => {
-    const [commands, setCommands] = useState([]);
-    const [importCategory, setImportCategory] = useState('all');
-    const [importSearch, setImportSearch] = useState('');
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [categories, setCategories] = useState(COMMAND_CATEGORIES);
+    const [commands, setCommands] = useState([]); // BUG FIX: Missing state
+    const [importCategory, setImportCategory] = useState('all'); // BUG FIX: Missing state
+    const [importSearch, setImportSearch] = useState(''); // BUG FIX: Missing state
 
     useEffect(() => {
         if (isOpen) {
             const savedCmds = localStorage.getItem(STORAGE_KEYS.COMMANDS);
             if (savedCmds) setCommands(JSON.parse(savedCmds));
+
+            const savedCats = localStorage.getItem('flowstudio_categories_custom');
+            if (savedCats) {
+                const parsedCats = JSON.parse(savedCats);
+                // MERGE LOGIC: Keep custom labels, but enforce new system colors/icons
+                const mergedCats = COMMAND_CATEGORIES.map(defaultCat => {
+                    const userCat = parsedCats.find(pc => pc.id === defaultCat.id);
+                    return userCat ? { ...defaultCat, label: userCat.label } : defaultCat;
+                });
+                setCategories(mergedCats);
+            }
         }
     }, [isOpen]);
 
@@ -31,8 +42,6 @@ const ImportCommandModal = ({ isOpen, onClose, onImport }) => {
             (cmd.content && cmd.content.toLowerCase().includes(importSearch.toLowerCase()));
         return matchesCategory && matchesSearch;
     });
-
-    const activeCategoryLabel = importCategory === 'all' ? 'All Commands' : COMMAND_CATEGORIES.find(c => c.id === importCategory)?.label;
 
     return (
         <AnimatePresence>
@@ -75,50 +84,41 @@ const ImportCommandModal = ({ isOpen, onClose, onImport }) => {
                                 />
                             </div>
 
-                            {/* Filter Dropdown */}
-                            <div className="relative">
+                            {/* Filter Dropdown - Dot Ribbon */}
+                            <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full shadow-inner border border-gray-200/50">
                                 <button
-                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
-                                    className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 border ${importCategory !== 'all' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'}`}
+                                    onClick={() => setImportCategory('all')}
+                                    className={`
+                                        w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold transition-all shrink-0
+                                        ${importCategory === 'all'
+                                            ? 'bg-white text-gray-900 shadow-md scale-110 z-10'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white/50'}
+                                    `}
+                                    title="All Commands"
                                 >
-                                    <Filter size={14} />
-                                    <span>{activeCategoryLabel}</span>
-                                    <ChevronDown size={14} className={`transition-transformDuration-200 ${isFilterOpen ? 'rotate-180' : ''}`} />
+                                    ALL
                                 </button>
+                                <div className="w-px h-4 bg-gray-300/50 mx-1" />
+                                {categories.map(cat => (
+                                    <div key={cat.id} className="relative group/cat">
+                                        <button
+                                            onClick={() => setImportCategory(cat.id)}
+                                            className={`
+                                                w-8 h-8 flex items-center justify-center rounded-full transition-all shrink-0 relative
+                                                ${importCategory === cat.id
+                                                    ? 'bg-white shadow-md scale-110 z-10 ring-2 ring-gray-100'
+                                                    : 'hover:bg-white/50 hover:scale-105'}
+                                            `}
+                                        >
+                                            <div className={`w-3 h-3 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')} ${importCategory === cat.id ? 'ring-2 ring-offset-2 ring-transparent' : ''}`} />
+                                        </button>
 
-                                <AnimatePresence>
-                                    {isFilterOpen && (
-                                        <>
-                                            <div className="fixed inset-0 z-0" onClick={() => setIsFilterOpen(false)} />
-                                            <motion.div
-                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-10 py-1"
-                                            >
-                                                <button
-                                                    onClick={() => { setImportCategory('all'); setIsFilterOpen(false); }}
-                                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2 ${importCategory === 'all' ? 'text-emerald-600 font-medium bg-emerald-50/50' : 'text-gray-600'}`}
-                                                >
-                                                    <LayoutGrid size={14} /> All Commands
-                                                </button>
-                                                <div className="h-px bg-gray-100 my-1" />
-                                                {COMMAND_CATEGORIES.map(cat => {
-                                                    const Icon = CATEGORY_ICONS[cat.icon] || LayoutGrid;
-                                                    return (
-                                                        <button
-                                                            key={cat.id}
-                                                            onClick={() => { setImportCategory(cat.id); setIsFilterOpen(false); }}
-                                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2 ${importCategory === cat.id ? 'text-emerald-600 font-medium bg-emerald-50/50' : 'text-gray-600'}`}
-                                                        >
-                                                            <Icon size={14} /> {cat.label}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </motion.div>
-                                        </>
-                                    )}
-                                </AnimatePresence>
+                                        {/* Tooltip */}
+                                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] rounded opacity-0 group-hover/cat:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 font-medium tracking-wide">
+                                            {cat.label}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
@@ -126,7 +126,7 @@ const ImportCommandModal = ({ isOpen, onClose, onImport }) => {
                         <div className="flex-1 overflow-y-auto p-4 bg-gray-50/30 custom-scrollbar">
                             <div className="grid grid-cols-1 gap-3">
                                 {filteredCommands.map(cmd => {
-                                    const CatIcon = CATEGORY_ICONS[COMMAND_CATEGORIES.find(c => c.id === (cmd.category || 'general'))?.icon] || LayoutGrid;
+                                    const CatIcon = CATEGORY_ICONS[categories.find(c => c.id === (cmd.category || 'general'))?.icon] || LayoutGrid;
 
                                     return (
                                         <div

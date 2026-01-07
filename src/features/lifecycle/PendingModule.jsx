@@ -5,27 +5,27 @@ import { v4 as uuidv4 } from 'uuid';
 import { STORAGE_KEYS } from '../../utils/constants';
 import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
 
-// Refined Soul-Searching Questions
+// Refined Founder-Focused Questions
 const QUESTIONS = [
     {
         id: 'clarity',
-        text: 'Do you have a crystal-clear vision of the final outcome?',
-        sub: 'Clarity of Purpose'
+        text: 'Can you describe the "Aha!" moment in one simple sentence?',
+        sub: 'Radical Clarity'
     },
     {
-        id: 'self_use',
-        text: 'Will you personally rely on this tool every single day?',
-        sub: 'Self-Necessity'
+        id: 'obsession',
+        text: 'Does this problem keep you awake at night? (Be honest)',
+        sub: 'Founder Obsession'
     },
     {
-        id: 'impact',
-        text: 'Can this project fundamentally upgrade your workflow?',
-        sub: 'Transformative Value'
+        id: 'market',
+        text: 'Is there a starving crowd waiting for this solution?',
+        sub: 'Market Pull'
     },
     {
-        id: 'value',
-        text: 'Do you believe it imparts real value to the world?',
-        sub: 'External Contribution'
+        id: 'moat',
+        text: 'Do you have an unfair advantage in building this?',
+        sub: 'Defensibility'
     },
 ];
 
@@ -134,8 +134,8 @@ const PendingModule = () => {
 
                 {/* Header */}
                 <div className="mb-8">
-                    <h2 className="text-2xl font-light tracking-wide text-gray-900">Pending Stream</h2>
-                    <p className="text-xs font-mono text-gray-400 mt-1 uppercase tracking-widest">Idea Assessment Queue</p>
+                    <h2 className="text-2xl font-light tracking-wide text-gray-900">Idea Staging</h2>
+                    <p className="text-xs font-mono text-gray-400 mt-1 uppercase tracking-widest">Validate before you build</p>
                 </div>
 
                 {/* Main Content Area - Split between Pending and Garden */}
@@ -470,8 +470,8 @@ const PendingModule = () => {
                     <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6 animate-pulse">
                         <Plus size={32} strokeWidth={1} className="text-gray-400" />
                     </div>
-                    <p className="font-light text-lg text-gray-900">Your Garden is Empty</p>
-                    <p className="font-light text-sm mt-2">Plant a new seed on the left to begin.</p>
+                    <p className="font-light text-lg text-gray-900">The Garden is Silent.</p>
+                    <p className="font-light text-sm mt-2 text-gray-400">Every great product starts as a fragile thought. Plant one.</p>
                 </div>
             )}
         </div>
