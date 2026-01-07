@@ -1,15 +1,11 @@
+```javascript
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-    Plus, Trash2, Lightbulb, Rocket, Sprout, TrendingUp, Award, DollarSign,
-    X, Copy, Check, MoreVertical, Edit2, Layers
-} from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import SectionHeader from '@/components/SectionHeader';
+import { Plus } from 'lucide-react';
 import SearchInput from '@/components/SearchInput';
 import Modal from '@/components/Modal';
 import { Logger } from '@/utils/logger';
+import CommandStageColumn from './components/CommandStageColumn';
 import './CommandTowerPage.css';
 
 export default function CommandTowerPage() {
@@ -75,7 +71,7 @@ export default function CommandTowerPage() {
     };
 
     const [newCommand, setNewCommand] = useState({ title: '', content: '', stage: '', color: '' });
-    const [newStage, setNewStage] = useState({ key: '', label: '', icon: 'Layers', color: defaultStages[0].color });
+    const [newStage, setNewStage] = useState({ key: '', label: '', icon: 'Layers', color: defaultStages[0].color }); // Default color will be corrected by UI or hook logic if needed
     const [searchQuery, setSearchQuery] = useState('');
 
     // --- Persistence ---
@@ -106,14 +102,70 @@ export default function CommandTowerPage() {
         };
     }
 
-    // --- Helpers ---
-    const getIcon = (iconName, color) => {
-        const props = { size: 20, style: { color: 'var(--text-primary)' } }; // Icon within card usually matches text or specific accent
-        const icons = { Lightbulb, Rocket, Sprout, TrendingUp, Award, DollarSign, Layers };
-        const IconComponent = icons[iconName] || Layers;
-        return <IconComponent {...props} />;
+    // --- Command Management ---
+    const addCommand = async (stageKey, command) => {
+        setCommands(prevCommands => {
+            const newCommands = { ...prevCommands };
+            const newId = new Date().getTime(); // Simple unique ID
+            newCommands[stageKey] = [...(newCommands[stageKey] || []), { id: newId, ...command }];
+            return newCommands;
+        });
     };
 
+    const updateCommand = async (stageKey, commandId, updatedFields) => {
+        setCommands(prevCommands => {
+            const newCommands = { ...prevCommands };
+            newCommands[stageKey] = newCommands[stageKey].map(cmd =>
+                cmd.id === commandId ? { ...cmd, ...updatedFields } : cmd
+            );
+            return newCommands;
+        });
+    };
+
+    const deleteCommand = async (stageKey, commandId) => {
+        setCommands(prevCommands => {
+            const newCommands = { ...prevCommands };
+            newCommands[stageKey] = newCommands[stageKey].filter(cmd => cmd.id !== commandId);
+            return newCommands;
+        });
+    };
+
+    // --- Stage Management ---
+    const addStage = async (newStageData) => {
+        setStages(prevStages => {
+            const newKey = newStageData.label.toLowerCase().replace(/\s/g, '-');
+            const newStage = {
+                key: newKey,
+                label: newStageData.label,
+                icon: newStageData.icon,
+                color: newStageData.color,
+                defaultCmdColor: newStageData.color, // For custom stages, defaultCmdColor can be the stage color
+                isCustom: true
+            };
+            return [...prevStages, newStage];
+        });
+        setCommands(prevCommands => ({ ...prevCommands, [newStageData.label.toLowerCase().replace(/\s/g, '-')]: [] }));
+    };
+
+    const updateStage = async (stageKey, updatedFields) => {
+        setStages(prevStages =>
+            prevStages.map(stage =>
+                stage.key === stageKey ? { ...stage, ...updatedFields, label: updatedFields.customLabel || stage.label } : stage
+            )
+        );
+    };
+
+    const deleteStage = async (stageKey) => {
+        setStages(prevStages => prevStages.filter(stage => stage.key !== stageKey));
+        setCommands(prevCommands => {
+            const newCommands = { ...prevCommands };
+            delete newCommands[stageKey];
+            return newCommands;
+        });
+    };
+
+
+    // --- Helpers ---
     const copyToClipboard = async (text, id) => {
         Logger.info('CommandTower', 'Copying to clipboard:', id);
         try {
@@ -137,34 +189,25 @@ export default function CommandTowerPage() {
 
     // --- Handlers ---
 
-    const handleAddCommand = () => {
+    const handleAddCommand = async () => {
         if (!newCommand.title.trim() || !newCommand.content.trim() || !newCommand.stage) return;
-        Logger.info('CommandTower', 'Adding new command:', newCommand);
-        const newId = Date.now();
+
         // 使用用户选择的颜色，如果没选则使用指令库默认颜色
         const commandColor = newCommand.color || getStageDefaultColor(newCommand.stage);
 
-        setCommands(prev => ({
-            ...prev,
-            [newCommand.stage]: [...(prev[newCommand.stage] || []), {
-                id: newId,
-                title: newCommand.title,
-                content: newCommand.content,
-                color: commandColor
-            }]
-        }));
+        await addCommand(newCommand.stage, {
+            title: newCommand.title,
+            content: newCommand.content,
+            color: commandColor
+        });
 
         setNewCommand({ title: '', content: '', stage: '', color: freshColors[0].color });
         setShowAddCommandModal(false);
     };
 
-    const handleDeleteCommand = (stageKey, id) => {
+    const handleDeleteCommand = async (stageKey, id) => {
         if (confirm(t('common.delete_confirm') || "Are you sure?")) {
-            Logger.info('CommandTower', 'Deleting command:', stageKey, id);
-            setCommands(prev => ({
-                ...prev,
-                [stageKey]: prev[stageKey].filter(cmd => cmd.id !== id)
-            }));
+            await deleteCommand(stageKey, id);
         }
     };
 
@@ -172,54 +215,41 @@ export default function CommandTowerPage() {
         setEditingCommand({ stageKey, command: { ...command } });
     };
 
-    const handleSaveEdit = () => {
+    const handleSaveEdit = async () => {
         if (!editingCommand || !editingCommand.command.title.trim()) return;
-        setCommands(prev => ({
-            ...prev,
-            [editingCommand.stageKey]: prev[editingCommand.stageKey].map(cmd =>
-                cmd.id === editingCommand.command.id ? editingCommand.command : cmd
-            )
-        }));
+
+        await updateCommand(editingCommand.stageKey, editingCommand.command.id, {
+            title: editingCommand.command.title,
+            content: editingCommand.command.content,
+            color: editingCommand.command.color
+        });
+
         setEditingCommand(null);
     };
 
-    const handleAddStage = () => {
+    const handleAddStage = async () => {
         if (!newStage.label.trim()) return;
-        const key = `custom_${Date.now()}`;
-        const newStageObj = {
-            key,
+
+        await addStage({
             label: newStage.label,
             icon: 'Layers',
             color: newStage.color,
             isCustom: true
-        };
+        });
 
-        setStages(prev => [...prev, newStageObj]);
-        setCommands(prev => ({ ...prev, [key]: [] }));
-        setNewStage({ key: '', label: '', icon: 'Layers', color: defaultStages[0].color });
+        setNewStage({ key: '', label: '', icon: 'Layers', color: '#84fab0' }); // Reset to a safe default
         setShowAddStageModal(false);
-        Logger.info('CommandTower', 'Added new stage:', newStageObj);
     };
 
-    const handleDeleteStage = (stageKey) => {
+    const handleDeleteStage = async (stageKey) => {
         if (confirm(t('common.delete_stage_confirm') || "Delete this category and all its commands?")) {
-            Logger.info('CommandTower', 'Deleting stage:', stageKey);
-            setStages(prev => prev.filter(s => s.key !== stageKey));
-            setCommands(prev => {
-                const newCmds = { ...prev };
-                delete newCmds[stageKey];
-                return newCmds;
-            });
+            await deleteStage(stageKey);
         }
     };
 
-    const handleStageRename = (stageKey, newLabel) => {
+    const handleStageRename = async (stageKey, newLabel) => {
         if (!newLabel.trim()) return;
-        setStages(prev => prev.map(s =>
-            s.key === stageKey
-                ? { ...s, customLabel: newLabel } // Store custom name in customLabel
-                : s
-        ));
+        await updateStage(stageKey, { customLabel: newLabel });
         setEditingStage(null);
     };
 
@@ -250,125 +280,31 @@ export default function CommandTowerPage() {
                         cmd.content.toLowerCase().includes(searchQuery.toLowerCase())
                     );
 
-                    if (searchQuery && filteredCommands.length === 0) return null;
-
-                    // Display Label: Prefer customLabel, falling back to translation key
-                    const displayLabel = stage.customLabel || (stage.isCustom ? stage.label : t(stage.label));
-
                     return (
-                        <div key={stage.key} className="ct-stage-card" style={{ background: stage.color }}>
-                            <div className="ct-stage-header">
-                                <div className="ct-stage-info">
-                                    <div className="ct-stage-icon">
-                                        {getIcon(stage.icon, stage.color)}
-                                    </div>
-
-                                    {editingStage?.key === stage.key ? (
-                                        <input
-                                            autoFocus
-                                            className="ct-stage-title-input"
-                                            value={editingStage.label}
-                                            onChange={(e) => setEditingStage({ ...editingStage, label: e.target.value })}
-                                            onBlur={() => handleStageRename(stage.key, editingStage.label)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter') handleStageRename(stage.key, editingStage.label);
-                                                if (e.key === 'Escape') setEditingStage(null);
-                                            }}
-                                        />
-                                    ) : (
-                                        <span
-                                            className="ct-stage-title"
-                                            onClick={() => setEditingStage({ key: stage.key, label: displayLabel })}
-                                            title="Click to rename"
-                                        >
-                                            {displayLabel}
-                                        </span>
-                                    )}
-
-                                    <span className="ct-stage-count">{filteredCommands.length}</span>
-                                </div>
-                                <div className="ct-stage-actions">
-                                    {stage.isCustom && (
-                                        <button
-                                            className="ct-stage-action-btn"
-                                            onClick={() => handleDeleteStage(stage.key)}
-                                            title={t('common.delete')}
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
-                                    )}
-                                    <button
-                                        className="ct-stage-action-btn"
-                                        onClick={() => {
-                                            setNewCommand({ title: '', content: '', stage: stage.key, color: getStageDefaultColor(stage.key) });
-                                            setShowAddCommandModal(true);
-                                        }}
-                                        title={t('common.add')}
-                                    >
-                                        <Plus size={14} />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="ct-command-list">
-                                {filteredCommands.length > 0 ? (
-                                    filteredCommands.map(cmd => {
-                                        const cmdColor = cmd.color || getStageDefaultColor(stage.key);
-                                        return (
-                                            <div
-                                                key={cmd.id}
-                                                className="ct-command-item"
-                                                style={{
-                                                    '--cmd-color': cmdColor,
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.9)' // Cards inside are white-ish for contrast
-                                                }}
-                                            >
-                                                <div
-                                                    className="ct-command-main"
-                                                    onClick={() => copyToClipboard(cmd.content, cmd.id)}
-                                                    title={t('common.click_to_copy')}
-                                                >
-                                                    <span className="ct-command-title">{cmd.title}</span>
-                                                    <span className="ct-copy-indicator">
-                                                        {copiedId === cmd.id ? (
-                                                            <Check size={14} color="#4ade80" />
-                                                        ) : (
-                                                            <Copy size={14} color="#64748b" />
-                                                        )}
-                                                    </span>
-                                                </div>
-                                                <div className="ct-command-actions">
-                                                    <button
-                                                        className="ct-action-btn ct-edit-btn"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleEditCommand(stage.key, cmd);
-                                                        }}
-                                                        title={t('common.edit')}
-                                                    >
-                                                        <Edit2 size={12} />
-                                                    </button>
-                                                    <button
-                                                        className="ct-action-btn ct-delete-btn"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDeleteCommand(stage.key, cmd.id);
-                                                        }}
-                                                        title={t('common.delete')}
-                                                    >
-                                                        <Trash2 size={12} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        );
-                                    })
-                                ) : (
-                                    <div className="ct-empty-stage">
-                                        {searchQuery ? t('common.no_results') : t('common.empty_stage_hint') || "No commands yet"}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        <CommandStageColumn
+                            key={stage.key}
+                            stage={stage}
+                            commands={filteredCommands}
+                            searchQuery={searchQuery}
+                            defaultCmdColor={getStageDefaultColor(stage.key)}
+                            // Edit Stage Props
+                            isEditing={editingStage?.key === stage.key}
+                            editLabel={editingStage?.key === stage.key ? editingStage.label : ''}
+                            setEditLabel={(val) => setEditingStage({ ...editingStage, label: val })}
+                            onStartEditing={(key, label) => setEditingStage({ key, label })}
+                            onRename={handleStageRename}
+                            onCancelEdit={() => setEditingStage(null)}
+                            onDeleteStage={handleDeleteStage}
+                            // Command Props
+                            onAddCommand={(stageKey) => {
+                                setNewCommand({ title: '', content: '', stage: stageKey, color: getStageDefaultColor(stageKey) });
+                                setShowAddCommandModal(true);
+                            }}
+                            onCopy={copyToClipboard}
+                            onEditCommand={handleEditCommand}
+                            onDeleteCommand={handleDeleteCommand}
+                            copiedId={copiedId}
+                        />
                     );
                 })}
 
@@ -460,7 +396,7 @@ export default function CommandTowerPage() {
                         {freshColors.map(c => (
                             <div
                                 key={c.color}
-                                className={`ct-color-option ${newCommand.color === c.color ? 'selected' : ''}`}
+                                className={`ct - color - option ${ newCommand.color === c.color ? 'selected' : '' } `}
                                 onClick={() => setNewCommand({ ...newCommand, color: c.color })}
                                 style={{ backgroundColor: c.color }}
                                 title={c.name}
@@ -496,22 +432,30 @@ export default function CommandTowerPage() {
                 <div className="form-group">
                     <label>{t('common.color') || "Color"}</label>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                        {defaultStages.map(ds => (
-                            <div
-                                key={ds.key}
-                                onClick={() => setNewStage({ ...newStage, color: ds.color })}
-                                style={{
-                                    width: '32px',
-                                    height: '32px',
-                                    borderRadius: '50%',
-                                    background: ds.color,
-                                    cursor: 'pointer',
-                                    border: newStage.color === ds.color ? '2px solid var(--text-primary)' : '2px solid transparent',
-                                    boxShadow: newStage.color === ds.color ? '0 0 0 2px var(--bg-card)' : 'none'
-                                }}
-                                title={ds.key}
-                            />
-                        ))}
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            {/* We use freshColors for stage creation now, or we could fetch defaults from a constant. 
+                            Since we removed defaultStages constant from component, let's use the first 6 fresh colors 
+                            or similar logic. For now, let's reuse freshColors but with gradient simulation if possible, 
+                            or just allow selecting solid colors which the API handles. 
+                            Actually, let's just use freshColors for simplicity as user wanted "fresh" aesthetics.
+                        */}
+                            {freshColors.map(c => (
+                                <div
+                                    key={c.color}
+                                    onClick={() => setNewStage({ ...newStage, color: c.color })}
+                                    style={{
+                                        width: '32px',
+                                        height: '32px',
+                                        borderRadius: '50%',
+                                        background: c.color,
+                                        cursor: 'pointer',
+                                        border: newStage.color === c.color ? '2px solid var(--text-primary)' : '2px solid transparent',
+                                        boxShadow: newStage.color === c.color ? '0 0 0 2px var(--bg-card)' : 'none'
+                                    }}
+                                    title={c.name}
+                                />
+                            ))}
+                        </div>
                     </div>
                 </div>
             </Modal>
@@ -563,7 +507,7 @@ export default function CommandTowerPage() {
                                 {freshColors.map(c => (
                                     <div
                                         key={c.color}
-                                        className={`ct-color-option ${editingCommand.command.color === c.color ? 'selected' : ''}`}
+                                        className={`ct - color - option ${ editingCommand.command.color === c.color ? 'selected' : '' } `}
                                         onClick={() => setEditingCommand({
                                             ...editingCommand,
                                             command: { ...editingCommand.command, color: c.color }

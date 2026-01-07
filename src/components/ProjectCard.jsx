@@ -7,18 +7,7 @@ import './ProjectCard.css';
 // 现代清新的默认渐变色背景
 // 现代高级感渐变色背景 - Premium Aurora & Mesh Gradients
 const DEFAULT_BACKGROUNDS = [
-    { id: 'gradient-1', type: 'gradient', value: 'linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)', name: '云雾白' },
-    { id: 'gradient-2', type: 'gradient', value: 'linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%)', name: '清透蓝' },
-    { id: 'gradient-3', type: 'gradient', value: 'linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%)', name: '初春绿' },
-    { id: 'gradient-4', type: 'gradient', value: 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)', name: '薄荷海' },
-    { id: 'gradient-5', type: 'gradient', value: 'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)', name: '晚霞紫' },
-    { id: 'gradient-6', type: 'gradient', value: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)', name: '梦幻紫' },
-    { id: 'gradient-7', type: 'gradient', value: 'linear-gradient(120deg, #f093fb 0%, #f5576c 100%)', name: '霓虹粉' },
-    { id: 'gradient-8', type: 'gradient', value: 'linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%)', name: '冰川蓝' },
-    { id: 'gradient-9', type: 'gradient', value: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', name: '极简灰' },
-    { id: 'gradient-10', type: 'gradient', value: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)', name: '马卡龙' },
-    { id: 'gradient-11', type: 'gradient', value: 'linear-gradient(135deg, #e6b980 0%, #eacda3 100%)', name: '香槟金' },
-    { id: 'gradient-12', type: 'gradient', value: 'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%)', name: '初恋粉' },
+    { id: 'white', type: 'solid', value: '#ffffff', name: '纯净白' }
 ];
 
 export default function ProjectCard({

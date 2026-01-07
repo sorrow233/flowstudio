@@ -20,12 +20,7 @@ const BacklogPage = lazy(() => import('@/modules/backlog/BacklogPage'));
 const WorkshopPage = lazy(() => import('@/modules/workshop/WorkshopPage'));
 const CommandTowerPage = lazy(() => import('@/modules/command-tower/CommandTowerPage'));
 
-// Loading fallback component
-const LoadingFallback = () => (
-  <div className="loading-container">
-    <div className="loading-spinner"></div>
-  </div>
-);
+import LoadingFallback from '@/components/LoadingFallback';
 
 function App() {
   const { t } = useTranslation();
@@ -61,6 +56,11 @@ function LocalizedRoutes({ lang }) {
     }
   }, [lang, i18n]);
 
+  // Prevent rendering with wrong language
+  if (lang && i18n.language !== lang) {
+    return <LoadingFallback />;
+  }
+
   return <AppRoutes />;
 }
 
@@ -80,26 +80,10 @@ function AppRoutes() {
           <Layout />
         </ProtectedRoute>
       }>
-        <Route index element={
-          <React.Suspense fallback={<LoadingFallback />}>
-            <Dashboard />
-          </React.Suspense>
-        } />
-        <Route path="backlog" element={
-          <React.Suspense fallback={<LoadingFallback />}>
-            <BacklogPage />
-          </React.Suspense>
-        } />
-        <Route path="workshop" element={
-          <React.Suspense fallback={<LoadingFallback />}>
-            <WorkshopPage />
-          </React.Suspense>
-        } />
-        <Route path="command-tower" element={
-          <React.Suspense fallback={<LoadingFallback />}>
-            <CommandTowerPage />
-          </React.Suspense>
-        } />
+        <Route index element={<Dashboard />} />
+        <Route path="backlog" element={<BacklogPage />} />
+        <Route path="workshop" element={<WorkshopPage />} />
+        <Route path="command-tower" element={<CommandTowerPage />} />
         <Route path="settings" element={<div className="text-h2">{t('settings.title')}</div>} />
       </Route>
 

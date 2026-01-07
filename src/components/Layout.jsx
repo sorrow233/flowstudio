@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import LanguageSwitcher from './LanguageSwitcher';
+import LoadingFallback from './LoadingFallback';
 
 const NavItem = ({ to, icon: Icon, label, isActive }) => (
     <Link
@@ -130,7 +131,9 @@ export default function Layout() {
             {/* Main Content */}
             <main className="app-main">
                 <div className="content-container">
-                    <Outlet />
+                    <React.Suspense fallback={<LoadingFallback />}>
+                        <Outlet />
+                    </React.Suspense>
                 </div>
             </main>
         </div>
