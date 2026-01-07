@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sprout, X, ArrowRight, Sun, CloudRain, Droplets, CheckCircle2, Plus } from 'lucide-react';
+import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { STORAGE_KEYS } from '../../utils/constants';
 
@@ -80,6 +80,7 @@ const PendingModule = () => {
         const newPrimary = {
             ...project,
             graduatedAt: Date.now(),
+            subStage: 1, // Default to Stage 1
             progress: 0,
             tasks: []
         };
@@ -192,10 +193,10 @@ const PendingModule = () => {
                         </button>
 
                         {/* Header / Visualization */}
-                        <div className="flex flex-col items-center mb-8">
+                        <div className="flex flex-col items-center mb-10 w-full transition-all duration-500">
                             <motion.div
                                 animate={getSaplingState(selectedProject.score)}
-                                className="mb-6 relative"
+                                className="mb-8 relative"
                             >
                                 <Sprout size={100} strokeWidth={1} />
                                 {selectedProject.score === 4 && (
@@ -208,55 +209,54 @@ const PendingModule = () => {
                                 )}
                             </motion.div>
 
-                            <input
-                                value={selectedProject.title}
-                                onChange={(e) => handleUpdateProject(selectedProject.id, 'title', e.target.value)}
-                                className="text-4xl font-thin text-gray-900 mb-2 text-center bg-transparent border-b border-transparent hover:border-gray-200 focus:border-gray-900 focus:outline-none transition-all w-full"
-                            />
-
-                            <div className="flex flex-col gap-4 w-full max-w-md mt-6">
+                            <div className="w-full max-w-md space-y-4">
                                 <input
-                                    placeholder="Project Website Link (Optional)"
-                                    value={selectedProject.link || ''}
-                                    onChange={(e) => handleUpdateProject(selectedProject.id, 'link', e.target.value)}
-                                    className="text-sm font-light text-center bg-gray-50 rounded-xl py-3 px-4 focus:outline-none focus:ring-1 focus:ring-gray-900 transition-shadow hover:bg-gray-100"
+                                    value={selectedProject.title}
+                                    onChange={(e) => handleUpdateProject(selectedProject.id, 'title', e.target.value)}
+                                    className="text-4xl font-thin text-gray-900 text-center bg-transparent border-b border-transparent hover:border-gray-200 focus:border-gray-900 focus:outline-none transition-all w-full pb-2"
+                                    placeholder="Project Title"
                                 />
 
-                                {/* Visual Vibe Selector */}
-                                <div className="flex flex-col items-center gap-2">
-                                    <span className="text-xs text-gray-400 uppercase tracking-widest font-medium">Select Visual Vibe</span>
-                                    <div className="flex gap-3">
-                                        {[
-                                            'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1000&q=80', // Gradient 1
-                                            'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1000&q=80', // Gradient 2
-                                            'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1000&q=80', // Abstract
-                                            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80', // Landscape
-                                            'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1000&q=80', // Tech
-                                            '' // None
-                                        ].map((imgUrl, idx) => (
-                                            <button
-                                                key={idx}
-                                                onClick={() => handleUpdateProject(selectedProject.id, 'bgImage', imgUrl)}
-                                                className={`
-                                          w-8 h-8 rounded-full border-2 overflow-hidden transition-all hover:scale-110
-                                          ${selectedProject.bgImage === imgUrl ? 'border-gray-900 scale-110' : 'border-transparent'}
-                                          ${!imgUrl ? 'bg-gray-100 border-gray-200' : ''}
-                                        `}
-                                            >
-                                                {imgUrl && <img src={imgUrl} className="w-full h-full object-cover" alt="vibe" />}
-                                                {!imgUrl && <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">×</div>}
-                                            </button>
-                                        ))}
+                                <textarea
+                                    value={selectedProject.desc}
+                                    onChange={(e) => handleUpdateProject(selectedProject.id, 'desc', e.target.value)}
+                                    rows={2}
+                                    className="w-full text-sm font-light text-center text-gray-600 bg-transparent resize-none focus:outline-none border border-transparent hover:border-gray-100 focus:border-gray-200 rounded-lg p-2 transition-all placeholder:text-gray-300"
+                                    placeholder="What is the core concept?"
+                                />
+
+                                <div className="grid grid-cols-1 gap-2 pt-2">
+                                    <div className="relative group">
+                                        <input
+                                            placeholder="Website Link (Optional)"
+                                            value={selectedProject.link || ''}
+                                            onChange={(e) => handleUpdateProject(selectedProject.id, 'link', e.target.value)}
+                                            className="w-full text-xs font-mono text-center bg-gray-50/50 hover:bg-gray-100 rounded-lg py-2 px-4 focus:outline-none focus:ring-1 focus:ring-gray-900 transition-all text-gray-400 focus:text-gray-900 placeholder:text-gray-300"
+                                        />
+                                    </div>
+                                    <div className="relative group">
+                                        <input
+                                            placeholder="Background Image URL (Optional)"
+                                            value={selectedProject.bgImage || ''}
+                                            onChange={(e) => handleUpdateProject(selectedProject.id, 'bgImage', e.target.value)}
+                                            className="w-full text-xs font-mono text-center bg-white border border-dashed border-gray-200 hover:border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:border-gray-900 transition-all text-gray-400 focus:text-gray-900 placeholder:text-gray-300"
+                                        />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="flex gap-6 mt-6 text-xs font-medium tracking-widest uppercase text-gray-400">
-                                <div className={`flex items-center gap-2 ${selectedProject.score >= 2 ? 'text-blue-500' : ''}`}>
-                                    <Droplets size={14} /> Hydration
+                            <div className="flex gap-8 mt-8 text-[10px] font-bold tracking-[0.2em] uppercase text-gray-300">
+                                <div className={`flex items-center gap-2 transition-colors duration-500 ${selectedProject.score >= 2 ? 'text-blue-500' : ''}`}>
+                                    <div className={`p-1.5 rounded-full ${selectedProject.score >= 2 ? 'bg-blue-50 text-blue-500' : 'bg-gray-50'}`}>
+                                        <Droplets size={14} />
+                                    </div>
+                                    Hydration
                                 </div>
-                                <div className={`flex items-center gap-2 ${selectedProject.score >= 4 ? 'text-yellow-500' : ''}`}>
-                                    <Sun size={14} /> Photosynthesis
+                                <div className={`flex items-center gap-2 transition-colors duration-500 ${selectedProject.score >= 4 ? 'text-yellow-500' : ''}`}>
+                                    <div className={`p-1.5 rounded-full ${selectedProject.score >= 4 ? 'bg-yellow-50 text-yellow-500' : 'bg-gray-50'}`}>
+                                        <Sun size={14} />
+                                    </div>
+                                    Photosynthesis
                                 </div>
                             </div>
                         </div>
@@ -310,35 +310,6 @@ const PendingModule = () => {
                                     </motion.div>
                                 );
                             })}
-
-                            {/* Founding Motivation Input */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.5 }}
-                                className="relative p-7 rounded-2xl border border-gray-100 bg-white group focus-within:border-gray-800 focus-within:ring-1 focus-within:ring-gray-800 transition-all duration-500 shadow-sm hover:shadow-md"
-                            >
-                                <h4 className="text-sm font-mono text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                    The Primal Desire
-                                    <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded text-gray-500">OPTIONAL</span>
-                                </h4>
-                                <p className="text-lg text-gray-800 font-light mb-5 leading-relaxed">
-                                    这不仅是开发理由，更是未来的动力之源。<br />
-                                    <span className="italic text-gray-400 text-base">“无论前路如何，我现在就要开发这个项目，因为...”</span>
-                                </p>
-                                <textarea
-                                    value={selectedProject.motivation || ''}
-                                    onChange={(e) => {
-                                        const updatedProjects = projects.map(p =>
-                                            p.id === selectedProject.id ? { ...p, motivation: e.target.value } : p
-                                        );
-                                        setProjects(updatedProjects);
-                                        setSelectedProject({ ...selectedProject, motivation: e.target.value });
-                                    }}
-                                    placeholder="写下你最本初的感动... (We force you to think, not to type)"
-                                    className="w-full min-h-[140px] p-4 bg-gray-50 rounded-xl border-none resize-none outline-none text-gray-700 placeholder:text-gray-300 focus:bg-white transition-colors text-lg font-light"
-                                />
-                            </motion.div>
                         </div>
 
                         {/* Graduation */}
@@ -346,26 +317,11 @@ const PendingModule = () => {
                             {selectedProject.score === 4 ? (
                                 <motion.button
                                     initial={{ opacity: 0, y: 20 }}
-                                    animate={{
-                                        opacity: 1,
-                                        y: 0,
-                                        boxShadow: selectedProject.motivation?.length > 10
-                                            ? "0 20px 25px -5px rgba(255, 255, 255, 0.5), 0 0 20px rgba(52, 211, 153, 0.5)"
-                                            : "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
-                                    }}
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                                    animate={{ opacity: 1, y: 0 }}
                                     onClick={() => handleGraduate(selectedProject)}
-                                    className={`
-                    w-full py-5 text-white rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 border border-transparent
-                    ${selectedProject.motivation?.length > 10
-                                            ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-emerald-200'
-                                            : 'bg-gray-900 hover:bg-black shadow-xl'}
-                  `}
+                                    className="w-full py-5 bg-gray-900 text-white rounded-2xl flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
                                 >
-                                    <span className="text-lg font-light tracking-wide">
-                                        {selectedProject.motivation?.length > 10 ? "Ignite & Graduate to Primary Dev" : "Graduate to Primary Dev"}
-                                    </span>
+                                    <span className="text-lg font-light tracking-wide">Graduate to Primary Dev</span>
                                     <ArrowRight size={20} />
                                 </motion.button>
                             ) : (
