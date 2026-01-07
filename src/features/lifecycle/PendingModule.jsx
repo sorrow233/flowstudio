@@ -274,6 +274,20 @@ const PendingModule = () => {
 };
 
 const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }) => {
+    // Local state for Vow to support IME (Chinese Input) properly
+    const [localVow, setLocalVow] = useState(project.foundingReason || '');
+
+    // Reset local state when switching projects
+    useEffect(() => {
+        setLocalVow(project.foundingReason || '');
+    }, [project.id]);
+
+    const handleVowBlur = () => {
+        if (localVow !== (project.foundingReason || '')) {
+            onUpdate(project.id, 'foundingReason', localVow);
+        }
+    };
+
     return (
         <motion.div
             key="detail"
@@ -396,36 +410,37 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                 })}
             </div>
 
-            {/* Sacred Reason Input (Fresh & Sacred Design) */}
+            {/* Sacred Reason Input (Fresh & Sacred Design - Faint Green) */}
             <div className="max-w-2xl mx-auto w-full relative z-20 mt-12 bg-white rounded-3xl p-1">
                 <div className="mb-4 flex items-center justify-between px-2">
                     <div className="flex items-center gap-2">
-                        <Scroll size={16} className="text-violet-300" />
-                        <h4 className="text-xs font-medium text-violet-300 tracking-widest uppercase">My Vow</h4>
+                        <Scroll size={16} className="text-emerald-300" />
+                        <h4 className="text-xs font-medium text-emerald-300 tracking-widest uppercase">My Vow</h4>
                     </div>
                 </div>
 
                 <div className="relative group">
                     <div className={`
-                        absolute -inset-0.5 bg-gradient-to-r from-violet-200 to-fuchsia-200 rounded-2xl opacity-0 transition duration-1000 group-hover:duration-200
-                        ${project.foundingReason ? 'opacity-30 blur' : 'opacity-0'}
+                        absolute -inset-0.5 bg-gradient-to-r from-emerald-100 to-teal-50 rounded-2xl opacity-0 transition duration-1000 group-hover:duration-200
+                        ${project.foundingReason ? 'opacity-40 blur' : 'opacity-0'}
                     `}></div>
 
                     <textarea
-                        value={project.foundingReason || ''}
-                        onChange={(e) => onUpdate(project.id, 'foundingReason', e.target.value)}
+                        value={localVow}
+                        onChange={(e) => setLocalVow(e.target.value)}
+                        onBlur={handleVowBlur}
                         className={`
-                            relative w-full p-6 bg-white border rounded-2xl text-gray-700 placeholder:text-gray-300 
+                            relative w-full p-6 bg-white border rounded-2xl text-gray-700 placeholder:text-gray-300
                             text-sm leading-relaxed min-h-[120px] resize-none transition-all duration-500 ease-out
                             ${project.foundingReason
-                                ? 'border-violet-200 shadow-[0_0_40px_-10px_rgba(167,139,250,0.3)] focus:border-violet-300 focus:shadow-[0_0_50px_-10px_rgba(139,92,246,0.4)]'
-                                : 'border-gray-100 focus:border-violet-200 focus:shadow-[0_0_30px_-10px_rgba(167,139,250,0.3)]'
+                                ? 'border-emerald-100 shadow-[0_0_40px_-10px_rgba(52,211,153,0.3)] focus:border-emerald-300 focus:shadow-[0_0_50px_-10px_rgba(16,185,129,0.4)]'
+                                : 'border-gray-100 focus:border-emerald-200 focus:shadow-[0_0_30px_-10px_rgba(52,211,153,0.2)]'
                             }
                             outline-none
                         `}
                         placeholder="在此刻写下你的初心..."
                     />
-                    <div className="absolute bottom-4 right-4 text-violet-200 pointer-events-none transition-colors duration-300 group-focus-within:text-violet-400">
+                    <div className="absolute bottom-4 right-4 text-emerald-100 pointer-events-none transition-colors duration-300 group-focus-within:text-emerald-400">
                         <Feather size={18} />
                     </div>
                 </div>
@@ -436,7 +451,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                         animate={{ opacity: 1 }}
                         className="flex justify-end mt-2 px-2"
                     >
-                        <span className="text-[10px] text-violet-300 font-mono tracking-wider flex items-center gap-1">
+                        <span className="text-[10px] text-emerald-400 font-mono tracking-wider flex items-center gap-1">
                             <Sparkles size={10} />
                             VOW ESTABLISHED
                         </span>
@@ -444,7 +459,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                 )}
             </div>
 
-            {/* Graduate Button (Fresh Light Style) */}
+            {/* Graduate Button (Fresh Light Style - Green) */}
             <div className="max-w-2xl mx-auto mt-6 pb-10 w-full relative z-30">
                 {project.score === 4 && (
                     <button
@@ -452,8 +467,8 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                         className={`
                         w-full py-5 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500
                         ${project.foundingReason
-                                ? 'bg-white border border-violet-100 text-violet-600 shadow-[0_10px_40px_-10px_rgba(139,92,246,0.3)] hover:shadow-[0_15px_50px_-10px_rgba(139,92,246,0.4)] hover:-translate-y-0.5'
-                                : 'bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed' // Actually previously we hid it or handled it. Let's keep it clickable but distinct.
+                                ? 'bg-white border border-emerald-100 text-emerald-600 shadow-[0_10px_40px_-10px_rgba(52,211,153,0.3)] hover:shadow-[0_15px_50px_-10px_rgba(16,185,129,0.4)] hover:-translate-y-0.5'
+                                : 'bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed'
                             }
                         ${!project.foundingReason && 'hover:bg-gray-100 hover:text-gray-500'}
                     `}
