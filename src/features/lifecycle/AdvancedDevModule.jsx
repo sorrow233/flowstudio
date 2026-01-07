@@ -102,13 +102,17 @@ const AdvancedDevModule = () => {
 
             {/* Workspace Modal */}
             <AnimatePresence>
-                {selectedProject && (
-                    <AdvancedProjectWorkspace
-                        project={selectedProject}
-                        onClose={() => setSelectedProject(null)}
-                        updateProject={updateProject}
-                    />
-                )}
+                {selectedProject && (() => {
+                    // Derive live project from the reactive projects array
+                    const liveProject = projects.find(p => p.id === selectedProject.id) || selectedProject;
+                    return (
+                        <AdvancedProjectWorkspace
+                            project={liveProject}
+                            onClose={() => setSelectedProject(null)}
+                            updateProject={updateProject}
+                        />
+                    );
+                })()}
             </AnimatePresence>
         </div>
     );
