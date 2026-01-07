@@ -4,7 +4,7 @@ import {
     Terminal, Plus, Trash2, Copy, Check, Search,
     Layers, MonitorPlay, Bug, Sparkles, Flag, Command,
     ChevronRight, Sparkle, Link as LinkIcon, GripVertical, FileText, Globe, Library, Download, X, Tag,
-    LayoutGrid, Monitor, Server, Database, Container, Beaker, Filter
+    LayoutGrid, Monitor, Server, Database, Container, Beaker, Filter, CheckCircle2
 } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES, COMMAND_CATEGORIES } from '../../utils/constants';
 import { v4 as uuidv4 } from 'uuid';
