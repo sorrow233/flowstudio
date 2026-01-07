@@ -42,7 +42,7 @@ const PendingModule = () => {
     const { doc } = useSync();
 
     useEffect(() => {
-        console.log("PendingModule v1.8 Loaded (Ceremonial Polish)");
+        // PendingModule v1.8 Loaded
     }, []);
 
     const {
@@ -175,7 +175,7 @@ const PendingModule = () => {
                                     placeholder="Plant a new seed..."
                                     className="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder:text-gray-400 font-light h-full"
                                     onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && e.target.value.trim()) {
+                                        if (e.key === 'Enter' && e.target.value?.trim()) {
                                             const newP = {
                                                 id: uuidv4(),
                                                 title: e.target.value.trim(),
