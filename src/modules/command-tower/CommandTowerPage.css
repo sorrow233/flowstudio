@@ -50,10 +50,10 @@
 
 /* Stage Card (Category Column) - 自适应大小 */
 .ct-stage-card {
-    background: var(--bg-card);
+    /* Background is set inline via React for dynamic gradients */
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: var(--radius-lg);
     padding: 1rem;
     display: flex;
@@ -66,24 +66,18 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
+/* Remove the old top strip ::before */
 .ct-stage-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--stage-color, var(--color-accent-sakura)), transparent);
-    opacity: 0.8;
+    display: none;
 }
 
 .ct-stage-card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--border-hover);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border-color: rgba(255, 255, 255, 0.8);
 }
 
 /* Stage Header */
@@ -93,40 +87,67 @@
     align-items: center;
     margin-bottom: 1.25rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .ct-stage-info {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+    /* for text truncation */
 }
 
 .ct-stage-icon {
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: var(--color-accent-kinari);
+    background: rgba(255, 255, 255, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--stage-color, var(--text-primary));
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
 }
 
 .ct-stage-title {
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--text-primary);
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ct-stage-title:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.ct-stage-title-input {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 2px 6px;
+    width: 100%;
+    outline: none;
 }
 
 .ct-stage-count {
     font-size: 0.75rem;
     color: var(--text-secondary);
-    background: var(--color-accent-kinari);
+    background: rgba(255, 255, 255, 0.5);
     padding: 2px 8px;
     border-radius: 12px;
-    border: 1px solid var(--border-subtle);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
 }
 
 .ct-stage-actions {
@@ -141,18 +162,18 @@
 }
 
 .ct-stage-action-btn {
-    background: transparent;
+    background: rgba(255, 255, 255, 0.4);
     border: none;
     color: var(--text-secondary);
     cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
+    padding: 6px;
+    border-radius: 6px;
     transition: all 0.2s;
 }
 
 .ct-stage-action-btn:hover {
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.8);
 }
 
 /* Command List */
@@ -171,14 +192,14 @@
 }
 
 .ct-command-list::-webkit-scrollbar-thumb {
-    background: var(--border-subtle);
+    background: rgba(0, 0, 0, 0.1);
     border-radius: 2px;
 }
 
 /* Command Item - Color Card Style */
 .ct-command-item {
-    background: var(--cmd-color, #3ECFB2);
-    border: none;
+    /* Background color set inline */
+    border: 1px solid rgba(0, 0, 0, 0.05);
     border-radius: 12px;
     padding: 0.75rem 1rem;
     cursor: default;
@@ -187,31 +208,31 @@
     align-items: center;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .ct-command-item:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    filter: brightness(1.05);
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .ct-command-item .ct-command-title {
-    color: #2d3748;
-    font-weight: 600;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+    color: #1e293b;
+    font-weight: 500;
+    font-size: 0.95rem;
 }
 
 .ct-command-item .ct-copy-indicator svg {
-    color: #4a5568 !important;
+    color: #64748b !important;
 }
 
 .ct-command-item .ct-action-btn {
-    color: #4a5568;
+    color: #64748b;
 }
 
 .ct-command-item .ct-action-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.05);
+    color: #0f172a;
 }
 
 .ct-command-item .ct-command-actions {
@@ -223,58 +244,6 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 0.5rem;
-}
-
-.ct-command-title {
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.ct-command-code {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    background: rgba(0, 0, 0, 0.05);
-    padding: 0.5rem;
-    border-radius: 6px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    position: relative;
-}
-
-.ct-command-code::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 20px;
-    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.05));
-}
-
-.ct-add-command-btn {
-    margin-top: 1rem;
-    width: 100%;
-    padding: 0.75rem;
-    background: transparent;
-    border: 1px dashed var(--border-subtle);
-    border-radius: 12px;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.2s;
-}
-
-.ct-add-command-btn:hover {
-    background: var(--color-accent-kinari);
-    color: var(--text-primary);
-    border-color: var(--color-accent-sakura);
 }
 
 /* Floating Actions */
@@ -302,13 +271,11 @@
     box-shadow: 0 12px 48px rgba(232, 180, 184, 0.4);
 }
 
-
-
 /* Empty State */
 .ct-empty-stage {
     text-align: center;
     padding: 2rem 1rem;
-    color: var(--text-secondary);
+    color: rgba(0, 0, 0, 0.4);
     font-size: 0.9rem;
     font-style: italic;
 }
@@ -336,7 +303,7 @@
     transition: opacity 0.2s ease;
     margin-left: 0.5rem;
     padding-left: 0.5rem;
-    border-left: 1px solid var(--border-subtle);
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .ct-command-item:hover .ct-command-actions {
@@ -372,6 +339,7 @@
     color: #ef4444;
     background: rgba(239, 68, 68, 0.1);
 }
+
 
 /* Color Picker for Commands */
 .ct-color-picker {

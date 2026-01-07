@@ -18,22 +18,34 @@ export default function CommandTowerPage() {
     const [showAddCommandModal, setShowAddCommandModal] = useState(false);
     const [showAddStageModal, setShowAddStageModal] = useState(false);
     const [editingCommand, setEditingCommand] = useState(null); // { stageKey, command }
+    const [editingStage, setEditingStage] = useState(null); // { key, label }
 
     // --- State Management ---
 
     // Stages: Custom + Default - 每个指令库有独特的清新颜色
     const defaultStages = [
-        { key: 'inspiration', icon: 'Lightbulb', label: 'modules.backlog.sections.inspiration', color: '#3ECFB2', defaultCmdColor: '#3ECFB2' },  // 薄荷绿
-        { key: 'pending', icon: 'Rocket', label: 'modules.backlog.sections.pending', color: '#FFB5C5', defaultCmdColor: '#FFB5C5' },           // 樱花粉
-        { key: 'early', icon: 'Sprout', label: 'modules.workshop.stages.early', color: '#87CEEB', defaultCmdColor: '#87CEEB' },                // 天空蓝
-        { key: 'growth', icon: 'TrendingUp', label: 'modules.workshop.stages.growth', color: '#FFEAA7', defaultCmdColor: '#FFEAA7' },          // 柠檬黄
-        { key: 'advanced', icon: 'Award', label: 'modules.workshop.stages.advanced', color: '#C3AED6', defaultCmdColor: '#C3AED6' },           // 薰衣草紫
-        { key: 'commercial', icon: 'DollarSign', label: 'modules.workshop.stages.commercial', color: '#FFCCBC', defaultCmdColor: '#FFCCBC' }   // 蜜桃橙
+        { key: 'inspiration', icon: 'Lightbulb', label: 'modules.backlog.sections.inspiration', color: 'linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)', defaultCmdColor: '#d4fc79' },  // 初春绿
+        { key: 'pending', icon: 'Rocket', label: 'modules.backlog.sections.pending', color: 'linear-gradient(120deg, #f093fb 0%, #f5576c 100%)', defaultCmdColor: '#f093fb' },           // 霓虹粉
+        { key: 'early', icon: 'Sprout', label: 'modules.workshop.stages.early', color: 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)', defaultCmdColor: '#84fab0' },                // 薄荷海
+        { key: 'growth', icon: 'TrendingUp', label: 'modules.workshop.stages.growth', color: 'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)', defaultCmdColor: '#fccb90' },          // 晚霞紫
+        { key: 'advanced', icon: 'Award', label: 'modules.workshop.stages.advanced', color: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)', defaultCmdColor: '#e0c3fc' },           // 梦幻紫
+        { key: 'commercial', icon: 'DollarSign', label: 'modules.workshop.stages.commercial', color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)', defaultCmdColor: '#a8edea' }   // 马卡龙
     ];
 
     const [stages, setStages] = useState(() => {
         const saved = localStorage.getItem('commandTowerStages');
-        return saved ? JSON.parse(saved) : defaultStages;
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            // Migrate old solid colors to new gradients if needed (simple check)
+            if (parsed.length > 0 && !parsed[0].color.includes('gradient')) {
+                return defaultStages.map(ds => {
+                    const existing = parsed.find(p => p.key === ds.key);
+                    return existing ? { ...existing, color: ds.color } : ds;
+                }).concat(parsed.filter(p => !defaultStages.find(ds => ds.key === p.key)));
+            }
+            return parsed;
+        }
+        return defaultStages;
     });
 
     // Commands
@@ -57,11 +69,13 @@ export default function CommandTowerPage() {
     // 获取指令库的默认颜色
     const getStageDefaultColor = (stageKey) => {
         const stage = stages.find(s => s.key === stageKey);
-        return stage?.defaultCmdColor || stage?.color || freshColors[0].color;
+        // 如果是渐变色，取一个主色调用于command
+        if (stage?.defaultCmdColor) return stage.defaultCmdColor;
+        return freshColors[0].color;
     };
 
     const [newCommand, setNewCommand] = useState({ title: '', content: '', stage: '', color: '' });
-    const [newStage, setNewStage] = useState({ key: '', label: '', icon: 'Layers', color: '#6366f1' });
+    const [newStage, setNewStage] = useState({ key: '', label: '', icon: 'Layers', color: defaultStages[0].color });
     const [searchQuery, setSearchQuery] = useState('');
 
     // --- Persistence ---
@@ -94,7 +108,7 @@ export default function CommandTowerPage() {
 
     // --- Helpers ---
     const getIcon = (iconName, color) => {
-        const props = { size: 20, style: { color } };
+        const props = { size: 20, style: { color: 'var(--text-primary)' } }; // Icon within card usually matches text or specific accent
         const icons = { Lightbulb, Rocket, Sprout, TrendingUp, Award, DollarSign, Layers };
         const IconComponent = icons[iconName] || Layers;
         return <IconComponent {...props} />;
@@ -182,7 +196,7 @@ export default function CommandTowerPage() {
 
         setStages(prev => [...prev, newStageObj]);
         setCommands(prev => ({ ...prev, [key]: [] }));
-        setNewStage({ key: '', label: '', icon: 'Layers', color: '#6366f1' });
+        setNewStage({ key: '', label: '', icon: 'Layers', color: defaultStages[0].color });
         setShowAddStageModal(false);
         Logger.info('CommandTower', 'Added new stage:', newStageObj);
     };
@@ -197,6 +211,16 @@ export default function CommandTowerPage() {
                 return newCmds;
             });
         }
+    };
+
+    const handleStageRename = (stageKey, newLabel) => {
+        if (!newLabel.trim()) return;
+        setStages(prev => prev.map(s =>
+            s.key === stageKey
+                ? { ...s, customLabel: newLabel } // Store custom name in customLabel
+                : s
+        ));
+        setEditingStage(null);
     };
 
     // --- Render ---
@@ -228,16 +252,39 @@ export default function CommandTowerPage() {
 
                     if (searchQuery && filteredCommands.length === 0) return null;
 
+                    // Display Label: Prefer customLabel, falling back to translation key
+                    const displayLabel = stage.customLabel || (stage.isCustom ? stage.label : t(stage.label));
+
                     return (
-                        <div key={stage.key} className="ct-stage-card" style={{ '--stage-color': stage.color }}>
+                        <div key={stage.key} className="ct-stage-card" style={{ background: stage.color }}>
                             <div className="ct-stage-header">
                                 <div className="ct-stage-info">
                                     <div className="ct-stage-icon">
                                         {getIcon(stage.icon, stage.color)}
                                     </div>
-                                    <span className="ct-stage-title">
-                                        {stage.isCustom ? stage.label : t(stage.label)}
-                                    </span>
+
+                                    {editingStage?.key === stage.key ? (
+                                        <input
+                                            autoFocus
+                                            className="ct-stage-title-input"
+                                            value={editingStage.label}
+                                            onChange={(e) => setEditingStage({ ...editingStage, label: e.target.value })}
+                                            onBlur={() => handleStageRename(stage.key, editingStage.label)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') handleStageRename(stage.key, editingStage.label);
+                                                if (e.key === 'Escape') setEditingStage(null);
+                                            }}
+                                        />
+                                    ) : (
+                                        <span
+                                            className="ct-stage-title"
+                                            onClick={() => setEditingStage({ key: stage.key, label: displayLabel })}
+                                            title="Click to rename"
+                                        >
+                                            {displayLabel}
+                                        </span>
+                                    )}
+
                                     <span className="ct-stage-count">{filteredCommands.length}</span>
                                 </div>
                                 <div className="ct-stage-actions">
@@ -273,7 +320,7 @@ export default function CommandTowerPage() {
                                                 className="ct-command-item"
                                                 style={{
                                                     '--cmd-color': cmdColor,
-                                                    backgroundColor: cmdColor
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.9)' // Cards inside are white-ish for contrast
                                                 }}
                                             >
                                                 <div
@@ -334,7 +381,8 @@ export default function CommandTowerPage() {
                         alignItems: 'center',
                         cursor: 'pointer',
                         opacity: 0.7,
-                        background: 'transparent'
+                        background: 'transparent',
+                        borderColor: 'var(--border-subtle)'
                     }}
                     onClick={() => setShowAddStageModal(true)}
                 >
@@ -402,7 +450,7 @@ export default function CommandTowerPage() {
                         className="project-input"
                     >
                         {stages.map(s => (
-                            <option key={s.key} value={s.key}>{s.isCustom ? s.label : t(s.label)}</option>
+                            <option key={s.key} value={s.key}>{s.customLabel || (s.isCustom ? s.label : t(s.label))}</option>
                         ))}
                     </select>
                 </div>
@@ -448,19 +496,20 @@ export default function CommandTowerPage() {
                 <div className="form-group">
                     <label>{t('common.color') || "Color"}</label>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                        {['#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'].map(c => (
+                        {defaultStages.map(ds => (
                             <div
-                                key={c}
-                                onClick={() => setNewStage({ ...newStage, color: c })}
+                                key={ds.key}
+                                onClick={() => setNewStage({ ...newStage, color: ds.color })}
                                 style={{
-                                    width: '24px',
-                                    height: '24px',
+                                    width: '32px',
+                                    height: '32px',
                                     borderRadius: '50%',
-                                    backgroundColor: c,
+                                    background: ds.color,
                                     cursor: 'pointer',
-                                    border: newStage.color === c ? '2px solid var(--text-primary)' : '2px solid transparent',
-                                    boxShadow: newStage.color === c ? '0 0 0 2px var(--bg-card)' : 'none'
+                                    border: newStage.color === ds.color ? '2px solid var(--text-primary)' : '2px solid transparent',
+                                    boxShadow: newStage.color === ds.color ? '0 0 0 2px var(--bg-card)' : 'none'
                                 }}
+                                title={ds.key}
                             />
                         ))}
                     </div>
