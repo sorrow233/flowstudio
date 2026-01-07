@@ -123,6 +123,8 @@ const PendingModule = () => {
             { color: 'text-emerald-600', scale: 1.1, icon: TreeDeciduous, label: 'Mature Tree' },
             { color: 'text-emerald-700', scale: 1.2, icon: TreePine, label: 'Ancient' },
         ];
+        // Fix: Use the last stage (Ancient) for any stage beyond the defined list (e.g., Stage 6 Advanced)
+        if (stage > stages.length) return stages[stages.length - 1];
         return stages[stage - 1] || stages[0];
     };
 

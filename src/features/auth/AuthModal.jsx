@@ -63,6 +63,54 @@ const AuthModal = ({ isOpen, onClose }) => {
 
     if (!isOpen) return null;
 
+    if (user) {
+        return (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                    onClick={onClose}
+                />
+                <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                    className="relative bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-sm text-center p-8"
+                >
+                    <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors">
+                        <X size={20} className="text-gray-400" />
+                    </button>
+
+                    <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span className="text-2xl font-bold">{user.email?.[0]?.toUpperCase()}</span>
+                    </div>
+
+                    <h2 className="text-xl font-medium text-gray-900 mb-1">Welcome Back</h2>
+                    <p className="text-sm text-gray-500 mb-8">{user.email}</p>
+
+                    <button
+                        onClick={() => {
+                            useAuth().logout();
+                            onClose();
+                        }}
+                        className="w-full py-3 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl font-medium transition-colors"
+                    >
+                        Sign Out
+                    </button>
+
+                    <button
+                        onClick={onClose}
+                        className="w-full py-3 mt-3 text-gray-400 hover:text-gray-600 font-medium transition-colors"
+                    >
+                        Close
+                    </button>
+                </motion.div>
+            </div>
+        )
+    }
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div
