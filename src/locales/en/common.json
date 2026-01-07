@@ -93,7 +93,16 @@
         "delete_permanent_warning": "This action cannot be undone.",
         "error_title": "Something went wrong",
         "try_again": "Try Again",
-        "offline_mode": "You are offline. Changes will be saved locally."
+        "offline_mode": "You are offline. Changes will be saved locally.",
+        "confirm_move": "Confirm Move",
+        "move_to_next_stage": "Are you sure you want to move this project to the next stage?",
+        "confirm": "Confirm",
+        "search_projects": "Search projects...",
+        "change_background": "Change Background",
+        "preset_colors": "Preset Colors",
+        "custom_image": "Custom Image",
+        "upload_image": "Upload Image",
+        "remove_image": "Remove Image"
     },
     "landing": {
         "hero_title": "Your AI-Powered Personal Software Arsenal",

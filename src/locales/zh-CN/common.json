@@ -98,7 +98,10 @@
         "delete_permanent_warning": "此操作无法撤销。",
         "error_title": "出错了",
         "try_again": "重试",
-        "offline_mode": "您已离线。更改将保存在本地。"
+        "offline_mode": "您已离线。更改将保存在本地。",
+        "confirm_move": "确认推进",
+        "move_to_next_stage": "确定要将此项目推进到下一阶段吗？",
+        "confirm": "确认"
     },
     "landing": {
         "hero_title": "您的 AI 驱动个人软件军火库",

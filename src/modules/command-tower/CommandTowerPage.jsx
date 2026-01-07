@@ -20,14 +20,14 @@ export default function CommandTowerPage() {
 
     // --- State Management ---
 
-    // Stages: Custom + Default
+    // Stages: Custom + Default - 每个指令库有独特的清新颜色
     const defaultStages = [
-        { key: 'inspiration', icon: 'Lightbulb', label: 'modules.backlog.sections.inspiration', color: 'var(--color-accent-matcha)' },
-        { key: 'pending', icon: 'Rocket', label: 'modules.backlog.sections.pending', color: 'var(--color-accent-sakura)' },
-        { key: 'early', icon: 'Sprout', label: 'modules.workshop.stages.early', color: 'var(--color-accent-matcha)' },
-        { key: 'growth', icon: 'TrendingUp', label: 'modules.workshop.stages.growth', color: 'var(--color-accent-sora)' },
-        { key: 'advanced', icon: 'Award', label: 'modules.workshop.stages.advanced', color: '#9c27b0' },
-        { key: 'commercial', icon: 'DollarSign', label: 'modules.workshop.stages.commercial', color: 'var(--color-accent-sakura)' }
+        { key: 'inspiration', icon: 'Lightbulb', label: 'modules.backlog.sections.inspiration', color: '#3ECFB2', defaultCmdColor: '#3ECFB2' },  // 薄荷绿
+        { key: 'pending', icon: 'Rocket', label: 'modules.backlog.sections.pending', color: '#FFB5C5', defaultCmdColor: '#FFB5C5' },           // 樱花粉
+        { key: 'early', icon: 'Sprout', label: 'modules.workshop.stages.early', color: '#87CEEB', defaultCmdColor: '#87CEEB' },                // 天空蓝
+        { key: 'growth', icon: 'TrendingUp', label: 'modules.workshop.stages.growth', color: '#FFEAA7', defaultCmdColor: '#FFEAA7' },          // 柠檬黄
+        { key: 'advanced', icon: 'Award', label: 'modules.workshop.stages.advanced', color: '#C3AED6', defaultCmdColor: '#C3AED6' },           // 薰衣草紫
+        { key: 'commercial', icon: 'DollarSign', label: 'modules.workshop.stages.commercial', color: '#FFCCBC', defaultCmdColor: '#FFCCBC' }   // 蜜桃橙
     ];
 
     const [stages, setStages] = useState(() => {
@@ -53,7 +53,13 @@ export default function CommandTowerPage() {
         { color: '#F8BBD9', name: '玫瑰粉' },   // Rose Pink
     ];
 
-    const [newCommand, setNewCommand] = useState({ title: '', content: '', stage: '', color: freshColors[0].color });
+    // 获取指令库的默认颜色
+    const getStageDefaultColor = (stageKey) => {
+        const stage = stages.find(s => s.key === stageKey);
+        return stage?.defaultCmdColor || stage?.color || freshColors[0].color;
+    };
+
+    const [newCommand, setNewCommand] = useState({ title: '', content: '', stage: '', color: '' });
     const [newStage, setNewStage] = useState({ key: '', label: '', icon: 'Layers', color: '#6366f1' });
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -116,6 +122,8 @@ export default function CommandTowerPage() {
     const handleAddCommand = () => {
         if (!newCommand.title.trim() || !newCommand.content.trim() || !newCommand.stage) return;
         const newId = Date.now();
+        // 使用用户选择的颜色，如果没选则使用指令库默认颜色
+        const commandColor = newCommand.color || getStageDefaultColor(newCommand.stage);
 
         setCommands(prev => ({
             ...prev,
@@ -123,7 +131,7 @@ export default function CommandTowerPage() {
                 id: newId,
                 title: newCommand.title,
                 content: newCommand.content,
-                color: newCommand.color || freshColors[0].color
+                color: commandColor
             }]
         }));
 
@@ -237,7 +245,7 @@ export default function CommandTowerPage() {
                                     <button
                                         className="ct-stage-action-btn"
                                         onClick={() => {
-                                            setNewCommand(prev => ({ ...prev, stage: stage.key }));
+                                            setNewCommand({ title: '', content: '', stage: stage.key, color: getStageDefaultColor(stage.key) });
                                             setShowAddCommandModal(true);
                                         }}
                                         title={t('common.add')}
@@ -249,53 +257,56 @@ export default function CommandTowerPage() {
 
                             <div className="ct-command-list">
                                 {filteredCommands.length > 0 ? (
-                                    filteredCommands.map(cmd => (
-                                        <div
-                                            key={cmd.id}
-                                            className="ct-command-item"
-                                            style={{
-                                                '--cmd-color': cmd.color || freshColors[0].color,
-                                                backgroundColor: cmd.color || freshColors[0].color
-                                            }}
-                                        >
+                                    filteredCommands.map(cmd => {
+                                        const cmdColor = cmd.color || getStageDefaultColor(stage.key);
+                                        return (
                                             <div
-                                                className="ct-command-main"
-                                                onClick={() => copyToClipboard(cmd.content, cmd.id)}
-                                                title={t('common.click_to_copy')}
+                                                key={cmd.id}
+                                                className="ct-command-item"
+                                                style={{
+                                                    '--cmd-color': cmdColor,
+                                                    backgroundColor: cmdColor
+                                                }}
                                             >
-                                                <span className="ct-command-title">{cmd.title}</span>
-                                                <span className="ct-copy-indicator">
-                                                    {copiedId === cmd.id ? (
-                                                        <Check size={14} color="#4ade80" />
-                                                    ) : (
-                                                        <Copy size={14} color="#64748b" />
-                                                    )}
-                                                </span>
-                                            </div>
-                                            <div className="ct-command-actions">
-                                                <button
-                                                    className="ct-action-btn ct-edit-btn"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleEditCommand(stage.key, cmd);
-                                                    }}
-                                                    title={t('common.edit')}
+                                                <div
+                                                    className="ct-command-main"
+                                                    onClick={() => copyToClipboard(cmd.content, cmd.id)}
+                                                    title={t('common.click_to_copy')}
                                                 >
-                                                    <Edit2 size={12} />
-                                                </button>
-                                                <button
-                                                    className="ct-action-btn ct-delete-btn"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDeleteCommand(stage.key, cmd.id);
-                                                    }}
-                                                    title={t('common.delete')}
-                                                >
-                                                    <Trash2 size={12} />
-                                                </button>
+                                                    <span className="ct-command-title">{cmd.title}</span>
+                                                    <span className="ct-copy-indicator">
+                                                        {copiedId === cmd.id ? (
+                                                            <Check size={14} color="#4ade80" />
+                                                        ) : (
+                                                            <Copy size={14} color="#64748b" />
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <div className="ct-command-actions">
+                                                    <button
+                                                        className="ct-action-btn ct-edit-btn"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleEditCommand(stage.key, cmd);
+                                                        }}
+                                                        title={t('common.edit')}
+                                                    >
+                                                        <Edit2 size={12} />
+                                                    </button>
+                                                    <button
+                                                        className="ct-action-btn ct-delete-btn"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteCommand(stage.key, cmd.id);
+                                                        }}
+                                                        title={t('common.delete')}
+                                                    >
+                                                        <Trash2 size={12} />
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        );
+                                    })
                                 ) : (
                                     <div className="ct-empty-stage">
                                         {searchQuery ? t('common.no_results') : t('common.empty_stage_hint') || "No commands yet"}
@@ -334,7 +345,8 @@ export default function CommandTowerPage() {
 
             {/* Floating Action Button (Alternative Add) */}
             <button className="ct-fab" onClick={() => {
-                setNewCommand({ title: '', content: '', stage: stages[0]?.key || '' });
+                const firstStageKey = stages[0]?.key || '';
+                setNewCommand({ title: '', content: '', stage: firstStageKey, color: getStageDefaultColor(firstStageKey) });
                 setShowAddCommandModal(true);
             }}>
                 <Plus size={24} />
