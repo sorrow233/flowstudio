@@ -415,6 +415,7 @@ const PrimaryDevModule = () => {
                                         setNewTaskInput={setNewTaskInput}
                                         newTaskCategory={newTaskCategory}
                                         setNewTaskCategory={setNewTaskCategory}
+                                        onImportCommand={() => setCommandModalOpen(true)}
                                         onScroll={(e) => {
                                             const scrollTop = e.currentTarget.scrollTop;
                                             if (scrollTop > 10 && !isHeaderCollapsed) {

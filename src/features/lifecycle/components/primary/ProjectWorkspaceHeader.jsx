@@ -149,15 +149,31 @@ const ProjectWorkspaceHeader = ({
                             </div>
 
                             {/* Floating Action Button for Command */}
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={onImportCommand}
-                                className="hidden md:flex items-center gap-3 px-6 py-4 bg-white text-gray-900 rounded-2xl shadow-2xl hover:shadow-white/20 transition-all font-medium"
-                            >
-                                <Terminal size={20} />
-                                <span>Import Command</span>
-                            </motion.button>
+                            <div className="flex gap-3">
+                                {/* Vow / Origin Button (Only if exists) */}
+                                {project.foundingReason && (
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => alert(`初心誓言 (The Vow):\n\n${project.foundingReason}`)} // Simple interaction for now, can be a modal later
+                                        className="flex items-center gap-2 px-4 py-3 bg-white/10 text-white rounded-2xl backdrop-blur-md hover:bg-white/20 transition-all border border-white/5"
+                                        title="View Founding Vow"
+                                    >
+                                        <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)] animate-pulse" />
+                                        <span className="text-xs font-medium tracking-widest uppercase hidden md:inline">The Vow</span>
+                                    </motion.button>
+                                )}
+
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={onImportCommand}
+                                    className="flex items-center gap-3 px-4 md:px-6 py-4 bg-white text-gray-900 rounded-2xl shadow-2xl hover:shadow-white/20 transition-all font-medium"
+                                >
+                                    <Terminal size={20} />
+                                    <span className="hidden md:inline">Import Command</span>
+                                </motion.button>
+                            </div>
                         </div>
                     )}
                 </div>

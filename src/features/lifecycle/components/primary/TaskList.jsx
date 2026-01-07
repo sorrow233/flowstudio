@@ -179,7 +179,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
     );
 };
 
-const TaskList = ({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask, onUpdateTask, newTaskInput, setNewTaskInput, newTaskCategory, setNewTaskCategory, onScroll, onReorder }) => {
+const TaskList = ({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask, onUpdateTask, newTaskInput, setNewTaskInput, newTaskCategory, setNewTaskCategory, onScroll, onReorder, onImportCommand }) => {
     const [copiedTaskId, setCopiedTaskId] = useState(null);
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const [editingTaskId, setEditingTaskId] = useState(null);
@@ -272,6 +272,13 @@ const TaskList = ({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask
                                 </div>
                                 <h4 className="text-xl font-light text-gray-900 mb-2">{emptyState?.title}</h4>
                                 <p className="text-sm text-gray-400 max-w-xs leading-relaxed">{emptyState?.desc}</p>
+                                <button
+                                    onClick={onImportCommand}
+                                    className="mt-6 flex items-center gap-2 px-5 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all font-medium text-sm shadow-sm hover:shadow-md"
+                                >
+                                    <Terminal size={14} />
+                                    <span>Import Command</span>
+                                </button>
                             </motion.div>
                         )}
                     </AnimatePresence>
