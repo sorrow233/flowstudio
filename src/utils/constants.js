@@ -10,55 +10,60 @@ export const DEV_STAGES = [
     {
         id: 1,
         label: 'Skeleton',
-        title: 'Architectural Foundation',
-        desc: 'Establish the core routing, layout structure, and component hierarchy.',
+        title: 'Architectural Blueprint',
+        desc: 'Define the structural integrity, routing logic, and component hierarchy.',
     },
     {
         id: 2,
         label: 'Functionality',
-        title: 'Core Mechanics',
-        desc: 'Implement primary business logic, data flows, and interactive elements.',
+        title: 'Core Mechanics & Logic',
+        desc: 'Implement primary business logic, data flows, and state management.',
     },
     {
         id: 3,
         label: 'Modules',
-        title: 'Ecosystem Expansion',
-        desc: 'Integrate authentication, database bindings, and external services.',
+        title: 'System Integration',
+        desc: 'Connect authentication, database bindings, and external API services.',
     },
     {
         id: 4,
         label: 'Optimization',
-        title: 'Polish & Performance',
-        desc: 'Refine UI/UX, optimize rendering, and resolve edge cases.',
+        title: 'Performance & Polish',
+        desc: 'Refine UI/UX transitions, optimize re-renders, and handle edge cases.',
     },
     {
         id: 5,
         label: 'Completion',
-        title: 'Golden Master',
-        desc: 'Final verification, production readiness, and launch.',
+        title: 'Production Readiness',
+        desc: 'Final QA, build verification, and deployment to production.',
     }
 ];
 
 export const STAGE_EMPTY_STATES = {
     1: {
-        title: 'Lay the Foundation',
-        desc: 'Every great app starts with a solid skeleton. Define your routes and basic layout.'
+        title: 'Architect\'s Blank Canvas',
+        desc: 'Begin by defining the core routes and layout components. A strong foundation prevents future debt.',
+        tips: ['Create the main AppRouter.', 'Set up the global Layout component.', 'Define the folder structure in /src.']
     },
     2: {
-        title: 'Breathe Life into It',
-        desc: 'Make it move. Implement the core interactions and logic.'
+        title: 'Engine Not Started',
+        desc: 'The structure is ready. Now, breathe life into it with logic and interactions.',
+        tips: ['Connect the navigation links.', 'Implement local state for forms.', 'Mock API calls for UI testing.']
     },
     3: {
-        title: 'Connect the Dots',
-        desc: 'It is time to expand. Add login, database connections, and sync features.'
+        title: 'Systems Offline',
+        desc: 'It is time to connect the isolated modules into a cohesive ecosystem.',
+        tips: ['Integrate Supabase/Firebase Auth.', 'Set up React Query for data fetching.', 'Connect third-party webhooks.']
     },
     4: {
-        title: 'Smooth the Edges',
-        desc: 'Perfection is in the details. Fix bugs, improve animations, and polish.'
+        title: 'Rough Around the Edges',
+        desc: 'The app works, but it needs that "premium" feel. Focus on details.',
+        tips: ['Add Framer Motion transitions.', 'Optimize image loading (lazy load).', 'Check for unnecessary re-renders.']
     },
     5: {
-        title: 'Ready for Liftoff',
-        desc: 'The final countdown. Verify everything is go for launch.'
+        title: 'Pre-Flight Checklist',
+        desc: 'You are almost there. Ensure systems are go for launch.',
+        tips: ['Run the full build command.', 'Check browser console for warnings.', 'Verify environment variables.']
     }
 };
 

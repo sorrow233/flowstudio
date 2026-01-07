@@ -1,5 +1,6 @@
 import React from 'react';
 import { Layers, MonitorPlay, Container, Sparkles, Flag, Check } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { DEV_STAGES } from '../../../../utils/constants';
 
 const STAGE_ICONS = {
@@ -13,15 +14,28 @@ const STAGE_ICONS = {
 const StageNavigation = ({ activeStage, currentStage, onStageSelect }) => {
     return (
         <div className="w-full md:w-80 bg-white border-r border-gray-100 p-8 overflow-y-auto shrink-0 custom-scrollbar relative">
-            <h3 className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-8 px-2">Development Cycle</h3>
+            <h3 className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-8 px-2">System Status</h3>
 
             <div className="space-y-0 relative">
                 {/* Circuit Line Background */}
-                <div className="absolute left-[27px] top-6 bottom-6 w-0.5 bg-gray-100/80 z-0">
-                    {/* Animated Progress Line */}
+                <div className="absolute left-[27px] top-6 bottom-6 w-0.5 bg-gray-100/80 z-0 overflow-hidden rounded-full">
+                    {/* Active Progress Line */}
                     <div
                         className="w-full bg-emerald-500/30 transition-all duration-700 ease-in-out absolute top-0"
                         style={{ height: `${((currentStage - 1) / 4) * 100}%` }}
+                    />
+
+                    {/* "Data Packet" Animation */}
+                    <motion.div
+                        className="absolute top-0 left-0 w-full bg-emerald-400 h-10 blur-[2px]"
+                        animate={{ top: ['0%', '100%'] }}
+                        transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: "linear",
+                            repeatDelay: 1
+                        }}
+                        style={{ opacity: 0.5 }}
                     />
                 </div>
 
@@ -51,6 +65,14 @@ const StageNavigation = ({ activeStage, currentStage, onStageSelect }) => {
                                             : 'bg-white border-2 border-gray-100 text-gray-300 group-hover:border-gray-300 group-hover:text-gray-400'
                                 }
                             `}>
+                                {/* Pulse Rings for Active State */}
+                                {isActive && (
+                                    <>
+                                        <span className="absolute inset-0 rounded-full border border-white/30 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]" />
+                                        <span className="absolute -inset-1 rounded-full border border-emerald-500/20 animate-pulse" />
+                                    </>
+                                )}
+
                                 {isCompleted ? (
                                     <Check size={14} strokeWidth={3} />
                                 ) : (
@@ -69,7 +91,10 @@ const StageNavigation = ({ activeStage, currentStage, onStageSelect }) => {
 
                             {/* Active Indicator Arrow */}
                             {isActive && (
-                                <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                                <motion.div
+                                    layoutId="active-dot"
+                                    className="absolute right-4 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                                />
                             )}
                         </div>
                     );

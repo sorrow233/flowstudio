@@ -116,6 +116,28 @@ const PrimaryDevModule = () => {
         handleUpdateProject(projectId, { tasks: updatedTasks });
     };
 
+    const handleUpdateTask = (projectId, taskId, updates) => {
+        const project = projects.find(p => p.id === projectId);
+        if (!project) return;
+        const updatedTasks = project.tasks.map(t =>
+            t.id === taskId ? { ...t, ...updates } : t
+        );
+        handleUpdateProject(projectId, { tasks: updatedTasks });
+    };
+
+    const handleReorderTasks = (newOrder, stageId) => {
+        // newOrder only contains tasks for the specific stage.
+        // We need to merge this back into the main task list while preserving other stages' tasks.
+
+        const project = projects.find(p => p.id === selectedProject.id);
+        if (!project) return;
+
+        const otherTasks = project.tasks.filter(t => (t.stage || 1) !== stageId);
+        const mergedTasks = [...otherTasks, ...newOrder];
+
+        handleUpdateProject(selectedProject.id, { tasks: mergedTasks });
+    };
+
     // --- Command Import Handler ---
     const handleLinkCommand = (command, tag = null) => {
         const project = projects.find(p => p.id === selectedProject.id);
@@ -278,6 +300,8 @@ const PrimaryDevModule = () => {
                                         onToggle={handleToggleTask}
                                         onDelete={handleDeleteTask}
                                         onAddTask={handleAddTask}
+                                        onUpdateTask={handleUpdateTask}
+                                        onReorder={handleReorderTasks}
                                         newTaskInput={newTaskInput}
                                         setNewTaskInput={setNewTaskInput}
                                         newTaskCategory={newTaskCategory}
