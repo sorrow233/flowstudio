@@ -175,7 +175,7 @@ export default function CommandTowerPage() {
     };
 
     const handleSaveEdit = () => {
-        if (!editingCommand || !editingCommand.command.title?.trim()) return;
+        if (!editingCommand || !editingCommand.command?.title?.trim()) return;
         setCommands(prev => ({
             ...prev,
             [editingCommand.stageKey]: prev[editingCommand.stageKey].map(cmd =>
