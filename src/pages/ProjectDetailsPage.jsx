@@ -12,8 +12,7 @@ import CommandSelectorModal from '@/components/CommandSelectorModal';
 import { useCommandTower } from '@/features/command-tower/hooks/useCommandTower';
 import CommandItem from '@/modules/command-tower/components/CommandItem';
 import { Logger } from '@/utils/logger';
-import ProjectPhaseTracker from '@/features/projects/components/ProjectPhaseTracker';
-import StageDashboard from '@/features/projects/components/StageDashboard';
+import PhaseNavigator from '@/features/phase-navigator/PhaseNavigator';
 import './ProjectDetailsPage.css';
 
 export default function ProjectDetailsPage() {
@@ -241,12 +240,9 @@ export default function ProjectDetailsPage() {
                 {/* Right Column: Relations & Content */}
                 <main className="details-main">
 
-                    {/* Phase Tracker */}
-                    <ProjectPhaseTracker currentStage={project.stage} />
-
-                    {/* Stage Dashboard */}
+                    {/* Phase Navigator */}
                     <section className="details-section animate-slide-up">
-                        <StageDashboard
+                        <PhaseNavigator
                             project={project}
                             stageCommands={suggestedCommands}
                             onToggleCompletion={toggleCommandCompletion}
