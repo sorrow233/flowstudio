@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Network, Sparkles, Activity, Zap, CheckCircle2, X, Plus, Box, AlignJustify, Grid } from 'lucide-react';
+import { Network, Sparkles, Activity, Zap, CheckCircle2, X, Plus, Box, AlignJustify, Grid, LayoutGrid, List } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import ModuleGrid from './ModuleGrid';
 import ModuleList from './ModuleList';
