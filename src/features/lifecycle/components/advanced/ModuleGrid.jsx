@@ -14,10 +14,12 @@ const ModuleGrid = ({ modules, onModuleClick }) => {
 
     if (Object.keys(groupedGroups).length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 text-gray-300">
-                <Layers size={48} strokeWidth={1} />
-                <p className="mt-4 font-light">No modules defined.</p>
-                <p className="text-sm">Import an architecture blueprint to begin.</p>
+            <div className="flex flex-col items-center justify-center py-20 text-gray-300 border-2 border-dashed border-gray-100 rounded-[2rem]">
+                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                    <Layers size={32} strokeWidth={1} className="text-gray-400" />
+                </div>
+                <p className="mt-2 font-light text-lg text-gray-900">System Architecture Empty</p>
+                <p className="text-sm text-gray-400 max-w-sm text-center">Import an AI blueprint or manually add modules to begin engineering.</p>
             </div>
         );
     }

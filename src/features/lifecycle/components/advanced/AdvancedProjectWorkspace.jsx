@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Network, Sparkles, Activity, Zap, CheckCircle2, X } from 'lucide-react';
+import { Network, Sparkles, Activity, Zap, CheckCircle2, X, Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import ModuleGrid from './ModuleGrid';
 import ArchitectureImportModal from './ArchitectureImportModal';
@@ -32,10 +32,31 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
 
     const handleUpdateModule = (moduleId, updates) => {
         const currentModules = project.modules || [];
-        const updatedModules = currentModules.map(m =>
-            m.id === moduleId ? { ...m, ...updates } : m
-        );
+        const exists = currentModules.find(m => m.id === moduleId);
+
+        let updatedModules;
+        if (exists) {
+            updatedModules = currentModules.map(m =>
+                m.id === moduleId ? { ...m, ...updates } : m
+            );
+        } else {
+            // Create new
+            updatedModules = [...currentModules, { id: moduleId, ...updates }];
+        }
         updateProject(project.id, { modules: updatedModules });
+    };
+
+    const handleCreateModule = () => {
+        const newModule = {
+            id: uuidv4(),
+            name: 'New Module',
+            description: '',
+            category: 'feature',
+            stage: 1,
+            progress: 0,
+            tasks: []
+        };
+        setEditingModule(newModule);
     };
 
     const handleDeleteModule = (moduleId) => {
@@ -75,14 +96,8 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-12">
 
                     {/* Header & Dashboard */}
-                    <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10 mb-16 relative">
-                        {/* Close Button */}
-                        <button
-                            onClick={onClose}
-                            className="absolute -top-4 -right-4 md:static md:order-last p-3 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-900"
-                        >
-                            <X size={24} />
-                        </button>
+                    <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10 mb-16">
+                        {/* Close Button MOVED OUT to absolute in container */}
 
                         <div className="flex-1">
                             <div className="flex items-center gap-3 text-emerald-600 mb-2">
@@ -128,6 +143,15 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
                         </div>
 
                         <div className="flex gap-3 mt-6 xl:mt-0">
+                            <button
+                                onClick={handleCreateModule}
+                                className="group flex items-center gap-2 px-6 py-4 bg-white border border-gray-200 text-gray-900 rounded-[2rem] hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm hover:shadow-md"
+                            >
+                                <div className="p-1 bg-gray-100 rounded-full group-hover:bg-gray-200 transition-colors">
+                                    <Plus size={16} strokeWidth={2} />
+                                </div>
+                                <span className="font-medium tracking-wide text-sm">Add Module</span>
+                            </button>
                             <button
                                 onClick={() => setIsImportOpen(true)}
                                 className="group flex items-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-[2rem] hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
