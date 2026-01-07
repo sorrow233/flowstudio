@@ -6,7 +6,7 @@ import {
     MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command, Check, Rocket, Globe, Pencil, Save, Image as ImageIcon,
     Tag
 } from 'lucide-react';
-import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
+import { STORAGE_KEYS, DEV_STAGES, COMMAND_CATEGORIES } from '../../utils/constants';
 
 const STAGE_ICONS = {
     1: Layers,
@@ -529,12 +529,29 @@ const PrimaryDevModule = () => {
 
                                                 return (
                                                     <motion.div
+                                                        layout // Animate layout changes when items are deleted
                                                         initial={{ opacity: 0, y: 10 }}
-                                                        animate={{ opacity: 1, y: 0 }}
+                                                        animate={{ opacity: 1, y: 0, x: 0 }}
+                                                        exit={{ opacity: 0, x: 200, transition: { duration: 0.2 } }}
                                                         key={task.id}
+
+                                                        // Drag to Delete Props
+                                                        drag="x"
+                                                        dragConstraints={{ left: 0, right: 0 }} // Elastic resistance
+                                                        dragElastic={{ right: 0.5, left: 0.05 }} // Allow dragging right, resist left
+                                                        onDragEnd={(e, info) => {
+                                                            const swipeThreshold = 100; // px
+                                                            const velocityThreshold = 500; // px/s
+
+                                                            // If swiped fast enough OR far enough to the right
+                                                            if (info.offset.x > swipeThreshold || info.velocity.x > velocityThreshold) {
+                                                                handleDeleteTask(selectedProject.id, task.id);
+                                                            }
+                                                        }}
+                                                        whileDrag={{ scale: 1.02, cursor: 'grabbing', zIndex: 50 }}
                                                         onClick={() => toggleTask(selectedProject.id, task.id)}
                                                         className={`
-                                                            group flex items-center gap-5 p-5 rounded-2xl transition-all cursor-pointer border relative overflow-hidden
+                                                            group flex items-center gap-5 p-5 rounded-2xl transition-all cursor-pointer border relative overflow-hidden select-none touch-pan-y
                                                             ${isMandatory && !task.done
                                                                 ? 'bg-white border-red-100 shadow-sm shadow-red-100 hover:border-red-200'
                                                                 : isMandatory && task.done
@@ -544,7 +561,16 @@ const PrimaryDevModule = () => {
                                                                         : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5'
                                                             }
                                                         `}
+                                                        style={{ x: 0 }} // Ensure it starts at x:0
                                                     >
+                                                        {/* Visual Indicator for "Slide to Delete" (Behind content, visible when dragging) */}
+                                                        <motion.div
+                                                            className="absolute inset-y-0 left-0 bg-red-500 -z-10 flex items-center pl-5 text-white font-bold uppercase tracking-wider text-xs pointer-events-none"
+                                                            style={{ width: '100%', x: '-100%' }} // Hidden by default, conceptually should be revealed but simpler to just let the card slide over background? 
+                                                        // Actually, since the card moves, the background "hole" is what's visible. 
+                                                        // But here we are moving the whole card. 
+                                                        // Let's keep it simple: The user sees the card moving. 
+                                                        />
                                                         {/* Icon based on type */}
                                                         {isUtility || isLink ? (
                                                             <div className={`
@@ -711,82 +737,99 @@ const PrimaryDevModule = () => {
 
                             <div className="p-6 overflow-y-auto bg-gray-50/30 custom-scrollbar flex-1">
                                 {commands.filter(c => c.stageIds?.includes(selectedProject?.subStage || 1)).length > 0 ? (
-                                    <div className="grid grid-cols-1 gap-3">
-                                        {commands
-                                            .filter(c => c.stageIds?.includes(selectedProject?.subStage || 1))
-                                            .map(cmd => (
-                                                <motion.div
-                                                    key={cmd.id}
-                                                    layout
-                                                    whileHover={{ scale: 1.01, y: -2 }}
-                                                    onClick={() => handleLinkCommand(cmd)}
-                                                    className={`
-                                                        p-5 rounded-2xl border transition-all cursor-pointer group relative overflow-hidden
-                                                        ${cmd.type === 'mandatory'
-                                                            ? 'bg-white border-red-100 hover:border-red-300 hover:shadow-lg hover:shadow-red-500/10'
-                                                            : cmd.type === 'link'
-                                                                ? 'bg-white border-blue-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/10'
-                                                                : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/10'
-                                                        }
-                                                    `}
-                                                >
-                                                    {cmd.type === 'mandatory' && (
-                                                        <div className="absolute top-0 right-0 px-3 py-1 bg-red-100 text-red-600 text-[10px] font-bold rounded-bl-xl uppercase tracking-wider">
-                                                            Mandatory
-                                                        </div>
-                                                    )}
-                                                    {cmd.type === 'link' && (
-                                                        <div className="absolute top-0 right-0 px-3 py-1 bg-blue-100 text-blue-600 text-[10px] font-bold rounded-bl-xl uppercase tracking-wider">
-                                                            Link
-                                                        </div>
-                                                    )}
-                                                    <div className={`absolute right-0 top-0 w-24 h-24 bg-gradient-to-br to-transparent rounded-bl-full -z-0 opacity-50 transition-colors 
-                                                        ${cmd.type === 'mandatory' ? 'from-red-50 group-hover:from-red-100' : cmd.type === 'link' ? 'from-blue-50 group-hover:from-blue-100' : 'from-gray-50 group-hover:from-emerald-50'}`}
-                                                    />
+                                    <div className="space-y-6">
+                                        {COMMAND_CATEGORIES.map(cat => {
+                                            const catCommands = commands
+                                                .filter(c => c.stageIds?.includes(selectedProject?.subStage || 1))
+                                                .filter(c => (c.category || 'general') === cat.id);
 
-                                                    <div className="flex justify-between items-center mb-2 relative z-10">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={`transition-colors ${cmd.type === 'mandatory' ? 'text-red-300 group-hover:text-red-500' : cmd.type === 'link' ? 'text-blue-300 group-hover:text-blue-500' : 'text-gray-300 group-hover:text-emerald-500'}`}>
-                                                                {cmd.type === 'link' ? <Globe size={16} /> : <Command size={16} />}
-                                                            </div>
-                                                            <span className="font-medium text-gray-900 text-lg">{cmd.title}</span>
-                                                            {/* Inline Tags */}
-                                                            {(cmd.tags && cmd.tags.length > 0) && (
-                                                                <div className="flex flex-wrap gap-1.5 ml-2">
-                                                                    {cmd.tags.map(tag => (
-                                                                        <button
-                                                                            key={tag.id}
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation(); // Prevent parent click (which imports default)
-                                                                                handleLinkCommand(cmd, tag);
-                                                                            }}
-                                                                            className="group/tag flex items-center gap-1 px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded text-[10px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden select-none hover:shadow-sm"
-                                                                            title={`Import variant: ${tag.value || cmd.content}`}
-                                                                        >
-                                                                            <Tag size={8} className="opacity-60 group-hover/tag:opacity-100" />
-                                                                            {tag.label}
-                                                                            <span className="opacity-0 group-hover/tag:opacity-100 transition-opacity ml-0.5">
-                                                                                <ArrowUpRight size={8} />
-                                                                            </span>
-                                                                        </button>
-                                                                    ))}
+                                            if (catCommands.length === 0) return null;
+
+                                            return (
+                                                <div key={cat.id}>
+                                                    <div className="sticky top-0 z-20 bg-white/95 backdrop-blur py-2 mb-2 border-b border-gray-100 flex items-center gap-2">
+                                                        <span className={`w-2 h-2 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')}`}></span>
+                                                        <h4 className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                                                            {cat.label}
+                                                        </h4>
+                                                        <span className="text-[10px] text-gray-300 font-mono bg-gray-50 px-1.5 rounded">{catCommands.length}</span>
+                                                    </div>
+                                                    <div className="grid grid-cols-1 gap-3">
+                                                        {catCommands.map(cmd => (
+                                                            <motion.div
+                                                                key={cmd.id}
+                                                                layout
+                                                                whileHover={{ scale: 1.01, y: -2 }}
+                                                                onClick={() => handleLinkCommand(cmd)}
+                                                                className={`
+                                                                    p-5 rounded-2xl border transition-all cursor-pointer group relative overflow-hidden
+                                                                    ${cmd.type === 'mandatory'
+                                                                        ? 'bg-white border-red-100 hover:border-red-300 hover:shadow-lg hover:shadow-red-500/10'
+                                                                        : cmd.type === 'link'
+                                                                            ? 'bg-white border-blue-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/10'
+                                                                            : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/10'
+                                                                    }
+                                                                `}
+                                                            >
+                                                                {cmd.type === 'mandatory' && (
+                                                                    <div className="absolute top-0 right-0 px-3 py-1 bg-red-100 text-red-600 text-[10px] font-bold rounded-bl-xl uppercase tracking-wider">
+                                                                        Mandatory
+                                                                    </div>
+                                                                )}
+                                                                {cmd.type === 'link' && (
+                                                                    <div className="absolute top-0 right-0 px-3 py-1 bg-blue-100 text-blue-600 text-[10px] font-bold rounded-bl-xl uppercase tracking-wider">
+                                                                        Link
+                                                                    </div>
+                                                                )}
+                                                                <div className={`absolute right-0 top-0 w-24 h-24 bg-gradient-to-br to-transparent rounded-bl-full -z-0 opacity-50 transition-colors 
+                                                                    ${cmd.type === 'mandatory' ? 'from-red-50 group-hover:from-red-100' : cmd.type === 'link' ? 'from-blue-50 group-hover:from-blue-100' : 'from-gray-50 group-hover:from-emerald-50'}`}
+                                                                />
+
+                                                                <div className="flex justify-between items-center mb-2 relative z-10">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className={`transition-colors ${cmd.type === 'mandatory' ? 'text-red-300 group-hover:text-red-500' : cmd.type === 'link' ? 'text-blue-300 group-hover:text-blue-500' : 'text-gray-300 group-hover:text-emerald-500'}`}>
+                                                                            {cmd.type === 'link' ? <Globe size={16} /> : <Command size={16} />}
+                                                                        </div>
+                                                                        <span className="font-medium text-gray-900 text-lg">{cmd.title}</span>
+                                                                        {/* Inline Tags */}
+                                                                        {(cmd.tags && cmd.tags.length > 0) && (
+                                                                            <div className="flex flex-wrap gap-1.5 ml-2">
+                                                                                {cmd.tags.map(tag => (
+                                                                                    <button
+                                                                                        key={tag.id}
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation(); // Prevent parent click (which imports default)
+                                                                                            handleLinkCommand(cmd, tag);
+                                                                                        }}
+                                                                                        className="group/tag flex items-center gap-1 px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded text-[10px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden select-none hover:shadow-sm"
+                                                                                        title={`Import variant: ${tag.value || cmd.content}`}
+                                                                                    >
+                                                                                        <Tag size={8} className="opacity-60 group-hover/tag:opacity-100" />
+                                                                                        {tag.label}
+                                                                                        <span className="opacity-0 group-hover/tag:opacity-100 transition-opacity ml-0.5">
+                                                                                            <ArrowUpRight size={8} />
+                                                                                        </span>
+                                                                                    </button>
+                                                                                ))}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className={`p-1.5 rounded-lg transition-colors ${cmd.type === 'mandatory' ? 'bg-red-50 group-hover:bg-red-500 group-hover:text-white' : cmd.type === 'link' ? 'bg-blue-50 group-hover:bg-blue-500 group-hover:text-white' : 'bg-gray-50 group-hover:bg-emerald-500 group-hover:text-white'}`}>
+                                                                        <Plus size={16} />
+                                                                    </div>
                                                                 </div>
-                                                            )}
-                                                        </div>
-                                                        <div className={`p-1.5 rounded-lg transition-colors ${cmd.type === 'mandatory' ? 'bg-red-50 group-hover:bg-red-500 group-hover:text-white' : cmd.type === 'link' ? 'bg-blue-50 group-hover:bg-blue-500 group-hover:text-white' : 'bg-gray-50 group-hover:bg-emerald-500 group-hover:text-white'}`}>
-                                                            <Plus size={16} />
-                                                        </div>
+                                                                <div className="pl-7">
+                                                                    <div className={`rounded-lg p-3 font-mono text-xs text-gray-500 leading-relaxed line-clamp-2 border border-transparent transition-all 
+                                                                        ${cmd.type === 'mandatory' ? 'bg-red-50/30 group-hover:border-red-100 group-hover:bg-red-50/50' : cmd.type === 'link' ? 'bg-blue-50/30 group-hover:border-blue-100 group-hover:bg-blue-50/50' : 'bg-gray-50 group-hover:border-emerald-100 group-hover:bg-emerald-50/30'}`}>
+                                                                        {cmd.type === 'link' ? cmd.url : cmd.content}
+                                                                    </div>
+                                                                </div>
+                                                            </motion.div>
+                                                        ))}
                                                     </div>
-                                                    <div className="pl-7">
-                                                        <div className={`rounded-lg p-3 font-mono text-xs text-gray-500 leading-relaxed line-clamp-2 border border-transparent transition-all 
-                                                            ${cmd.type === 'mandatory' ? 'bg-red-50/30 group-hover:border-red-100 group-hover:bg-red-50/50' : cmd.type === 'link' ? 'bg-blue-50/30 group-hover:border-blue-100 group-hover:bg-blue-50/50' : 'bg-gray-50 group-hover:border-emerald-100 group-hover:bg-emerald-50/30'}`}>
-                                                            {cmd.type === 'link' ? cmd.url : cmd.content}
-                                                        </div>
-
-
-                                                    </div>
-                                                </motion.div>
-                                            ))}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 ) : (
                                     <div className="h-full flex flex-col items-center justify-center text-center py-12">
