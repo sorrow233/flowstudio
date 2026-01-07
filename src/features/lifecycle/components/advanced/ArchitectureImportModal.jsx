@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Copy, Check, Terminal, FileJson, ArrowRight, BrainCircuit } from 'lucide-react';
 
 const generatePrompt = (currentModules = []) => {
-    const existingNames = currentModules.map(m => m.name).join(', ');
-    const context = existingNames
-        ? `\nCURRENT EXISTING MODULES: [${existingNames}]\nIMPORTANT: The user has already defined the above modules. Do NOT output them again. Only generate NEW, supplementary modules that are missing (e.g., if "Auth" exists, don't add it again).`
+    const existingList = currentModules.map(m => `- ${m.name}`).join('\n');
+    const context = existingList
+        ? `\nCURRENT EXISTING MODULES (Do NOT duplicate these):\n${existingList}\n\nIMPORTANT: The above modules already exist. Only generate NEW, supplementary modules to add features or services not listed above.`
         : '';
 
     return `
