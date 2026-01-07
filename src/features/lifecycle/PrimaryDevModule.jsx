@@ -49,6 +49,23 @@ const PrimaryDevModule = () => {
 
     // --- Graduation State ---
     const [showGraduationChecklist, setShowGraduationChecklist] = useState(false);
+    const [graduationChecks, setGraduationChecks] = useState({});
+
+    const GRADUATION_PILLARS = [
+        { id: 'audience', label: 'Have I truly understood who I am building for?' },
+        { id: 'vow', label: 'Does this solution honor the original Founder\'s Vow?' },
+        { id: 'tech', label: 'Is the technical heart beating steadily?' },
+        { id: 'ready', label: 'Am I ready to leave the nursery and face the real world?' }
+    ];
+
+    const toggleGraduationCheck = (id) => {
+        setGraduationChecks(prev => ({
+            ...prev,
+            [id]: !prev[id]
+        }));
+    };
+
+    const allPillarsChecked = GRADUATION_PILLARS.every(p => graduationChecks[p.id]);
 
 
     // --- Project Filtering ---
@@ -169,22 +186,24 @@ const PrimaryDevModule = () => {
 
     // --- Graduation Logic ---
     const handleGraduateToAdvanced = () => {
+        if (!allPillarsChecked) return;
+
         // Trigger Confetti
         confetti({
-            particleCount: 150,
-            spread: 70,
+            particleCount: 200,
+            spread: 100,
             origin: { y: 0.6 },
-            colors: ['#10B981', '#34D399', '#FCD34D']
+            colors: ['#10B981', '#34D399', '#FBBF24', '#ffffff']
         });
 
         // Update Project Stage to 6 (Advanced)
         handleUpdateProject(selectedProject.id, { subStage: 6 });
 
-        // Close modal after delay? Or keep it open in "Advanced" mode.
-        // For now, let's keep it open but it will visually update.
+        // Close modal after delay
         setTimeout(() => {
-            // Optional: Close modal to show the move
+            setShowGraduationChecklist(false);
             setSelectedProject(null);
+            setGraduationChecks({}); // Reset
         }, 1500);
     };
 
@@ -396,45 +415,85 @@ const PrimaryDevModule = () => {
                             </div>
 
 
-                            {/* Graduation Checklist Overlay (Inner Modal) */}
+                            {/* Graduation Checklist Overlay (The Ascension Ritual) */}
                             <AnimatePresence>
                                 {showGraduationChecklist && (
                                     <motion.div
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
-                                        className="absolute inset-0 z-50 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center p-10"
+                                        className="absolute inset-0 z-50 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center p-8"
                                     >
-                                        <div className="max-w-lg w-full text-center slide-in-from-bottom-10 animate-in fade-in duration-500">
-                                            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
-                                                <Sparkles size={40} />
-                                            </div>
-                                            <h2 className="text-3xl font-light text-gray-900 mb-2">Graduation Criteria</h2>
-                                            <p className="text-gray-500 mb-10">Confirm the 4 Sacred Pillars before proceeding.</p>
+                                        <div className="max-w-xl w-full text-center relative">
+                                            {/* Close Button */}
+                                            <button
+                                                onClick={() => setShowGraduationChecklist(false)}
+                                                className="absolute -top-12 right-0 p-2 text-gray-300 hover:text-gray-500 transition-colors"
+                                            >
+                                                <X size={24} />
+                                            </button>
 
-                                            <div className="space-y-4 text-left mb-10">
-                                                {['Target Audience Validated', 'Core Value Proposition Clear', 'Technical Feasibility Confirmed', 'Founder\'s Vow Intact'].map((item, i) => (
-                                                    <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
-                                                        <div className="w-6 h-6 rounded-full border-2 border-emerald-500 flex items-center justify-center">
-                                                            <Check size={14} className="text-emerald-500" />
-                                                        </div>
-                                                        <span className="text-gray-700 font-medium">{item}</span>
-                                                    </div>
-                                                ))}
+                                            <motion.div
+                                                initial={{ scale: 0.9, opacity: 0 }}
+                                                animate={{ scale: 1, opacity: 1 }}
+                                                className="mb-10"
+                                            >
+                                                <div className="w-24 h-24 bg-gradient-to-tr from-emerald-50 to-teal-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-emerald-100/50">
+                                                    <Sparkles size={40} className="text-emerald-500/80" />
+                                                </div>
+                                                <h2 className="text-4xl font-thin text-gray-900 mb-3 tracking-tight">The Ascension Ritual</h2>
+                                                <p className="text-emerald-600/60 font-medium tracking-widest text-xs uppercase">Stabilize the Four Pillars to Proceed</p>
+                                            </motion.div>
+
+                                            <div className="space-y-4 text-left mb-12">
+                                                {GRADUATION_PILLARS.map((pillar, i) => {
+                                                    const isChecked = graduationChecks[pillar.id];
+                                                    return (
+                                                        <motion.button
+                                                            key={pillar.id}
+                                                            initial={{ x: -20, opacity: 0 }}
+                                                            animate={{ x: 0, opacity: 1 }}
+                                                            transition={{ delay: i * 0.1 }}
+                                                            onClick={() => toggleGraduationCheck(pillar.id)}
+                                                            className={`
+                                                                w-full group flex items-center gap-5 p-5 rounded-2xl border text-left transition-all duration-300
+                                                                ${isChecked
+                                                                    ? 'bg-emerald-50/50 border-emerald-200 shadow-lg shadow-emerald-100/50 scale-[1.02]'
+                                                                    : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                                                                }
+                                                            `}
+                                                        >
+                                                            <div className={`
+                                                                w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500
+                                                                ${isChecked ? 'border-emerald-500 bg-emerald-500 text-white rotate-0' : 'border-gray-200 text-transparent -rotate-180'}
+                                                            `}>
+                                                                <Check size={16} strokeWidth={3} />
+                                                            </div>
+                                                            <span className={`
+                                                                text-lg font-light transition-colors duration-300
+                                                                ${isChecked ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-600'}
+                                                            `}>
+                                                                {pillar.label}
+                                                            </span>
+                                                        </motion.button>
+                                                    );
+                                                })}
                                             </div>
 
-                                            <div className="flex gap-4">
-                                                <button
-                                                    onClick={() => setShowGraduationChecklist(false)}
-                                                    className="flex-1 py-4 text-gray-400 font-medium hover:text-gray-600"
-                                                >
-                                                    Not Yet
-                                                </button>
+                                            <div className="flex justify-center">
                                                 <button
                                                     onClick={handleGraduateToAdvanced}
-                                                    className="flex-1 py-4 bg-emerald-500 text-white rounded-xl shadow-xl shadow-emerald-200 hover:scale-105 transition-transform font-bold uppercase tracking-widest"
+                                                    disabled={!allPillarsChecked}
+                                                    className={`
+                                                        px-12 py-5 rounded-2xl font-bold text-sm uppercase tracking-[0.2em] transition-all duration-500 flex items-center gap-3
+                                                        ${allPillarsChecked
+                                                            ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-2xl shadow-emerald-500/40 hover:shadow-emerald-500/60 hover:-translate-y-1 cursor-pointer'
+                                                            : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                                                        }
+                                                    `}
                                                 >
-                                                    Graduate Project
+                                                    <Trophy size={18} className={allPillarsChecked ? 'animate-bounce' : ''} />
+                                                    <span>Ascend Project</span>
                                                 </button>
                                             </div>
                                         </div>
