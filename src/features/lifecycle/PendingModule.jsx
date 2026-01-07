@@ -342,8 +342,30 @@ const PendingModule = () => {
                                         </div>
 
                                         <div className="relative z-30 flex gap-3">
-                                            <button onClick={() => handleAnswer(selectedProject.id, q.id, true)} className={`cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all ${ans === true ? 'bg-emerald-500 text-white border-emerald-500' : 'hover:bg-gray-50 bg-white'}`}>YES</button>
-                                            <button onClick={() => handleAnswer(selectedProject.id, q.id, false)} className={`cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all ${ans === false ? 'bg-red-500 text-white border-red-500' : 'hover:bg-gray-50 bg-white'}`}>NO</button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleAnswer(selectedProject.id, q.id, true);
+                                                }}
+                                                className={`
+                                                    relative z-50 cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all active:scale-95
+                                                    ${ans === true ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-200' : 'hover:bg-gray-50 bg-white hover:border-gray-300'}
+                                                `}
+                                            >
+                                                YES
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleAnswer(selectedProject.id, q.id, false);
+                                                }}
+                                                className={`
+                                                    relative z-50 cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all active:scale-95
+                                                    ${ans === false ? 'bg-red-500 text-white border-red-500 shadow-md shadow-red-200' : 'hover:bg-gray-50 bg-white hover:border-gray-300'}
+                                                `}
+                                            >
+                                                NO
+                                            </button>
                                         </div>
                                     </motion.div>
                                 );
