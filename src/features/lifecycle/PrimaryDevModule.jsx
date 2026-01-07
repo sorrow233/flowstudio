@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Code2, ExternalLink, Trash2, Check, Rocket, Sparkles, Trophy, Star } from 'lucide-react';
+import { Code2, ExternalLink, Trash2, Check, Rocket, Sparkles, Trophy, Star, X } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
 
 // Import New Modular Components
