@@ -107,6 +107,10 @@ const PrimaryDevModule = () => {
         }
     };
 
+    // Derived State for UI
+    const stageInfo = DEV_STAGES.find(s => s.id === (selectedProject?.subStage || 1)) || DEV_STAGES[0];
+    const StageIcon = STAGE_ICONS[stageInfo.id] || LayoutGrid;
+
     // Edit Handlers
     const startEditing = () => {
         setEditForm({
@@ -368,9 +372,9 @@ const PrimaryDevModule = () => {
                             {/* Rich Hero Header with Parallax-like effect */}
                             <motion.div
                                 animate={{
-                                    height: isHeaderCollapsed && !isEditingProject ? 120 : 288,
+                                    height: isHeaderCollapsed && !isEditingProject ? 100 : 288,
                                 }}
-                                transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                 className="relative shrink-0 bg-gray-900 flex items-end p-10 overflow-hidden group"
                             >
                                 {isEditingProject ? (
@@ -643,144 +647,89 @@ const PrimaryDevModule = () => {
                                                         const isLink = task.isCommand && task.commandType === 'link';
                                                         const isUtility = task.isCommand && task.commandType === 'utility';
 
+
                                                         // Determine Category Icon
                                                         const taskCat = COMMAND_CATEGORIES.find(c => c.id === (task.category || 'general'));
                                                         const TaskCatIcon = CATEGORY_ICONS[taskCat?.icon] || LayoutGrid;
 
                                                         return (
                                                             <motion.div
-                                                                layout // Animate layout changes when items are deleted
-                                                                initial={{ opacity: 0, y: 10 }}
-                                                                animate={{ opacity: 1, y: 0, x: 0 }}
-                                                                exit={{ opacity: 0, x: -200, transition: { duration: 0.2 } }} // Fly out to LEFT
+                                                                layout
                                                                 key={task.id}
-
-                                                                // Drag to Delete Props
-                                                                drag="x"
-                                                                dragConstraints={{ left: 0, right: 0 }} // Elastic resistance
-                                                                dragElastic={{ right: 0.05, left: 0.5 }} // Allow dragging LEFT (delete), resist RIGHT
-                                                                onDragEnd={(e, info) => {
-                                                                    const swipeThreshold = -100; // px
-                                                                    const velocityThreshold = -500; // px/s
-
-                                                                    // If swiped fast enough OR far enough to the right
-                                                                    if (info.offset.x < swipeThreshold || info.velocity.x < velocityThreshold) {
-                                                                        handleDeleteTask(selectedProject.id, task.id);
-                                                                    }
-                                                                }}
-                                                                whileDrag={{ scale: 1.02, cursor: 'grabbing', zIndex: 50 }}
-                                                                onClick={() => toggleTask(selectedProject.id, task.id)}
-                                                                className={`
-                                                            group flex items-center gap-5 p-5 rounded-2xl transition-all cursor-pointer border relative overflow-hidden select-none touch-pan-y
-                                                            ${isMandatory && !task.done
-                                                                        ? 'bg-white border-red-100 shadow-sm shadow-red-100 hover:border-red-200'
-                                                                        : isMandatory && task.done
-                                                                            ? 'bg-emerald-50/30 border-emerald-100 opacity-75 hover:opacity-100'
-                                                                            : isLink
-                                                                                ? 'bg-white border-blue-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5'
-                                                                                : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5'
-                                                                    }
-                                                        `}
-                                                                style={{ x: 0 }} // Ensure it starts at x:0
+                                                                className="group flex items-start gap-4 p-4 rounded-2xl bg-white hover:bg-white border border-transparent hover:border-gray-100 hover:shadow-lg hover:shadow-gray-100/50 transition-all duration-300 relative overflow-hidden"
                                                             >
-                                                                {/* Visual Indicator for "Slide to Delete" (Behind content, visible when dragging LEFT) */}
-                                                                <motion.div
-                                                                    className="absolute inset-y-0 right-0 bg-red-500 -z-10 flex items-center justify-end pr-5 text-white font-bold uppercase tracking-wider text-xs pointer-events-none"
-                                                                    style={{ width: '100%', x: '100%' }}
+                                                                {/* Checkbox / Status */}
+                                                                <button
+                                                                    onClick={(e) => markTaskDone(e, selectedProject.id, task.id)}
+                                                                    className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 shrink-0 relative group/icon ${task.done ? 'bg-emerald-500 border-emerald-500 text-white scale-110' : isMandatory ? 'border-red-200 bg-red-50 text-red-500' : 'border-gray-200 bg-transparent text-gray-300 hover:border-gray-400 hover:text-gray-900'}`}
                                                                 >
-                                                                    Slide Left to Delete
-                                                                </motion.div>
-                                                                {/* Icon based on type */}
-                                                                {isUtility || isLink ? (
-                                                                    <div className={`
-                                                                w-6 h-6 flex items-center justify-center transition-colors rounded-lg 
-                                                                ${isLink
-                                                                            ? 'bg-blue-50 text-blue-500 group-hover:bg-blue-100'
-                                                                            : 'bg-gray-50 text-gray-400 group-hover:text-emerald-500 group-hover:bg-emerald-50'}
-                                                            `}>
-                                                                        {copiedTaskId === task.id ? <Check size={16} /> : (isLink ? <Globe size={16} /> : <Terminal size={16} />)}
-                                                                    </div>
-                                                                ) : (
-                                                                    <button
-                                                                        onClick={(e) => markTaskDone(e, selectedProject.id, task.id)}
-                                                                        className={`
-                                                                    w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 shrink-0
-                                                                    ${task.done
-                                                                                ? 'bg-emerald-500 border-emerald-500 text-white scale-110'
-                                                                                : isMandatory
-                                                                                    ? 'border-red-200 text-transparent hover:border-red-400 bg-red-50 hover:bg-red-100'
-                                                                                    : 'border-gray-200 text-transparent group-hover:border-gray-400 hover:bg-gray-50'
-                                                                            }
-                                                                `}
-                                                                    >
+                                                                    {task.done ? (
                                                                         <Check size={14} strokeWidth={3} />
-                                                                    </button>
-                                                                )}
+                                                                    ) : (
+                                                                        <>
+                                                                            <div className="absolute inset-0 flex items-center justify-center opacity-100 group-hover/icon:opacity-0 transition-opacity">
+                                                                                <TaskCatIcon size={12} className={taskCat?.color?.split(' ')[1]} />
+                                                                            </div>
+                                                                            <Check size={14} strokeWidth={3} className="absolute opacity-0 group-hover/icon:opacity-100 transition-opacity text-gray-400 group-hover:text-gray-900" />
+                                                                        </>
+                                                                    )}
+                                                                </button>
 
-                                                                <div className="flex-1 min-w-0">
-                                                                    <div className="flex flex-wrap items-center gap-2">
-                                                                        <span className={`text-base font-medium transition-colors ${task.done ? 'opacity-40 line-through decoration-emerald-500/50' : 'text-gray-700'}`}>
+                                                                <div className="flex-1 min-w-0 pt-0.5">
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <span className={`text-base font-medium transition-colors leading-snug ${task.done ? 'opacity-40 line-through decoration-emerald-500/50' : 'text-gray-900'}`}>
                                                                             {task.text}
                                                                         </span>
 
-                                                                        {/* Helper Badges */}
-                                                                        {isMandatory && (
-                                                                            <span className="text-[10px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-red-100">
-                                                                                Mandatory
+                                                                        <div className="flex flex-wrap items-center gap-2">
+                                                                            {/* Category Badge */}
+                                                                            <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded flex items-center gap-1 ${taskCat?.color.replace('text-', 'bg-').replace('500', '50').replace('600', '100')} text-gray-500`}>
+                                                                                {taskCat?.label}
                                                                             </span>
-                                                                        )}
-                                                                        {isLink && (
-                                                                            <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-blue-100 flex items-center gap-1">
-                                                                                <ExternalLink size={8} /> Link
-                                                                            </span>
-                                                                        )}
 
-                                                                        {/* INLINE TAGS IN LIST */}
-                                                                        {(task.commandTags && task.commandTags.length > 0) && (
-                                                                            <div className="flex flex-wrap gap-1.5 ml-1">
-                                                                                {task.commandTags.map(tag => (
-                                                                                    <button
-                                                                                        key={tag.id}
-                                                                                        onClick={(e) => {
-                                                                                            e.stopPropagation();
-                                                                                            toggleTask(selectedProject.id, task.id, tag.value, `${task.id}-${tag.id}`);
-                                                                                        }}
-                                                                                        className="group/tag flex items-center gap-1 px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded text-[10px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden select-none hover:shadow-sm"
-                                                                                        title={`Copy: ${tag.value || task.commandContent}`}
-                                                                                    >
-                                                                                        <Tag size={8} className="opacity-60 group-hover/tag:opacity-100" />
-                                                                                        {tag.label}
-                                                                                        {copiedTaskId === `${task.id}-${tag.id}` && (
-                                                                                            <motion.div
-                                                                                                initial={{ opacity: 0, y: 10 }}
-                                                                                                animate={{ opacity: 1, y: 0 }}
-                                                                                                className="absolute inset-0 bg-emerald-600 text-white flex items-center justify-center font-bold"
-                                                                                            >
-                                                                                                <Check size={10} strokeWidth={3} />
-                                                                                            </motion.div>
-                                                                                        )}
-                                                                                    </button>
-                                                                                ))}
-                                                                            </div>
-                                                                        )}
+                                                                            {isMandatory && <span className="text-[10px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-red-100">Mandatory</span>}
+                                                                            {isLink && <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-blue-100 flex items-center gap-1"><ExternalLink size={8} /> Link</span>}
+
+                                                                            {/* Tags */}
+                                                                            {(task.commandTags && task.commandTags.length > 0) && (
+                                                                                <div className="flex flex-wrap gap-1.5 ml-1">
+                                                                                    {task.commandTags.map(tag => (
+                                                                                        <button
+                                                                                            key={tag.id}
+                                                                                            onClick={(e) => { e.stopPropagation(); toggleTask(selectedProject.id, task.id, tag.value, `${task.id}-${tag.id}`); }}
+                                                                                            className="group/tag flex items-center gap-1 px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded text-[10px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden select-none hover:shadow-sm"
+                                                                                            title={`Copy: ${tag.value}`}
+                                                                                        >
+                                                                                            <Tag size={8} className="opacity-60 group-hover/tag:opacity-100" />
+                                                                                            {tag.label}
+                                                                                            {copiedTaskId === `${task.id}-${tag.id}` && (
+                                                                                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="absolute inset-0 bg-emerald-600 text-white flex items-center justify-center font-bold"><Check size={10} strokeWidth={3} /></motion.div>
+                                                                                            )}
+                                                                                        </button>
+                                                                                    ))}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
                                                                 </div>
 
-                                                                {task.isCommand && copiedTaskId === task.id && (
-                                                                    <span className="text-[10px] uppercase font-bold text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full animate-pulse transition-all">
-                                                                        Copied
-                                                                    </span>
-                                                                )}
+                                                                {
+                                                                    task.isCommand && copiedTaskId === task.id && (
+                                                                        <span className="text-[10px] uppercase font-bold text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full animate-pulse transition-all">Copied</span>
+                                                                    )
+                                                                }
                                                             </motion.div>
                                                         );
                                                     })}
                                                 {(!selectedProject.tasks || selectedProject.tasks.length === 0) && (
                                                     <div className="flex flex-col items-center justify-center py-20 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100 text-center">
                                                         <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4 text-gray-300">
-                                                            <CheckSquare size={24} />
+                                                            <StageIcon size={24} className="opacity-50" />
                                                         </div>
                                                         <p className="text-gray-900 font-medium">Quiet on the Front</p>
-                                                        <p className="text-gray-400 text-sm mt-1">No active missions. Add a task or import a command to begin.</p>
+                                                        <p className="text-gray-400 text-sm mt-1 max-w-xs mx-auto text-balance">
+                                                            {stageInfo.emptyState || "No active missions. Add a task to begin."}
+                                                        </p>
                                                     </div>
                                                 )}
                                             </div>
@@ -871,11 +820,12 @@ const PrimaryDevModule = () => {
                             </div>
                         </motion.div>
                     </div>
-                )}
-            </AnimatePresence>
+                )
+                }
+            </AnimatePresence >
 
             {/* Undo Toast */}
-            <AnimatePresence>
+            < AnimatePresence >
                 {recentlyDeleted && (
                     <motion.div
                         initial={{ opacity: 0, y: 50 }}
@@ -898,10 +848,10 @@ const PrimaryDevModule = () => {
                         </button>
                     </motion.div>
                 )}
-            </AnimatePresence>
+            </AnimatePresence >
 
             {/* Command Selector Modal */}
-            <AnimatePresence>
+            < AnimatePresence >
                 {commandModalOpen && (
                     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none">
                         <motion.div
@@ -1100,8 +1050,8 @@ const PrimaryDevModule = () => {
                         </motion.div>
                     </div>
                 )}
-            </AnimatePresence>
-        </div>
+            </AnimatePresence >
+        </div >
     );
 };
 

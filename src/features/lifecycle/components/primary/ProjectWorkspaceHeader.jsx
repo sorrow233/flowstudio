@@ -1,0 +1,167 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { ExternalLink, Terminal, Pencil, Save, X, Trash2, ArrowLeft, Image as ImageIcon } from 'lucide-react';
+import { DEV_STAGES } from '../../../../utils/constants';
+
+const VISUAL_VIBES = [
+    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop', // Tech Dark
+    'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop', // Circuit
+    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop', // Cyberpunk
+    'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?q=80&w=2076&auto=format&fit=crop', // Mountain
+    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop'  // Nature
+];
+
+const ProjectWorkspaceHeader = ({
+    project, activeStage, isCollapsed, isEditing, editForm,
+    setEditForm, onSaveEdit, onCancelEdit, onStartEdit, onClose, onDelete, onImportCommand
+}) => {
+
+    // Get info for current stage to show in header title if needed, 
+    // though the design requests the PROJECT title to be dominant.
+    const stageInfo = DEV_STAGES.find(s => s.id === activeStage);
+
+    return (
+        <motion.div
+            className="relative shrink-0 flex flex-col justify-end overflow-hidden transition-all duration-500 bg-gray-900 group"
+            animate={{
+                height: isCollapsed ? 120 : 320,
+            }}
+        >
+            {/* Background Image Logic */}
+            <div className="absolute inset-0 z-0">
+                {isEditing ? (
+                    <>
+                        {editForm.bgImage ? (
+                            <img src={editForm.bgImage} alt="" className="w-full h-full object-cover opacity-40 blur-sm" />
+                        ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-gray-800 to-black" />
+                        )}
+                        <div className="absolute inset-0 bg-black/60" />
+                    </>
+                ) : (
+                    <>
+                        {project.bgImage ? (
+                            <motion.img
+                                src={project.bgImage}
+                                alt=""
+                                className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-[2s]"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-gray-900 via-gray-800 to-black" />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
+                    </>
+                )}
+            </div>
+
+            {/* Top Toolbar */}
+            <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-30">
+                <button
+                    onClick={onClose}
+                    className="flex items-center gap-2 text-white/50 hover:text-white transition-colors bg-black/20 hover:bg-black/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/5"
+                >
+                    <ArrowLeft size={16} />
+                    <span className="text-xs font-medium uppercase tracking-widest">Back</span>
+                </button>
+
+                <div className="flex gap-2">
+                    {isEditing ? (
+                        <>
+                            <button onClick={onCancelEdit} className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md transition-colors text-xs font-medium">
+                                Cancel
+                            </button>
+                            <button onClick={onSaveEdit} className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl shadow-lg transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+                                <Save size={14} /> Save
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button onClick={onStartEdit} className="p-3 bg-black/20 hover:bg-black/40 text-white/70 hover:text-white rounded-full transition-colors backdrop-blur-md border border-white/5" title="Edit Properties">
+                                <Pencil size={18} />
+                            </button>
+                            <button onClick={onDelete} className="p-3 bg-black/20 hover:bg-red-500/80 text-white/70 hover:text-white rounded-full transition-colors backdrop-blur-md border border-white/5" title="Delete Project">
+                                <Trash2 size={18} />
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="relative z-20 p-8 pb-10 w-full max-w-7xl mx-auto flex justify-between items-end">
+                <div className="w-full">
+                    {isEditing ? (
+                        // EDIT FORM (Simplified inline)
+                        <div className="space-y-4 max-w-2xl bg-black/40 backdrop-blur-xl p-6 rounded-3xl border border-white/10 animate-in fade-in slide-in-from-bottom-4">
+                            <input
+                                value={editForm.title}
+                                onChange={e => setEditForm({ ...editForm, title: e.target.value })}
+                                className="w-full bg-transparent text-3xl font-light text-white placeholder:text-white/30 outline-none border-b border-white/10 focus:border-emerald-500 pb-2 transition-colors"
+                                placeholder="Project Title"
+                            />
+                            <textarea
+                                value={editForm.desc}
+                                onChange={e => setEditForm({ ...editForm, desc: e.target.value })}
+                                className="w-full bg-transparent text-sm text-white/80 placeholder:text-white/30 outline-none resize-none h-16"
+                                placeholder="Brief mission statement..."
+                            />
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Background Theme</label>
+                                    <div className="flex items-center gap-2">
+                                        {VISUAL_VIBES.map((vibe, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => setEditForm({ ...editForm, bgImage: vibe })}
+                                                className={`w-6 h-6 rounded-full border-2 overflow-hidden transition-all ${editForm.bgImage === vibe ? 'border-emerald-500 scale-125' : 'border-transparent opacity-50 hover:opacity-100'}`}
+                                            >
+                                                <img src={vibe} className="w-full h-full object-cover" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        // VIEW MODE
+                        <div className="flex justify-between items-end w-full">
+                            <div>
+                                <motion.div layout className="flex items-center gap-3 mb-2 opacity-80">
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
+                                        {stageInfo?.label} Phase
+                                    </span>
+                                    {project.link && (
+                                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-white/70 hover:text-white transition-colors">
+                                            <ExternalLink size={12} /> {new URL(project.link).hostname}
+                                        </a>
+                                    )}
+                                </motion.div>
+                                <motion.h1 layout className={`font-thin text-white leading-none tracking-tighter ${isCollapsed ? 'text-4xl' : 'text-6xl mb-4'}`}>
+                                    {project.title}
+                                </motion.h1>
+                                {!isCollapsed && (
+                                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-lg font-light text-white/70 max-w-xl leading-relaxed">
+                                        {project.desc}
+                                    </motion.p>
+                                )}
+                            </div>
+
+                            {/* Floating Action Button for Command */}
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={onImportCommand}
+                                className="hidden md:flex items-center gap-3 px-6 py-4 bg-white text-gray-900 rounded-2xl shadow-2xl hover:shadow-white/20 transition-all font-medium"
+                            >
+                                <Terminal size={20} />
+                                <span>Import Command</span>
+                            </motion.button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </motion.div>
+    );
+};
+
+export default ProjectWorkspaceHeader;

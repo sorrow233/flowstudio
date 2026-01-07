@@ -10,35 +10,57 @@ export const DEV_STAGES = [
     {
         id: 1,
         label: 'Skeleton',
-        title: 'Core Skeleton Implementation',
-        desc: 'Build the fundamental structure, routing, and component architecture.',
-        // icon: Layers - Icons need to be handled in component due to JSX
+        title: 'Architectural Foundation',
+        desc: 'Establish the core routing, layout structure, and component hierarchy.',
     },
     {
         id: 2,
         label: 'Functionality',
-        title: 'Core Functions Running',
-        desc: 'Implement main features and ensure critical paths are working.',
+        title: 'Core Mechanics',
+        desc: 'Implement primary business logic, data flows, and interactive elements.',
     },
     {
         id: 3,
         label: 'Modules',
-        title: 'Module Expansion',
-        desc: 'Implement Login, Binding, and Sync features to complete the ecosystem.',
+        title: 'Ecosystem Expansion',
+        desc: 'Integrate authentication, database bindings, and external services.',
     },
     {
         id: 4,
         label: 'Optimization',
-        title: 'Optimization & Stability',
-        desc: 'Reduce bugs, improve stability, refine UI/UX, and polish.',
+        title: 'Polish & Performance',
+        desc: 'Refine UI/UX, optimize rendering, and resolve edge cases.',
     },
     {
         id: 5,
         label: 'Completion',
-        title: 'Original Intent Met',
-        desc: 'Project fulfills its original vision and is ready for next steps.',
+        title: 'Golden Master',
+        desc: 'Final verification, production readiness, and launch.',
     }
 ];
+
+export const STAGE_EMPTY_STATES = {
+    1: {
+        title: 'Lay the Foundation',
+        desc: 'Every great app starts with a solid skeleton. Define your routes and basic layout.'
+    },
+    2: {
+        title: 'Breathe Life into It',
+        desc: 'Make it move. Implement the core interactions and logic.'
+    },
+    3: {
+        title: 'Connect the Dots',
+        desc: 'It is time to expand. Add login, database connections, and sync features.'
+    },
+    4: {
+        title: 'Smooth the Edges',
+        desc: 'Perfection is in the details. Fix bugs, improve animations, and polish.'
+    },
+    5: {
+        title: 'Ready for Liftoff',
+        desc: 'The final countdown. Verify everything is go for launch.'
+    }
+};
 
 export const formatDate = (timestamp) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
