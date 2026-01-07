@@ -74,7 +74,13 @@ export const useSyncStore = (docId, initialData = {}) => {
                 }, 'remote');
                 setStatus('synced');
             }, (error) => {
-                console.error("Firestore Sync Error:", error);
+                // Silece permission errors - they just mean we are offline/unauthorized, which is fine.
+                // The user can still work locally.
+                if (error.code === 'permission-denied') {
+                    console.info("Firestore Permission Denied (Offline Mode active)");
+                } else {
+                    console.error("Firestore Sync Error:", error);
+                }
                 setStatus('offline');
             });
 
@@ -88,7 +94,11 @@ export const useSyncStore = (docId, initialData = {}) => {
                         createdAt: serverTimestamp(),
                         userId: user.uid
                     }).catch(err => {
-                        console.error("Failed to push update", err);
+                        if (err.code === 'permission-denied') {
+                            // Ignore push errors due to permissions
+                        } else {
+                            console.error("Failed to push update", err);
+                        }
                         setStatus('offline');
                     });
                 }
