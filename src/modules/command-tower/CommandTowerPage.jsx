@@ -28,25 +28,37 @@ export default function CommandTowerPage() {
     ];
 
     const [stages, setStages] = useState(() => {
-        const saved = localStorage.getItem('commandTowerStages');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            // Migrate old solid colors to new gradients if needed (simple check)
-            if (parsed.length > 0 && !parsed[0].color.includes('gradient')) {
-                return defaultStages.map(ds => {
-                    const existing = parsed.find(p => p.key === ds.key);
-                    return existing ? { ...existing, color: ds.color } : ds;
-                }).concat(parsed.filter(p => !defaultStages.find(ds => ds.key === p.key)));
+        try {
+            const saved = localStorage.getItem('commandTowerStages');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                // Migrate old solid colors to new gradients if needed (simple check)
+                if (parsed.length > 0 && Array.isArray(parsed) && !parsed[0].color.includes('gradient')) {
+                    return defaultStages.map(ds => {
+                        const existing = parsed.find(p => p.key === ds.key);
+                        return existing ? { ...existing, color: ds.color } : ds;
+                    }).concat(parsed.filter(p => !defaultStages.find(ds => ds.key === p.key)));
+                }
+                return parsed;
             }
-            return parsed;
+        } catch (error) {
+            console.error('Failed to load stages, resetting to default:', error);
+            // 出错时自动重置，防止无限崩溃
+            return defaultStages;
         }
         return defaultStages;
     });
 
     // Commands
     const [commands, setCommands] = useState(() => {
-        const saved = localStorage.getItem('commandTowerData');
-        return saved ? JSON.parse(saved) : getDefaultCommands();
+        try {
+            const saved = localStorage.getItem('commandTowerData');
+            return saved ? JSON.parse(saved) : getDefaultCommands();
+        } catch (error) {
+            console.error('Failed to load commands, resetting to default:', error);
+            // 同样，出错时自动重置为默认值
+            return getDefaultCommands();
+        }
     });
 
     // 清新颜色选择 (8个清新明亮的颜色)
@@ -126,7 +138,7 @@ export default function CommandTowerPage() {
     // --- Handlers ---
 
     const handleAddCommand = () => {
-        if (!newCommand.title.trim() || !newCommand.content.trim() || !newCommand.stage) return;
+        if (!newCommand.title?.trim() || !newCommand.content?.trim() || !newCommand.stage) return;
         Logger.info('CommandTower', 'Adding new command:', newCommand);
         // Fix: Use correct ID generation to avoid conflicts in concurrent usage (though mostly single user here)
         // Original was Date.now()
@@ -163,7 +175,7 @@ export default function CommandTowerPage() {
     };
 
     const handleSaveEdit = () => {
-        if (!editingCommand || !editingCommand.command.title.trim()) return;
+        if (!editingCommand || !editingCommand.command.title?.trim()) return;
         setCommands(prev => ({
             ...prev,
             [editingCommand.stageKey]: prev[editingCommand.stageKey].map(cmd =>
@@ -174,7 +186,7 @@ export default function CommandTowerPage() {
     };
 
     const handleAddStage = () => {
-        if (!newStage.label.trim()) return;
+        if (!newStage.label?.trim()) return;
         const key = `custom_${Date.now()}`;
         const newStageObj = {
             key,
@@ -204,7 +216,7 @@ export default function CommandTowerPage() {
     };
 
     const handleStageRename = (stageKey, newLabel) => {
-        if (!newLabel.trim()) return;
+        if (!newLabel?.trim()) return;
         setStages(prev => prev.map(s =>
             s.key === stageKey
                 ? { ...s, customLabel: newLabel } // Store custom name in customLabel

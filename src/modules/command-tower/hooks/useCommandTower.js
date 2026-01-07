@@ -86,7 +86,7 @@ export function useCommandTower() {
     const addCommand = (commandData) => {
         // commandData: { title, content, stage, color }
         const { title, content, stage, color } = commandData;
-        if (!title.trim() || !content.trim() || !stage) return;
+        if (!title?.trim() || !content?.trim() || !stage) return;
 
         Logger.info('CommandTower', 'Adding new command:', commandData);
         const newId = Date.now();
@@ -115,7 +115,7 @@ export function useCommandTower() {
 
     const updateCommand = (stageKey, command) => {
         // command: { id, title, content, color, ... }
-        if (!command || !command.title.trim()) return;
+        if (!command || !command.title?.trim()) return;
         setCommands(prev => ({
             ...prev,
             [stageKey]: prev[stageKey].map(cmd =>
@@ -126,7 +126,7 @@ export function useCommandTower() {
 
     const addStage = (stageData) => {
         // stageData: { label, color }
-        if (!stageData.label.trim()) return;
+        if (!stageData.label?.trim()) return;
         const key = `custom_${Date.now()}`;
         const newStageObj = {
             key,
@@ -154,7 +154,7 @@ export function useCommandTower() {
     };
 
     const renameStage = (stageKey, newLabel) => {
-        if (!newLabel.trim()) return;
+        if (!newLabel?.trim()) return;
         setStages(prev => prev.map(s =>
             s.key === stageKey
                 ? { ...s, customLabel: newLabel }
