@@ -1,16 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sprout, AlertCircle, Check, X, ArrowRight, Leaf, Droplets, Sun } from 'lucide-react';
+import { Sprout, X, ArrowRight, Sun, CloudRain, Droplets, CheckCircle2 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+import { STORAGE_KEYS } from '../../utils/constants';
 
-const STORAGE_KEY = 'flowstudio_pending_projects';
-
-// Assessment Questions
+// Refined Soul-Searching Questions
 const QUESTIONS = [
-    { id: 'q1', text: '是否能够清晰表达自己究竟想要什么？' },
-    { id: 'q2', text: '开发出来后，你自己会经常使用它吗？' },
-    { id: 'q3', text: '这个软件能长期改变你的生活吗？' },
-    { id: 'q4', text: '这个项目是否能真正帮助到大家？' },
+    {
+        id: 'clarity',
+        text: '你能否清晰地表达自己究竟想要通过它达成什么？',
+        sub: 'Clarity of Purpose'
+    },
+    {
+        id: 'self_use',
+        text: '开发完成后，你自己会频繁地使用它吗？',
+        sub: 'Self-Necessity'
+    },
+    {
+        id: 'impact',
+        text: '它能在未来长久地改变你的生活方式吗？',
+        sub: 'Long-term Impact'
+    },
+    {
+        id: 'value',
+        text: '你是否坚信这个项目能为他人带来价值？',
+        sub: 'External Value'
+    },
 ];
 
 const PendingModule = () => {
@@ -19,26 +34,13 @@ const PendingModule = () => {
 
     // Load projects
     useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved = localStorage.getItem(STORAGE_KEYS.PENDING);
         if (saved) setProjects(JSON.parse(saved));
-        else {
-            // Mock data for initial view
-            setProjects([
-                {
-                    id: '1',
-                    title: 'Flow Studio Next',
-                    desc: 'Modernizing personal project management workflow',
-                    status: 'sapling',
-                    score: 0,
-                    answers: {}
-                }
-            ]);
-        }
     }, []);
 
     // Save projects
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+        localStorage.setItem(STORAGE_KEYS.PENDING, JSON.stringify(projects));
     }, [projects]);
 
     const handleAnswer = (projectId, questionId, value) => {
@@ -52,167 +54,230 @@ const PendingModule = () => {
         });
         setProjects(updatedProjects);
 
-        // Update selected project view in real-time
-        if (selectedProject && selectedProject.id === projectId) {
+        if (selectedProject?.id === projectId) {
             setSelectedProject(updatedProjects.find(p => p.id === projectId));
         }
     };
 
-    const getSaplingStage = (score) => {
-        if (score === 0) return { scale: 0.5, color: 'text-gray-400', label: 'Seed' };
-        if (score <= 2) return { scale: 0.8, color: 'text-yellow-500', label: 'Sprout' };
-        if (score <= 3) return { scale: 1.0, color: 'text-green-400', label: 'Sapling' };
-        return { scale: 1.2, color: 'text-emerald-600', label: 'Tree' };
+    const handleGraduate = (project) => {
+        // 1. Remove from Pending
+        const remaining = projects.filter(p => p.id !== project.id);
+        setProjects(remaining);
+        setSelectedProject(null);
+
+        // 2. Add to Primary Dev
+        const primaryProjects = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRIMARY) || '[]');
+        const newPrimary = {
+            ...project,
+            graduatedAt: Date.now(),
+            progress: 0,
+            tasks: []
+        };
+        localStorage.setItem(STORAGE_KEYS.PRIMARY, JSON.stringify([newPrimary, ...primaryProjects]));
+    };
+
+    const handleDelete = (e, id) => {
+        e.stopPropagation();
+        const remaining = projects.filter(p => p.id !== id);
+        setProjects(remaining);
+        if (selectedProject?.id === id) setSelectedProject(null);
+    }
+
+    const getSaplingState = (score) => {
+        if (score === 0) return { scale: 0.8, opacity: 0.3, color: 'text-gray-300' }; // Seed
+        if (score <= 2) return { scale: 0.9, opacity: 0.7, color: 'text-yellow-500' }; // Sprout
+        if (score < 4) return { scale: 1.0, opacity: 0.9, color: 'text-lime-500' }; // Sapling
+        return { scale: 1.1, opacity: 1, color: 'text-emerald-600' }; // Tree
     };
 
     return (
-        <div className="max-w-6xl mx-auto pt-10 px-6 h-full flex gap-8">
+        <div className="max-w-7xl mx-auto pt-8 px-6 h-full flex gap-10">
 
-            {/* List View (Left Stream) */}
-            <div className={`flex-1 transition-all duration-500 ${selectedProject ? 'w-1/3' : 'w-full'}`}>
+            {/* Stream (Left) */}
+            <div className={`transition-all duration-500 flex flex-col ${selectedProject ? 'w-[350px] opacity-40 hover:opacity-100' : 'w-full'}`}>
                 <div className="mb-8">
-                    <h2 className="text-2xl font-light text-gray-900 mb-2">Pending Projects</h2>
-                    <p className="text-gray-400 text-sm font-light">
-                        Each idea is a seed. Water it with honesty.
-                    </p>
+                    <h2 className="text-2xl font-light tracking-wide text-gray-900">Pending Stream</h2>
+                    <p className="text-xs font-mono text-gray-400 mt-1 uppercase tracking-widest">Assessment Queue</p>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-4 overflow-y-auto pb-20 no-scrollbar">
                     {projects.map(project => (
                         <motion.div
-                            layoutId={`card-${project.id}`}
+                            layoutId={project.id}
                             key={project.id}
-                            onDoubleClick={() => setSelectedProject(project)}
+                            onClick={() => setSelectedProject(project)}
                             className={`
-                group cursor-pointer bg-white border border-gray-100 rounded-2xl p-4 flex items-center gap-6 hover:shadow-lg transition-all duration-300
-                ${selectedProject?.id === project.id ? 'ring-2 ring-gray-900 shadow-xl' : ''}
+                group cursor-pointer bg-white border rounded-xl p-5 relative transition-all duration-300
+                ${selectedProject?.id === project.id ? 'border-gray-900 shadow-md ring-1 ring-gray-900' : 'border-gray-100 hover:border-gray-300'}
               `}
                         >
-                            <div className={`
-                w-16 h-16 rounded-xl flex items-center justify-center bg-gray-50 group-hover:bg-gray-100 transition-colors
-                ${getSaplingStage(project.score).color}
-              `}>
-                                <Sprout size={32} strokeWidth={1.5} />
+                            <div className="flex justify-between items-start mb-3">
+                                <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+                                    <Sprout size={18} className={project.score === 4 ? 'text-emerald-500' : ''} />
+                                </div>
+                                <button
+                                    onClick={(e) => handleDelete(e, project.id)}
+                                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 transition-all"
+                                >
+                                    <X size={14} />
+                                </button>
                             </div>
-                            <div className="flex-1">
-                                <h3 className="text-lg font-medium text-gray-900">{project.title}</h3>
-                                <p className="text-gray-500 text-sm font-light mt-1">{project.desc}</p>
+                            <h3 className="text-gray-900 font-medium mb-1">{project.title}</h3>
+                            <p className="text-gray-400 text-xs font-light line-clamp-2">{project.desc}</p>
+
+                            <div className="mt-4 flex gap-1 h-1">
+                                {QUESTIONS.map((q, i) => (
+                                    <div key={i} className={`flex-1 rounded-full ${project.answers[q.id] ? 'bg-emerald-500' : project.answers[q.id] === false ? 'bg-red-200' : 'bg-gray-100'}`} />
+                                ))}
                             </div>
                         </motion.div>
                     ))}
 
                     <button
-                        className="w-full py-4 border-2 border-dashed border-gray-100 rounded-2xl text-gray-300 hover:border-gray-300 hover:text-gray-500 transition-all font-light"
                         onClick={() => {
-                            const newP = { id: uuidv4(), title: 'New Concept', desc: 'Double click to edit details...', status: 'sapling', score: 0, answers: {} };
-                            setProjects([...projects, newP]);
+                            const title = prompt("Project Name?");
+                            if (title) {
+                                setProjects([{
+                                    id: uuidv4(),
+                                    title,
+                                    desc: 'New Concept awaiting assessment...',
+                                    score: 0,
+                                    answers: {}
+                                }, ...projects]);
+                            }
                         }}
+                        className="w-full py-4 border border-dashed border-gray-200 rounded-xl text-gray-400 text-sm font-light hover:border-gray-400 hover:text-gray-600 transition-all flex items-center justify-center gap-2"
                     >
-                        + New Seed
+                        <span className="text-lg">+</span> Add Concept
                     </button>
                 </div>
             </div>
 
-            {/* Detail View (Right Panel - The "Visualizer") */}
-            <AnimatePresence>
+            {/* Assessment (Right) */}
+            <AnimatePresence mode="wait">
                 {selectedProject && (
                     <motion.div
-                        initial={{ opacity: 0, x: 20 }}
+                        key="detail"
+                        initial={{ opacity: 0, x: 50 }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        className="w-2/3 bg-white h-fit min-h-[600px] rounded-3xl shadow-2xl border border-gray-100 p-8 relative overflow-hidden"
+                        exit={{ opacity: 0, x: 50 }}
+                        className="flex-1 bg-white border border-gray-100 rounded-3xl p-10 shadow-sm overflow-y-auto no-scrollbar relative"
                     >
                         <button
                             onClick={() => setSelectedProject(null)}
-                            className="absolute top-6 right-6 p-2 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors z-10"
+                            className="absolute top-6 right-6 p-2 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors"
                         >
-                            <X size={20} className="text-gray-500" />
+                            <X size={20} className="text-gray-400" />
                         </button>
 
-                        {/* Sapling Visualization */}
-                        <div className="flex flex-col items-center justify-center py-10 border-b border-gray-50 relative">
+                        {/* Header / Visualization */}
+                        <div className="flex flex-col items-center mb-16">
                             <motion.div
-                                animate={{ scale: getSaplingStage(selectedProject.score).scale }}
-                                className={`mb-4 transition-colors duration-500 ${getSaplingStage(selectedProject.score).color}`}
+                                animate={getSaplingState(selectedProject.score)}
+                                className="mb-6 relative"
                             >
-                                <Sprout size={80} strokeWidth={1} />
+                                <Sprout size={100} strokeWidth={1} />
+                                {selectedProject.score === 4 && (
+                                    <motion.div
+                                        initial={{ scale: 0 }} animate={{ scale: 1 }}
+                                        className="absolute -top-1 -right-1 text-yellow-500"
+                                    >
+                                        <Sun size={32} fill="currentColor" className="animate-spin-slow" />
+                                    </motion.div>
+                                )}
                             </motion.div>
-                            <h1 className="text-3xl font-light text-gray-900">{selectedProject.title}</h1>
-                            <p className="text-gray-400 mt-2 font-light">Viability Score: {selectedProject.score} / 4</p>
 
-                            {/* Status Indicator */}
-                            <div className="flex gap-4 mt-6">
-                                <div className={`flex items-center gap-1 text-xs px-3 py-1 rounded-full ${selectedProject.score > 2 ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-400'}`}>
-                                    <Sun size={12} />
-                                    <span>Sunlight</span>
+                            <h1 className="text-4xl font-thin text-gray-900 mb-2">{selectedProject.title}</h1>
+                            <div className="flex gap-6 mt-4 text-xs font-medium tracking-widest uppercase text-gray-400">
+                                <div className={`flex items-center gap-2 ${selectedProject.score >= 2 ? 'text-blue-500' : ''}`}>
+                                    <Droplets size={14} /> Hydration
                                 </div>
-                                <div className={`flex items-center gap-1 text-xs px-3 py-1 rounded-full ${selectedProject.score > 1 ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-400'}`}>
-                                    <Droplets size={12} />
-                                    <span>Water</span>
+                                <div className={`flex items-center gap-2 ${selectedProject.score >= 4 ? 'text-yellow-500' : ''}`}>
+                                    <Sun size={14} /> Photosynthesis
                                 </div>
                             </div>
                         </div>
 
-                        {/* Assessment Flow (Vertical Scroll) */}
-                        <div className="mt-8 space-y-6">
-                            <h3 className="text-sm uppercase tracking-widest text-gray-400 font-medium mb-6">Survival Assessment</h3>
-
-                            {QUESTIONS.map((q, index) => {
-                                const answer = selectedProject.answers[q.id];
+                        {/* Questions Flow */}
+                        <div className="space-y-4 max-w-2xl mx-auto">
+                            {QUESTIONS.map((q, i) => {
+                                const ans = selectedProject.answers[q.id];
                                 return (
-                                    <div key={q.id} className="group">
-                                        <div className={`
-                      p-6 rounded-2xl border transition-all duration-300
-                      ${answer === true ? 'bg-green-50/50 border-green-100' : ''}
-                      ${answer === false ? 'bg-red-50/50 border-red-100' : ''}
-                      ${answer === undefined ? 'bg-gray-50 border-transparent' : ''}
-                    `}>
-                                            <p className="text-lg text-gray-800 font-light mb-4">{q.text}</p>
-                                            <div className="flex gap-4">
-                                                <button
-                                                    onClick={() => handleAnswer(selectedProject.id, q.id, true)}
-                                                    className={`
-                            flex-1 py-3 rounded-xl flex items-center justify-center gap-2 transition-all
-                            ${answer === true ? 'bg-green-500 text-white shadow-lg shadow-green-200' : 'bg-white text-gray-400 hover:bg-green-50 hover:text-green-500'}
-                          `}
-                                                >
-                                                    <Check size={18} />
-                                                    <span>YES</span>
-                                                </button>
-                                                <button
-                                                    onClick={() => handleAnswer(selectedProject.id, q.id, false)}
-                                                    className={`
-                            flex-1 py-3 rounded-xl flex items-center justify-center gap-2 transition-all
-                            ${answer === false ? 'bg-red-500 text-white shadow-lg shadow-red-200' : 'bg-white text-gray-400 hover:bg-red-50 hover:text-red-500'}
-                          `}
-                                                >
-                                                    <X size={18} />
-                                                    <span>NO</span>
-                                                </button>
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.1 }}
+                                        key={q.id}
+                                        className={`
+                      relative p-6 rounded-2xl border transition-all duration-500
+                      ${ans === true ? 'bg-emerald-50/30 border-emerald-100' : ''}
+                      ${ans === false ? 'bg-red-50/30 border-red-100' : ''}
+                      ${ans === undefined ? 'bg-white border-gray-100' : ''}
+                    `}
+                                    >
+                                        <div className="flex justify-between items-center mb-4">
+                                            <div>
+                                                <h4 className="text-sm font-mono text-gray-400 uppercase tracking-wider mb-1">{q.sub}</h4>
+                                                <p className="text-lg text-gray-800 font-light">{q.text}</p>
                                             </div>
+                                            {ans === true && <CheckCircle2 className="text-emerald-500" size={24} />}
+                                            {ans === false && <X className="text-red-400" size={24} />}
                                         </div>
-                                    </div>
+
+                                        <div className="flex gap-4 opacity-100 transition-opacity">
+                                            <button
+                                                onClick={() => handleAnswer(selectedProject.id, q.id, true)}
+                                                className={`
+                          flex-1 py-3 border rounded-xl text-sm transition-all hover:scale-[1.02] active:scale-100
+                          ${ans === true ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-200' : 'bg-white border-gray-200 text-gray-400 hover:border-emerald-200 hover:text-emerald-600 bg-transparent'}
+                        `}
+                                            >
+                                                YES
+                                            </button>
+                                            <button
+                                                onClick={() => handleAnswer(selectedProject.id, q.id, false)}
+                                                className={`
+                          flex-1 py-3 border rounded-xl text-sm transition-all hover:scale-[1.02] active:scale-100
+                          ${ans === false ? 'bg-red-400 border-red-400 text-white shadow-lg shadow-red-200' : 'bg-white border-gray-200 text-gray-400 hover:border-red-200 hover:text-red-500 bg-transparent'}
+                        `}
+                                            >
+                                                NO
+                                            </button>
+                                        </div>
+                                    </motion.div>
                                 );
                             })}
                         </div>
 
-                        {/* Action Bar */}
-                        {selectedProject.score === 4 && (
-                            <motion.div
-                                initial={{ y: 50, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                className="sticky bottom-0 mt-8 pt-4 bg-gradient-to-t from-white via-white to-transparent"
-                            >
-                                <button className="w-full py-4 bg-gray-900 text-white rounded-2xl flex items-center justify-center gap-2 hover:bg-black transition-colors shadow-xl">
-                                    <span>Move to Primary Dev</span>
-                                    <ArrowRight size={18} />
-                                </button>
-                            </motion.div>
-                        )}
+                        {/* Graduation */}
+                        <div className="max-w-2xl mx-auto mt-12 pb-10">
+                            {selectedProject.score === 4 ? (
+                                <motion.button
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    onClick={() => handleGraduate(selectedProject)}
+                                    className="w-full py-5 bg-gray-900 text-white rounded-2xl flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                                >
+                                    <span className="text-lg font-light tracking-wide">Graduate to Primary Dev</span>
+                                    <ArrowRight size={20} />
+                                </motion.button>
+                            ) : (
+                                <div className="text-center text-gray-300 font-light text-sm italic">
+                                    Complete self-assessment to proceed
+                                </div>
+                            )}
+                        </div>
 
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {!selectedProject && projects.length > 0 && (
+                <div className="flex-1 flex flex-col items-center justify-center text-gray-200">
+                    <Sprout size={64} strokeWidth={0.5} />
+                    <p className="mt-4 font-light">Select a seed to assess</p>
+                </div>
+            )}
         </div>
     );
 };
