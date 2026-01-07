@@ -54,7 +54,9 @@ export const useSyncStore = (docId, initialData = {}) => {
 
         if (user) {
             setStatus('syncing');
-            const updatesColl = collection(db, `sync_rooms/${docId}/updates`);
+            // User-scoped path: users/{uid}/rooms/{docId}/updates
+            // This ensures users can only read/write their own data, solving permission errors (with standard rules).
+            const updatesColl = collection(db, `users/${user.uid}/rooms/${docId}/updates`);
 
             // Listen for remote updates
             const q = query(updatesColl, orderBy('createdAt', 'asc')); // Simplification: Load all updates. optimizing later.
