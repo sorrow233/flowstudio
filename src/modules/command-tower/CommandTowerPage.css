@@ -376,6 +376,31 @@
     height: 10px;
     border-radius: 50%;
     flex-shrink: 0;
-    margin-right: 10px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Tag Pills */
+.ct-command-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.ct-tag-pill {
+    font-size: 0.65rem;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 1px 6px;
+    border-radius: 10px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.ct-command-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+    margin-right: 8px;
 }

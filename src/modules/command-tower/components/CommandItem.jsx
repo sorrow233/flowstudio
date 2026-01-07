@@ -34,15 +34,16 @@ export default function CommandItem({
                         <Circle size={18} color="#cbd5e1" />
                     )}
                 </div>
-
-                <span className="ct-command-title">{command.title}</span>
-                {command.tags && command.tags.length > 0 && (
-                    <div className="ct-command-tags">
-                        {command.tags.map(tag => (
-                            <span key={tag} className="ct-tag-pill">{tag}</span>
-                        ))}
-                    </div>
-                )}
+                <div className="ct-command-content-wrapper">
+                    <span className="ct-command-title">{command.title}</span>
+                    {command.tags && command.tags.length > 0 && (
+                        <div className="ct-command-tags">
+                            {command.tags.map(tag => (
+                                <span key={tag} className="ct-tag-pill">{tag}</span>
+                            ))}
+                        </div>
+                    )}
+                </div>
                 <span
                     className="ct-copy-indicator"
                     onClick={(e) => {
