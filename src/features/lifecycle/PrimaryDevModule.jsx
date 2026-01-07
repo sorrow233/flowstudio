@@ -65,8 +65,16 @@ const PrimaryDevModule = () => {
                     <motion.div
                         layout
                         key={project.id}
-                        className="group bg-white border border-gray-100 rounded-3xl p-6 hover:shadow-xl hover:shadow-gray-100/50 transition-all cursor-default"
+                        className={`
+                          group bg-white border rounded-3xl p-6 hover:shadow-xl transition-all cursor-default relative overflow-hidden
+                          ${project.motivation
+                                ? 'border-emerald-100/50 shadow-[0_0_30px_rgba(16,185,129,0.05)] hover:shadow-[0_0_30px_rgba(16,185,129,0.1)]'
+                                : 'border-gray-100 hover:shadow-gray-100/50'}
+                        `}
                     >
+                        {project.motivation && (
+                            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-emerald-500/10 to-transparent rounded-bl-full -mr-10 -mt-10 pointer-events-none" />
+                        )}
                         <div className="flex justify-between items-start mb-6">
                             <div className="w-12 h-12 bg-gray-900 text-white rounded-2xl flex items-center justify-center transition-transform group-hover:scale-105 shadow-lg shadow-gray-200">
                                 <Code2 size={24} strokeWidth={1.5} />

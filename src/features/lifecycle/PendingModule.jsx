@@ -43,6 +43,16 @@ const PendingModule = () => {
         localStorage.setItem(STORAGE_KEYS.PENDING, JSON.stringify(projects));
     }, [projects]);
 
+    const handleUpdateProject = (id, field, value) => {
+        const updatedProjects = projects.map(p =>
+            p.id === id ? { ...p, [field]: value } : p
+        );
+        setProjects(updatedProjects);
+        if (selectedProject?.id === id) {
+            setSelectedProject({ ...selectedProject, [field]: value });
+        }
+    };
+
     const handleAnswer = (projectId, questionId, value) => {
         const updatedProjects = projects.map(p => {
             if (p.id !== projectId) return p;
@@ -171,7 +181,7 @@ const PendingModule = () => {
                         </button>
 
                         {/* Header / Visualization */}
-                        <div className="flex flex-col items-center mb-16">
+                        <div className="flex flex-col items-center mb-8">
                             <motion.div
                                 animate={getSaplingState(selectedProject.score)}
                                 className="mb-6 relative"
@@ -187,8 +197,28 @@ const PendingModule = () => {
                                 )}
                             </motion.div>
 
-                            <h1 className="text-4xl font-thin text-gray-900 mb-2">{selectedProject.title}</h1>
-                            <div className="flex gap-6 mt-4 text-xs font-medium tracking-widest uppercase text-gray-400">
+                            <input
+                                value={selectedProject.title}
+                                onChange={(e) => handleUpdateProject(selectedProject.id, 'title', e.target.value)}
+                                className="text-4xl font-thin text-gray-900 mb-2 text-center bg-transparent border-b border-transparent hover:border-gray-200 focus:border-gray-900 focus:outline-none transition-all w-full"
+                            />
+
+                            <div className="flex flex-col gap-2 w-full max-w-md mt-4">
+                                <input
+                                    placeholder="Website Link (Optional)"
+                                    value={selectedProject.link || ''}
+                                    onChange={(e) => handleUpdateProject(selectedProject.id, 'link', e.target.value)}
+                                    className="text-sm font-light text-center bg-gray-50 rounded-lg py-2 px-4 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                                />
+                                <input
+                                    placeholder="Background Image URL (Optional)"
+                                    value={selectedProject.bgImage || ''}
+                                    onChange={(e) => handleUpdateProject(selectedProject.id, 'bgImage', e.target.value)}
+                                    className="text-xs font-light text-center text-gray-400 bg-transparent py-1 hover:text-gray-600 focus:outline-none"
+                                />
+                            </div>
+
+                            <div className="flex gap-6 mt-6 text-xs font-medium tracking-widest uppercase text-gray-400">
                                 <div className={`flex items-center gap-2 ${selectedProject.score >= 2 ? 'text-blue-500' : ''}`}>
                                     <Droplets size={14} /> Hydration
                                 </div>
@@ -247,6 +277,35 @@ const PendingModule = () => {
                                     </motion.div>
                                 );
                             })}
+
+                            {/* Founding Motivation Input */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5 }}
+                                className="relative p-7 rounded-2xl border border-gray-100 bg-white group focus-within:border-gray-800 focus-within:ring-1 focus-within:ring-gray-800 transition-all duration-500 shadow-sm hover:shadow-md"
+                            >
+                                <h4 className="text-sm font-mono text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                    The Primal Desire
+                                    <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded text-gray-500">OPTIONAL</span>
+                                </h4>
+                                <p className="text-lg text-gray-800 font-light mb-5 leading-relaxed">
+                                    这不仅是开发理由，更是未来的动力之源。<br />
+                                    <span className="italic text-gray-400 text-base">“无论前路如何，我现在就要开发这个项目，因为...”</span>
+                                </p>
+                                <textarea
+                                    value={selectedProject.motivation || ''}
+                                    onChange={(e) => {
+                                        const updatedProjects = projects.map(p =>
+                                            p.id === selectedProject.id ? { ...p, motivation: e.target.value } : p
+                                        );
+                                        setProjects(updatedProjects);
+                                        setSelectedProject({ ...selectedProject, motivation: e.target.value });
+                                    }}
+                                    placeholder="写下你最本初的感动... (We force you to think, not to type)"
+                                    className="w-full min-h-[140px] p-4 bg-gray-50 rounded-xl border-none resize-none outline-none text-gray-700 placeholder:text-gray-300 focus:bg-white transition-colors text-lg font-light"
+                                />
+                            </motion.div>
                         </div>
 
                         {/* Graduation */}
@@ -254,11 +313,26 @@ const PendingModule = () => {
                             {selectedProject.score === 4 ? (
                                 <motion.button
                                     initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
+                                    animate={{
+                                        opacity: 1,
+                                        y: 0,
+                                        boxShadow: selectedProject.motivation?.length > 10
+                                            ? "0 20px 25px -5px rgba(255, 255, 255, 0.5), 0 0 20px rgba(52, 211, 153, 0.5)"
+                                            : "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                                    }}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                     onClick={() => handleGraduate(selectedProject)}
-                                    className="w-full py-5 bg-gray-900 text-white rounded-2xl flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                                    className={`
+                    w-full py-5 text-white rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 border border-transparent
+                    ${selectedProject.motivation?.length > 10
+                                            ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-emerald-200'
+                                            : 'bg-gray-900 hover:bg-black shadow-xl'}
+                  `}
                                 >
-                                    <span className="text-lg font-light tracking-wide">Graduate to Primary Dev</span>
+                                    <span className="text-lg font-light tracking-wide">
+                                        {selectedProject.motivation?.length > 10 ? "Ignite & Graduate to Primary Dev" : "Graduate to Primary Dev"}
+                                    </span>
                                     <ArrowRight size={20} />
                                 </motion.button>
                             ) : (
