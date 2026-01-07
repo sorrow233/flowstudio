@@ -46,7 +46,7 @@ export default function CommandStageColumn({
     };
 
     return (
-        <div className="ct-stage-card" style={{ background: stage.color }}>
+        <div className="ct-stage-card">
             <div className="ct-stage-header">
                 <div className="ct-stage-info">
                     <div className="ct-stage-icon">

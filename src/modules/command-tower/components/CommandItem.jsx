@@ -10,7 +10,7 @@ export default function CommandItem({ command, onCopy, onEdit, onDelete, isCopie
             className="ct-command-item"
             style={{
                 '--cmd-color': command.color,
-                backgroundColor: 'rgba(255, 255, 255, 0.9)'
+                backgroundColor: '#ffffff'
             }}
         >
             <div

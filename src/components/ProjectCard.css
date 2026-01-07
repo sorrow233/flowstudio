@@ -8,7 +8,7 @@
     min-height: 180px;
     padding: 24px;
     border-radius: 20px;
-    background: var(--bg-glass);
+    background: #ffffff;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(0, 0, 0, 0.06);
@@ -16,12 +16,77 @@
         0 4px 20px rgba(0, 0, 0, 0.04),
         0 1px 3px rgba(0, 0, 0, 0.02);
     transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
+    perspective: 1000px;
+    background: transparent !important;
+    /* Let inner card handle background */
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+.project-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: left;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
     display: flex;
     flex-direction: column;
 }
 
-.project-card::before {
+.project-card.is-flipped .project-card-inner {
+    transform: rotateY(180deg);
+}
+
+.project-card-front,
+.project-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 20px;
+    background: #ffffff;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.04),
+        0 1px 3px rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.project-card-front {
+    z-index: 2;
+}
+
+.project-card-back {
+    transform: rotateY(180deg);
+    overflow: hidden;
+    background: #f8fafc;
+    /* Slightly different background for back */
+}
+
+/* Hover effects need to apply to the inner faces now */
+.project-card:hover .project-card-front {
+    /* transform: translateY(-4px);  Avoid transform conflict with flip? No, parent handles perspective. */
+    /* Let's simplify: lift the whole card container on hover if not flipped? */
+    /* Actually we should apply lift to the container */
+}
+
+/* Move hover lift to container, but ensure it doesn't break 3d */
+.project-card:hover .project-card-inner {
+    /* transform: translateY(-8px); This would conflict with rotateY. 
+       Better to just apply shadow changes or simple scale to container 
+       BUT container has perspective. 
+       Let's try applying hover effect safely. */
+}
+
+.project-card-front::before {
     content: '';
     position: absolute;
     top: 0;
@@ -33,15 +98,7 @@
     transition: opacity 0.3s ease;
 }
 
-.project-card:hover {
-    transform: translateY(-8px) scale(1.01);
-    box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.08),
-        0 8px 16px rgba(0, 0, 0, 0.04);
-    border-color: rgba(0, 0, 0, 0.1);
-}
-
-.project-card:hover::before {
+.project-card:hover .project-card-front::before {
     opacity: 1;
 }
 
