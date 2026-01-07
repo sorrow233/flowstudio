@@ -657,10 +657,10 @@ const PrimaryDevModule = () => {
                             </div>
 
                             <div className="p-6 overflow-y-auto bg-gray-50/30 custom-scrollbar flex-1">
-                                {commands.filter(c => c.stageId === (selectedProject?.subStage || 1)).length > 0 ? (
+                                {commands.filter(c => c.stageIds?.includes(selectedProject?.subStage || 1)).length > 0 ? (
                                     <div className="grid grid-cols-1 gap-3">
                                         {commands
-                                            .filter(c => c.stageId === (selectedProject?.subStage || 1))
+                                            .filter(c => c.stageIds?.includes(selectedProject?.subStage || 1))
                                             .map(cmd => (
                                                 <motion.div
                                                     key={cmd.id}

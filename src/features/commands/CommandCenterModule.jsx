@@ -3,7 +3,7 @@ import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import {
     Terminal, Plus, Trash2, Copy, Check, Search,
     Layers, MonitorPlay, Bug, Sparkles, Flag, Command,
-    ChevronRight, Sparkle, Link as LinkIcon, GripVertical, FileText, Globe
+    ChevronRight, Sparkle, Link as LinkIcon, GripVertical, FileText, Globe, Library, Download, X
 } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,6 +20,7 @@ const CommandCenterModule = () => {
     const [commands, setCommands] = useState([]);
     const [activeStage, setActiveStage] = useState(1);
     const [isAdding, setIsAdding] = useState(false);
+    const [isImporting, setIsImporting] = useState(false);
     const [search, setSearch] = useState('');
     const [copiedId, setCopiedId] = useState(null);
 
@@ -28,7 +29,25 @@ const CommandCenterModule = () => {
 
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEYS.COMMANDS);
-        if (saved) setCommands(JSON.parse(saved));
+        if (saved) {
+            let parsed = JSON.parse(saved);
+
+            // DATA MIGRATION: Ensure all commands have stageIds array
+            const migrated = parsed.map(c => {
+                if (!c.stageIds) {
+                    return {
+                        ...c,
+                        stageIds: c.stageId ? [c.stageId] : []
+                    };
+                }
+                return c;
+            });
+
+            // Check if we actually needed migration to avoid infinite loops if we were setting state inside effect without check
+            // (But creating a new array reference always triggers re-render if not careful. 
+            // Here we just set it once on mount. The save effect handles persist.)
+            setCommands(migrated);
+        }
     }, []);
 
     useEffect(() => {
@@ -49,8 +68,8 @@ const CommandCenterModule = () => {
                 title: newCmd.title.trim(),
                 content: newCmd.content.trim(),
                 url: newCmd.url.trim(),
-                type: newCmd.type,
-                stageId: activeStage
+                type: newCmd.type
+                // stageIds remains unchanged during simple edit
             } : c));
         } else {
             // Create New
@@ -60,7 +79,7 @@ const CommandCenterModule = () => {
                 content: newCmd.content.trim(),
                 url: newCmd.url.trim(),
                 type: newCmd.type,
-                stageId: activeStage,
+                stageIds: [activeStage], // Assign to current stage
                 createdAt: Date.now()
             };
             setCommands([command, ...commands]);
@@ -68,6 +87,17 @@ const CommandCenterModule = () => {
 
         setNewCmd({ title: '', content: '', type: 'utility', url: '' });
         setIsAdding(false);
+    };
+
+    const handleImport = (cmd) => {
+        // Add activeStage to the command's stageIds
+        const updated = commands.map(c =>
+            c.id === cmd.id
+                ? { ...c, stageIds: [...(c.stageIds || []), activeStage] }
+                : c
+        );
+        setCommands(updated);
+        setIsImporting(false);
     };
 
     const handleEdit = (cmd) => {
@@ -81,9 +111,28 @@ const CommandCenterModule = () => {
         setIsAdding(true);
     };
 
-    const handleDelete = (id) => {
-        if (confirm('Delete this command?')) {
-            setCommands(commands.filter(c => c.id !== id));
+    const handleRemove = (id) => {
+        const command = commands.find(c => c.id === id);
+        if (!command) return;
+
+        // Check if this is the last stage assignment
+        // If it's the last one, we hard delete.
+        // If it's mandatory, it's usually 1:1, but new logic allows M to be anywhere technically, 
+        // but user requirement implies M is specific. We treat all same here for consistency.
+
+        const isLastInstance = command.stageIds.length <= 1;
+
+        if (confirm(isLastInstance ? 'Delete this command permanently?' : 'Remove command from this stage? (It will remain in others)')) {
+            if (isLastInstance) {
+                setCommands(commands.filter(c => c.id !== id));
+            } else {
+                // Just remove the stageId
+                setCommands(commands.map(c =>
+                    c.id === id
+                        ? { ...c, stageIds: c.stageIds.filter(sid => sid !== activeStage) }
+                        : c
+                ));
+            }
         }
     };
 
@@ -94,12 +143,38 @@ const CommandCenterModule = () => {
     };
 
     // Reorder Handlers
+    // Note: Reordering is tricky with global commands. 
+    // We will store the order in the array itself relative to other items?
+    // Simplified User Reorder: We just update the command array order. 
+    // Since we filter by stage, moving an item in the main array changes its relative pos.
+    // Ideally we need per-stage order. For V1, we accept that reordering might affect global order.
+    // Or we keep it simple: Reorder just moves it in the master list.
     const handleReorder = (reorderedStageCommands) => {
-        const otherCommands = commands.filter(c => c.stageId !== activeStage);
-        setCommands([...reorderedStageCommands, ...otherCommands]);
+        // We need to merge reordered subset back into the main list without losing others
+        // Strategy: Create a new list where the items of this stage are replaced by the reordered ones
+
+        // 1. Get IDs of items in this stage
+        const stageIdsSet = new Set(reorderedStageCommands.map(c => c.id));
+
+        // 2. Filter out current stage items from main list to preserve "others" order
+        const others = commands.filter(c => !stageIdsSet.has(c.id));
+
+        // 3. We can't just append 'others' at the end or we lose the global mix.
+        // Simpler V1 approach: Just put text stage items at TOP or replace them?
+        // Let's just put the reordered ones + others.
+        // This effectively "groups" stage commands together in the master list if we view raw DB, 
+        // but for the user it looks correct.
+        setCommands([...reorderedStageCommands, ...others]);
     };
 
-    const stageCommands = commands.filter(c => c.stageId === activeStage);
+    // Filter commands for current stage
+    const stageCommands = commands.filter(c => c.stageIds?.includes(activeStage));
+
+    // For Import Modal: Commands NOT in current stage AND (Link or Utility)
+    const importableCommands = commands.filter(c =>
+        !c.stageIds?.includes(activeStage) &&
+        (c.type === 'link' || c.type === 'utility')
+    );
 
     // Search filtering
     const isSearching = search.trim().length > 0;
@@ -133,7 +208,8 @@ const CommandCenterModule = () => {
                 <div className="space-y-1">
                     {DEV_STAGES.map(stage => {
                         const Icon = STAGE_ICONS[stage.id];
-                        const count = commands.filter(c => c.stageId === stage.id).length;
+                        // Count items in this stage
+                        const count = commands.filter(c => c.stageIds?.includes(stage.id)).length;
                         const isActive = activeStage === stage.id;
 
                         return (
@@ -202,16 +278,30 @@ const CommandCenterModule = () => {
                         </p>
                     </div>
                     <div className="flex flex-col items-end gap-4">
-                        <button
-                            onClick={() => {
-                                setNewCmd({ title: '', content: '', type: 'utility', url: '' }); // Clear for new
-                                setIsAdding(true);
-                            }}
-                            className="group flex items-center gap-3 px-6 py-3 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-                        >
-                            <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
-                            <span className="font-medium tracking-wide">New Command</span>
-                        </button>
+                        <div className="flex gap-2">
+                            {/* Import Button */}
+                            <button
+                                onClick={() => setIsImporting(true)}
+                                className="group flex items-center gap-2 px-5 py-3 bg-white text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all shadow-sm hover:shadow-md"
+                                title="Import from Global Library"
+                            >
+                                <Library size={18} />
+                                <span className="font-medium text-sm">Library</span>
+                            </button>
+
+                            {/* New Command Button */}
+                            <button
+                                onClick={() => {
+                                    setNewCmd({ title: '', content: '', type: 'utility', url: '' }); // Clear for new
+                                    setIsAdding(true);
+                                }}
+                                className="group flex items-center gap-3 px-6 py-3 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                            >
+                                <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
+                                <span className="font-medium tracking-wide">New Command</span>
+                            </button>
+                        </div>
+
                         <div className="relative group">
                             <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
                             <input
@@ -377,6 +467,11 @@ const CommandCenterModule = () => {
                                                 {cmd.type === 'link' && (
                                                     <span className="text-[10px] font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full uppercase tracking-wider">LINK</span>
                                                 )}
+                                                {(cmd.stageIds && cmd.stageIds.length > 1) && (
+                                                    <span className="text-[10px] font-bold bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                                                        <Globe size={8} /> SHARED
+                                                    </span>
+                                                )}
                                             </div>
                                             <div className="text-xs text-gray-400 font-mono truncate flex items-center gap-2">
                                                 {cmd.type === 'link' ? (
@@ -408,9 +503,9 @@ const CommandCenterModule = () => {
                                                 {copiedId === cmd.id ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} />}
                                             </button>
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); handleDelete(cmd.id); }}
+                                                onClick={(e) => { e.stopPropagation(); handleRemove(cmd.id); }}
                                                 className="p-2 hover:bg-red-50 rounded-xl text-gray-400 hover:text-red-500 transition-colors"
-                                                title="Delete"
+                                                title="Remove"
                                             >
                                                 <Trash2 size={18} />
                                             </button>
@@ -420,7 +515,7 @@ const CommandCenterModule = () => {
                             ))}
                         </Reorder.Group>
                     ) : (
-                        !isAdding && (
+                        !isAdding && !isImporting && (
                             <div className="flex flex-col items-center justify-center py-32 text-center select-none">
                                 <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 animate-pulse">
                                     <Terminal size={32} className="text-gray-300" />
@@ -429,20 +524,92 @@ const CommandCenterModule = () => {
                                 <p className="text-gray-400 max-w-sm mx-auto mb-8">
                                     Stage {activeStage} is waiting for orders.
                                 </p>
-                                <button
-                                    onClick={() => {
-                                        setNewCmd({ title: '', content: '', type: 'utility', url: '' });
-                                        setIsAdding(true);
-                                    }}
-                                    className="text-emerald-600 font-medium hover:text-emerald-700 flex items-center gap-2 hover:gap-3 transition-all"
-                                >
-                                    Create First Command <ChevronRight size={16} />
-                                </button>
+                                <div className="flex gap-4">
+                                    <button
+                                        onClick={() => setIsImporting(true)}
+                                        className="text-gray-500 font-medium hover:text-gray-700 flex items-center gap-2 hover:gap-3 transition-all"
+                                    >
+                                        <Library size={16} /> Open Library
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setNewCmd({ title: '', content: '', type: 'utility', url: '' });
+                                            setIsAdding(true);
+                                        }}
+                                        className="text-emerald-600 font-medium hover:text-emerald-700 flex items-center gap-2 hover:gap-3 transition-all"
+                                    >
+                                        Create Command <ChevronRight size={16} />
+                                    </button>
+                                </div>
                             </div>
                         )
                     )}
                 </div>
             </div>
+
+            {/* Import Library Modal */}
+            <AnimatePresence>
+                {isImporting && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                            onClick={() => setIsImporting(false)}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="bg-white rounded-[2rem] shadow-2xl p-8 max-w-2xl w-full max-h-[80vh] flex flex-col relative z-50"
+                        >
+                            <div className="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 className="text-xl font-light text-gray-900 flex items-center gap-2">
+                                        <Library size={20} /> Global Command Library
+                                    </h3>
+                                    <p className="text-xs text-gray-400 mt-1">Import commands from other stages</p>
+                                </div>
+                                <button onClick={() => setIsImporting(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                                    <X size={20} className="text-gray-400" />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
+                                {importableCommands.length > 0 ? (
+                                    importableCommands.map(cmd => (
+                                        <div key={cmd.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:border-emerald-200 hover:shadow-md transition-all group">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`
+                                                    w-10 h-10 rounded-lg flex items-center justify-center shrink-0
+                                                    ${cmd.type === 'link' ? 'bg-blue-50 text-blue-500' : 'bg-gray-50 text-gray-400'}
+                                                `}>
+                                                    {cmd.type === 'link' ? <LinkIcon size={18} /> : <Command size={18} />}
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-medium text-gray-900">{cmd.title}</h4>
+                                                    <p className="text-xs text-gray-400 font-mono line-clamp-1 max-w-xs">{cmd.url || cmd.content}</p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => handleImport(cmd)}
+                                                className="px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-emerald-500 hover:text-white transition-colors flex items-center gap-2"
+                                            >
+                                                <Download size={14} /> Import
+                                            </button>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-12 text-gray-400">
+                                        <Library size={48} className="mx-auto mb-4 opacity-20" />
+                                        <p>No other commands available to import.</p>
+                                        <p className="text-xs mt-2">Only 'Utility' and 'Link' types are shared globally.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
