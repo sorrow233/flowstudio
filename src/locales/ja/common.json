@@ -88,7 +88,15 @@
         "delete_permanent_warning": "この操作は取り消せません。",
         "error_title": "問題が発生しました",
         "try_again": "再試行",
-        "offline_mode": "オフラインです。変更はローカルに保存されます。"
+        "offline_mode": "オフラインです。変更はローカルに保存されます。",
+        "confirm_move": "移動を確認",
+        "move_to_next_stage": "このプロジェクトを次の段階に進めてもよろしいですか？",
+        "confirm": "確認",
+        "change_background": "背景を変更",
+        "preset_colors": "プリセットカラー",
+        "custom_image": "カスタム画像",
+        "upload_image": "画像をアップロード",
+        "remove_image": "画像を削除"
     },
     "landing": {
         "hero_title": "あなたのAI搭載パーソナルソフトウェア武器庫",
