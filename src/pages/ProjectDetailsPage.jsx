@@ -12,13 +12,15 @@ import CommandSelectorModal from '@/components/CommandSelectorModal';
 import { useCommandTower } from '@/features/command-tower/hooks/useCommandTower';
 import CommandItem from '@/modules/command-tower/components/CommandItem';
 import { Logger } from '@/utils/logger';
+import ProjectPhaseTracker from '@/features/projects/components/ProjectPhaseTracker';
+import StageDashboard from '@/features/projects/components/StageDashboard';
 import './ProjectDetailsPage.css';
 
 export default function ProjectDetailsPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { t } = useTranslation();
-    const { projects, updateProject, loading } = useProjects();
+    const { projects, updateProject, loading, toggleCommandCompletion, moveItemNext } = useProjects();
     const [isCommandModalOpen, setIsCommandModalOpen] = useState(false);
     const [copiedId, setCopiedId] = useState(null);
     const [isEditingTags, setIsEditingTags] = useState(false);
@@ -207,109 +209,51 @@ export default function ProjectDetailsPage() {
                             </div>
                         )}
                     </div>
+
+                    {/* Quick Access to Pinned Commands */}
+                    <div className="sidebar-card" style={{ marginTop: '1rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <h3>{t('common.pinned_commands') || "Pinned Commands"}</h3>
+                            <button className="btn-icon-sm" onClick={() => setIsCommandModalOpen(true)}><Plus size={14} /></button>
+                        </div>
+                        <div className="pinned-commands-list">
+                            {pinnedCommands.length === 0 ? (
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>No pinned commands.</p>
+                            ) : (
+                                pinnedCommands.map(cmd => (
+                                    <div key={cmd.id} className="mini-pinned-item">
+                                        <div className="mini-pinned-header">
+                                            <span className="mini-pinned-title">{cmd.title}</span>
+                                            <button className="btn-icon-danger" onClick={() => handleUnpinCommand(cmd.id)}><Trash2 size={12} /></button>
+                                        </div>
+                                        <div className="mini-pinned-code" onClick={() => copyToClipboard(cmd.content, cmd.id)}>
+                                            <Terminal size={12} style={{ marginRight: '4px' }} />
+                                            <span className="truncate">{cmd.content.substring(0, 20)}...</span>
+                                            {copiedId === cmd.id && <Check size={12} color="#4ade80" style={{ marginLeft: 'auto' }} />}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
                 </aside>
 
                 {/* Right Column: Relations & Content */}
                 <main className="details-main">
-                    {/* Access / Commands Section */}
-                    <section className="details-section">
-                        <div className="section-header-row">
-                            <SectionHeader
-                                icon={<Terminal size={18} />}
-                                title={t('common.pinned_commands') || "Pinned Commands"}
-                                count={pinnedCommands.length}
-                            />
-                            <button
-                                className="btn-add-command"
-                                onClick={() => setIsCommandModalOpen(true)}
-                            >
-                                <Plus size={14} />
-                                {t('common.pin_command') || "Pin Command"}
-                            </button>
-                        </div>
 
-                        <div className="pinned-commands-grid">
-                            {pinnedCommands.length === 0 ? (
-                                <div className="empty-relations">
-                                    <p>{t('common.no_pinned_commands') || "No commands pinned yet. Add frequently used commands from Command Tower."}</p>
-                                </div>
-                            ) : (
-                                pinnedCommands.map(cmd => (
-                                    <div key={cmd.id} className="pinned-command-card" style={{ borderLeftColor: cmd.color || 'var(--color-primary)' }}>
-                                        <div className="pinned-cmd-header">
-                                            <span className="pinned-cmd-title">{cmd.title}</span>
-                                            <button
-                                                className="btn-icon-danger"
-                                                onClick={() => handleUnpinCommand(cmd.id)}
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                        <div
-                                            className="pinned-cmd-code-block"
-                                            onClick={() => copyToClipboard(cmd.content, cmd.id)}
-                                            title={t('common.click_to_copy') || "Click to copy"}
-                                        >
-                                            <code>{cmd.content}</code>
-                                            <div className="copy-indicator">
-                                                {copiedId === cmd.id ? <Check size={14} color="#4ade80" /> : <Copy size={14} />}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </section>
+                    {/* Phase Tracker */}
+                    <ProjectPhaseTracker currentStage={project.stage} />
 
-                    {/* Suggested Commands (Quantum Entanglement) */}
-                    <section className="details-section animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                        <SectionHeader
-                            icon={<Target size={18} />} // Or Sparkles?
-                            title={t('project.suggested_commands') || "Suggested Commands"}
-                            subtitle={
-                                project.tags && project.tags.length > 0
-                                    ? `Based on stage "${project.stage}" & tags: ${project.tags.join(', ')}`
-                                    : `All commands for stage "${project.stage}"`
-                            }
-                            count={suggestedCommands.length}
+                    {/* Stage Dashboard */}
+                    <section className="details-section animate-slide-up">
+                        <StageDashboard
+                            project={project}
+                            stageCommands={suggestedCommands}
+                            onToggleCompletion={toggleCommandCompletion}
+                            onAdvanceStage={(id) => moveItemNext(id, suggestedCommands)}
                         />
-
-                        <div className="pinned-commands-grid">
-                            {suggestedCommands.length === 0 ? (
-                                <div className="empty-relations">
-                                    <p>{t('project.no_suggested_commands') || "No suggested commands found for this stage/tag combination."}</p>
-                                </div>
-                            ) : (
-                                suggestedCommands.map(cmd => (
-                                    <div key={cmd.id} style={{ position: 'relative' }}>
-                                        <CommandItem
-                                            command={cmd}
-                                            onCopy={copyToClipboard}
-                                            isCopied={copiedId === cmd.id}
-                                            // Disable edit/delete here, purely suggestion
-                                            onEdit={() => { }}
-                                            onDelete={() => { }}
-                                        />
-                                        {/* Overlay to Pin? Optional enhancement. For now just view/copy. */}
-                                        <button
-                                            className="btn-icon"
-                                            style={{
-                                                position: 'absolute',
-                                                top: '8px',
-                                                right: '8px',
-                                                background: 'white',
-                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                            }}
-                                            onClick={() => handlePinCommand(cmd)}
-                                            title={t('common.pin_to_project') || "Pin to Project"}
-                                        >
-                                            <Plus size={14} color="var(--color-primary)" />
-                                        </button>
-                                    </div>
-                                ))
-                            )}
-                        </div>
                     </section>
+
                 </main>
             </div>
 

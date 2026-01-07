@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import {
     Plus, Trash2, Lightbulb, Rocket, Sprout, TrendingUp, Award, DollarSign, Layers
 } from 'lucide-react';
-import CommandItem from './CommandItem';
 
 // Helper to render icons based on string name
 const getIcon = (iconName) => {
@@ -15,17 +14,9 @@ const getIcon = (iconName) => {
 
 export default function CommandStageColumn({
     stage,
-    commands,
     onRename,
     onDeleteStage,
-    onAddCommand,
-    onEditCommand,
-    onDeleteCommand,
-    onCopyCommand,
-    copiedId,
-    // New props
-    selectedCommands = [],
-    onToggleSelect
+    // Future Project Props will go here
 }) {
     const { t } = useTranslation();
     const [isRenaming, setIsRenaming] = useState(false);
@@ -75,7 +66,7 @@ export default function CommandStageColumn({
                         </span>
                     )}
 
-                    <span className="ct-stage-count">{commands.length}</span>
+
                 </div>
                 <div className="ct-stage-actions">
                     {stage.isCustom && (
@@ -87,35 +78,14 @@ export default function CommandStageColumn({
                             <Trash2 size={14} />
                         </button>
                     )}
-                    <button
-                        className="ct-stage-action-btn"
-                        onClick={() => onAddCommand(stage.key)}
-                        title={t('common.add')}
-                    >
-                        <Plus size={14} />
-                    </button>
                 </div>
             </div>
 
             <div className="ct-command-list">
-                {commands.length > 0 ? (
-                    commands.map(cmd => (
-                        <CommandItem
-                            key={cmd.id}
-                            command={cmd}
-                            onCopy={onCopyCommand}
-                            onEdit={onEditCommand}
-                            onDelete={(id) => onDeleteCommand(stage.key, id)}
-                            isCopied={copiedId === cmd.id}
-                            isSelected={selectedCommands.some(c => c.id === cmd.id)}
-                            onToggleSelect={onToggleSelect}
-                        />
-                    ))
-                ) : (
-                    <div className="ct-empty-stage">
-                        {t('common.empty_stage_hint') || "No commands yet"}
-                    </div>
-                )}
+                {/* Project cards will be rendered here in the future */}
+                <div className="ct-empty-stage">
+                    {t('common.empty_stage_hint') || "Empty Category"}
+                </div>
             </div>
         </div>
     );

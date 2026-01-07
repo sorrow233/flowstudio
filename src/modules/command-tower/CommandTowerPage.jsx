@@ -5,27 +5,19 @@ import { Plus } from 'lucide-react';
 import SearchInput from '@/components/SearchInput';
 import Modal from '@/components/Modal';
 import { Logger } from '@/utils/logger';
-import { Copy, Check, Trash2 } from 'lucide-react'; // Import icons for Floating Bar
 import CommandStageColumn from './components/CommandStageColumn';
 import { generateId } from '@/features/command-tower/api/local';
 import './CommandTowerPage.css';
 
 export default function CommandTowerPage() {
     const { t } = useTranslation();
-    const [copiedId, setCopiedId] = useState(null);
-    const [showAddCommandModal, setShowAddCommandModal] = useState(false);
     const [showAddStageModal, setShowAddStageModal] = useState(false);
-    const [editingCommand, setEditingCommand] = useState(null); // { stageKey, command }
     const [editingStage, setEditingStage] = useState(null); // { key, label }
-    const [selectedCommands, setSelectedCommands] = useState([]); // Array to store selected commands in order
+    const [searchQuery, setSearchQuery] = useState('');
 
     // --- State Management ---
     const {
         stages,
-        commands,
-        addCommand,
-        updateCommand,
-        deleteCommand,
         addStage,
         updateStage,
         deleteStage
@@ -45,142 +37,13 @@ export default function CommandTowerPage() {
         'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
     ];
 
-    // 清新颜色选择 (8个清新明亮的颜色)
-    const freshColors = [
-        { color: '#3ECFB2', name: '薄荷绿' },   // Mint Green
-        { color: '#FFB5C5', name: '樱花粉' },   // Sakura Pink
-        { color: '#87CEEB', name: '天空蓝' },   // Sky Blue
-        { color: '#FFEAA7', name: '柠檬黄' },   // Lemon Yellow
-        { color: '#C3AED6', name: '薰衣草紫' }, // Lavender Purple
-        { color: '#FFCCBC', name: '蜜桃橙' },   // Peach Orange
-        { color: '#B2DFDB', name: '青瓷绿' },   // Celadon Green
-        { color: '#F8BBD9', name: '玫瑰粉' },   // Rose Pink
-    ];
-
-    // 获取指令库的默认颜色
-    const getStageDefaultColor = (stageKey) => {
-        const stage = stages.find(s => s.key === stageKey);
-        // 如果是渐变色，取一个主色调用于command
-        if (stage?.defaultCmdColor) return stage.defaultCmdColor;
-        return freshColors[0].color;
-    };
-
-    const [newCommand, setNewCommand] = useState({ title: '', content: '', stage: '', color: '', tags: '' });
     const [newStage, setNewStage] = useState({ key: '', label: '', icon: 'Layers', color: defaultStageColors[0] });
-    const [searchQuery, setSearchQuery] = useState('');
-
-
-
-    // --- Batch Selection Helpers ---
-    const handleToggleSelect = (command) => {
-        setSelectedCommands(prev => {
-            const isSelected = prev.some(c => c.id === command.id);
-            if (isSelected) {
-                // Remove if already selected
-                return prev.filter(c => c.id !== command.id);
-            } else {
-                // Add to end if not selected
-                return [...prev, command];
-            }
-        });
-    };
-
-    const handleBatchCopy = async () => {
-        if (selectedCommands.length === 0) return;
-
-        const batchContent = selectedCommands.map((cmd, index) => {
-            return `
-### 第 ${index + 1} 步：${cmd.title}
-${cmd.content}
-`;
-        }).join('\n----------------------------------------\n');
-
-        const finalPrompt = `请按照以下 ${selectedCommands.length} 个步骤依次执行任务：\n${batchContent}`;
-
-        await copyToClipboard(finalPrompt, 'batch_copy');
-        // Optional: clear selection after copy?
-        // setSelectedCommands([]); 
-    };
-
-    // --- Helpers ---
-    const copyToClipboard = async (text, id) => {
-        Logger.info('CommandTower', 'Copying to clipboard:', id);
-        try {
-            await navigator.clipboard.writeText(text);
-            setCopiedId(id);
-            setTimeout(() => setCopiedId(null), 2000);
-            Logger.info('CommandTower', 'Copy success');
-        } catch (err) {
-            Logger.error('CommandTower', 'Copy failed, using fallback', err);
-            // Fallback
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            setCopiedId(id);
-            setTimeout(() => setCopiedId(null), 2000);
-        }
-    };
 
     // --- Handlers ---
-
-    const handleAddCommand = () => {
-        if (!newCommand.title?.trim() || !newCommand.content?.trim() || !newCommand.stage) return;
-        Logger.info('CommandTower', 'Adding new command:', newCommand);
-
-        // 使用用户选择的颜色，如果没选则使用指令库默认颜色
-        const commandColor = newCommand.color || getStageDefaultColor(newCommand.stage);
-
-        addCommand({
-            stageKey: newCommand.stage,
-            command: {
-                title: newCommand.title,
-                content: newCommand.content,
-                color: commandColor,
-                tags: newCommand.tags ? newCommand.tags.split(',').map(t => t.trim()).filter(Boolean) : []
-            }
-        });
-
-        setNewCommand({ title: '', content: '', stage: '', color: freshColors[0].color, tags: '' });
-        setShowAddCommandModal(false);
-    };
-
-    const handleDeleteCommand = (stageKey, id) => {
-        if (confirm(t('common.delete_confirm') || "Are you sure?")) {
-            Logger.info('CommandTower', 'Deleting command:', stageKey, id);
-            deleteCommand({ stageKey, commandId: id });
-        }
-    };
-
-    const handleEditCommand = (stageKey, command) => {
-        // Flatten tags array to string for editing
-        const tagsStr = command.tags ? command.tags.join(', ') : '';
-        setEditingCommand({
-            stageKey,
-            command: { ...command },
-            tagsStr
-        });
-    };
-
-    const handleSaveEdit = () => {
-        if (!editingCommand || !editingCommand.command.title?.trim()) return;
-        updateCommand({
-            stageKey: editingCommand.stageKey,
-            command: {
-                ...editingCommand.command,
-                tags: editingCommand.tagsStr ? editingCommand.tagsStr.split(',').map(t => t.trim()).filter(Boolean) : []
-            }
-        });
-        setEditingCommand(null);
-    };
 
     const handleAddStage = () => {
         if (!newStage.label?.trim()) return;
         const key = `custom_${generateId()}`; // Use nanoid for unique key
-        // Let's stick to simple generation here or move to nanoid if strict. 
-        // Since key is used for filtering, simple unique string is fine.
 
         const newStageObj = {
             key,
@@ -198,7 +61,7 @@ ${cmd.content}
     };
 
     const handleDeleteStage = (stageKey) => {
-        if (confirm(t('common.delete_stage_confirm') || "Delete this category and all its commands?")) {
+        if (confirm(t('common.delete_stage_confirm') || "Delete this category?")) {
             Logger.info('CommandTower', 'Deleting stage:', stageKey);
             deleteStage(stageKey);
         }
@@ -234,19 +97,11 @@ ${cmd.content}
 
             <div className="ct-stage-grid">
                 {stages.map((stage) => {
-                    const stageCommands = commands[stage.key] || [];
-                    const filteredCommands = stageCommands.filter(cmd =>
-                        cmd.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        cmd.content.toLowerCase().includes(searchQuery.toLowerCase())
-                    );
-
                     return (
                         <CommandStageColumn
                             key={stage.key}
                             stage={stage}
-                            commands={filteredCommands}
                             searchQuery={searchQuery}
-                            defaultCmdColor={getStageDefaultColor(stage.key)}
                             // Edit Stage Props
                             isEditing={editingStage?.key === stage.key}
                             editLabel={editingStage?.key === stage.key ? editingStage.label : ''}
@@ -255,18 +110,6 @@ ${cmd.content}
                             onRename={handleStageRename}
                             onCancelEdit={() => setEditingStage(null)}
                             onDeleteStage={handleDeleteStage}
-                            // Command Props
-                            onAddCommand={(stageKey) => {
-                                setNewCommand({ title: '', content: '', stage: stageKey, color: getStageDefaultColor(stageKey), tags: '' });
-                                setShowAddCommandModal(true);
-                            }}
-                            onCopy={copyToClipboard}
-                            onEditCommand={handleEditCommand}
-                            onDeleteCommand={handleDeleteCommand}
-                            copiedId={copiedId}
-                            // Selection Props
-                            selectedCommands={selectedCommands}
-                            onToggleSelect={handleToggleSelect}
                         />
                     );
                 })}
@@ -297,87 +140,6 @@ ${cmd.content}
                     </span>
                 </button>
             </div>
-
-            {/* Floating Action Button (Alternative Add) */}
-            <button className="ct-fab" onClick={() => {
-                const firstStageKey = stages[0]?.key || '';
-                setNewCommand({ title: '', content: '', stage: firstStageKey, color: getStageDefaultColor(firstStageKey), tags: '' });
-                setShowAddCommandModal(true);
-            }}>
-                <Plus size={24} />
-            </button>
-
-
-            {/* Add Command Modal */}
-            <Modal
-                isOpen={showAddCommandModal}
-                onClose={() => setShowAddCommandModal(false)}
-                title={t('command_tower.add_command')}
-                footer={
-                    <>
-                        <button className="btn" onClick={() => setShowAddCommandModal(false)}>{t('common.cancel')}</button>
-                        <button className="btn btn-primary" onClick={handleAddCommand}>{t('common.add')}</button>
-                    </>
-                }
-            >
-                <div className="form-group">
-                    <label>{t('command_tower.title')}</label>
-                    <input
-                        type="text"
-                        value={newCommand.title}
-                        onChange={e => setNewCommand({ ...newCommand, title: e.target.value })}
-                        placeholder={t('command_tower.title_placeholder')}
-                        autoFocus
-                        className="project-input"
-                    />
-                </div>
-                <div className="form-group">
-                    <label>{t('command_tower.command')}</label>
-                    <textarea
-                        value={newCommand.content}
-                        onChange={e => setNewCommand({ ...newCommand, content: e.target.value })}
-                        placeholder={t('command_tower.command_placeholder')}
-                        rows={3}
-                        className="project-input"
-                    />
-                </div>
-                <div className="form-group">
-                    <label>{t('common.tags') || "Tags (comma separated)"}</label>
-                    <input
-                        type="text"
-                        value={newCommand.tags}
-                        onChange={e => setNewCommand({ ...newCommand, tags: e.target.value })}
-                        placeholder="react, git, deploy"
-                        className="project-input"
-                    />
-                </div>
-                <div className="form-group">
-                    <label>{t('command_tower.stage')}</label>
-                    <select
-                        value={newCommand.stage}
-                        onChange={e => setNewCommand({ ...newCommand, stage: e.target.value })}
-                        className="project-input"
-                    >
-                        {stages.map(s => (
-                            <option key={s.key} value={s.key}>{s.customLabel || (s.isCustom ? s.label : t(s.label))}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label>{t('common.color') || "颜色"}</label>
-                    <div className="ct-color-picker">
-                        {freshColors.map(c => (
-                            <div
-                                key={c.color}
-                                className={`ct-color-option ${newCommand.color === c.color ? 'selected' : ''}`}
-                                onClick={() => setNewCommand({ ...newCommand, color: c.color })}
-                                style={{ backgroundColor: c.color }}
-                                title={c.name}
-                            />
-                        ))}
-                    </div>
-                </div>
-            </Modal>
 
             {/* Add Stage Modal */}
             <Modal
@@ -423,155 +185,6 @@ ${cmd.content}
                     </div>
                 </div>
             </Modal>
-
-            {/* Edit Command Modal */}
-            <Modal
-                isOpen={!!editingCommand}
-                onClose={() => setEditingCommand(null)}
-                title={t('common.edit')}
-                footer={
-                    <>
-                        <button className="btn" onClick={() => setEditingCommand(null)}>{t('common.cancel')}</button>
-                        <button className="btn btn-primary" onClick={handleSaveEdit}>{t('common.save')}</button>
-                    </>
-                }
-            >
-                {editingCommand && (
-                    <>
-                        <div className="form-group">
-                            <label>{t('command_tower.title')}</label>
-                            <input
-                                type="text"
-                                value={editingCommand.command.title}
-                                onChange={e => setEditingCommand({
-                                    ...editingCommand,
-                                    command: { ...editingCommand.command, title: e.target.value }
-                                })}
-                                placeholder={t('command_tower.title_placeholder')}
-                                autoFocus
-                                className="project-input"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>{t('command_tower.command')}</label>
-                            <textarea
-                                value={editingCommand.command.content}
-                                onChange={e => setEditingCommand({
-                                    ...editingCommand,
-                                    command: { ...editingCommand.command, content: e.target.value }
-                                })}
-                                placeholder={t('command_tower.command_placeholder')}
-                                rows={3}
-                                className="project-input"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>{t('common.tags') || "Tags (comma separated)"}</label>
-                            <input
-                                type="text"
-                                value={editingCommand.tagsStr}
-                                onChange={e => setEditingCommand({
-                                    ...editingCommand,
-                                    tagsStr: e.target.value
-                                })}
-                                placeholder="react, git, deploy"
-                                className="project-input"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>{t('common.color') || "颜色"}</label>
-                            <div className="ct-color-picker">
-                                {freshColors.map(c => (
-                                    <div
-                                        key={c.color}
-                                        className={`ct-color-option ${editingCommand.command.color === c.color ? 'selected' : ''}`}
-                                        onClick={() => setEditingCommand({
-                                            ...editingCommand,
-                                            command: { ...editingCommand.command, color: c.color }
-                                        })}
-                                        style={{ backgroundColor: c.color }}
-                                        title={c.name}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    </>
-                )}
-            </Modal>
-
-            {/* --- Floating Batch Action Bar --- */}
-            {selectedCommands.length > 0 && (
-                <div className="ct-batch-bar" style={{
-                    position: 'fixed',
-                    bottom: '30px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    backgroundColor: 'var(--bg-card)',
-                    padding: '12px 24px',
-                    borderRadius: '50px',
-                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '16px',
-                    zIndex: 100,
-                    border: '1px solid var(--border-color)',
-                    animation: 'slideUp 0.3s ease-out'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
-                            已选择 {selectedCommands.length} 个指令
-                        </span>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                            (按勾选顺序执行)
-                        </span>
-                    </div>
-
-                    {/* Preview Bubbles */}
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                        {selectedCommands.map((c, i) => (
-                            <div key={c.id} style={{
-                                width: '20px', height: '20px',
-                                borderRadius: '50%',
-                                backgroundColor: c.color,
-                                fontSize: '10px',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: '#fff', fontWeight: 'bold'
-                            }}>
-                                {i + 1}
-                            </div>
-                        ))}
-                    </div>
-
-                    <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--border-color)' }}></div>
-
-                    <button
-                        className="btn btn-primary"
-                        onClick={handleBatchCopy}
-                        style={{ borderRadius: '20px', padding: '6px 16px' }}
-                    >
-                        {copiedId === 'batch_copy' ? (
-                            <>
-                                <Check size={16} style={{ marginRight: '6px' }} />
-                                已复制拼盘
-                            </>
-                        ) : (
-                            <>
-                                <Copy size={16} style={{ marginRight: '6px' }} />
-                                生成执行流
-                            </>
-                        )}
-                    </button>
-
-                    <button
-                        className="btn-icon"
-                        onClick={() => setSelectedCommands([])}
-                        title="清空选择"
-                        style={{ marginLeft: '4px', color: 'var(--text-secondary)' }}
-                    >
-                        <Trash2 size={16} />
-                    </button>
-                </div>
-            )}
         </div>
     );
 }

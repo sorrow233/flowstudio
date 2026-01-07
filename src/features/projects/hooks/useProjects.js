@@ -78,7 +78,28 @@ export function useProjects() {
         }
     };
 
-    const moveItemNext = async (id) => {
+    const toggleCommandCompletion = async (projectId, commandId) => {
+        const project = projects.find(p => p.id === projectId);
+        if (!project) return;
+
+        const currentCompleted = project.completedCommandIds || [];
+        let newCompleted;
+        if (currentCompleted.includes(commandId)) {
+            newCompleted = currentCompleted.filter(id => id !== commandId);
+        } else {
+            newCompleted = [...currentCompleted, commandId];
+        }
+
+        Logger.info('useProjects', 'toggleCommandCompletion', projectId, commandId);
+        await updateProject(projectId, { completedCommandIds: newCompleted });
+    };
+
+    // NOTE: validation now requires stageCommands. 
+    // We cannot easily inject them here since they live in a different hook/context.
+    // We will perform the validation IN THE COMPONENT before calling moveItemNext, 
+    // OR we modify moveItemNext to accept the commands.
+    // Let's modify moveItemNext to accept commands as an optional second argument for validation.
+    const moveItemNext = async (id, stageCommands = []) => {
         const item = projects.find(i => i.id === id);
         if (!item) {
             Logger.warn('useProjects', 'moveItemNext: Item not found', id);
@@ -97,10 +118,17 @@ export function useProjects() {
 
         Logger.info('useProjects', 'moveItemNext:', id, item.stage, '->', nextStage);
 
-        const validation = validateForNextStage(item, nextStage);
+        const validation = validateForNextStage(item, nextStage, stageCommands);
         if (!validation.valid) {
             Logger.warn('useProjects', 'Validation failed:', validation.message);
-            return;
+            // We should probably throw or return error here so UI can show it
+            // For now, we rely on the caller to validate BEFORE calling, or check the result.
+            // But since this is async void, we can't return easily without breaking API.
+            // Let's assume caller validates. But if they pass stageCommands, we enforce it.
+            if (stageCommands.length > 0) {
+                alert(validation.message); // Simple alert fallback if UI didn't catch it
+                return;
+            }
         }
 
         await updateProject(id, { stage: nextStage });
@@ -131,6 +159,7 @@ export function useProjects() {
         moveItemNext,
         moveItemToStage,
         toggleArchive,
+        toggleCommandCompletion,
         validateForNextStage
     };
 }

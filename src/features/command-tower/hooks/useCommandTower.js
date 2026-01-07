@@ -12,12 +12,6 @@ export const useCommandTower = () => {
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
 
-    const commandsQuery = useQuery({
-        queryKey: ['command-tower', 'commands'],
-        queryFn: api.getCommands,
-        staleTime: 1000 * 60 * 5, // 5 minutes
-    });
-
     // --- Mutations: Stages ---
 
     const addStageMutation = useMutation({
@@ -25,20 +19,10 @@ export const useCommandTower = () => {
             const currentStages = await api.getStages();
             // Check for duplicates handled in UI or here? Let's append.
             const updated = [...currentStages, newStage];
-            await api.saveStages(updated);
-
-            // Also initialize command list for this stage
-            const currentCommands = await api.getCommands();
-            if (!currentCommands[newStage.key]) {
-                const updatedCmds = { ...currentCommands, [newStage.key]: [] };
-                await api.saveCommands(updatedCmds);
-            }
-
-            return { stages: updated };
+            return api.saveStages(updated);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['command-tower', 'stages'] });
-            queryClient.invalidateQueries({ queryKey: ['command-tower', 'commands'] });
         }
     });
 
@@ -57,96 +41,22 @@ export const useCommandTower = () => {
         mutationFn: async (stageKey) => {
             const currentStages = await api.getStages();
             const updatedStages = currentStages.filter(s => s.key !== stageKey);
-            await api.saveStages(updatedStages);
-
-            const currentCommands = await api.getCommands();
-            const updatedCommands = { ...currentCommands };
-            delete updatedCommands[stageKey];
-            await api.saveCommands(updatedCommands);
-
-            return { stages: updatedStages, commands: updatedCommands };
+            return api.saveStages(updatedStages);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['command-tower', 'stages'] });
-            queryClient.invalidateQueries({ queryKey: ['command-tower', 'commands'] });
-        }
-    });
-
-    // --- Mutations: Commands ---
-
-    const addCommandMutation = useMutation({
-        mutationFn: async ({ stageKey, command }) => {
-            const currentCommands = await api.getCommands();
-            const stageCommands = currentCommands[stageKey] || [];
-
-            const newCommand = {
-                ...command,
-                id: api.generateId() // Use nanoid here
-            };
-
-            const updated = {
-                ...currentCommands,
-                [stageKey]: [...stageCommands, newCommand]
-            };
-            return api.saveCommands(updated);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['command-tower', 'commands'] });
-        }
-    });
-
-    const updateCommandMutation = useMutation({
-        mutationFn: async ({ stageKey, command }) => {
-            const currentCommands = await api.getCommands();
-            const stageCommands = currentCommands[stageKey] || [];
-
-            const updatedStageCommands = stageCommands.map(cmd =>
-                cmd.id === command.id ? command : cmd
-            );
-
-            const updated = {
-                ...currentCommands,
-                [stageKey]: updatedStageCommands
-            };
-            return api.saveCommands(updated);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['command-tower', 'commands'] });
-        }
-    });
-
-    const deleteCommandMutation = useMutation({
-        mutationFn: async ({ stageKey, commandId }) => {
-            const currentCommands = await api.getCommands();
-            const stageCommands = currentCommands[stageKey] || [];
-
-            const updatedStageCommands = stageCommands.filter(cmd => cmd.id !== commandId);
-
-            const updated = {
-                ...currentCommands,
-                [stageKey]: updatedStageCommands
-            };
-            return api.saveCommands(updated);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['command-tower', 'commands'] });
         }
     });
 
     return {
         // Data
         stages: stagesQuery.data || [],
-        commands: commandsQuery.data || {},
-        isLoading: stagesQuery.isLoading || commandsQuery.isLoading,
-        isError: stagesQuery.isError || commandsQuery.isError,
+        isLoading: stagesQuery.isLoading,
+        isError: stagesQuery.isError,
 
         // Actions
         addStage: addStageMutation.mutate,
         updateStage: updateStageMutation.mutate,
-        deleteStage: deleteStageMutation.mutate,
-
-        addCommand: addCommandMutation.mutate,
-        updateCommand: updateCommandMutation.mutate,
-        deleteCommand: deleteCommandMutation.mutate
+        deleteStage: deleteStageMutation.mutate
     };
 };
