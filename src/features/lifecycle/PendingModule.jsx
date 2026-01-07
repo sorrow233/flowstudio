@@ -43,6 +43,11 @@ const PendingModule = () => {
     // Sync Store Integration (Context)
     const { doc } = useSync();
 
+    // Force new hash
+    useEffect(() => {
+        console.log("[PendingModule] Loaded V1.3 - SyncContext Active");
+    }, []);
+
     // Note: useSyncedProjects is still a hook that takes 'doc'. 
     // Since doc is stable from Context, this works perfectly.
     const {
@@ -188,7 +193,7 @@ const PendingModule = () => {
                                                 score: 0,
                                                 answers: {}
                                             };
-                                            addProject(newP);
+                                            addProject(newP); // USING addProject
                                             setSelectedProject(newP);
                                             e.target.value = '';
                                         }
