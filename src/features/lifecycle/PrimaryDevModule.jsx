@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Code2, GitBranch, Layers, PlayCircle, Plus, CheckSquare,
     Square, Trash2, ExternalLink, X, ChevronRight, CheckCircle2,
-    MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command, Check, Rocket
+    MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command, Check, Rocket, Globe
 } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
 
@@ -80,12 +80,13 @@ const PrimaryDevModule = () => {
         const project = projects.find(p => p.id === selectedProject.id);
         const newTasks = [...(project.tasks || []), {
             id: Date.now(),
-            text: command.title, // Use command title as task text
+            text: command.title,
             done: false,
             isCommand: true,
             commandContent: command.content,
+            commandUrl: command.url,
             commandId: command.id,
-            commandType: command.type || 'utility' // Default to utility if undefined
+            commandType: command.type || 'utility'
         }];
         handleUpdateProject(selectedProject.id, { tasks: newTasks });
         setCommandModalOpen(false);
@@ -96,6 +97,22 @@ const PrimaryDevModule = () => {
         const task = project.tasks.find(t => t.id === taskId);
 
         if (task.isCommand) {
+            // Special handling for Link type
+            if (task.commandType === 'link') {
+                // If there's content to copy, copy it first
+                if (task.commandContent) {
+                    navigator.clipboard.writeText(task.commandContent);
+                    setCopiedTaskId(taskId);
+                    setTimeout(() => setCopiedTaskId(null), 2000);
+                }
+
+                // Open URL in new tab
+                if (task.commandUrl) {
+                    window.open(task.commandUrl, '_blank');
+                }
+                return;
+            }
+
             navigator.clipboard.writeText(task.commandContent);
             setCopiedTaskId(taskId);
             setTimeout(() => setCopiedTaskId(null), 2000);
@@ -344,7 +361,8 @@ const PrimaryDevModule = () => {
                                         <div className="flex-1 space-y-3">
                                             {selectedProject.tasks?.map(task => {
                                                 const isMandatory = task.isCommand && task.commandType === 'mandatory';
-                                                const isUtility = task.isCommand && task.commandType !== 'mandatory';
+                                                const isLink = task.isCommand && task.commandType === 'link';
+                                                const isUtility = task.isCommand && task.commandType === 'utility';
 
                                                 return (
                                                     <motion.div
@@ -358,16 +376,21 @@ const PrimaryDevModule = () => {
                                                                 ? 'bg-white border-red-100 shadow-sm shadow-red-100 hover:border-red-200'
                                                                 : isMandatory && task.done
                                                                     ? 'bg-emerald-50/30 border-emerald-100 opacity-75 hover:opacity-100'
-                                                                    : isUtility
-                                                                        ? 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5'
-                                                                        : 'bg-white border-gray-100 hover:border-gray-300 hover:shadow-md'
+                                                                    : isLink
+                                                                        ? 'bg-white border-blue-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5'
+                                                                        : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5'
                                                             }
                                                         `}
                                                     >
-                                                        {/* Checkbox / Icon based on type */}
-                                                        {isUtility ? (
-                                                            <div className="w-6 h-6 flex items-center justify-center text-gray-400 group-hover:text-emerald-500 transition-colors bg-gray-50 rounded-lg group-hover:bg-emerald-50">
-                                                                {copiedTaskId === task.id ? <Check size={16} /> : <Terminal size={16} />}
+                                                        {/* Icon based on type */}
+                                                        {isUtility || isLink ? (
+                                                            <div className={`
+                                                                w-6 h-6 flex items-center justify-center transition-colors rounded-lg 
+                                                                ${isLink
+                                                                    ? 'bg-blue-50 text-blue-500 group-hover:bg-blue-100'
+                                                                    : 'bg-gray-50 text-gray-400 group-hover:text-emerald-500 group-hover:bg-emerald-50'}
+                                                            `}>
+                                                                {copiedTaskId === task.id ? <Check size={16} /> : (isLink ? <Globe size={16} /> : <Terminal size={16} />)}
                                                             </div>
                                                         ) : (
                                                             <button
@@ -395,11 +418,15 @@ const PrimaryDevModule = () => {
                                                                 {copiedTaskId === task.id ? (
                                                                     <span className="text-[10px] uppercase font-bold text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full animate-pulse">Copied</span>
                                                                 ) : (
-                                                                    isMandatory && (
+                                                                    isMandatory ? (
                                                                         <span className="text-[10px] font-bold bg-red-50 text-red-500 px-3 py-1 rounded-full uppercase tracking-wider border border-red-100">
                                                                             Mandatory
                                                                         </span>
-                                                                    )
+                                                                    ) : isLink ? (
+                                                                        <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-3 py-1 rounded-full uppercase tracking-wider border border-blue-100 flex items-center gap-1">
+                                                                            <ExternalLink size={8} /> Link
+                                                                        </span>
+                                                                    ) : null
                                                                 )}
                                                             </div>
                                                         )}
@@ -501,7 +528,9 @@ const PrimaryDevModule = () => {
                                                         p-5 rounded-2xl border transition-all cursor-pointer group relative overflow-hidden
                                                         ${cmd.type === 'mandatory'
                                                             ? 'bg-white border-red-100 hover:border-red-300 hover:shadow-lg hover:shadow-red-500/10'
-                                                            : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/10'
+                                                            : cmd.type === 'link'
+                                                                ? 'bg-white border-blue-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/10'
+                                                                : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/10'
                                                         }
                                                     `}
                                                 >
@@ -510,20 +539,30 @@ const PrimaryDevModule = () => {
                                                             Mandatory
                                                         </div>
                                                     )}
-                                                    <div className={`absolute right-0 top-0 w-24 h-24 bg-gradient-to-br to-transparent rounded-bl-full -z-0 opacity-50 transition-colors ${cmd.type === 'mandatory' ? 'from-red-50 group-hover:from-red-100' : 'from-gray-50 group-hover:from-emerald-50'}`} />
+                                                    {cmd.type === 'link' && (
+                                                        <div className="absolute top-0 right-0 px-3 py-1 bg-blue-100 text-blue-600 text-[10px] font-bold rounded-bl-xl uppercase tracking-wider">
+                                                            Link
+                                                        </div>
+                                                    )}
+                                                    <div className={`absolute right-0 top-0 w-24 h-24 bg-gradient-to-br to-transparent rounded-bl-full -z-0 opacity-50 transition-colors 
+                                                        ${cmd.type === 'mandatory' ? 'from-red-50 group-hover:from-red-100' : cmd.type === 'link' ? 'from-blue-50 group-hover:from-blue-100' : 'from-gray-50 group-hover:from-emerald-50'}`}
+                                                    />
 
                                                     <div className="flex justify-between items-center mb-2 relative z-10">
                                                         <div className="flex items-center gap-3">
-                                                            <Command size={16} className={`transition-colors ${cmd.type === 'mandatory' ? 'text-red-300 group-hover:text-red-500' : 'text-gray-300 group-hover:text-emerald-500'}`} />
+                                                            <div className={`transition-colors ${cmd.type === 'mandatory' ? 'text-red-300 group-hover:text-red-500' : cmd.type === 'link' ? 'text-blue-300 group-hover:text-blue-500' : 'text-gray-300 group-hover:text-emerald-500'}`}>
+                                                                {cmd.type === 'link' ? <Globe size={16} /> : <Command size={16} />}
+                                                            </div>
                                                             <span className="font-medium text-gray-900 text-lg">{cmd.title}</span>
                                                         </div>
-                                                        <div className={`p-1.5 rounded-lg transition-colors ${cmd.type === 'mandatory' ? 'bg-red-50 group-hover:bg-red-500 group-hover:text-white' : 'bg-gray-50 group-hover:bg-emerald-500 group-hover:text-white'}`}>
+                                                        <div className={`p-1.5 rounded-lg transition-colors ${cmd.type === 'mandatory' ? 'bg-red-50 group-hover:bg-red-500 group-hover:text-white' : cmd.type === 'link' ? 'bg-blue-50 group-hover:bg-blue-500 group-hover:text-white' : 'bg-gray-50 group-hover:bg-emerald-500 group-hover:text-white'}`}>
                                                             <Plus size={16} />
                                                         </div>
                                                     </div>
                                                     <div className="pl-7">
-                                                        <div className={`rounded-lg p-3 font-mono text-xs text-gray-500 leading-relaxed line-clamp-2 border border-transparent transition-all ${cmd.type === 'mandatory' ? 'bg-red-50/30 group-hover:border-red-100 group-hover:bg-red-50/50' : 'bg-gray-50 group-hover:border-emerald-100 group-hover:bg-emerald-50/30'}`}>
-                                                            {cmd.content}
+                                                        <div className={`rounded-lg p-3 font-mono text-xs text-gray-500 leading-relaxed line-clamp-2 border border-transparent transition-all 
+                                                            ${cmd.type === 'mandatory' ? 'bg-red-50/30 group-hover:border-red-100 group-hover:bg-red-50/50' : cmd.type === 'link' ? 'bg-blue-50/30 group-hover:border-blue-100 group-hover:bg-blue-50/50' : 'bg-gray-50 group-hover:border-emerald-100 group-hover:bg-emerald-50/30'}`}>
+                                                            {cmd.type === 'link' ? cmd.url : cmd.content}
                                                         </div>
                                                     </div>
                                                 </motion.div>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import {
     Terminal, Plus, Trash2, Copy, Check, Search,
     Layers, MonitorPlay, Bug, Sparkles, Flag, Command,
-    ChevronRight, Sparkle
+    ChevronRight, Sparkle, Link as LinkIcon, GripVertical, FileText, Globe
 } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
 import { v4 as uuidv4 } from 'uuid';
@@ -24,7 +24,7 @@ const CommandCenterModule = () => {
     const [copiedId, setCopiedId] = useState(null);
 
     // Form State
-    const [newCmd, setNewCmd] = useState({ title: '', content: '', type: 'utility' });
+    const [newCmd, setNewCmd] = useState({ title: '', content: '', type: 'utility', url: '' });
 
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEYS.COMMANDS);
@@ -36,19 +36,24 @@ const CommandCenterModule = () => {
     }, [commands]);
 
     const handleAdd = () => {
-        if (!newCmd.title.trim() || !newCmd.content.trim()) return;
+        if (!newCmd.title.trim()) return;
+
+        // Validation based on type
+        if (newCmd.type === 'link' && !newCmd.url.trim()) return;
+        if (newCmd.type !== 'link' && !newCmd.content.trim()) return;
 
         const command = {
             id: uuidv4(),
             title: newCmd.title.trim(),
-            content: newCmd.content.trim(),
+            content: newCmd.content.trim(), // Optional for Link type
+            url: newCmd.url.trim(),
             type: newCmd.type,
             stageId: activeStage,
             createdAt: Date.now()
         };
 
         setCommands([command, ...commands]);
-        setNewCmd({ title: '', content: '', type: 'utility' });
+        setNewCmd({ title: '', content: '', type: 'utility', url: '' });
         setIsAdding(false);
     };
 
@@ -64,11 +69,36 @@ const CommandCenterModule = () => {
         setTimeout(() => setCopiedId(null), 2000);
     };
 
-    const filteredCommands = commands.filter(c =>
-        c.stageId === activeStage &&
-        (c.title.toLowerCase().includes(search.toLowerCase()) ||
-            c.content.toLowerCase().includes(search.toLowerCase()))
-    );
+    // Reorder Handlers
+    // We only reorder within the current stage view, but updating the main array
+    const handleReorder = (reorderedStageCommands) => {
+        // 1. Get commands NOT in this stage
+        const otherCommands = commands.filter(c => c.stageId !== activeStage);
+
+        // 2. Combine others + new ordered stage commands
+        // Note: We might want to preserve the relative position of other stage items, 
+        // but typically simply concatenating is fine as long as stability is maintained by ID.
+        // However, a safer bet for "global state" is to map the new order.
+
+        // Actually, Reorder.Group expects the full state it controls to be passed back.
+        // Since we are filtering, we need to be careful.
+        // Strategy: We won't use Reorder.Group on the *filtered* list directly to set state if it conflicts with the global list.
+        // Instead, we update the global list by stitching.
+
+        setCommands([...reorderedStageCommands, ...otherCommands]);
+    };
+
+    // Derived state for the current stage (needs to be stable for Reorder)
+    const stageCommands = commands.filter(c => c.stageId === activeStage);
+
+    // Search filtering applies visually but might disable reordering if active
+    const isSearching = search.trim().length > 0;
+    const visibleCommands = isSearching
+        ? stageCommands.filter(c =>
+            c.title.toLowerCase().includes(search.toLowerCase()) ||
+            c.content.toLowerCase().includes(search.toLowerCase())
+        )
+        : stageCommands;
 
     return (
         <div className="max-w-7xl mx-auto pt-8 px-6 h-[calc(100vh-4rem)] flex gap-8">
@@ -181,8 +211,8 @@ const CommandCenterModule = () => {
                     </div>
                 </div>
 
-                {/* Command Grid */}
-                <div className="flex-1 overflow-y-auto pr-2 space-y-4 -mr-4 pr-6 pb-20 custom-scrollbar">
+                {/* Command Grid / List */}
+                <div className="flex-1 overflow-y-auto pr-2 -mr-4 pr-6 pb-20 custom-scrollbar">
                     <AnimatePresence mode="popLayout">
                         {isAdding && (
                             <motion.div
@@ -193,44 +223,70 @@ const CommandCenterModule = () => {
                             >
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-full -z-10 opacity-50" />
 
-                                <div className="flex gap-4 mb-4">
-                                    <div className="flex-1">
-                                        <input
-                                            className="w-full bg-transparent text-2xl font-light outline-none placeholder:text-gray-300"
-                                            placeholder="Command Title..."
-                                            autoFocus
-                                            value={newCmd.title}
-                                            onChange={e => setNewCmd({ ...newCmd, title: e.target.value })}
-                                        />
+                                <div className="flex flex-col gap-6">
+                                    {/* Type Selector */}
+                                    <div className="flex gap-2 p-1 bg-gray-100 rounded-xl w-fit">
+                                        {[
+                                            { id: 'utility', label: 'Utility (Copy)', icon: Copy },
+                                            { id: 'mandatory', label: 'Mandatory (Task)', icon: Check },
+                                            { id: 'link', label: 'Link (URL)', icon: LinkIcon }
+                                        ].map(type => (
+                                            <button
+                                                key={type.id}
+                                                onClick={() => setNewCmd({ ...newCmd, type: type.id })}
+                                                className={`
+                                                    flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all
+                                                    ${newCmd.type === type.id
+                                                        ? 'bg-white shadow-sm text-gray-900'
+                                                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}
+                                                `}
+                                            >
+                                                <type.icon size={14} />
+                                                {type.label}
+                                            </button>
+                                        ))}
                                     </div>
-                                    <div className="flex bg-gray-100 p-1 rounded-xl">
-                                        <button
-                                            onClick={() => setNewCmd({ ...newCmd, type: 'utility' })}
-                                            className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${newCmd.type === 'utility' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-                                        >
-                                            Utility (Copy)
-                                        </button>
-                                        <button
-                                            onClick={() => setNewCmd({ ...newCmd, type: 'mandatory' })}
-                                            className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${newCmd.type === 'mandatory' ? 'bg-red-500 shadow-sm text-white' : 'text-gray-500 hover:text-gray-700'}`}
-                                        >
-                                            Mandatory (Task)
-                                        </button>
+
+                                    {/* Title Input */}
+                                    <input
+                                        className="w-full bg-transparent text-2xl font-light outline-none placeholder:text-gray-300 border-b border-transparent focus:border-gray-100 pb-2 transition-colors"
+                                        placeholder="Command Title..."
+                                        autoFocus
+                                        value={newCmd.title}
+                                        onChange={e => setNewCmd({ ...newCmd, title: e.target.value })}
+                                    />
+
+                                    {/* Content Inputs based on Type */}
+                                    <div className="space-y-4">
+                                        {newCmd.type === 'link' && (
+                                            <div className="relative rounded-2xl border border-gray-100 overflow-hidden bg-gray-50/30 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 transition-all">
+                                                <div className="absolute top-3 left-4 text-gray-300 pointer-events-none">
+                                                    <Globe size={16} />
+                                                </div>
+                                                <input
+                                                    className="w-full bg-transparent p-3 pl-12 text-sm font-mono text-emerald-600 outline-none"
+                                                    placeholder="https://..."
+                                                    value={newCmd.url}
+                                                    onChange={e => setNewCmd({ ...newCmd, url: e.target.value })}
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div className="relative rounded-2xl border border-gray-100 overflow-hidden bg-gray-50/30 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 transition-all">
+                                            <div className="absolute top-3 left-4 text-gray-300 pointer-events-none">
+                                                <Terminal size={16} />
+                                            </div>
+                                            <textarea
+                                                className="w-full bg-transparent p-4 pl-12 text-sm font-mono text-gray-600 outline-none resize-y min-h-[120px]"
+                                                placeholder={newCmd.type === 'link' ? "(Optional) Content to copy before opening URL..." : "Enter your system instruction or prompt here..."}
+                                                value={newCmd.content}
+                                                onChange={e => setNewCmd({ ...newCmd, content: e.target.value })}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="relative rounded-2xl border border-gray-100 overflow-hidden bg-gray-50/30 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 transition-all">
-                                    <div className="absolute top-3 left-4 text-gray-300 pointer-events-none">
-                                        <Terminal size={16} />
-                                    </div>
-                                    <textarea
-                                        className="w-full bg-transparent p-4 pl-12 text-sm font-mono text-gray-600 outline-none resize-y min-h-[160px]"
-                                        placeholder="Enter your system instruction or prompt here..."
-                                        value={newCmd.content}
-                                        onChange={e => setNewCmd({ ...newCmd, content: e.target.value })}
-                                    />
-                                </div>
-                                <div className="flex justify-end gap-3 mt-6">
+                                <div className="flex justify-end gap-3 mt-8">
                                     <button
                                         onClick={() => setIsAdding(false)}
                                         className="px-6 py-2.5 text-sm text-gray-500 hover:text-gray-900 transition-colors font-medium"
@@ -239,7 +295,7 @@ const CommandCenterModule = () => {
                                     </button>
                                     <button
                                         onClick={handleAdd}
-                                        disabled={!newCmd.title.trim() || !newCmd.content.trim()}
+                                        disabled={!newCmd.title.trim() || (newCmd.type === 'link' ? !newCmd.url.trim() : !newCmd.content.trim())}
                                         className="px-8 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-medium hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-200 transition-all disabled:opacity-50 disabled:shadow-none"
                                     >
                                         Create Command
@@ -247,80 +303,107 @@ const CommandCenterModule = () => {
                                 </div>
                             </motion.div>
                         )}
+                    </AnimatePresence>
 
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                            {filteredCommands.map(cmd => (
-                                <motion.div
+                    {/* Draggable List */}
+                    {visibleCommands.length > 0 ? (
+                        <Reorder.Group
+                            axis="y"
+                            values={stageCommands}
+                            onReorder={handleReorder}
+                            className="space-y-3"
+                        >
+                            {visibleCommands.map(cmd => (
+                                <Reorder.Item
                                     key={cmd.id}
-                                    layout
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.9 }}
-                                    whileHover={{ y: -4, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)" }}
-                                    className={`
-                                        group bg-white border rounded-3xl p-6 transition-all duration-300 flex flex-col h-full relative overflow-hidden
-                                        ${cmd.type === 'mandatory' ? 'border-red-100 hover:border-red-200' : 'border-gray-100 hover:border-emerald-100'}
-                                    `}
+                                    value={cmd}
+                                    dragListener={!isSearching} // Disable drag when searching
+                                    className="relative"
                                 >
-                                    {cmd.type === 'mandatory' && (
-                                        <div className="absolute top-0 left-0 w-full h-1 bg-red-400" />
-                                    )}
-
-                                    <div className="flex justify-between items-start mb-4 relative z-10">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`
-                                                w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-500
-                                                ${cmd.type === 'mandatory' ? 'bg-red-50 text-red-500 group-hover:bg-red-100' : 'bg-gray-50 text-gray-400 group-hover:bg-emerald-50 group-hover:text-emerald-600'}
-                                            `}>
-                                                <Command size={18} />
+                                    <motion.div
+                                        layout
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.9 }}
+                                        whileHover={{ y: -2, scale: 1.005, boxShadow: "0 10px 20px -5px rgba(0, 0, 0, 0.05)" }}
+                                        className={`
+                                            group bg-white border rounded-2xl p-4 transition-all duration-300 flex items-center gap-4 relative overflow-hidden select-none
+                                            ${cmd.type === 'mandatory' ? 'border-red-100 hover:border-red-200' : ''}
+                                            ${cmd.type === 'link' ? 'border-blue-100 hover:border-blue-200' : ''}
+                                            ${cmd.type === 'utility' ? 'border-gray-100 hover:border-emerald-100' : ''}
+                                        `}
+                                    >
+                                        {/* Drag Handle */}
+                                        {!isSearching && (
+                                            <div className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-400 p-2 -ml-2">
+                                                <GripVertical size={16} />
                                             </div>
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <h4 className="font-medium text-lg text-gray-900">{cmd.title}</h4>
-                                                    {cmd.type === 'mandatory' && (
-                                                        <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                                            MANDATORY
-                                                        </span>
-                                                    )}
-                                                </div>
+                                        )}
+
+                                        {/* Icon Box */}
+                                        <div className={`
+                                            w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-500
+                                            ${cmd.type === 'mandatory' ? 'bg-red-50 text-red-500 group-hover:bg-red-100' : ''}
+                                            ${cmd.type === 'link' ? 'bg-blue-50 text-blue-500 group-hover:bg-blue-100' : ''}
+                                            ${cmd.type === 'utility' ? 'bg-gray-50 text-gray-400 group-hover:bg-emerald-50 group-hover:text-emerald-600' : ''}
+                                        `}>
+                                            {cmd.type === 'link' ? <LinkIcon size={20} /> : <Command size={20} />}
+                                        </div>
+
+                                        {/* Text Content */}
+                                        <div className="flex-1 min-w-0 py-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h4 className="font-medium text-gray-900 truncate">{cmd.title}</h4>
+                                                {cmd.type === 'mandatory' && (
+                                                    <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase tracking-wider">MANDATORY</span>
+                                                )}
+                                                {cmd.type === 'link' && (
+                                                    <span className="text-[10px] font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full uppercase tracking-wider">LINK</span>
+                                                )}
+                                            </div>
+                                            <div className="text-xs text-gray-400 font-mono truncate flex items-center gap-2">
+                                                {cmd.type === 'link' ? (
+                                                    <>
+                                                        <Globe size={10} /> {cmd.url}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <FileText size={10} /> {cmd.content}
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
+
+                                        {/* Actions */}
                                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                             <button
-                                                onClick={() => handleCopy(cmd.id, cmd.content)}
+                                                onClick={() => handleCopy(cmd.id, cmd.content || cmd.url)}
                                                 className="p-2 hover:bg-emerald-50 rounded-xl text-gray-400 hover:text-emerald-600 transition-colors relative"
+                                                title="Copy Content"
                                             >
                                                 {copiedId === cmd.id ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} />}
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(cmd.id)}
                                                 className="p-2 hover:bg-red-50 rounded-xl text-gray-400 hover:text-red-500 transition-colors"
+                                                title="Delete"
                                             >
                                                 <Trash2 size={18} />
                                             </button>
                                         </div>
-                                    </div>
-
-                                    <div className="flex-1 bg-gray-50/50 group-hover:bg-gray-50 rounded-2xl p-4 font-mono text-xs text-gray-600 leading-relaxed relative border border-transparent group-hover:border-gray-100 transition-colors">
-                                        <div className={`absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity ${cmd.type === 'mandatory' ? 'text-red-200' : 'text-emerald-200'}`}>
-                                            <Sparkle size={12} fill="currentColor" />
-                                        </div>
-                                        <p className="line-clamp-4 pl-0 group-hover:pl-4 transition-all duration-300">
-                                            {cmd.content}
-                                        </p>
-                                    </div>
-                                </motion.div>
+                                    </motion.div>
+                                </Reorder.Item>
                             ))}
-                        </div>
-
-                        {filteredCommands.length === 0 && !isAdding && (
-                            <div className="flex flex-col items-center justify-center py-32 text-center">
+                        </Reorder.Group>
+                    ) : (
+                        !isAdding && (
+                            <div className="flex flex-col items-center justify-center py-32 text-center select-none">
                                 <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 animate-pulse">
                                     <Terminal size={32} className="text-gray-300" />
                                 </div>
                                 <h4 className="text-lg font-medium text-gray-900 mb-2">No Commands Configured</h4>
                                 <p className="text-gray-400 max-w-sm mx-auto mb-8">
-                                    This stage is empty. Add your frequently used AI prompts here to streamline your workflow.
+                                    Stage {activeStage} is waiting for orders.
                                 </p>
                                 <button
                                     onClick={() => setIsAdding(true)}
@@ -329,8 +412,8 @@ const CommandCenterModule = () => {
                                     Create First Command <ChevronRight size={16} />
                                 </button>
                             </div>
-                        )}
-                    </AnimatePresence>
+                        )
+                    )}
                 </div>
             </div>
         </div>
