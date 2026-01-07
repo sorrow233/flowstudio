@@ -161,6 +161,14 @@ const PrimaryDevModule = () => {
         }
     };
 
+    const handleDeleteTask = (projectId, taskId) => {
+        const project = projects.find(p => p.id === projectId);
+        if (!project) return;
+
+        const updatedTasks = project.tasks.filter(t => t.id !== taskId);
+        handleUpdateProject(projectId, { tasks: updatedTasks });
+    };
+
     const toggleTask = (projectId, taskId, specificContent = null, subId = null) => {
         const project = projects.find(p => p.id === projectId);
         const task = project.tasks.find(t => t.id === taskId);
@@ -541,19 +549,19 @@ const PrimaryDevModule = () => {
                                                         layout // Animate layout changes when items are deleted
                                                         initial={{ opacity: 0, y: 10 }}
                                                         animate={{ opacity: 1, y: 0, x: 0 }}
-                                                        exit={{ opacity: 0, x: 200, transition: { duration: 0.2 } }}
+                                                        exit={{ opacity: 0, x: -200, transition: { duration: 0.2 } }} // Fly out to LEFT
                                                         key={task.id}
 
                                                         // Drag to Delete Props
                                                         drag="x"
                                                         dragConstraints={{ left: 0, right: 0 }} // Elastic resistance
-                                                        dragElastic={{ right: 0.5, left: 0.05 }} // Allow dragging right, resist left
+                                                        dragElastic={{ right: 0.05, left: 0.5 }} // Allow dragging LEFT (delete), resist RIGHT
                                                         onDragEnd={(e, info) => {
-                                                            const swipeThreshold = 100; // px
-                                                            const velocityThreshold = 500; // px/s
+                                                            const swipeThreshold = -100; // px
+                                                            const velocityThreshold = -500; // px/s
 
                                                             // If swiped fast enough OR far enough to the right
-                                                            if (info.offset.x > swipeThreshold || info.velocity.x > velocityThreshold) {
+                                                            if (info.offset.x < swipeThreshold || info.velocity.x < velocityThreshold) {
                                                                 handleDeleteTask(selectedProject.id, task.id);
                                                             }
                                                         }}
