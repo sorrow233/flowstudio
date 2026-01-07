@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Navbar from './components/Navbar';
 import InspirationModule from './features/lifecycle/Inspiration/InspirationModule';
 import PendingModule from './features/lifecycle/Pending/PendingModule';
 import PrimaryDevModule from './features/lifecycle/PrimaryDev/PrimaryDevModule';
@@ -8,53 +10,41 @@ import CommercialModule from './features/lifecycle/Commercial/CommercialModule';
 import CommandCenterModule from './features/commands/CommandCenterModule';
 
 function App() {
+    const [activeTab, setActiveTab] = useState('inspiration');
+
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'inspiration': return <InspirationModule />;
+            case 'pending': return <PendingModule />;
+            case 'primary': return <PrimaryDevModule />;
+            case 'final': return <FinalDevModule />;
+            case 'advanced': return <AdvancedDevModule />;
+            case 'commercial': return <CommercialModule />;
+            case 'command': return <CommandCenterModule />;
+            default: return <InspirationModule />;
+        }
+    };
+
     return (
-        <div className="flex flex-col h-screen overflow-hidden">
-            {/* Header */}
-            <header className="p-6 border-b border-white/10 bg-slate-900/50 backdrop-blur-md">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                    Flow Studio Lifecycle Manager
-                </h1>
-                <p className="text-slate-400 text-sm">7 个独立模块的端到端管理</p>
-            </header>
+        <div className="flex flex-col h-screen bg-[#f8f9fa] text-slate-900 overflow-hidden">
+            {/* Dynamic Navigation */}
+            <Navbar activeTab={activeTab} onTabChange={setActiveTab} />
 
-            {/* Main Grid */}
-            <main className="flex-1 overflow-x-auto p-6 bg-[#0f172a]">
-                <div className="flex gap-6 h-full min-w-max">
-                    {/* Module 1: Inspiration */}
-                    <section className="w-80 h-full">
-                        <InspirationModule />
-                    </section>
-
-                    {/* Module 2: Pending */}
-                    <section className="w-80 h-full">
-                        <PendingModule />
-                    </section>
-
-                    {/* Module 3: Primary Dev */}
-                    <section className="w-80 h-full">
-                        <PrimaryDevModule />
-                    </section>
-
-                    {/* Module 4: Final Dev */}
-                    <section className="w-80 h-full">
-                        <FinalDevModule />
-                    </section>
-
-                    {/* Module 5: Advanced Dev */}
-                    <section className="w-80 h-full">
-                        <AdvancedDevModule />
-                    </section>
-
-                    {/* Module 6: Commercial */}
-                    <section className="w-80 h-full">
-                        <CommercialModule />
-                    </section>
-
-                    {/* Module 7: Command Management */}
-                    <section className="w-80 h-full">
-                        <CommandCenterModule />
-                    </section>
+            {/* Main Content Area */}
+            <main className="flex-1 overflow-y-auto px-6 pb-8 no-scrollbar">
+                <div className="max-w-5xl mx-auto h-full">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={activeTab}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                            className="h-full"
+                        >
+                            {renderContent()}
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
             </main>
         </div>

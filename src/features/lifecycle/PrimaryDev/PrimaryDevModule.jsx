@@ -2,14 +2,13 @@ import React from 'react';
 
 const PrimaryDevModule = () => {
     return (
-        <div className="glass-card h-full flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-blue-400"></div>
-                <h2 className="text-xl font-bold">初级开发阶段</h2>
+        <div className="max-w-4xl mx-auto py-8">
+            <div className="mb-12">
+                <h1 className="text-4xl font-bold mb-4 text-slate-900">初级开发</h1>
+                <p className="text-xl text-slate-700">构建项目核心，实现 MVP 蓝图。</p>
             </div>
-            <p className="text-sm text-slate-400">构建核心逻辑，实现 MVP 基础功能。</p>
-            <div className="flex-1 border-t border-white/10 pt-4">
-                {/* Module Content */}
+            <div className="bg-white p-12 rounded-3xl border border-slate-100 shadow-sm text-center text-slate-400">
+                <p>核心逻辑模块开发中...</p>
             </div>
         </div>
     );

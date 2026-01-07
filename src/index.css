@@ -1,12 +1,9 @@
 :root {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --accent-blue: #38bdf8;
-    --accent-purple: #818cf8;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --bg-primary: #f8f9fa;
+    --bg-secondary: #ffffff;
+    --accent-pink: #f43f5e;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
 }
 
 * {
@@ -16,7 +13,7 @@
 }
 
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg-primary);
     color: var(--text-primary);
     min-height: 100vh;
@@ -27,16 +24,11 @@ body {
     height: 100vh;
 }
 
-.glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    padding: 1.5rem;
-    transition: all 0.3s ease;
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
 }
 
-.glass-card:hover {
-    border-color: var(--accent-blue);
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
