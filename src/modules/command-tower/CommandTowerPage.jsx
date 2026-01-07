@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useCommandTower } from '@/features/command-tower/hooks/useCommandTower';
 import { Plus } from 'lucide-react';
 import SearchInput from '@/components/SearchInput';
 import Modal from '@/components/Modal';
 import { Logger } from '@/utils/logger';
 import CommandStageColumn from './components/CommandStageColumn';
+import { generateId } from '@/features/command-tower/api/local';
 import './CommandTowerPage.css';
 
 export default function CommandTowerPage() {
@@ -16,50 +18,30 @@ export default function CommandTowerPage() {
     const [editingStage, setEditingStage] = useState(null); // { key, label }
 
     // --- State Management ---
+    const {
+        stages,
+        commands,
+        addCommand,
+        updateCommand,
+        deleteCommand,
+        addStage,
+        updateStage,
+        deleteStage
+    } = useCommandTower();
 
-    // Stages: Custom + Default - 每个指令库有独特的清新颜色
-    const defaultStages = [
-        { key: 'inspiration', icon: 'Lightbulb', label: 'modules.backlog.sections.inspiration', color: 'linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)', defaultCmdColor: '#d4fc79' },  // 初春绿
-        { key: 'pending', icon: 'Rocket', label: 'modules.backlog.sections.pending', color: 'linear-gradient(120deg, #f093fb 0%, #f5576c 100%)', defaultCmdColor: '#f093fb' },           // 霓虹粉
-        { key: 'early', icon: 'Sprout', label: 'modules.workshop.stages.early', color: 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)', defaultCmdColor: '#84fab0' },                // 薄荷海
-        { key: 'growth', icon: 'TrendingUp', label: 'modules.workshop.stages.growth', color: 'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)', defaultCmdColor: '#fccb90' },          // 晚霞紫
-        { key: 'advanced', icon: 'Award', label: 'modules.workshop.stages.advanced', color: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)', defaultCmdColor: '#e0c3fc' },           // 梦幻紫
-        { key: 'commercial', icon: 'DollarSign', label: 'modules.workshop.stages.commercial', color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)', defaultCmdColor: '#a8edea' }   // 马卡龙
+    // Default Stages no longer needed here as they are in API layer, 
+    // but color references might be needed for UI logic if not in stage object.
+    // However, the stages from hook should have everything.
+
+    // Fallback/Default colors for UI picker usage
+    const defaultStageColors = [
+        'linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)',
+        'linear-gradient(120deg, #f093fb 0%, #f5576c 100%)',
+        'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)',
+        'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)',
+        'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)',
+        'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
     ];
-
-    const [stages, setStages] = useState(() => {
-        try {
-            const saved = localStorage.getItem('commandTowerStages');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                // Migrate old solid colors to new gradients if needed (simple check)
-                if (parsed.length > 0 && Array.isArray(parsed) && !parsed[0].color.includes('gradient')) {
-                    return defaultStages.map(ds => {
-                        const existing = parsed.find(p => p.key === ds.key);
-                        return existing ? { ...existing, color: ds.color } : ds;
-                    }).concat(parsed.filter(p => !defaultStages.find(ds => ds.key === p.key)));
-                }
-                return parsed;
-            }
-        } catch (error) {
-            console.error('Failed to load stages, resetting to default:', error);
-            // 出错时自动重置，防止无限崩溃
-            return defaultStages;
-        }
-        return defaultStages;
-    });
-
-    // Commands
-    const [commands, setCommands] = useState(() => {
-        try {
-            const saved = localStorage.getItem('commandTowerData');
-            return saved ? JSON.parse(saved) : getDefaultCommands();
-        } catch (error) {
-            console.error('Failed to load commands, resetting to default:', error);
-            // 同样，出错时自动重置为默认值
-            return getDefaultCommands();
-        }
-    });
 
     // 清新颜色选择 (8个清新明亮的颜色)
     const freshColors = [
@@ -82,36 +64,10 @@ export default function CommandTowerPage() {
     };
 
     const [newCommand, setNewCommand] = useState({ title: '', content: '', stage: '', color: '' });
-    const [newStage, setNewStage] = useState({ key: '', label: '', icon: 'Layers', color: defaultStages[0].color });
+    const [newStage, setNewStage] = useState({ key: '', label: '', icon: 'Layers', color: defaultStageColors[0] });
     const [searchQuery, setSearchQuery] = useState('');
 
-    // --- Persistence ---
-    useEffect(() => {
-        localStorage.setItem('commandTowerData', JSON.stringify(commands));
-    }, [commands]);
 
-    useEffect(() => {
-        localStorage.setItem('commandTowerStages', JSON.stringify(stages));
-    }, [stages]);
-
-    function getDefaultCommands() {
-        return {
-            inspiration: [
-                { id: 1, title: 'Code Review Prompt', content: 'Review this code for best practices...' }
-            ],
-            pending: [
-                { id: 2, title: 'Deploy Pipeline', content: 'npm run deploy:main' }
-            ],
-            early: [
-                { id: 3, title: 'Git Status', content: 'git status' }
-            ],
-            growth: [
-                { id: 4, title: 'Full Scan', content: '/filescan' }
-            ],
-            advanced: [],
-            commercial: []
-        };
-    }
 
     // --- Helpers ---
     const copyToClipboard = async (text, id) => {
@@ -140,21 +96,18 @@ export default function CommandTowerPage() {
     const handleAddCommand = () => {
         if (!newCommand.title?.trim() || !newCommand.content?.trim() || !newCommand.stage) return;
         Logger.info('CommandTower', 'Adding new command:', newCommand);
-        // Fix: Use correct ID generation to avoid conflicts in concurrent usage (though mostly single user here)
-        // Original was Date.now()
-        const newId = Date.now();
+
         // 使用用户选择的颜色，如果没选则使用指令库默认颜色
         const commandColor = newCommand.color || getStageDefaultColor(newCommand.stage);
 
-        setCommands(prev => ({
-            ...prev,
-            [newCommand.stage]: [...(prev[newCommand.stage] || []), {
-                id: newId,
+        addCommand({
+            stageKey: newCommand.stage,
+            command: {
                 title: newCommand.title,
                 content: newCommand.content,
                 color: commandColor
-            }]
-        }));
+            }
+        });
 
         setNewCommand({ title: '', content: '', stage: '', color: freshColors[0].color });
         setShowAddCommandModal(false);
@@ -163,10 +116,7 @@ export default function CommandTowerPage() {
     const handleDeleteCommand = (stageKey, id) => {
         if (confirm(t('common.delete_confirm') || "Are you sure?")) {
             Logger.info('CommandTower', 'Deleting command:', stageKey, id);
-            setCommands(prev => ({
-                ...prev,
-                [stageKey]: prev[stageKey].filter(cmd => cmd.id !== id)
-            }));
+            deleteCommand({ stageKey, commandId: id });
         }
     };
 
@@ -175,19 +125,20 @@ export default function CommandTowerPage() {
     };
 
     const handleSaveEdit = () => {
-        if (!editingCommand || !editingCommand.command?.title?.trim()) return;
-        setCommands(prev => ({
-            ...prev,
-            [editingCommand.stageKey]: prev[editingCommand.stageKey].map(cmd =>
-                cmd.id === editingCommand.command.id ? editingCommand.command : cmd
-            )
-        }));
+        if (!editingCommand || !editingCommand.command.title?.trim()) return;
+        updateCommand({
+            stageKey: editingCommand.stageKey,
+            command: editingCommand.command
+        });
         setEditingCommand(null);
     };
 
     const handleAddStage = () => {
         if (!newStage.label?.trim()) return;
-        const key = `custom_${Date.now()}`;
+        const key = `custom_${generateId()}`; // Use nanoid for unique key
+        // Let's stick to simple generation here or move to nanoid if strict. 
+        // Since key is used for filtering, simple unique string is fine.
+
         const newStageObj = {
             key,
             label: newStage.label,
@@ -196,9 +147,9 @@ export default function CommandTowerPage() {
             isCustom: true
         };
 
-        setStages(prev => [...prev, newStageObj]);
-        setCommands(prev => ({ ...prev, [key]: [] }));
-        setNewStage({ key: '', label: '', icon: 'Layers', color: defaultStages[0].color });
+        addStage(newStageObj);
+
+        setNewStage({ key: '', label: '', icon: 'Layers', color: defaultStageColors[0] });
         setShowAddStageModal(false);
         Logger.info('CommandTower', 'Added new stage:', newStageObj);
     };
@@ -206,22 +157,16 @@ export default function CommandTowerPage() {
     const handleDeleteStage = (stageKey) => {
         if (confirm(t('common.delete_stage_confirm') || "Delete this category and all its commands?")) {
             Logger.info('CommandTower', 'Deleting stage:', stageKey);
-            setStages(prev => prev.filter(s => s.key !== stageKey));
-            setCommands(prev => {
-                const newCmds = { ...prev };
-                delete newCmds[stageKey];
-                return newCmds;
-            });
+            deleteStage(stageKey);
         }
     };
 
     const handleStageRename = (stageKey, newLabel) => {
         if (!newLabel?.trim()) return;
-        setStages(prev => prev.map(s =>
-            s.key === stageKey
-                ? { ...s, customLabel: newLabel } // Store custom name in customLabel
-                : s
-        ));
+        updateStage({
+            key: stageKey,
+            updates: { customLabel: newLabel }
+        });
         setEditingStage(null);
     };
 
@@ -404,20 +349,19 @@ export default function CommandTowerPage() {
                 <div className="form-group">
                     <label>{t('common.color') || "Color"}</label>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                        {defaultStages.map(ds => (
+                        {defaultStageColors.map(color => (
                             <div
-                                key={ds.key}
-                                onClick={() => setNewStage({ ...newStage, color: ds.color })}
+                                key={color}
+                                onClick={() => setNewStage({ ...newStage, color: color })}
                                 style={{
                                     width: '32px',
                                     height: '32px',
                                     borderRadius: '50%',
-                                    background: ds.color,
+                                    background: color,
                                     cursor: 'pointer',
-                                    border: newStage.color === ds.color ? '2px solid var(--text-primary)' : '2px solid transparent',
-                                    boxShadow: newStage.color === ds.color ? '0 0 0 2px var(--bg-card)' : 'none'
+                                    border: newStage.color === color ? '2px solid var(--text-primary)' : '2px solid transparent',
+                                    boxShadow: newStage.color === color ? '0 0 0 2px var(--bg-card)' : 'none'
                                 }}
-                                title={ds.key}
                             />
                         ))}
                     </div>

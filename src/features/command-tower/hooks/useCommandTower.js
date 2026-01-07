@@ -7,13 +7,13 @@ export const useCommandTower = () => {
     // --- Queries ---
 
     const stagesQuery = useQuery({
-        queryKey: ['dates', 'stages'],
+        queryKey: ['command-tower', 'stages'],
         queryFn: api.getStages,
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
 
     const commandsQuery = useQuery({
-        queryKey: ['dates', 'commands'],
+        queryKey: ['command-tower', 'commands'],
         queryFn: api.getCommands,
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
@@ -37,8 +37,8 @@ export const useCommandTower = () => {
             return { stages: updated };
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['dates', 'stages'] });
-            queryClient.invalidateQueries({ queryKey: ['dates', 'commands'] });
+            queryClient.invalidateQueries({ queryKey: ['command-tower', 'stages'] });
+            queryClient.invalidateQueries({ queryKey: ['command-tower', 'commands'] });
         }
     });
 
@@ -49,7 +49,7 @@ export const useCommandTower = () => {
             return api.saveStages(updated);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['dates', 'stages'] });
+            queryClient.invalidateQueries({ queryKey: ['command-tower', 'stages'] });
         }
     });
 
@@ -67,8 +67,8 @@ export const useCommandTower = () => {
             return { stages: updatedStages, commands: updatedCommands };
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['dates', 'stages'] });
-            queryClient.invalidateQueries({ queryKey: ['dates', 'commands'] });
+            queryClient.invalidateQueries({ queryKey: ['command-tower', 'stages'] });
+            queryClient.invalidateQueries({ queryKey: ['command-tower', 'commands'] });
         }
     });
 
@@ -91,7 +91,7 @@ export const useCommandTower = () => {
             return api.saveCommands(updated);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['dates', 'commands'] });
+            queryClient.invalidateQueries({ queryKey: ['command-tower', 'commands'] });
         }
     });
 
@@ -111,7 +111,7 @@ export const useCommandTower = () => {
             return api.saveCommands(updated);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['dates', 'commands'] });
+            queryClient.invalidateQueries({ queryKey: ['command-tower', 'commands'] });
         }
     });
 
@@ -129,7 +129,7 @@ export const useCommandTower = () => {
             return api.saveCommands(updated);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['dates', 'commands'] });
+            queryClient.invalidateQueries({ queryKey: ['command-tower', 'commands'] });
         }
     });
 
