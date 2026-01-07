@@ -189,7 +189,7 @@ const PendingModule = () => {
                                                 score: 0,
                                                 answers: {}
                                             };
-                                            setProjects([newP, ...projects]);
+                                            addProject(newP); // FIX: Use addProject hook instead of setProjects (ReferenceError)
                                             setSelectedProject(newP);
                                             e.target.value = '';
                                         }

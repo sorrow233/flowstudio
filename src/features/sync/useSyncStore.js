@@ -191,7 +191,7 @@ export const useSyncedProjects = (doc, arrayName) => {
     const addProject = (project) => {
         if (!doc) return;
         const yArray = doc.getArray(arrayName);
-        yArray.push([project]);
+        yArray.insert(0, [project]);
     };
 
     const removeProject = (id) => {
