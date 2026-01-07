@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus, TreeDeciduous, TreePine, Image as ImageIcon, Sparkles, RefreshCw, Feather } from 'lucide-react';
+import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus, TreeDeciduous, TreePine, Image as ImageIcon, Sparkles, RefreshCw, Feather, Scroll } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { STORAGE_KEYS } from '../../utils/constants';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 
-// 初始构想的灵魂四问 (Original Vision Questions)
+// 灵魂四问 (Soul Questions - Final Polish)
 const QUESTIONS = [
     {
         id: 'clarity',
@@ -20,7 +20,7 @@ const QUESTIONS = [
     },
     {
         id: 'impact',
-        text: '它能在未来长期改变你的生活吗？（否则是浪费时间）',
+        text: '它能在未来长期改变你的生活吗？',
         sub: '长期价值'
     },
     {
@@ -42,7 +42,7 @@ const PendingModule = () => {
     const { doc } = useSync();
 
     useEffect(() => {
-        console.log("PendingModule v1.7 Loaded (Visionary Edition)");
+        console.log("PendingModule v1.8 Loaded (Ceremonial Polish)");
     }, []);
 
     const {
@@ -58,7 +58,6 @@ const PendingModule = () => {
 
     const [selectedProject, setSelectedProject] = useState(null);
 
-    // Keep detail view in sync
     useEffect(() => {
         if (selectedProject) {
             const current = projects.find(p => p.id === selectedProject.id);
@@ -88,7 +87,6 @@ const PendingModule = () => {
 
         if (doc) {
             const primaryList = doc.getArray('primary_projects');
-            // Check if "Sacred Reason" is filled
             const hasReason = project.foundingReason && project.foundingReason.trim().length > 0;
 
             const newPrimary = {
@@ -97,7 +95,7 @@ const PendingModule = () => {
                 subStage: 1,
                 progress: 0,
                 tasks: [],
-                hasHolyGlow: hasReason // Flag for the visual effect
+                hasHolyGlow: hasReason
             };
             primaryList.unshift([newPrimary]);
         }
@@ -206,7 +204,6 @@ const PendingModule = () => {
                             <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 no-scrollbar snap-x">
                                 {primaryProjects.map(p => {
                                     const visual = getTreeVisual(p.subStage || 1);
-                                    // Holy Glow Effect Check
                                     const isHoly = p.hasHolyGlow;
 
                                     return (
@@ -214,17 +211,24 @@ const PendingModule = () => {
                                             key={p.id}
                                             layoutId={`nursery-${p.id}`}
                                             className={`
-                                                min-w-[140px] snap-start bg-gradient-to-b from-emerald-50/50 to-white 
+                                                min-w-[140px] snap-start bg-gradient-to-b from-white to-white 
                                                 border rounded-2xl p-4 flex flex-col items-center justify-between text-center 
                                                 hover:shadow-sm transition-all cursor-default h-[160px] relative overflow-hidden
-                                                ${isHoly ? 'border-emerald-200 ring-4 ring-emerald-50/50 shadow-[0_0_20px_rgba(16,185,129,0.15)]' : 'border-emerald-100'}
+                                                ${isHoly ? 'border-violet-200 shadow-[0_0_15px_rgba(139,92,246,0.15)] ring-1 ring-violet-100' : 'border-emerald-100'}
                                             `}
                                         >
-                                            {isHoly && <div className="absolute inset-0 bg-gradient-to-t from-emerald-100/30 to-transparent pointer-events-none" />}
+                                            {/* Holy Glow Animation */}
+                                            {isHoly && (
+                                                <motion.div
+                                                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                                                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                                                    className="absolute inset-0 bg-gradient-to-tr from-violet-50/50 via-transparent to-emerald-50/50 pointer-events-none"
+                                                />
+                                            )}
 
                                             <div className="flex-1 flex items-center justify-center w-full relative">
                                                 <motion.div
-                                                    className={`relative z-10 ${visual.color} ${isHoly ? 'drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]' : ''}`}
+                                                    className={`relative z-10 ${visual.color} ${isHoly ? 'drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' : ''}`}
                                                     animate={{ scale: visual.scale }}
                                                 >
                                                     <visual.icon size={32} strokeWidth={1.5} />
@@ -346,41 +350,53 @@ const PendingModule = () => {
                             })}
                         </div>
 
-                        {/* Sacred Reason Input */}
-                        <div className="max-w-2xl mx-auto w-full relative z-20 mt-10">
-                            <div className="mb-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Feather size={16} className="text-purple-400" />
-                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">创始人誓言 (可选)</h4>
+                        {/* Sacred Reason Input (Premium Design) */}
+                        <div className="max-w-2xl mx-auto w-full relative z-20 mt-12 bg-gray-50/50 rounded-3xl p-6 border border-gray-100">
+                            <div className="mb-4 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Scroll size={16} className="text-violet-400" />
+                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">创始人誓言 (Founder's Vow)</h4>
                                 </div>
-                                <p className="text-sm text-gray-500 font-light mb-3">
-                                    请认真思考：你是否有十分充分的理由去开发这个项目？无论什么理由，请写下来告诉自己。
-                                    <span className="block text-xs mt-1 text-purple-400/70">* 哪怕不写，你依然可以继续。但写下的承诺，由于“本初的感动”，将赋予它特殊的光芒。</span>
-                                </p>
+                                {selectedProject.foundingReason && (
+                                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-1 text-[10px] text-violet-500 font-medium bg-violet-50 px-2 py-1 rounded-full">
+                                        <Sparkles size={10} />
+                                        <span>誓言已立</span>
+                                    </motion.div>
+                                )}
+                            </div>
+
+                            <div className="relative group">
                                 <textarea
                                     value={selectedProject.foundingReason || ''}
                                     onChange={(e) => handleUpdateProject(selectedProject.id, 'foundingReason', e.target.value)}
-                                    className="w-full p-4 bg-purple-50/30 border border-purple-100 rounded-2xl text-gray-700 placeholder:text-gray-400 focus:bg-white focus:border-purple-300 focus:ring-4 focus:ring-purple-100 transition-all text-sm leading-relaxed min-h-[100px]"
-                                    placeholder="我为什么要开发它？最本初的渴望是..."
+                                    className="w-full p-5 bg-white border border-gray-200 rounded-2xl text-gray-700 placeholder:text-gray-300 focus:bg-white focus:border-violet-300 focus:ring-4 focus:ring-violet-50 transition-all text-sm leading-relaxed min-h-[120px] resize-none"
+                                    placeholder="为了这颗种子，我愿意付出什么？为何它值得我投入生命中的这段时光？（写下你的理由，赋予它生长的力量）"
                                 />
+                                <div className="absolute bottom-4 right-4 text-violet-200 pointer-events-none">
+                                    <Feather size={20} />
+                                </div>
                             </div>
                         </div>
 
                         {/* Graduate Button */}
-                        <div className="max-w-2xl mx-auto mt-6 pb-10 w-full relative z-30">
+                        <div className="max-w-2xl mx-auto mt-8 pb-10 w-full relative z-30">
                             {selectedProject.score === 4 && (
                                 <button
                                     onClick={() => handleGraduate(selectedProject)}
                                     className={`
-                                        group w-full py-5 text-white rounded-2xl flex items-center justify-center gap-3 hover:translate-y-[-2px] transition-all shadow-xl
-                                        ${selectedProject.foundingReason ? 'bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 shadow-purple-900/20' : 'bg-gray-900 shadow-gray-900/10'}
+                                        relative overflow-hidden group w-full py-5 text-white rounded-2xl flex items-center justify-center gap-3 hover:translate-y-[-2px] transition-all shadow-xl
+                                        ${selectedProject.foundingReason ? 'bg-gradient-to-r from-gray-900 via-violet-900 to-gray-900 shadow-violet-900/20' : 'bg-gray-900 shadow-gray-900/10'}
                                     `}
                                 >
-                                    <span className="text-lg font-light tracking-wide">
-                                        {selectedProject.foundingReason ? '立下誓言并启程 (Primary Dev)' : '直接启程 (Primary Dev)'}
+                                    {selectedProject.foundingReason && (
+                                        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+                                    )}
+
+                                    <span className="text-lg font-light tracking-wide relative z-10">
+                                        {selectedProject.foundingReason ? '立誓启程 (Primary Dev)' : '开启开发 (Primary Dev)'}
                                     </span>
-                                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                                    {selectedProject.foundingReason && <Sparkles size={16} className="text-purple-300 animate-pulse" />}
+                                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform relative z-10" />
+                                    {selectedProject.foundingReason && <Sparkles size={16} className="text-violet-300 animate-pulse relative z-10" />}
                                 </button>
                             )}
                         </div>
