@@ -9,14 +9,14 @@ import ModuleDetailModal from './ModuleDetailModal';
 import ModuleLibraryModal from './ModuleLibraryModal';
 
 const CATEGORIES = [
-    { id: 'frontend', label: 'Frontend' },
-    { id: 'backend', label: 'Backend' },
-    { id: 'database', label: 'Database' },
-    { id: 'core', label: 'Core' },
-    { id: 'feature', label: 'Features' },
-    { id: 'integration', label: 'Integration' },
-    { id: 'security', label: 'Security' },
-    { id: 'devops', label: 'DevOps' },
+    { id: 'frontend', label: 'Frontend', aliases: ['frontend', '前端'] },
+    { id: 'backend', label: 'Backend', aliases: ['backend', '后端'] },
+    { id: 'database', label: 'Database', aliases: ['database', '数据库'] },
+    { id: 'core', label: 'Core', aliases: ['core', '核心'] },
+    { id: 'feature', label: 'Features', aliases: ['feature', 'features', '功能'] },
+    { id: 'integration', label: 'Integration', aliases: ['integration', '集成'] },
+    { id: 'security', label: 'Security', aliases: ['security', '安全'] },
+    { id: 'devops', label: 'DevOps', aliases: ['devops', '运维'] },
 ];
 
 const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
@@ -268,7 +268,10 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
                         {viewMode === 'grid' ? (
                             <div className="pb-20">
                                 {CATEGORIES.map(category => {
-                                    const categoryModules = modules.filter(m => m.category?.toLowerCase() === category.id);
+                                    const categoryModules = modules.filter(m => {
+                                        const cat = m.category?.toLowerCase();
+                                        return category.aliases.some(alias => cat === alias || cat?.includes(alias));
+                                    });
                                     if (categoryModules.length === 0) return null;
 
                                     return (
@@ -297,8 +300,8 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
 
                                                         <div className="flex justify-between items-start mb-4">
                                                             <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${module.priority === 'High' ? 'bg-red-50 text-red-500' :
-                                                                    module.priority === 'Low' ? 'bg-gray-100 text-gray-500' :
-                                                                        'bg-blue-50 text-blue-500'
+                                                                module.priority === 'Low' ? 'bg-gray-100 text-gray-500' :
+                                                                    'bg-blue-50 text-blue-500'
                                                                 }`}>
                                                                 {module.category}
                                                             </span>
@@ -331,51 +334,57 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
                                 })}
 
                                 {/* Fallback for Uncategorized */}
-                                {modules.length > 0 && modules.filter(m => !CATEGORIES.find(c => c.id === m.category?.toLowerCase())).length > 0 && (
-                                    <div className="mb-12">
-                                        <div className="flex items-center gap-3 mb-6">
-                                            <h3 className="text-xl font-light text-gray-900">Uncategorized</h3>
-                                            <div className="h-px flex-1 bg-gray-200/50" />
+                                {modules.length > 0 && modules.filter(m => {
+                                    const cat = m.category?.toLowerCase();
+                                    return !CATEGORIES.some(c => c.aliases.some(alias => cat === alias || cat?.includes(alias)));
+                                }).length > 0 && (
+                                        <div className="mb-12">
+                                            <div className="flex items-center gap-3 mb-6">
+                                                <h3 className="text-xl font-light text-gray-900">Uncategorized</h3>
+                                                <div className="h-px flex-1 bg-gray-200/50" />
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                {modules.filter(m => {
+                                                    const cat = m.category?.toLowerCase();
+                                                    return !CATEGORIES.some(c => c.aliases.some(alias => cat === alias || cat?.includes(alias)));
+                                                }).map(module => (
+                                                    <motion.div
+                                                        layoutId={`module-${module.id}`}
+                                                        key={module.id}
+                                                        onClick={() => setEditingModule(module)}
+                                                        className="group bg-white border border-gray-100 rounded-[2rem] p-6 hover:shadow-xl hover:border-blue-100 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
+                                                    >
+                                                        <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                                            <div className="bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase">
+                                                                Edit
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex justify-between items-start mb-4">
+                                                            <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+                                                                {module.category || 'Other'}
+                                                            </span>
+                                                        </div>
+
+                                                        <h3 className="text-xl font-light text-gray-900 mb-2 truncate">{module.name}</h3>
+                                                        <p className="text-xs text-gray-400 line-clamp-2 min-h-[2.5em] mb-6 font-light leading-relaxed">
+                                                            {module.description || 'No description provided.'}
+                                                        </p>
+
+                                                        <div className="space-y-2">
+                                                            <div className="flex justify-between text-xs">
+                                                                <span className="font-bold text-gray-300 uppercase tracking-wider">Progress</span>
+                                                                <span className="font-mono text-gray-400">{module.progress}%</span>
+                                                            </div>
+                                                            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                                                <div className="h-full rounded-full bg-blue-500" style={{ width: `${module.progress}%` }} />
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                            {modules.filter(m => !CATEGORIES.find(c => c.id === m.category?.toLowerCase())).map(module => (
-                                                <motion.div
-                                                    layoutId={`module-${module.id}`}
-                                                    key={module.id}
-                                                    onClick={() => setEditingModule(module)}
-                                                    className="group bg-white border border-gray-100 rounded-[2rem] p-6 hover:shadow-xl hover:border-blue-100 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
-                                                >
-                                                    <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                                        <div className="bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase">
-                                                            Edit
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex justify-between items-start mb-4">
-                                                        <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
-                                                            {module.category || 'Other'}
-                                                        </span>
-                                                    </div>
-
-                                                    <h3 className="text-xl font-light text-gray-900 mb-2 truncate">{module.name}</h3>
-                                                    <p className="text-xs text-gray-400 line-clamp-2 min-h-[2.5em] mb-6 font-light leading-relaxed">
-                                                        {module.description || 'No description provided.'}
-                                                    </p>
-
-                                                    <div className="space-y-2">
-                                                        <div className="flex justify-between text-xs">
-                                                            <span className="font-bold text-gray-300 uppercase tracking-wider">Progress</span>
-                                                            <span className="font-mono text-gray-400">{module.progress}%</span>
-                                                        </div>
-                                                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                            <div className="h-full rounded-full bg-blue-500" style={{ width: `${module.progress}%` }} />
-                                                        </div>
-                                                    </div>
-                                                </motion.div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+                                    )}
 
                                 {/* Empty State */}
                                 {modules.length === 0 && (
