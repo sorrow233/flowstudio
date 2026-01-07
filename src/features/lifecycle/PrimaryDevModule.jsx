@@ -23,20 +23,9 @@ const PrimaryDevModule = () => {
     // --- Global State ---
     const [selectedProject, setSelectedProject] = useState(null);
 
-    // Sync selectedProject with latest data
-    useEffect(() => {
-        if (selectedProject) {
-            const current = projects.find(p => p.id === selectedProject.id);
-            if (current) {
-                setSelectedProject(current);
-            } else {
-                setSelectedProject(null);
-            }
-        }
-    }, [projects]);
-
     // --- UI/Interaction State ---
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
+    const [viewStage, setViewStage] = useState(1);
 
     // --- Edit Mode State ---
     const [isEditingProject, setIsEditingProject] = useState(false);
@@ -57,6 +46,24 @@ const PrimaryDevModule = () => {
         { id: 'tech', label: 'Is the technical heart beating steadily?' },
         { id: 'ready', label: 'Am I ready to leave the nursery and face the real world?' }
     ];
+
+    // Sync selectedProject with latest data
+    useEffect(() => {
+        if (selectedProject) {
+            const current = projects.find(p => p.id === selectedProject.id);
+            if (current) {
+                setSelectedProject(current);
+            } else {
+                setSelectedProject(null);
+            }
+        }
+    }, [projects]);
+
+    // When opening a project, set view to current progress
+    const handleSelectProject = (project) => {
+        setSelectedProject(project);
+        setViewStage(project.subStage || 1);
+    };
 
     const toggleGraduationCheck = (id) => {
         setGraduationChecks(prev => ({
@@ -179,9 +186,16 @@ const PrimaryDevModule = () => {
     };
 
     // --- Stage Handler ---
-    const handleStageSelect = (stageId) => {
-        // If selecting specific stage logic is needed
-        handleUpdateProject(selectedProject.id, { subStage: stageId });
+    const handleToggleStageComplete = (stageId, isComplete) => {
+        // If marking complete, move to next stage (stageId + 1)
+        // If marking incomplete (undo), move back to this stage (stageId)
+        const newSubStage = isComplete ? stageId + 1 : stageId;
+        handleUpdateProject(selectedProject.id, { subStage: newSubStage });
+
+        // Optional: Auto-switch view to next stage when completed?
+        if (isComplete) {
+            setViewStage(newSubStage <= 5 ? newSubStage : 5);
+        }
     };
 
     // --- Graduation Logic ---
@@ -228,7 +242,7 @@ const PrimaryDevModule = () => {
                     <motion.div
                         layoutId={`primary-card-${project.id}`}
                         key={project.id}
-                        onClick={() => setSelectedProject(project)}
+                        onClick={() => handleSelectProject(project)}
                         className="group bg-white border border-gray-100 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-gray-200/50 transition-all cursor-pointer relative h-[360px] flex flex-col ring-1 ring-transparent hover:ring-gray-100"
                     >
                         {/* Card Background */}
@@ -311,7 +325,7 @@ const PrimaryDevModule = () => {
                             <motion.div
                                 key={project.id}
                                 layoutId={`primary-card-${project.id}`} // Keep animation
-                                onClick={() => setSelectedProject(project)}
+                                onClick={() => handleSelectProject(project)}
                                 className="group bg-white border border-amber-100/50 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-amber-100/50 transition-all cursor-pointer relative h-[300px] flex flex-col opacity-80 hover:opacity-100"
                             >
                                 <div className="absolute inset-0 z-0 h-32 bg-amber-50/30">
@@ -348,7 +362,7 @@ const PrimaryDevModule = () => {
                         >
                             <ProjectWorkspaceHeader
                                 project={selectedProject}
-                                activeStage={selectedProject.subStage || 1}
+                                activeStage={viewStage}
                                 isCollapsed={isHeaderCollapsed}
                                 isEditing={isEditingProject}
                                 editForm={editForm}
@@ -368,23 +382,22 @@ const PrimaryDevModule = () => {
                             >
                                 {/* Left Sidebar: Stage Navigation */}
                                 <StageNavigation
-                                    activeStage={selectedProject.subStage || 1}
-                                    currentStage={selectedProject.subStage || 1}
-                                    onStageSelect={handleStageSelect}
-                                // Pass 'onGraduate' if in stage 5 to show visual cue?
-                                // For now StageNavigation just shows steps.
+                                    viewStage={viewStage}
+                                    onViewChange={setViewStage}
+                                    currentProgress={selectedProject.subStage || 1}
+                                    onToggleComplete={handleToggleStageComplete}
                                 />
 
                                 {/* Right Content: Task List */}
                                 <div className="flex-1 flex flex-col relative w-full overflow-hidden">
-                                    {/* Graduation Call To Action if Stage 5 */}
-                                    {(selectedProject.subStage || 1) === 5 && (
+                                    {/* Graduation Call To Action - Only if Stage 5 is active view AND progress is at 5 (waiting for graduation) OR 6 (advanced) */}
+                                    {viewStage === 5 && (selectedProject.subStage || 1) >= 6 && (
                                         <div className="px-6 pt-6 -mb-4">
                                             <button
                                                 onClick={() => setShowGraduationChecklist(true)}
-                                                className="w-full py-3 bg-gradient-to-r from-amber-200 to-yellow-100 rounded-xl text-amber-800 font-bold uppercase tracking-widest text-xs shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
+                                                className="w-full py-3 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-xl text-emerald-800 font-bold uppercase tracking-widest text-xs shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
                                             >
-                                                <Trophy size={16} /> Ready for Advanced Development?
+                                                <Trophy size={16} /> Enter Ascension Ritual
                                             </button>
                                         </div>
                                     )}
@@ -392,7 +405,7 @@ const PrimaryDevModule = () => {
                                     <TaskList
                                         tasks={selectedProject.tasks}
                                         projectId={selectedProject.id}
-                                        activeStage={selectedProject.subStage || 1}
+                                        activeStage={viewStage}
                                         onToggle={handleToggleTask}
                                         onDelete={handleDeleteTask}
                                         onAddTask={handleAddTask}
