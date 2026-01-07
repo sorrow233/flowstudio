@@ -4,7 +4,7 @@ import {
     Code2, GitBranch, Layers, PlayCircle, Plus, CheckSquare,
     Square, Trash2, ExternalLink, X, ChevronRight, CheckCircle2,
     MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command, Check, Rocket, Globe, Pencil, Save, Image as ImageIcon,
-    Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker
+    Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, Search
 } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES, COMMAND_CATEGORIES } from '../../utils/constants';
 
