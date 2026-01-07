@@ -24,7 +24,7 @@ const CommandCenterModule = () => {
     const [copiedId, setCopiedId] = useState(null);
 
     // Form State
-    const [newCmd, setNewCmd] = useState({ title: '', content: '' });
+    const [newCmd, setNewCmd] = useState({ title: '', content: '', type: 'utility' });
 
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEYS.COMMANDS);
@@ -42,12 +42,13 @@ const CommandCenterModule = () => {
             id: uuidv4(),
             title: newCmd.title.trim(),
             content: newCmd.content.trim(),
+            type: newCmd.type,
             stageId: activeStage,
             createdAt: Date.now()
         };
 
         setCommands([command, ...commands]);
-        setNewCmd({ title: '', content: '' });
+        setNewCmd({ title: '', content: '', type: 'utility' });
         setIsAdding(false);
     };
 
@@ -192,13 +193,32 @@ const CommandCenterModule = () => {
                             >
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-full -z-10 opacity-50" />
 
-                                <input
-                                    className="w-full bg-transparent text-2xl font-light outline-none mb-4 placeholder:text-gray-300"
-                                    placeholder="Command Title..."
-                                    autoFocus
-                                    value={newCmd.title}
-                                    onChange={e => setNewCmd({ ...newCmd, title: e.target.value })}
-                                />
+                                <div className="flex gap-4 mb-4">
+                                    <div className="flex-1">
+                                        <input
+                                            className="w-full bg-transparent text-2xl font-light outline-none placeholder:text-gray-300"
+                                            placeholder="Command Title..."
+                                            autoFocus
+                                            value={newCmd.title}
+                                            onChange={e => setNewCmd({ ...newCmd, title: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="flex bg-gray-100 p-1 rounded-xl">
+                                        <button
+                                            onClick={() => setNewCmd({ ...newCmd, type: 'utility' })}
+                                            className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${newCmd.type === 'utility' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                                        >
+                                            Utility (Copy)
+                                        </button>
+                                        <button
+                                            onClick={() => setNewCmd({ ...newCmd, type: 'mandatory' })}
+                                            className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${newCmd.type === 'mandatory' ? 'bg-red-500 shadow-sm text-white' : 'text-gray-500 hover:text-gray-700'}`}
+                                        >
+                                            Mandatory (Task)
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <div className="relative rounded-2xl border border-gray-100 overflow-hidden bg-gray-50/30 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 transition-all">
                                     <div className="absolute top-3 left-4 text-gray-300 pointer-events-none">
                                         <Terminal size={16} />
@@ -237,14 +257,33 @@ const CommandCenterModule = () => {
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
                                     whileHover={{ y: -4, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)" }}
-                                    className="group bg-white border border-gray-100 hover:border-emerald-100 rounded-3xl p-6 transition-all duration-300 flex flex-col h-full relative overflow-hidden"
+                                    className={`
+                                        group bg-white border rounded-3xl p-6 transition-all duration-300 flex flex-col h-full relative overflow-hidden
+                                        ${cmd.type === 'mandatory' ? 'border-red-100 hover:border-red-200' : 'border-gray-100 hover:border-emerald-100'}
+                                    `}
                                 >
+                                    {cmd.type === 'mandatory' && (
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-red-400" />
+                                    )}
+
                                     <div className="flex justify-between items-start mb-4 relative z-10">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-gray-50 group-hover:bg-emerald-50 rounded-xl flex items-center justify-center text-gray-400 group-hover:text-emerald-600 transition-colors duration-500">
+                                            <div className={`
+                                                w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-500
+                                                ${cmd.type === 'mandatory' ? 'bg-red-50 text-red-500 group-hover:bg-red-100' : 'bg-gray-50 text-gray-400 group-hover:bg-emerald-50 group-hover:text-emerald-600'}
+                                            `}>
                                                 <Command size={18} />
                                             </div>
-                                            <h4 className="font-medium text-lg text-gray-900">{cmd.title}</h4>
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <h4 className="font-medium text-lg text-gray-900">{cmd.title}</h4>
+                                                    {cmd.type === 'mandatory' && (
+                                                        <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                                            MANDATORY
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                             <button
@@ -263,7 +302,7 @@ const CommandCenterModule = () => {
                                     </div>
 
                                     <div className="flex-1 bg-gray-50/50 group-hover:bg-gray-50 rounded-2xl p-4 font-mono text-xs text-gray-600 leading-relaxed relative border border-transparent group-hover:border-gray-100 transition-colors">
-                                        <div className="absolute top-4 left-4 text-emerald-200 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className={`absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity ${cmd.type === 'mandatory' ? 'text-red-200' : 'text-emerald-200'}`}>
                                             <Sparkle size={12} fill="currentColor" />
                                         </div>
                                         <p className="line-clamp-4 pl-0 group-hover:pl-4 transition-all duration-300">

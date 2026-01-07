@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Code2, GitBranch, Layers, PlayCircle, Plus, CheckSquare,
     Square, Trash2, ExternalLink, X, ChevronRight, CheckCircle2,
-    MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command
+    MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command, Check
 } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
 
@@ -84,7 +84,8 @@ const PrimaryDevModule = () => {
             done: false,
             isCommand: true,
             commandContent: command.content,
-            commandId: command.id
+            commandId: command.id,
+            commandType: command.type || 'utility' // Default to utility if undefined
         }];
         handleUpdateProject(selectedProject.id, { tasks: newTasks });
         setCommandModalOpen(false);
@@ -94,16 +95,17 @@ const PrimaryDevModule = () => {
         const project = projects.find(p => p.id === projectId);
         const task = project.tasks.find(t => t.id === taskId);
 
-        // If it's a command task, copy and don't toggle immediately (or maybe toggle too?)
-        // Let's copy first.
         if (task.isCommand) {
             navigator.clipboard.writeText(task.commandContent);
             setCopiedTaskId(taskId);
             setTimeout(() => setCopiedTaskId(null), 2000);
-            return; // Don't toggle completion on copy? Or maybe we should?
-            // User said: "clicking... will copy... to my mouse"
-            // User didn't say it marks done. Let's keep separate.
-            // Maybe a separate checkbox for done?
+
+            // If it's a utility command, we just copy. No checkbox toggle.
+            if (task.commandType !== 'mandatory') {
+                return;
+            }
+            // Fallthrough for Mandatory: Copy AND allow checking separately (handled by markTaskDone)
+            return;
         }
 
         const updatedTasks = project.tasks.map(t =>
@@ -330,44 +332,70 @@ const PrimaryDevModule = () => {
                                         </div>
 
                                         <div className="flex-1 overflow-y-auto space-y-2 mb-4 -mx-2 px-2">
-                                            {selectedProject.tasks?.map(task => (
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: 10 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    key={task.id}
-                                                    onClick={() => toggleTask(selectedProject.id, task.id)}
-                                                    className={`
-                                                        group flex items-center gap-4 p-4 rounded-xl transition-all cursor-pointer border border-transparent
-                                                        ${task.isCommand ? 'bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200' : 'hover:bg-gray-50 hover:border-gray-100'}
-                                                    `}
-                                                >
-                                                    <button
-                                                        onClick={(e) => markTaskDone(e, selectedProject.id, task.id)}
+                                            {selectedProject.tasks?.map(task => {
+                                                const isMandatory = task.isCommand && task.commandType === 'mandatory';
+                                                const isUtility = task.isCommand && task.commandType !== 'mandatory';
+
+                                                return (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 10 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        key={task.id}
+                                                        onClick={() => toggleTask(selectedProject.id, task.id)}
                                                         className={`
-                                                            w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-300 shrink-0
-                                                            ${task.done
-                                                                ? 'bg-emerald-500 border-emerald-500 text-white'
-                                                                : task.isCommand ? 'border-gray-600 text-transparent hover:border-gray-400' : 'border-gray-300 text-transparent group-hover:border-gray-400'}
+                                                            group flex items-center gap-4 p-4 rounded-xl transition-all cursor-pointer border
+                                                            ${isMandatory && !task.done
+                                                                ? 'bg-red-50/50 border-red-100 hover:border-red-200 hover:bg-red-50'
+                                                                : isMandatory && task.done
+                                                                    ? 'bg-emerald-50/50 border-emerald-100 hover:border-emerald-200 hover:bg-emerald-50'
+                                                                    : isUtility
+                                                                        ? 'bg-white hover:bg-gray-50 border-gray-100' // Utility style
+                                                                        : 'hover:bg-gray-50 border-transparent hover:border-gray-100' // Manual task
+                                                            }
                                                         `}
                                                     >
-                                                        <CheckCircle2 size={14} />
-                                                    </button>
+                                                        {/* Checkbox / Icon based on type */}
+                                                        {isUtility ? (
+                                                            <div className="w-5 h-5 flex items-center justify-center text-gray-400 group-hover:text-gray-600 transition-colors">
+                                                                {copiedTaskId === task.id ? <Check size={16} className="text-emerald-500" /> : <Terminal size={16} />}
+                                                            </div>
+                                                        ) : (
+                                                            <button
+                                                                onClick={(e) => markTaskDone(e, selectedProject.id, task.id)}
+                                                                className={`
+                                                                    w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-300 shrink-0
+                                                                    ${task.done
+                                                                        ? 'bg-emerald-500 border-emerald-500 text-white'
+                                                                        : isMandatory
+                                                                            ? 'border-red-300 text-transparent hover:border-red-400 bg-white'
+                                                                            : 'border-gray-300 text-transparent group-hover:border-gray-400'
+                                                                    }
+                                                                `}
+                                                            >
+                                                                <CheckCircle2 size={14} />
+                                                            </button>
+                                                        )}
 
-                                                    <span className={`flex-1 text-sm font-medium transition-colors ${task.done ? 'opacity-50 line-through' : ''}`}>
-                                                        {task.text}
-                                                    </span>
+                                                        <span className={`flex-1 text-sm font-medium transition-colors ${task.done ? 'opacity-50 line-through' : ''}`}>
+                                                            {task.text}
+                                                        </span>
 
-                                                    {task.isCommand && (
-                                                        <div className="flex items-center gap-2">
-                                                            {copiedTaskId === task.id ? (
-                                                                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">COPIED</span>
-                                                            ) : (
-                                                                <Terminal size={14} className="opacity-50" />
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </motion.div>
-                                            ))}
+                                                        {task.isCommand && (
+                                                            <div className="flex items-center gap-2">
+                                                                {copiedTaskId === task.id ? (
+                                                                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">COPIED</span>
+                                                                ) : (
+                                                                    isMandatory && (
+                                                                        <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                                                            REQUIRED
+                                                                        </span>
+                                                                    )
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </motion.div>
+                                                );
+                                            })}
                                             {(!selectedProject.tasks || selectedProject.tasks.length === 0) && (
                                                 <div className="text-gray-400 text-sm font-light italic py-8 text-center bg-gray-50/50 rounded-2xl border border-dashed border-gray-100">
                                                     No active missions for this stage.
@@ -451,21 +479,32 @@ const PrimaryDevModule = () => {
                                                     layout
                                                     whileHover={{ scale: 1.01, y: -2 }}
                                                     onClick={() => handleLinkCommand(cmd)}
-                                                    className="bg-white p-5 rounded-2xl border border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/10 transition-all cursor-pointer group relative overflow-hidden"
+                                                    className={`
+                                                        p-5 rounded-2xl border transition-all cursor-pointer group relative overflow-hidden
+                                                        ${cmd.type === 'mandatory'
+                                                            ? 'bg-white border-red-100 hover:border-red-300 hover:shadow-lg hover:shadow-red-500/10'
+                                                            : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/10'
+                                                        }
+                                                    `}
                                                 >
-                                                    <div className="absolute right-0 top-0 w-24 h-24 bg-gradient-to-br from-gray-50 to-transparent rounded-bl-full -z-0 opacity-50 group-hover:from-emerald-50 transition-colors" />
+                                                    {cmd.type === 'mandatory' && (
+                                                        <div className="absolute top-0 right-0 px-3 py-1 bg-red-100 text-red-600 text-[10px] font-bold rounded-bl-xl uppercase tracking-wider">
+                                                            Mandatory
+                                                        </div>
+                                                    )}
+                                                    <div className={`absolute right-0 top-0 w-24 h-24 bg-gradient-to-br to-transparent rounded-bl-full -z-0 opacity-50 transition-colors ${cmd.type === 'mandatory' ? 'from-red-50 group-hover:from-red-100' : 'from-gray-50 group-hover:from-emerald-50'}`} />
 
                                                     <div className="flex justify-between items-center mb-2 relative z-10">
                                                         <div className="flex items-center gap-3">
-                                                            <Command size={16} className="text-gray-300 group-hover:text-emerald-500 transition-colors" />
+                                                            <Command size={16} className={`transition-colors ${cmd.type === 'mandatory' ? 'text-red-300 group-hover:text-red-500' : 'text-gray-300 group-hover:text-emerald-500'}`} />
                                                             <span className="font-medium text-gray-900 text-lg">{cmd.title}</span>
                                                         </div>
-                                                        <div className="p-1.5 bg-gray-50 group-hover:bg-emerald-500 group-hover:text-white rounded-lg transition-colors">
+                                                        <div className={`p-1.5 rounded-lg transition-colors ${cmd.type === 'mandatory' ? 'bg-red-50 group-hover:bg-red-500 group-hover:text-white' : 'bg-gray-50 group-hover:bg-emerald-500 group-hover:text-white'}`}>
                                                             <Plus size={16} />
                                                         </div>
                                                     </div>
                                                     <div className="pl-7">
-                                                        <div className="bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-500 leading-relaxed line-clamp-2 border border-transparent group-hover:border-emerald-100 group-hover:bg-emerald-50/30 transition-all">
+                                                        <div className={`rounded-lg p-3 font-mono text-xs text-gray-500 leading-relaxed line-clamp-2 border border-transparent transition-all ${cmd.type === 'mandatory' ? 'bg-red-50/30 group-hover:border-red-100 group-hover:bg-red-50/50' : 'bg-gray-50 group-hover:border-emerald-100 group-hover:bg-emerald-50/30'}`}>
                                                             {cmd.content}
                                                         </div>
                                                     </div>
