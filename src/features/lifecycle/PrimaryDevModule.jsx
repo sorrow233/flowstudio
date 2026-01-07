@@ -411,46 +411,76 @@ const PrimaryDevModule = () => {
                     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none">
                         <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/20 backdrop-blur-sm pointer-events-auto"
+                            className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto"
                             onClick={() => setCommandModalOpen(false)}
                         />
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-                            className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col max-h-[70vh]"
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="w-full max-w-2xl bg-white/90 backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden pointer-events-auto flex flex-col max-h-[75vh] ring-1 ring-white/50"
                         >
-                            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                                <h3 className="font-medium text-gray-900 flex items-center gap-2">
-                                    <Terminal size={18} />
-                                    Import Command
-                                </h3>
-                                <button onClick={() => setCommandModalOpen(false)} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
-                                    <X size={18} />
+                            <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-gray-50/50 to-white/50">
+                                <div>
+                                    <h3 className="text-xl font-light text-gray-900 flex items-center gap-3">
+                                        <div className="p-2 bg-gray-900 text-white rounded-lg shadow-lg shadow-gray-200">
+                                            <Terminal size={18} />
+                                        </div>
+                                        Import Command
+                                    </h3>
+                                    <p className="text-xs text-gray-400 mt-2 ml-1">
+                                        Inject pre-configured AI prompts into your workflow
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setCommandModalOpen(false)}
+                                    className="p-2 hover:bg-gray-100/50 rounded-full transition-colors text-gray-400 hover:text-gray-900"
+                                >
+                                    <X size={20} />
                                 </button>
                             </div>
 
-                            <div className="p-2 overflow-y-auto bg-gray-50">
+                            <div className="p-6 overflow-y-auto bg-gray-50/30 custom-scrollbar flex-1">
                                 {commands.filter(c => c.stageId === (selectedProject?.subStage || 1)).length > 0 ? (
-                                    <div className="space-y-2">
+                                    <div className="grid grid-cols-1 gap-3">
                                         {commands
                                             .filter(c => c.stageId === (selectedProject?.subStage || 1))
                                             .map(cmd => (
-                                                <div
+                                                <motion.div
                                                     key={cmd.id}
+                                                    layout
+                                                    whileHover={{ scale: 1.01, y: -2 }}
                                                     onClick={() => handleLinkCommand(cmd)}
-                                                    className="bg-white p-4 rounded-xl border border-gray-100 hover:border-emerald-500 hover:shadow-md transition-all cursor-pointer group"
+                                                    className="bg-white p-5 rounded-2xl border border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/10 transition-all cursor-pointer group relative overflow-hidden"
                                                 >
-                                                    <div className="flex justify-between items-center mb-1">
-                                                        <span className="font-medium text-gray-900">{cmd.title}</span>
-                                                        <Plus size={16} className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                    <div className="absolute right-0 top-0 w-24 h-24 bg-gradient-to-br from-gray-50 to-transparent rounded-bl-full -z-0 opacity-50 group-hover:from-emerald-50 transition-colors" />
+
+                                                    <div className="flex justify-between items-center mb-2 relative z-10">
+                                                        <div className="flex items-center gap-3">
+                                                            <Command size={16} className="text-gray-300 group-hover:text-emerald-500 transition-colors" />
+                                                            <span className="font-medium text-gray-900 text-lg">{cmd.title}</span>
+                                                        </div>
+                                                        <div className="p-1.5 bg-gray-50 group-hover:bg-emerald-500 group-hover:text-white rounded-lg transition-colors">
+                                                            <Plus size={16} />
+                                                        </div>
                                                     </div>
-                                                    <p className="text-xs text-gray-500 line-clamp-2 font-mono bg-gray-50 p-2 rounded">{cmd.content}</p>
-                                                </div>
+                                                    <div className="pl-7">
+                                                        <div className="bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-500 leading-relaxed line-clamp-2 border border-transparent group-hover:border-emerald-100 group-hover:bg-emerald-50/30 transition-all">
+                                                            {cmd.content}
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
                                             ))}
                                     </div>
                                 ) : (
-                                    <div className="py-12 text-center text-gray-400">
-                                        <p>No commands configured for this stage.</p>
-                                        <p className="text-xs mt-2">Go to Command Center to add some.</p>
+                                    <div className="h-full flex flex-col items-center justify-center text-center py-12">
+                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 opacity-50">
+                                            <Terminal size={24} className="text-gray-400" />
+                                        </div>
+                                        <p className="text-gray-900 font-medium">No commands found</p>
+                                        <p className="text-sm text-gray-400 mt-1 max-w-xs">
+                                            There are no commands configured for the <span className="font-mono text-emerald-600 bg-emerald-50 px-1 rounded">Stage {selectedProject?.subStage || 1}</span> phase.
+                                        </p>
                                     </div>
                                 )}
                             </div>
