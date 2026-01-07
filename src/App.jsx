@@ -10,8 +10,14 @@ import AdvancedDevModule from './features/lifecycle/AdvancedDevModule';
 import CommercialModule from './features/lifecycle/CommercialModule';
 import CommandCenterModule from './features/commands/CommandCenterModule';
 
+import { useSyncStore, useDataMigration } from './features/sync/useSyncStore';
+
 function App() {
     const location = useLocation();
+
+    // --- Global Sync & Migration ---
+    const { doc } = useSyncStore('flowstudio_v1');
+    useDataMigration(doc);
 
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-gray-50/50">
