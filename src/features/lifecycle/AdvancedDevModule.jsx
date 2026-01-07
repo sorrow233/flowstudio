@@ -1,187 +1,115 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Network, Sparkles, FolderDot, Plus, Settings2, Activity, Zap, CheckCircle2 } from 'lucide-react';
-import ModuleGrid from './components/advanced/ModuleGrid';
-import ArchitectureImportModal from './components/advanced/ArchitectureImportModal';
-import ModuleDetailModal from './components/advanced/ModuleDetailModal';
+import { Network, Sparkles, FolderDot, Box, Activity, Trophy } from 'lucide-react';
 import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
 import { useSync } from '../sync/SyncContext';
-import { v4 as uuidv4 } from 'uuid';
+import AdvancedProjectWorkspace from './components/advanced/AdvancedProjectWorkspace';
 
 const AdvancedDevModule = () => {
-    // --- Data Layer (Context + Hook) ---
+    // --- Data Layer ---
     const { doc } = useSync();
-
-    // We will store advanced modules INSIDE the project object in the 'primary_projects' list ideally,
     const { projects, updateProject } = useSyncedProjects(doc, 'primary_projects');
 
-    // State for selected project context
-    const [selectedProjectId, setSelectedProjectId] = useState(null);
-    const [isImportOpen, setIsImportOpen] = useState(false);
+    // Filter for Advanced Projects (Stage 6+)
+    const advancedProjects = projects.filter(p => (p.subStage || 1) >= 6);
 
-    // Detail Modal State
-    const [editingModule, setEditingModule] = useState(null);
-
-    // Derived: Current Project
-    const currentProject = projects.find(p => p.id === selectedProjectId) || projects[0];
-    const modules = currentProject?.modules || [];
-
-    // Effect: Auto-select first project if available and none selected
-    useEffect(() => {
-        if (!selectedProjectId && projects.length > 0) {
-            setSelectedProjectId(projects[0].id);
-        }
-    }, [projects, selectedProjectId]);
-
-    // --- Actions ---
-
-    const handleImportModules = (newModules) => {
-        if (!currentProject) return;
-
-        // Enhance modules with IDs and initial state
-        const enhancedModules = newModules.map(m => ({
-            id: uuidv4(),
-            ...m,
-            stage: 1,      // 1-5 Scale
-            progress: 0,   // 0-100%
-            tasks: []
-        }));
-
-        const currentModules = currentProject.modules || [];
-        // Append
-        const updatedModules = [...currentModules, ...enhancedModules];
-        updateProject(currentProject.id, { modules: updatedModules });
-    };
-
-    const handleUpdateModule = (moduleId, updates) => {
-        if (!currentProject) return;
-        const currentModules = currentProject.modules || [];
-        const updatedModules = currentModules.map(m =>
-            m.id === moduleId ? { ...m, ...updates } : m
-        );
-        updateProject(currentProject.id, { modules: updatedModules });
-    };
-
-    const handleDeleteModule = (moduleId) => {
-        if (!currentProject) return;
-        const currentModules = currentProject.modules || [];
-        const updatedModules = currentModules.filter(m => m.id !== moduleId);
-        updateProject(currentProject.id, { modules: updatedModules });
-        setEditingModule(null);
-    };
-
-    const handleModuleClick = (module) => {
-        setEditingModule(module);
-    };
-
-    // --- System Health Calculation ---
-    const totalModules = modules.length;
-    const avgProgress = totalModules > 0
-        ? Math.round(modules.reduce((acc, m) => acc + (m.progress || 0), 0) / totalModules)
-        : 0;
-    const stableModules = modules.filter(m => m.stage >= 4).length;
-
+    // --- State ---
+    const [selectedProject, setSelectedProject] = useState(null);
 
     // --- Empty State ---
-    if (!currentProject) {
+    if (advancedProjects.length === 0) {
         return (
             <div className="max-w-7xl mx-auto pt-20 px-6 text-center text-gray-400 font-light">
-                <FolderDot size={48} className="mx-auto mb-4 opacity-50" />
-                <p>No active projects found in Primary Dev.</p>
-                <p className="text-sm">Graduate a project to begin advanced engineering.</p>
+                <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Trophy size={40} className="text-gray-300" strokeWidth={1} />
+                </div>
+                <h3 className="text-xl font-light text-gray-900 mb-2">No Advanced Projects Yet</h3>
+                <p className="max-w-md mx-auto leading-relaxed">
+                    Graduate projects from the Production Pipeline by completing all 5 stages and the Ascension Ritual.
+                </p>
             </div>
         );
     }
 
     return (
-        <div className="max-w-[1600px] mx-auto pt-10 px-6 md:px-12 pb-20">
-            {/* Header & Dashboard */}
-            <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10 mb-16">
-                <div className="flex-1">
-                    <div className="flex items-center gap-3 text-emerald-600 mb-2">
-                        <div className="p-2 bg-emerald-50 rounded-lg">
-                            <Network size={20} />
-                        </div>
-                        <span className="text-xs font-bold uppercase tracking-widest">System Architecture</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <h2 className="text-4xl font-thin text-gray-900 tracking-tight">
-                            {currentProject.title}
-                        </h2>
-                        {projects.length > 1 && (
-                            <select
-                                value={selectedProjectId}
-                                onChange={(e) => setSelectedProjectId(e.target.value)}
-                                className="text-sm bg-gray-50 border-none rounded-lg text-gray-500 font-medium focus:ring-0 cursor-pointer hover:bg-gray-100 transition-colors"
-                            >
-                                {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
-                            </select>
-                        )}
-                    </div>
-
-                    {/* System Health Dashboard */}
-                    <div className="flex gap-6 mt-8">
-                        <div className="flex items-center gap-3 pr-6 border-r border-gray-100">
-                            <div className="p-3 bg-blue-50 text-blue-500 rounded-full">
-                                <Activity size={20} />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-light text-gray-900">{avgProgress}%</p>
-                                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">System Maturity</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3 pr-6 border-r border-gray-100">
-                            <div className="p-3 bg-emerald-50 text-emerald-500 rounded-full">
-                                <CheckCircle2 size={20} />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-light text-gray-900">{stableModules}/{totalModules}</p>
-                                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Production Ready</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="p-3 bg-amber-50 text-amber-500 rounded-full">
-                                <Zap size={20} />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-light text-gray-900">{totalModules}</p>
-                                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Total Modules</p>
-                            </div>
-                        </div>
-                    </div>
+        <div className="max-w-7xl mx-auto pt-10 px-6 pb-20">
+            {/* Header */}
+            <div className="mb-12 flex justify-between items-end">
+                <div>
+                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">Advanced Development</h2>
+                    <p className="text-gray-400 text-sm font-light tracking-wide">System Architecture & Module Management</p>
                 </div>
-
-                <div className="flex gap-3">
-                    <button
-                        onClick={() => setIsImportOpen(true)}
-                        className="group flex items-center gap-3 px-8 py-5 bg-gray-900 text-white rounded-[2rem] hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
-                    >
-                        <Sparkles size={18} className="text-emerald-400 group-hover:rotate-12 transition-transform" />
-                        <span className="font-medium tracking-wide">AI Architect Import</span>
-                    </button>
+                <div className="text-right">
+                    <span className="text-3xl font-thin text-gray-900">{advancedProjects.length}</span>
+                    <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">Projects</span>
                 </div>
             </div>
 
-            {/* Main Grid Content */}
-            <ModuleGrid
-                modules={modules}
-                onModuleClick={handleModuleClick}
-            />
+            {/* Project Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {advancedProjects.map((project) => {
+                    const modules = project.modules || [];
+                    const moduleCount = modules.length;
+                    const progress = moduleCount > 0
+                        ? Math.round(modules.reduce((acc, m) => acc + (m.progress || 0), 0) / moduleCount)
+                        : 0;
 
-            {/* Modals */}
-            <ArchitectureImportModal
-                isOpen={isImportOpen}
-                onClose={() => setIsImportOpen(false)}
-                onImport={handleImportModules}
-            />
+                    return (
+                        <motion.div
+                            layoutId={`advanced-card-${project.id}`}
+                            key={project.id}
+                            onClick={() => setSelectedProject(project)}
+                            className="group bg-white border border-gray-100 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-blue-900/5 transition-all cursor-pointer relative h-[320px] flex flex-col ring-1 ring-transparent hover:ring-blue-50"
+                        >
+                            {/* Card Background */}
+                            <div className="absolute inset-0 z-0 h-40">
+                                {project.bgImage ? (
+                                    <div className="w-full h-full relative">
+                                        <img src={project.bgImage} alt="" className="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent" />
+                                    </div>
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-blue-50 to-white" />
+                                )}
+                            </div>
 
-            <ModuleDetailModal
-                isOpen={!!editingModule}
-                module={editingModule}
-                onClose={() => setEditingModule(null)}
-                onUpdate={handleUpdateModule}
-                onDelete={handleDeleteModule}
-            />
+                            <div className="p-8 relative z-10 flex flex-col h-full mt-auto">
+                                <div className="mb-auto pt-12">
+                                    <div className="w-12 h-12 bg-white text-gray-900 rounded-2xl flex items-center justify-center shadow-sm border border-gray-100 mb-6 group-hover:scale-110 transition-transform duration-300">
+                                        <Network size={24} strokeWidth={1.5} />
+                                    </div>
+                                    <h3 className="text-2xl font-light text-gray-900 mb-2 line-clamp-1 group-hover:text-blue-900 transition-colors">
+                                        {project.title}
+                                    </h3>
+                                    <p className="text-sm text-gray-500 line-clamp-2">{project.desc || 'No description provided.'}</p>
+                                </div>
+
+                                <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center">
+                                    <div className="flex items-center gap-2 text-gray-500">
+                                        <Box size={14} />
+                                        <span className="text-xs font-medium">{moduleCount} Modules</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                                        <Activity size={12} />
+                                        <span className="text-xs font-bold">{progress}% Health</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    );
+                })}
+            </div>
+
+            {/* Workspace Modal */}
+            <AnimatePresence>
+                {selectedProject && (
+                    <AdvancedProjectWorkspace
+                        project={selectedProject}
+                        onClose={() => setSelectedProject(null)}
+                        updateProject={updateProject}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 };
