@@ -14,6 +14,10 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
     const [editingModule, setEditingModule] = useState(null);
     const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
+    // Undo State
+    const [prevModules, setPrevModules] = useState(null);
+    const [showUndo, setShowUndo] = useState(false);
+
     const modules = project.modules || [];
 
     // --- Actions ---
@@ -29,6 +33,12 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
         }));
 
         const currentModules = project.modules || [];
+
+        // Save history for Undo
+        setPrevModules(currentModules);
+        setShowUndo(true);
+        setTimeout(() => setShowUndo(false), 5000);
+
         // Append
         const updatedModules = [...currentModules, ...enhancedModules];
         updateProject(project.id, { modules: updatedModules });
@@ -36,8 +46,22 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
 
     const handleAddFromLibrary = (newModules) => {
         const currentModules = project.modules || [];
+
+        // Save history for Undo
+        setPrevModules(currentModules);
+        setShowUndo(true);
+        setTimeout(() => setShowUndo(false), 5000);
+
         const updatedModules = [...currentModules, ...newModules];
         updateProject(project.id, { modules: updatedModules });
+    };
+
+    const handleUndo = () => {
+        if (prevModules) {
+            updateProject(project.id, { modules: prevModules });
+            setPrevModules(null);
+            setShowUndo(false);
+        }
     };
 
     const handleUpdateModule = (moduleId, updates) => {
@@ -228,7 +252,31 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
                     isOpen={isImportOpen}
                     onClose={() => setIsImportOpen(false)}
                     onImport={handleImportModules}
+                    currentModules={modules}
                 />
+
+                {/* Undo Toast */}
+                <AnimatePresence>
+                    {showUndo && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-2xl"
+                        >
+                            <span className="text-sm">Modules added.</span>
+                            <button
+                                onClick={handleUndo}
+                                className="text-sm font-bold text-blue-400 hover:text-blue-300 transition-colors"
+                            >
+                                Undo
+                            </button>
+                            <button onClick={() => setShowUndo(false)} className="text-gray-500 hover:text-white">
+                                <X size={14} />
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 <ModuleLibraryModal
                     isOpen={isLibraryOpen}

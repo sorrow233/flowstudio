@@ -2,9 +2,16 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Copy, Check, Terminal, FileJson, ArrowRight, BrainCircuit } from 'lucide-react';
 
-const ARCHITECTURE_PROMPT = `
+const generatePrompt = (currentModules = []) => {
+    const existingNames = currentModules.map(m => m.name).join(', ');
+    const context = existingNames
+        ? `\nCURRENT EXISTING MODULES: [${existingNames}]\nIMPORTANT: The user has already defined the above modules. Do NOT output them again. Only generate NEW, supplementary modules that are missing (e.g., if "Auth" exists, don't add it again).`
+        : '';
+
+    return `
 You are a Senior System Architect. Analyze the codebase/project requirements provided.
 I need a structural breakdown of this project for my "Advanced Development" dashboard.
+${context}
 
 Please output a strictly valid JSON object with a single key "modules" containing an array of module objects.
 Each "module" object must have:
@@ -14,16 +21,19 @@ Each "module" object must have:
 - "priority": "High" | "Medium" | "Low"
 
 Do NOT include any markdown formatting (like \`\`\`json). Just the raw JSON string.
-Break down the system into logical functional units (aim for 10-25 modules for a complex app).
+Break down the system into logical functional units (aim for 5-10 *new* modules to complement the existing ones).
 `.trim();
+};
 
-const ArchitectureImportModal = ({ isOpen, onClose, onImport }) => {
+const ArchitectureImportModal = ({ isOpen, onClose, onImport, currentModules = [] }) => {
     const [jsonInput, setJsonInput] = useState('');
     const [error, setError] = useState(null);
     const [copied, setCopied] = useState(false);
 
+    const promptText = generatePrompt(currentModules);
+
     const handleCopy = () => {
-        navigator.clipboard.writeText(ARCHITECTURE_PROMPT);
+        navigator.clipboard.writeText(promptText);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -100,8 +110,8 @@ const ArchitectureImportModal = ({ isOpen, onClose, onImport }) => {
                                     {copied ? <Check size={16} className="text-emerald-400" /> : <Copy size={16} />}
                                 </button>
                             </div>
-                            <div className="bg-gray-900 text-gray-300 p-4 rounded-xl text-xs font-mono leading-relaxed opacity-90">
-                                {ARCHITECTURE_PROMPT}
+                            <div className="bg-gray-900 text-gray-300 p-4 rounded-xl text-xs font-mono leading-relaxed opacity-90 h-40 overflow-y-auto custom-scrollbar">
+                                {promptText}
                             </div>
                         </div>
                         <p className="text-xs text-gray-400">
