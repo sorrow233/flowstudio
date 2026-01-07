@@ -114,8 +114,18 @@ const PrimaryDevModule = () => {
 
     const handleLinkCommand = (command, tag = null) => {
         const project = projects.find(p => p.id === selectedProject.id);
-        const taskText = tag ? `${command.title} [${tag.label}]` : command.title;
-        const taskContent = tag ? (tag.value || command.content) : command.content;
+
+        // If importing a specific tag, we just add that specific variant as a task.
+        // If importing the "Command Container" (default), we store the whole thing.
+        // BUT user wants the "Container" look in the list. 
+        // So effectively, we always import the Command ID and metadata, 
+        // and if a specific tag was clicked, maybe highlight it? 
+        // OR simply: Always add the task as a "Command Container", 
+        // and if a tag was clicked, maybe we just auto-copy that value once?
+        // Let's stick to the User Request: "The task list should show the tags".
+
+        const taskText = command.title; // Keep clean title
+        const taskContent = command.content;
 
         const newTasks = [...(project.tasks || []), {
             id: Date.now(),
@@ -125,42 +135,48 @@ const PrimaryDevModule = () => {
             commandContent: taskContent,
             commandUrl: command.url,
             commandId: command.id,
-            commandType: command.type || 'utility'
+            commandType: command.type || 'utility',
+
+            // KEY CHANGE: Store the tags!
+            commandTags: command.tags || []
         }];
+
         handleUpdateProject(selectedProject.id, { tasks: newTasks });
         setCommandModalOpen(false);
+
+        // If a specific tag was clicked during import, maybe copy it immediately?
+        if (tag) {
+            navigator.clipboard.writeText(tag.value || command.content);
+            // We can't easily show the "Copied" state on the new task immediately without complex ID matching,
+            // but the user will see the tags in the list.
+        }
     };
 
-    const toggleTask = (projectId, taskId) => {
+    const toggleTask = (projectId, taskId, specificContent = null, subId = null) => {
         const project = projects.find(p => p.id === projectId);
         const task = project.tasks.find(t => t.id === taskId);
 
         if (task.isCommand) {
             // Special handling for Link type
             if (task.commandType === 'link') {
-                // If there's content to copy, copy it first
                 if (task.commandContent) {
                     navigator.clipboard.writeText(task.commandContent);
-                    setCopiedTaskId(taskId);
+                    setCopiedTaskId(taskId); // Main ID for checkmark
                     setTimeout(() => setCopiedTaskId(null), 2000);
                 }
-
-                // Open URL in new tab
-                if (task.commandUrl) {
-                    window.open(task.commandUrl, '_blank');
-                }
+                if (task.commandUrl) window.open(task.commandUrl, '_blank');
                 return;
             }
 
-            navigator.clipboard.writeText(task.commandContent);
-            setCopiedTaskId(taskId);
+            // Copy Content (Default or Specific Tag)
+            const contentToCopy = specificContent || task.commandContent;
+            navigator.clipboard.writeText(contentToCopy);
+
+            // Set the ID to show "Check" (either main task ID or composite tag ID)
+            setCopiedTaskId(subId || taskId);
             setTimeout(() => setCopiedTaskId(null), 2000);
 
-            // If it's a utility command, we just copy. No checkbox toggle.
-            if (task.commandType !== 'mandatory') {
-                return;
-            }
-            // Fallthrough for Mandatory: Copy AND allow checking separately (handled by markTaskDone)
+            if (task.commandType !== 'mandatory') return;
             return;
         }
 
@@ -518,7 +534,7 @@ const PrimaryDevModule = () => {
                                                         key={task.id}
                                                         onClick={() => toggleTask(selectedProject.id, task.id)}
                                                         className={`
-                                                            group flex items-center gap-5 p-5 rounded-2xl transition-all cursor-pointer border
+                                                            group flex items-center gap-5 p-5 rounded-2xl transition-all cursor-pointer border relative overflow-hidden
                                                             ${isMandatory && !task.done
                                                                 ? 'bg-white border-red-100 shadow-sm shadow-red-100 hover:border-red-200'
                                                                 : isMandatory && task.done
@@ -556,26 +572,59 @@ const PrimaryDevModule = () => {
                                                             </button>
                                                         )}
 
-                                                        <span className={`flex-1 text-base font-medium transition-colors ${task.done ? 'opacity-40 line-through decoration-emerald-500/50' : 'text-gray-700'}`}>
-                                                            {task.text}
-                                                        </span>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <span className={`text-base font-medium transition-colors ${task.done ? 'opacity-40 line-through decoration-emerald-500/50' : 'text-gray-700'}`}>
+                                                                    {task.text}
+                                                                </span>
 
-                                                        {task.isCommand && (
-                                                            <div className="flex items-center gap-2">
-                                                                {copiedTaskId === task.id ? (
-                                                                    <span className="text-[10px] uppercase font-bold text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full animate-pulse">Copied</span>
-                                                                ) : (
-                                                                    isMandatory ? (
-                                                                        <span className="text-[10px] font-bold bg-red-50 text-red-500 px-3 py-1 rounded-full uppercase tracking-wider border border-red-100">
-                                                                            Mandatory
-                                                                        </span>
-                                                                    ) : isLink ? (
-                                                                        <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-3 py-1 rounded-full uppercase tracking-wider border border-blue-100 flex items-center gap-1">
-                                                                            <ExternalLink size={8} /> Link
-                                                                        </span>
-                                                                    ) : null
+                                                                {/* Helper Badges */}
+                                                                {isMandatory && (
+                                                                    <span className="text-[10px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-red-100">
+                                                                        Mandatory
+                                                                    </span>
+                                                                )}
+                                                                {isLink && (
+                                                                    <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-blue-100 flex items-center gap-1">
+                                                                        <ExternalLink size={8} /> Link
+                                                                    </span>
+                                                                )}
+
+                                                                {/* INLINE TAGS IN LIST */}
+                                                                {(task.commandTags && task.commandTags.length > 0) && (
+                                                                    <div className="flex flex-wrap gap-1.5 ml-1">
+                                                                        {task.commandTags.map(tag => (
+                                                                            <button
+                                                                                key={tag.id}
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    toggleTask(selectedProject.id, task.id, tag.value, `${task.id}-${tag.id}`);
+                                                                                }}
+                                                                                className="group/tag flex items-center gap-1 px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded text-[10px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden select-none hover:shadow-sm"
+                                                                                title={`Copy: ${tag.value || task.commandContent}`}
+                                                                            >
+                                                                                <Tag size={8} className="opacity-60 group-hover/tag:opacity-100" />
+                                                                                {tag.label}
+                                                                                {copiedTaskId === `${task.id}-${tag.id}` && (
+                                                                                    <motion.div
+                                                                                        initial={{ opacity: 0, y: 10 }}
+                                                                                        animate={{ opacity: 1, y: 0 }}
+                                                                                        className="absolute inset-0 bg-emerald-600 text-white flex items-center justify-center font-bold"
+                                                                                    >
+                                                                                        <Check size={10} strokeWidth={3} />
+                                                                                    </motion.div>
+                                                                                )}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
                                                                 )}
                                                             </div>
+                                                        </div>
+
+                                                        {task.isCommand && copiedTaskId === task.id && (
+                                                            <span className="text-[10px] uppercase font-bold text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full animate-pulse transition-all">
+                                                                Copied
+                                                            </span>
                                                         )}
                                                     </motion.div>
                                                 );

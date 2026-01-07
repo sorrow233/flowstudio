@@ -47,3 +47,12 @@ export const formatDate = (timestamp) => {
         year: 'numeric'
     });
 };
+
+export const COMMAND_CATEGORIES = [
+    { id: 'general', label: 'General', color: 'bg-gray-100 text-gray-600' },
+    { id: 'frontend', label: 'Frontend', color: 'bg-blue-50 text-blue-600' },
+    { id: 'backend', label: 'Backend', color: 'bg-emerald-50 text-emerald-600' },
+    { id: 'database', label: 'Database', color: 'bg-amber-50 text-amber-600' },
+    { id: 'devops', label: 'DevOps', color: 'bg-purple-50 text-purple-600' },
+    { id: 'testing', label: 'Testing', color: 'bg-rose-50 text-rose-600' },
+];

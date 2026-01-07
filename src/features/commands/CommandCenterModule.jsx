@@ -5,7 +5,7 @@ import {
     Layers, MonitorPlay, Bug, Sparkles, Flag, Command,
     ChevronRight, Sparkle, Link as LinkIcon, GripVertical, FileText, Globe, Library, Download, X, Tag
 } from 'lucide-react';
-import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
+import { STORAGE_KEYS, DEV_STAGES, COMMAND_CATEGORIES } from '../../utils/constants';
 import { v4 as uuidv4 } from 'uuid';
 
 const STAGE_ICONS = {
@@ -25,7 +25,7 @@ const CommandCenterModule = () => {
     const [copiedId, setCopiedId] = useState(null);
 
     // Form State
-    const [newCmd, setNewCmd] = useState({ title: '', content: '', type: 'utility', url: '', tags: [] });
+    const [newCmd, setNewCmd] = useState({ title: '', content: '', type: 'utility', url: '', tags: [], category: 'general' });
     const [newTag, setNewTag] = useState({ label: '', value: '' });
     const [editingTagId, setEditingTagId] = useState(null); // Track which tag is being edited
 
@@ -42,6 +42,9 @@ const CommandCenterModule = () => {
                 }
                 if (!updated.tags) {
                     updated.tags = [];
+                }
+                if (!updated.category) {
+                    updated.category = 'general';
                 }
                 return updated;
             });
@@ -72,7 +75,8 @@ const CommandCenterModule = () => {
                 content: newCmd.content.trim(),
                 url: newCmd.url.trim(),
                 type: newCmd.type,
-                tags: newCmd.tags || []
+                tags: newCmd.tags || [],
+                category: newCmd.category || 'general'
             } : c));
         } else {
             // Create New
@@ -83,13 +87,14 @@ const CommandCenterModule = () => {
                 url: newCmd.url.trim(),
                 type: newCmd.type,
                 tags: newCmd.tags || [],
+                category: newCmd.category || 'general',
                 stageIds: [activeStage], // Assign to current stage
                 createdAt: Date.now()
             };
             setCommands([command, ...commands]);
         }
 
-        setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [] });
+        setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [], category: 'general' });
         setIsAdding(false);
     };
 
@@ -159,7 +164,8 @@ const CommandCenterModule = () => {
             content: cmd.content || '',
             url: cmd.url || '',
             type: cmd.type,
-            tags: cmd.tags || []
+            tags: cmd.tags || [],
+            category: cmd.category || 'general'
         });
         setNewTag({ label: '', value: '' }); // Clear tag form when editing command
         setEditingTagId(null); // Clear editing tag state
@@ -408,6 +414,24 @@ const CommandCenterModule = () => {
                                                 </button>
                                             ))}
                                         </div>
+                                    </div>
+
+                                    {/* Category Selector */}
+                                    <div className="flex flex-wrap gap-2">
+                                        {COMMAND_CATEGORIES.map(cat => (
+                                            <button
+                                                key={cat.id}
+                                                onClick={() => setNewCmd({ ...newCmd, category: cat.id })}
+                                                className={`
+                                                    px-3 py-1.5 rounded-lg text-xs font-medium transition-all border
+                                                    ${newCmd.category === cat.id
+                                                        ? `${cat.color} border-transparent ring-2 ring-offset-1 ring-gray-100`
+                                                        : 'bg-white text-gray-500 border-gray-100 hover:border-gray-200'}
+                                                `}
+                                            >
+                                                {cat.label}
+                                            </button>
+                                        ))}
                                     </div>
 
                                     {/* Title Input */}
