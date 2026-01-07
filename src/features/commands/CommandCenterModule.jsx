@@ -71,8 +71,8 @@ const CommandCenterModule = () => {
                 title: newCmd.title.trim(),
                 content: newCmd.content.trim(),
                 url: newCmd.url.trim(),
-                type: newCmd.type
-                // stageIds remains unchanged during simple edit
+                type: newCmd.type,
+                tags: newCmd.tags || []
             } : c));
         } else {
             // Create New
