@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus, TreeDeciduous, TreePine, Image as ImageIcon, Sparkles, RefreshCw } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { STORAGE_KEYS } from '../../utils/constants';
+import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
 
 // Refined Soul-Searching Questions
 const QUESTIONS = [
@@ -38,81 +39,72 @@ const VISUAL_VIBES = [
 ];
 
 const PendingModule = () => {
-    const [projects, setProjects] = useState([]);
+    // Sync Store Integration
+    const { doc } = useSyncStore('flowstudio_v1');
+    const {
+        projects,
+        addProject,
+        removeProject: deleteProject,
+        updateProject
+    } = useSyncedProjects(doc, 'pending_projects');
+
+    const {
+        projects: primaryProjects
+    } = useSyncedProjects(doc, 'primary_projects'); // Read-only view here
+
     const [selectedProject, setSelectedProject] = useState(null);
-    const [primaryProjects, setPrimaryProjects] = useState([]);
 
-    // Load projects
+    // Sync selectedProject with latest data in case of remote updates
     useEffect(() => {
-        const loadData = () => {
-            const savedPending = localStorage.getItem(STORAGE_KEYS.PENDING);
-            if (savedPending) setProjects(JSON.parse(savedPending));
-
-            const savedPrimary = localStorage.getItem(STORAGE_KEYS.PRIMARY);
-            if (savedPrimary) setPrimaryProjects(JSON.parse(savedPrimary));
-        };
-
-        loadData();
-        window.addEventListener('storage', loadData);
-        return () => window.removeEventListener('storage', loadData);
-    }, []);
-
-    // Save projects (Pending only)
-    useEffect(() => {
-        localStorage.setItem(STORAGE_KEYS.PENDING, JSON.stringify(projects));
+        if (selectedProject) {
+            const current = projects.find(p => p.id === selectedProject.id);
+            if (current) {
+                setSelectedProject(current);
+            } else {
+                // Project was deleted remotely
+                setSelectedProject(null);
+            }
+        }
     }, [projects]);
 
     const handleUpdateProject = (id, field, value) => {
-        const updatedProjects = projects.map(p =>
-            p.id === id ? { ...p, [field]: value } : p
-        );
-        setProjects(updatedProjects);
-        if (selectedProject?.id === id) {
-            setSelectedProject({ ...selectedProject, [field]: value });
-        }
+        updateProject(id, { [field]: value });
     };
 
     const handleAnswer = (projectId, questionId, value) => {
-        const updatedProjects = projects.map(p => {
-            if (p.id !== projectId) return p;
-            const newAnswers = { ...p.answers, [questionId]: value };
+        const project = projects.find(p => p.id === projectId);
+        if (!project) return;
 
-            // Calculate Score
-            const yesCount = Object.values(newAnswers).filter(v => v === true).length;
-            return { ...p, answers: newAnswers, score: yesCount };
-        });
-        setProjects(updatedProjects);
+        const newAnswers = { ...project.answers, [questionId]: value };
+        const yesCount = Object.values(newAnswers).filter(v => v === true).length;
 
-        if (selectedProject?.id === projectId) {
-            setSelectedProject(updatedProjects.find(p => p.id === projectId));
-        }
+        updateProject(projectId, { answers: newAnswers, score: yesCount });
     };
 
     const handleGraduate = (project) => {
-        // 1. Remove from Pending
-        const remaining = projects.filter(p => p.id !== project.id);
-        setProjects(remaining);
+        // 1. Remove from Pending (via Yjs)
+        deleteProject(project.id);
         setSelectedProject(null);
 
-        // 2. Add to Primary Dev
-        const currentPrimary = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRIMARY) || '[]');
-        const newPrimary = {
-            ...project,
-            graduatedAt: Date.now(),
-            subStage: 1, // Default to Stage 1
-            progress: 0,
-            tasks: []
-        };
-        const updatedPrimary = [newPrimary, ...currentPrimary];
-        localStorage.setItem(STORAGE_KEYS.PRIMARY, JSON.stringify(updatedPrimary));
-        setPrimaryProjects(updatedPrimary); // Update local state immediately
+        // 2. Add to Primary Dev (via Yjs - Transaction ideally)
+        if (doc) {
+            const primaryList = doc.getArray('primary_projects');
+            const newPrimary = {
+                ...project,
+                graduatedAt: Date.now(),
+                subStage: 1,
+                progress: 0,
+                tasks: []
+            };
+            primaryList.unshift([newPrimary]);
+        }
     };
 
     const handleDelete = (e, id) => {
         e.stopPropagation();
-        const remaining = projects.filter(p => p.id !== id);
-        setProjects(remaining);
-        if (selectedProject?.id === id) setSelectedProject(null);
+        if (confirm('Are you sure you want to compost this idea?')) {
+            deleteProject(id);
+        }
     }
 
     const getSaplingState = (score) => {
