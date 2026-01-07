@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
-import InspirationModule from './features/lifecycle/Inspiration/InspirationModule';
-import PendingModule from './features/lifecycle/Pending/PendingModule';
-import PrimaryDevModule from './features/lifecycle/PrimaryDev/PrimaryDevModule';
-import FinalDevModule from './features/lifecycle/FinalDev/FinalDevModule';
-import AdvancedDevModule from './features/lifecycle/AdvancedDev/AdvancedDevModule';
-import CommercialModule from './features/lifecycle/Commercial/CommercialModule';
+import InspirationModule from './features/lifecycle/InspirationModule';
+import PendingModule from './features/lifecycle/PendingModule';
+import PrimaryDevModule from './features/lifecycle/PrimaryDevModule';
+import FinalDevModule from './features/lifecycle/FinalDevModule';
+import AdvancedDevModule from './features/lifecycle/AdvancedDevModule';
+import CommercialModule from './features/lifecycle/CommercialModule';
 import CommandCenterModule from './features/commands/CommandCenterModule';
 
 function App() {
@@ -26,20 +26,18 @@ function App() {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-[#f8f9fa] text-slate-900 overflow-hidden">
-            {/* Dynamic Navigation */}
+        <div className="flex flex-col h-screen overflow-hidden bg-gray-50/50">
             <Navbar activeTab={activeTab} onTabChange={setActiveTab} />
 
-            {/* Main Content Area */}
-            <main className="flex-1 overflow-y-auto px-6 pb-8 no-scrollbar">
-                <div className="max-w-5xl mx-auto h-full">
+            <main className="flex-1 overflow-y-auto w-full no-scrollbar">
+                <div className="max-w-7xl mx-auto h-full px-4 md:px-6 pb-20">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTab}
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.3 }}
+                            exit={{ opacity: 0, y: -15 }}
+                            transition={{ duration: 0.25, ease: "easeInOut" }}
                             className="h-full"
                         >
                             {renderContent()}
