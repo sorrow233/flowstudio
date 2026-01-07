@@ -41,6 +41,7 @@ const PrimaryDevModule = () => {
     // Edit Project State
     const [isEditingProject, setIsEditingProject] = useState(false);
     const [commandModalOpen, setCommandModalOpen] = useState(false);
+    const [commands, setCommands] = useState([]);
 
     // Import Modal State
     const [importCategory, setImportCategory] = useState('all');
