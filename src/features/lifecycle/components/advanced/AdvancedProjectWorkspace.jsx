@@ -160,28 +160,47 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
             >
                 <div className="flex flex-col h-full bg-white relative">
                     {/* Header */}
-                    <div className="flex justify-between items-center px-8 py-6 border-b border-gray-100 bg-white z-10">
-                        <div>
-                            <div className="flex items-center gap-3">
-                                <h2 className="text-2xl font-light text-gray-900 tracking-tight flex items-center gap-3">
-                                    {project.title}
-                                    <span className="px-2 py-0.5 rounded-full bg-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                        Rapid Iteration
-                                    </span>
-                                </h2>
+                    <div className="flex justify-between items-start px-8 py-6 border-b border-gray-100 bg-white z-10">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-3 text-emerald-600 mb-2">
+                                <div className="p-2 bg-emerald-50 rounded-lg">
+                                    <Network size={20} />
+                                </div>
+                                <span className="text-xs font-bold uppercase tracking-widest">Rapid Iteration</span>
                             </div>
-                            <div className="flex items-center gap-2 mt-1">
-                                <p className="text-sm text-gray-400 font-light">
-                                    {modules.length} modules defined
-                                </p>
-                                {lastEdited && (
-                                    <>
-                                        <span className="text-gray-200">•</span>
-                                        <span className="text-xs text-gray-400 font-mono">
-                                            Saved {formatLastEdited(lastEdited)}
-                                        </span>
-                                    </>
-                                )}
+                            <h2 className="text-3xl font-light text-gray-900 tracking-tight mb-4">
+                                {project.title}
+                            </h2>
+
+                            {/* System Health Dashboard */}
+                            <div className="flex flex-wrap gap-6">
+                                <div className="flex items-center gap-3 pr-6 border-r border-gray-100">
+                                    <div className="p-3 bg-blue-50 text-blue-500 rounded-xl">
+                                        <Activity size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-light text-gray-900">{avgProgress}%</p>
+                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">System Maturity</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 pr-6 border-r border-gray-100">
+                                    <div className="p-3 bg-emerald-50 text-emerald-500 rounded-xl">
+                                        <CheckCircle2 size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-light text-gray-900">{stableModules}/{totalModules}</p>
+                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Production Ready</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="p-3 bg-amber-50 text-amber-500 rounded-xl">
+                                        <Zap size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-light text-gray-900">{totalModules}</p>
+                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Total Modules</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
