@@ -465,20 +465,40 @@ const CommandCenterModule = () => {
                                             <div className="flex gap-2 items-start">
                                                 <div className="flex-1 space-y-1">
                                                     <input
-                                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 text-sm outline-none focus:bg-white focus:border-emerald-200 focus:ring-2 focus:ring-emerald-50 transition-all placeholder:text-gray-400"
+                                                        className={`
+                                                            w-full border rounded-xl px-3 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400
+                                                            ${editingTagId
+                                                                ? 'bg-amber-50 border-amber-200 focus:border-amber-300 focus:ring-2 focus:ring-amber-100 text-amber-900'
+                                                                : 'bg-gray-50 border-gray-100 focus:bg-white focus:border-emerald-200 focus:ring-2 focus:ring-emerald-50'}
+                                                        `}
                                                         placeholder="Label (e.g. 'Prod')"
                                                         value={newTag.label}
                                                         onChange={e => setNewTag({ ...newTag, label: e.target.value })}
-                                                        onKeyDown={e => e.key === 'Enter' && handleAddTag()}
+                                                        onKeyDown={e => {
+                                                            if (e.key === 'Enter') {
+                                                                e.preventDefault();
+                                                                if (newTag.label.trim()) handleAddTag();
+                                                            }
+                                                        }}
                                                     />
                                                 </div>
                                                 <div className="flex-[2] space-y-1">
                                                     <input
-                                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 text-sm outline-none focus:bg-white focus:border-emerald-200 focus:ring-2 focus:ring-emerald-50 transition-all font-mono text-gray-600 placeholder:text-gray-400"
+                                                        className={`
+                                                            w-full border rounded-xl px-3 py-2.5 text-sm outline-none transition-all font-mono placeholder:text-gray-400
+                                                            ${editingTagId
+                                                                ? 'bg-amber-50 border-amber-200 focus:border-amber-300 focus:ring-2 focus:ring-amber-100 text-amber-900'
+                                                                : 'bg-gray-50 border-gray-100 focus:bg-white focus:border-emerald-200 focus:ring-2 focus:ring-emerald-50 text-gray-600'}
+                                                        `}
                                                         placeholder="Content Override (Optional)"
                                                         value={newTag.value}
                                                         onChange={e => setNewTag({ ...newTag, value: e.target.value })}
-                                                        onKeyDown={e => e.key === 'Enter' && handleAddTag()}
+                                                        onKeyDown={e => {
+                                                            if (e.key === 'Enter') {
+                                                                e.preventDefault();
+                                                                if (newTag.label.trim()) handleAddTag();
+                                                            }
+                                                        }}
                                                     />
                                                 </div>
                                                 <div className="flex gap-1">
@@ -488,7 +508,7 @@ const CommandCenterModule = () => {
                                                         className={`
                                                             px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all
                                                             ${editingTagId
-                                                                ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-200'
+                                                                ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-200'
                                                                 : 'bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200'}
                                                             disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed
                                                         `}
@@ -515,13 +535,13 @@ const CommandCenterModule = () => {
                                                             key={tag.id}
                                                             onClick={() => handleEditTagClick(tag)}
                                                             className={`
-                                                                group flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border cursor-pointer transition-all select-none
-                                                                ${editingTagId === tag.id
-                                                                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300 ring-2 ring-emerald-200 ring-offset-1'
+                                                                    group flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border cursor-pointer transition-all select-none
+                                                                    ${editingTagId === tag.id
+                                                                    ? 'bg-amber-100 text-amber-800 border-amber-300 ring-2 ring-amber-200 ring-offset-1'
                                                                     : 'bg-white text-gray-600 border-gray-200 hover:border-emerald-200 hover:text-emerald-600 hover:shadow-sm'}
-                                                            `}
+                                                                `}
                                                         >
-                                                            <Tag size={12} className={editingTagId === tag.id ? 'text-emerald-600' : 'text-gray-400 group-hover:text-emerald-500'} />
+                                                            <Tag size={12} className={editingTagId === tag.id ? 'text-amber-600' : 'text-gray-400 group-hover:text-emerald-500'} />
                                                             <span>{tag.label}</span>
                                                             {tag.value && (
                                                                 <>
@@ -669,7 +689,7 @@ const CommandCenterModule = () => {
 
                                         {/* Tags Display */}
                                         {(cmd.tags && cmd.tags.length > 0) && (
-                                            <div className="flex flex-wrap gap-2 pl-[4.5rem] mt-2">
+                                            <div className="flex flex-wrap gap-2 pl-[4.5rem] mt-3 mb-1">
                                                 {cmd.tags.map(tag => (
                                                     <button
                                                         key={tag.id}
@@ -677,18 +697,18 @@ const CommandCenterModule = () => {
                                                             e.stopPropagation();
                                                             handleCopy(`${cmd.id}-${tag.id}`, tag.value || cmd.content);
                                                         }}
-                                                        className="group/tag flex items-center gap-2 px-3 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-500 hover:text-emerald-600 rounded-lg text-[10px] font-medium border border-gray-100 hover:border-emerald-200 transition-all relative overflow-hidden"
-                                                        title={tag.value}
+                                                        className="group/tag flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg text-[11px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden shadow-sm"
+                                                        title={`Copy: ${tag.value || cmd.content}`}
                                                     >
-                                                        <Tag size={10} className="opacity-70" />
+                                                        <Tag size={10} className="opacity-60 group-hover/tag:opacity-100" />
                                                         {tag.label}
                                                         {copiedId === `${cmd.id}-${tag.id}` && (
                                                             <motion.div
                                                                 initial={{ opacity: 0, y: 10 }}
                                                                 animate={{ opacity: 1, y: 0 }}
-                                                                className="absolute inset-0 bg-emerald-500 text-white flex items-center justify-center font-bold"
+                                                                className="absolute inset-0 bg-emerald-600 text-white flex items-center justify-center font-bold"
                                                             >
-                                                                <Check size={10} />
+                                                                <Check size={12} strokeWidth={3} />
                                                             </motion.div>
                                                         )}
                                                     </button>
