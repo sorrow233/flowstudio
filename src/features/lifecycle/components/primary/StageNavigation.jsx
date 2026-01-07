@@ -76,46 +76,52 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                             </div>
 
                             {/* Manual Completion Dot - Double Click to Toggle */}
-                                                } else {
-                                onToggleComplete(stage.id, true);
-                                                }
-                                            }}
-                            className={`
-                                            w-2.5 h-2.5 rounded-full transition-all duration-300 shadow-sm
-                                            ${isCompleted
-                                    ? 'bg-emerald-500 shadow-emerald-200 ring-2 ring-emerald-100'
-                                    : (() => {
-                                        const stageColors = {
-                                            1: 'bg-slate-300',
-                                            2: 'bg-blue-300',
-                                            3: 'bg-violet-300',
-                                            4: 'bg-amber-300',
-                                            5: 'bg-rose-300'
-                                        };
-                                        return stageColors[stage.id] || 'bg-gray-300';
-                                    })()
-                                }
-                                        `}
-                            title={isCompleted ? "Double click to undo" : "Double click to complete"}
-                                        />
-                            {/* Minimal Hover Hint */}
-                            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 opacity-0 group-hover/dot:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
-                                <span className="bg-gray-900 text-white text-[8px] px-1.5 py-0.5 rounded shadow-lg">
-                                    Double Click
-                                </span>
+                            <div className="ml-2 group/dot relative flex items-center justify-center">
+                                <motion.button
+                                    whileHover={{ scale: 1.5 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onDoubleClick={(e) => {
+                                        e.stopPropagation();
+                                        if (isCompleted) {
+                                            onToggleComplete(stage.id, false);
+                                        } else {
+                                            onToggleComplete(stage.id, true);
+                                        }
+                                    }}
+                                    className={`
+                                        w-2.5 h-2.5 rounded-full transition-all duration-300 shadow-sm
+                                        ${isCompleted
+                                            ? 'bg-emerald-500 shadow-emerald-200 ring-2 ring-emerald-100'
+                                            : (() => {
+                                                const stageColors = {
+                                                    1: 'bg-slate-300',
+                                                    2: 'bg-blue-300',
+                                                    3: 'bg-violet-300',
+                                                    4: 'bg-amber-300',
+                                                    5: 'bg-rose-300'
+                                                };
+                                                return stageColors[stage.id] || 'bg-gray-300';
+                                            })()
+                                        }
+                                    `}
+                                    title={isCompleted ? "Double click to undo" : "Double click to complete"}
+                                />
+                                {/* Minimal Hover Hint */}
+                                <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 opacity-0 group-hover/dot:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
+                                    <span className="bg-gray-900 text-white text-[8px] px-1.5 py-0.5 rounded shadow-lg">
+                                        Double Click
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    )
-                }
-                        </div>
-            );
+                    );
                 })}
-        </div>
+            </div>
 
-            {/* Legend / Tip */ }
-    <div className="mt-8 px-4 py-3 bg-gray-50 rounded-xl text-[10px] text-gray-400 leading-relaxed border border-gray-100">
-        <p><strong>提示:</strong> 自由查看各阶段。使用 <span className="inline-block w-6 h-3 bg-gray-200 rounded-full align-middle mx-1"></span> 开关手动标记阶段完成。</p>
-    </div>
+            {/* Legend / Tip */}
+            <div className="mt-8 px-4 py-3 bg-gray-50 rounded-xl text-[10px] text-gray-400 leading-relaxed border border-gray-100">
+                <p><strong>提示:</strong> 自由查看各阶段。使用 <span className="inline-block w-6 h-3 bg-gray-200 rounded-full align-middle mx-1"></span> 开关手动标记阶段完成。</p>
+            </div>
         </div >
     );
 };
