@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Trash2, Sparkles, Plus, X } from 'lucide-react';
+import { Send, Trash2, ArrowRight } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -40,79 +40,69 @@ const InspirationModule = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-4">
-            <div className="mb-8">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent mb-2">
-                    灵感迸发
+        <div className="max-w-3xl mx-auto pt-10 px-6">
+            <div className="mb-12">
+                <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">
+                    Inspiration
                 </h2>
-                <p className="text-gray-500">
-                    捕捉瞬时的巧思，为未来的项目积蓄能量。
+                <p className="text-gray-400 text-sm font-light tracking-wide">
+                    捕捉瞬时灵感，为未来积蓄能量
                 </p>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-8">
+            <div className="relative mb-16 group">
                 <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="写下你的想法... (⌘ + Enter 发送)"
-                    className="w-full min-h-[100px] p-2 text-lg outline-none resize-none placeholder:text-gray-300"
+                    placeholder="在此记录想法..."
+                    className="w-full bg-transparent text-lg text-gray-800 placeholder:text-gray-300 border-b border-gray-200 focus:border-gray-800 outline-none py-4 transition-colors resize-none h-24 font-light leading-relaxed"
                     onKeyDown={(e) => {
                         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                             handleAdd();
                         }
                     }}
                 />
-                <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-50">
-                    <span className="text-xs text-gray-400">支持 Markdown 格式</span>
+                <div className="absolute bottom-4 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <button
                         onClick={handleAdd}
                         disabled={!input.trim()}
-                        className="flex items-center gap-2 px-6 py-2 bg-rose-500 text-white rounded-full font-medium hover:bg-rose-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-rose-200"
+                        className="p-2 text-gray-400 hover:text-gray-900 transition-colors disabled:opacity-30"
                     >
-                        <Send size={16} />
-                        记录
+                        <ArrowRight size={20} strokeWidth={1.5} />
                     </button>
                 </div>
             </div>
 
-            <div className="space-y-4">
-                <AnimatePresence>
+            <div className="space-y-8 pb-20">
+                <AnimatePresence mode="popLayout">
                     {ideas.map((idea) => (
                         <motion.div
                             key={idea.id}
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="group bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all"
+                            exit={{ opacity: 0, x: -10 }}
+                            layout
+                            className="group relative border-l-2 border-transparent hover:border-gray-900 pl-6 py-1 transition-all duration-500"
                         >
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-rose-100 to-orange-100 flex items-center justify-center text-rose-500">
-                                        <Sparkles size={14} />
-                                    </div>
-                                    <span className="text-sm font-semibold text-gray-700">Idea</span>
-                                </div>
+                            <p className="text-gray-700 text-base font-light leading-7 whitespace-pre-wrap">{idea.content}</p>
+                            <div className="flex items-center gap-4 mt-3">
+                                <span className="text-[10px] text-gray-300 uppercase tracking-widest font-medium">
+                                    {new Date(idea.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                </span>
                                 <button
                                     onClick={() => handleDelete(idea.id)}
-                                    className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="text-gray-200 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
                                 >
-                                    <Trash2 size={18} />
+                                    <Trash2 size={14} strokeWidth={1.5} />
                                 </button>
-                            </div>
-                            <p className="text-gray-800 text-lg leading-relaxed whitespace-pre-wrap">{idea.content}</p>
-                            <div className="mt-4 text-xs text-gray-300">
-                                {new Date(idea.timestamp).toLocaleString()}
                             </div>
                         </motion.div>
                     ))}
                 </AnimatePresence>
 
                 {ideas.length === 0 && (
-                    <div className="text-center py-20">
-                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
-                            <Sparkles size={32} />
-                        </div>
-                        <p className="text-gray-400">暂无灵感，快去记录第一个想法吧！</p>
+                    <div className="py-20 text-center opacity-30">
+                        <span className="text-sm font-light text-gray-400">暂无内容</span>
                     </div>
                 )}
             </div>

@@ -2,9 +2,18 @@ import React from 'react';
 
 const PrimaryDevModule = () => {
     return (
-        <div className="flex flex-col items-center justify-center h-[60vh] text-gray-400">
-            <h2 className="text-2xl font-bold mb-2">初级开发阶段</h2>
-            <p>MVP 与核心功能构建中</p>
+        <div className="max-w-3xl mx-auto pt-10 px-6">
+            <div className="mb-12">
+                <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">
+                    Primary Dev
+                </h2>
+                <p className="text-gray-400 text-sm font-light tracking-wide">
+                    MVP 核心功能构建
+                </p>
+            </div>
+            <div className="flex flex-col items-center justify-center py-20 border border-dashed border-gray-200 rounded-lg">
+                <p className="text-gray-300 font-light text-sm">构建中</p>
+            </div>
         </div>
     );
 };
