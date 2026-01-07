@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Terminal, Plus, Trash2, Copy, Check, Search,
-    Layers, MonitorPlay, Bug, Sparkles, Flag, Command
+    Layers, MonitorPlay, Bug, Sparkles, Flag, Command,
+    ChevronRight, Sparkle
 } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
 import { v4 as uuidv4 } from 'uuid';
@@ -69,155 +70,225 @@ const CommandCenterModule = () => {
     );
 
     return (
-        <div className="max-w-7xl mx-auto pt-10 px-6 h-full flex gap-8">
+        <div className="max-w-7xl mx-auto pt-8 px-6 h-[calc(100vh-4rem)] flex gap-8">
+            {/* Ambient Background */}
+            <div className="fixed inset-0 -z-10 bg-gray-50/50 pointer-events-none" />
+            <div className="fixed top-0 left-0 w-full h-96 bg-gradient-to-b from-gray-100 to-transparent -z-10 opacity-50" />
+
             {/* Sidebar / Stage Select */}
-            <div className="w-64 shrink-0 flex flex-col gap-2">
-                <div className="mb-8 px-4">
-                    <h2 className="text-xl font-medium text-gray-900 flex items-center gap-2">
-                        <Terminal size={20} />
+            <div className="w-72 shrink-0 flex flex-col gap-2 py-4">
+                <div className="mb-10 px-4">
+                    <h2 className="text-2xl font-thin text-gray-900 flex items-center gap-3 tracking-tight">
+                        <div className="w-10 h-10 bg-gray-900 text-white rounded-xl flex items-center justify-center shadow-lg shadow-gray-200">
+                            <Terminal size={20} />
+                        </div>
                         Command Center
                     </h2>
-                    <p className="text-xs text-gray-400 mt-1">Manage your AI Prompts</p>
+                    <p className="text-xs text-gray-400 mt-2 pl-1 font-light tracking-wide">
+                        AI PROMPT ORCHESTRATION
+                    </p>
                 </div>
 
-                {DEV_STAGES.map(stage => {
-                    const Icon = STAGE_ICONS[stage.id];
-                    const count = commands.filter(c => c.stageId === stage.id).length;
-                    const isActive = activeStage === stage.id;
+                <div className="space-y-1">
+                    {DEV_STAGES.map(stage => {
+                        const Icon = STAGE_ICONS[stage.id];
+                        const count = commands.filter(c => c.stageId === stage.id).length;
+                        const isActive = activeStage === stage.id;
 
-                    return (
-                        <button
-                            key={stage.id}
-                            onClick={() => setActiveStage(stage.id)}
-                            className={`
-                                flex items-center justify-between p-3 rounded-xl transition-all text-sm
-                                ${isActive ? 'bg-gray-900 text-white shadow-lg' : 'hover:bg-gray-100 text-gray-600'}
-                            `}
-                        >
-                            <div className="flex items-center gap-3">
-                                <Icon size={16} />
-                                <span>{stage.label}</span>
-                            </div>
-                            {count > 0 && (
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20' : 'bg-gray-200'}`}>
-                                    {count}
-                                </span>
-                            )}
-                        </button>
-                    );
-                })}
+                        return (
+                            <button
+                                key={stage.id}
+                                onClick={() => setActiveStage(stage.id)}
+                                className={`
+                                    w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 group relative overflow-hidden
+                                    ${isActive ? 'bg-white shadow-xl shadow-gray-200/50 scale-105 z-10' : 'hover:bg-white/50 hover:pl-5 text-gray-500'}
+                                `}
+                            >
+                                <div className="flex items-center gap-4 relative z-10">
+                                    <div className={`
+                                        w-8 h-8 rounded-lg flex items-center justify-center transition-colors
+                                        ${isActive ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-white'}
+                                    `}>
+                                        <Icon size={16} />
+                                    </div>
+                                    <div className="text-left">
+                                        <div className={`text-sm font-medium ${isActive ? 'text-gray-900' : 'text-gray-600'}`}>
+                                            {stage.label}
+                                        </div>
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="subtitle"
+                                                className="text-[10px] text-gray-400 font-mono hidden xl:block"
+                                            >
+                                                STAGE 0{stage.id}
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                </div>
+                                {count > 0 && (
+                                    <span className={`text-[10px] font-mono px-2 py-1 rounded-full transition-colors ${isActive ? 'bg-gray-100 text-gray-900' : 'bg-gray-200/50 text-gray-400'}`}>
+                                        {count}
+                                    </span>
+                                )}
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="active-bg"
+                                        className="absolute inset-0 border-2 border-gray-100 rounded-2xl pointer-events-none"
+                                    />
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 bg-white border border-gray-100 rounded-3xl p-8 shadow-sm flex flex-col h-[calc(100vh-140px)]">
+            <div className="flex-1 bg-white/80 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-10 shadow-2xl shadow-gray-200/50 flex flex-col relative overflow-hidden ring-1 ring-gray-100/50">
+                {/* Decorative Elements */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-50/50 to-transparent blur-3xl -z-10 pointer-events-none" />
+
                 {/* Header */}
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-end mb-10">
                     <div>
-                        <h3 className="text-2xl font-light text-gray-900">{DEV_STAGES[activeStage - 1].title}</h3>
-                        <p className="text-sm text-gray-400 mt-1">{DEV_STAGES[activeStage - 1].desc}</p>
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="px-2 py-1 rounded-md bg-gray-100 text-[10px] font-bold tracking-widest uppercase text-gray-500">
+                                Stage 0{activeStage}
+                            </span>
+                        </div>
+                        <h3 className="text-4xl font-thin text-gray-900 mb-2">{DEV_STAGES[activeStage - 1].title}</h3>
+                        <p className="text-gray-400 font-light max-w-lg leading-relaxed">
+                            {DEV_STAGES[activeStage - 1].desc}
+                        </p>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <div className="relative">
-                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <div className="flex flex-col items-end gap-4">
+                        <button
+                            onClick={() => setIsAdding(true)}
+                            className="group flex items-center gap-3 px-6 py-3 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                        >
+                            <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
+                            <span className="font-medium tracking-wide">New Command</span>
+                        </button>
+                        <div className="relative group">
+                            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
                             <input
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Search commands..."
-                                className="pl-9 pr-4 py-2 bg-gray-50 rounded-lg text-sm border-none outline-none focus:ring-1 focus:ring-gray-900 w-64"
+                                className="pl-10 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white rounded-xl text-sm border border-transparent hover:border-gray-200 focus:border-emerald-200 outline-none w-64 transition-all focus:w-80 shadow-inner"
                             />
                         </div>
-                        <button
-                            onClick={() => setIsAdding(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors shadow-emerald-200 shadow-md"
-                        >
-                            <Plus size={16} /> New Command
-                        </button>
                     </div>
                 </div>
 
                 {/* Command Grid */}
-                <div className="flex-1 overflow-y-auto pr-2 space-y-4">
-                    <AnimatePresence>
+                <div className="flex-1 overflow-y-auto pr-2 space-y-4 -mr-4 pr-6 pb-20 custom-scrollbar">
+                    <AnimatePresence mode="popLayout">
                         {isAdding && (
                             <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className="bg-gray-50 border border-emerald-100 rounded-xl p-6 mb-6 overflow-hidden"
+                                initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                                className="bg-white border border-emerald-100 rounded-3xl p-8 mb-8 shadow-xl shadow-emerald-500/5 relative overflow-hidden"
                             >
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-full -z-10 opacity-50" />
+
                                 <input
-                                    className="w-full bg-transparent text-lg font-medium outline-none mb-3 placeholder:text-gray-400"
-                                    placeholder="Command Title (e.g., 'Generate API Logic')"
+                                    className="w-full bg-transparent text-2xl font-light outline-none mb-4 placeholder:text-gray-300"
+                                    placeholder="Command Title..."
                                     autoFocus
                                     value={newCmd.title}
                                     onChange={e => setNewCmd({ ...newCmd, title: e.target.value })}
                                 />
-                                <textarea
-                                    className="w-full bg-white rounded-lg p-4 text-sm font-mono text-gray-600 outline-none border border-gray-200 resize-y min-h-[120px]"
-                                    placeholder="Enter your AI prompt here..."
-                                    value={newCmd.content}
-                                    onChange={e => setNewCmd({ ...newCmd, content: e.target.value })}
-                                />
-                                <div className="flex justify-end gap-3 mt-4">
+                                <div className="relative rounded-2xl border border-gray-100 overflow-hidden bg-gray-50/30 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 transition-all">
+                                    <div className="absolute top-3 left-4 text-gray-300 pointer-events-none">
+                                        <Terminal size={16} />
+                                    </div>
+                                    <textarea
+                                        className="w-full bg-transparent p-4 pl-12 text-sm font-mono text-gray-600 outline-none resize-y min-h-[160px]"
+                                        placeholder="Enter your system instruction or prompt here..."
+                                        value={newCmd.content}
+                                        onChange={e => setNewCmd({ ...newCmd, content: e.target.value })}
+                                    />
+                                </div>
+                                <div className="flex justify-end gap-3 mt-6">
                                     <button
                                         onClick={() => setIsAdding(false)}
-                                        className="px-4 py-2 text-sm text-gray-500 hover:text-gray-900"
+                                        className="px-6 py-2.5 text-sm text-gray-500 hover:text-gray-900 transition-colors font-medium"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         onClick={handleAdd}
                                         disabled={!newCmd.title.trim() || !newCmd.content.trim()}
-                                        className="px-6 py-2 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="px-8 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-medium hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-200 transition-all disabled:opacity-50 disabled:shadow-none"
                                     >
-                                        Save Command
+                                        Create Command
                                     </button>
                                 </div>
                             </motion.div>
                         )}
 
-                        {filteredCommands.map(cmd => (
-                            <motion.div
-                                key={cmd.id}
-                                layout
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="group bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-all relative"
-                            >
-                                <div className="flex justify-between items-start mb-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-gray-50 rounded-lg text-gray-400 group-hover:text-gray-900 transition-colors">
-                                            <Command size={18} />
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                            {filteredCommands.map(cmd => (
+                                <motion.div
+                                    key={cmd.id}
+                                    layout
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    whileHover={{ y: -4, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)" }}
+                                    className="group bg-white border border-gray-100 hover:border-emerald-100 rounded-3xl p-6 transition-all duration-300 flex flex-col h-full relative overflow-hidden"
+                                >
+                                    <div className="flex justify-between items-start mb-4 relative z-10">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 bg-gray-50 group-hover:bg-emerald-50 rounded-xl flex items-center justify-center text-gray-400 group-hover:text-emerald-600 transition-colors duration-500">
+                                                <Command size={18} />
+                                            </div>
+                                            <h4 className="font-medium text-lg text-gray-900">{cmd.title}</h4>
                                         </div>
-                                        <h4 className="font-medium text-gray-900">{cmd.title}</h4>
+                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            <button
+                                                onClick={() => handleCopy(cmd.id, cmd.content)}
+                                                className="p-2 hover:bg-emerald-50 rounded-xl text-gray-400 hover:text-emerald-600 transition-colors relative"
+                                            >
+                                                {copiedId === cmd.id ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} />}
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(cmd.id)}
+                                                className="p-2 hover:bg-red-50 rounded-xl text-gray-400 hover:text-red-500 transition-colors"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button
-                                            onClick={() => handleCopy(cmd.id, cmd.content)}
-                                            className="p-2 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-emerald-600 transition-colors"
-                                            title="Copy Prompt"
-                                        >
-                                            {copiedId === cmd.id ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(cmd.id)}
-                                            className="p-2 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-red-500 transition-colors"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+
+                                    <div className="flex-1 bg-gray-50/50 group-hover:bg-gray-50 rounded-2xl p-4 font-mono text-xs text-gray-600 leading-relaxed relative border border-transparent group-hover:border-gray-100 transition-colors">
+                                        <div className="absolute top-4 left-4 text-emerald-200 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Sparkle size={12} fill="currentColor" />
+                                        </div>
+                                        <p className="line-clamp-4 pl-0 group-hover:pl-4 transition-all duration-300">
+                                            {cmd.content}
+                                        </p>
                                     </div>
-                                </div>
-                                <div className="bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-600 leading-relaxed whitespace-pre-wrap line-clamp-3 group-hover:line-clamp-none transition-all duration-500">
-                                    {cmd.content}
-                                </div>
-                            </motion.div>
-                        ))}
+                                </motion.div>
+                            ))}
+                        </div>
 
                         {filteredCommands.length === 0 && !isAdding && (
-                            <div className="text-center py-20 text-gray-300">
-                                <Terminal size={48} className="mx-auto mb-4 opacity-20" />
-                                <p>No commands in this stage yet.</p>
+                            <div className="flex flex-col items-center justify-center py-32 text-center">
+                                <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                                    <Terminal size={32} className="text-gray-300" />
+                                </div>
+                                <h4 className="text-lg font-medium text-gray-900 mb-2">No Commands Configured</h4>
+                                <p className="text-gray-400 max-w-sm mx-auto mb-8">
+                                    This stage is empty. Add your frequently used AI prompts here to streamline your workflow.
+                                </p>
+                                <button
+                                    onClick={() => setIsAdding(true)}
+                                    className="text-emerald-600 font-medium hover:text-emerald-700 flex items-center gap-2 hover:gap-3 transition-all"
+                                >
+                                    Create First Command <ChevronRight size={16} />
+                                </button>
                             </div>
                         )}
                     </AnimatePresence>

@@ -233,7 +233,7 @@ const PrimaryDevModule = () => {
                                     <div>
                                         <div className="flex items-center gap-3 mb-2 opacity-80">
                                             <span className="px-3 py-1 rounded-full border border-white/20 bg-white/10 text-xs font-mono backdrop-blur-sm">
-                                                v4.2.0
+                                                v4.2.1
                                             </span>
                                             {selectedProject.link && (
                                                 <a href={selectedProject.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs hover:text-emerald-400 transition-colors">

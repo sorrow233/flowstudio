@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus } from 'lucide-react';
+import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus, TreeDeciduous, TreePine } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { STORAGE_KEYS } from '../../utils/constants';
 
@@ -8,27 +8,29 @@ import { STORAGE_KEYS } from '../../utils/constants';
 const QUESTIONS = [
     {
         id: 'clarity',
-        text: '你能否清晰地表达自己究竟想要通过它达成什么？',
+        text: 'Do you have a crystal-clear vision of the final outcome?',
         sub: 'Clarity of Purpose'
     },
     {
         id: 'self_use',
-        text: '开发完成后，你自己会频繁地使用它吗？',
+        text: 'Will you personally rely on this tool every single day?',
         sub: 'Self-Necessity'
     },
     {
         id: 'impact',
-        text: '它能在未来长久地改变你的生活方式吗？',
-        sub: 'Long-term Impact'
+        text: 'Can this project fundamentally upgrade your workflow?',
+        sub: 'Transformative Value'
     },
     {
         id: 'value',
-        text: '你是否坚信这个项目能为他人带来价值？',
-        sub: 'External Value'
+        text: 'Do you believe it imparts real value to the world?',
+        sub: 'External Contribution'
     },
 ];
 
 const PendingModule = () => {
+    const [projects, setProjects] = useState([]);
+    const [selectedProject, setSelectedProject] = useState(null);
     const [primaryProjects, setPrimaryProjects] = useState([]);
 
     // Load projects
@@ -116,11 +118,11 @@ const PendingModule = () => {
     // Tree Growth Visualization Helper
     const getTreeVisual = (stage = 1) => {
         const stages = [
-            { color: 'text-emerald-200', scale: 0.8, icon: Sprout }, // 1: Seedling
-            { color: 'text-emerald-300', scale: 0.9, icon: Sprout }, // 2: Sapling
-            { color: 'text-emerald-400', scale: 1.0, icon: Sprout }, // 3: Young Tree
-            { color: 'text-emerald-500', scale: 1.1, icon: Sprout }, // 4: Mature Tree
-            { color: 'text-emerald-600', scale: 1.2, icon: Sprout }, // 5: Grand Tree
+            { color: 'text-emerald-300', scale: 0.9, icon: Sprout, label: 'Seedling' },      // 1: Seedling
+            { color: 'text-emerald-400', scale: 1.1, icon: Sprout, label: 'Sapling' },       // 2: Sapling
+            { color: 'text-emerald-500', scale: 1.0, icon: TreeDeciduous, label: 'Young Tree' }, // 3: Young Tree
+            { color: 'text-emerald-600', scale: 1.1, icon: TreeDeciduous, label: 'Mature Tree' }, // 4: Mature Tree
+            { color: 'text-emerald-700', scale: 1.2, icon: TreePine, label: 'Ancient' },      // 5: Grand Tree
         ];
         return stages[stage - 1] || stages[0];
     };
@@ -134,7 +136,7 @@ const PendingModule = () => {
                 {/* Header */}
                 <div className="mb-8">
                     <h2 className="text-2xl font-light tracking-wide text-gray-900">Pending Stream</h2>
-                    <p className="text-xs font-mono text-gray-400 mt-1 uppercase tracking-widest">Assessment Queue</p>
+                    <p className="text-xs font-mono text-gray-400 mt-1 uppercase tracking-widest">Idea Assessment Queue</p>
                 </div>
 
                 {/* Main Content Area - Split between Pending and Garden */}
@@ -204,30 +206,40 @@ const PendingModule = () => {
                             <div className="mb-4 flex items-center gap-2">
                                 <Sun size={16} className="text-amber-400" />
                                 <h3 className="text-sm font-medium text-gray-900 uppercase tracking-widest">Nursery</h3>
-                                <span className="text-xs text-gray-400 font-mono">({primaryProjects.length} Growing)</span>
+                                <span className="text-xs text-gray-400 font-mono hidden sm:inline-block">({primaryProjects.length} Growing)</span>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 no-scrollbar snap-x">
                                 {primaryProjects.map(p => {
                                     const visual = getTreeVisual(p.subStage || 1);
                                     return (
                                         <motion.div
                                             key={p.id}
                                             layoutId={`nursery-${p.id}`}
-                                            className="bg-emerald-50/30 border border-emerald-100/50 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:bg-emerald-50 transition-colors cursor-default"
+                                            className="min-w-[140px] snap-start bg-gradient-to-b from-emerald-50/50 to-white border border-emerald-100 rounded-2xl p-4 flex flex-col items-center justify-between text-center hover:shadow-sm transition-all cursor-default h-[160px]"
                                         >
-                                            <motion.div
-                                                className={`mb-2 ${visual.color}`}
-                                                animate={{ scale: visual.scale }}
-                                            >
-                                                <visual.icon size={24} />
-                                            </motion.div>
-                                            <h4 className="text-xs font-medium text-gray-800 line-clamp-1 w-full">{p.title}</h4>
-                                            <div className="w-full bg-gray-200 h-1 rounded-full mt-2 overflow-hidden">
-                                                <div
-                                                    className="h-full bg-emerald-400"
-                                                    style={{ width: `${((p.subStage || 1) / 5) * 100}%` }}
-                                                />
+                                            <div className="flex-1 flex items-center justify-center w-full relative">
+                                                <motion.div
+                                                    className={`relative z-10 ${visual.color}`}
+                                                    animate={{ scale: visual.scale }}
+                                                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                                                >
+                                                    <visual.icon size={32} strokeWidth={1.5} />
+                                                </motion.div>
+                                                {/* Ground shadow */}
+                                                <div className="absolute bottom-2 w-8 h-1 bg-emerald-900/10 rounded-full blur-sm" />
+                                            </div>
+
+                                            <div className="w-full">
+                                                <h4 className="text-xs font-medium text-gray-700 line-clamp-1 w-full mb-2" title={p.title}>{p.title}</h4>
+                                                <div className="flex items-center gap-1.5 justify-center">
+                                                    <div className="w-full bg-gray-100 h-1 rounded-full overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-emerald-400 rounded-full"
+                                                            style={{ width: `${((p.subStage || 1) / 5) * 100}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
                                         </motion.div>
                                     );
@@ -278,7 +290,7 @@ const PendingModule = () => {
                                     value={selectedProject.title}
                                     onChange={(e) => handleUpdateProject(selectedProject.id, 'title', e.target.value)}
                                     className="text-4xl font-thin text-gray-900 text-center bg-transparent border-b border-transparent hover:border-gray-200 focus:border-gray-900 focus:outline-none transition-all w-full pb-2"
-                                    placeholder="Project Title"
+                                    placeholder="Blue Sky Project"
                                 />
 
                                 <textarea
@@ -286,7 +298,7 @@ const PendingModule = () => {
                                     onChange={(e) => handleUpdateProject(selectedProject.id, 'desc', e.target.value)}
                                     rows={2}
                                     className="w-full text-sm font-light text-center text-gray-600 bg-transparent resize-none focus:outline-none border border-transparent hover:border-gray-100 focus:border-gray-200 rounded-lg p-2 transition-all placeholder:text-gray-300"
-                                    placeholder="What is the core concept?"
+                                    placeholder="Describe the essence of your idea..."
                                 />
 
                                 <div className="grid grid-cols-1 gap-2 pt-2">
