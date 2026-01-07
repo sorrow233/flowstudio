@@ -308,7 +308,8 @@ const PrimaryDevModule = () => {
                                         setNewTaskCategory={setNewTaskCategory}
                                         onScroll={(e) => {
                                             const scrollTop = e.currentTarget.scrollTop;
-                                            if (scrollTop > 50 && !isHeaderCollapsed) {
+                                            // Reduced threshold from 50 to 10 for snappier response, especially on Stage 1
+                                            if (scrollTop > 10 && !isHeaderCollapsed) {
                                                 setIsHeaderCollapsed(true);
                                             } else if (scrollTop === 0 && isHeaderCollapsed) {
                                                 setIsHeaderCollapsed(false);
