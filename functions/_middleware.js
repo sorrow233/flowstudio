@@ -56,6 +56,9 @@ export async function onRequest(context) {
     }
 
     // 5. Inject Metadata using HTMLRewriter
+    // Disable caching for HTML files to ensure users always get the latest version (and correct asset hashes)
+    response.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
+
     return new HTMLRewriter()
         .on('title', {
             element(element) {
