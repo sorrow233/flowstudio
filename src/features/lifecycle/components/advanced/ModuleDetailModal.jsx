@@ -52,15 +52,26 @@ const ModuleDetailModal = ({ isOpen, onClose, module, onUpdate, onDelete }) => {
                 {/* Header */}
                 <div className="p-8 pb-0 flex justify-between items-start">
                     <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 mb-3">
                             <span className="px-2 py-1 rounded-md bg-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                                 {localModule.category}
                             </span>
+                            {/* Priority Select (Inline) */}
+                            <select
+                                value={localModule.priority || 'Medium'}
+                                onChange={(e) => handleChange('priority', e.target.value)}
+                                className="bg-transparent text-[10px] font-bold uppercase tracking-widest text-blue-600 border-none p-0 focus:ring-0 cursor-pointer"
+                            >
+                                <option value="High">High Priority</option>
+                                <option value="Medium">Medium Priority</option>
+                                <option value="Low">Low Priority</option>
+                            </select>
                         </div>
                         <input
                             value={localModule.name}
                             onChange={(e) => handleChange('name', e.target.value)}
-                            className="text-3xl font-light text-gray-900 bg-transparent border-none p-0 focus:ring-0 w-full"
+                            className="text-3xl font-light text-gray-900 bg-transparent border-none p-0 focus:ring-0 w-full placeholder:text-gray-300"
+                            placeholder="Module Name"
                         />
                     </div>
                     <button onClick={onClose} className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 text-gray-400">
@@ -71,11 +82,12 @@ const ModuleDetailModal = ({ isOpen, onClose, module, onUpdate, onDelete }) => {
                 <div className="p-8 space-y-8">
                     {/* Description */}
                     <div>
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">Description</label>
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">Description</label>
                         <textarea
                             value={localModule.description}
                             onChange={(e) => handleChange('description', e.target.value)}
-                            className="w-full text-sm text-gray-600 bg-gray-50 rounded-xl p-3 border-none focus:ring-1 focus:ring-emerald-200 resize-none h-24"
+                            className="w-full text-sm text-gray-600 bg-gray-50 rounded-xl p-4 border-none focus:ring-2 focus:ring-blue-100 resize-none h-24"
+                            placeholder="Describe the module's purpose..."
                         />
                     </div>
 
@@ -137,8 +149,8 @@ const ModuleDetailModal = ({ isOpen, onClose, module, onUpdate, onDelete }) => {
                         onClick={handleSave}
                         disabled={!hasChanges}
                         className={`px-6 py-3 rounded-xl flex items-center gap-2 font-medium transition-all ${hasChanges
-                                ? 'bg-gray-900 text-white hover:bg-black shadow-lg hover:shadow-xl hover:-translate-y-1'
-                                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                            ? 'bg-gray-900 text-white hover:bg-black shadow-lg hover:shadow-xl hover:-translate-y-1'
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                             }`}
                     >
                         <Save size={18} />

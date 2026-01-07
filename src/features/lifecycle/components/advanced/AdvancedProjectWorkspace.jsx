@@ -14,6 +14,24 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
     const [editingModule, setEditingModule] = useState(null);
     const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
+    // Last Edited Logic
+    const [lastEdited, setLastEdited] = useState(null);
+
+    useEffect(() => {
+        if (project.updatedAt) {
+            setLastEdited(new Date(project.updatedAt));
+        }
+    }, [project.updatedAt]);
+
+    const formatLastEdited = (date) => {
+        if (!date) return '';
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000); // seconds
+        if (diff < 60) return 'Just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+        return 'Today';
+    };
+
     // Undo History Stack (Max 20 steps, session only)
     const [history, setHistory] = useState([]);
     const [showUndo, setShowUndo] = useState(false);
@@ -29,6 +47,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
             return newHistory.slice(-20); // Keep max 20 snapshots
         });
         setShowUndo(true);
+        setLastEdited(new Date());
     };
 
     const handleImportModules = (newModules) => {
@@ -97,6 +116,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
             name: 'New Module',
             description: '',
             category: 'feature',
+            priority: 'Medium',
             stage: 1,
             progress: 0,
             tasks: []
@@ -138,173 +158,205 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
                 className="w-full max-w-[1600px] h-[95vh] bg-white rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10 flex flex-col ring-1 ring-gray-100"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Scrollable Content */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-12">
-
-                    {/* Header & Dashboard */}
-                    <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10 mb-16 relative">
-                        {/* Close Button */}
-                        <button
-                            onClick={onClose}
-                            className="absolute -top-4 -right-4 md:static md:order-last p-3 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-900"
-                        >
-                            <X size={24} />
-                        </button>
-
-                        <div className="flex-1">
-                            <div className="flex items-center gap-3 text-emerald-600 mb-2">
-                                <div className="p-2 bg-emerald-50 rounded-lg">
-                                    <Network size={20} />
-                                </div>
-                                <span className="text-xs font-bold uppercase tracking-widest">Rapid Iteration</span>
+                <div className="flex flex-col h-full bg-white relative">
+                    {/* Header */}
+                    <div className="flex justify-between items-center px-8 py-6 border-b border-gray-100 bg-white z-10">
+                        <div>
+                            <div className="flex items-center gap-3">
+                                <h2 className="text-2xl font-light text-gray-900 tracking-tight flex items-center gap-3">
+                                    {project.title}
+                                    <span className="px-2 py-0.5 rounded-full bg-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                        Rapid Iteration
+                                    </span>
+                                </h2>
                             </div>
-                            <h2 className="text-4xl md:text-5xl font-thin text-gray-900 tracking-tight mb-6">
-                                {project.title}
-                            </h2>
-
-                            {/* System Health Dashboard */}
-                            <div className="flex flex-wrap gap-8">
-                                <div className="flex items-center gap-4 pr-6 border-r border-gray-100">
-                                    <div className="p-4 bg-blue-50 text-blue-500 rounded-2xl">
-                                        <Activity size={24} />
-                                    </div>
-                                    <div>
-                                        <p className="text-3xl font-light text-gray-900">{avgProgress}%</p>
-                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">System Maturity</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-4 pr-6 border-r border-gray-100">
-                                    <div className="p-4 bg-emerald-50 text-emerald-500 rounded-2xl">
-                                        <CheckCircle2 size={24} />
-                                    </div>
-                                    <div>
-                                        <p className="text-3xl font-light text-gray-900">{stableModules}/{totalModules}</p>
-                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Production Ready</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="p-4 bg-amber-50 text-amber-500 rounded-2xl">
-                                        <Zap size={24} />
-                                    </div>
-                                    <div>
-                                        <p className="text-3xl font-light text-gray-900">{totalModules}</p>
-                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Total Modules</p>
-                                    </div>
-                                </div>
+                            <div className="flex items-center gap-2 mt-1">
+                                <p className="text-sm text-gray-400 font-light">
+                                    {modules.length} modules defined
+                                </p>
+                                {lastEdited && (
+                                    <>
+                                        <span className="text-gray-200">•</span>
+                                        <span className="text-xs text-gray-400 font-mono">
+                                            Saved {formatLastEdited(lastEdited)}
+                                        </span>
+                                    </>
+                                )}
                             </div>
                         </div>
 
                         {/* Controls */}
-                        <div className="flex flex-wrap gap-2 mt-6 xl:mt-0 items-center bg-white p-2 rounded-[2rem] shadow-sm border border-gray-100 backdrop-blur-md">
-                            {/* View Toggle */}
-                            <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-3xl mr-2">
+                        <div className="flex items-center gap-3">
+                            {/* View Toggles */}
+                            <div className="flex bg-gray-50 rounded-xl p-1 mr-2">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-full transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
                                 >
-                                    <Grid size={16} />
+                                    <LayoutGrid size={16} />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-full transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
                                 >
-                                    <AlignJustify size={16} />
+                                    <List size={16} />
                                 </button>
                             </div>
 
                             <button
-                                onClick={handleCreateModule}
-                                className="group flex items-center gap-2 px-5 py-3 bg-white border border-gray-200 text-gray-900 rounded-[2rem] hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm hover:shadow-md"
+                                onClick={() => setIsLibraryOpen(true)}
+                                className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-blue-100 transition-colors flex items-center gap-2"
                             >
-                                <div className="p-1 bg-gray-100 rounded-full group-hover:bg-gray-200 transition-colors">
-                                    <Plus size={14} strokeWidth={2} />
-                                </div>
-                                <span className="font-medium tracking-wide text-xs">Add</span>
+                                <Box size={14} />
+                                Library
                             </button>
 
-                            <button
-                                onClick={() => setIsLibraryOpen(true)}
-                                className="group flex items-center gap-2 px-5 py-3 bg-blue-50 text-blue-600 rounded-[2rem] hover:bg-blue-100 transition-all shadow-sm hover:shadow-md border border-blue-100"
-                            >
-                                <div className="p-1 bg-white rounded-full transition-colors">
-                                    <Box size={14} strokeWidth={2} />
-                                </div>
-                                <span className="font-medium tracking-wide text-xs">Library</span>
-                            </button>
+                            <div className="h-8 w-px bg-gray-100 mx-1" />
 
                             <button
                                 onClick={() => setIsImportOpen(true)}
-                                className="group flex items-center justify-center w-12 h-12 bg-gray-900 text-white rounded-full hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                                className="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-xl transition-all"
                                 title="AI Architect Import"
                             >
-                                <Sparkles size={18} className="text-emerald-400 group-hover:rotate-12 transition-transform" />
+                                <Sparkles size={20} />
+                            </button>
+                            <button
+                                onClick={handleCreateModule}
+                                className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
+                                title="Add Custom Module"
+                            >
+                                <Plus size={20} />
+                            </button>
+                            <button onClick={onClose} className="p-2 text-gray-300 hover:text-gray-500 hover:bg-gray-50 rounded-xl transition-all">
+                                <X size={20} />
                             </button>
                         </div>
                     </div>
 
-                    {/* Main Content */}
-                    <div className="min-h-[500px]">
+                    {/* Content */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-8 bg-gray-50/30">
                         {viewMode === 'grid' ? (
-                            <ModuleGrid
-                                modules={modules}
-                                onModuleClick={handleModuleClick}
-                            />
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
+                                {/* Modules */}
+                                {modules.map(module => (
+                                    <motion.div
+                                        layoutId={`module-${module.id}`}
+                                        key={module.id}
+                                        onClick={() => setEditingModule(module)}
+                                        className="group bg-white border border-gray-100 rounded-[2rem] p-6 hover:shadow-xl hover:border-blue-100 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
+                                    >
+                                        <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                            <div className="bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase">
+                                                Edit
+                                            </div>
+                                        </div>
+
+                                        <div className="flex justify-between items-start mb-4">
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${module.priority === 'High' ? 'bg-red-50 text-red-500' :
+                                                    module.priority === 'Low' ? 'bg-gray-100 text-gray-500' :
+                                                        'bg-blue-50 text-blue-500' // Medium default
+                                                }`}>
+                                                {module.category}
+                                            </span>
+                                        </div>
+
+                                        <h3 className="text-xl font-light text-gray-900 mb-2 truncate">{module.name}</h3>
+                                        <p className="text-xs text-gray-400 line-clamp-2 min-h-[2.5em] mb-6 font-light leading-relaxed">
+                                            {module.description || 'No description provided.'}
+                                        </p>
+
+                                        {/* Progress Bar */}
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-xs">
+                                                <span className="font-bold text-gray-300 uppercase tracking-wider">Progress</span>
+                                                <span className="font-mono text-gray-400">{module.progress}%</span>
+                                            </div>
+                                            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                                <div
+                                                    className={`h-full rounded-full transition-all duration-500 ${module.progress === 100 ? 'bg-emerald-400' : 'bg-blue-500'
+                                                        }`}
+                                                    style={{ width: `${module.progress}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+
+                                {/* Empty State */}
+                                {modules.length === 0 && (
+                                    <div className="col-span-full py-20 flex flex-col items-center justify-center text-gray-300 border-2 border-dashed border-gray-100 rounded-[3rem]">
+                                        <Sparkles size={48} className="mb-4 text-emerald-100" />
+                                        <p className="text-lg font-light text-gray-400">Your architecture is empty</p>
+                                        <p className="text-xs text-gray-300 mt-2 font-mono">
+                                            Use AI Import or Library to get started
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
                         ) : (
                             <ModuleList
                                 modules={modules}
-                                onModuleClick={handleModuleClick}
+                                onModuleClick={setEditingModule}
                                 onDeleteModule={handleDeleteModule}
                             />
                         )}
                     </div>
-                </div>
 
-                {/* Internal Modals */}
-                <ArchitectureImportModal
-                    isOpen={isImportOpen}
-                    onClose={() => setIsImportOpen(false)}
-                    onImport={handleImportModules}
-                    currentModules={modules}
-                />
+                    {/* Modals */}
+                    <AnimatePresence>
+                        {editingModule && (
+                            <ModuleDetailModal
+                                isOpen={!!editingModule}
+                                module={editingModule}
+                                onClose={() => setEditingModule(null)}
+                                onUpdate={handleUpdateModule}
+                                onDelete={handleDeleteModule}
+                            />
+                        )}
+                    </AnimatePresence>
 
-                {/* Undo Toast */}
-                <AnimatePresence>
-                    {showUndo && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 50 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 20 }}
-                            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-2xl"
-                        >
-                            <span className="text-sm">
-                                {history.length > 0 ? `Change applied (${history.length} in stack)` : 'Modules updated.'}
-                            </span>
-                            <button
-                                onClick={handleUndo}
-                                className="text-sm font-bold text-blue-400 hover:text-blue-300 transition-colors"
+                    <ArchitectureImportModal
+                        isOpen={isImportOpen}
+                        onClose={() => setIsImportOpen(false)}
+                        onImport={handleImportModules}
+                        currentModules={modules}
+                    />
+
+                    {/* Undo Toast - Refined */}
+                    <AnimatePresence>
+                        {showUndo && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 20, scale: 0.9 }}
+                                className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 bg-gray-900/90 backdrop-blur-md text-white px-6 py-3 rounded-2xl shadow-2xl ring-1 ring-white/10"
                             >
-                                Undo {history.length > 1 && `(${history.length})`}
-                            </button>
-                            <button onClick={() => setShowUndo(false)} className="text-gray-500 hover:text-white">
-                                <X size={14} />
-                            </button>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                                <div className="flex items-center gap-3 border-r border-white/10 pr-4">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                    <span className="text-xs font-medium tracking-wide">
+                                        {history.length > 0 ? `Change applied` : 'Updated'}
+                                    </span>
+                                </div>
 
-                <ModuleLibraryModal
-                    isOpen={isLibraryOpen}
-                    onClose={() => setIsLibraryOpen(false)}
-                    onAddModule={handleAddFromLibrary}
-                />
+                                <button
+                                    onClick={handleUndo}
+                                    className="text-xs font-bold text-blue-300 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2"
+                                >
+                                    Undo {history.length > 1 && <span className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">{history.length}</span>}
+                                </button>
+                                <button onClick={() => setShowUndo(false)} className="text-gray-500 hover:text-white transition-colors ml-2">
+                                    <X size={14} />
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
-                <ModuleDetailModal
-                    isOpen={!!editingModule}
-                    module={editingModule}
-                    onClose={() => setEditingModule(null)}
-                    onUpdate={handleUpdateModule}
-                    onDelete={handleDeleteModule}
-                />
+                    <ModuleLibraryModal
+                        isOpen={isLibraryOpen}
+                        onClose={() => setIsLibraryOpen(false)}
+                        onAddModule={handleAddFromLibrary}
+                    />
+                </div>
             </motion.div>
         </div>
     );
