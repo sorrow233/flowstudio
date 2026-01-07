@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Code2, GitBranch, Layers, PlayCircle, Plus, CheckSquare,
     Square, Trash2, ExternalLink, X, ChevronRight, CheckCircle2,
-    MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command, Check
+    MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command, Check, Rocket
 } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
 
@@ -144,46 +144,53 @@ const PrimaryDevModule = () => {
                         layoutId={`card-${project.id}`}
                         key={project.id}
                         onClick={() => setSelectedProject(project)}
-                        className="group bg-white border border-gray-100 rounded-3xl overflow-hidden hover:shadow-xl hover:shadow-gray-100/50 transition-all cursor-pointer relative h-[320px] flex flex-col"
+                        className="group bg-white border border-gray-100 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-gray-200/50 transition-all cursor-pointer relative h-[360px] flex flex-col ring-1 ring-transparent hover:ring-gray-100"
                     >
                         {/* Background Image / Gradient */}
-                        <div className="absolute inset-0 z-0">
+                        <div className="absolute inset-0 z-0 h-48">
                             {project.bgImage ? (
-                                <img src={project.bgImage} alt="" className="w-full h-full object-cover opacity-10 group-hover:opacity-20 transition-opacity grayscale hover:grayscale-0" />
+                                <div className="w-full h-full relative">
+                                    <img src={project.bgImage} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent" />
+                                </div>
                             ) : (
                                 <div className="w-full h-full bg-gradient-to-br from-gray-50 to-white" />
                             )}
-                            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-white via-white/90 to-transparent" />
                         </div>
 
                         <div className="p-8 relative z-10 flex flex-col h-full">
                             <div className="flex justify-between items-start mb-6">
-                                <div className="w-12 h-12 bg-gray-900 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-gray-200 group-hover:scale-105 transition-transform">
+                                <div className="w-12 h-12 bg-white/80 backdrop-blur text-gray-900 rounded-2xl flex items-center justify-center shadow-sm border border-white/50 group-hover:scale-105 transition-transform">
                                     <Code2 size={24} strokeWidth={1.5} />
                                 </div>
                                 {project.link && (
-                                    <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 text-gray-400 hover:text-gray-900 transition-colors bg-white/50 backdrop-blur rounded-full">
+                                    <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 text-gray-500 hover:text-gray-900 transition-colors bg-white/50 backdrop-blur rounded-full hover:bg-white">
                                         <ExternalLink size={16} />
                                     </a>
                                 )}
                             </div>
 
-                            <h3 className="text-2xl font-light text-gray-900 mb-2 line-clamp-1">{project.title}</h3>
-                            <p className="text-xs text-gray-400 line-clamp-2 min-h-[2.5em]">{project.desc || 'No description provided.'}</p>
+                            <div className="mt-8">
+                                <h3 className="text-2xl font-light text-gray-900 mb-2 line-clamp-1 group-hover:text-emerald-900 transition-colors">{project.title}</h3>
+                                <p className="text-sm text-gray-500 line-clamp-2 min-h-[2.5em] leading-relaxed">{project.desc || 'No description provided.'}</p>
+                            </div>
 
-                            <div className="mt-auto">
+                            <div className="mt-auto pt-6 border-t border-gray-100/50">
                                 {/* Stage Visualization */}
-                                <div className="flex items-center gap-1 mb-2">
+                                <div className="flex items-center gap-1.5 mb-3">
                                     {[1, 2, 3, 4, 5].map(step => (
                                         <div
                                             key={step}
-                                            className={`h-1 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-emerald-500' : 'bg-gray-100'}`}
+                                            className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-emerald-500 shadow-sm shadow-emerald-200' : 'bg-gray-100'}`}
                                         />
                                     ))}
                                 </div>
                                 <div className="flex justify-between items-center text-xs font-mono text-gray-400 uppercase tracking-wider">
-                                    <span>Stage {project.subStage || 1}</span>
-                                    <span className="text-gray-900">{DEV_STAGES[(project.subStage || 1) - 1].label}</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                        <span>Stage {project.subStage || 1}</span>
+                                    </div>
+                                    <span className="text-gray-900 font-medium">{DEV_STAGES[(project.subStage || 1) - 1].label}</span>
                                 </div>
                             </div>
                         </div>
@@ -192,10 +199,12 @@ const PrimaryDevModule = () => {
 
                 {/* Empty State */}
                 {projects.length === 0 && (
-                    <div className="col-span-full border-2 border-dashed border-gray-100 rounded-3xl p-12 flex flex-col items-center justify-center text-gray-300 min-h-[400px]">
-                        <Layers size={64} className="mb-6 opacity-20" strokeWidth={1} />
-                        <span className="text-lg font-light text-gray-900 mb-2">No active projects</span>
-                        <span className="text-sm text-gray-400">Graduate a sapling from 'Pending' to start primary development.</span>
+                    <div className="col-span-full border-2 border-dashed border-gray-100 rounded-[2rem] p-12 flex flex-col items-center justify-center text-gray-300 min-h-[400px]">
+                        <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 opacity-50 animate-pulse">
+                            <Rocket size={40} className="text-gray-400" strokeWidth={1} />
+                        </div>
+                        <span className="text-xl font-light text-gray-900 mb-2">Ready for Liftoff?</span>
+                        <span className="text-sm text-gray-400 max-w-sm text-center leading-relaxed">Your primary command center is waiting. Graduate a project from the 'Pending' phase to begin development.</span>
                     </div>
                 )}
             </div>
@@ -211,58 +220,58 @@ const PrimaryDevModule = () => {
                         />
                         <motion.div
                             layoutId={`card-${selectedProject.id}`}
-                            className="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden relative pointer-events-auto h-[85vh] flex flex-col ring-1 ring-gray-100"
+                            className="w-full max-w-6xl bg-white rounded-[3rem] shadow-2xl overflow-hidden relative pointer-events-auto h-[90vh] flex flex-col ring-1 ring-gray-100"
                         >
-                            {/* Rich Hero Header */}
-                            <div className="relative shrink-0 h-64 bg-gray-50 flex items-end p-10 overflow-hidden">
+                            {/* Rich Hero Header with Parallax-like effect */}
+                            <div className="relative shrink-0 h-72 bg-gray-900 flex items-end p-10 overflow-hidden group">
                                 {selectedProject.bgImage ? (
                                     <motion.div className="absolute inset-0 z-0">
-                                        <img src={selectedProject.bgImage} alt="" className="w-full h-full object-cover opacity-100" />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                                        <img src={selectedProject.bgImage} alt="" className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-1000" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
                                     </motion.div>
                                 ) : (
-                                    <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-800" />
+                                    <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black" />
                                 )}
 
                                 <button
                                     onClick={() => setSelectedProject(null)}
-                                    className="absolute top-8 right-8 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors backdrop-blur-md z-20"
+                                    className="absolute top-8 right-8 p-3 bg-black/20 hover:bg-black/40 text-white rounded-full transition-colors backdrop-blur-md z-20 border border-white/10"
                                 >
                                     <X size={20} />
                                 </button>
 
                                 <div className="relative z-10 w-full flex justify-between items-end text-white">
-                                    <div>
-                                        <div className="flex items-center gap-3 mb-2 opacity-80">
+                                    <div className="max-w-3xl">
+                                        <div className="flex items-center gap-3 mb-4 opacity-80">
                                             <span className="px-3 py-1 rounded-full border border-white/20 bg-white/10 text-xs font-mono backdrop-blur-sm">
-                                                v4.2.1
+                                                Active Development
                                             </span>
                                             {selectedProject.link && (
-                                                <a href={selectedProject.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs hover:text-emerald-400 transition-colors">
+                                                <a href={selectedProject.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs hover:text-emerald-400 transition-colors px-3 py-1 rounded-full hover:bg-white/10">
                                                     <ExternalLink size={12} /> {selectedProject.link.replace('https://', '')}
                                                 </a>
                                             )}
                                         </div>
-                                        <h2 className="text-5xl font-thin tracking-tight mb-2">{selectedProject.title}</h2>
-                                        <p className="text-lg font-light opacity-80 max-w-2xl text-shadow-sm">{selectedProject.desc}</p>
+                                        <h2 className="text-6xl font-thin tracking-tighter mb-4 text-shadow-lg">{selectedProject.title}</h2>
+                                        <p className="text-xl font-light opacity-80 leading-relaxed text-shadow-sm">{selectedProject.desc}</p>
                                     </div>
                                     <button
                                         onClick={(e) => handleDelete(e, selectedProject.id)}
-                                        className="text-white/30 hover:text-red-400 transition-colors p-3"
+                                        className="text-white/30 hover:text-red-400 transition-colors p-4 hover:bg-white/5 rounded-2xl"
                                     >
-                                        <Trash2 size={20} />
+                                        <Trash2 size={24} strokeWidth={1.5} />
                                     </button>
                                 </div>
                             </div>
 
-                            <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
+                            <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/50">
                                 {/* Left: Stage Controller */}
-                                <div className="w-full md:w-80 bg-gray-50 border-r border-gray-100 p-8 overflow-y-auto shrink-0">
-                                    <h3 className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-6">Development Lifecycle</h3>
+                                <div className="w-full md:w-80 bg-white border-r border-gray-100 p-8 overflow-y-auto shrink-0 custom-scrollbar">
+                                    <h3 className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-6 px-2">Development Cycle</h3>
 
-                                    <div className="space-y-4 relative">
+                                    <div className="space-y-3 relative">
                                         {/* Connecting Line */}
-                                        <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-gray-200 z-0" />
+                                        <div className="absolute left-[27px] top-6 bottom-6 w-0.5 bg-gray-100 z-0" />
 
                                         {DEV_STAGES.map((stage) => {
                                             const isActive = (selectedProject.subStage || 1) === stage.id;
@@ -274,22 +283,21 @@ const PrimaryDevModule = () => {
                                                     key={stage.id}
                                                     onClick={() => handleUpdateProject(selectedProject.id, { subStage: stage.id })}
                                                     className={`
-                                                        relative z-10 flex items-start gap-4 p-3 rounded-2xl cursor-pointer transition-all duration-300
-                                                        ${isActive ? 'bg-white shadow-lg shadow-gray-200/50 scale-105 ring-1 ring-black/5' : 'hover:bg-white/50'}
+                                                        relative z-10 flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-300 group
+                                                        ${isActive
+                                                            ? 'bg-gray-900 text-white shadow-xl shadow-gray-200 scale-105'
+                                                            : 'hover:bg-gray-50 text-gray-500'}
                                                     `}
                                                 >
                                                     <div className={`
-                                                        w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors duration-300 border-4 border-gray-50
-                                                        ${isActive ? 'bg-gray-900 text-white' : isDone ? 'bg-emerald-500 text-white' : 'bg-gray-200 text-gray-400'}
+                                                        w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300
+                                                        ${isActive ? 'bg-white/20 text-white' : isDone ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400'}
                                                     `}>
-                                                        <Icon size={18} />
+                                                        {isDone ? <Check size={14} strokeWidth={3} /> : <Icon size={16} />}
                                                     </div>
                                                     <div>
-                                                        <div className={`text-sm font-medium mb-0.5 ${isActive ? 'text-gray-900' : 'text-gray-500'}`}>
+                                                        <div className={`text-sm font-medium ${isActive ? 'text-white' : 'group-hover:text-gray-900'}`}>
                                                             {stage.label}
-                                                        </div>
-                                                        <div className="text-[10px] text-gray-400 leading-tight pr-2">
-                                                            {stage.title}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -299,24 +307,26 @@ const PrimaryDevModule = () => {
                                 </div>
 
                                 {/* Right: Tasks & Details */}
-                                <div className="flex-1 p-8 md:p-12 overflow-y-auto bg-white flex flex-col">
+                                <div className="flex-1 p-8 md:p-12 overflow-y-auto flex flex-col relative custom-scrollbar">
                                     {/* Active Stage Info */}
-                                    <div className="mb-10">
-                                        <div className="flex items-center gap-3 mb-2 text-emerald-600">
-                                            <Sparkles size={18} />
-                                            <span className="text-xs font-bold tracking-widest uppercase">Current Focus</span>
+                                    <div className="mb-12">
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                                                <Sparkles size={20} />
+                                            </div>
+                                            <span className="text-xs font-bold tracking-widest uppercase text-emerald-600">Current Phase</span>
                                         </div>
-                                        <h3 className="text-2xl font-light text-gray-900 mb-2">
+                                        <h3 className="text-3xl font-light text-gray-900 mb-4">
                                             {DEV_STAGES[(selectedProject.subStage || 1) - 1].title}
                                         </h3>
-                                        <p className="text-gray-500 font-light leading-relaxed max-w-2xl">
+                                        <p className="text-gray-500 font-light leading-relaxed max-w-3xl text-lg">
                                             {DEV_STAGES[(selectedProject.subStage || 1) - 1].desc}
                                         </p>
                                     </div>
 
                                     {/* Task List */}
-                                    <div className="flex-1 flex flex-col min-h-0">
-                                        <div className="flex justify-between items-center mb-4">
+                                    <div className="flex-1 flex flex-col min-h-0 pb-24">
+                                        <div className="flex justify-between items-center mb-6">
                                             <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
                                                 <CheckSquare size={16} /> Mission Log
                                             </h4>
@@ -324,14 +334,14 @@ const PrimaryDevModule = () => {
                                             {/* Import Command Button */}
                                             <button
                                                 onClick={() => setCommandModalOpen(true)}
-                                                className="text-xs flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
+                                                className="text-xs flex items-center gap-2 px-4 py-2 bg-white text-gray-600 rounded-xl hover:bg-gray-50 transition-all border border-gray-200 hover:border-gray-300 hover:shadow-sm"
                                             >
-                                                <Terminal size={12} />
+                                                <Terminal size={14} />
                                                 <span>Import Command</span>
                                             </button>
                                         </div>
 
-                                        <div className="flex-1 overflow-y-auto space-y-2 mb-4 -mx-2 px-2">
+                                        <div className="flex-1 space-y-3">
                                             {selectedProject.tasks?.map(task => {
                                                 const isMandatory = task.isCommand && task.commandType === 'mandatory';
                                                 const isUtility = task.isCommand && task.commandType !== 'mandatory';
@@ -343,51 +353,51 @@ const PrimaryDevModule = () => {
                                                         key={task.id}
                                                         onClick={() => toggleTask(selectedProject.id, task.id)}
                                                         className={`
-                                                            group flex items-center gap-4 p-4 rounded-xl transition-all cursor-pointer border
+                                                            group flex items-center gap-5 p-5 rounded-2xl transition-all cursor-pointer border
                                                             ${isMandatory && !task.done
-                                                                ? 'bg-red-50/50 border-red-100 hover:border-red-200 hover:bg-red-50'
+                                                                ? 'bg-white border-red-100 shadow-sm shadow-red-100 hover:border-red-200'
                                                                 : isMandatory && task.done
-                                                                    ? 'bg-emerald-50/50 border-emerald-100 hover:border-emerald-200 hover:bg-emerald-50'
+                                                                    ? 'bg-emerald-50/30 border-emerald-100 opacity-75 hover:opacity-100'
                                                                     : isUtility
-                                                                        ? 'bg-white hover:bg-gray-50 border-gray-100' // Utility style
-                                                                        : 'hover:bg-gray-50 border-transparent hover:border-gray-100' // Manual task
+                                                                        ? 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5'
+                                                                        : 'bg-white border-gray-100 hover:border-gray-300 hover:shadow-md'
                                                             }
                                                         `}
                                                     >
                                                         {/* Checkbox / Icon based on type */}
                                                         {isUtility ? (
-                                                            <div className="w-5 h-5 flex items-center justify-center text-gray-400 group-hover:text-gray-600 transition-colors">
-                                                                {copiedTaskId === task.id ? <Check size={16} className="text-emerald-500" /> : <Terminal size={16} />}
+                                                            <div className="w-6 h-6 flex items-center justify-center text-gray-400 group-hover:text-emerald-500 transition-colors bg-gray-50 rounded-lg group-hover:bg-emerald-50">
+                                                                {copiedTaskId === task.id ? <Check size={16} /> : <Terminal size={16} />}
                                                             </div>
                                                         ) : (
                                                             <button
                                                                 onClick={(e) => markTaskDone(e, selectedProject.id, task.id)}
                                                                 className={`
-                                                                    w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-300 shrink-0
+                                                                    w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 shrink-0
                                                                     ${task.done
-                                                                        ? 'bg-emerald-500 border-emerald-500 text-white'
+                                                                        ? 'bg-emerald-500 border-emerald-500 text-white scale-110'
                                                                         : isMandatory
-                                                                            ? 'border-red-300 text-transparent hover:border-red-400 bg-white'
-                                                                            : 'border-gray-300 text-transparent group-hover:border-gray-400'
+                                                                            ? 'border-red-200 text-transparent hover:border-red-400 bg-red-50 hover:bg-red-100'
+                                                                            : 'border-gray-200 text-transparent group-hover:border-gray-400 hover:bg-gray-50'
                                                                     }
                                                                 `}
                                                             >
-                                                                <CheckCircle2 size={14} />
+                                                                <Check size={14} strokeWidth={3} />
                                                             </button>
                                                         )}
 
-                                                        <span className={`flex-1 text-sm font-medium transition-colors ${task.done ? 'opacity-50 line-through' : ''}`}>
+                                                        <span className={`flex-1 text-base font-medium transition-colors ${task.done ? 'opacity-40 line-through decoration-emerald-500/50' : 'text-gray-700'}`}>
                                                             {task.text}
                                                         </span>
 
                                                         {task.isCommand && (
                                                             <div className="flex items-center gap-2">
                                                                 {copiedTaskId === task.id ? (
-                                                                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">COPIED</span>
+                                                                    <span className="text-[10px] uppercase font-bold text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full animate-pulse">Copied</span>
                                                                 ) : (
                                                                     isMandatory && (
-                                                                        <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                                                            REQUIRED
+                                                                        <span className="text-[10px] font-bold bg-red-50 text-red-500 px-3 py-1 rounded-full uppercase tracking-wider border border-red-100">
+                                                                            Mandatory
                                                                         </span>
                                                                     )
                                                                 )}
@@ -397,32 +407,40 @@ const PrimaryDevModule = () => {
                                                 );
                                             })}
                                             {(!selectedProject.tasks || selectedProject.tasks.length === 0) && (
-                                                <div className="text-gray-400 text-sm font-light italic py-8 text-center bg-gray-50/50 rounded-2xl border border-dashed border-gray-100">
-                                                    No active missions for this stage.
+                                                <div className="flex flex-col items-center justify-center py-20 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100 text-center">
+                                                    <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4 text-gray-300">
+                                                        <CheckSquare size={24} />
+                                                    </div>
+                                                    <p className="text-gray-900 font-medium">Quiet on the Front</p>
+                                                    <p className="text-gray-400 text-sm mt-1">No active missions. Add a task or import a command to begin.</p>
                                                 </div>
                                             )}
                                         </div>
 
-                                        {/* Add Task Input */}
-                                        <div className="mt-auto relative group">
-                                            <input
-                                                type="text"
-                                                value={newTaskInput}
-                                                onChange={(e) => setNewTaskInput(e.target.value)}
-                                                onKeyDown={(e) => e.key === 'Enter' && handleAddTask(selectedProject.id)}
-                                                placeholder="Add a new mission..."
-                                                className="w-full bg-gray-50 hover:bg-gray-100 focus:bg-white border-none rounded-xl py-4 pl-12 pr-4 transition-all outline-none focus:ring-2 focus:ring-gray-900/5 placeholder:text-gray-400"
-                                            />
-                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                                <Plus size={20} />
-                                            </div>
-                                            <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                                                <button
-                                                    onClick={() => handleAddTask(selectedProject.id)}
-                                                    className="p-1.5 bg-white shadow-sm rounded-lg text-gray-400 hover:text-emerald-600 transition-colors"
-                                                >
-                                                    <ArrowUpRight size={16} />
-                                                </button>
+                                        {/* Floating Action Bar */}
+                                        <div className="absolute bottom-8 left-8 right-8 md:left-12 md:right-12">
+                                            <div className="relative group shadow-2xl shadow-gray-200/50 rounded-2xl bg-white">
+                                                <input
+                                                    type="text"
+                                                    value={newTaskInput}
+                                                    onChange={(e) => setNewTaskInput(e.target.value)}
+                                                    onKeyDown={(e) => e.key === 'Enter' && handleAddTask(selectedProject.id)}
+                                                    placeholder="Type a new mission..."
+                                                    className="w-full bg-white hover:bg-gray-50/50 focus:bg-white border-0 rounded-2xl py-5 pl-14 pr-16 transition-all outline-none ring-1 ring-gray-100 focus:ring-2 focus:ring-gray-900 placeholder:text-gray-400 text-lg font-light"
+                                                    autoFocus
+                                                />
+                                                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-emerald-500 transition-colors">
+                                                    <Plus size={24} />
+                                                </div>
+                                                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                                    <button
+                                                        onClick={() => handleAddTask(selectedProject.id)}
+                                                        disabled={!newTaskInput.trim()}
+                                                        className="p-2 bg-gray-900 text-white rounded-xl hover:bg-black transition-all disabled:opacity-0 disabled:pointer-events-none shadow-lg shadow-gray-900/20"
+                                                    >
+                                                        <ArrowUpRight size={20} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
