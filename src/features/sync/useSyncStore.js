@@ -31,15 +31,16 @@ export const useSyncStore = (docId, initialData = {}) => {
         if (!doc) {
             doc = new Y.Doc();
             docMap.set(docId, doc);
+            console.info(`[Sync] Initialized Doc: ${docId}`);
         }
 
         // 1. Local Persistence (IndexedDB)
         const localProvider = new IndexeddbPersistence(docId, doc);
 
         localProvider.on('synced', () => {
-            console.log(`[Sync] ${docId} loaded from local DB`);
-            // If empty, initialize with default data
+            // Only log if data was actually loaded or empty
             if (doc.getMap('data').keys().next().done && Object.keys(initialData).length > 0) {
+                console.info(`[Sync] Seeding default data for ${docId}`);
                 doc.transact(() => {
                     const map = doc.getMap('data');
                     Object.entries(initialData).forEach(([k, v]) => {
@@ -55,18 +56,15 @@ export const useSyncStore = (docId, initialData = {}) => {
         if (user) {
             setStatus('syncing');
             // User-scoped path: users/{uid}/rooms/{docId}/updates
-            // This ensures users can only read/write their own data, solving permission errors (with standard rules).
             const updatesColl = collection(db, `users/${user.uid}/rooms/${docId}/updates`);
 
             // Listen for remote updates
-            const q = query(updatesColl, orderBy('createdAt', 'asc')); // Simplification: Load all updates. optimizing later.
+            const q = query(updatesColl, orderBy('createdAt', 'asc'));
             unsubscribeFirestore = onSnapshot(q, (snapshot) => {
                 doc.transact(() => {
                     snapshot.docChanges().forEach((change) => {
                         if (change.type === 'added') {
                             const data = change.doc.data();
-                            // Apply update if it's not from local (optimization: checking origin/clientID usually better but here simple broadcast)
-                            // In this simple model, we just apply everything. Yjs handles deduplication efficiently.
                             if (data.update) {
                                 const update = Uint8Array.from(atob(data.update), c => c.charCodeAt(0));
                                 Y.applyUpdate(doc, update, 'remote');
@@ -76,12 +74,10 @@ export const useSyncStore = (docId, initialData = {}) => {
                 }, 'remote');
                 setStatus('synced');
             }, (error) => {
-                // Silece permission errors - they just mean we are offline/unauthorized, which is fine.
-                // The user can still work locally.
                 if (error.code === 'permission-denied') {
-                    console.info("Firestore Permission Denied (Offline Mode active)");
+                    console.warn("[Sync] Permission Denied (Offline Mode)");
                 } else {
-                    console.error("Firestore Sync Error:", error);
+                    console.error("[Sync] Firestore Error:", error);
                 }
                 setStatus('offline');
             });
@@ -89,17 +85,14 @@ export const useSyncStore = (docId, initialData = {}) => {
             // Push local updates
             const handleUpdate = (update, origin) => {
                 if (origin !== 'remote') {
-                    // Convert Uint8Array to Base64 for Firestore storage
                     const updateStr = btoa(String.fromCharCode.apply(null, update));
                     addDoc(updatesColl, {
                         update: updateStr,
                         createdAt: serverTimestamp(),
                         userId: user.uid
                     }).catch(err => {
-                        if (err.code === 'permission-denied') {
-                            // Ignore push errors due to permissions
-                        } else {
-                            console.error("Failed to push update", err);
+                        if (err.code !== 'permission-denied') {
+                            console.error("[Sync] Push Failed:", err);
                         }
                         setStatus('offline');
                     });
@@ -135,10 +128,6 @@ export const useSyncStore = (docId, initialData = {}) => {
         });
     }, [syncedDoc]);
 
-    // Helper to get observer
-    // Note: useSyncStore consumers should usually use useObserver equivalent or just manual Yjs observation.
-    // For React, we often make a simplified "useYMap" hook.
-
     return { doc: syncedDoc, status, update };
 };
 
@@ -148,21 +137,12 @@ export const useYMap = (doc) => {
 
     useEffect(() => {
         if (!doc) return;
-
         const map = doc.getMap('data');
+        const handleChange = () => setData(map.toJSON());
 
-        const handleChange = () => {
-            setData(map.toJSON());
-        };
-
-        // Initial set
         handleChange();
-
         map.observeDeep(handleChange);
-
-        return () => {
-            map.unobserveDeep(handleChange);
-        };
+        return () => map.unobserveDeep(handleChange);
     }, [doc]);
 
     return data;
@@ -178,18 +158,13 @@ export const useSyncedProjects = (doc, arrayName) => {
         const yArray = doc.getArray(arrayName);
 
         const handleChange = () => {
+            // console.debug(`[Sync] Array ${arrayName} updated. Length: ${yArray.length}`);
             setProjects(yArray.toArray());
         };
 
-        // Initial load
         handleChange();
-
-        // Observe
         yArray.observeDeep(handleChange);
-
-        return () => {
-            yArray.unobserveDeep(handleChange);
-        };
+        return () => yArray.unobserveDeep(handleChange);
     }, [doc, arrayName]);
 
     const addProject = (project) => {
@@ -201,8 +176,6 @@ export const useSyncedProjects = (doc, arrayName) => {
     const removeProject = (id) => {
         if (!doc) return;
         const yArray = doc.getArray(arrayName);
-        // Find index (naive approach, for production usage with large lists consider Y.Map keyed by ID)
-        // But for <100 items array is fine and preserves order easily.
         let index = -1;
         const arr = yArray.toArray();
         for (let i = 0; i < arr.length; i++) {
@@ -230,18 +203,8 @@ export const useSyncedProjects = (doc, arrayName) => {
             }
 
             if (index !== -1) {
-                // To update an object in Y.Array, we actually have to replace it or use a nested Y.Map.
-                // For simplicity and since we are using JSON objects in Y.Array, we replace the item.
-                // A better CRDT approach is to use Y.Map for each project, but that requires changing the data structure.
-                // To support field-level granularity without full refactor:
-                // We'll read the current, merge, delete, and insert at same position.
-                // NOTE: This is "Last Write Wins" for the object. To do property merging properly with Y.Array of JSONs:
-                // We should really be using Y.Array of Y.Maps.
-                // But for now to fix the crash and support basic sync:
-
                 const current = arr[index];
                 const updated = { ...current, ...updates };
-
                 yArray.delete(index, 1);
                 yArray.insert(index, [updated]);
             }
@@ -262,12 +225,9 @@ export const useDataMigration = (doc) => {
 
         const migrate = () => {
             // 1. Check if migration already ran
-            if (localStorage.getItem(MIGRATION_KEY)) {
-                console.log("[Migration] Migration previously completed. Skipping.");
-                return;
-            }
+            if (localStorage.getItem(MIGRATION_KEY)) return;
 
-            console.log("[Migration] Starting one-time migration from LocalStorage...");
+            console.info("[Migration] Starting one-time migration...");
             let hasMigrated = false;
 
             // 2. Pending Projects
@@ -277,7 +237,6 @@ export const useDataMigration = (doc) => {
                 if (localPending) {
                     const parsed = JSON.parse(localPending);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        console.log(`[Migration] Migrating ${parsed.length} pending projects`);
                         doc.transact(() => {
                             yPending.push(parsed);
                         });
@@ -285,7 +244,7 @@ export const useDataMigration = (doc) => {
                     }
                 }
             } catch (e) {
-                console.error("[Migration] Failed to migrate pending:", e);
+                console.error("[Migration] Failed pending:", e);
             }
 
             // 3. Primary Projects
@@ -295,7 +254,6 @@ export const useDataMigration = (doc) => {
                 if (localPrimary) {
                     const parsed = JSON.parse(localPrimary);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        console.log(`[Migration] Migrating ${parsed.length} primary projects`);
                         doc.transact(() => {
                             yPrimary.push(parsed);
                         });
@@ -303,15 +261,13 @@ export const useDataMigration = (doc) => {
                     }
                 }
             } catch (e) {
-                console.error("[Migration] Failed to migrate primary:", e);
+                console.error("[Migration] Failed primary:", e);
             }
 
             // 4. Mark as completed
             localStorage.setItem(MIGRATION_KEY, 'true');
             if (hasMigrated) {
-                console.log("[Migration] Completed successfully.");
-            } else {
-                console.log("[Migration] No local data found to migrate. Marked as completed.");
+                console.info("[Migration] Completed.");
             }
         };
 

@@ -41,9 +41,8 @@ const VISUAL_VIBES = [
 const PendingModule = () => {
     const { doc } = useSync();
 
-    useEffect(() => {
-        // PendingModule v1.8 Loaded
-    }, []);
+    // Cleaned up unused useEffect
+
 
     const {
         projects,
