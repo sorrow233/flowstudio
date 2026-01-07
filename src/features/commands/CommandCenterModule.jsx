@@ -634,7 +634,7 @@ const CommandCenterModule = () => {
 
                                             {/* Text Content */}
                                             <div className="flex-1 min-w-0 py-1">
-                                                <div className="flex items-center gap-2 mb-1">
+                                                <div className="flex flex-wrap items-center gap-2 mb-1">
                                                     <h4 className="font-medium text-gray-900 truncate">{cmd.title}</h4>
                                                     {cmd.type === 'mandatory' && (
                                                         <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase tracking-wider">MANDATORY</span>
@@ -646,6 +646,34 @@ const CommandCenterModule = () => {
                                                         <span className="text-[10px] font-bold bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
                                                             <Globe size={8} /> SHARED
                                                         </span>
+                                                    )}
+                                                    {/* Inline Tags */}
+                                                    {(cmd.tags && cmd.tags.length > 0) && (
+                                                        <div className="flex flex-wrap gap-1.5 ml-1">
+                                                            {cmd.tags.map(tag => (
+                                                                <button
+                                                                    key={tag.id}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleCopy(`${cmd.id}-${tag.id}`, tag.value || cmd.content);
+                                                                    }}
+                                                                    className="group/tag flex items-center gap-1 px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded text-[10px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden select-none"
+                                                                    title={`Copy: ${tag.value || cmd.content}`}
+                                                                >
+                                                                    <Tag size={8} className="opacity-60 group-hover/tag:opacity-100" />
+                                                                    {tag.label}
+                                                                    {copiedId === `${cmd.id}-${tag.id}` && (
+                                                                        <motion.div
+                                                                            initial={{ opacity: 0, y: 10 }}
+                                                                            animate={{ opacity: 1, y: 0 }}
+                                                                            className="absolute inset-0 bg-emerald-600 text-white flex items-center justify-center font-bold"
+                                                                        >
+                                                                            <Check size={10} strokeWidth={3} />
+                                                                        </motion.div>
+                                                                    )}
+                                                                </button>
+                                                            ))}
+                                                        </div>
                                                     )}
                                                 </div>
                                                 <div className="text-xs text-gray-400 font-mono truncate flex items-center gap-2">
@@ -687,34 +715,7 @@ const CommandCenterModule = () => {
                                             </div>
                                         </div>
 
-                                        {/* Tags Display */}
-                                        {(cmd.tags && cmd.tags.length > 0) && (
-                                            <div className="flex flex-wrap gap-2 pl-[4.5rem] mt-3">
-                                                {cmd.tags.map(tag => (
-                                                    <button
-                                                        key={tag.id}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleCopy(`${cmd.id}-${tag.id}`, tag.value || cmd.content);
-                                                        }}
-                                                        className="group/tag flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg text-[11px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden shadow-sm"
-                                                        title={`Copy: ${tag.value || cmd.content}`}
-                                                    >
-                                                        <Tag size={10} className="opacity-60 group-hover/tag:opacity-100" />
-                                                        {tag.label}
-                                                        {copiedId === `${cmd.id}-${tag.id}` && (
-                                                            <motion.div
-                                                                initial={{ opacity: 0, y: 10 }}
-                                                                animate={{ opacity: 1, y: 0 }}
-                                                                className="absolute inset-0 bg-emerald-600 text-white flex items-center justify-center font-bold"
-                                                            >
-                                                                <Check size={12} strokeWidth={3} />
-                                                            </motion.div>
-                                                        )}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
+
                                     </motion.div>
                                 </Reorder.Item>
                             ))}

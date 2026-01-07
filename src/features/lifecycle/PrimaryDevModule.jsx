@@ -701,6 +701,28 @@ const PrimaryDevModule = () => {
                                                                 {cmd.type === 'link' ? <Globe size={16} /> : <Command size={16} />}
                                                             </div>
                                                             <span className="font-medium text-gray-900 text-lg">{cmd.title}</span>
+                                                            {/* Inline Tags */}
+                                                            {(cmd.tags && cmd.tags.length > 0) && (
+                                                                <div className="flex flex-wrap gap-1.5 ml-2">
+                                                                    {cmd.tags.map(tag => (
+                                                                        <button
+                                                                            key={tag.id}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation(); // Prevent parent click (which imports default)
+                                                                                handleLinkCommand(cmd, tag);
+                                                                            }}
+                                                                            className="group/tag flex items-center gap-1 px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded text-[10px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden select-none hover:shadow-sm"
+                                                                            title={`Import variant: ${tag.value || cmd.content}`}
+                                                                        >
+                                                                            <Tag size={8} className="opacity-60 group-hover/tag:opacity-100" />
+                                                                            {tag.label}
+                                                                            <span className="opacity-0 group-hover/tag:opacity-100 transition-opacity ml-0.5">
+                                                                                <ArrowUpRight size={8} />
+                                                                            </span>
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <div className={`p-1.5 rounded-lg transition-colors ${cmd.type === 'mandatory' ? 'bg-red-50 group-hover:bg-red-500 group-hover:text-white' : cmd.type === 'link' ? 'bg-blue-50 group-hover:bg-blue-500 group-hover:text-white' : 'bg-gray-50 group-hover:bg-emerald-500 group-hover:text-white'}`}>
                                                             <Plus size={16} />
@@ -712,28 +734,7 @@ const PrimaryDevModule = () => {
                                                             {cmd.type === 'link' ? cmd.url : cmd.content}
                                                         </div>
 
-                                                        {/* Tags Display */}
-                                                        {(cmd.tags && cmd.tags.length > 0) && (
-                                                            <div className="flex flex-wrap gap-2 mt-3">
-                                                                {cmd.tags.map(tag => (
-                                                                    <button
-                                                                        key={tag.id}
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation(); // Prevent parent click (which imports default)
-                                                                            handleLinkCommand(cmd, tag);
-                                                                        }}
-                                                                        className="group/tag flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg text-[11px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden shadow-sm hover:shadow-md"
-                                                                        title={`Import variant: ${tag.value || cmd.content}`}
-                                                                    >
-                                                                        <Tag size={10} className="opacity-60 group-hover/tag:opacity-100" />
-                                                                        {tag.label}
-                                                                        <span className="opacity-0 group-hover/tag:opacity-100 transition-opacity ml-1">
-                                                                            <ArrowUpRight size={10} />
-                                                                        </span>
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        )}
+
                                                     </div>
                                                 </motion.div>
                                             ))}
