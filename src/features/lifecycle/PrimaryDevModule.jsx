@@ -1,66 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Code2, GitBranch, Layers, PlayCircle, Plus, CheckSquare,
-    Square, Trash2, ExternalLink, X, ChevronRight, CheckCircle2,
-    MonitorPlay, Bug, Sparkles, Flag, ArrowUpRight, Terminal, Command, Check, Rocket, Globe, Pencil, Save, Image as ImageIcon,
-    Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, Search
-} from 'lucide-react';
-import { STORAGE_KEYS, DEV_STAGES, COMMAND_CATEGORIES } from '../../utils/constants';
+import { Code2, ExternalLink, Trash2, Check, Rocket } from 'lucide-react';
+import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
 
-const STAGE_ICONS = {
-    1: Layers,
-    2: MonitorPlay,
-    3: Container,
-    4: Sparkles,
-    5: Flag
-};
-
-const CATEGORY_ICONS = {
-    'LayoutGrid': LayoutGrid,
-    'Monitor': Monitor,
-    'Server': Server,
-    'Database': Database,
-    'Container': Container,
-    'Beaker': Beaker
-};
-
-const VISUAL_VIBES = [
-    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop', // Tech Dark
-    'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop', // Circuit
-    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop', // Cyberpunk
-    'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?q=80&w=2076&auto=format&fit=crop', // Mountain
-    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop'  // Nature
-];
+// Import New Modular Components
+import StageNavigation from './components/primary/StageNavigation';
+import TaskList from './components/primary/TaskList';
+import ProjectWorkspaceHeader from './components/primary/ProjectWorkspaceHeader';
+import ImportCommandModal from './components/primary/ImportCommandModal';
 
 const PrimaryDevModule = () => {
+    // --- Global State ---
     const [projects, setProjects] = useState([]);
     const [selectedProject, setSelectedProject] = useState(null);
-    const [newTaskInput, setNewTaskInput] = useState('');
 
-    // Edit Project State
-    const [isEditingProject, setIsEditingProject] = useState(false);
-    const [commandModalOpen, setCommandModalOpen] = useState(false);
-    const [commands, setCommands] = useState([]);
-
-    // Import Modal State
-    const [importCategory, setImportCategory] = useState('all');
-    const [importSearch, setImportSearch] = useState('');
-
-    // Undo State
-    const [recentlyDeleted, setRecentlyDeleted] = useState(null);
-
-    const [editForm, setEditForm] = useState({});
-    const [copiedTaskId, setCopiedTaskId] = useState(null);
-
-    // Header State
+    // --- UI/Interaction State ---
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
 
+    // --- Edit Mode State ---
+    const [isEditingProject, setIsEditingProject] = useState(false);
+    const [editForm, setEditForm] = useState({});
+
+    // --- Task/Command State ---
+    const [newTaskInput, setNewTaskInput] = useState('');
+    const [newTaskCategory, setNewTaskCategory] = useState('general');
+    const [commandModalOpen, setCommandModalOpen] = useState(false);
+
+    // --- Undo State (Optional Enhancement) ---
+    const [recentlyDeleted, setRecentlyDeleted] = useState(null);
+
+    // --- Data Persistence ---
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEYS.PRIMARY);
         if (saved) {
             const parsed = JSON.parse(saved);
-            // Migration: Ensure subStage exists AND assign existing tasks to the current stage if they don't have one
+            // Ensure migration for stages
             const migrated = parsed.map(p => {
                 const currentStage = p.subStage || 1;
                 return {
@@ -68,7 +42,7 @@ const PrimaryDevModule = () => {
                     subStage: currentStage,
                     tasks: (p.tasks || []).map(t => ({
                         ...t,
-                        stage: t.stage || currentStage // Lock existing tasks to the current stage they are found in
+                        stage: t.stage || currentStage
                     }))
                 };
             });
@@ -76,19 +50,12 @@ const PrimaryDevModule = () => {
         }
     }, []);
 
-    // Load commands when modal opens
-    useEffect(() => {
-        if (commandModalOpen) {
-            const savedCmds = localStorage.getItem(STORAGE_KEYS.COMMANDS);
-            if (savedCmds) setCommands(JSON.parse(savedCmds));
-        }
-    }, [commandModalOpen]);
-
     useEffect(() => {
         localStorage.setItem(STORAGE_KEYS.PRIMARY, JSON.stringify(projects));
     }, [projects]);
 
-    const handleDelete = (e, id) => {
+    // --- Project Handlers ---
+    const handleDeleteProject = (e, id) => {
         e.stopPropagation();
         if (confirm('Delete project?')) {
             setProjects(projects.filter(p => p.id !== id));
@@ -97,21 +64,13 @@ const PrimaryDevModule = () => {
     };
 
     const handleUpdateProject = (id, updates) => {
-        const updated = projects.map(p => p.id === id ? { ...p, ...updates } : p);
-        setProjects(updated);
-        // If updating the currently selected project, update it too
+        setProjects(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
         if (selectedProject?.id === id) {
-            // Careful not to overwrite if we are just closing the modal or similar, 
-            // but here we want to reflect changes immediately.
             setSelectedProject(prev => ({ ...prev, ...updates }));
         }
     };
 
-    // Derived State for UI
-    const stageInfo = DEV_STAGES.find(s => s.id === (selectedProject?.subStage || 1)) || DEV_STAGES[0];
-    const StageIcon = STAGE_ICONS[stageInfo.id] || LayoutGrid;
-
-    // Edit Handlers
+    // --- Edit Handlers ---
     const startEditing = () => {
         setEditForm({
             title: selectedProject.title,
@@ -127,153 +86,74 @@ const PrimaryDevModule = () => {
         setIsEditingProject(false);
     };
 
-    const cancelEditing = () => {
-        setIsEditingProject(false);
-    };
-
-    const [newTaskCategory, setNewTaskCategory] = useState('general');
-    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-
+    // --- Task Handlers ---
     const handleAddTask = (projectId) => {
         if (!newTaskInput.trim()) return;
-
         const project = projects.find(p => p.id === projectId);
         const newTasks = [...(project.tasks || []), {
             id: Date.now(),
             text: newTaskInput,
             done: false,
             category: newTaskCategory,
-            stage: project.subStage || 1 // Bind to current stage
+            stage: project.subStage || 1
         }];
         handleUpdateProject(projectId, { tasks: newTasks });
         setNewTaskInput('');
     };
 
+    const handleDeleteTask = (projectId, taskId) => {
+        const project = projects.find(p => p.id === projectId);
+        if (!project) return;
+        const updatedTasks = project.tasks.filter(t => t.id !== taskId);
+        handleUpdateProject(projectId, { tasks: updatedTasks });
+    };
+
+    const handleToggleTask = (projectId, taskId) => {
+        const project = projects.find(p => p.id === projectId);
+        const updatedTasks = project.tasks.map(t =>
+            t.id === taskId ? { ...t, done: !t.done } : t
+        );
+        handleUpdateProject(projectId, { tasks: updatedTasks });
+    };
+
+    // --- Command Import Handler ---
     const handleLinkCommand = (command, tag = null) => {
         const project = projects.find(p => p.id === selectedProject.id);
-
-        // If importing a specific tag, we just add that specific variant as a task.
-        // If importing the "Command Container" (default), we store the whole thing.
-        // BUT user wants the "Container" look in the list. 
-        // So effectively, we always import the Command ID and metadata, 
-        // and if a specific tag was clicked, maybe highlight it? 
-        // OR simply: Always add the task as a "Command Container", 
-        // and if a tag was clicked, maybe we just auto-copy that value once?
-        // Let's stick to the User Request: "The task list should show the tags".
-
-        const taskText = command.title; // Keep clean title
-        const taskContent = command.content;
+        const currentStage = project.subStage || 1;
 
         const newTasks = [...(project.tasks || []), {
             id: Date.now(),
-            text: taskText,
+            text: command.title,
             done: false,
             isCommand: true,
-            commandContent: taskContent,
+            commandContent: command.content,
             commandUrl: command.url,
             commandId: command.id,
             commandType: command.type || 'utility',
-
-            // KEY CHANGE: Store the tags!
             commandTags: command.tags || [],
-            stage: project.subStage || 1 // Bind to current stage
+            stage: currentStage
         }];
 
         handleUpdateProject(selectedProject.id, { tasks: newTasks });
         setCommandModalOpen(false);
 
-        // If a specific tag was clicked during import, maybe copy it immediately?
         if (tag) {
             navigator.clipboard.writeText(tag.value || command.content);
-            // We can't easily show the "Copied" state on the new task immediately without complex ID matching,
-            // but the user will see the tags in the list.
         }
     };
 
-    const handleDeleteTask = (projectId, taskId) => {
-        const project = projects.find(p => p.id === projectId);
-        if (!project) return;
-
-        const taskIndex = project.tasks.findIndex(t => t.id === taskId);
-        const task = project.tasks[taskIndex];
-
-        // Save for undo
-        setRecentlyDeleted({ projectId, task, index: taskIndex });
-
-        const updatedTasks = project.tasks.filter(t => t.id !== taskId);
-        handleUpdateProject(projectId, { tasks: updatedTasks });
-
-        // Auto-clear undo after 4 seconds
-        setTimeout(() => {
-            setRecentlyDeleted(prev => (prev && prev.task.id === task.id ? null : prev));
-        }, 4000);
-    };
-
-    const handleUndoDelete = () => {
-        if (!recentlyDeleted) return;
-        const { projectId, task, index } = recentlyDeleted;
-        const project = projects.find(p => p.id === projectId);
-        if (!project) return;
-
-        // Re-insert at original index
-        const newTasks = [...project.tasks];
-        newTasks.splice(index, 0, task);
-
-        handleUpdateProject(projectId, { tasks: newTasks });
-        setRecentlyDeleted(null);
-    };
-
-    const toggleTask = (projectId, taskId, specificContent = null, subId = null) => {
-        const project = projects.find(p => p.id === projectId);
-        const task = project.tasks.find(t => t.id === taskId);
-
-        if (task.isCommand) {
-            // Special handling for Link type
-            if (task.commandType === 'link') {
-                if (task.commandContent) {
-                    navigator.clipboard.writeText(task.commandContent);
-                    setCopiedTaskId(taskId); // Main ID for checkmark
-                    setTimeout(() => setCopiedTaskId(null), 2000);
-                }
-                if (task.commandUrl) window.open(task.commandUrl, '_blank');
-                return;
-            }
-
-            // Copy Content (Default or Specific Tag)
-            const contentToCopy = specificContent || task.commandContent;
-            navigator.clipboard.writeText(contentToCopy);
-
-            // Set the ID to show "Check" (either main task ID or composite tag ID)
-            setCopiedTaskId(subId || taskId);
-            setTimeout(() => setCopiedTaskId(null), 2000);
-
-            if (task.commandType !== 'mandatory') return;
-            return;
-        }
-
-        const updatedTasks = project.tasks.map(t =>
-            t.id === taskId ? { ...t, done: !t.done } : t
-        );
-        handleUpdateProject(projectId, { tasks: updatedTasks });
-    };
-
-    const markTaskDone = (e, projectId, taskId) => {
-        e.stopPropagation();
-        const project = projects.find(p => p.id === projectId);
-        const updatedTasks = project.tasks.map(t =>
-            t.id === taskId ? { ...t, done: !t.done } : t
-        );
-        handleUpdateProject(projectId, { tasks: updatedTasks });
+    // --- Stage Handler ---
+    const handleStageSelect = (stageId) => {
+        handleUpdateProject(selectedProject.id, { subStage: stageId });
     };
 
     return (
         <div className="max-w-7xl mx-auto pt-10 px-6 pb-20">
+            {/* Dashboard Header */}
             <div className="mb-12 flex justify-between items-end">
                 <div>
                     <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">Active Projects</h2>
-                    <p className="text-gray-400 text-sm font-light tracking-wide">
-                        Primary Development Phase
-                    </p>
+                    <p className="text-gray-400 text-sm font-light tracking-wide">Primary Development Phase</p>
                 </div>
                 <div className="text-right">
                     <span className="text-3xl font-thin text-gray-900">{projects.length}</span>
@@ -281,6 +161,7 @@ const PrimaryDevModule = () => {
                 </div>
             </div>
 
+            {/* Project Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {projects.map((project) => (
                     <motion.div
@@ -289,7 +170,7 @@ const PrimaryDevModule = () => {
                         onClick={() => setSelectedProject(project)}
                         className="group bg-white border border-gray-100 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-gray-200/50 transition-all cursor-pointer relative h-[360px] flex flex-col ring-1 ring-transparent hover:ring-gray-100"
                     >
-                        {/* Background Image / Gradient */}
+                        {/* Card Background */}
                         <div className="absolute inset-0 z-0 h-48">
                             {project.bgImage ? (
                                 <div className="w-full h-full relative">
@@ -319,7 +200,7 @@ const PrimaryDevModule = () => {
                             </div>
 
                             <div className="mt-auto pt-6 border-t border-gray-100/50">
-                                {/* Stage Visualization */}
+                                {/* Mini Stage Visualization */}
                                 <div className="flex items-center gap-1.5 mb-3">
                                     {[1, 2, 3, 4, 5].map(step => (
                                         <div
@@ -333,7 +214,7 @@ const PrimaryDevModule = () => {
                                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                         <span>Stage {project.subStage || 1}</span>
                                     </div>
-                                    <span className="text-gray-900 font-medium">{DEV_STAGES[(project.subStage || 1) - 1].label}</span>
+                                    <span className="text-gray-900 font-medium">{DEV_STAGES[(project.subStage || 1) - 1]?.label}</span>
                                 </div>
                             </div>
                         </div>
@@ -352,706 +233,77 @@ const PrimaryDevModule = () => {
                 )}
             </div>
 
-            {/* Detailed View Modal */}
+            {/* Project Workspace Modal */}
             <AnimatePresence>
                 {selectedProject && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-10 pointer-events-none">
                         <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             className="absolute inset-0 bg-white/80 backdrop-blur-md pointer-events-auto"
-                            onClick={() => {
-                                setSelectedProject(null);
-                                setIsEditingProject(false); // Reset edit mode on close
-                            }}
+                            onClick={() => { setSelectedProject(null); setIsEditingProject(false); }}
                         />
                         <motion.div
                             layoutId={`card-${selectedProject.id}`}
                             className="w-full max-w-6xl bg-white rounded-[3rem] shadow-2xl overflow-hidden relative pointer-events-auto h-[90vh] flex flex-col ring-1 ring-gray-100"
                         >
-                            {/* Rich Hero Header with Parallax-like effect */}
-                            {/* Rich Hero Header with Parallax-like effect */}
-                            <motion.div
-                                animate={{
-                                    height: isHeaderCollapsed && !isEditingProject ? 100 : 288,
-                                }}
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                className="relative shrink-0 bg-gray-900 flex items-end p-10 overflow-hidden group"
-                            >
-                                {isEditingProject ? (
-                                    // EDIT MODE HERO BACKGROUND
-                                    <div className="absolute inset-0 z-0 bg-gray-900">
-                                        {editForm.bgImage ? (
-                                            <>
-                                                <img src={editForm.bgImage} alt="" className="w-full h-full object-cover opacity-50 blur-sm" />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
-                                            </>
-                                        ) : (
-                                            <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black" />
-                                        )}
-                                    </div>
-                                ) : (
-                                    // VIEW MODE HERO BACKGROUND
-                                    selectedProject.bgImage ? (
-                                        <motion.div className="absolute inset-0 z-0">
-                                            <img src={selectedProject.bgImage} alt="" className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-1000" />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
-                                        </motion.div>
-                                    ) : (
-                                        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black" />
-                                    )
-                                )}
+                            <ProjectWorkspaceHeader
+                                project={selectedProject}
+                                activeStage={selectedProject.subStage || 1}
+                                isCollapsed={isHeaderCollapsed}
+                                isEditing={isEditingProject}
+                                editForm={editForm}
+                                setEditForm={setEditForm}
+                                onStartEdit={startEditing}
+                                onSaveEdit={saveEditing}
+                                onCancelEdit={() => setIsEditingProject(false)}
+                                onClose={() => setSelectedProject(null)}
+                                onDelete={(e) => handleDeleteProject(e, selectedProject.id)}
+                                onImportCommand={() => setCommandModalOpen(true)}
+                            />
 
-                                {/* Top Actions */}
-                                <div className="absolute top-8 right-8 flex gap-3 z-20">
-                                    {isEditingProject ? (
-                                        <>
-                                            <button
-                                                onClick={cancelEditing}
-                                                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md transition-colors text-sm font-medium"
-                                            >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                onClick={saveEditing}
-                                                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl shadow-lg transition-colors flex items-center gap-2 text-sm font-medium"
-                                            >
-                                                <Save size={16} /> Save Changes
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button
-                                                onClick={startEditing}
-                                                className="p-3 bg-black/20 hover:bg-black/40 text-white rounded-full transition-colors backdrop-blur-md border border-white/10"
-                                                title="Edit Settings"
-                                            >
-                                                <Pencil size={20} />
-                                            </button>
-                                            <button
-                                                onClick={() => setSelectedProject(null)}
-                                                className="p-3 bg-black/20 hover:bg-black/40 text-white rounded-full transition-colors backdrop-blur-md border border-white/10"
-                                            >
-                                                <X size={20} />
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
+                            <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30">
+                                {/* Left Sidebar: Stage Navigation */}
+                                <StageNavigation
+                                    activeStage={selectedProject.subStage || 1}
+                                    currentStage={selectedProject.subStage || 1}
+                                    onStageSelect={handleStageSelect}
+                                />
 
-
-                                <div className="relative z-10 w-full flex justify-between items-end text-white">
-                                    <div className="max-w-3xl w-full">
-                                        {isEditingProject ? (
-                                            // EDIT FORM
-                                            <div className="space-y-4 w-full bg-black/40 backdrop-blur-xl p-6 rounded-3xl border border-white/10">
-                                                <input
-                                                    value={editForm.title}
-                                                    onChange={e => setEditForm({ ...editForm, title: e.target.value })}
-                                                    className="w-full bg-transparent text-4xl font-thin tracking-tighter text-white placeholder:text-white/30 outline-none border-b border-white/20 focus:border-emerald-400/50 pb-2 transition-colors"
-                                                    placeholder="Project Title"
-                                                />
-                                                <textarea
-                                                    value={editForm.desc}
-                                                    onChange={e => setEditForm({ ...editForm, desc: e.target.value })}
-                                                    className="w-full bg-transparent text-lg font-light text-white/90 placeholder:text-white/30 outline-none resize-none h-20"
-                                                    placeholder="Brief mission manifesto..."
-                                                />
-                                                <div className="flex gap-4">
-                                                    <div className="flex-1">
-                                                        <label className="text-xs uppercase tracking-widest text-white/50 mb-1 block">External Link</label>
-                                                        <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2 border border-white/10 focus-within:border-emerald-500/50 transition-colors">
-                                                            <ExternalLink size={14} className="text-white/50" />
-                                                            <input
-                                                                value={editForm.link}
-                                                                onChange={e => setEditForm({ ...editForm, link: e.target.value })}
-                                                                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/20"
-                                                                placeholder="https://..."
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <label className="text-xs uppercase tracking-widest text-white/50 mb-1 block">Visual Vibe</label>
-                                                        <div className="flex items-center gap-2">
-                                                            {VISUAL_VIBES.map((vibe, i) => (
-                                                                <button
-                                                                    key={i}
-                                                                    onClick={() => setEditForm({ ...editForm, bgImage: vibe })}
-                                                                    className={`w-8 h-8 rounded-full border-2 overflow-hidden transition-all ${editForm.bgImage === vibe ? 'border-emerald-500 scale-110' : 'border-transparent opacity-50 hover:opacity-100'}`}
-                                                                >
-                                                                    <img src={vibe} className="w-full h-full object-cover" />
-                                                                </button>
-                                                            ))}
-                                                            <button
-                                                                onClick={() => {
-                                                                    const url = prompt("Enter custom image URL:", editForm.bgImage);
-                                                                    if (url) setEditForm({ ...editForm, bgImage: url });
-                                                                }}
-                                                                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-colors"
-                                                            >
-                                                                <ImageIcon size={14} />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            // VIEW MODE
-                                            <>
-                                                <motion.div
-                                                    animate={{ opacity: isHeaderCollapsed ? 0 : 1, height: isHeaderCollapsed ? 0 : 'auto' }}
-                                                    className="overflow-hidden"
-                                                >
-                                                    <div className="flex items-center gap-3 mb-4 opacity-80">
-                                                        <span className="px-3 py-1 rounded-full border border-white/20 bg-white/10 text-xs font-mono backdrop-blur-sm">
-                                                            Active Development
-                                                        </span>
-                                                        {selectedProject.link && (
-                                                            <a href={selectedProject.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs hover:text-emerald-400 transition-colors px-3 py-1 rounded-full hover:bg-white/10">
-                                                                <ExternalLink size={12} /> {selectedProject.link.replace('https://', '')}
-                                                            </a>
-                                                        )}
-                                                    </div>
-                                                </motion.div>
-
-                                                <motion.h2
-                                                    layout
-                                                    className={`font-thin tracking-tighter mb-4 text-shadow-lg transition-all ${isHeaderCollapsed ? 'text-4xl' : 'text-6xl'}`}
-                                                >
-                                                    {selectedProject.title}
-                                                </motion.h2>
-
-                                                <motion.p
-                                                    animate={{ opacity: isHeaderCollapsed ? 0 : 0.8, height: isHeaderCollapsed ? 0 : 'auto' }}
-                                                    className="text-xl font-light leading-relaxed text-shadow-sm overflow-hidden"
-                                                >
-                                                    {selectedProject.desc}
-                                                </motion.p>
-                                            </>
-                                        )}
-                                    </div>
-                                    {!isEditingProject && (
-                                        <button
-                                            onClick={(e) => handleDelete(e, selectedProject.id)}
-                                            className="text-white/30 hover:text-red-400 transition-colors p-4 hover:bg-white/5 rounded-2xl"
-                                        >
-                                            <Trash2 size={24} strokeWidth={1.5} />
-                                        </button>
-                                    )}
-                                </div>
-                            </motion.div>
-
-                            <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/50">
-                                {/* Left: Stage Controller */}
-                                <div className="w-full md:w-80 bg-white border-r border-gray-100 p-8 overflow-y-auto shrink-0 custom-scrollbar">
-                                    <h3 className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-6 px-2">Development Cycle</h3>
-
-                                    <div className="space-y-3 relative">
-                                        {/* Connecting Line */}
-                                        <div className="absolute left-[27px] top-6 bottom-6 w-0.5 bg-gray-100 z-0" />
-
-                                        {DEV_STAGES.map((stage) => {
-                                            const isActive = (selectedProject.subStage || 1) === stage.id;
-                                            const isDone = (selectedProject.subStage || 1) > stage.id;
-                                            const Icon = STAGE_ICONS[stage.id];
-
-                                            return (
-                                                <div
-                                                    key={stage.id}
-                                                    onClick={() => {
-                                                        handleUpdateProject(selectedProject.id, { subStage: stage.id });
-                                                        setIsHeaderCollapsed(true); // Auto-focus on content
-                                                    }}
-                                                    className={`
-                                                        relative z-10 flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-300 group
-                                                        ${isActive
-                                                            ? 'bg-gray-900 text-white shadow-xl shadow-gray-200 scale-105'
-                                                            : 'hover:bg-gray-50 text-gray-500'}
-                                                    `}
-                                                >
-                                                    <div className={`
-                                                        w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300
-                                                        ${isActive ? 'bg-white/20 text-white' : isDone ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400'}
-                                                    `}>
-                                                        {isDone ? <Check size={14} strokeWidth={3} /> : <Icon size={16} />}
-                                                    </div>
-                                                    <div>
-                                                        <div className={`text-sm font-medium ${isActive ? 'text-white' : 'group-hover:text-gray-900'}`}>
-                                                            {stage.label}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                {/* Right: Tasks & Details */}
-                                <div className="flex-1 p-8 md:p-12 overflow-y-auto flex flex-col relative custom-scrollbar">
-                                    <div className="flex-1 flex flex-col h-full overflow-hidden">
-                                        {/* Header (Static) */}
-                                        <div className="p-8 pb-4 flex justify-between items-start shrink-0">
-                                            <div>
-                                                <div className="flex items-center gap-3 mb-2">
-                                                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                                        <StageIcon size={18} />
-                                                    </div>
-                                                    <span className="text-xs font-bold uppercase tracking-widest text-emerald-500">
-                                                        当前阶段 {selectedProject.subStage}
-                                                    </span>
-                                                </div>
-                                                <h2 className="text-3xl font-light text-gray-900">{stageInfo.title}</h2>
-                                                <p className="text-gray-400 mt-2 max-w-md">{stageInfo.desc}</p>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => {
-                                                        const link = projects.find(p => p.id === selectedProject.id).link;
-                                                        if (link) window.open(link, '_blank');
-                                                    }}
-                                                    className="text-xs flex items-center gap-2 px-4 py-2 bg-white text-gray-600 rounded-xl hover:bg-gray-50 transition-all border border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                                                >
-                                                    <ExternalLink size={14} />
-                                                    <span>Visit</span>
-                                                </button>
-
-                                                {/* Import Command Button */}
-                                                <button
-                                                    onClick={() => setCommandModalOpen(true)}
-                                                    className="text-xs flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl hover:bg-black transition-all shadow-lg shadow-gray-900/10 hover:shadow-gray-900/20"
-                                                >
-                                                    <Terminal size={14} />
-                                                    <span>Import Command</span>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* Task List (Scrollable Area) */}
-                                        <div
-                                            className="flex-1 overflow-y-auto px-8 pb-4 custom-scrollbar"
-                                            onScroll={(e) => {
-                                                const scrollTop = e.currentTarget.scrollTop;
-                                                // Trigger collapse on scroll down
-                                                if (scrollTop > 20 && !isHeaderCollapsed) {
-                                                    setIsHeaderCollapsed(true);
-                                                }
-                                                // Trigger expand only at the very top
-                                                else if (scrollTop === 0 && isHeaderCollapsed) {
-                                                    setIsHeaderCollapsed(false);
-                                                }
-                                            }}
-                                        >
-                                            <div className="space-y-3 min-h-[100px]">
-                                                {selectedProject.tasks
-                                                    ?.filter(t => (t.stage || 1) === (selectedProject.subStage || 1)) // ONLY SHOW STAGE-SPECIFIC TASKS
-                                                    .map(task => {
-                                                        const isMandatory = task.isCommand && task.commandType === 'mandatory';
-                                                        const isLink = task.isCommand && task.commandType === 'link';
-                                                        const isUtility = task.isCommand && task.commandType === 'utility';
-
-
-                                                        // Determine Category Icon
-                                                        const taskCat = COMMAND_CATEGORIES.find(c => c.id === (task.category || 'general'));
-                                                        const TaskCatIcon = CATEGORY_ICONS[taskCat?.icon] || LayoutGrid;
-
-                                                        return (
-                                                            <motion.div
-                                                                layout
-                                                                key={task.id}
-                                                                className="group flex items-start gap-4 p-4 rounded-2xl bg-white hover:bg-white border border-transparent hover:border-gray-100 hover:shadow-lg hover:shadow-gray-100/50 transition-all duration-300 relative overflow-hidden"
-                                                            >
-                                                                {/* Checkbox / Status */}
-                                                                <button
-                                                                    onClick={(e) => markTaskDone(e, selectedProject.id, task.id)}
-                                                                    className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 shrink-0 relative group/icon ${task.done ? 'bg-emerald-500 border-emerald-500 text-white scale-110' : isMandatory ? 'border-red-200 bg-red-50 text-red-500' : 'border-gray-200 bg-transparent text-gray-300 hover:border-gray-400 hover:text-gray-900'}`}
-                                                                >
-                                                                    {task.done ? (
-                                                                        <Check size={14} strokeWidth={3} />
-                                                                    ) : (
-                                                                        <>
-                                                                            <div className="absolute inset-0 flex items-center justify-center opacity-100 group-hover/icon:opacity-0 transition-opacity">
-                                                                                <TaskCatIcon size={12} className={taskCat?.color?.split(' ')[1]} />
-                                                                            </div>
-                                                                            <Check size={14} strokeWidth={3} className="absolute opacity-0 group-hover/icon:opacity-100 transition-opacity text-gray-400 group-hover:text-gray-900" />
-                                                                        </>
-                                                                    )}
-                                                                </button>
-
-                                                                <div className="flex-1 min-w-0 pt-0.5">
-                                                                    <div className="flex flex-col gap-1">
-                                                                        <span className={`text-base font-medium transition-colors leading-snug ${task.done ? 'opacity-40 line-through decoration-emerald-500/50' : 'text-gray-900'}`}>
-                                                                            {task.text}
-                                                                        </span>
-
-                                                                        <div className="flex flex-wrap items-center gap-2">
-                                                                            {/* Category Badge */}
-                                                                            <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded flex items-center gap-1 ${taskCat?.color.replace('text-', 'bg-').replace('500', '50').replace('600', '100')} text-gray-500`}>
-                                                                                {taskCat?.label}
-                                                                            </span>
-
-                                                                            {isMandatory && <span className="text-[10px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-red-100">Mandatory</span>}
-                                                                            {isLink && <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-blue-100 flex items-center gap-1"><ExternalLink size={8} /> Link</span>}
-
-                                                                            {/* Tags */}
-                                                                            {(task.commandTags && task.commandTags.length > 0) && (
-                                                                                <div className="flex flex-wrap gap-1.5 ml-1">
-                                                                                    {task.commandTags.map(tag => (
-                                                                                        <button
-                                                                                            key={tag.id}
-                                                                                            onClick={(e) => { e.stopPropagation(); toggleTask(selectedProject.id, task.id, tag.value, `${task.id}-${tag.id}`); }}
-                                                                                            className="group/tag flex items-center gap-1 px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded text-[10px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden select-none hover:shadow-sm"
-                                                                                            title={`Copy: ${tag.value}`}
-                                                                                        >
-                                                                                            <Tag size={8} className="opacity-60 group-hover/tag:opacity-100" />
-                                                                                            {tag.label}
-                                                                                            {copiedTaskId === `${task.id}-${tag.id}` && (
-                                                                                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="absolute inset-0 bg-emerald-600 text-white flex items-center justify-center font-bold"><Check size={10} strokeWidth={3} /></motion.div>
-                                                                                            )}
-                                                                                        </button>
-                                                                                    ))}
-                                                                                </div>
-                                                                            )}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-
-                                                                {
-                                                                    task.isCommand && copiedTaskId === task.id && (
-                                                                        <span className="text-[10px] uppercase font-bold text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full animate-pulse transition-all">Copied</span>
-                                                                    )
-                                                                }
-                                                            </motion.div>
-                                                        );
-                                                    })}
-                                                {(!selectedProject.tasks || selectedProject.tasks.length === 0) && (
-                                                    <div className="flex flex-col items-center justify-center py-20 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100 text-center">
-                                                        <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4 text-gray-300">
-                                                            <StageIcon size={24} className="opacity-50" />
-                                                        </div>
-                                                        <p className="text-gray-900 font-medium">Quiet on the Front</p>
-                                                        <p className="text-gray-400 text-sm mt-1 max-w-xs mx-auto text-balance">
-                                                            {stageInfo.emptyState || "No active missions. Add a task to begin."}
-                                                        </p>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Static Action Bar (Footer) */}
-                                            <div className="p-8 pt-4 bg-white/80 backdrop-blur-sm shrink-0 border-t border-gray-100">
-                                                <div className="relative group shadow-2xl shadow-gray-200/50 rounded-2xl bg-white ring-1 ring-gray-100 focus-within:ring-2 focus-within:ring-gray-900 transition-all">
-                                                    <input
-                                                        type="text"
-                                                        value={newTaskInput}
-                                                        onChange={(e) => setNewTaskInput(e.target.value)}
-                                                        onKeyDown={(e) => e.key === 'Enter' && handleAddTask(selectedProject.id)}
-                                                        onFocus={() => setIsHeaderCollapsed(true)} // Focus mode
-                                                        placeholder="Type a new mission..."
-                                                        className="w-full bg-transparent border-0 rounded-2xl py-5 pl-16 pr-16 transition-all outline-none placeholder:text-gray-400 text-lg font-light"
-                                                        autoFocus
-                                                    />
-
-                                                    {/* Category Trigger (Left) */}
-                                                    <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                                                        <button
-                                                            onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                                                            className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-50 text-gray-400 hover:text-gray-900 transition-colors"
-                                                        >
-                                                            {(() => {
-                                                                const activeCat = COMMAND_CATEGORIES.find(c => c.id === newTaskCategory);
-                                                                const ActiveIcon = CATEGORY_ICONS[activeCat?.icon] || LayoutGrid;
-                                                                return <ActiveIcon size={20} className={activeCat?.color.split(' ')[1]} />
-                                                            })()}
-                                                        </button>
-
-                                                        {/* Category Popover */}
-                                                        <AnimatePresence>
-                                                            {isCategoryOpen && (
-                                                                <>
-                                                                    <div
-                                                                        className="fixed inset-0 z-40"
-                                                                        onClick={() => setIsCategoryOpen(false)}
-                                                                    />
-                                                                    <motion.div
-                                                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                                        className="absolute bottom-full left-0 mb-2 p-2 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 flex gap-1 min-w-[280px]"
-                                                                    >
-                                                                        {COMMAND_CATEGORIES.map(cat => {
-                                                                            const Icon = CATEGORY_ICONS[cat.icon] || LayoutGrid;
-                                                                            return (
-                                                                                <button
-                                                                                    key={cat.id}
-                                                                                    onClick={() => {
-                                                                                        setNewTaskCategory(cat.id);
-                                                                                        setIsCategoryOpen(false);
-                                                                                    }}
-                                                                                    className={`
-                                                                            p-2 rounded-xl transition-all flex flex-col items-center gap-1 flex-1
-                                                                            ${newTaskCategory === cat.id
-                                                                                            ? 'bg-gray-900 text-white shadow-lg'
-                                                                                            : 'hover:bg-gray-50 text-gray-500 hover:text-gray-900'}
-                                                                        `}
-                                                                                    title={cat.label}
-                                                                                >
-                                                                                    <Icon size={18} />
-                                                                                    <span className="text-[9px] font-bold uppercase">{cat.label.slice(0, 3)}</span>
-                                                                                </button>
-                                                                            )
-                                                                        })}
-                                                                    </motion.div>
-                                                                </>
-                                                            )}
-                                                        </AnimatePresence>
-                                                    </div>
-
-                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                                        <button
-                                                            onClick={() => handleAddTask(selectedProject.id)}
-                                                            disabled={!newTaskInput.trim()}
-                                                            className="p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all disabled:opacity-0 disabled:pointer-events-none shadow-lg shadow-gray-900/20"
-                                                        >
-                                                            <ArrowUpRight size={20} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                {/* Right Content: Task List */}
+                                <div className="flex-1 flex flex-col relative w-full overflow-hidden">
+                                    <TaskList
+                                        tasks={selectedProject.tasks}
+                                        projectId={selectedProject.id}
+                                        activeStage={selectedProject.subStage || 1}
+                                        onToggle={handleToggleTask}
+                                        onDelete={handleDeleteTask}
+                                        onAddTask={handleAddTask}
+                                        newTaskInput={newTaskInput}
+                                        setNewTaskInput={setNewTaskInput}
+                                        newTaskCategory={newTaskCategory}
+                                        setNewTaskCategory={setNewTaskCategory}
+                                        onScroll={(e) => {
+                                            const scrollTop = e.currentTarget.scrollTop;
+                                            if (scrollTop > 50 && !isHeaderCollapsed) {
+                                                setIsHeaderCollapsed(true);
+                                            } else if (scrollTop === 0 && isHeaderCollapsed) {
+                                                setIsHeaderCollapsed(false);
+                                            }
+                                        }}
+                                    />
                                 </div>
                             </div>
                         </motion.div>
                     </div>
-                )
-                }
-            </AnimatePresence >
-
-            {/* Undo Toast */}
-            < AnimatePresence >
-                {recentlyDeleted && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 50 }}
-                        className="fixed bottom-8 right-8 z-[70] flex items-center gap-4 bg-gray-900 text-white pl-4 pr-2 py-2 rounded-xl shadow-2xl shadow-gray-900/40"
-                    >
-                        <span className="text-sm font-medium">Task deleted</span>
-                        <button
-                            onClick={handleUndoDelete}
-                            className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
-                        >
-                            Undo
-                        </button>
-                        <button
-                            onClick={() => setRecentlyDeleted(null)}
-                            className="p-1 hover:bg-gray-800 rounded-full text-gray-500 hover:text-white transition-colors"
-                        >
-                            <X size={14} />
-                        </button>
-                    </motion.div>
                 )}
-            </AnimatePresence >
+            </AnimatePresence>
 
-            {/* Command Selector Modal */}
-            < AnimatePresence >
-                {commandModalOpen && (
-                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none">
-                        <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto"
-                            onClick={() => setCommandModalOpen(false)}
-                        />
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="w-full max-w-2xl bg-white/90 backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden pointer-events-auto flex flex-col max-h-[75vh] ring-1 ring-white/50"
-                        >
-                            <div className="p-8 border-b border-gray-100 bg-white/50 backdrop-blur-xl">
-                                <div className="flex justify-between items-start mb-6">
-                                    <div>
-                                        <h3 className="text-2xl font-light text-gray-900 flex items-center gap-3">
-                                            Import Command
-                                        </h3>
-                                        <p className="text-sm text-gray-400 mt-1">
-                                            Inject pre-configured AI prompts into your workflow
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => setCommandModalOpen(false)}
-                                        className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-900"
-                                    >
-                                        <X size={20} />
-                                    </button>
-                                </div>
-
-                                {/* Search and Filter Toolbar */}
-                                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                                    {/* Category Filter Pills */}
-                                    <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl overflow-x-auto no-scrollbar max-w-full">
-                                        <button
-                                            onClick={() => setImportCategory('all')}
-                                            className={`
-                                                px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0
-                                                ${importCategory === 'all'
-                                                    ? 'bg-white text-gray-900 shadow-sm'
-                                                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-200/50'}
-                                            `}
-                                        >
-                                            All
-                                        </button>
-                                        {COMMAND_CATEGORIES.map(cat => (
-                                            <button
-                                                key={cat.id}
-                                                onClick={() => setImportCategory(cat.id)}
-                                                className={`
-                                                    w-8 h-8 flex items-center justify-center rounded-lg transition-all shrink-0 relative
-                                                    ${importCategory === cat.id
-                                                        ? 'bg-white shadow-md text-gray-900 scale-105 z-10'
-                                                        : 'text-gray-400 hover:bg-white/50 hover:text-gray-600'}
-                                                `}
-                                                title={cat.label}
-                                            >
-                                                <div className={`w-2.5 h-2.5 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')} ${importCategory === cat.id ? 'ring-2 ring-offset-1 ring-gray-100' : ''}`} />
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {/* Search Input */}
-                                    <div className="relative w-full sm:w-64 group">
-                                        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
-                                        <input
-                                            value={importSearch}
-                                            onChange={(e) => setImportSearch(e.target.value)}
-                                            placeholder="Search commands..."
-                                            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 hover:bg-white focus:bg-white rounded-xl text-sm border border-transparent hover:border-gray-200 focus:border-emerald-200 outline-none transition-all shadow-inner focus:shadow-sm"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="p-6 overflow-y-auto bg-gray-50/30 custom-scrollbar flex-1">
-                                {commands.filter(c => c.stageIds?.includes(selectedProject?.subStage || 1)).length > 0 ? (
-                                    <div className="space-y-6">
-                                        {COMMAND_CATEGORIES.map(cat => {
-                                            if (importCategory !== 'all' && importCategory !== cat.id) return null;
-
-                                            const catCommands = commands
-                                                .filter(c => c.stageIds?.includes(selectedProject?.subStage || 1))
-                                                .filter(c => (c.category || 'general') === cat.id)
-                                                .filter(c =>
-                                                    !importSearch.trim() ||
-                                                    c.title.toLowerCase().includes(importSearch.toLowerCase()) ||
-                                                    c.content.toLowerCase().includes(importSearch.toLowerCase())
-                                                );
-
-                                            if (catCommands.length === 0) return null;
-
-                                            const CatIcon = CATEGORY_ICONS[cat.icon] || LayoutGrid;
-
-                                            return (
-                                                <div key={cat.id}>
-                                                    <div className="sticky top-0 z-20 bg-white/95 backdrop-blur py-2 mb-2 border-b border-gray-100 flex items-center gap-2">
-                                                        <span className={`w-6 h-6 rounded-lg flex items-center justify-center ${cat.color.split(' ')[0].replace('bg-', 'bg-')} bg-opacity-20`}>
-                                                            <CatIcon size={12} className={cat.color.split(' ')[1]} />
-                                                        </span>
-                                                        <h4 className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                                                            {cat.label}
-                                                        </h4>
-                                                        <span className="text-[10px] text-gray-300 font-mono bg-gray-50 px-1.5 rounded">{catCommands.length}</span>
-                                                    </div>
-                                                    <div className="grid grid-cols-1 gap-3">
-                                                        {catCommands.map(cmd => (
-                                                            <motion.div
-                                                                key={cmd.id}
-                                                                layout
-                                                                whileHover={{ scale: 1.01, y: -2 }}
-                                                                onClick={() => handleLinkCommand(cmd)}
-                                                                className={`
-                                                                    p-5 rounded-2xl border transition-all cursor-pointer group relative overflow-hidden
-                                                                    ${cmd.type === 'mandatory'
-                                                                        ? 'bg-white border-red-100 hover:border-red-300 hover:shadow-lg hover:shadow-red-500/10'
-                                                                        : cmd.type === 'link'
-                                                                            ? 'bg-white border-blue-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/10'
-                                                                            : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/10'
-                                                                    }
-                                                                `}
-                                                            >
-                                                                {cmd.type === 'mandatory' && (
-                                                                    <div className="absolute top-0 right-0 px-3 py-1 bg-red-100 text-red-600 text-[10px] font-bold rounded-bl-xl uppercase tracking-wider">
-                                                                        Mandatory
-                                                                    </div>
-                                                                )}
-                                                                {cmd.type === 'link' && (
-                                                                    <div className="absolute top-0 right-0 px-3 py-1 bg-blue-100 text-blue-600 text-[10px] font-bold rounded-bl-xl uppercase tracking-wider">
-                                                                        Link
-                                                                    </div>
-                                                                )}
-                                                                <div className={`absolute right-0 top-0 w-24 h-24 bg-gradient-to-br to-transparent rounded-bl-full -z-0 opacity-50 transition-colors 
-                                                                    ${cmd.type === 'mandatory' ? 'from-red-50 group-hover:from-red-100' : cmd.type === 'link' ? 'from-blue-50 group-hover:from-blue-100' : 'from-gray-50 group-hover:from-emerald-50'}`}
-                                                                />
-
-                                                                <div className="flex justify-between items-center mb-2 relative z-10">
-                                                                    <div className="flex items-center gap-3">
-                                                                        <div className={`transition-colors ${cmd.type === 'mandatory' ? 'text-red-300 group-hover:text-red-500' : cmd.type === 'link' ? 'text-blue-300 group-hover:text-blue-500' : 'text-gray-300 group-hover:text-emerald-500'}`}>
-                                                                            {cmd.type === 'link' ? <Globe size={16} /> : <Command size={16} />}
-                                                                        </div>
-                                                                        <span className="font-medium text-gray-900 text-lg">{cmd.title}</span>
-                                                                        {/* Inline Tags */}
-                                                                        {(cmd.tags && cmd.tags.length > 0) && (
-                                                                            <div className="flex flex-wrap gap-1.5 ml-2">
-                                                                                {cmd.tags.map(tag => (
-                                                                                    <button
-                                                                                        key={tag.id}
-                                                                                        onClick={(e) => {
-                                                                                            e.stopPropagation(); // Prevent parent click (which imports default)
-                                                                                            handleLinkCommand(cmd, tag);
-                                                                                        }}
-                                                                                        className="group/tag flex items-center gap-1 px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded text-[10px] font-bold border border-emerald-200 hover:border-emerald-300 transition-all relative overflow-hidden select-none hover:shadow-sm"
-                                                                                        title={`Import variant: ${tag.value || cmd.content}`}
-                                                                                    >
-                                                                                        <Tag size={8} className="opacity-60 group-hover/tag:opacity-100" />
-                                                                                        {tag.label}
-                                                                                        <span className="opacity-0 group-hover/tag:opacity-100 transition-opacity ml-0.5">
-                                                                                            <ArrowUpRight size={8} />
-                                                                                        </span>
-                                                                                    </button>
-                                                                                ))}
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                    <div className={`p-1.5 rounded-lg transition-colors ${cmd.type === 'mandatory' ? 'bg-red-50 group-hover:bg-red-500 group-hover:text-white' : cmd.type === 'link' ? 'bg-blue-50 group-hover:bg-blue-500 group-hover:text-white' : 'bg-gray-50 group-hover:bg-emerald-500 group-hover:text-white'}`}>
-                                                                        <Plus size={16} />
-                                                                    </div>
-                                                                </div>
-                                                                <div className="pl-7">
-                                                                    <div className={`rounded-lg p-3 font-mono text-xs text-gray-500 leading-relaxed line-clamp-2 border border-transparent transition-all 
-                                                                        ${cmd.type === 'mandatory' ? 'bg-red-50/30 group-hover:border-red-100 group-hover:bg-red-50/50' : cmd.type === 'link' ? 'bg-blue-50/30 group-hover:border-blue-100 group-hover:bg-blue-50/50' : 'bg-gray-50 group-hover:border-emerald-100 group-hover:bg-emerald-50/30'}`}>
-                                                                        {cmd.type === 'link' ? cmd.url : cmd.content}
-                                                                    </div>
-                                                                </div>
-                                                            </motion.div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                ) : (
-                                    <div className="h-full flex flex-col items-center justify-center text-center py-12">
-                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 opacity-50">
-                                            <Terminal size={24} className="text-gray-400" />
-                                        </div>
-                                        <p className="text-gray-900 font-medium">No commands found</p>
-                                        <p className="text-sm text-gray-400 mt-1 max-w-xs">
-                                            There are no commands configured for the <span className="font-mono text-emerald-600 bg-emerald-50 px-1 rounded">Stage {selectedProject?.subStage || 1}</span> phase.
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence >
-        </div >
+            <ImportCommandModal
+                isOpen={commandModalOpen}
+                onClose={() => setCommandModalOpen(false)}
+                onImport={handleLinkCommand}
+            />
+        </div>
     );
 };
 

@@ -12,7 +12,7 @@ const CATEGORY_ICONS = {
     'Beaker': Beaker
 };
 
-const TaskList = ({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask, newTaskInput, setNewTaskInput, newTaskCategory, setNewTaskCategory }) => {
+const TaskList = ({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask, newTaskInput, setNewTaskInput, newTaskCategory, setNewTaskCategory, onScroll }) => {
     const [copiedTaskId, setCopiedTaskId] = useState(null);
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
@@ -34,7 +34,10 @@ const TaskList = ({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask
         <div className="flex-1 flex flex-col h-full overflow-hidden relative">
 
             {/* Scrollable List */}
-            <div className="flex-1 overflow-y-auto px-8 pb-4 custom-scrollbar">
+            <div
+                className="flex-1 overflow-y-auto px-8 pb-4 custom-scrollbar"
+                onScroll={onScroll}
+            >
                 <AnimatePresence mode="popLayout">
                     {visibleTasks.length > 0 ? (
                         <div className="space-y-3 min-h-[100px] pt-4">
