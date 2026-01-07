@@ -580,14 +580,13 @@ const PrimaryDevModule = () => {
                                                         `}
                                                         style={{ x: 0 }} // Ensure it starts at x:0
                                                     >
-                                                        {/* Visual Indicator for "Slide to Delete" (Behind content, visible when dragging) */}
+                                                        {/* Visual Indicator for "Slide to Delete" (Behind content, visible when dragging LEFT) */}
                                                         <motion.div
-                                                            className="absolute inset-y-0 left-0 bg-red-500 -z-10 flex items-center pl-5 text-white font-bold uppercase tracking-wider text-xs pointer-events-none"
-                                                            style={{ width: '100%', x: '-100%' }} // Hidden by default, conceptually should be revealed but simpler to just let the card slide over background? 
-                                                        // Actually, since the card moves, the background "hole" is what's visible. 
-                                                        // But here we are moving the whole card. 
-                                                        // Let's keep it simple: The user sees the card moving. 
-                                                        />
+                                                            className="absolute inset-y-0 right-0 bg-red-500 -z-10 flex items-center justify-end pr-5 text-white font-bold uppercase tracking-wider text-xs pointer-events-none"
+                                                            style={{ width: '100%', x: '100%' }}
+                                                        >
+                                                            Slide Left to Delete
+                                                        </motion.div>
                                                         {/* Icon based on type */}
                                                         {isUtility || isLink ? (
                                                             <div className={`
