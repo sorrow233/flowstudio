@@ -1,21 +1,20 @@
 import React from 'react';
-import { Zap } from 'lucide-react';
-import ComingSoon from '../../components/ComingSoon';
 
 const AdvancedDevModule = () => {
     return (
-        <ComingSoon
-            title="Advanced Dev"
-            description="复杂功能与高级特性 (Advanced Features)"
-            icon={Zap}
-            color="purple"
-            features={[
-                "AI Agent Orchestration",
-                "Cross-Platform Compilation",
-                "Advanced State Management Patterns",
-                "Custom Plugin System"
-            ]}
-        />
+        <div className="max-w-3xl mx-auto pt-10 px-6">
+            <div className="mb-12">
+                <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">
+                    Advanced Dev
+                </h2>
+                <p className="text-gray-400 text-sm font-light tracking-wide">
+                    复杂功能与高级特性
+                </p>
+            </div>
+            <div className="flex flex-col items-center justify-center py-20 border border-dashed border-gray-200 rounded-lg">
+                <p className="text-gray-300 font-light text-sm">优化中</p>
+            </div>
+        </div>
     );
 };
 
