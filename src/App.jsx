@@ -1,5 +1,5 @@
 import React, { lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider } from '@/contexts/AuthContext';
 // import { ProjectProvider } from '@/contexts/ProjectContext';
@@ -36,7 +36,12 @@ function App() {
           <BrowserRouter>
             <OfflineAlert />
             <Routes>
-              <Route path="/:lang/*" element={<LocalizedRoutes />} />
+              {/* Explicit language routes to avoid matching /app, /login, etc. */}
+              <Route path="/en/*" element={<LocalizedRoutes lang="en" />} />
+              <Route path="/zh-CN/*" element={<LocalizedRoutes lang="zh-CN" />} />
+              <Route path="/zh-TW/*" element={<LocalizedRoutes lang="zh-TW" />} />
+              <Route path="/ja/*" element={<LocalizedRoutes lang="ja" />} />
+              <Route path="/ko/*" element={<LocalizedRoutes lang="ko" />} />
               <Route path="*" element={<AppRoutes />} />
             </Routes>
           </BrowserRouter>
@@ -47,16 +52,12 @@ function App() {
 }
 
 
-function LocalizedRoutes() {
-  const { lang } = useParams();
+function LocalizedRoutes({ lang }) {
   const { i18n } = useTranslation();
 
   React.useEffect(() => {
-    const supportedLangs = ['en', 'zh-CN', 'zh-TW', 'ja', 'ko'];
-    if (lang && supportedLangs.includes(lang)) {
-      if (i18n.language !== lang) {
-        i18n.changeLanguage(lang);
-      }
+    if (lang && i18n.language !== lang) {
+      i18n.changeLanguage(lang);
     }
   }, [lang, i18n]);
 
