@@ -20,6 +20,7 @@ const InspirationModule = () => {
     const { projects: pendingProjects } = useSyncedProjects(doc, 'pending_projects');
 
     const [input, setInput] = useState('');
+    const [copiedId, setCopiedId] = useState(null);
     const [deletedIdea, setDeletedIdea] = useState(null);
 
     // Migration: LocalStorage -> Yjs
