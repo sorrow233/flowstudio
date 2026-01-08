@@ -47,6 +47,7 @@ export class SyncEngine {
         // Internal flags
         this.isPushing = false;
         this.hasPendingChanges = false;
+        this.isServerLoaded = false;
         this.unsubscribes = [];
         this.pushTimeout = null;
 
@@ -76,11 +77,16 @@ export class SyncEngine {
             this.connectFirestore();
         } else {
             this.setStatus('offline');
+            this.isServerLoaded = true; // No server to load
         }
 
         // 4. Local Update Listener
         const handleUpdate = (update, origin) => {
             if (origin !== 'remote') {
+                // Ignore local updates until we have established a baseline from the server
+                // This prevents initial IndexedDB load from being treated as "pending changes"
+                if (!this.isServerLoaded) return;
+
                 this.hasPendingChanges = true;
                 this.updatePendingCount(); // Calculate simplistic pending count
                 this.setStatus('syncing');
@@ -125,6 +131,12 @@ export class SyncEngine {
                 });
             }
 
+            // Mark server as loaded on first successful snapshot
+            if (!this.isServerLoaded) {
+                this.isServerLoaded = true;
+                console.info("[SyncEngine] Server state loaded.");
+            }
+
             // Post-pull check: Do we have local changes that need pushing?
             // (e.g. we were offline, got new server data, now we merge ours)
             this.checkForPendingChanges();
@@ -135,6 +147,10 @@ export class SyncEngine {
             } else {
                 console.error("[SyncEngine] Firestore Error:", error);
             }
+
+            // Even on error, we mark server as "loaded" in the sense that we tried.
+            // This allows subsequent local edits to be correctly marked as pending.
+            this.isServerLoaded = true;
             this.setStatus('offline');
         });
 
