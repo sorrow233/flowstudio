@@ -134,10 +134,10 @@ const PendingModule = () => {
         // Advanced Stage (>= 6): Special mature trees
         if (stage >= 6) {
             const advancedTrees = [
-                { color: 'text-pink-400', scale: 1.4, icon: TreeDeciduous, label: '🌸 Cherry Blossom', emoji: '🌸' },
-                { color: 'text-orange-500', scale: 1.4, icon: TreeDeciduous, label: '🍁 Maple', emoji: '🍁' },
-                { color: 'text-yellow-500', scale: 1.4, icon: TreeDeciduous, label: '🍂 Ginkgo', emoji: '🍂' },
-                { color: 'text-emerald-600', scale: 1.4, icon: TreePine, label: '🌲 Cedar', emoji: '🌲' },
+                { color: 'text-pink-400', dropShadow: 'shadow-pink-200', scale: 1.4, icon: TreeDeciduous, label: 'Sakura Tree' }, // 樱花树
+                { color: 'text-orange-500', dropShadow: 'shadow-orange-200', scale: 1.4, icon: TreeDeciduous, label: 'Maple Tree' },  // 枫树
+                { color: 'text-yellow-400', dropShadow: 'shadow-yellow-200', scale: 1.4, icon: TreeDeciduous, label: 'Ginkgo Tree' }, // 银杏树
+                { color: 'text-emerald-700', dropShadow: 'shadow-emerald-200', scale: 1.4, icon: TreePine, label: 'Cedar Tree' },     // 雪松
             ];
             // Deterministic random based on projectId for consistency
             const hash = projectId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -274,22 +274,18 @@ const PendingModule = () => {
 
                                             <div className="flex-1 flex items-center justify-center w-full relative">
                                                 <motion.div
-                                                    className={`relative z-10 ${visual.color} ${isHoly ? 'drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' : ''} ${isAdvanced ? 'drop-shadow-[0_0_12px_rgba(251,191,36,0.4)]' : ''}`}
+                                                    className={`relative z-10 ${visual.color} ${isHoly ? 'drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' : ''} ${isAdvanced ? `drop-shadow-lg ${visual.dropShadow}` : ''}`}
                                                     animate={{ scale: visual.scale }}
                                                 >
-                                                    {isAdvanced && visual.emoji ? (
-                                                        <span className="text-4xl">{visual.emoji}</span>
-                                                    ) : (
-                                                        <visual.icon size={isAdvanced ? 48 : 32} strokeWidth={1.5} />
-                                                    )}
+                                                    <visual.icon size={isAdvanced ? 48 : 32} strokeWidth={isAdvanced ? 1.5 : 1.5} />
                                                 </motion.div>
                                                 <div className={`absolute bottom-2 ${isAdvanced ? 'w-12' : 'w-8'} h-1 bg-emerald-900/10 rounded-full blur-sm`} />
                                             </div>
                                             <div className="w-full relative z-10">
                                                 <h4 className={`font-medium text-gray-700 line-clamp-1 w-full mb-2 ${isAdvanced ? 'text-sm' : 'text-xs'}`}>{p.title}</h4>
                                                 {isAdvanced ? (
-                                                    <div className="flex items-center gap-1 justify-center text-[10px] text-amber-600 font-bold uppercase tracking-widest">
-                                                        <span>⭐ Advanced</span>
+                                                    <div className="flex items-center gap-1 justify-center text-[10px] text-amber-600 font-bold uppercase tracking-widest bg-amber-50 py-0.5 px-2 rounded-full mx-auto w-fit border border-amber-100/50">
+                                                        <span>{visual.label}</span>
                                                     </div>
                                                 ) : (
                                                     <div className="flex items-center gap-1.5 justify-center">
