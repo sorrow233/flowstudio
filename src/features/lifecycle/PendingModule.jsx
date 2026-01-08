@@ -122,6 +122,10 @@ const PendingModule = () => {
         return { scale: 1.1, opacity: 1, color: 'text-emerald-600' };
     };
 
+    import { SakuraTree, MapleTree, GinkgoTree, CedarTree } from '../../components/illustrations/TreeIllustrations';
+
+    // ...
+
     const getTreeVisual = (stage = 1, projectId = '') => {
         const stages = [
             { color: 'text-emerald-300', scale: 0.9, icon: Sprout, label: 'Seedling' },
@@ -134,10 +138,10 @@ const PendingModule = () => {
         // Advanced Stage (>= 6): Special mature trees
         if (stage >= 6) {
             const advancedTrees = [
-                { color: 'text-pink-400', dropShadow: 'shadow-pink-200', scale: 1.4, icon: TreeDeciduous, label: 'Sakura Tree' }, // 樱花树
-                { color: 'text-orange-500', dropShadow: 'shadow-orange-200', scale: 1.4, icon: TreeDeciduous, label: 'Maple Tree' },  // 枫树
-                { color: 'text-yellow-400', dropShadow: 'shadow-yellow-200', scale: 1.4, icon: TreeDeciduous, label: 'Ginkgo Tree' }, // 银杏树
-                { color: 'text-emerald-700', dropShadow: 'shadow-emerald-200', scale: 1.4, icon: TreePine, label: 'Cedar Tree' },     // 雪松
+                { Component: SakuraTree, label: 'Sakura Tree', bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-600' },
+                { Component: MapleTree, label: 'Maple Tree', bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-600' },
+                { Component: GinkgoTree, label: 'Ginkgo Tree', bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-600' },
+                { Component: CedarTree, label: 'Cedar Tree', bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700' },
             ];
             // Deterministic random based on projectId for consistency
             const hash = projectId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -304,17 +308,21 @@ const PendingModule = () => {
 
                                             <div className="flex-1 flex items-center justify-center w-full relative">
                                                 <motion.div
-                                                    className={`relative z-10 ${visual.color} ${isHoly ? 'drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' : ''} ${isAdvanced ? `drop-shadow-lg ${visual.dropShadow}` : ''}`}
+                                                    className={`relative z-10 ${!isAdvanced && visual.color} ${isHoly ? 'drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' : ''}`}
                                                     animate={{ scale: visual.scale }}
                                                 >
-                                                    <visual.icon size={isAdvanced ? 48 : 32} strokeWidth={isAdvanced ? 1.5 : 1.5} />
+                                                    {isAdvanced && visual.Component ? (
+                                                        <visual.Component className={`w-28 h-28 drop-shadow-xl`} />
+                                                    ) : (
+                                                        <visual.icon size={32} strokeWidth={1.5} />
+                                                    )}
                                                 </motion.div>
-                                                <div className={`absolute bottom-2 ${isAdvanced ? 'w-12' : 'w-8'} h-1 bg-emerald-900/10 rounded-full blur-sm`} />
+                                                <div className={`absolute bottom-2 ${isAdvanced ? 'w-16' : 'w-8'} h-1 bg-emerald-900/10 rounded-full blur-sm`} />
                                             </div>
                                             <div className="w-full relative z-10">
                                                 <h4 className={`font-medium text-gray-700 line-clamp-1 w-full mb-2 ${isAdvanced ? 'text-sm' : 'text-xs'}`}>{p.title}</h4>
                                                 {isAdvanced ? (
-                                                    <div className="flex items-center gap-1 justify-center text-[10px] text-amber-600 font-bold uppercase tracking-widest bg-amber-50 py-0.5 px-2 rounded-full mx-auto w-fit border border-amber-100/50">
+                                                    <div className={`flex items-center gap-1 justify-center text-[10px] font-bold uppercase tracking-widest py-0.5 px-2 rounded-full mx-auto w-fit border ${visual.bg} ${visual.border} ${visual.text}`}>
                                                         <span>{visual.label}</span>
                                                     </div>
                                                 ) : (
