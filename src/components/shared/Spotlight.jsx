@@ -16,17 +16,17 @@ const Spotlight = ({
     size = 400
 }) => {
     const divRef = useRef(null);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
     const [opacity, setOpacity] = useState(0);
 
     const handleMouseMove = (e) => {
         if (!divRef.current) return;
 
         const rect = divRef.current.getBoundingClientRect();
-        setPosition({
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
-        });
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        divRef.current.style.setProperty('--mouse-x', `${x}px`);
+        divRef.current.style.setProperty('--mouse-y', `${y}px`);
     };
 
     const handleMouseEnter = () => {
@@ -47,10 +47,10 @@ const Spotlight = ({
         >
             {/* The Spotlight Overlay */}
             <div
-                className="pointer-events-none absolute inset-0 z-0 transition-opacity duration-300"
+                className="pointer-events-none absolute inset-0 z-30 transition-opacity duration-300"
                 style={{
                     opacity,
-                    background: `radial-gradient(${size}px circle at ${position.x}px ${position.y}px, ${spotColor}, transparent 40%)`
+                    background: `radial-gradient(${size}px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), ${spotColor}, transparent 40%)`
                 }}
             />
 
