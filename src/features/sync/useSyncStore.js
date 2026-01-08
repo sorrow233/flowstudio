@@ -95,8 +95,8 @@ export const useSyncedProjects = (doc, arrayName) => {
         undoManagerDisplayRef.current = undoManager;
 
         const handleChange = () => {
-            // console.debug(`[Sync] Array ${arrayName} updated. Length: ${yArray.length}`);
-            setProjects(yArray.toArray());
+            // Use toJSON() to ensure we get POJOs (Plain Old JavaScript Objects)
+            setProjects(yArray.toJSON());
         };
 
         const handleStackChange = () => {
@@ -120,24 +120,27 @@ export const useSyncedProjects = (doc, arrayName) => {
     const addProject = (project) => {
         if (!doc) return;
         const yArray = doc.getArray(arrayName);
-        // Ensure this transaction is tracked if needed, though standard manipulations on yArray are tracked by default
         yArray.insert(0, [project]);
     };
 
     const removeProject = (id) => {
         if (!doc) return;
-        const yArray = doc.getArray(arrayName);
-        let index = -1;
-        const arr = yArray.toArray();
-        for (let i = 0; i < arr.length; i++) {
-            if (arr[i].id === id) {
-                index = i;
-                break;
+        doc.transact(() => {
+            const yArray = doc.getArray(arrayName);
+            let index = -1;
+            const arr = yArray.toArray();
+            for (let i = 0; i < arr.length; i++) {
+                const item = arr[i];
+                const itemId = item instanceof Y.Map ? item.get('id') : item.id;
+                if (itemId === id) {
+                    index = i;
+                    break;
+                }
             }
-        }
-        if (index !== -1) {
-            yArray.delete(index, 1);
-        }
+            if (index !== -1) {
+                yArray.delete(index, 1);
+            }
+        });
     };
 
     const updateProject = (id, updates) => {
@@ -145,17 +148,27 @@ export const useSyncedProjects = (doc, arrayName) => {
         doc.transact(() => {
             const yArray = doc.getArray(arrayName);
             const arr = yArray.toArray();
-            let index = -1;
+            let targetMap = null;
+
+            // Find the Y.Map
             for (let i = 0; i < arr.length; i++) {
-                if (arr[i].id === id) {
-                    index = i;
+                const item = arr[i];
+                const itemId = item instanceof Y.Map ? item.get('id') : item.id;
+                if (itemId === id) {
+                    targetMap = item;
                     break;
                 }
             }
 
-            if (index !== -1) {
-                const current = arr[index];
-                const updated = { ...current, ...updates };
+            if (targetMap && targetMap instanceof Y.Map) {
+                // Granular update on the Y.Map
+                Object.entries(updates).forEach(([key, value]) => {
+                    targetMap.set(key, value);
+                });
+            } else if (targetMap) {
+                // Fallback for non-Y.Map items
+                const index = arr.indexOf(targetMap);
+                const updated = { ...targetMap, ...updates };
                 yArray.delete(index, 1);
                 yArray.insert(index, [updated]);
             }
