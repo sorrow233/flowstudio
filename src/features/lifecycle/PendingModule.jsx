@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { STORAGE_KEYS, getRandomProjectImage, COMMAND_CATEGORIES } from '../../utils/constants';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
+import { toast } from 'sonner'; // Assuming sonner is used, or console if not available
 
 // 灵魂四问 (Soul Questions - Final Polish)
 const QUESTIONS = [
@@ -45,8 +46,41 @@ const PendingModule = () => {
         projects,
         addProject,
         removeProject: deleteProject,
-        updateProject
+        updateProject,
+        undo,
+        redo
     } = useSyncedProjects(doc, 'pending_projects');
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Check for Ctrl+Z or Cmd+Z
+            if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+                if (e.shiftKey) {
+                    // Redo (Shift + Ctrl/Cmd + Z)
+                    e.preventDefault();
+                    if (redo) {
+                        redo();
+                        // Optional: toast('Redo', { position: 'bottom-center' });
+                    }
+                } else {
+                    // Undo
+                    e.preventDefault();
+                    if (undo) {
+                        undo();
+                        // Optional: toast('Undo', { position: 'bottom-center' });
+                    }
+                }
+            }
+            // Check for Ctrl+Y (Redo on Windows commonly)
+            if ((e.ctrlKey) && e.key === 'y') {
+                e.preventDefault();
+                if (redo) redo();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [undo, redo]);
 
     const {
         projects: primaryProjects

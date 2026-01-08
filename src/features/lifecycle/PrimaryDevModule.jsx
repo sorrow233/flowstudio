@@ -17,8 +17,45 @@ const PrimaryDevModule = () => {
     const {
         projects,
         updateProject,
-        removeProject: deleteProject
+        removeProject: deleteProject,
+        undo,
+        redo
     } = useSyncedProjects(doc, 'primary_projects');
+
+    // --- Keyboard Shortcuts for Undo/Redo ---
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Only trigger if we are NOT in an input/textarea to avoid conflicting with native text undo,
+            // UNLESS the focus is on the body/main container.
+            // Actually, for a global app undo, we often want to override or handle carefully.
+            // For now, let's keep it global but maybe check if activeElement is an input?
+            // Standard behavior: if specific input is focused, browser handles text undo. 
+            // If we preventDefault, we block text undo. 
+            // Better approach: Only handle if not in input, OR if input is empty? 
+            // Simple approach for now: Global handler, but be careful with inputs.
+            // Let's rely on event bubbling check?
+
+            const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
+            if (isInput) return; // Let browser handle text undo/redo inside inputs
+
+            if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+                if (e.shiftKey) {
+                    e.preventDefault();
+                    redo && redo();
+                } else {
+                    e.preventDefault();
+                    undo && undo();
+                }
+            }
+            if ((e.ctrlKey) && e.key === 'y') {
+                e.preventDefault();
+                redo && redo();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [undo, redo]);
 
     // --- Global State ---
     const [selectedProject, setSelectedProject] = useState(null);

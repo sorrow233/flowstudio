@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import {
@@ -151,25 +151,49 @@ export const useYMap = (doc) => {
 // --- CRDT Array Hook (for Projects) ---
 export const useSyncedProjects = (doc, arrayName) => {
     const [projects, setProjects] = useState([]);
+    const [canUndo, setCanUndo] = useState(false);
+    const [canRedo, setCanRedo] = useState(false);
+    const undoManagerDisplayRef = useRef(null); // Keep a ref to the UndoManager
 
     useEffect(() => {
         if (!doc) return;
 
         const yArray = doc.getArray(arrayName);
 
+        // Initialize UndoManager scoped to this specific array (and its children)
+        const undoManager = new Y.UndoManager(yArray, {
+            trackedOrigins: new Set([null, 'local']), // Track local changes (null origin or explicit 'local')
+            ignoreRemoteOrigins: true // Don't undo other people's changes by default (optional, but usually good for UX)
+        });
+        undoManagerDisplayRef.current = undoManager;
+
         const handleChange = () => {
             // console.debug(`[Sync] Array ${arrayName} updated. Length: ${yArray.length}`);
             setProjects(yArray.toArray());
         };
 
+        const handleStackChange = () => {
+            setCanUndo(undoManager.undoStack.length > 0);
+            setCanRedo(undoManager.redoStack.length > 0);
+        };
+
         handleChange();
         yArray.observeDeep(handleChange);
-        return () => yArray.unobserveDeep(handleChange);
+        undoManager.on('stack-item-added', handleStackChange);
+        undoManager.on('stack-item-popped', handleStackChange);
+
+        return () => {
+            yArray.unobserveDeep(handleChange);
+            undoManager.off('stack-item-added', handleStackChange);
+            undoManager.off('stack-item-popped', handleStackChange);
+            undoManager.destroy();
+        };
     }, [doc, arrayName]);
 
     const addProject = (project) => {
         if (!doc) return;
         const yArray = doc.getArray(arrayName);
+        // Ensure this transaction is tracked if needed, though standard manipulations on yArray are tracked by default
         yArray.insert(0, [project]);
     };
 
@@ -211,7 +235,15 @@ export const useSyncedProjects = (doc, arrayName) => {
         });
     };
 
-    return { projects, addProject, removeProject, updateProject };
+    const undo = useCallback(() => {
+        undoManagerDisplayRef.current?.undo();
+    }, []);
+
+    const redo = useCallback(() => {
+        undoManagerDisplayRef.current?.redo();
+    }, []);
+
+    return { projects, addProject, removeProject, updateProject, undo, redo, canUndo, canRedo };
 };
 
 
