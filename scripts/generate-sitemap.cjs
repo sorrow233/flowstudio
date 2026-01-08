@@ -17,7 +17,7 @@ const configContent = fs.readFileSync(configPath, 'utf-8');
 
 // 提取 seoConfig 对象（简化处理，直接内联配置）
 const seoConfig = {
-    siteUrl: 'https://flowstudio.dev',
+    siteUrl: 'https://flowstudio.catzz.work',
     defaultLang: 'zh',
     supportedLangs: ['zh', 'en', 'ja', 'ko'],
     pages: {

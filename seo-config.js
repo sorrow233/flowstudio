@@ -7,7 +7,7 @@
 
 const seoConfig = {
     // 生产环境 URL
-    siteUrl: 'https://flowstudio.dev',
+    siteUrl: 'https://flowstudio.catzz.work',
 
     // 默认语言 (不添加 URL 前缀)
     defaultLang: 'zh',

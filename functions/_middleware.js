@@ -9,7 +9,7 @@
 
 // SEO 配置内联 (Cloudflare Functions 不支持直接 import 根目录文件)
 const seoConfig = {
-    siteUrl: 'https://flowstudio.dev',
+    siteUrl: 'https://flowstudio.catzz.work',
     defaultLang: 'zh',
     supportedLangs: ['zh', 'en', 'ja', 'ko'],
 
