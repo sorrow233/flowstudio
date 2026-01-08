@@ -71,11 +71,7 @@ const SyncStatus = ({ status, pendingCount = 0 }) => {
                 </span>
             </motion.div>
 
-            {/* Tooltip */}
-            <div className="absolute top-full mt-2 w-max px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 shadow-xl translate-y-[-4px] group-hover:translate-y-0 text-center">
-                {config.tooltip}
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45" />
-            </div>
+
         </div>
     );
 };
