@@ -7,7 +7,7 @@ const STAGE_LABELS = {
     2: { label: 'Alpha', color: 'bg-blue-50 text-blue-600' },
     3: { label: 'Beta', color: 'bg-purple-50 text-purple-600' },
     4: { label: 'Stable', color: 'bg-emerald-50 text-emerald-600' },
-    5: { label: 'Locked', color: 'bg-amber-50 text-amber-600' },
+    5: { label: 'Optimization', color: 'bg-amber-50 text-amber-600' },
 };
 
 const MODULE_ICONS = {

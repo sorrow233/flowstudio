@@ -114,7 +114,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                         </div>
                                     )}
                                     <div className={`text-[10px] truncate transition-colors ${isViewActive ? 'text-white/50' : 'text-gray-400'}`}>
-                                        {isCompleted ? 'Completed' : isCurrentProgress ? 'In Progress' : 'Locked'}
+                                        {isCompleted ? 'Completed' : isCurrentProgress ? 'In Progress' : 'Pending'}
                                     </div>
                                 </div>
 

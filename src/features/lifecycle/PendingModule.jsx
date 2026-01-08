@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus, TreeDeciduous, TreePine, Image as ImageIcon, Sparkles, RefreshCw, Feather, Scroll } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { STORAGE_KEYS, getRandomProjectImage } from '../../utils/constants';
+import { STORAGE_KEYS, getRandomProjectImage, COMMAND_CATEGORIES } from '../../utils/constants';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 
@@ -80,7 +80,7 @@ const PendingModule = () => {
         updateProject(projectId, { answers: newAnswers, score: yesCount });
     };
 
-    const handleGraduate = (project) => {
+    const handleGraduate = (project, category = 'general') => {
         deleteProject(project.id);
         setSelectedProject(null);
 
@@ -90,6 +90,7 @@ const PendingModule = () => {
 
             const newPrimary = {
                 ...project,
+                category,
                 graduatedAt: Date.now(),
                 subStage: 1,
                 progress: 0,
@@ -276,34 +277,7 @@ const PendingModule = () => {
     );
 };
 
-// ... imports ...
-import { STORAGE_KEYS, getRandomProjectImage, COMMAND_CATEGORIES } from '../../utils/constants'; // Import COMMAND_CATEGORIES
 
-// ... (Existing code)
-
-const handleGraduate = (project, category = 'general') => { // Accept category
-    deleteProject(project.id);
-    setSelectedProject(null);
-
-    if (doc) {
-        const primaryList = doc.getArray('primary_projects');
-        const hasReason = project.foundingReason && project.foundingReason.trim().length > 0;
-
-        const newPrimary = {
-            ...project,
-            category, // Save category
-            graduatedAt: Date.now(),
-            subStage: 1,
-            progress: 0,
-            tasks: [],
-            hasHolyGlow: hasReason,
-            bgImage: project.bgImage || getRandomProjectImage()
-        };
-        primaryList.unshift([newPrimary]);
-    }
-};
-
-// ... (Existing code)
 
 const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }) => {
     // Local state for Vow to support IME (Chinese Input) properly

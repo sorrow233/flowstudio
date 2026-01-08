@@ -7,7 +7,7 @@ const STAGE_LABELS = {
     2: 'Alpha',
     3: 'Beta',
     4: 'Stable',
-    5: 'Locked'
+    5: 'Optimization'
 };
 
 const ModuleDetailModal = ({ isOpen, onClose, module, onUpdate, onDelete }) => {
