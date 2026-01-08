@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Code2, ExternalLink, Trash2, Check, Rocket, Sparkles, Trophy, Star, X, Plus } from 'lucide-react';
 import { STORAGE_KEYS, FINAL_STAGES } from '../../utils/constants';
 
-// Reusing Primary Components
+// Reusing Primary Components (Assuming they are generic enough or we might need to duplicate/adapt if they have hardcoded 'Primary' logic)
+// Based on PrimaryDevModule imports:
 import StageNavigation from './components/primary/StageNavigation';
 import TaskList from './components/primary/TaskList';
 import ProjectWorkspaceHeader from './components/primary/ProjectWorkspaceHeader';
@@ -13,7 +14,6 @@ import confetti from 'canvas-confetti';
 import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
 
 import Spotlight from '../../components/shared/Spotlight';
-import { useTranslation } from '../i18n';
 
 // Default card background images - randomly selected per project
 const DEFAULT_CARD_BACKGROUNDS = [
@@ -36,8 +36,6 @@ const getDefaultBackground = (projectId) => {
 
 
 const FinalDevModule = () => {
-    const { t } = useTranslation();
-
     // --- Sync Integration (using 'final_projects' key) ---
     const { doc } = useSyncStore('flowstudio_v1');
     const {
@@ -116,7 +114,17 @@ const FinalDevModule = () => {
 
 
     // --- Project Filtering ---
+    // For Final module, we might not have 'advanced' separation internally like Primary, 
+    // or maybe 'Completed' projects are separated. 
+    // For now, let's treat all as active unless marked complete? 
+    // Primary separated by stage < 6. Final has only 3 stages.
+    // Let's assume all are active for now, or maybe separate fully completed ones later.
     const activeProjects = projects;
+    // If we want to separate 'Done' ones:
+    // const activeProjects = projects.filter(p => (p.subStage || 1) <= 3);
+    // const completedProjects = projects.filter(p => (p.subStage || 1) > 3);
+    // But specific requirement was just "Final becomes Primary's card format".
+
 
     // --- Create Project Handler (Inline, no prompt) ---
     const handleCreateProject = () => {
@@ -125,7 +133,7 @@ const FinalDevModule = () => {
         const newProject = {
             id: Date.now().toString(),
             title: newProjectTitle.trim(),
-            desc: t('final.newProjectDefaultDesc'),
+            desc: '新的最终开发项目',
             subStage: 1,
             tasks: [],
             createdAt: Date.now()
@@ -139,7 +147,7 @@ const FinalDevModule = () => {
     // --- Project Handlers ---
     const handleDeleteProject = (e, id) => {
         e.stopPropagation();
-        if (confirm(t('common.delete') + '?')) {
+        if (confirm('Delete project?')) {
             deleteProject(id);
             if (selectedProject?.id === id) setSelectedProject(null);
         }
@@ -190,8 +198,6 @@ const FinalDevModule = () => {
         handleUpdateProject(projectId, { tasks: updatedTasks });
     };
 
-    // Fix double toggle issue: use simple timeout or just trust sync store?
-    // Sync store is fast enough. The issue was double handlers or event propagation.
     const handleToggleTask = (projectId, taskId) => {
         const project = projects.find(p => p.id === projectId);
         const updatedTasks = project.tasks.map(t =>
@@ -288,8 +294,8 @@ const FinalDevModule = () => {
             {/* Dashboard Header */}
             <div className="mb-12 flex justify-between items-end">
                 <div>
-                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">{t('final.title')}</h2>
-                    <p className="text-gray-400 text-sm font-light tracking-wide">{t('final.subtitle')}</p>
+                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">最终开发阶段</h2>
+                    <p className="text-gray-400 text-sm font-light tracking-wide">优化、功能与修复</p>
                 </div>
                 <div className="flex items-center gap-4 text-right">
                     {isCreatingProject ? (
@@ -303,7 +309,7 @@ const FinalDevModule = () => {
                                     if (e.key === 'Enter') handleCreateProject();
                                     if (e.key === 'Escape') { setIsCreatingProject(false); setNewProjectTitle(''); }
                                 }}
-                                placeholder={t('final.projectName')}
+                                placeholder="项目名称..."
                                 className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 outline-none w-48"
                             />
                             <button
@@ -311,7 +317,7 @@ const FinalDevModule = () => {
                                 disabled={!newProjectTitle.trim()}
                                 className="bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-600 transition-colors disabled:opacity-50"
                             >
-                                {t('final.create')}
+                                创建
                             </button>
                             <button
                                 onClick={() => { setIsCreatingProject(false); setNewProjectTitle(''); }}
@@ -325,12 +331,12 @@ const FinalDevModule = () => {
                             onClick={() => setIsCreatingProject(true)}
                             className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
                         >
-                            <Plus size={16} /> {t('final.createProject')}
+                            <Plus size={16} /> 新建项目
                         </button>
                     )}
                     <div>
                         <span className="text-3xl font-thin text-gray-900">{activeProjects.length}</span>
-                        <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">{t('final.total')}</span>
+                        <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">TOTAL</span>
                     </div>
                 </div>
             </div>
@@ -425,7 +431,7 @@ const FinalDevModule = () => {
                                                 <span>Step {project.subStage || 1}</span>
                                             </div>
                                             <span className="text-gray-900 font-medium">
-                                                {project.stageNames?.[project.subStage || 1] || t(`finalStages.${project.subStage || 1}.title`, FINAL_STAGES[(project.subStage || 1) - 1]?.label)}
+                                                {project.stageNames?.[project.subStage || 1] || FINAL_STAGES[(project.subStage || 1) - 1]?.label}
                                             </span>
                                         </div>
                                     </div>
@@ -441,13 +447,13 @@ const FinalDevModule = () => {
                         <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 opacity-50 animate-pulse">
                             <Sparkles size={40} className="text-gray-400" strokeWidth={1} />
                         </div>
-                        <span className="text-xl font-light text-gray-900 mb-2">{t('final.noProjectsTitle')}</span>
-                        <span className="text-sm text-gray-400 max-w-sm text-center leading-relaxed">{t('final.noProjectsDesc')}</span>
+                        <span className="text-xl font-light text-gray-900 mb-2">暂无最终项目</span>
+                        <span className="text-sm text-gray-400 max-w-sm text-center leading-relaxed">创建项目以开始优化与功能完善</span>
                         <button
                             onClick={() => setIsCreatingProject(true)}
                             className="mt-6 text-indigo-500 hover:text-indigo-600 font-medium text-sm transition-colors"
                         >
-                            {t('final.createFirst')}
+                            + 创建首个项目
                         </button>
                     </div>
                 )}
@@ -482,7 +488,7 @@ const FinalDevModule = () => {
                                 onImportCommand={() => setCommandModalOpen(true)}
                                 onToggleCollapse={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
                                 onWheel={handleHeaderWheel}
-                                stages={FINAL_STAGES}
+                                stages={FINAL_STAGES} // Pass custom stages as 'stages' prop
                             />
 
                             <div
@@ -498,7 +504,7 @@ const FinalDevModule = () => {
                                     customStageNames={selectedProject.stageNames || {}}
                                     onRenameStage={handleRenameStage}
                                     stageStats={stageStats}
-                                    stages={FINAL_STAGES}
+                                    stages={FINAL_STAGES} // Use FINAL_STAGES here
                                 />
 
                                 {/* Right Content: Task List */}
