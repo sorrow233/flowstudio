@@ -328,16 +328,15 @@ const PendingModule = () => {
                                                 >
                                                     {isAdvanced ? (
                                                         <>
-                                                            {/* Actual Image - mix-blend-multiply helps merge white bg if card isn't perfectly white, but bg-white is cleaner */}
-                                                            <img
-                                                                src={visual.img}
-                                                                alt={visual.label}
-                                                                className="max-w-[180px] max-h-[180px] w-auto h-auto object-contain relative z-20"
-                                                                style={{ filter: 'contrast(1.05) saturate(1.05)' }} // Subtle pop
-                                                            />
-
-                                                            {/* Ground Shadow - Blended Overlay to anchor the tree */}
-                                                            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-32 h-8 bg-black/10 blur-xl rounded-full z-10 mix-blend-multiply" />
+                                                            {/* Actual Image - masked at the bottom to fade into the card */}
+                                                            <div className="relative" style={{ maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)' }}>
+                                                                <img
+                                                                    src={visual.img}
+                                                                    alt={visual.label}
+                                                                    className="max-w-[190px] max-h-[190px] w-auto h-auto object-contain relative z-20"
+                                                                    style={{ filter: 'contrast(1.05) saturate(1.05)' }}
+                                                                />
+                                                            </div>
                                                         </>
                                                     ) : (
                                                         <visual.icon size={32} strokeWidth={1.5} />
