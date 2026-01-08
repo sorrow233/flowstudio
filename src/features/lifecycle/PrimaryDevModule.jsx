@@ -299,19 +299,26 @@ const PrimaryDevModule = () => {
             colors: ['#10B981', '#34D399', '#FBBF24', '#ffffff']
         });
 
-        // 1. DUPLICATE TO FINAL DEV MODULE
-        const finalProject = {
-            id: `${selectedProject.id}-final`, // Ensure unique ID but linkable
-            title: selectedProject.title,
-            desc: selectedProject.desc,
-            link: selectedProject.link,
-            bgImage: selectedProject.bgImage,
-            subStage: 1, // Start at Stage 1 (Optimization)
-            tasks: [],   // Start fresh with tasks for Final phase
-            createdAt: Date.now(),
-            originProjectId: selectedProject.id // Traceability
-        };
-        addFinalProject(finalProject);
+        // 1. DUPLICATE TO FINAL DEV MODULE (only if not already there)
+        const expectedFinalId = `${selectedProject.id}-final`;
+        const alreadyInFinal = finalProjectsList?.some(p =>
+            p.id === expectedFinalId || p.title === selectedProject.title
+        );
+
+        if (!alreadyInFinal) {
+            const finalProject = {
+                id: expectedFinalId,
+                title: selectedProject.title,
+                desc: selectedProject.desc,
+                link: selectedProject.link,
+                bgImage: selectedProject.bgImage,
+                subStage: 1, // Start at Stage 1 (Optimization)
+                tasks: [],   // Start fresh with tasks for Final phase
+                createdAt: Date.now(),
+                originProjectId: selectedProject.id // Traceability
+            };
+            addFinalProject(finalProject);
+        }
 
         // 2. UPDATE PRIMARY TO ADVANCED STAGE
         handleUpdateProject(selectedProject.id, { subStage: 6 });

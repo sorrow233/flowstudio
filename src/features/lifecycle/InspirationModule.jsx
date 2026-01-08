@@ -20,7 +20,7 @@ const InspirationModule = () => {
     const { projects: pendingProjects } = useSyncedProjects(doc, 'pending_projects');
 
     const [input, setInput] = useState('');
-    const [copiedId, setCopiedId] = useState(null);
+    const [deletedIdea, setDeletedIdea] = useState(null);
 
     // Migration: LocalStorage -> Yjs
     useEffect(() => {
@@ -47,6 +47,16 @@ const InspirationModule = () => {
         }
     }, [doc, addIdea]);
 
+    // Cleanup undo toast after 5s
+    useEffect(() => {
+        if (deletedIdea) {
+            const timer = setTimeout(() => {
+                setDeletedIdea(null);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [deletedIdea]);
+
     const handleAdd = () => {
         if (!input.trim()) return;
         const newIdea = {
@@ -65,6 +75,21 @@ const InspirationModule = () => {
             setTimeout(() => setCopiedId(null), 2000);
         } catch (err) {
             console.error('Failed to copy:', err);
+        }
+    };
+
+    const handleRemove = (id) => {
+        const idea = ideas.find(i => i.id === id);
+        if (idea) {
+            setDeletedIdea(idea);
+            removeIdea(id);
+        }
+    };
+
+    const handleUndo = () => {
+        if (deletedIdea) {
+            addIdea(deletedIdea);
+            setDeletedIdea(null);
         }
     };
 
@@ -162,10 +187,11 @@ const InspirationModule = () => {
                             <motion.div
                                 drag="x"
                                 dragConstraints={{ left: 0, right: 0 }}
-                                dragElastic={{ right: 0.05, left: 0.5 }}
+                                dragElastic={{ right: 0.1, left: 0.7 }}
                                 onDragEnd={(e, info) => {
-                                    if (info.offset.x < -100) {
-                                        removeIdea(idea.id);
+                                    // More forgiving threshold and velocity check
+                                    if (info.offset.x < -80 || info.velocity.x < -400) {
+                                        handleRemove(idea.id);
                                     }
                                 }}
                                 onClick={() => handleCopy(idea.content, idea.id)}
@@ -251,6 +277,26 @@ const InspirationModule = () => {
                     </motion.div>
                 )}
             </div>
+
+            {/* Undo Toast */}
+            <AnimatePresence>
+                {deletedIdea && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 50 }}
+                        className="fixed bottom-10 right-10 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-4 z-50"
+                    >
+                        <span className="text-sm font-medium">Idea deleted</span>
+                        <button
+                            onClick={handleUndo}
+                            className="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
+                        >
+                            Undo
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
