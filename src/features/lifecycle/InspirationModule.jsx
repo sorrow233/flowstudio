@@ -6,9 +6,32 @@ import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
 
 const STORAGE_KEY = 'flowstudio_inspiration_ideas';
 
+// Color palette for status dots
+const DOT_COLORS = [
+    'bg-gradient-to-br from-emerald-400 to-teal-500',
+    'bg-gradient-to-br from-amber-400 to-orange-500',
+    'bg-gradient-to-br from-violet-400 to-purple-500',
+    'bg-gradient-to-br from-sky-400 to-blue-500',
+    'bg-gradient-to-br from-rose-400 to-pink-500',
+    'bg-gradient-to-br from-lime-400 to-green-500',
+];
+
+// Get consistent color based on idea id
+const getDotColor = (id) => {
+    const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return DOT_COLORS[hash % DOT_COLORS.length];
+};
+
 // Extracted Item Component to manage local drag state
 const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
     const [isDragging, setIsDragging] = useState(false);
+    const [isCompleted, setIsCompleted] = useState(false);
+
+    // Handle double click to toggle completion (strikethrough)
+    const handleDoubleClick = (e) => {
+        e.stopPropagation();
+        setIsCompleted(prev => !prev);
+    };
 
     return (
         <div className="relative">
@@ -34,6 +57,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                     }
                 }}
                 onClick={() => onCopy(idea.content, idea.id)}
+                onDoubleClick={handleDoubleClick}
                 initial={{ opacity: 0, y: 20, scale: 0.98 }}
                 animate={{
                     opacity: 1,
@@ -43,10 +67,14 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                 }}
                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                 layout
-                className="group relative bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] hover:border-gray-200 transition-all duration-300 cursor-pointer active:scale-[0.99]"
+                className={`group relative bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] hover:border-gray-200 transition-all duration-300 cursor-pointer active:scale-[0.99] ${isCompleted ? 'opacity-50' : ''}`}
             >
                 <div className="flex justify-between items-start gap-6">
-                    <div className="text-gray-700 text-base font-light leading-7 whitespace-pre-wrap flex-grow font-sans select-none">
+                    {/* Color Status Dot */}
+                    <div className="flex-shrink-0 pt-1.5">
+                        <div className={`w-3 h-3 rounded-full ${getDotColor(idea.id)} shadow-sm ring-2 ring-white transition-transform duration-200 ${isCompleted ? 'scale-75 opacity-50' : ''}`} />
+                    </div>
+                    <div className={`text-gray-700 text-base font-light leading-7 whitespace-pre-wrap flex-grow font-sans select-none transition-all duration-200 ${isCompleted ? 'line-through text-gray-400' : ''}`}>
                         {(() => {
                             // Parser for [Tag] pattern in saved ideas
                             const parts = idea.content.split(/(\[.*?\])/g);

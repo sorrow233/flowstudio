@@ -13,7 +13,7 @@ const CATEGORY_ICONS = {
     'Flag': Flag
 };
 
-const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCategory }) => {
+const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCategory, stages = DEV_STAGES }) => {
     const [categories, setCategories] = useState(COMMAND_CATEGORIES);
     const [commands, setCommands] = useState([]); // BUG FIX: Missing state
     const [importCategory, setImportCategory] = useState('all'); // BUG FIX: Missing state
@@ -242,7 +242,7 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                                         <div className="p-4 pb-2">
                                             <h4 className="text-xs font-bold text-emerald-800 uppercase tracking-widest flex items-center gap-2">
                                                 <Sparkles size={14} className="text-emerald-500" />
-                                                Recommended for {DEV_STAGES.find(s => s.id === currentStage)?.label || 'Current Stage'}
+                                                Recommended for {stages.find(s => s.id === currentStage)?.label || 'Current Stage'}
                                             </h4>
                                         </div>
 

@@ -54,6 +54,10 @@ const FinalDevModule = () => {
     // --- Global State ---
     const [selectedProject, setSelectedProject] = useState(null);
 
+    // --- Project Creation State ---
+    const [isCreatingProject, setIsCreatingProject] = useState(false);
+    const [newProjectTitle, setNewProjectTitle] = useState('');
+
     // --- UI/Interaction State ---
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
     const [viewStage, setViewStage] = useState(1);
@@ -122,20 +126,21 @@ const FinalDevModule = () => {
     // But specific requirement was just "Final becomes Primary's card format".
 
 
-    // --- Create Project Handler (New for Final) ---
+    // --- Create Project Handler (Inline, no prompt) ---
     const handleCreateProject = () => {
-        const title = prompt("Enter project title:");
-        if (!title) return;
+        if (!newProjectTitle.trim()) return;
 
         const newProject = {
             id: Date.now().toString(),
-            title,
-            desc: 'New final development project',
+            title: newProjectTitle.trim(),
+            desc: '新的最终开发项目',
             subStage: 1,
             tasks: [],
             createdAt: Date.now()
         };
         addProject(newProject);
+        setNewProjectTitle('');
+        setIsCreatingProject(false);
     };
 
 
@@ -289,19 +294,49 @@ const FinalDevModule = () => {
             {/* Dashboard Header */}
             <div className="mb-12 flex justify-between items-end">
                 <div>
-                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">Final Development</h2>
-                    <p className="text-gray-400 text-sm font-light tracking-wide">Optimization, Features & Fixes</p>
+                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">最终开发阶段</h2>
+                    <p className="text-gray-400 text-sm font-light tracking-wide">优化、功能与修复</p>
                 </div>
                 <div className="flex items-center gap-4 text-right">
-                    <button
-                        onClick={handleCreateProject}
-                        className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
-                    >
-                        <Plus size={16} /> New Project
-                    </button>
+                    {isCreatingProject ? (
+                        <div className="flex items-center gap-2">
+                            <input
+                                autoFocus
+                                type="text"
+                                value={newProjectTitle}
+                                onChange={(e) => setNewProjectTitle(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleCreateProject();
+                                    if (e.key === 'Escape') { setIsCreatingProject(false); setNewProjectTitle(''); }
+                                }}
+                                placeholder="项目名称..."
+                                className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 outline-none w-48"
+                            />
+                            <button
+                                onClick={handleCreateProject}
+                                disabled={!newProjectTitle.trim()}
+                                className="bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-600 transition-colors disabled:opacity-50"
+                            >
+                                创建
+                            </button>
+                            <button
+                                onClick={() => { setIsCreatingProject(false); setNewProjectTitle(''); }}
+                                className="text-gray-400 hover:text-gray-600 p-2"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => setIsCreatingProject(true)}
+                            className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+                        >
+                            <Plus size={16} /> 新建项目
+                        </button>
+                    )}
                     <div>
                         <span className="text-3xl font-thin text-gray-900">{activeProjects.length}</span>
-                        <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">Total</span>
+                        <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">TOTAL</span>
                     </div>
                 </div>
             </div>
@@ -412,13 +447,13 @@ const FinalDevModule = () => {
                         <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 opacity-50 animate-pulse">
                             <Sparkles size={40} className="text-gray-400" strokeWidth={1} />
                         </div>
-                        <span className="text-xl font-light text-gray-900 mb-2">No Final Projects Yet</span>
-                        <span className="text-sm text-gray-400 max-w-sm text-center leading-relaxed">Create a project to begin optimization and feature polishing.</span>
+                        <span className="text-xl font-light text-gray-900 mb-2">暂无最终项目</span>
+                        <span className="text-sm text-gray-400 max-w-sm text-center leading-relaxed">创建项目以开始优化与功能完善</span>
                         <button
-                            onClick={handleCreateProject}
+                            onClick={() => setIsCreatingProject(true)}
                             className="mt-6 text-indigo-500 hover:text-indigo-600 font-medium text-sm transition-colors"
                         >
-                            + Create First Project
+                            + 创建首个项目
                         </button>
                     </div>
                 )}

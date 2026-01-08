@@ -303,7 +303,7 @@ const CommandCenterModule = () => {
                             {/* Community Button */}
                             <button
                                 onClick={() => setIsCommunityBrowsing(true)}
-                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-gradient-to-r from-violet-50 to-fuchsia-50 text-violet-600 border border-violet-200 rounded-2xl hover:from-violet-100 hover:to-fuchsia-100 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-100 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
                                 title="浏览社区分享"
                             >
                                 <Globe2 size={18} />
