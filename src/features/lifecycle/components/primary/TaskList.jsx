@@ -319,19 +319,6 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                     )}
                 </div>
 
-                {/* Actions */}
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                    {!task.isCommand && !isEditing && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); startEditing(task); }}
-                            className={`p-2 text-gray-400 rounded-lg transition-colors ${theme.action}`}
-                        >
-                            <Edit2 size={16} />
-                        </button>
-                    )}
-
-                </div>
-
                 {/* Copied Feedback Badge */}
                 {task.isCommand && copiedTaskId === task.id && (
                     <span className="absolute top-2 right-2 text-[9px] uppercase font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full animate-pulse">
@@ -357,9 +344,10 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
 
     useEffect(() => {
         const filtered = tasks?.filter(t => (t.stage || 1) === activeStage) || [];
-        const currentIds = localTasks.map(t => t.id).join(',');
-        const newIds = filtered.map(t => t.id).join(',');
-        if (currentIds !== newIds) {
+        // Compare using stringified state to detect property changes (e.g., done status)
+        const currentState = JSON.stringify(localTasks.map(t => ({ id: t.id, done: t.done, text: t.text })));
+        const newState = JSON.stringify(filtered.map(t => ({ id: t.id, done: t.done, text: t.text })));
+        if (currentState !== newState) {
             setLocalTasks(filtered);
         }
     }, [tasks, activeStage]);
