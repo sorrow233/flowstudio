@@ -115,8 +115,8 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
     // Dynamic Color Classes
     const getCheckboxStyle = () => {
         const base = `shrink-0 flex items-center justify-center transition-all duration-300 border-2`;
-        // Unified smaller size w-4 h-4 (16px) for both, distinguishing only by shape (circle vs square)
-        const shape = task.isCommand ? 'w-4 h-4 rounded-full' : 'w-4 h-4 rounded-lg';
+        // Unified smaller size w-4 h-4 (16px), Commands=Circle, Tasks=Square (rounded for subtle corners)
+        const shape = task.isCommand ? 'w-4 h-4 rounded-full' : 'w-4 h-4 rounded';
 
         if (task.done) {
             // Completed state
