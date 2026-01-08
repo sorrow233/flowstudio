@@ -4,7 +4,7 @@ import { X, Mail, Lock, ArrowRight, Github } from 'lucide-react';
 import { useAuth } from './AuthContext';
 
 const AuthModal = ({ isOpen, onClose }) => {
-    const { login, register, loginWithGoogle, user } = useAuth();
+    const { login, register, loginWithGoogle, logout, user } = useAuth();
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -92,7 +92,7 @@ const AuthModal = ({ isOpen, onClose }) => {
 
                     <button
                         onClick={() => {
-                            useAuth().logout();
+                            logout();
                             onClose();
                         }}
                         className="w-full py-3 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl font-medium transition-colors"

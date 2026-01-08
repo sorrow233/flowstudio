@@ -25,7 +25,7 @@ export const useSyncStore = (docId, initialData = {}) => {
 
     // Initialize Y.Doc and Providers
     useEffect(() => {
-        if (!docId || !user) return;
+        if (!docId) return;
 
         let doc = docMap.get(docId);
         if (!doc) {
