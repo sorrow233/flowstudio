@@ -60,7 +60,11 @@ const PrimaryDevModule = () => {
 
         advancedLegacyProjects.forEach(primary => {
             const expectedFinalId = `${primary.id}-final`;
-            const existsInFinal = finalProjectsList.some(final => final.id === expectedFinalId);
+            // Check for ID match OR Title match (to prevent duplicates if user manually created it)
+            const existsInFinal = finalProjectsList.some(final =>
+                final.id === expectedFinalId ||
+                final.title === primary.title // Stronger check
+            );
 
             if (!existsInFinal) {
                 console.log(`[Migration] Syncing legacy advanced project to Final: ${primary.title}`);

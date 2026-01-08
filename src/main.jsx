@@ -6,8 +6,10 @@ import { SyncProvider } from './features/sync/SyncContext'
 import App from './App'
 import './index.css'
 
-// Flow Studio v4.3.32 - Force Hash Refresh
-console.log('Flow Studio v4.3.32 loaded');
+import { version } from '../package.json';
+
+// Flow Studio - Force Hash Refresh
+console.log(`Flow Studio v${version} loaded`);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>

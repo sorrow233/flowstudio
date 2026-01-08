@@ -427,6 +427,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
         const newSelected = new Set(selectedIds);
         rangeIds.forEach(rid => newSelected.add(rid));
         setSelectedIds(newSelected);
+        if (!isSelectionMode) setIsSelectionMode(true);
     };
 
     const toggleSelection = (id) => {
