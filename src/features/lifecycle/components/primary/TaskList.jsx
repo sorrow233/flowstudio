@@ -20,6 +20,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
     const longPressTimer = useRef(null);
     const isLongPress = useRef(false);
     const startPos = useRef({ x: 0, y: 0 });
+    const [isGrabbing, setIsGrabbing] = useState(false);
 
     const handlePointerDown = (e) => {
         // Prevent default only if needed, but here we want to allow potential swipes
@@ -28,9 +29,10 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
 
         longPressTimer.current = setTimeout(() => {
             isLongPress.current = true;
+            setIsGrabbing(true);
             if (navigator.vibrate) navigator.vibrate(50);
             dragControls.start(e);
-        }, 500); // 500ms long press threshold
+        }, 300); // 300ms long press threshold
     };
 
     const handlePointerMove = (e) => {
@@ -48,6 +50,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
         if (longPressTimer.current) {
             clearTimeout(longPressTimer.current);
         }
+        setIsGrabbing(false);
     };
 
     // Check for updates
@@ -61,9 +64,16 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
             dragListener={false} // Disable auto-drag for the whole item to allow swipe
             dragControls={dragControls} // Pass controls to the handle
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
+            animate={{
+                opacity: 1,
+                scale: isGrabbing ? 1.02 : 1,
+                y: 0,
+                transition: { scale: { duration: 0.2 } }
+            }}
             exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
             className="relative"
+            onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerUp}
         >
             <motion.div
                 drag="x"
@@ -73,13 +83,13 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                     if (info.offset.x < -100 || info.velocity.x < -500) {
                         onDelete(projectId, task.id);
                     }
+                    setIsGrabbing(false);
                 }}
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerLeave={handlePointerUp}
                 className={`
                     group flex items-center gap-4 p-5 rounded-2xl transition-all border relative overflow-hidden select-none touch-pan-y
+                    ${isGrabbing ? 'border-violet-300 shadow-md ring-1 ring-violet-100 bg-violet-50/10' : ''}
                     ${isMandatory && !task.done
                         ? 'bg-white border-red-100 shadow-sm shadow-red-100 hover:border-red-200'
                         : isMandatory && task.done
@@ -114,18 +124,14 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                     <button
                         onClick={(e) => { e.stopPropagation(); onToggle(projectId, task.id); }}
                         className={`
-                            w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 shrink-0
-                            ${task.done
-                                ? (task.isCommand ? 'bg-violet-500 border-violet-500 text-white scale-110' : 'bg-emerald-500 border-emerald-500 text-white scale-110')
-                                : isMandatory
-                                    ? 'border-red-200 text-transparent hover:border-red-400 bg-red-50 hover:bg-red-100'
-                                    : task.isCommand
-                                        ? 'border-violet-200 text-transparent hover:border-violet-400 hover:bg-violet-50'
-                                        : 'border-gray-200 text-transparent group-hover:border-gray-400 hover:bg-gray-50'
+                            shrink-0 flex items-center justify-center transition-all duration-300
+                            ${task.isCommand
+                                ? `w-5 h-5 rounded-full border-2 ${task.done ? 'bg-violet-500 border-violet-500 text-white' : 'border-violet-300 hover:border-violet-400 bg-transparent text-transparent hover:bg-violet-50'}`
+                                : `w-6 h-6 rounded-lg border-2 ${task.done ? 'bg-emerald-500 border-emerald-500 text-white scale-110' : isMandatory ? 'border-red-200 text-transparent hover:border-red-400 bg-red-50' : 'border-gray-200 text-transparent group-hover:border-gray-400 hover:bg-gray-50'}`
                             }
                         `}
                     >
-                        <Check size={14} strokeWidth={3} />
+                        <Check size={task.isCommand ? 10 : 14} strokeWidth={3} />
                     </button>
                 )}
 
@@ -153,7 +159,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                             }}
                         >
                             <div className="flex items-center gap-2">
-                                <span className={`text-base font-medium transition-all ${task.done ? (task.isCommand ? 'opacity-40 line-through decoration-violet-500/30 text-gray-400' : 'opacity-50 line-through decoration-emerald-500/30') : 'text-gray-700'}`}>
+                                <span className={`text-base font-medium transition-all truncate ${task.done ? (task.isCommand ? 'opacity-60 line-through decoration-2 decoration-violet-500/30 text-gray-400' : 'opacity-50 line-through decoration-emerald-500/30') : 'text-gray-700'}`}>
                                     {task.text}
                                 </span>
                                 {isOutdated && (
@@ -167,10 +173,10 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                                                 commandTags: sourceCommand.tags || []
                                             });
                                         }}
-                                        className="p-1 text-amber-500 bg-amber-50 rounded-full hover:bg-amber-100 transition-colors animate-pulse z-10 relative"
-                                        title="Update to latest version"
+                                        className="shrink-0 p-1 text-amber-500 bg-amber-50 rounded-full hover:bg-amber-100 transition-colors animate-pulse z-10"
+                                        title="Update available"
                                     >
-                                        <RefreshCw size={12} />
+                                        <RefreshCw size={10} />
                                     </button>
                                 )}
                             </div>

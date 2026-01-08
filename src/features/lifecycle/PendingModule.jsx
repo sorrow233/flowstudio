@@ -7,6 +7,7 @@ import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
 import UndoRedoButtons from '../../components/shared/UndoRedoButtons';
+import Spotlight from '../../components/shared/Spotlight';
 
 // 灵魂四问 (Soul Questions - Final Polish)
 const QUESTIONS = [
@@ -158,23 +159,25 @@ const PendingModule = () => {
                                 key={project.id}
                                 onClick={() => setSelectedProject(project)}
                                 className={`
-                                    group cursor-pointer bg-white border rounded-xl p-5 relative transition-all duration-300
+                                    group cursor-pointer bg-white border rounded-xl relative transition-all duration-300 overflow-hidden
                                     ${selectedProject?.id === project.id ? 'border-gray-900 shadow-xl shadow-gray-200 ring-1 ring-gray-900 scale-[1.02]' : 'border-gray-100 hover:border-gray-300 hover:shadow-md'}
                                 `}
                             >
-                                <div className="flex justify-between items-start mb-3">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${project.score === 4 ? 'bg-emerald-50 text-emerald-500' : 'bg-gray-50 text-gray-400'}`}>
-                                        <Sprout size={18} />
+                                <Spotlight className="p-5 h-full" spotColor="rgba(16, 185, 129, 0.2)">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${project.score === 4 ? 'bg-emerald-50 text-emerald-500' : 'bg-gray-50 text-gray-400'}`}>
+                                            <Sprout size={18} />
+                                        </div>
+                                        <button
+                                            onClick={(e) => handleDelete(e, project.id)}
+                                            className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-50 hover:text-red-500 rounded-full transition-all relative z-40"
+                                        >
+                                            <X size={14} />
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={(e) => handleDelete(e, project.id)}
-                                        className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-50 hover:text-red-500 rounded-full transition-all"
-                                    >
-                                        <X size={14} />
-                                    </button>
-                                </div>
-                                <h3 className="text-gray-900 font-medium mb-1 line-clamp-1">{project.title}</h3>
-                                <p className="text-gray-400 text-xs font-light line-clamp-2">{project.desc}</p>
+                                    <h3 className="text-gray-900 font-medium mb-1 line-clamp-1">{project.title}</h3>
+                                    <p className="text-gray-400 text-xs font-light line-clamp-2">{project.desc}</p>
+                                </Spotlight>
                             </motion.div>
                         ))}
 

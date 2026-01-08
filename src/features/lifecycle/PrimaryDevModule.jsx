@@ -12,6 +12,7 @@ import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
 import confetti from 'canvas-confetti';
 import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
 import UndoRedoButtons from '../../components/shared/UndoRedoButtons';
+import Spotlight from '../../components/shared/Spotlight';
 
 const PrimaryDevModule = () => {
     // --- Sync Integration ---
@@ -310,56 +311,58 @@ const PrimaryDevModule = () => {
                         onClick={() => handleSelectProject(project)}
                         className="group bg-white border border-gray-100 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-gray-200/50 transition-all cursor-pointer relative h-[360px] flex flex-col ring-1 ring-transparent hover:ring-gray-100"
                     >
-                        {/* Card Background */}
-                        <div className="absolute inset-0 z-0 h-48">
-                            {project.bgImage ? (
-                                <div className="w-full h-full relative">
-                                    <img src={project.bgImage} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent" />
-                                </div>
-                            ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-gray-50 to-white" />
-                            )}
-                        </div>
-
-                        <div className="p-8 relative z-10 flex flex-col h-full">
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="w-12 h-12 bg-white/80 backdrop-blur text-gray-900 rounded-2xl flex items-center justify-center shadow-sm border border-white/50 group-hover:scale-105 transition-transform">
-                                    <Code2 size={24} strokeWidth={1.5} />
-                                </div>
-                                {project.link && (
-                                    <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 text-gray-500 hover:text-gray-900 transition-colors bg-white/50 backdrop-blur rounded-full hover:bg-white">
-                                        <ExternalLink size={16} />
-                                    </a>
+                        <Spotlight className="w-full h-full" spotColor="rgba(16, 185, 129, 0.2)">
+                            {/* Card Background */}
+                            <div className="absolute inset-0 z-0 h-48">
+                                {project.bgImage ? (
+                                    <div className="w-full h-full relative">
+                                        <img src={project.bgImage} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent" />
+                                    </div>
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-gray-50 to-white" />
                                 )}
                             </div>
 
-                            <div className="mt-8">
-                                <h3 className="text-2xl font-light text-gray-900 mb-2 line-clamp-1 group-hover:text-emerald-900 transition-colors">{project.title}</h3>
-                                <p className="text-sm text-gray-500 line-clamp-2 min-h-[2.5em] leading-relaxed">{project.desc || 'No description provided.'}</p>
-                            </div>
-
-                            <div className="mt-auto pt-6 border-t border-gray-100/50">
-                                {/* Mini Stage Visualization */}
-                                <div className="flex items-center gap-1.5 mb-3">
-                                    {[1, 2, 3, 4, 5].map(step => (
-                                        <div
-                                            key={step}
-                                            className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-emerald-500 shadow-sm shadow-emerald-200' : 'bg-gray-100'}`}
-                                        />
-                                    ))}
-                                </div>
-                                <div className="flex justify-between items-center text-xs font-mono text-gray-400 uppercase tracking-wider">
-                                    <div className="flex items-center gap-2">
-                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                        <span>Stage {project.subStage || 1}</span>
+                            <div className="p-8 relative z-10 flex flex-col h-full">
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className="w-12 h-12 bg-white/80 backdrop-blur text-gray-900 rounded-2xl flex items-center justify-center shadow-sm border border-white/50 group-hover:scale-105 transition-transform">
+                                        <Code2 size={24} strokeWidth={1.5} />
                                     </div>
-                                    <span className="text-gray-900 font-medium">
-                                        {project.stageNames?.[project.subStage || 1] || DEV_STAGES[(project.subStage || 1) - 1]?.label}
-                                    </span>
+                                    {project.link && (
+                                        <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 text-gray-500 hover:text-gray-900 transition-colors bg-white/50 backdrop-blur rounded-full hover:bg-white">
+                                            <ExternalLink size={16} />
+                                        </a>
+                                    )}
+                                </div>
+
+                                <div className="mt-8">
+                                    <h3 className="text-2xl font-light text-gray-900 mb-2 line-clamp-1 group-hover:text-emerald-900 transition-colors">{project.title}</h3>
+                                    <p className="text-sm text-gray-500 line-clamp-2 min-h-[2.5em] leading-relaxed">{project.desc || 'No description provided.'}</p>
+                                </div>
+
+                                <div className="mt-auto pt-6 border-t border-gray-100/50">
+                                    {/* Mini Stage Visualization */}
+                                    <div className="flex items-center gap-1.5 mb-3">
+                                        {[1, 2, 3, 4, 5].map(step => (
+                                            <div
+                                                key={step}
+                                                className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-emerald-500 shadow-sm shadow-emerald-200' : 'bg-gray-100'}`}
+                                            />
+                                        ))}
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs font-mono text-gray-400 uppercase tracking-wider">
+                                        <div className="flex items-center gap-2">
+                                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                            <span>Stage {project.subStage || 1}</span>
+                                        </div>
+                                        <span className="text-gray-900 font-medium">
+                                            {project.stageNames?.[project.subStage || 1] || DEV_STAGES[(project.subStage || 1) - 1]?.label}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </Spotlight>
                     </motion.div>
                 ))}
 
@@ -395,17 +398,19 @@ const PrimaryDevModule = () => {
                                 onClick={() => handleSelectProject(project)}
                                 className="group bg-white border border-amber-100/50 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-amber-100/50 transition-all cursor-pointer relative h-[300px] flex flex-col opacity-80 hover:opacity-100"
                             >
-                                <div className="absolute inset-0 z-0 h-32 bg-amber-50/30">
-                                    {project.bgImage && <img src={project.bgImage} className="w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 transition-all" />}
-                                </div>
-                                <div className="p-8 relative z-10 flex flex-col h-full mt-16">
-                                    <h3 className="text-xl font-medium text-gray-900 mb-1">{project.title}</h3>
-                                    <div className="flex items-center gap-2 text-amber-600 text-xs font-bold uppercase tracking-widest mb-4">
-                                        <Star size={12} fill="currentColor" />
-                                        <span>Advanced Phase</span>
+                                <Spotlight className="w-full h-full" spotColor="rgba(251, 191, 36, 0.15)">
+                                    <div className="absolute inset-0 z-0 h-32 bg-amber-50/30">
+                                        {project.bgImage && <img src={project.bgImage} className="w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 transition-all" />}
                                     </div>
-                                    <p className="text-sm text-gray-400 line-clamp-2">{project.desc}</p>
-                                </div>
+                                    <div className="p-8 relative z-10 flex flex-col h-full mt-16">
+                                        <h3 className="text-xl font-medium text-gray-900 mb-1">{project.title}</h3>
+                                        <div className="flex items-center gap-2 text-amber-600 text-xs font-bold uppercase tracking-widest mb-4">
+                                            <Star size={12} fill="currentColor" />
+                                            <span>Advanced Phase</span>
+                                        </div>
+                                        <p className="text-sm text-gray-400 line-clamp-2">{project.desc}</p>
+                                    </div>
+                                </Spotlight>
                             </motion.div>
                         ))}
                     </div>
