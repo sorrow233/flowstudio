@@ -12,14 +12,22 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
+// Generate a unique session ID for this browser tab
+const SESSION_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+
 /**
- * SyncEngine - Debug Version
+ * SyncEngine - Fixed Version
+ * 
+ * Key Fix: Use session-based filtering to prevent re-applying our own pushes.
+ * Each update document includes a `sessionId` field.
+ * onSnapshot skips updates from the current session.
  */
 export class SyncEngine {
     constructor(docId, userId, initialData = {}) {
         this.docId = docId;
         this.userId = userId;
         this.initialData = initialData;
+        this.sessionId = SESSION_ID;
 
         // State
         this.status = 'disconnected';
@@ -37,15 +45,12 @@ export class SyncEngine {
         this.unsubscribes = [];
         this.pushTimeout = null;
 
-        // Track processed updates to avoid re-processing our own pushes
-        this.processedUpdateIds = new Set();
-
         // Init
         this.init();
     }
 
     init() {
-        console.info(`[SyncEngine] Initializing for ${this.docId}, userId: ${this.userId}`);
+        console.info(`[SyncEngine] Init: docId=${this.docId}, sessionId=${this.sessionId}`);
 
         // 1. IndexedDB (Local First)
         this.localProvider = new IndexeddbPersistence(this.docId, this.doc);
@@ -56,8 +61,10 @@ export class SyncEngine {
 
         // 2. Network Listeners
         const handleOnline = () => {
-            console.info("[SyncEngine] Network Online. Resuming sync...");
-            this.tryPushUpdates();
+            console.info("[SyncEngine] Network Online.");
+            if (this.hasPendingChanges) {
+                this.debouncedPush();
+            }
         };
         window.addEventListener('online', handleOnline);
         this.unsubscribes.push(() => window.removeEventListener('online', handleOnline));
@@ -66,7 +73,7 @@ export class SyncEngine {
         if (this.userId) {
             this.connectFirestore();
         } else {
-            console.warn("[SyncEngine] No userId, going offline mode.");
+            console.warn("[SyncEngine] No userId, offline mode.");
             this.setStatus('offline');
             this.isServerLoaded = true;
         }
@@ -74,12 +81,8 @@ export class SyncEngine {
         // 4. Local Update Listener
         const handleUpdate = (update, origin) => {
             if (origin !== 'remote') {
-                if (!this.isServerLoaded) {
-                    console.debug("[SyncEngine] Ignoring local update (server not loaded yet).");
-                    return;
-                }
+                if (!this.isServerLoaded) return;
 
-                console.debug("[SyncEngine] Local update detected, marking pending.");
                 this.hasPendingChanges = true;
                 this.updatePendingCount();
                 this.setStatus('syncing');
@@ -98,24 +101,22 @@ export class SyncEngine {
         console.info("[SyncEngine] Connecting to Firestore...");
 
         const unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
-            console.info(`[SyncEngine] onSnapshot: ${snapshot.docChanges().length} changes.`);
-
             const updatesToApply = [];
+
             snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
-                    const docId = change.doc.id;
+                    const data = change.doc.data();
 
-                    // Skip if we already processed this (our own push)
-                    if (this.processedUpdateIds.has(docId)) {
-                        console.debug(`[SyncEngine] Skipping already processed update: ${docId}`);
+                    // KEY FIX: Skip updates from our own session
+                    if (data.sessionId === this.sessionId) {
+                        console.debug(`[SyncEngine] Skipping own update (session match).`);
                         return;
                     }
 
-                    const data = change.doc.data();
                     if (data.update) {
                         try {
                             const update = Uint8Array.from(atob(data.update), c => c.charCodeAt(0));
-                            updatesToApply.push({ id: docId, update });
+                            updatesToApply.push(update);
                         } catch (e) {
                             console.error("[SyncEngine] Failed to parse update:", e);
                         }
@@ -124,26 +125,23 @@ export class SyncEngine {
             });
 
             if (updatesToApply.length > 0) {
-                console.info(`[SyncEngine] Applying ${updatesToApply.length} updates from server.`);
+                console.info(`[SyncEngine] Applying ${updatesToApply.length} remote updates.`);
 
-                // Apply to Main
+                // Apply to Main Doc
                 this.doc.transact(() => {
-                    updatesToApply.forEach(({ update }) => Y.applyUpdate(this.doc, update, 'remote'));
+                    updatesToApply.forEach(u => Y.applyUpdate(this.doc, u, 'remote'));
                 }, 'remote');
 
-                // Apply to Shadow
+                // Apply to Shadow Doc (to keep it in sync with remote state)
                 this.shadowDoc.transact(() => {
-                    updatesToApply.forEach(({ update }) => Y.applyUpdate(this.shadowDoc, update));
+                    updatesToApply.forEach(u => Y.applyUpdate(this.shadowDoc, u));
                 });
-
-                // Mark as processed
-                updatesToApply.forEach(({ id }) => this.processedUpdateIds.add(id));
             }
 
             // Mark server as loaded
             if (!this.isServerLoaded) {
                 this.isServerLoaded = true;
-                console.info("[SyncEngine] Server state loaded. Now checking for pending local changes...");
+                console.info("[SyncEngine] Server loaded. Checking for pending changes...");
             }
 
             this.checkForPendingChanges();
@@ -158,77 +156,47 @@ export class SyncEngine {
     }
 
     async tryPushUpdates() {
-        console.debug(`[SyncEngine] tryPushUpdates called. isPushing=${this.isPushing}, hasPendingChanges=${this.hasPendingChanges}, onLine=${navigator.onLine}`);
-
-        if (this.isPushing) {
-            console.debug("[SyncEngine] Already pushing, skipping.");
+        if (this.isPushing || !this.hasPendingChanges || !navigator.onLine) {
             return;
         }
-        if (!this.hasPendingChanges) {
-            console.debug("[SyncEngine] No pending changes, skipping.");
-            return;
-        }
-        if (!navigator.onLine) {
-            console.debug("[SyncEngine] Offline, skipping.");
-            return;
-        }
-
-        const PUSH_TIMEOUT_MS = 15000;
-        let timeoutId;
 
         try {
             this.isPushing = true;
-            console.info("[SyncEngine] Push started...");
 
-            // 1. Calculate Diff
+            // Calculate Diff
             const stateVector = Y.encodeStateVector(this.shadowDoc);
             const diff = Y.encodeStateAsUpdate(this.doc, stateVector);
 
-            console.info(`[SyncEngine] Diff size: ${diff.byteLength} bytes`);
-
             if (diff.byteLength === 0) {
-                console.info("[SyncEngine] No diff found. Already synced.");
+                console.info("[SyncEngine] No diff. Synced!");
                 this.hasPendingChanges = false;
                 this.pendingCount = 0;
                 this.setStatus('synced');
-                this.isPushing = false;
                 return;
             }
 
-            // 2. Send to Firestore
+            console.info(`[SyncEngine] Pushing ${diff.byteLength} bytes...`);
+
+            // Send to Firestore with sessionId
             const updateStr = btoa(String.fromCharCode.apply(null, diff));
             const updatesColl = collection(db, `users/${this.userId}/rooms/${this.docId}/updates`);
 
-            const timeoutPromise = new Promise((_, reject) => {
-                timeoutId = setTimeout(() => {
-                    reject(new Error("Push Timeout"));
-                }, PUSH_TIMEOUT_MS);
+            await addDoc(updatesColl, {
+                update: updateStr,
+                createdAt: serverTimestamp(),
+                userId: this.userId,
+                sessionId: this.sessionId  // KEY: Include session ID
             });
 
-            console.info("[SyncEngine] Sending to Firestore...");
-            const docRef = await Promise.race([
-                addDoc(updatesColl, {
-                    update: updateStr,
-                    createdAt: serverTimestamp(),
-                    userId: this.userId
-                }),
-                timeoutPromise
-            ]);
-            clearTimeout(timeoutId);
+            console.info("[SyncEngine] Push Success!");
 
-            // Mark this update ID as processed so we don't re-apply it from onSnapshot
-            this.processedUpdateIds.add(docRef.id);
-
-            console.info(`[SyncEngine] Push Success! DocId: ${docRef.id}`);
-
-            // 3. Update Shadow
+            // Update Shadow to match what we just pushed
             Y.applyUpdate(this.shadowDoc, diff);
 
-            // 4. Re-check
+            // Re-check for any remaining changes
             this.checkForPendingChanges();
 
         } catch (error) {
-            clearTimeout(timeoutId);
             console.error(`[SyncEngine] Push Failed:`, error);
             this.setStatus('offline');
         } finally {
@@ -240,17 +208,13 @@ export class SyncEngine {
         const stateVector = Y.encodeStateVector(this.shadowDoc);
         const diff = Y.encodeStateAsUpdate(this.doc, stateVector);
 
-        console.debug(`[SyncEngine] checkForPendingChanges: diff=${diff.byteLength} bytes`);
-
         if (diff.byteLength > 0) {
             this.hasPendingChanges = true;
             this.updatePendingCount();
-            // Don't immediately push again, debounce it
             if (!this.isPushing) {
                 this.debouncedPush();
             }
         } else {
-            console.info("[SyncEngine] No pending changes. Synced!");
             this.hasPendingChanges = false;
             this.pendingCount = 0;
             this.notifyListeners();
@@ -270,7 +234,7 @@ export class SyncEngine {
 
     seedData() {
         if (this.doc.getMap('data').keys().next().done && Object.keys(this.initialData).length > 0) {
-            console.info(`[SyncEngine] Seeding default data for ${this.docId}`);
+            console.info(`[SyncEngine] Seeding default data.`);
             this.doc.transact(() => {
                 const map = this.doc.getMap('data');
                 Object.entries(this.initialData).forEach(([k, v]) => {
