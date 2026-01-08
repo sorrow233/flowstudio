@@ -4,7 +4,7 @@ import { X, Mail, Lock, ArrowRight, Github } from 'lucide-react';
 import { useAuth } from './AuthContext';
 
 const AuthModal = ({ isOpen, onClose }) => {
-    const { login, register, loginWithGoogle } = useAuth();
+    const { login, register, loginWithGoogle, user } = useAuth();
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
