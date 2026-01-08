@@ -138,10 +138,10 @@ const PendingModule = () => {
         // Advanced Stage (>= 6): Special mature trees
         if (stage >= 6) {
             const advancedTrees = [
-                { Component: SakuraTree, label: 'Sakura Tree', bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-600' },
-                { Component: MapleTree, label: 'Maple Tree', bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-600' },
-                { Component: GinkgoTree, label: 'Ginkgo Tree', bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-600' },
-                { Component: CedarTree, label: 'Cedar Tree', bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700' },
+                { img: '/trees/sakura.png', label: 'Sakura Tree', bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-600', scale: 1.2 },
+                { img: '/trees/maple.png', label: 'Maple Tree', bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-600', scale: 1.2 },
+                { img: '/trees/ginkgo.png', label: 'Ginkgo Tree', bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-600', scale: 1.2 },
+                { img: '/trees/cedar.png', label: 'Cedar Tree', bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', scale: 1.2 },
             ];
             // Deterministic random based on projectId for consistency
             const hash = projectId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -311,13 +311,17 @@ const PendingModule = () => {
                                                     className={`relative z-10 ${!isAdvanced && visual.color} ${isHoly ? 'drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' : ''}`}
                                                     animate={{ scale: visual.scale }}
                                                 >
-                                                    {isAdvanced && visual.Component ? (
-                                                        <visual.Component className={`w-28 h-28 drop-shadow-xl`} />
+                                                    {isAdvanced ? (
+                                                        <img
+                                                            src={visual.img}
+                                                            alt={visual.label}
+                                                            className="w-32 h-32 object-contain drop-shadow-md"
+                                                        />
                                                     ) : (
                                                         <visual.icon size={32} strokeWidth={1.5} />
                                                     )}
                                                 </motion.div>
-                                                <div className={`absolute bottom-2 ${isAdvanced ? 'w-16' : 'w-8'} h-1 bg-emerald-900/10 rounded-full blur-sm`} />
+                                                <div className={`absolute bottom-2 ${isAdvanced ? 'w-20' : 'w-8'} h-1 bg-emerald-900/10 rounded-full blur-sm`} />
                                             </div>
                                             <div className="w-full relative z-10">
                                                 <h4 className={`font-medium text-gray-700 line-clamp-1 w-full mb-2 ${isAdvanced ? 'text-sm' : 'text-xs'}`}>{p.title}</h4>
