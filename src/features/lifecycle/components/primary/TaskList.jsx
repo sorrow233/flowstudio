@@ -439,6 +439,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
         }
         setSelectedIds(newSelected);
         setLastSelectedId(id);
+        if (!isSelectionMode) setIsSelectionMode(true);
     };
 
     const handleSelectAll = () => {
