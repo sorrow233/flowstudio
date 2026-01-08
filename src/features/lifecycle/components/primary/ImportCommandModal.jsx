@@ -45,17 +45,30 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage }) => {
         return matchesCategory && matchesSearch;
     });
 
-    // Sort/Group by relevance to current stage
+    // Sort/Group by relevance to current stage AND project category
     const recommendedCommands = [];
     const otherCommands = [];
 
+    // Prioritization Logic:
+    // 1. Match BOTH Stage AND Category (Best)
+    // 2. Match Stage (Good)
+    // 3. Match Category (User Preference)
     filteredCommands.forEach(cmd => {
-        if (currentStage && cmd.stageIds?.includes(currentStage)) {
-            recommendedCommands.push(cmd);
+        const matchesStage = currentStage && cmd.stageIds?.includes(currentStage);
+        const matchesCategory = projectCategory && cmd.category === projectCategory;
+
+        if (matchesStage || matchesCategory) {
+            recommendedCommands.push({
+                ...cmd,
+                _priority: (matchesStage && matchesCategory) ? 3 : (matchesStage ? 2 : 1)
+            });
         } else {
             otherCommands.push(cmd);
         }
     });
+
+    // Sort recommended commands by priority
+    recommendedCommands.sort((a, b) => b._priority - a._priority);
 
     const renderCommandCard = (cmd) => {
         const CatIcon = CATEGORY_ICONS[categories.find(c => c.id === (cmd.category || 'general'))?.icon] || LayoutGrid;
@@ -80,6 +93,11 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage }) => {
                                 {currentStage && cmd.stageIds?.includes(currentStage) && (
                                     <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 uppercase tracking-wider">
                                         Recommended
+                                    </span>
+                                )}
+                                {projectCategory && cmd.category === projectCategory && (
+                                    <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100 uppercase tracking-wider">
+                                        Preferred
                                     </span>
                                 )}
                             </h4>

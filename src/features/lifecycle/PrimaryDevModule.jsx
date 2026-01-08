@@ -541,6 +541,7 @@ const PrimaryDevModule = () => {
                 onClose={() => setCommandModalOpen(false)}
                 onImport={handleLinkCommand}
                 currentStage={viewStage}
+                projectCategory={selectedProject?.category}
             />
         </div>
     );

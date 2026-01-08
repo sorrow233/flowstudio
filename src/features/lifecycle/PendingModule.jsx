@@ -276,36 +276,101 @@ const PendingModule = () => {
     );
 };
 
+// ... imports ...
+import { STORAGE_KEYS, getRandomProjectImage, COMMAND_CATEGORIES } from '../../utils/constants'; // Import COMMAND_CATEGORIES
+
+// ... (Existing code)
+
+const handleGraduate = (project, category = 'general') => { // Accept category
+    deleteProject(project.id);
+    setSelectedProject(null);
+
+    if (doc) {
+        const primaryList = doc.getArray('primary_projects');
+        const hasReason = project.foundingReason && project.foundingReason.trim().length > 0;
+
+        const newPrimary = {
+            ...project,
+            category, // Save category
+            graduatedAt: Date.now(),
+            subStage: 1,
+            progress: 0,
+            tasks: [],
+            hasHolyGlow: hasReason,
+            bgImage: project.bgImage || getRandomProjectImage()
+        };
+        primaryList.unshift([newPrimary]);
+    }
+};
+
+// ... (Existing code)
+
 const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }) => {
     // Local state for Vow to support IME (Chinese Input) properly
     const [localVow, setLocalVow] = useState(project.foundingReason || '');
+    const [selectedCategory, setSelectedCategory] = useState('general'); // Local state for Category
 
     // Reset local state when switching projects
     useEffect(() => {
         setLocalVow(project.foundingReason || '');
+        setSelectedCategory('general'); // Reset category
     }, [project.id]);
 
-    const handleVowBlur = () => {
-        if (localVow !== (project.foundingReason || '')) {
-            onUpdate(project.id, 'foundingReason', localVow);
-        }
-    };
+    // ... (Existing logic)
 
     return (
-        <motion.div
-            key="detail"
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 50 }}
-            className="flex-1 bg-white border border-gray-100 rounded-[2.5rem] p-10 shadow-2xl shadow-gray-200/50 overflow-y-auto no-scrollbar relative flex flex-col z-10"
-        >
-            <button
-                onClick={onClose}
-                className="absolute top-8 right-8 p-3 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors z-30"
-            >
-                <X size={20} className="text-gray-400" />
-            </button>
+        <motion.div>
+            {/* ... (Existing JSX) ... */}
 
+            {/* Sacred Reason Input ... */}
+
+            {/* Category Selection Section - NEW */}
+            <div className="max-w-2xl mx-auto w-full relative z-20 mt-8 bg-white rounded-3xl p-6 border border-gray-100">
+                <h4 className="text-xs font-medium text-gray-400 tracking-widest uppercase mb-4 text-center">Select Code Domain</h4>
+                <div className="flex flex-wrap justify-center gap-3">
+                    {COMMAND_CATEGORIES.filter(c => c.id !== 'general').map(cat => ( // Filter out general if desired, or keep it
+                        <button
+                            key={cat.id}
+                            onClick={() => setSelectedCategory(cat.id)}
+                            className={`
+                                flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all border
+                                ${selectedCategory === cat.id
+                                    ? 'bg-gray-900 text-white border-gray-900 shadow-lg scale-105'
+                                    : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+                                }
+                            `}
+                        >
+                            <span>{cat.label}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Graduate Button ... */}
+            <div className="max-w-2xl mx-auto mt-6 pb-10 w-full relative z-30">
+                {project.score === 4 && (
+                    <button
+                        onClick={() => onGraduate(project, selectedCategory)} // Pass category
+                        className={`
+                        w-full py-5 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500
+                        ${project.foundingReason
+                                ? 'bg-white border border-emerald-100 text-emerald-600 shadow-[0_10px_40px_-10px_rgba(52,211,153,0.3)] hover:shadow-[0_15px_50px_-10px_rgba(16,185,129,0.4)] hover:-translate-y-0.5'
+                                : 'bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed'
+                            }
+                        ${!project.foundingReason && 'hover:bg-gray-100 hover:text-gray-500'}
+                    `}
+                    >
+                        <span className="text-base font-light tracking-widest relative z-10 uppercase">
+                            {project.foundingReason ? `Begin ${COMMAND_CATEGORIES.find(c => c.id === selectedCategory)?.label || ''} Journey` : 'Begin Journey'}
+                        </span>
+                        <ArrowRight size={18} className={`transition-transform duration-300 ${project.foundingReason ? 'group-hover:translate-x-1' : ''}`} />
+                    </button>
+                )}
+            </div>
+
+        </motion.div>
+    );
+};
             <div className="absolute top-0 left-0 right-0 h-48 bg-gray-50 overflow-hidden rounded-t-[2.5rem] z-0">
                 {project.bgImage ? (
                     <>
@@ -354,137 +419,137 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                 </div>
             </div>
 
-            {/* Questions List */}
-            <div className="space-y-4 max-w-2xl mx-auto w-full relative z-20">
-                {QUESTIONS.map((q, i) => {
-                    const ans = project.answers[q.id];
-                    return (
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                            key={q.id}
-                            className={`
+{/* Questions List */ }
+<div className="space-y-4 max-w-2xl mx-auto w-full relative z-20">
+    {QUESTIONS.map((q, i) => {
+        const ans = project.answers[q.id];
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                key={q.id}
+                className={`
                             relative p-6 rounded-2xl border transition-all duration-500 overflow-hidden
                             ${ans === true ? 'bg-emerald-50/50 border-emerald-100' : ''}
                             ${ans === false ? 'bg-red-50/50 border-red-100' : ''}
                             ${ans === undefined ? 'bg-white border-gray-100' : ''}
                         `}
-                        >
-                            <div className="relative z-30 flex justify-between items-center mb-4">
-                                <div>
-                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{q.sub}</h4>
-                                    <p className="text-lg text-gray-800 font-light">{q.text}</p>
-                                </div>
-                                <div className="w-8 h-8 flex items-center justify-center">
-                                    {ans === true && <CheckCircle2 className="text-emerald-500" size={20} />}
-                                    {ans === false && <X className="text-red-400" size={20} />}
-                                </div>
-                            </div>
-
-                            <div className="relative z-30 flex gap-3">
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onAnswer(project.id, q.id, true);
-                                    }}
-                                    className={`
-                                    relative z-50 cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all active:scale-95
-                                    ${ans === true ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-200' : 'hover:bg-gray-50 bg-white hover:border-gray-300'}
-                                `}
-                                >
-                                    YES
-                                </button>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onAnswer(project.id, q.id, false);
-                                    }}
-                                    className={`
-                                    relative z-50 cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all active:scale-95
-                                    ${ans === false ? 'bg-red-500 text-white border-red-500 shadow-md shadow-red-200' : 'hover:bg-gray-50 bg-white hover:border-gray-300'}
-                                `}
-                                >
-                                    NO
-                                </button>
-                            </div>
-                        </motion.div>
-                    );
-                })}
-            </div>
-
-            {/* Sacred Reason Input (Fresh & Sacred Design - Faint Green) */}
-            <div className="max-w-2xl mx-auto w-full relative z-20 mt-12 bg-white rounded-3xl p-1">
-                <div className="mb-4 flex items-center justify-between px-2">
-                    <div className="flex items-center gap-2">
-                        <Scroll size={16} className="text-emerald-300" />
-                        <h4 className="text-xs font-medium text-emerald-300 tracking-widest uppercase">My Vow</h4>
+            >
+                <div className="relative z-30 flex justify-between items-center mb-4">
+                    <div>
+                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{q.sub}</h4>
+                        <p className="text-lg text-gray-800 font-light">{q.text}</p>
+                    </div>
+                    <div className="w-8 h-8 flex items-center justify-center">
+                        {ans === true && <CheckCircle2 className="text-emerald-500" size={20} />}
+                        {ans === false && <X className="text-red-400" size={20} />}
                     </div>
                 </div>
 
-                <div className="relative group">
-                    <div className={`
+                <div className="relative z-30 flex gap-3">
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onAnswer(project.id, q.id, true);
+                        }}
+                        className={`
+                                    relative z-50 cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all active:scale-95
+                                    ${ans === true ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-200' : 'hover:bg-gray-50 bg-white hover:border-gray-300'}
+                                `}
+                    >
+                        YES
+                    </button>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onAnswer(project.id, q.id, false);
+                        }}
+                        className={`
+                                    relative z-50 cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all active:scale-95
+                                    ${ans === false ? 'bg-red-500 text-white border-red-500 shadow-md shadow-red-200' : 'hover:bg-gray-50 bg-white hover:border-gray-300'}
+                                `}
+                    >
+                        NO
+                    </button>
+                </div>
+            </motion.div>
+        );
+    })}
+</div>
+
+{/* Sacred Reason Input (Fresh & Sacred Design - Faint Green) */ }
+<div className="max-w-2xl mx-auto w-full relative z-20 mt-12 bg-white rounded-3xl p-1">
+    <div className="mb-4 flex items-center justify-between px-2">
+        <div className="flex items-center gap-2">
+            <Scroll size={16} className="text-emerald-300" />
+            <h4 className="text-xs font-medium text-emerald-300 tracking-widest uppercase">My Vow</h4>
+        </div>
+    </div>
+
+    <div className="relative group">
+        <div className={`
                         absolute -inset-0.5 bg-gradient-to-r from-emerald-100 to-teal-50 rounded-2xl opacity-0 transition duration-1000 group-hover:duration-200
                         ${project.foundingReason ? 'opacity-40 blur' : 'opacity-0'}
                     `}></div>
 
-                    <textarea
-                        value={localVow}
-                        onChange={(e) => setLocalVow(e.target.value)}
-                        onBlur={handleVowBlur}
-                        className={`
+        <textarea
+            value={localVow}
+            onChange={(e) => setLocalVow(e.target.value)}
+            onBlur={handleVowBlur}
+            className={`
                             relative w-full p-6 bg-white border rounded-2xl text-gray-700 placeholder:text-gray-300
                             text-sm leading-relaxed min-h-[120px] resize-none transition-all duration-500 ease-out
                             ${project.foundingReason
-                                ? 'border-emerald-100 shadow-[0_0_40px_-10px_rgba(52,211,153,0.3)] focus:border-emerald-300 focus:shadow-[0_0_50px_-10px_rgba(16,185,129,0.4)]'
-                                : 'border-gray-100 focus:border-emerald-200 focus:shadow-[0_0_30px_-10px_rgba(52,211,153,0.2)]'
-                            }
+                    ? 'border-emerald-100 shadow-[0_0_40px_-10px_rgba(52,211,153,0.3)] focus:border-emerald-300 focus:shadow-[0_0_50px_-10px_rgba(16,185,129,0.4)]'
+                    : 'border-gray-100 focus:border-emerald-200 focus:shadow-[0_0_30px_-10px_rgba(52,211,153,0.2)]'
+                }
                             outline-none
                         `}
-                        placeholder="在此刻写下你的初心..."
-                    />
-                    <div className="absolute bottom-4 right-4 text-emerald-100 pointer-events-none transition-colors duration-300 group-focus-within:text-emerald-400">
-                        <Feather size={18} />
-                    </div>
-                </div>
+            placeholder="在此刻写下你的初心..."
+        />
+        <div className="absolute bottom-4 right-4 text-emerald-100 pointer-events-none transition-colors duration-300 group-focus-within:text-emerald-400">
+            <Feather size={18} />
+        </div>
+    </div>
 
-                {project.foundingReason && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex justify-end mt-2 px-2"
-                    >
-                        <span className="text-[10px] text-emerald-400 font-mono tracking-wider flex items-center gap-1">
-                            <Sparkles size={10} />
-                            VOW ESTABLISHED
-                        </span>
-                    </motion.div>
-                )}
-            </div>
+    {project.foundingReason && (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex justify-end mt-2 px-2"
+        >
+            <span className="text-[10px] text-emerald-400 font-mono tracking-wider flex items-center gap-1">
+                <Sparkles size={10} />
+                VOW ESTABLISHED
+            </span>
+        </motion.div>
+    )}
+</div>
 
-            {/* Graduate Button (Fresh Light Style - Green) */}
-            <div className="max-w-2xl mx-auto mt-6 pb-10 w-full relative z-30">
-                {project.score === 4 && (
-                    <button
-                        onClick={() => onGraduate(project)}
-                        className={`
+{/* Graduate Button (Fresh Light Style - Green) */ }
+<div className="max-w-2xl mx-auto mt-6 pb-10 w-full relative z-30">
+    {project.score === 4 && (
+        <button
+            onClick={() => onGraduate(project)}
+            className={`
                         w-full py-5 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500
                         ${project.foundingReason
-                                ? 'bg-white border border-emerald-100 text-emerald-600 shadow-[0_10px_40px_-10px_rgba(52,211,153,0.3)] hover:shadow-[0_15px_50px_-10px_rgba(16,185,129,0.4)] hover:-translate-y-0.5'
-                                : 'bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed'
-                            }
+                    ? 'bg-white border border-emerald-100 text-emerald-600 shadow-[0_10px_40px_-10px_rgba(52,211,153,0.3)] hover:shadow-[0_15px_50px_-10px_rgba(16,185,129,0.4)] hover:-translate-y-0.5'
+                    : 'bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed'
+                }
                         ${!project.foundingReason && 'hover:bg-gray-100 hover:text-gray-500'}
                     `}
-                    >
-                        <span className="text-base font-light tracking-widest relative z-10 uppercase">
-                            {project.foundingReason ? 'Begin Journey' : 'Begin Journey'}
-                        </span>
-                        <ArrowRight size={18} className={`transition-transform duration-300 ${project.foundingReason ? 'group-hover:translate-x-1' : ''}`} />
-                    </button>
-                )}
-            </div>
+        >
+            <span className="text-base font-light tracking-widest relative z-10 uppercase">
+                {project.foundingReason ? 'Begin Journey' : 'Begin Journey'}
+            </span>
+            <ArrowRight size={18} className={`transition-transform duration-300 ${project.foundingReason ? 'group-hover:translate-x-1' : ''}`} />
+        </button>
+    )}
+</div>
 
-        </motion.div>
+        </motion.div >
     );
 };
 
