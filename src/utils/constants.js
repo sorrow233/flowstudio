@@ -114,3 +114,27 @@ export const DEFAULT_PROJECT_IMAGES = [
 export const getRandomProjectImage = () => {
     return DEFAULT_PROJECT_IMAGES[Math.floor(Math.random() * DEFAULT_PROJECT_IMAGES.length)];
 };
+
+// 灵魂四问 (Soul Questions)
+export const QUESTIONS = [
+    {
+        id: 'clarity',
+        text: '你是否能够清晰地表达自己究竟想要什么？',
+        sub: '清晰度'
+    },
+    {
+        id: 'dogfood',
+        text: '开发出来之后，你自己也会经常用它吗？',
+        sub: '自用需求'
+    },
+    {
+        id: 'impact',
+        text: '它能在未来长期改变你的生活吗？',
+        sub: '长期价值'
+    },
+    {
+        id: 'value',
+        text: '你是否相信这个项目能够真正帮助到大家？',
+        sub: '利他之心'
+    },
+];
