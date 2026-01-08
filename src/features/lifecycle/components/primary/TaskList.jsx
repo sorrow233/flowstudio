@@ -160,12 +160,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                             <Edit2 size={16} />
                         </button>
                     )}
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onDelete(projectId, task.id); }}
-                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                        <Trash2 size={16} />
-                    </button>
+
                 </div>
 
                 {/* Copied Feedback Badge */}
