@@ -11,7 +11,30 @@ const STAGE_ICONS = {
     5: Flag
 };
 
-const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleComplete }) => {
+const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleComplete, customStageNames = {}, onRenameStage }) => {
+    const [editingStageId, setEditingStageId] = React.useState(null);
+    const [editValue, setEditValue] = React.useState('');
+
+    const startEditing = (e, stage) => {
+        e.stopPropagation();
+        setEditingStageId(stage.id);
+        const currentName = customStageNames[stage.id] || stage.label;
+        setEditValue(currentName);
+    };
+
+    const cancelEditing = () => {
+        setEditingStageId(null);
+        setEditValue('');
+    };
+
+    const saveEditing = () => {
+        if (!editingStageId) return;
+        if (editValue.trim()) {
+            onRenameStage(editingStageId, editValue.trim());
+        }
+        setEditingStageId(null);
+        setEditValue('');
+    };
     return (
         <div className="w-full md:w-80 bg-white border-r border-gray-100 p-8 overflow-y-auto shrink-0 custom-scrollbar relative">
             <h3 className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-8 px-2">Pipeline Stages</h3>
@@ -66,9 +89,30 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                 </div>
 
                                 <div className="min-w-0 flex-1">
-                                    <div className={`text-sm font-bold tracking-tight transition-colors ${isViewActive ? 'text-white' : isCompleted ? 'text-emerald-900' : 'text-gray-600'}`}>
-                                        {stage.label}
-                                    </div>
+                                    {editingStageId === stage.id ? (
+                                        <input
+                                            autoFocus
+                                            type="text"
+                                            value={editValue}
+                                            onChange={(e) => setEditValue(e.target.value)}
+                                            onBlur={saveEditing}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') saveEditing();
+                                                if (e.key === 'Escape') cancelEditing();
+                                                e.stopPropagation(); // Prevent triggering other listeners
+                                            }}
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="w-full bg-transparent border-b border-white/50 text-white text-sm font-bold tracking-tight outline-none p-0"
+                                        />
+                                    ) : (
+                                        <div
+                                            onDoubleClick={(e) => startEditing(e, stage)}
+                                            title="Double click to rename"
+                                            className={`text-sm font-bold tracking-tight transition-colors cursor-text ${isViewActive ? 'text-white' : isCompleted ? 'text-emerald-900' : 'text-gray-600'}`}
+                                        >
+                                            {customStageNames[stage.id] || stage.label}
+                                        </div>
+                                    )}
                                     <div className={`text-[10px] truncate transition-colors ${isViewActive ? 'text-white/50' : 'text-gray-400'}`}>
                                         {isCompleted ? 'Completed' : isCurrentProgress ? 'In Progress' : 'Locked'}
                                     </div>

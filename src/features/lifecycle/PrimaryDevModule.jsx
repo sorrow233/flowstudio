@@ -222,6 +222,16 @@ const PrimaryDevModule = () => {
     };
 
 
+    // --- Rename Stage Handler ---
+    const handleRenameStage = (stageId, newName) => {
+        const currentStageNames = selectedProject.stageNames || {};
+        const updatedStageNames = {
+            ...currentStageNames,
+            [stageId]: newName
+        };
+        handleUpdateProject(selectedProject.id, { stageNames: updatedStageNames });
+    };
+
     return (
         <div className="max-w-7xl mx-auto pt-10 px-6 pb-20">
             {/* Dashboard Header */}
@@ -289,7 +299,9 @@ const PrimaryDevModule = () => {
                                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                         <span>Stage {project.subStage || 1}</span>
                                     </div>
-                                    <span className="text-gray-900 font-medium">{DEV_STAGES[(project.subStage || 1) - 1]?.label}</span>
+                                    <span className="text-gray-900 font-medium">
+                                        {project.stageNames?.[project.subStage || 1] || DEV_STAGES[(project.subStage || 1) - 1]?.label}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -386,6 +398,8 @@ const PrimaryDevModule = () => {
                                     onViewChange={setViewStage}
                                     currentProgress={selectedProject.subStage || 1}
                                     onToggleComplete={handleToggleStageComplete}
+                                    customStageNames={selectedProject.stageNames || {}}
+                                    onRenameStage={handleRenameStage}
                                 />
 
                                 {/* Right Content: Task List */}
@@ -526,6 +540,7 @@ const PrimaryDevModule = () => {
                 isOpen={commandModalOpen}
                 onClose={() => setCommandModalOpen(false)}
                 onImport={handleLinkCommand}
+                currentStage={viewStage}
             />
         </div>
     );
