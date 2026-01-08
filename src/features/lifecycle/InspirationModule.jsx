@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Trash2, ArrowRight } from 'lucide-react';
+import { Send, Trash2, ArrowRight, Copy, Check, Sparkles } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
@@ -16,6 +16,7 @@ const InspirationModule = () => {
     } = useSyncedProjects(doc, 'inspiration');
 
     const [input, setInput] = useState('');
+    const [copiedId, setCopiedId] = useState(null);
 
     // Migration: LocalStorage -> Yjs
     useEffect(() => {
@@ -53,71 +54,131 @@ const InspirationModule = () => {
         setInput('');
     };
 
+    const handleCopy = async (content, id) => {
+        try {
+            await navigator.clipboard.writeText(content);
+            setCopiedId(id);
+            setTimeout(() => setCopiedId(null), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+    };
+
     return (
-        <div className="max-w-3xl mx-auto pt-10 px-6">
-            <div className="mb-12">
-                <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">
-                    Inspiration
-                </h2>
-                <p className="text-gray-400 text-sm font-light tracking-wide">
-                    捕捉瞬时灵感，为未来积蓄能量
+        <div className="max-w-4xl mx-auto pt-14 px-6 md:px-10 pb-32">
+            {/* Header Section */}
+            <div className="mb-14 text-center md:text-left">
+                <div className="inline-flex items-center justify-center md:justify-start gap-2 mb-3">
+                    <div className="p-2 bg-gray-50 rounded-xl">
+                        <Sparkles className="w-5 h-5 text-amber-500" />
+                    </div>
+                    <h2 className="text-3xl font-light text-gray-900 tracking-tight">
+                        Inspiration
+                    </h2>
+                </div>
+                <p className="text-gray-500 text-base font-light tracking-wide max-w-md mx-auto md:mx-0 leading-relaxed">
+                    捕捉瞬时灵感，为未来积蓄能量。
                 </p>
             </div>
 
-            <div className="relative mb-16 group">
-                <textarea
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="在此记录想法..."
-                    className="w-full bg-transparent text-lg text-gray-800 placeholder:text-gray-300 border-b border-gray-200 focus:border-gray-800 outline-none py-4 transition-colors resize-none h-24 font-light leading-relaxed"
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                            handleAdd();
-                        }
-                    }}
-                />
-                <div className="absolute bottom-4 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <button
-                        onClick={handleAdd}
-                        disabled={!input.trim()}
-                        className="p-2 text-gray-400 hover:text-gray-900 transition-colors disabled:opacity-30"
-                    >
-                        <ArrowRight size={20} strokeWidth={1.5} />
-                    </button>
+            {/* Input Section */}
+            <div className="relative mb-20 group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                <div className="relative bg-white rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] group-hover:border-gray-200">
+                    <textarea
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="记录一闪而过的念头..."
+                        className="w-full bg-transparent text-lg text-gray-800 placeholder:text-gray-300 outline-none p-6 min-h-[140px] resize-none font-light leading-relaxed"
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                                handleAdd();
+                            }
+                        }}
+                    />
+                    <div className="absolute bottom-4 right-4 flex items-center gap-3">
+                        <span className="text-[10px] text-gray-300 font-mono hidden md:inline-block">
+                            CMD + ENTER TO SAVE
+                        </span>
+                        <button
+                            onClick={handleAdd}
+                            disabled={!input.trim()}
+                            className="flex items-center justify-center p-3 bg-gray-900 text-white rounded-xl hover:bg-black disabled:opacity-30 disabled:hover:bg-gray-900 transition-all duration-300 active:scale-95 shadow-lg shadow-gray-200"
+                        >
+                            <ArrowRight size={18} strokeWidth={2} />
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div className="space-y-8 pb-20">
+            {/* List Section */}
+            <div className="space-y-6">
                 <AnimatePresence mode="popLayout">
-                    {ideas.map((idea) => (
+                    {ideas.sort((a, b) => b.timestamp - a.timestamp).map((idea) => (
                         <motion.div
                             key={idea.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                             layout
-                            className="group relative border-l-2 border-transparent hover:border-gray-900 pl-6 py-1 transition-all duration-500"
+                            className="group relative bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] hover:border-gray-200 transition-all duration-300"
                         >
-                            <p className="text-gray-700 text-base font-light leading-7 whitespace-pre-wrap">{idea.content}</p>
-                            <div className="flex items-center gap-4 mt-3">
-                                <span className="text-[10px] text-gray-300 uppercase tracking-widest font-medium">
-                                    {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            <div className="flex justify-between items-start gap-6">
+                                <p className="text-gray-700 text-base font-light leading-7 whitespace-pre-wrap flex-grow font-sans">
+                                    {idea.content}
+                                </p>
+                                <div className="flex flex-col items-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <button
+                                        onClick={() => handleCopy(idea.content, idea.id)}
+                                        className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
+                                        title="Copy to clipboard"
+                                    >
+                                        {copiedId === idea.id ? (
+                                            <Check size={16} className="text-emerald-500" strokeWidth={2} />
+                                        ) : (
+                                            <Copy size={16} strokeWidth={1.5} />
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={() => removeIdea(idea.id)}
+                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                        title="Delete"
+                                    >
+                                        <Trash2 size={16} strokeWidth={1.5} />
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
+                                <span className="text-[10px] text-gray-400 font-medium tracking-wider uppercase">
+                                    {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
+                                    })}
+                                    <span className="mx-2 text-gray-200">|</span>
+                                    {new Date(idea.timestamp || Date.now()).toLocaleTimeString(undefined, {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
                                 </span>
-                                <button
-                                    onClick={() => removeIdea(idea.id)}
-                                    className="text-gray-200 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
-                                >
-                                    <Trash2 size={14} strokeWidth={1.5} />
-                                </button>
                             </div>
                         </motion.div>
                     ))}
                 </AnimatePresence>
 
                 {ideas.length === 0 && (
-                    <div className="py-20 text-center opacity-30">
-                        <span className="text-sm font-light text-gray-400">暂无内容</span>
-                    </div>
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="py-32 text-center"
+                    >
+                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Sparkles className="text-gray-300" size={24} />
+                        </div>
+                        <p className="text-gray-400 text-sm font-light tracking-wide">
+                            暂无灵感，记录下第一个想法吧
+                        </p>
+                    </motion.div>
                 )}
             </div>
         </div>
