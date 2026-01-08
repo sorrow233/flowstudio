@@ -16,7 +16,8 @@ import {
     RefreshCw,
     Settings,
     Sun,
-    Moon
+    Moon,
+    Globe
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../features/auth/AuthContext';
@@ -93,10 +94,13 @@ const Navbar = () => {
                         {/* Language Toggle Button */}
                         <button
                             onClick={toggleLanguage}
-                            className="relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all z-40 shrink-0"
-                            title="Switch Language"
+                            className="relative flex items-center justify-center gap-1 px-2 h-8 md:h-9 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all z-40 shrink-0"
+                            title={language === 'zh' ? '切换语言' : language === 'ja' ? '言語を切り替え' : language === 'ko' ? '언어 변경' : 'Switch Language'}
                         >
-                            <span className="text-xs font-medium uppercase">{language === 'zh' ? '简' : language === 'ja' ? '日' : language === 'ko' ? '한' : 'EN'}</span>
+                            <Globe size={14} strokeWidth={1.5} className="md:w-4 md:h-4" />
+                            <span className="text-[10px] md:text-xs font-medium uppercase tracking-wide">
+                                {language === 'zh' ? '简' : language === 'ja' ? '日' : language === 'ko' ? '한' : 'EN'}
+                            </span>
                         </button>
 
                         {/* Theme Toggle Button */}
