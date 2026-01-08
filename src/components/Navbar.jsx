@@ -23,8 +23,8 @@ const tabs = [
     { id: 'inspiration', label: 'Inspiration', icon: Sparkles, path: '/inspiration' },
     { id: 'pending', label: 'Pending', icon: Clock, path: '/pending' },
     { id: 'primary', label: 'Primary', icon: Code2, path: '/primary' },
-    { id: 'final', label: 'Final', icon: CheckCircle2, path: '/final' },
     { id: 'advanced', label: 'Advanced', icon: Zap, path: '/advanced' },
+    { id: 'final', label: 'Final', icon: CheckCircle2, path: '/final' },
     { id: 'commercial', label: 'Commercial', icon: Briefcase, path: '/commercial' },
     { id: 'command', label: 'Command', icon: Terminal, path: '/commands' },
 ];
