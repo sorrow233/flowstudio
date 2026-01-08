@@ -15,6 +15,7 @@ import ShareViewPage from './features/share/components/ShareViewPage';
 import { Toaster } from 'sonner';
 import { KeymapProvider, ShortcutHelpModal, useBrowserIntercept } from './features/shortcuts';
 import { LanguageProvider } from './features/i18n';
+import { ThemeProvider } from './hooks/ThemeContext';
 
 function App() {
     const location = useLocation();

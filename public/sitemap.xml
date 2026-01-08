@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://flowstudio.dev/</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/en</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ja</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ko</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/inspiration</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/inspiration" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/inspiration" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/inspiration" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/inspiration" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/inspiration" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/en/inspiration</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/inspiration" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/inspiration" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/inspiration" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/inspiration" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/inspiration" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ja/inspiration</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/inspiration" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/inspiration" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/inspiration" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/inspiration" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/inspiration" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ko/inspiration</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/inspiration" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/inspiration" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/inspiration" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/inspiration" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/inspiration" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/pending</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/pending" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/pending" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/pending" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/pending" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/pending" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/en/pending</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/pending" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/pending" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/pending" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/pending" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/pending" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ja/pending</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/pending" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/pending" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/pending" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/pending" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/pending" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ko/pending</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/pending" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/pending" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/pending" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/pending" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/pending" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/primary</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/primary" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/primary" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/primary" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/primary" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/primary" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/en/primary</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/primary" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/primary" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/primary" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/primary" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/primary" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ja/primary</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/primary" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/primary" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/primary" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/primary" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/primary" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ko/primary</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/primary" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/primary" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/primary" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/primary" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/primary" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/advanced</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/advanced" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/advanced" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/advanced" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/advanced" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/advanced" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/en/advanced</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/advanced" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/advanced" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/advanced" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/advanced" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/advanced" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ja/advanced</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/advanced" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/advanced" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/advanced" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/advanced" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/advanced" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ko/advanced</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/advanced" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/advanced" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/advanced" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/advanced" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/advanced" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/final</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/final" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/final" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/final" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/final" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/final" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/en/final</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/final" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/final" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/final" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/final" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/final" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ja/final</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/final" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/final" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/final" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/final" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/final" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ko/final</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/final" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/final" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/final" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/final" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/final" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/commercial</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/commercial" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/commercial" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/commercial" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/commercial" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/commercial" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/en/commercial</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/commercial" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/commercial" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/commercial" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/commercial" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/commercial" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ja/commercial</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/commercial" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/commercial" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/commercial" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/commercial" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/commercial" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ko/commercial</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/commercial" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/commercial" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/commercial" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/commercial" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/commercial" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/commands</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/commands" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/commands" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/commands" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/commands" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/commands" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/en/commands</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/commands" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/commands" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/commands" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/commands" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/commands" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ja/commands</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/commands" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/commands" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/commands" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/commands" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/commands" />
+  </url>
+  <url>
+    <loc>https://flowstudio.dev/ko/commands</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.dev/commands" />
+      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.dev/en/commands" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.dev/ja/commands" />
+      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.dev/ko/commands" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.dev/commands" />
+  </url>
+</urlset>
