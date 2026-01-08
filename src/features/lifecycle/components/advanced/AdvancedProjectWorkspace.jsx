@@ -43,21 +43,13 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
         return 'Today';
     };
 
-    // Undo History Stack (Max 20 steps, session only)
-    const [history, setHistory] = useState([]);
-    const [showUndo, setShowUndo] = useState(false);
+
 
     const modules = project.modules || [];
 
     // --- Actions ---
 
     const pushSnapshot = () => {
-        const currentModules = project.modules || [];
-        setHistory(prev => {
-            const newHistory = [...prev, currentModules];
-            return newHistory.slice(-20); // Keep max 20 snapshots
-        });
-        setShowUndo(true);
         setLastEdited(new Date());
     };
 
@@ -86,17 +78,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
         updateProject(project.id, { modules: updatedModules });
     };
 
-    const handleUndo = () => {
-        if (history.length > 0) {
-            const previousState = history[history.length - 1];
-            const newHistory = history.slice(0, -1);
 
-            updateProject(project.id, { modules: previousState });
-            setHistory(newHistory);
-
-            if (newHistory.length === 0) setShowUndo(false);
-        }
-    };
 
     const handleUpdateModule = (moduleId, updates) => {
         // Only snapshot for significant changes if desired, but for now snapshot everything
