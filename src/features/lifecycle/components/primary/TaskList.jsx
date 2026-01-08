@@ -189,7 +189,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                 onPointerMove={disableReorder ? undefined : handlePointerMove}
                 onClick={(e) => {
                     if (isSelectionMode) {
-                        onSelect();
+                        onSelect(e);
                         return;
                     }
                     // Manual double-click detection (Framer Motion drag conflicts with native dblclick)
@@ -352,6 +352,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
     // Multi-select State
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState(new Set());
+    const [lastSelectedId, setLastSelectedId] = useState(null); // For Shift+click range selection
 
     // Completed section collapse state - default collapsed
     const [isCompletedCollapsed, setIsCompletedCollapsed] = useState(true);
@@ -370,11 +371,61 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
     useEffect(() => {
         setIsSelectionMode(false);
         setSelectedIds(new Set());
+        setLastSelectedId(null);
     }, [activeStage]);
+
+    // Keyboard shortcuts: Cmd/Ctrl+A for select all
+    useEffect(() => {
+        if (!isSelectionMode) return;
+
+        const handleKeyDown = (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+                e.preventDefault();
+                handleSelectAll();
+            }
+            if (e.key === 'Escape') {
+                setIsSelectionMode(false);
+                setSelectedIds(new Set());
+                setLastSelectedId(null);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isSelectionMode, localTasks]);
 
     // Separate tasks into pending and completed
     const pendingTasks = localTasks.filter(t => !t.done);
     const completedTasks = localTasks.filter(t => t.done);
+
+    // Shift+click range selection
+    const handleShiftSelect = (id, e) => {
+        if (!e.shiftKey || !lastSelectedId) {
+            // Normal click
+            toggleSelection(id);
+            setLastSelectedId(id);
+            return;
+        }
+
+        // Shift+click: select range
+        const allIds = localTasks.map(t => t.id);
+        const lastIdx = allIds.indexOf(lastSelectedId);
+        const currentIdx = allIds.indexOf(id);
+
+        if (lastIdx === -1 || currentIdx === -1) {
+            toggleSelection(id);
+            setLastSelectedId(id);
+            return;
+        }
+
+        const start = Math.min(lastIdx, currentIdx);
+        const end = Math.max(lastIdx, currentIdx);
+        const rangeIds = allIds.slice(start, end + 1);
+
+        const newSelected = new Set(selectedIds);
+        rangeIds.forEach(rid => newSelected.add(rid));
+        setSelectedIds(newSelected);
+    };
 
     const toggleSelection = (id) => {
         const newSelected = new Set(selectedIds);
@@ -384,6 +435,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
             newSelected.add(id);
         }
         setSelectedIds(newSelected);
+        setLastSelectedId(id);
     };
 
     const handleSelectAll = () => {
@@ -422,6 +474,18 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
         navigator.clipboard.writeText(textToCopy);
         setIsSelectionMode(false);
         setSelectedIds(new Set());
+        setLastSelectedId(null);
+    };
+
+    // Bulk Move to Stage
+    const handleBulkMove = (targetStage) => {
+        if (selectedIds.size === 0 || targetStage === activeStage) return;
+        selectedIds.forEach(id => {
+            onUpdateTask(projectId, id, { stage: targetStage });
+        });
+        setIsSelectionMode(false);
+        setSelectedIds(new Set());
+        setLastSelectedId(null);
     };
 
     const handleReorder = (newOrder) => {
@@ -508,7 +572,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                                 themeColor={activeTheme}
                                                 isSelectionMode={isSelectionMode}
                                                 isSelected={selectedIds.has(task.id)}
-                                                onSelect={() => toggleSelection(task.id)}
+                                                onSelect={(e) => handleShiftSelect(task.id, e)}
                                             />
                                         ))}
                                     </Reorder.Group>
@@ -600,7 +664,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                                                     themeColor={activeTheme}
                                                                     isSelectionMode={isSelectionMode}
                                                                     isSelected={selectedIds.has(task.id)}
-                                                                    onSelect={() => toggleSelection(task.id)}
+                                                                    onSelect={(e) => handleShiftSelect(task.id, e)}
                                                                     disableReorder={true}
                                                                 />
                                                             </motion.div>
@@ -713,10 +777,32 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                     <Copy size={18} />
                                 </button>
                                 <div className={`w-px h-4 bg-${activeTheme}-200 mx-1`} />
+                                {/* Move to Stage Buttons */}
+                                <div className="flex items-center gap-0.5 bg-white/50 rounded-lg p-0.5">
+                                    {[1, 2, 3, 4, 5].filter(s => s !== activeStage).map(stage => (
+                                        <button
+                                            key={stage}
+                                            onClick={() => handleBulkMove(stage)}
+                                            disabled={selectedIds.size === 0}
+                                            className={`w-7 h-7 rounded-md text-xs font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed
+                                                ${stage === 1 ? 'hover:bg-emerald-100 hover:text-emerald-700' : ''}
+                                                ${stage === 2 ? 'hover:bg-blue-100 hover:text-blue-700' : ''}
+                                                ${stage === 3 ? 'hover:bg-violet-100 hover:text-violet-700' : ''}
+                                                ${stage === 4 ? 'hover:bg-amber-100 hover:text-amber-700' : ''}
+                                                ${stage === 5 ? 'hover:bg-rose-100 hover:text-rose-700' : ''}
+                                                text-gray-500
+                                            `}
+                                            title={`Move to Stage ${stage}`}
+                                        >
+                                            {stage}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className={`w-px h-4 bg-${activeTheme}-200 mx-1`} />
                                 <button
                                     onClick={() => setIsSelectionMode(false)}
                                     className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all"
-                                    title="Cancel"
+                                    title="Cancel (Esc)"
                                 >
                                     <X size={18} />
                                 </button>

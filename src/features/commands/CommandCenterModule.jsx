@@ -426,6 +426,8 @@ const CommandCenterModule = () => {
                     setIsAdding={setIsAdding}
                     setIsImporting={setIsImporting}
                     copiedId={copiedId}
+                    commands={commands}
+                    setCommands={setCommands}
                 />
             </div>
 
