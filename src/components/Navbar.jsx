@@ -45,7 +45,7 @@ const Navbar = () => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isDataModalOpen, setIsDataModalOpen] = useState(false);
     const { isDark, toggleTheme } = useTheme();
-    const { t } = useTranslation();
+    const { t, language, toggleLanguage } = useTranslation();
 
     // Generate tabs with translations
     const tabs = [
@@ -89,6 +89,15 @@ const Navbar = () => {
                         })}
 
                         <div className="w-px h-5 md:h-6 bg-gray-100 dark:bg-gray-700 mx-0.5 md:mx-1 relative z-40 shrink-0" />
+
+                        {/* Language Toggle Button */}
+                        <button
+                            onClick={toggleLanguage}
+                            className="relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all z-40 shrink-0"
+                            title="Switch Language"
+                        >
+                            <span className="text-xs font-medium uppercase">{language === 'zh' ? '简' : language === 'ja' ? '日' : language === 'ko' ? '한' : 'EN'}</span>
+                        </button>
 
                         {/* Theme Toggle Button */}
                         <button
