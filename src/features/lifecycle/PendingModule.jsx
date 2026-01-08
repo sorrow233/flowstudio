@@ -276,11 +276,15 @@ const PendingModule = () => {
 const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }) => {
     // Local state for Vow to support IME (Chinese Input) properly
     const [localVow, setLocalVow] = useState(project.foundingReason || '');
+    const [localTitle, setLocalTitle] = useState(project.title || '');
+    const [localDesc, setLocalDesc] = useState(project.desc || '');
     const [selectedCategory, setSelectedCategory] = useState('general'); // Local state for Category
 
     // Reset local state when switching projects
     useEffect(() => {
         setLocalVow(project.foundingReason || '');
+        setLocalTitle(project.title || '');
+        setLocalDesc(project.desc || '');
         setSelectedCategory('general'); // Reset category
     }, [project.id]);
 
@@ -289,6 +293,18 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
     const handleVowBlur = () => {
         if (localVow !== (project.foundingReason || '')) {
             onUpdate(project.id, 'foundingReason', localVow);
+        }
+    };
+
+    const handleTitleBlur = () => {
+        if (localTitle !== project.title) {
+            onUpdate(project.id, 'title', localTitle);
+        }
+    };
+
+    const handleDescBlur = () => {
+        if (localDesc !== project.desc) {
+            onUpdate(project.id, 'desc', localDesc);
         }
     };
 
@@ -330,18 +346,20 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
 
                 <div className="w-full max-w-lg text-center">
                     <input
-                        value={project.title}
-                        onChange={(e) => onUpdate(project.id, 'title', e.target.value)}
+                        value={localTitle}
+                        onChange={(e) => setLocalTitle(e.target.value)}
+                        onBlur={handleTitleBlur}
                         className="w-full text-4xl md:text-5xl font-thin text-gray-900 text-center bg-transparent border-none focus:ring-0 placeholder:text-gray-300 mb-2"
                         placeholder="无名项目"
                     />
                     <textarea
-                        value={project.desc}
+                        value={localDesc}
                         onChange={(e) => {
-                            onUpdate(project.id, 'desc', e.target.value);
+                            setLocalDesc(e.target.value);
                             e.target.style.height = 'auto';
                             e.target.style.height = e.target.scrollHeight + 'px';
                         }}
+                        onBlur={handleDescBlur}
                         className="w-full text-base font-light text-center text-gray-500 bg-transparent resize-none border-none focus:ring-0 min-h-[3em]"
                         placeholder="这个想法的原动力是什么？"
                     />
