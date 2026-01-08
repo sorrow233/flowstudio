@@ -35,6 +35,20 @@ const PrimaryDevModule = () => {
     const [newTaskInput, setNewTaskInput] = useState('');
     const [newTaskCategory, setNewTaskCategory] = useState('general');
     const [commandModalOpen, setCommandModalOpen] = useState(false);
+    const [availableCommands, setAvailableCommands] = useState([]);
+
+    // Load commands for sync check
+    useEffect(() => {
+        const loadCommands = () => {
+            const savedCmds = localStorage.getItem(STORAGE_KEYS.COMMANDS);
+            if (savedCmds) {
+                setAvailableCommands(JSON.parse(savedCmds));
+            }
+        };
+        loadCommands();
+        window.addEventListener('focus', loadCommands);
+        return () => window.removeEventListener('focus', loadCommands);
+    }, []);
 
     // --- Graduation State ---
     const [showGraduationChecklist, setShowGraduationChecklist] = useState(false);
@@ -458,6 +472,7 @@ const PrimaryDevModule = () => {
                                         newTaskCategory={newTaskCategory}
                                         setNewTaskCategory={setNewTaskCategory}
                                         onImportCommand={() => setCommandModalOpen(true)}
+                                        availableCommands={availableCommands}
                                         onScroll={(e) => {
                                             const scrollTop = e.currentTarget.scrollTop;
                                             if (scrollTop > 10 && !isHeaderCollapsed) {

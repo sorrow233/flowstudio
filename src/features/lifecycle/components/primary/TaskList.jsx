@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
-import { Check, Trash2, ExternalLink, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, CheckSquare, Globe, Edit2, GripVertical } from 'lucide-react';
+import { Check, Trash2, ExternalLink, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, CheckSquare, Globe, Edit2, GripVertical, RefreshCw } from 'lucide-react';
 import { COMMAND_CATEGORIES, STAGE_EMPTY_STATES, DEV_STAGES } from '../../../../utils/constants';
 
 const CATEGORY_ICONS = {
@@ -13,8 +13,12 @@ const CATEGORY_ICONS = {
 };
 
 // Separated Task Item Component to handle individual drag controls properly
-const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskId, onToggle, onDelete, handleCopy, startEditing, isEditing, editValue, setEditValue, saveEdit }) => {
+const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskId, onToggle, onDelete, handleCopy, startEditing, isEditing, editValue, setEditValue, saveEdit, availableCommands, onUpdateTask }) => {
     const dragControls = useDragControls();
+
+    // Check for updates
+    const sourceCommand = task.isCommand && availableCommands?.find(c => c.id === task.commandId);
+    const isOutdated = sourceCommand && (sourceCommand.content !== task.commandContent || sourceCommand.title !== task.text);
 
     return (
         <Reorder.Item
@@ -114,9 +118,27 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                                 }
                             }}
                         >
-                            <span className={`text-base font-medium transition-all ${task.done ? 'opacity-50 line-through decoration-emerald-500/30' : 'text-gray-700'}`}>
-                                {task.text}
-                            </span>
+                            <div className="flex items-center gap-2">
+                                <span className={`text-base font-medium transition-all ${task.done ? 'opacity-50 line-through decoration-emerald-500/30' : 'text-gray-700'}`}>
+                                    {task.text}
+                                </span>
+                                {isOutdated && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onUpdateTask(projectId, task.id, {
+                                                text: sourceCommand.title,
+                                                commandContent: sourceCommand.content,
+                                                commandTags: sourceCommand.tags || []
+                                            });
+                                        }}
+                                        className="p-1 text-amber-500 bg-amber-50 rounded-full hover:bg-amber-100 transition-colors animate-pulse"
+                                        title="Update to latest version"
+                                    >
+                                        <RefreshCw size={12} />
+                                    </button>
+                                )}
+                            </div>
 
                             {/* Tags Row */}
                             <div className="flex flex-wrap items-center gap-2">
@@ -194,7 +216,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
     );
 };
 
-const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask, onUpdateTask, newTaskInput, setNewTaskInput, newTaskCategory, setNewTaskCategory, onScroll, onReorder, onImportCommand }, ref) => {
+const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask, onUpdateTask, newTaskInput, setNewTaskInput, newTaskCategory, setNewTaskCategory, onScroll, onReorder, onImportCommand, availableCommands }, ref) => {
     const [copiedTaskId, setCopiedTaskId] = useState(null);
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const [editingTaskId, setEditingTaskId] = useState(null);
@@ -274,6 +296,8 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                         editValue={editValue}
                                         setEditValue={setEditValue}
                                         saveEdit={saveEdit}
+                                        availableCommands={availableCommands}
+                                        onUpdateTask={onUpdateTask}
                                     />
                                 ))}
                             </Reorder.Group>
