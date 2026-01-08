@@ -241,6 +241,22 @@ const PrimaryDevModule = () => {
         handleUpdateProject(selectedProject.id, { stageNames: updatedStageNames });
     };
 
+    // --- Stage Metadata Calculation ---
+    // Calculate counts for tasks and commands per stage to show as badges
+    const stageStats = React.useMemo(() => {
+        if (!selectedProject?.tasks) return {};
+
+        const stats = {};
+        DEV_STAGES.forEach(stage => {
+            const stageTasks = selectedProject.tasks.filter(t => (t.stage || 1) === stage.id);
+            stats[stage.id] = {
+                taskCount: stageTasks.filter(t => !t.isCommand && !t.done).length,
+                commandCount: stageTasks.filter(t => t.isCommand && !t.done).length
+            };
+        });
+        return stats;
+    }, [selectedProject?.tasks]);
+
     return (
         <div className="max-w-7xl mx-auto pt-10 px-6 pb-20">
             {/* Dashboard Header */}
@@ -410,6 +426,7 @@ const PrimaryDevModule = () => {
                                     onToggleComplete={handleToggleStageComplete}
                                     customStageNames={selectedProject.stageNames || {}}
                                     onRenameStage={handleRenameStage}
+                                    stageStats={stageStats}
                                 />
 
                                 {/* Right Content: Task List */}

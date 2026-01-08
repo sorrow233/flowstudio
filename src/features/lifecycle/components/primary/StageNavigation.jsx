@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, MonitorPlay, Container, Sparkles, Flag, Check, Lock } from 'lucide-react';
+import { Layers, MonitorPlay, Container, Sparkles, Flag, Check, Lock, Terminal, CheckSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { DEV_STAGES } from '../../../../utils/constants';
 
@@ -11,7 +11,7 @@ const STAGE_ICONS = {
     5: Flag
 };
 
-const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleComplete, customStageNames = {}, onRenameStage }) => {
+const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleComplete, customStageNames = {}, onRenameStage, stageStats = {} }) => {
     const [editingStageId, setEditingStageId] = React.useState(null);
     const [editValue, setEditValue] = React.useState('');
 
@@ -55,6 +55,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                     const isCurrentProgress = currentProgress === stage.id;
                     // const isLocked = currentProgress < stage.id; // Removed lock logic as per user request
 
+                    const stats = stageStats[stage.id] || { taskCount: 0, commandCount: 0 };
                     const Icon = STAGE_ICONS[stage.id];
 
                     return (
@@ -113,8 +114,24 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                             {customStageNames[stage.id] || stage.label}
                                         </div>
                                     )}
-                                    <div className={`text-[10px] truncate transition-colors ${isViewActive ? 'text-white/50' : 'text-gray-400'}`}>
-                                        {isCompleted ? 'Completed' : isCurrentProgress ? 'In Progress' : 'Pending'}
+                                    <div className={`flex items-center gap-2 mt-0.5 text-[10px] truncate transition-colors ${isViewActive ? 'text-white/50' : 'text-gray-400'}`}>
+                                        <span className={isCompleted ? 'text-emerald-600/70' : ''}>{isCompleted ? 'Completed' : isCurrentProgress ? 'In Progress' : 'Pending'}</span>
+
+                                        {/* Content Badges */}
+                                        {!isCompleted && (stats.commandCount > 0 || stats.taskCount > 0) && (
+                                            <div className="flex items-center gap-2 ml-1 opacity-80">
+                                                {stats.commandCount > 0 && (
+                                                    <span className="flex items-center gap-0.5" title={`${stats.commandCount} Commands awaiting`}>
+                                                        <Terminal size={8} /> {stats.commandCount}
+                                                    </span>
+                                                )}
+                                                {stats.taskCount > 0 && (
+                                                    <span className="flex items-center gap-0.5" title={`${stats.taskCount} Tasks awaiting`}>
+                                                        <CheckSquare size={8} /> {stats.taskCount}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 

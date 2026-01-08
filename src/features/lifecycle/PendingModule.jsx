@@ -373,60 +373,84 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                 </div>
             </div>
 
-            {/* Questions List */}
-            <div className="space-y-4 max-w-2xl mx-auto w-full relative z-20">
+            {/* Questions List - Auto-Jump (Collapsible) */}
+            <div className="space-y-3 max-w-2xl mx-auto w-full relative z-20">
                 {QUESTIONS.map((q, i) => {
                     const ans = project.answers[q.id];
+                    const isAnswered = ans !== undefined;
+
                     return (
                         <motion.div
+                            layout
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
+                            transition={{ duration: 0.4, type: "spring", bounce: 0 }}
                             key={q.id}
                             className={`
-                            relative p-6 rounded-2xl border transition-all duration-500 overflow-hidden
-                            ${ans === true ? 'bg-emerald-50/50 border-emerald-100' : ''}
-                            ${ans === false ? 'bg-red-50/50 border-red-100' : ''}
-                            ${ans === undefined ? 'bg-white border-gray-100' : ''}
-                        `}
+                                relative rounded-2xl border transition-all duration-300 overflow-hidden
+                                ${isAnswered
+                                    ? 'p-4 bg-gray-50/50 border-gray-100' // Collapsed state
+                                    : 'p-6 bg-white border-gray-100 shadow-sm' // Active state
+                                }
+                            `}
                         >
-                            <div className="relative z-30 flex justify-between items-center mb-4">
-                                <div>
-                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{q.sub}</h4>
-                                    <p className="text-lg text-gray-800 font-light">{q.text}</p>
+                            {isAnswered ? (
+                                /* Collapsed Summary Row */
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-1 rounded-full ${ans ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'}`}>
+                                            {ans ? <CheckCircle2 size={14} /> : <X size={14} />}
+                                        </div>
+                                        <span className={`text-sm font-medium ${ans ? 'text-emerald-900' : 'text-gray-500'}`}>
+                                            {q.text}
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={() => onAnswer(project.id, q.id, undefined)}
+                                        className="text-xs text-gray-400 hover:text-emerald-500 transition-colors px-2 py-1 rounded hover:bg-white"
+                                    >
+                                        Redo
+                                    </button>
                                 </div>
-                                <div className="w-8 h-8 flex items-center justify-center">
-                                    {ans === true && <CheckCircle2 className="text-emerald-500" size={20} />}
-                                    {ans === false && <X className="text-red-400" size={20} />}
-                                </div>
-                            </div>
+                            ) : (
+                                /* Active Question Card */
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.2 }}
+                                >
+                                    <div className="relative z-30 flex justify-between items-start mb-6">
+                                        <div>
+                                            <h4 className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-widest mb-2 flex items-center gap-1">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                                Question {i + 1} / 4
+                                            </h4>
+                                            <p className="text-xl text-gray-800 font-light leading-relaxed">{q.text}</p>
+                                        </div>
+                                    </div>
 
-                            <div className="relative z-30 flex gap-3">
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onAnswer(project.id, q.id, true);
-                                    }}
-                                    className={`
-                                    relative z-50 cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all active:scale-95
-                                    ${ans === true ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-200' : 'hover:bg-gray-50 bg-white hover:border-gray-300'}
-                                `}
-                                >
-                                    YES
-                                </button>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onAnswer(project.id, q.id, false);
-                                    }}
-                                    className={`
-                                    relative z-50 cursor-pointer flex-1 py-3 border rounded-xl text-sm font-medium tracking-wide transition-all active:scale-95
-                                    ${ans === false ? 'bg-red-500 text-white border-red-500 shadow-md shadow-red-200' : 'hover:bg-gray-50 bg-white hover:border-gray-300'}
-                                `}
-                                >
-                                    NO
-                                </button>
-                            </div>
+                                    <div className="relative z-30 flex gap-3">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onAnswer(project.id, q.id, true);
+                                            }}
+                                            className="relative z-50 cursor-pointer flex-1 py-4 border border-emerald-100 rounded-xl text-sm font-medium tracking-wide transition-all bg-white text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100 active:scale-[0.98] group"
+                                        >
+                                            <span className="group-hover:scale-110 inline-block transition-transform">YES</span>
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onAnswer(project.id, q.id, false);
+                                            }}
+                                            className="relative z-50 cursor-pointer flex-1 py-4 border border-gray-100 rounded-xl text-sm font-medium tracking-wide transition-all bg-white text-gray-400 hover:bg-gray-50 hover:text-gray-600 hover:border-gray-200 active:scale-[0.98]"
+                                        >
+                                            NO
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )}
                         </motion.div>
                     );
                 })}
@@ -516,7 +540,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                                 className={`
                                     relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-300 group
                                     ${isSelected
-                                        ? 'bg-gray-900 border-gray-900 shadow-xl shadow-gray-200 scale-105 z-10'
+                                        ? 'bg-white border-emerald-500 shadow-xl shadow-emerald-500/10 scale-105 z-10 ring-1 ring-emerald-500'
                                         : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-1'
                                     }
                                 `}
@@ -524,7 +548,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                                 <div className={`
                                     w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-colors
                                     ${isSelected
-                                        ? 'bg-white/10 text-white'
+                                        ? 'bg-emerald-50 text-emerald-600'
                                         : 'bg-gray-50 text-gray-400 group-hover:bg-emerald-50 group-hover:text-emerald-500'
                                     }
                                 `}>
@@ -532,7 +556,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                                 </div>
                                 <span className={`
                                     text-xs font-medium tracking-wide transition-colors
-                                    ${isSelected ? 'text-white' : 'text-gray-600 group-hover:text-gray-900'}
+                                    ${isSelected ? 'text-emerald-900 font-bold' : 'text-gray-600 group-hover:text-gray-900'}
                                 `}>
                                     {cat.label}
                                 </span>
@@ -540,9 +564,9 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                                 {isSelected && (
                                     <motion.div
                                         layoutId="category-check"
-                                        className="absolute top-2 right-2 text-white/50"
+                                        className="absolute top-2 right-2 text-emerald-500"
                                     >
-                                        <CheckCircle2 size={14} />
+                                        <CheckCircle2 size={14} fill="currentColor" className="text-white" />
                                     </motion.div>
                                 )}
                             </button>
