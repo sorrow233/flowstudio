@@ -160,14 +160,20 @@ export class SyncEngine {
     async tryPushUpdates() {
         if (this.isPushing || !this.hasPendingChanges || !navigator.onLine) return;
 
+        // Safety: Prevent infinite hanging if Firestore is unresponsive (e.g. AdBlock blocking requests)
+        const PUSH_TIMEOUT_MS = 15000;
+        let timeoutId;
+
         try {
             this.isPushing = true;
+            // console.debug("[SyncEngine] Push started...");
 
-            // Calculate Diff: Local - Shadow
+            // 1. Calculate Diff: Local - Shadow
             const stateVector = Y.encodeStateVector(this.shadowDoc);
             const diff = Y.encodeStateAsUpdate(this.doc, stateVector);
 
             if (diff.byteLength === 0) {
+                // console.debug("[SyncEngine] No diff found. Synced.");
                 this.hasPendingChanges = false;
                 this.pendingCount = 0;
                 this.setStatus('synced');
@@ -175,34 +181,51 @@ export class SyncEngine {
                 return;
             }
 
-            // Send
-            const updatesColl = collection(db, `users/${this.userId}/rooms/${this.docId}/updates`);
+            // 2. Prepare Push
             const updateStr = btoa(String.fromCharCode.apply(null, diff));
+            const updatesColl = collection(db, `users/${this.userId}/rooms/${this.docId}/updates`);
 
-            await addDoc(updatesColl, {
+            // 3. Race Firestore against Timeout
+            const pushPromise = addDoc(updatesColl, {
                 update: updateStr,
                 createdAt: serverTimestamp(),
                 userId: this.userId
             });
 
-            // Update Shadow to match confirmed state
+            const timeoutPromise = new Promise((_, reject) => {
+                timeoutId = setTimeout(() => {
+                    reject(new Error("Push Timeout"));
+                }, PUSH_TIMEOUT_MS);
+            });
+
+            await Promise.race([pushPromise, timeoutPromise]);
+            clearTimeout(timeoutId);
+
+            // console.info(`[SyncEngine] Push Success (${diff.byteLength} bytes).`);
+
+            // 4. Update Shadow to match confirmed state
             Y.applyUpdate(this.shadowDoc, diff);
 
-            // Re-check
+            // 5. Re-check for more changes
             this.checkForPendingChanges();
 
         } catch (error) {
-            console.warn("[SyncEngine] Push Failed:", error.code);
+            clearTimeout(timeoutId);
+            console.warn(`[SyncEngine] Push Failed: ${error.message}`);
+
+            // If timeout or error, we mark as offline so user knows.
+            // Pending changes remain in flags for next retry.
             this.setStatus('offline');
-            // Don't clear pending changes; retry later
         } finally {
             this.isPushing = false;
         }
     }
 
     checkForPendingChanges() {
+        // Double check if we still have differences after the push
         const stateVector = Y.encodeStateVector(this.shadowDoc);
         const diff = Y.encodeStateAsUpdate(this.doc, stateVector);
+
         if (diff.byteLength > 0) {
             this.hasPendingChanges = true;
             this.updatePendingCount();
@@ -210,21 +233,12 @@ export class SyncEngine {
         } else {
             this.hasPendingChanges = false;
             this.pendingCount = 0;
-            this.notifyListeners(); // Update UI to show 0 pending
+            this.notifyListeners();
             this.setStatus('synced');
         }
     }
 
     updatePendingCount() {
-        // Estimating complexity of pending changes is hard in binary Yjs.
-        // We will just use a generic "Pending" flag or try to estimate bytes.
-        // For UI "Saving (3)...", exact operation count is complex.
-        // We'll stick to a simple byte-size check or valid updates count.
-        // For this iteration, let's just assume 1 composite update pending if hasPendingChanges is true.
-        // Or we could track local 'update' events since last sync.
-
-        // Let's refine this: We can't easily know "how many cards" changed.
-        // But we can show "Unsaved Changes" text.
         this.pendingCount = this.hasPendingChanges ? 1 : 0;
         this.notifyListeners();
     }

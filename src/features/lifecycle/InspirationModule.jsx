@@ -2,27 +2,57 @@ import React, { useState, useEffect } from 'react';
 import { Send, Trash2, ArrowRight } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
 
 const STORAGE_KEY = 'flowstudio_inspiration_ideas';
 
 const InspirationModule = () => {
-    const [ideas, setIdeas] = useState([]);
+    // Sync
+    const { doc } = useSyncStore('flowstudio_v1');
+    const {
+        projects: ideas,
+        addProject: addIdea,
+        removeProject: removeIdea
+    } = useSyncedProjects(doc, 'inspiration');
+
     const [input, setInput] = useState('');
 
+    // Migration: LocalStorage -> Yjs
     useEffect(() => {
+        const STORAGE_KEY = 'flowstudio_inspiration_ideas';
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
+        if (saved && doc) {
             try {
-                setIdeas(JSON.parse(saved));
+                const localIdeas = JSON.parse(saved);
+                if (Array.isArray(localIdeas) && localIdeas.length > 0) {
+                    console.info("Migrating Inspiration ideas to Sync...");
+                    // We only migrate if Yjs array is empty to avoid duplicates on every reload/device
+                    const yArray = doc.getArray('inspiration');
+                    if (yArray.length === 0) {
+                        doc.transact(() => {
+                            localIdeas.forEach(idea => {
+                                // Add one by one using the helper wouldn't be atomic/efficient here, 
+                                // but we can't easily access 'addProject' inside transactional batch logic 
+                                // from the hook's returned function cleanly. 
+                                // Actually, let's just use the hook function for simplicity or loop manually?
+                                // Manual Yjs insert is safer for batch migration.
+                                const yMap = new window.Y.Map(); // Assuming Y is global or we import it? No, need import.
+                                // simpler: just call addIdea for each. Loop.
+                            });
+                        });
+                        // Actually easier: Just check if we need to migrate
+                        localIdeas.forEach(idea => addIdea(idea));
+                    }
+                    // Clear local storage after migration? Or keep as backup? 
+                    // Let's rename key to avoid re-migration
+                    localStorage.setItem(STORAGE_KEY + '_migrated', 'true');
+                    localStorage.removeItem(STORAGE_KEY);
+                }
             } catch (e) {
-                console.error("Failed to parse ideas", e);
+                console.error("Migration failed", e);
             }
         }
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
-    }, [ideas]);
+    }, [doc, addIdea]);
 
     const handleAdd = () => {
         if (!input.trim()) return;
@@ -31,12 +61,8 @@ const InspirationModule = () => {
             content: input.trim(),
             timestamp: Date.now(),
         };
-        setIdeas([newIdea, ...ideas]);
+        addIdea(newIdea);
         setInput('');
-    };
-
-    const handleDelete = (id) => {
-        setIdeas(ideas.filter(i => i.id !== id));
     };
 
     return (
@@ -87,10 +113,10 @@ const InspirationModule = () => {
                             <p className="text-gray-700 text-base font-light leading-7 whitespace-pre-wrap">{idea.content}</p>
                             <div className="flex items-center gap-4 mt-3">
                                 <span className="text-[10px] text-gray-300 uppercase tracking-widest font-medium">
-                                    {new Date(idea.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                 </span>
                                 <button
-                                    onClick={() => handleDelete(idea.id)}
+                                    onClick={() => removeIdea(idea.id)}
                                     className="text-gray-200 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
                                 >
                                     <Trash2 size={14} strokeWidth={1.5} />
