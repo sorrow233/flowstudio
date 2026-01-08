@@ -45,7 +45,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                     {/* Progress Line - Based on Actual Progress, not View */}
                     <div
                         className="w-full bg-emerald-500/30 transition-all duration-700 ease-in-out absolute top-0"
-                        style={{ height: `${Math.min(((currentProgress - 1) / 5) * 100, 100)}%` }}
+                        style={{ height: `${Math.min(((currentProgress - 1) / (stages.length - 1)) * 100, 100)}%` }}
                     />
                 </div>
 
