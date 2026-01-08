@@ -47,6 +47,9 @@ const PrimaryDevModule = () => {
         canRedo
     } = useSyncedProjects(doc, 'primary_projects');
 
+    // Also connect to Final Projects to push graduated projects there
+    const { addProject: addFinalProject } = useSyncedProjects(doc, 'final_projects');
+
     useUndoShortcuts(undo, redo);
 
     // --- Global State ---
@@ -262,7 +265,21 @@ const PrimaryDevModule = () => {
             colors: ['#10B981', '#34D399', '#FBBF24', '#ffffff']
         });
 
-        // Update Project Stage to 6 (Advanced)
+        // 1. DUPLICATE TO FINAL DEV MODULE
+        const finalProject = {
+            id: `${selectedProject.id}-final`, // Ensure unique ID but linkable
+            title: selectedProject.title,
+            desc: selectedProject.desc,
+            link: selectedProject.link,
+            bgImage: selectedProject.bgImage,
+            subStage: 1, // Start at Stage 1 (Optimization)
+            tasks: [],   // Start fresh with tasks for Final phase
+            createdAt: Date.now(),
+            originProjectId: selectedProject.id // Traceability
+        };
+        addFinalProject(finalProject);
+
+        // 2. UPDATE PRIMARY TO ADVANCED STAGE
         handleUpdateProject(selectedProject.id, { subStage: 6 });
 
         // Close modal after delay

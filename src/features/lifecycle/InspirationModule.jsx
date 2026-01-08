@@ -162,9 +162,26 @@ const InspirationModule = () => {
                             className="group relative bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] hover:border-gray-200 transition-all duration-300"
                         >
                             <div className="flex justify-between items-start gap-6">
-                                <p className="text-gray-700 text-base font-light leading-7 whitespace-pre-wrap flex-grow font-sans">
-                                    {idea.content}
-                                </p>
+                                <div className="text-gray-700 text-base font-light leading-7 whitespace-pre-wrap flex-grow font-sans">
+                                    {(() => {
+                                        // Simple parser for [Tag] pattern
+                                        const parts = idea.content.split(/(\[.*?\])/g);
+                                        return parts.map((part, index) => {
+                                            if (part.match(/^\[(.*?)\]$/)) {
+                                                const tagName = part.slice(1, -1); // Remove [ and ]
+                                                return (
+                                                    <span
+                                                        key={index}
+                                                        className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-emerald-50 text-emerald-600 rounded-md text-[11px] font-medium align-middle border border-emerald-100/50 shadow-sm transform -translate-y-0.5"
+                                                    >
+                                                        {tagName}
+                                                    </span>
+                                                );
+                                            }
+                                            return <span key={index}>{part}</span>;
+                                        });
+                                    })()}
+                                </div>
                                 <div className="flex flex-col items-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                     <button
                                         onClick={() => handleCopy(idea.content, idea.id)}

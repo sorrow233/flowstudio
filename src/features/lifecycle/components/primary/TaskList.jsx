@@ -532,7 +532,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
             {/* Scrollable List */}
             <div
                 ref={ref}
-                className="flex-1 overflow-y-auto px-8 pb-4 custom-scrollbar"
+                className="flex-1 overflow-y-auto px-4 md:px-8 pb-4 custom-scrollbar"
                 onScroll={onScroll}
             >
                 <div className="min-h-full flex flex-col">

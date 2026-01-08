@@ -98,6 +98,7 @@ export const COMMAND_CATEGORIES = [
     { id: 'database', label: 'Database', color: 'bg-amber-400 text-white', icon: 'Database' },
     { id: 'devops', label: 'DevOps', color: 'bg-violet-400 text-white', icon: 'Container' },
     { id: 'testing', label: 'Testing', color: 'bg-rose-400 text-white', icon: 'Beaker' },
+    { id: 'final', label: 'Final', color: 'bg-zinc-700 text-white', icon: 'Flag' },
 ];
 
 export const DEFAULT_PROJECT_IMAGES = [

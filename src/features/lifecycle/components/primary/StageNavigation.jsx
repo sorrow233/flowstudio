@@ -62,7 +62,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                         <div
                             key={stage.id}
                             className={`
-                                relative z-10 flex items-center p-2 rounded-xl transition-all duration-300 group
+                                relative z-10 flex items-center p-2 rounded-xl transition-all duration-300 group min-w-[260px] md:min-w-0
                                 ${isViewActive ? 'bg-gray-900 shadow-xl shadow-gray-200 ring-1 ring-black/5' : 'hover:bg-gray-50'}
                             `}
                         >

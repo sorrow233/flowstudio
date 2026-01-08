@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, ChevronDown, Filter, Sparkles } from 'lucide-react';
+import { X, Search, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, ChevronDown, Filter, Sparkles, Flag } from 'lucide-react';
 import { STORAGE_KEYS, COMMAND_CATEGORIES, DEV_STAGES } from '../../../../utils/constants';
 
 const CATEGORY_ICONS = {
@@ -9,7 +9,8 @@ const CATEGORY_ICONS = {
     'Server': Server,
     'Database': Database,
     'Container': Container,
-    'Beaker': Beaker
+    'Beaker': Beaker,
+    'Flag': Flag
 };
 
 const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCategory }) => {
@@ -194,7 +195,7 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                             </div>
 
                             {/* Filter Dropdown - Dot Ribbon */}
-                            <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full shadow-inner border border-gray-200/50">
+                            <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full shadow-inner border border-gray-200/50 overflow-x-auto no-scrollbar max-w-full">
                                 <button
                                     onClick={() => setImportCategory('all')}
                                     className={`

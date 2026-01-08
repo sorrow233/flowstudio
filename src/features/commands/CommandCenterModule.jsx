@@ -255,7 +255,7 @@ const CommandCenterModule = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto pt-8 px-6 h-[calc(100vh-4rem)] flex gap-8">
+        <div className="max-w-7xl mx-auto pt-8 px-4 md:px-6 h-full md:h-[calc(100vh-4rem)] flex flex-col md:flex-row gap-4 md:gap-8">
             {/* Ambient Background */}
             <div className="fixed inset-0 -z-10 bg-gray-50/50 pointer-events-none" />
             <div className="fixed top-0 left-0 w-full h-96 bg-gradient-to-b from-gray-100 to-transparent -z-10 opacity-50" />
@@ -268,12 +268,12 @@ const CommandCenterModule = () => {
             />
 
             {/* Main Content */}
-            <div className="flex-1 bg-white/80 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-10 shadow-2xl shadow-gray-200/50 flex flex-col relative overflow-hidden ring-1 ring-gray-100/50">
+            <div className="flex-1 bg-white/80 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-4 md:p-10 shadow-2xl shadow-gray-200/50 flex flex-col relative overflow-hidden ring-1 ring-gray-100/50">
                 {/* Decorative Elements */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-50/50 to-transparent blur-3xl -z-10 pointer-events-none" />
 
                 {/* Header */}
-                <div className="flex justify-between items-end mb-10">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 md:mb-10 gap-6 md:gap-0">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
                             <span className="px-2 py-1 rounded-md bg-gray-100 text-[10px] font-bold tracking-widest uppercase text-gray-500">
@@ -293,17 +293,17 @@ const CommandCenterModule = () => {
                                 )}
                             </div>
                         </div>
-                        <h3 className="text-4xl font-thin text-gray-900 mb-2">{DEV_STAGES[activeStage - 1].title}</h3>
-                        <p className="text-gray-400 font-light max-w-lg leading-relaxed">
+                        <h3 className="text-3xl md:text-4xl font-thin text-gray-900 mb-2">{DEV_STAGES[activeStage - 1].title}</h3>
+                        <p className="text-gray-400 font-light max-w-lg leading-relaxed text-sm md:text-base">
                             {DEV_STAGES[activeStage - 1].desc}
                         </p>
                     </div>
-                    <div className="flex flex-col items-end gap-4">
-                        <div className="flex gap-2">
+                    <div className="flex flex-col-reverse md:flex-col items-end gap-4 w-full md:w-auto">
+                        <div className="flex flex-wrap md:flex-nowrap gap-2 w-full md:w-auto justify-end">
                             {/* Community Button */}
                             <button
                                 onClick={() => setIsCommunityBrowsing(true)}
-                                className="group flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-violet-50 to-fuchsia-50 text-violet-600 border border-violet-200 rounded-2xl hover:from-violet-100 hover:to-fuchsia-100 transition-all shadow-sm hover:shadow-md"
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-violet-50 to-fuchsia-50 text-violet-600 border border-violet-200 rounded-2xl hover:from-violet-100 hover:to-fuchsia-100 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
                                 title="浏览社区分享"
                             >
                                 <Globe2 size={18} />
@@ -313,7 +313,7 @@ const CommandCenterModule = () => {
                             {/* Import Button */}
                             <button
                                 onClick={() => setIsImporting(true)}
-                                className="group flex items-center gap-2 px-5 py-3 bg-white text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all shadow-sm hover:shadow-md"
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 px-5 py-3 bg-white text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
                                 title="Import from Global Library"
                             >
                                 <Library size={18} />
@@ -328,17 +328,17 @@ const CommandCenterModule = () => {
                                     setEditingTagId(null);
                                     setIsAdding(true);
                                 }}
-                                className="group flex items-center gap-3 px-6 py-3 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-3 px-6 py-3 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap"
                             >
                                 <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
-                                <span className="font-medium tracking-wide">New Command</span>
+                                <span className="font-medium tracking-wide">New</span>
                             </button>
                         </div>
 
-                        <div className="flex gap-2">
-                            <div className="flex gap-2">
+                        <div className="flex gap-2 w-full md:w-auto justify-between md:justify-end">
+                            <div className="flex gap-2 w-full md:w-auto">
                                 {/* Category Filter Pills - Dot Ribbon */}
-                                <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full overflow-x-auto no-scrollbar max-w-[300px] xl:max-w-none shadow-inner border border-gray-200/50">
+                                <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full overflow-x-auto no-scrollbar scrollbar-hide max-w-[200px] md:max-w-[300px] xl:max-w-none shadow-inner border border-gray-200/50">
                                     <button
                                         onClick={() => setSelectedCategory('all')}
                                         className={`

@@ -153,9 +153,9 @@ const PendingModule = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto pt-8 px-6 h-full flex gap-10">
+        <div className="max-w-7xl mx-auto pt-8 px-4 md:px-6 h-full flex flex-col md:flex-row gap-4 md:gap-10">
             {/* Left Column: Stream & Nursery */}
-            <div className={`transition-all duration-500 flex flex-col ${selectedProject ? 'w-[350px] opacity-100' : 'w-full'}`}>
+            <div className={`transition-all duration-500 flex-col ${selectedProject ? 'hidden md:flex md:w-[350px] opacity-100' : 'flex w-full'}`}>
                 <div className="mb-8 flex justify-between items-end">
                     <div>
                         <h2 className="text-2xl font-light tracking-wide text-gray-900">Idea Staging</h2>
@@ -387,7 +387,7 @@ const PendingModule = () => {
             </AnimatePresence>
 
             {!selectedProject && (
-                <div className="flex-1 flex flex-col items-center justify-center text-gray-300">
+                <div className="hidden md:flex flex-1 flex-col items-center justify-center text-gray-300">
                     <p>选择一颗种子</p>
                 </div>
             )}
@@ -436,7 +436,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 50 }}
-            className="flex-1 bg-white border border-gray-100 rounded-[2.5rem] p-10 shadow-2xl shadow-gray-200/50 overflow-y-auto no-scrollbar relative flex flex-col z-10"
+            className="flex-1 bg-white border border-gray-100 rounded-[2.5rem] p-4 md:p-10 shadow-2xl shadow-gray-200/50 overflow-y-auto no-scrollbar relative flex flex-col z-10"
         >
             <button
                 onClick={onClose}

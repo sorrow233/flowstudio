@@ -13,20 +13,22 @@ const STAGE_ICONS = {
 
 const StageSelector = ({ activeStage, setActiveStage, commands }) => {
     return (
-        <div className="w-72 shrink-0 flex flex-col gap-2 py-4">
-            <div className="mb-10 px-4">
-                <h2 className="text-2xl font-thin text-gray-900 flex items-center gap-3 tracking-tight">
-                    <div className="w-10 h-10 bg-gray-900 text-white rounded-xl flex items-center justify-center shadow-lg shadow-gray-200">
+    return (
+        <div className="w-full md:w-72 shrink-0 flex flex-row md:flex-col gap-2 py-4 overflow-x-auto md:overflow-visible no-scrollbar">
+            <div className="mb-0 md:mb-10 px-0 md:px-4 shrink-0 flex items-center md:block mr-4 md:mr-0">
+                <h2 className="text-xl md:text-2xl font-thin text-gray-900 flex items-center gap-3 tracking-tight whitespace-nowrap">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-gray-900 text-white rounded-xl flex items-center justify-center shadow-lg shadow-gray-200">
                         <Terminal size={20} />
                     </div>
-                    Command Center
+                    <span className="hidden md:inline">Command Center</span>
+                    <span className="md:hidden">Cmd Center</span>
                 </h2>
-                <p className="text-xs text-gray-400 mt-2 pl-1 font-light tracking-wide">
+                <p className="hidden md:block text-xs text-gray-400 mt-2 pl-1 font-light tracking-wide">
                     AI PROMPT ORCHESTRATION
                 </p>
             </div>
 
-            <div className="space-y-1">
+            <div className="flex flex-row md:flex-col gap-2 md:gap-1 items-center md:items-stretch">
                 {DEV_STAGES.map(stage => {
                     const Icon = STAGE_ICONS[stage.id];
                     // Count items in this stage
@@ -38,11 +40,12 @@ const StageSelector = ({ activeStage, setActiveStage, commands }) => {
                             key={stage.id}
                             onClick={() => setActiveStage(stage.id)}
                             className={`
-                                w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 group relative overflow-hidden
-                                ${isActive ? 'bg-white shadow-xl shadow-gray-200/50 scale-105 z-10' : 'hover:bg-white/50 hover:pl-5 text-gray-500'}
+                                shrink-0 flex items-center justify-between p-3 md:p-4 rounded-2xl transition-all duration-300 group relative overflow-hidden
+                                ${isActive ? 'bg-white shadow-xl shadow-gray-200/50 scale-100 md:scale-105 z-10' : 'hover:bg-white/50 hover:pl-5 text-gray-500'}
+                                min-w-[160px] md:min-w-0 md:w-full
                             `}
                         >
-                            <div className="flex items-center gap-4 relative z-10">
+                            <div className="flex items-center gap-3 md:gap-4 relative z-10 show-full">
                                 <div className={`
                                     w-8 h-8 rounded-lg flex items-center justify-center transition-colors
                                     ${isActive ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-white'}
@@ -79,6 +82,7 @@ const StageSelector = ({ activeStage, setActiveStage, commands }) => {
                 })}
             </div>
         </div>
+    );
     );
 };
 

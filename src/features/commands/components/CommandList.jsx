@@ -145,7 +145,7 @@ const CommandList = ({
     return (
         <div className="flex-1 flex flex-col overflow-hidden">
             {/* Command List */}
-            <div className="flex-1 overflow-y-auto pr-2 -mr-4 pr-6 pb-20 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto pr-2 md:-mr-4 md:pr-6 pb-20 custom-scrollbar">
                 {visibleCommands.length > 0 ? (
                     <Reorder.Group
                         axis="y"
