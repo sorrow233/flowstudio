@@ -70,16 +70,18 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
     // Sort recommended commands by priority
     recommendedCommands.sort((a, b) => b._priority - a._priority);
 
-    const renderCommandCard = (cmd) => {
+    const renderCommandCard = (cmd, isGrouped = false) => {
         const CatIcon = CATEGORY_ICONS[categories.find(c => c.id === (cmd.category || 'general'))?.icon] || LayoutGrid;
 
         return (
             <div
                 key={cmd.id}
                 onClick={() => onImport(cmd)}
-                className={`group bg-white border p-4 rounded-xl hover:shadow-lg hover:shadow-emerald-500/5 cursor-pointer transition-all relative ${currentStage && cmd.stageIds?.includes(currentStage)
-                    ? 'border-emerald-200 ring-1 ring-emerald-50'
-                    : 'border-gray-100 hover:border-emerald-300'
+                className={`group bg-white border p-4 rounded-xl hover:shadow-lg hover:shadow-emerald-500/5 cursor-pointer transition-all relative ${isGrouped
+                        ? 'border-emerald-100/50 hover:border-emerald-300'
+                        : currentStage && cmd.stageIds?.includes(currentStage)
+                            ? 'border-emerald-200 ring-1 ring-emerald-50'
+                            : 'border-gray-100 hover:border-emerald-300'
                     }`}
             >
                 <div className="flex justify-between items-center">
@@ -218,13 +220,18 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                         <div className="flex-1 overflow-y-auto p-4 bg-gray-50/30 custom-scrollbar">
                             <div className="grid grid-cols-1 gap-3">
                                 {recommendedCommands.length > 0 && (
-                                    <div className="mb-6">
-                                        <h4 className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                            <Sparkles size={12} />
-                                            Recommended for {DEV_STAGES.find(s => s.id === currentStage)?.label || 'Current Stage'}
-                                        </h4>
-                                        <div className="grid grid-cols-1 gap-3">
-                                            {recommendedCommands.map(renderCommandCard)}
+                                    <div className="mb-6 p-1 rounded-3xl border border-emerald-100 bg-emerald-50/50 relative overflow-hidden">
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-teal-400 opacity-50" />
+
+                                        <div className="p-4 pb-2">
+                                            <h4 className="text-xs font-bold text-emerald-800 uppercase tracking-widest flex items-center gap-2">
+                                                <Sparkles size={14} className="text-emerald-500" />
+                                                Recommended for {DEV_STAGES.find(s => s.id === currentStage)?.label || 'Current Stage'}
+                                            </h4>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 gap-2 p-2 pt-0">
+                                            {recommendedCommands.map(cmd => renderCommandCard(cmd, true))}
                                         </div>
                                     </div>
                                 )}
@@ -232,12 +239,12 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                                 {otherCommands.length > 0 && (
                                     <div>
                                         {recommendedCommands.length > 0 && (
-                                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 mt-2">
+                                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 mt-2 px-2">
                                                 Other Commands
                                             </h4>
                                         )}
                                         <div className="grid grid-cols-1 gap-3">
-                                            {otherCommands.map(renderCommandCard)}
+                                            {otherCommands.map(cmd => renderCommandCard(cmd, false))}
                                         </div>
                                     </div>
                                 )}
