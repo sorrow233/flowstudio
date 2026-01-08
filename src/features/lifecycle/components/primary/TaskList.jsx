@@ -13,7 +13,7 @@ const CATEGORY_ICONS = {
 };
 
 // Separated Task Item Component to handle individual drag controls properly
-const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskId, onToggle, onDelete, handleCopy, startEditing, isEditing, editValue, setEditValue, saveEdit, availableCommands, onUpdateTask, themeColor, isSelectionMode, isSelected, onSelect }) => {
+const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskId, onToggle, onDelete, handleCopy, startEditing, isEditing, editValue, setEditValue, saveEdit, availableCommands, onUpdateTask, themeColor, isSelectionMode, isSelected, onSelect, disableReorder = false }) => {
     const dragControls = useDragControls();
 
     // Long Press Logic
@@ -146,26 +146,37 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
         }
     };
 
-    return (
-        <Reorder.Item
-            value={task}
-            id={task.id}
-            dragListener={!isSelectionMode} // Disable auto-drag for the whole item to allow swipe
-            dragControls={dragControls} // Pass controls to the handle
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{
+    // Wrapper component based on disableReorder
+    const Wrapper = disableReorder ? motion.div : Reorder.Item;
+    const wrapperProps = disableReorder
+        ? {
+            initial: { opacity: 0, scale: 0.95, y: 10 },
+            animate: { opacity: 1, scale: 1, y: 0 },
+            exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } },
+            className: "relative"
+        }
+        : {
+            value: task,
+            id: task.id,
+            dragListener: !isSelectionMode,
+            dragControls: dragControls,
+            initial: { opacity: 0, scale: 0.95, y: 10 },
+            animate: {
                 opacity: 1,
                 scale: isGrabbing ? 1.02 : 1,
                 y: 0,
                 transition: { scale: { duration: 0.2 } }
-            }}
-            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-            className="relative"
-            onPointerUp={handlePointerUp}
-            onPointerLeave={handlePointerUp}
-        >
+            },
+            exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } },
+            className: "relative",
+            onPointerUp: handlePointerUp,
+            onPointerLeave: handlePointerUp
+        };
+
+    return (
+        <Wrapper {...wrapperProps}>
             <motion.div
-                drag={(isSelectionMode || isEditing) ? false : "x"}
+                drag={(isSelectionMode || isEditing || disableReorder) ? false : "x"}
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={{ right: 0.05, left: 0.5 }}
                 onDragEnd={(e, info) => {
@@ -174,8 +185,8 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                     }
                     setIsGrabbing(false);
                 }}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
+                onPointerDown={disableReorder ? undefined : handlePointerDown}
+                onPointerMove={disableReorder ? undefined : handlePointerMove}
                 onClick={(e) => {
                     if (isSelectionMode) {
                         onSelect();
@@ -326,7 +337,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                     </span>
                 )}
             </motion.div>
-        </Reorder.Item >
+        </Wrapper>
     );
 };
 
@@ -590,6 +601,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                                                     isSelectionMode={isSelectionMode}
                                                                     isSelected={selectedIds.has(task.id)}
                                                                     onSelect={() => toggleSelection(task.id)}
+                                                                    disableReorder={true}
                                                                 />
                                                             </motion.div>
                                                         ))}
