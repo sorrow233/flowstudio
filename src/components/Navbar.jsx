@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { useAuth } from '../features/auth/AuthContext';
 import AuthModal from '../features/auth/AuthModal';
 import { useSyncStore } from '../features/sync/useSyncStore';
+import SyncStatus from '../features/sync/SyncStatus';
 
 const tabs = [
     { id: 'inspiration', label: 'Inspiration', icon: Sparkles, path: '/inspiration' },
@@ -36,7 +37,7 @@ const Navbar = () => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
     // Get Sync Status
-    const { status } = useSyncStore('flowstudio_v1');
+    const { status, pendingCount } = useSyncStore('flowstudio_v1');
 
     return (
         <div className="flex justify-center w-full px-4 pt-10 pb-4 relative z-50">
@@ -65,28 +66,15 @@ const Navbar = () => {
 
                 <button
                     onClick={() => setIsAuthModalOpen(true)}
-                    className={`
-                        flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 whitespace-nowrap
-                        ${user ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-900 text-white hover:bg-black'}
-                    `}
+                    className="focus:outline-none"
                 >
                     {user ? (
-                        <>
-                            {status === 'synced' && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
-                            {status === 'syncing' && <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />}
-                            {status === 'offline' && <div className="w-2 h-2 rounded-full bg-gray-400" />}
-
-                            <span className={`text-sm font-medium ${status === 'synced' ? 'text-emerald-700' :
-                                    status === 'syncing' ? 'text-yellow-700' : 'text-gray-500'
-                                }`}>
-                                {status === 'synced' ? 'Synced' : status === 'syncing' ? 'Saving...' : 'Offline'}
-                            </span>
-                        </>
+                        <SyncStatus status={status} pendingCount={pendingCount} />
                     ) : (
-                        <>
+                        <div className="flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 whitespace-nowrap bg-gray-900 text-white hover:bg-black">
                             <Cloud size={16} />
                             <span className="text-sm">Cloud Sync</span>
-                        </>
+                        </div>
                     )}
                 </button>
             </nav>
