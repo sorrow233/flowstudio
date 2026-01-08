@@ -242,8 +242,9 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                         <div
                             className={`flex flex-col gap-1 ${task.isCommand ? 'cursor-pointer' : ''}`}
                             onClick={(e) => {
+                                if (isSelectionMode) return; // Let event bubble to parent for selection
                                 if (task.isCommand && handleCopy) {
-                                    e.stopPropagation();
+                                    // Remove stopPropagation to ensure double-click bubbles correctly
                                     handleCopy(task.id, task.commandContent || task.text);
                                 }
                             }}
