@@ -56,9 +56,20 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
         setIsGrabbing(false);
     };
 
-    // Check for updates
+    // Auto-sync outdated commands
     const sourceCommand = task.isCommand && availableCommands?.find(c => c.id === task.commandId);
     const isOutdated = sourceCommand && (sourceCommand.content !== task.commandContent || sourceCommand.title !== task.text);
+
+    // Automatically update if outdated (silent sync)
+    useEffect(() => {
+        if (isOutdated && onUpdateTask) {
+            onUpdateTask(projectId, task.id, {
+                text: sourceCommand.title,
+                commandContent: sourceCommand.content,
+                commandTags: sourceCommand.tags || []
+            });
+        }
+    }, [isOutdated, sourceCommand, task.id, projectId, onUpdateTask]);
 
     // Explicit Color Mapping for Tailwind (Dynamic template literals don't work reliably with JIT/Purge)
     const COLOR_MAP = {
@@ -241,23 +252,6 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                                 <span className={`text-base font-medium transition-all truncate ${task.done ? `opacity-60 line-through decoration-2 text-gray-400 ${theme.decoration}` : 'text-gray-700'}`}>
                                     {task.text}
                                 </span>
-                                {isOutdated && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            onUpdateTask(projectId, task.id, {
-                                                text: sourceCommand.title,
-                                                commandContent: sourceCommand.content,
-                                                commandTags: sourceCommand.tags || []
-                                            });
-                                        }}
-                                        className="shrink-0 p-1 text-amber-500 bg-amber-50 rounded-full hover:bg-amber-100 transition-colors animate-pulse z-10"
-                                        title="Update available"
-                                    >
-                                        <RefreshCw size={10} />
-                                    </button>
-                                )}
                             </div>
 
                             {/* Tags Row */}
