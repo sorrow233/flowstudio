@@ -65,8 +65,17 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                     )}
                                 </div>
 
+                                <div className="min-w-0 flex-1">
+                                    <div className={`text-sm font-bold tracking-tight transition-colors ${isViewActive ? 'text-white' : isCompleted ? 'text-emerald-900' : 'text-gray-600'}`}>
+                                        {stage.label}
+                                    </div>
+                                    <div className={`text-[10px] truncate transition-colors ${isViewActive ? 'text-white/50' : 'text-gray-400'}`}>
+                                        {isCompleted ? 'Completed' : isCurrentProgress ? 'In Progress' : 'Locked'}
+                                    </div>
+                                </div>
+
                                 {/* Manual Completion Dot - Double Click to Toggle */}
-                                <div className="group/dot relative flex items-center justify-center -ml-1 mr-1">
+                                <div className="group/dot relative flex items-center justify-center ml-2">
                                     <motion.button
                                         whileHover={{ scale: 1.5 }}
                                         whileTap={{ scale: 0.9 }}
@@ -97,19 +106,10 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                         title={isCompleted ? "Double click to undo" : "Double click to complete"}
                                     />
                                     {/* Minimal Hover Hint */}
-                                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 opacity-0 group-hover/dot:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
+                                    <div className="absolute right-0 top-full mt-1 opacity-0 group-hover/dot:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
                                         <span className="bg-gray-900 text-white text-[8px] px-1.5 py-0.5 rounded shadow-lg">
                                             Double Click
                                         </span>
-                                    </div>
-                                </div>
-
-                                <div className="min-w-0">
-                                    <div className={`text-sm font-bold tracking-tight transition-colors ${isViewActive ? 'text-white' : isCompleted ? 'text-emerald-900' : 'text-gray-600'}`}>
-                                        {stage.label}
-                                    </div>
-                                    <div className={`text-[10px] truncate transition-colors ${isViewActive ? 'text-white/50' : 'text-gray-400'}`}>
-                                        {isCompleted ? 'Completed' : isCurrentProgress ? 'In Progress' : 'Locked'}
                                     </div>
                                 </div>
                             </div>
