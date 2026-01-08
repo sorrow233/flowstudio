@@ -120,7 +120,14 @@ export const useSyncedProjects = (doc, arrayName) => {
     const addProject = (project) => {
         if (!doc) return;
         const yArray = doc.getArray(arrayName);
-        yArray.insert(0, [project]);
+
+        // Convert plain object to Y.Map for granular tracking
+        const yMap = new Y.Map();
+        Object.entries(project).forEach(([key, value]) => {
+            yMap.set(key, value);
+        });
+
+        yArray.insert(0, [yMap]);
     };
 
     const removeProject = (id) => {
@@ -210,7 +217,12 @@ export const useDataMigration = (doc) => {
                     const parsed = JSON.parse(localPending);
                     if (Array.isArray(parsed) && parsed.length > 0) {
                         doc.transact(() => {
-                            yPending.push(parsed);
+                            const yMaps = parsed.map(p => {
+                                const yMap = new Y.Map();
+                                Object.entries(p).forEach(([k, v]) => yMap.set(k, v));
+                                return yMap;
+                            });
+                            yPending.push(yMaps);
                         });
                         hasMigrated = true;
                     }
@@ -227,7 +239,12 @@ export const useDataMigration = (doc) => {
                     const parsed = JSON.parse(localPrimary);
                     if (Array.isArray(parsed) && parsed.length > 0) {
                         doc.transact(() => {
-                            yPrimary.push(parsed);
+                            const yMaps = parsed.map(p => {
+                                const yMap = new Y.Map();
+                                Object.entries(p).forEach(([k, v]) => yMap.set(k, v));
+                                return yMap;
+                            });
+                            yPrimary.push(yMaps);
                         });
                         hasMigrated = true;
                     }
