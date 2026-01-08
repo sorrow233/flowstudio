@@ -174,12 +174,42 @@ const PendingModule = () => {
                                 onClick={() => setSelectedProject(project)}
                                 className={`
                                     group cursor-pointer bg-white border rounded-xl relative transition-all duration-300 overflow-hidden
-                                    ${selectedProject?.id === project.id ? 'border-gray-900 shadow-xl shadow-gray-200 ring-1 ring-gray-900 scale-[1.02]' : 'border-gray-100 hover:border-gray-300 hover:shadow-md'}
+                                    ${selectedProject?.id === project.id
+                                        ? 'border-gray-900 shadow-xl shadow-gray-200 ring-1 ring-gray-900 scale-[1.02]'
+                                        : project.hasHolyGlow
+                                            ? 'border-transparent shadow-[0_0_0_1px_rgba(16,185,129,0.3)] hover:shadow-[0_0_15px_rgba(16,185,129,0.2)]'
+                                            : 'border-gray-100 hover:border-gray-300 hover:shadow-md'}
                                 `}
                             >
-                                <Spotlight className="p-5 h-full" spotColor="rgba(16, 185, 129, 0.2)">
+                                {/* Holy Flowing Border Animation */}
+                                {project.hasHolyGlow && (
+                                    <motion.div
+                                        className="absolute inset-0 rounded-xl pointer-events-none z-50"
+                                        style={{
+                                            background: 'linear-gradient(90deg, transparent, rgba(16,185,129,0.4), transparent)',
+                                            backgroundSize: '200% 100%',
+                                        }}
+                                        animate={{
+                                            backgroundPosition: ['200% 0', '-200% 0'],
+                                        }}
+                                        transition={{
+                                            duration: 3,
+                                            repeat: Infinity,
+                                            ease: 'linear',
+                                        }}
+                                    />
+                                )}
+
+                                <Spotlight className="p-5 h-full" spotColor={project.hasHolyGlow ? "rgba(59, 130, 246, 0.15)" : "rgba(16, 185, 129, 0.2)"}>
                                     <div className="flex justify-between items-start mb-3">
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${project.score === 4 ? 'bg-emerald-50 text-emerald-500' : 'bg-gray-50 text-gray-400'}`}>
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors 
+                                            ${project.hasHolyGlow
+                                                ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100'
+                                                : project.score === 4
+                                                    ? 'bg-emerald-50 text-emerald-500'
+                                                    : 'bg-gray-50 text-gray-400'
+                                            }
+                                        `}>
                                             <Sprout size={18} />
                                         </div>
                                         <button
@@ -189,7 +219,7 @@ const PendingModule = () => {
                                             <X size={14} />
                                         </button>
                                     </div>
-                                    <h3 className="text-gray-900 font-medium mb-1 line-clamp-1">{project.title}</h3>
+                                    <h3 className={`font-medium mb-1 line-clamp-1 transition-colors ${project.hasHolyGlow ? 'text-emerald-900' : 'text-gray-900'}`}>{project.title}</h3>
                                     <p className="text-gray-400 text-xs font-light line-clamp-2">{project.desc}</p>
                                 </Spotlight>
                             </motion.div>
