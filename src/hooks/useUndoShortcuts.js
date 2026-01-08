@@ -1,47 +1,28 @@
-import { useEffect } from 'react';
 import { toast } from 'sonner';
+import { useAppShortcut } from '../features/shortcuts';
 
 /**
  * Hook to handle global keyboard shortcuts for Undo/Redo.
+ * 使用新的快捷键系统，获得 IME 防御和统一管理
+ * 
  * @param {Function} undo - The undo function from useSyncedProjects
  * @param {Function} redo - The redo function from useSyncedProjects
  */
 export const useUndoShortcuts = (undo, redo) => {
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            // Avoid conflict with inputs unless it's a "global" intent (optional refinement)
-            const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
-            if (isInput) return;
+    // Undo: Cmd+Z / Ctrl+Z
+    useAppShortcut('UNDO', () => {
+        if (undo) {
+            undo();
+            toast.info('已撤销', { duration: 1000, position: 'bottom-center' });
+        }
+    });
 
-            // CMD+Z or CTRL+Z
-            if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
-                if (e.shiftKey) {
-                    // Redo: CMD+SHIFT+Z
-                    e.preventDefault();
-                    if (redo) {
-                        redo();
-                        toast.success('Redid Change', { duration: 1000, position: 'bottom-center' });
-                    }
-                } else {
-                    // Undo: CMD+Z
-                    e.preventDefault();
-                    if (undo) {
-                        undo();
-                        toast.info('Undid Change', { duration: 1000, position: 'bottom-center' });
-                    }
-                }
-            }
-            // Redo: CTRL+Y (Windows standard)
-            if ((e.ctrlKey) && e.key === 'y') {
-                e.preventDefault();
-                if (redo) {
-                    redo();
-                    toast.success('Redid Change', { duration: 1000, position: 'bottom-center' });
-                }
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [undo, redo]);
+    // Redo: Cmd+Shift+Z / Ctrl+Y
+    useAppShortcut('REDO', () => {
+        if (redo) {
+            redo();
+            toast.success('已重做', { duration: 1000, position: 'bottom-center' });
+        }
+    });
 };
+

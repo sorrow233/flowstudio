@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { RotateCcw, RotateCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ShortcutKbd } from '../../features/shortcuts';
 
 const UndoRedoButtons = ({ onUndo, onRedo, canUndo, canRedo, className = '' }) => {
     return (
@@ -9,16 +10,16 @@ const UndoRedoButtons = ({ onUndo, onRedo, canUndo, canRedo, className = '' }) =
                 onClick={onUndo}
                 disabled={!canUndo}
                 icon={RotateCcw}
-                label="Undo"
-                shortcut="⌘Z"
+                label="撤销"
+                shortcut="mod+z"
             />
             <div className="w-px h-4 bg-gray-200/50 mx-0.5" />
             <ActionButton
                 onClick={onRedo}
                 disabled={!canRedo}
                 icon={RotateCw}
-                label="Redo"
-                shortcut="⌘⇧Z"
+                label="重做"
+                shortcut="mod+shift+z"
             />
         </div>
     );
@@ -53,9 +54,9 @@ const ActionButton = ({ onClick, disabled, icon: Icon, label, shortcut }) => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute top-full mt-2 px-2 py-1 bg-gray-900 text-white text-[10px] font-medium rounded-lg shadow-xl whitespace-nowrap z-50 pointer-events-none"
+                        className="absolute top-full mt-2 px-2 py-1 bg-gray-900 text-white text-[10px] font-medium rounded-lg shadow-xl whitespace-nowrap z-50 pointer-events-none flex items-center gap-1.5"
                     >
-                        {label} <span className="opacity-50 ml-1 font-mono">{shortcut}</span>
+                        {label} <ShortcutKbd shortcut={shortcut} size="sm" />
                         <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45" />
                     </motion.div>
                 )}
