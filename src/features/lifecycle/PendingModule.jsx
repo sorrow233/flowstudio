@@ -278,12 +278,12 @@ const PendingModule = () => {
                                             key={p.id}
                                             layoutId={`nursery-${p.id}`}
                                             className={`
-                                                snap-start bg-gradient-to-b from-white to-white 
-                                                border rounded-2xl p-4 flex flex-col items-center justify-between text-center 
+                                                snap-start bg-gradient-to-b from-white to-gray-50/30
+                                                border rounded-2xl flex flex-col items-center justify-end text-center 
                                                 hover:shadow-lg transition-all cursor-default relative overflow-hidden
                                                 ${isAdvanced
-                                                    ? 'min-w-[180px] h-[200px] border-amber-200 shadow-[0_0_20px_rgba(251,191,36,0.15)] ring-1 ring-amber-100'
-                                                    : 'min-w-[140px] h-[160px]'}
+                                                    ? 'min-w-[200px] w-[200px] h-[260px] p-3 border-amber-200/80 shadow-[0_0_25px_rgba(251,191,36,0.12)] ring-1 ring-amber-100/50'
+                                                    : 'min-w-[140px] h-[160px] p-4'}
                                                 ${isHoly && !isAdvanced ? 'border-violet-200 shadow-[0_0_15px_rgba(139,92,246,0.15)] ring-1 ring-violet-100' : ''}
                                                 ${!isHoly && !isAdvanced ? 'border-emerald-100' : ''}
                                             `}
@@ -300,33 +300,35 @@ const PendingModule = () => {
                                             {/* Advanced Golden Glow */}
                                             {isAdvanced && (
                                                 <motion.div
-                                                    animate={{ opacity: [0.2, 0.4, 0.2] }}
+                                                    animate={{ opacity: [0.15, 0.3, 0.15] }}
                                                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                                    className="absolute inset-0 bg-gradient-to-tr from-amber-50/60 via-transparent to-orange-50/40 pointer-events-none"
+                                                    className="absolute inset-0 bg-gradient-to-b from-amber-50/40 via-transparent to-orange-50/20 pointer-events-none"
                                                 />
                                             )}
 
-                                            <div className="flex-1 flex items-center justify-center w-full relative">
+                                            {/* Tree Image Container */}
+                                            <div className={`flex-1 flex items-center justify-center w-full relative ${isAdvanced ? 'p-2' : ''}`}>
                                                 <motion.div
-                                                    className={`relative z-10 ${!isAdvanced && visual.color} ${isHoly ? 'drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' : ''}`}
-                                                    animate={{ scale: visual.scale }}
+                                                    className={`relative z-10 flex items-center justify-center ${!isAdvanced && visual.color} ${isHoly ? 'drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' : ''}`}
+                                                    animate={{ scale: visual.scale || 1 }}
                                                 >
                                                     {isAdvanced ? (
                                                         <img
                                                             src={visual.img}
                                                             alt={visual.label}
-                                                            className="w-32 h-32 object-contain drop-shadow-md"
+                                                            className="max-w-[160px] max-h-[160px] w-auto h-auto object-contain drop-shadow-lg"
                                                         />
                                                     ) : (
                                                         <visual.icon size={32} strokeWidth={1.5} />
                                                     )}
                                                 </motion.div>
-                                                <div className={`absolute bottom-2 ${isAdvanced ? 'w-20' : 'w-8'} h-1 bg-emerald-900/10 rounded-full blur-sm`} />
                                             </div>
-                                            <div className="w-full relative z-10">
+
+                                            {/* Title and Label */}
+                                            <div className={`w-full relative z-10 ${isAdvanced ? 'pt-2' : ''}`}>
                                                 <h4 className={`font-medium text-gray-700 line-clamp-1 w-full mb-2 ${isAdvanced ? 'text-sm' : 'text-xs'}`}>{p.title}</h4>
                                                 {isAdvanced ? (
-                                                    <div className={`flex items-center gap-1 justify-center text-[10px] font-bold uppercase tracking-widest py-0.5 px-2 rounded-full mx-auto w-fit border ${visual.bg} ${visual.border} ${visual.text}`}>
+                                                    <div className={`flex items-center gap-1 justify-center text-[10px] font-bold uppercase tracking-widest py-1 px-3 rounded-full mx-auto w-fit border ${visual.bg} ${visual.border} ${visual.text}`}>
                                                         <span>{visual.label}</span>
                                                     </div>
                                                 ) : (
