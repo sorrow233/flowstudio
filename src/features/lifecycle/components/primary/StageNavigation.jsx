@@ -11,7 +11,7 @@ const STAGE_ICONS = {
     5: Flag
 };
 
-const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleComplete, customStageNames = {}, onRenameStage, stageStats = {} }) => {
+const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleComplete, customStageNames = {}, onRenameStage, stageStats = {}, stages = DEV_STAGES }) => {
     const [editingStageId, setEditingStageId] = React.useState(null);
     const [editValue, setEditValue] = React.useState('');
 
@@ -36,12 +36,12 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
         setEditValue('');
     };
     return (
-        <div className="w-full md:w-80 bg-white border-r border-gray-100 p-8 overflow-y-auto shrink-0 custom-scrollbar relative">
-            <h3 className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-8 px-2">Pipeline Stages</h3>
+        <div className="w-full md:w-80 bg-white border-b md:border-b-0 md:border-r border-gray-100 p-4 md:p-8 overflow-x-auto md:overflow-y-auto shrink-0 custom-scrollbar relative flex md:block gap-4 md:gap-0 items-center md:items-stretch no-scrollbar">
+            <h3 className="text-xs font-mono text-gray-400 uppercase tracking-widest md:mb-8 px-2 hidden md:block">Pipeline Stages</h3>
 
-            <div className="space-y-4 relative">
-                {/* Circuit Line Background */}
-                <div className="absolute left-[27px] top-6 bottom-6 w-0.5 bg-gray-100/80 z-0 overflow-hidden rounded-full">
+            <div className="flex md:block gap-4 md:gap-0 md:space-y-4 relative w-full md:w-auto">
+                {/* Circuit Line Background - Desktop Only */}
+                <div className="absolute left-[27px] top-6 bottom-6 w-0.5 bg-gray-100/80 z-0 overflow-hidden rounded-full hidden md:block">
                     {/* Progress Line - Based on Actual Progress, not View */}
                     <div
                         className="w-full bg-emerald-500/30 transition-all duration-700 ease-in-out absolute top-0"
@@ -49,7 +49,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                     />
                 </div>
 
-                {DEV_STAGES.map((stage) => {
+                {stages.map((stage) => {
                     const isViewActive = viewStage === stage.id;
                     const isCompleted = currentProgress > stage.id;
                     const isCurrentProgress = currentProgress === stage.id;

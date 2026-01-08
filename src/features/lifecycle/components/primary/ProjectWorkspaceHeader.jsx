@@ -14,12 +14,13 @@ const VISUAL_VIBES = [
 const ProjectWorkspaceHeader = ({
     project, activeStage, isCollapsed, isEditing, editForm,
     setEditForm, onSaveEdit, onCancelEdit, onStartEdit, onClose, onDelete, onImportCommand, onToggleCollapse,
+    stages = DEV_STAGES,
     ...props
 }) => {
 
     // Get info for current stage to show in header title if needed, 
     // though the design requests the PROJECT title to be dominant.
-    const stageInfo = DEV_STAGES.find(s => s.id === activeStage);
+    const stageInfo = stages.find(s => s.id === activeStage);
 
     return (
         <motion.div
