@@ -546,6 +546,7 @@ const FinalDevModule = () => {
                 onImport={handleLinkCommand}
                 currentStage={viewStage}
                 projectCategory={selectedProject?.category}
+                stages={FINAL_STAGES}
             />
         </div>
     );

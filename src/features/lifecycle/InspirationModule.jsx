@@ -47,12 +47,12 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
             <motion.div
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={{ right: 0.1, left: 0.7 }}
+                dragElastic={{ right: 0.05, left: 0.5 }}
                 onDragStart={() => setIsDragging(true)}
                 onDragEnd={(e, info) => {
                     setIsDragging(false);
-                    // More forgiving threshold and velocity check
-                    if (info.offset.x < -80 || info.velocity.x < -400) {
+                    // Higher threshold: need to drag further or swipe faster
+                    if (info.offset.x < -150 || info.velocity.x < -800) {
                         onRemove(idea.id);
                     }
                 }}
@@ -65,6 +65,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                     scale: 1,
                     x: 0
                 }}
+                transition={{ x: { type: "spring", stiffness: 500, damping: 30 } }}
                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                 layout
                 className={`group relative bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] hover:border-gray-200 transition-all duration-300 cursor-pointer active:scale-[0.99] ${isCompleted ? 'opacity-50' : ''}`}
