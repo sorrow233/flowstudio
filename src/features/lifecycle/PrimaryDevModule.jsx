@@ -171,7 +171,7 @@ const PrimaryDevModule = () => {
     // --- Command Import Handler ---
     const handleLinkCommand = (command, tag = null) => {
         const project = projects.find(p => p.id === selectedProject.id);
-        const currentStage = project.subStage || 1;
+        const currentStage = viewStage;
 
         const newTasks = [...(project.tasks || []), {
             id: Date.now(),
