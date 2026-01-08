@@ -26,21 +26,9 @@ const InspirationModule = () => {
                 const localIdeas = JSON.parse(saved);
                 if (Array.isArray(localIdeas) && localIdeas.length > 0) {
                     console.info("Migrating Inspiration ideas to Sync...");
-                    // We only migrate if Yjs array is empty to avoid duplicates on every reload/device
+                    // We only migrate if Sync data is empty to avoid duplicates
                     const yArray = doc.getArray('inspiration');
                     if (yArray.length === 0) {
-                        doc.transact(() => {
-                            localIdeas.forEach(idea => {
-                                // Add one by one using the helper wouldn't be atomic/efficient here, 
-                                // but we can't easily access 'addProject' inside transactional batch logic 
-                                // from the hook's returned function cleanly. 
-                                // Actually, let's just use the hook function for simplicity or loop manually?
-                                // Manual Yjs insert is safer for batch migration.
-                                const yMap = new window.Y.Map(); // Assuming Y is global or we import it? No, need import.
-                                // simpler: just call addIdea for each. Loop.
-                            });
-                        });
-                        // Actually easier: Just check if we need to migrate
                         localIdeas.forEach(idea => addIdea(idea));
                     }
                     // Clear local storage after migration? Or keep as backup? 
