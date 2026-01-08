@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
-import { Check, Trash2, ExternalLink, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, CheckSquare, Globe, Edit2, RefreshCw, ListChecks, Copy, X } from 'lucide-react';
+import { Check, Trash2, ExternalLink, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, CheckSquare, Globe, Edit2, RefreshCw, ListChecks, Copy, X, ChevronDown, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { COMMAND_CATEGORIES, STAGE_EMPTY_STATES, DEV_STAGES } from '../../../../utils/constants';
 
 const CATEGORY_ICONS = {
@@ -342,6 +342,9 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState(new Set());
 
+    // Completed section collapse state - default collapsed
+    const [isCompletedCollapsed, setIsCompletedCollapsed] = useState(true);
+
     useEffect(() => {
         const filtered = tasks?.filter(t => (t.stage || 1) === activeStage) || [];
         // Compare using stringified state to detect property changes (e.g., done status)
@@ -357,6 +360,10 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
         setIsSelectionMode(false);
         setSelectedIds(new Set());
     }, [activeStage]);
+
+    // Separate tasks into pending and completed
+    const pendingTasks = localTasks.filter(t => !t.done);
+    const completedTasks = localTasks.filter(t => t.done);
 
     const toggleSelection = (id) => {
         const newSelected = new Set(selectedIds);
@@ -456,39 +463,130 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                 <div className="min-h-full flex flex-col">
                     <AnimatePresence mode="popLayout">
                         {localTasks.length > 0 ? (
-                            <Reorder.Group
-                                axis="y"
-                                values={localTasks}
-                                onReorder={handleReorder}
-                                className="space-y-3 min-h-[100px] pt-4 pb-20"
-                            >
-                                {localTasks.map(task => (
-                                    <TaskItem
-                                        key={task.id}
-                                        task={task}
-                                        projectId={projectId}
-                                        isMandatory={task.isCommand && task.commandType === 'mandatory'}
-                                        isLink={task.isCommand && task.commandType === 'link'}
-                                        isUtility={task.isCommand && task.commandType === 'utility'}
-                                        copiedTaskId={copiedTaskId}
-                                        onToggle={onToggle}
-                                        onDelete={onDelete}
-                                        handleCopy={handleCopy}
-                                        startEditing={startEditing}
-                                        isEditing={editingTaskId === task.id}
-                                        editValue={editValue}
-                                        setEditValue={setEditValue}
-                                        saveEdit={saveEdit}
-                                        availableCommands={availableCommands}
-                                        onUpdateTask={onUpdateTask}
-                                        themeColor={activeTheme}
-                                        // Selection Props
-                                        isSelectionMode={isSelectionMode}
-                                        isSelected={selectedIds.has(task.id)}
-                                        onSelect={() => toggleSelection(task.id)}
-                                    />
-                                ))}
-                            </Reorder.Group>
+                            <div className="space-y-3 pt-4 pb-20">
+                                {/* Pending Tasks - Reorderable */}
+                                {pendingTasks.length > 0 && (
+                                    <Reorder.Group
+                                        axis="y"
+                                        values={pendingTasks}
+                                        onReorder={(newOrder) => {
+                                            // Merge reordered pending with completed
+                                            handleReorder([...newOrder, ...completedTasks]);
+                                        }}
+                                        className="space-y-3"
+                                    >
+                                        {pendingTasks.map(task => (
+                                            <TaskItem
+                                                key={task.id}
+                                                task={task}
+                                                projectId={projectId}
+                                                isMandatory={task.isCommand && task.commandType === 'mandatory'}
+                                                isLink={task.isCommand && task.commandType === 'link'}
+                                                isUtility={task.isCommand && task.commandType === 'utility'}
+                                                copiedTaskId={copiedTaskId}
+                                                onToggle={onToggle}
+                                                onDelete={onDelete}
+                                                handleCopy={handleCopy}
+                                                startEditing={startEditing}
+                                                isEditing={editingTaskId === task.id}
+                                                editValue={editValue}
+                                                setEditValue={setEditValue}
+                                                saveEdit={saveEdit}
+                                                availableCommands={availableCommands}
+                                                onUpdateTask={onUpdateTask}
+                                                themeColor={activeTheme}
+                                                isSelectionMode={isSelectionMode}
+                                                isSelected={selectedIds.has(task.id)}
+                                                onSelect={() => toggleSelection(task.id)}
+                                            />
+                                        ))}
+                                    </Reorder.Group>
+                                )}
+
+                                {/* Completed Tasks Section - Collapsible */}
+                                {completedTasks.length > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="mt-6"
+                                    >
+                                        {/* Completed Section Header */}
+                                        <button
+                                            onClick={() => setIsCompletedCollapsed(!isCompletedCollapsed)}
+                                            className="w-full flex items-center gap-3 py-3 px-4 bg-gray-50/80 hover:bg-gray-100/80 rounded-xl transition-all group mb-3"
+                                        >
+                                            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-600">
+                                                {isCompletedCollapsed ? (
+                                                    <ChevronRight size={14} strokeWidth={2.5} />
+                                                ) : (
+                                                    <ChevronDown size={14} strokeWidth={2.5} />
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <CheckCircle2 size={16} className="text-emerald-500" />
+                                                <span className="text-sm font-medium text-gray-600">已完成</span>
+                                            </div>
+                                            <span className="ml-auto text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                                                {completedTasks.length}
+                                            </span>
+                                        </button>
+
+                                        {/* Completed Tasks List */}
+                                        <AnimatePresence>
+                                            {!isCompletedCollapsed && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: 'auto', opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    transition={{ duration: 0.2 }}
+                                                    className="space-y-2 overflow-hidden"
+                                                >
+                                                    {completedTasks.map(task => (
+                                                        <TaskItem
+                                                            key={task.id}
+                                                            task={task}
+                                                            projectId={projectId}
+                                                            isMandatory={task.isCommand && task.commandType === 'mandatory'}
+                                                            isLink={task.isCommand && task.commandType === 'link'}
+                                                            isUtility={task.isCommand && task.commandType === 'utility'}
+                                                            copiedTaskId={copiedTaskId}
+                                                            onToggle={onToggle}
+                                                            onDelete={onDelete}
+                                                            handleCopy={handleCopy}
+                                                            startEditing={startEditing}
+                                                            isEditing={editingTaskId === task.id}
+                                                            editValue={editValue}
+                                                            setEditValue={setEditValue}
+                                                            saveEdit={saveEdit}
+                                                            availableCommands={availableCommands}
+                                                            onUpdateTask={onUpdateTask}
+                                                            themeColor={activeTheme}
+                                                            isSelectionMode={isSelectionMode}
+                                                            isSelected={selectedIds.has(task.id)}
+                                                            onSelect={() => toggleSelection(task.id)}
+                                                        />
+                                                    ))}
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </motion.div>
+                                )}
+
+                                {/* Empty pending state when all tasks are done */}
+                                {pendingTasks.length === 0 && completedTasks.length > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="flex flex-col items-center py-12 text-center"
+                                    >
+                                        <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-4">
+                                            <CheckCircle2 size={28} className="text-emerald-500" />
+                                        </div>
+                                        <h4 className="text-lg font-medium text-gray-900 mb-1">全部完成！</h4>
+                                        <p className="text-sm text-gray-400">这个阶段的所有任务都已完成</p>
+                                    </motion.div>
+                                )}
+                            </div>
                         ) : (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }}
