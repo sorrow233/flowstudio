@@ -184,6 +184,23 @@ const InspirationModule = () => {
         }
     }, [deletedIdea]);
 
+    // Keyboard shortcut: Cmd+Z to undo
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Cmd+Z or Ctrl+Z to undo
+            if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
+                if (deletedIdea) {
+                    e.preventDefault();
+                    addIdea(deletedIdea);
+                    setDeletedIdea(null);
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [deletedIdea, addIdea]);
+
     const handleAdd = () => {
         if (!input.trim()) return;
         const newIdea = {
@@ -340,12 +357,13 @@ const InspirationModule = () => {
                         exit={{ opacity: 0, y: 50 }}
                         className="fixed bottom-10 right-10 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-4 z-50"
                     >
-                        <span className="text-sm font-medium">Idea deleted</span>
+                        <span className="text-sm font-medium">想法已删除</span>
                         <button
                             onClick={handleUndo}
-                            className="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
+                            className="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-2"
                         >
-                            Undo
+                            <span>撤销</span>
+                            <kbd className="text-[10px] bg-gray-700 px-1.5 py-0.5 rounded text-gray-300 font-mono">⌘Z</kbd>
                         </button>
                     </motion.div>
                 )}
