@@ -8,6 +8,7 @@ import { useSyncedProjects } from '../sync/useSyncStore';
 import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
 import UndoRedoButtons from '../../components/shared/UndoRedoButtons';
 import Spotlight from '../../components/shared/Spotlight';
+import { SakuraTree, MapleTree, GinkgoTree, CedarTree } from '../../components/illustrations/TreeIllustrations';
 
 // 灵魂四问 (Soul Questions - Final Polish)
 const QUESTIONS = [
@@ -122,9 +123,8 @@ const PendingModule = () => {
         return { scale: 1.1, opacity: 1, color: 'text-emerald-600' };
     };
 
-    import { SakuraTree, MapleTree, GinkgoTree, CedarTree } from '../../components/illustrations/TreeIllustrations';
 
-    // ...
+
 
     const getTreeVisual = (stage = 1, projectId = '') => {
         const stages = [
