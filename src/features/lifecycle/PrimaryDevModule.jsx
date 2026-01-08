@@ -445,8 +445,6 @@ const PrimaryDevModule = () => {
                                             const scrollTop = e.currentTarget.scrollTop;
                                             if (scrollTop > 10 && !isHeaderCollapsed) {
                                                 setIsHeaderCollapsed(true);
-                                            } else if (scrollTop <= 10 && isHeaderCollapsed) {
-                                                setIsHeaderCollapsed(false);
                                             }
                                         }}
                                     />
