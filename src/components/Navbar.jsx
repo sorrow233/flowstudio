@@ -25,16 +25,18 @@ import { useSyncStore } from '../features/sync/useSyncStore';
 import SyncStatus from '../features/sync/SyncStatus';
 import { DataManagementModal } from '../features/settings';
 import { useTheme } from '../hooks/ThemeContext';
+import { useTranslation } from '../features/i18n';
 
-const tabs = [
-    { id: 'inspiration', label: 'Inspiration', icon: Sparkles, path: '/inspiration' },
-    { id: 'pending', label: 'Pending', icon: Clock, path: '/pending' },
-    { id: 'primary', label: 'Primary', icon: Code2, path: '/primary' },
-    { id: 'advanced', label: 'Advanced', icon: Zap, path: '/advanced' },
-    { id: 'final', label: 'Final', icon: CheckCircle2, path: '/final' },
-    { id: 'commercial', label: 'Commercial', icon: Briefcase, path: '/commercial' },
-    { id: 'command', label: 'Command', icon: Terminal, path: '/commands' },
-];
+// Tab icons mapping
+const tabIcons = {
+    inspiration: Sparkles,
+    pending: Clock,
+    primary: Code2,
+    advanced: Zap,
+    final: CheckCircle2,
+    commercial: Briefcase,
+    command: Terminal,
+};
 
 const Navbar = () => {
     const location = useLocation();
@@ -43,6 +45,18 @@ const Navbar = () => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isDataModalOpen, setIsDataModalOpen] = useState(false);
     const { isDark, toggleTheme } = useTheme();
+    const { t } = useTranslation();
+
+    // Generate tabs with translations
+    const tabs = [
+        { id: 'inspiration', label: t('navbar.inspiration'), icon: tabIcons.inspiration, path: '/inspiration' },
+        { id: 'pending', label: t('navbar.pending'), icon: tabIcons.pending, path: '/pending' },
+        { id: 'primary', label: t('navbar.primary'), icon: tabIcons.primary, path: '/primary' },
+        { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' },
+        { id: 'final', label: t('navbar.final'), icon: tabIcons.final, path: '/final' },
+        { id: 'commercial', label: t('navbar.commercial'), icon: tabIcons.commercial, path: '/commercial' },
+        { id: 'command', label: t('navbar.command'), icon: tabIcons.command, path: '/commands' },
+    ];
 
     // Get Sync Status
     const { status, pendingCount } = useSyncStore('flowstudio_v1');
@@ -80,7 +94,7 @@ const Navbar = () => {
                         <button
                             onClick={toggleTheme}
                             className="relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all z-40 shrink-0"
-                            title={isDark ? "切换到亮色模式" : "切换到暗色模式"}
+                            title={isDark ? t('common.lightMode', '亮色模式') : t('common.darkMode', '暗色模式')}
                         >
                             {isDark ? (
                                 <Sun size={16} strokeWidth={1.5} className="md:w-[18px] md:h-[18px]" />
@@ -93,7 +107,7 @@ const Navbar = () => {
                         <button
                             onClick={() => setIsDataModalOpen(true)}
                             className="relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all z-40 shrink-0"
-                            title="数据管理"
+                            title={t('navbar.dataManagement')}
                         >
                             <Settings size={16} strokeWidth={1.5} className="md:w-[18px] md:h-[18px]" />
                         </button>
@@ -108,8 +122,8 @@ const Navbar = () => {
                                 ) : (
                                     <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-black dark:hover:bg-white">
                                         <Cloud size={14} className="md:w-4 md:h-4" />
-                                        <span className="text-xs md:text-sm hidden sm:inline">Cloud Sync</span>
-                                        <span className="text-xs md:text-sm sm:hidden">Sync</span>
+                                        <span className="text-xs md:text-sm hidden sm:inline">{t('navbar.cloudSync')}</span>
+                                        <span className="text-xs md:text-sm sm:hidden">{t('navbar.sync')}</span>
                                     </div>
                                 )}
                             </button>

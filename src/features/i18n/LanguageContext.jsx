@@ -1,11 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import zh from './locales/zh';
-import en from './locales/en';
+import ja from './locales/ja';
+import ko from './locales/ko';
 
 const STORAGE_KEY = 'flowstudio_language';
 
 // 可用语言
-const locales = { zh, en };
+const locales = { zh, en, ja, ko };
 
 // 默认语言
 const DEFAULT_LANGUAGE = 'zh';
@@ -15,7 +14,7 @@ const LanguageContext = createContext(null);
 
 /**
  * 检测用户浏览器语言
- * @returns {string} 语言代码 (zh | en)
+ * @returns {string} 语言代码 (zh | en | ja | ko)
  */
 const detectLanguage = () => {
     // 1. 优先使用 localStorage 保存的语言偏好
@@ -35,6 +34,16 @@ const detectLanguage = () => {
     // 英文匹配
     if (browserLang.startsWith('en')) {
         return 'en';
+    }
+
+    // 日语匹配
+    if (browserLang.startsWith('ja')) {
+        return 'ja';
+    }
+
+    // 韩语匹配
+    if (browserLang.startsWith('ko')) {
+        return 'ko';
     }
 
     // 3. 默认返回中文
@@ -84,9 +93,14 @@ export const LanguageProvider = ({ children }) => {
         }
     };
 
-    // 切换到下一个语言（用于简单切换按钮）
+    // 切换到下一个语言（循环切换：中 -> 英 -> 日 -> 韩 -> 中）
     const toggleLanguage = () => {
-        setLanguageState(prev => prev === 'zh' ? 'en' : 'zh');
+        setLanguageState(prev => {
+            if (prev === 'zh') return 'en';
+            if (prev === 'en') return 'ja';
+            if (prev === 'ja') return 'ko';
+            return 'zh';
+        });
     };
 
     // 获取翻译

@@ -3,6 +3,7 @@ import { Send, Trash2, ArrowRight, Copy, Check, Sparkles, Hash, Tag } from 'luci
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
+import { useTranslation } from '../i18n';
 
 const STORAGE_KEY = 'flowstudio_inspiration_ideas';
 
@@ -26,6 +27,7 @@ const getDotColor = (id) => {
 const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
+    const { t } = useTranslation();
 
     // Handle double click to toggle completion (strikethrough)
     const handleDoubleClick = (e) => {
@@ -122,12 +124,13 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                             className="absolute top-3 right-3 bg-emerald-50 text-emerald-600 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 shadow-sm border border-emerald-100"
                         >
                             <Check size={12} strokeWidth={3} />
-                            <span>COPIED</span>
+                            <span>{t('common.copied')}</span>
+                        </motion.div>
                         </motion.div>
                     )}
-                </AnimatePresence>
-            </motion.div>
-        </div>
+        </AnimatePresence>
+            </motion.div >
+        </div >
     );
 };
 
@@ -135,6 +138,7 @@ const InspirationModule = () => {
     // ... (rest of component logic remains same until return)
     // Sync
     const { doc } = useSyncStore('flowstudio_v1');
+    const { t } = useTranslation();
     const {
         projects: ideas,
         addProject: addIdea,
@@ -257,11 +261,11 @@ const InspirationModule = () => {
                         <Sparkles className="w-5 h-5 text-amber-500" />
                     </div>
                     <h2 className="text-3xl font-light text-gray-900 tracking-tight">
-                        Inspiration
+                        {t('inspiration.title')}
                     </h2>
                 </div>
                 <p className="text-gray-500 text-base font-light tracking-wide max-w-md mx-auto md:mx-0 leading-relaxed">
-                    捕捉瞬时灵感，为未来积蓄能量。
+                    {t('inspiration.subtitle')}
                 </p>
             </div>
 
@@ -273,7 +277,7 @@ const InspirationModule = () => {
                     <textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder="记录一闪而过的念头..."
+                        placeholder={t('inspiration.placeholder')}
                         className="w-full bg-transparent text-lg text-gray-800 placeholder:text-gray-300 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed"
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -304,7 +308,7 @@ const InspirationModule = () => {
 
                         <div className="flex items-center gap-3 flex-shrink-0">
                             <span className="text-[10px] text-gray-300 font-mono hidden md:inline-block">
-                                CMD + ENTER
+                                {t('inspiration.cmdEnter')}
                             </span>
                             <button
                                 onClick={handleAdd}
@@ -342,7 +346,7 @@ const InspirationModule = () => {
                             <Sparkles className="text-gray-300" size={24} />
                         </div>
                         <p className="text-gray-400 text-sm font-light tracking-wide">
-                            暂无灵感，记录下第一个想法吧
+                            {t('inspiration.emptyState')}
                         </p>
                     </motion.div>
                 )}
@@ -357,12 +361,12 @@ const InspirationModule = () => {
                         exit={{ opacity: 0, y: 50 }}
                         className="fixed bottom-10 right-10 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-4 z-50"
                     >
-                        <span className="text-sm font-medium">想法已删除</span>
+                        <span className="text-sm font-medium">{t('inspiration.ideaDeleted')}</span>
                         <button
                             onClick={handleUndo}
                             className="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-2"
                         >
-                            <span>撤销</span>
+                            <span>{t('common.undo')}</span>
                             <kbd className="text-[10px] bg-gray-700 px-1.5 py-0.5 rounded text-gray-300 font-mono">⌘Z</kbd>
                         </button>
                     </motion.div>

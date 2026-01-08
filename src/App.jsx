@@ -14,7 +14,6 @@ import ShareViewPage from './features/share/components/ShareViewPage';
 
 import { Toaster } from 'sonner';
 import { KeymapProvider, ShortcutHelpModal, useBrowserIntercept } from './features/shortcuts';
-import { ThemeProvider } from './hooks/ThemeContext';
 import { LanguageProvider } from './features/i18n';
 
 function App() {
@@ -24,32 +23,37 @@ function App() {
     useBrowserIntercept();
 
     return (
-        <div className="max-w-7xl mx-auto h-full px-4 md:px-6 pb-20">
-            <ErrorBoundary>
-                <Routes location={location} key={location.pathname}>
-                    <Route path="/" element={<Navigate to="/inspiration" replace />} />
-                    <Route path="/inspiration" element={<InspirationModule />} />
-                    <Route path="/pending" element={<PendingModule />} />
-                    <Route path="/primary" element={<PrimaryDevModule />} />
-                    <Route path="/final" element={<FinalDevModule />} />
-                    <Route path="/advanced" element={<AdvancedDevModule />} />
-                    <Route path="/commercial" element={<CommercialModule />} />
-                    <Route path="/commands" element={<CommandCenterModule />} />
-                    <Route path="/share/:id" element={<ShareViewPage />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-            </ErrorBoundary>
-        </div>
-                    </main >
+        <LanguageProvider>
+            <KeymapProvider>
+                <div className="flex flex-col h-screen overflow-hidden bg-gray-50/50">
+                    <Toaster position="top-right" richColors />
+                    <Navbar />
 
-        {/* 全局快捷键帮助面板 - Shift + ? 触发 */ }
-        < ShortcutHelpModal />
-                </div >
-            </KeymapProvider >
-        </ThemeProvider >
+                    <main className="flex-1 overflow-y-auto w-full no-scrollbar">
+                        <div className="max-w-7xl mx-auto h-full px-4 md:px-6 pb-20">
+                            <ErrorBoundary>
+                                <Routes location={location} key={location.pathname}>
+                                    <Route path="/" element={<Navigate to="/inspiration" replace />} />
+                                    <Route path="/inspiration" element={<InspirationModule />} />
+                                    <Route path="/pending" element={<PendingModule />} />
+                                    <Route path="/primary" element={<PrimaryDevModule />} />
+                                    <Route path="/final" element={<FinalDevModule />} />
+                                    <Route path="/advanced" element={<AdvancedDevModule />} />
+                                    <Route path="/commercial" element={<CommercialModule />} />
+                                    <Route path="/commands" element={<CommandCenterModule />} />
+                                    <Route path="/share/:id" element={<ShareViewPage />} />
+                                    <Route path="*" element={<Navigate to="/" replace />} />
+                                </Routes>
+                            </ErrorBoundary>
+                        </div>
+                    </main>
+
+                    {/* 全局快捷键帮助面板 - Shift + ? 触发 */}
+                    <ShortcutHelpModal />
+                </div>
+            </KeymapProvider>
+        </LanguageProvider>
     );
 }
 
 export default App;
-
-
