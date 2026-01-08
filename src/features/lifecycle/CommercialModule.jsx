@@ -172,20 +172,21 @@ ${Object.entries(data.checklist || {}).map(([key, val]) => `- [${val ? 'x' : ' '
                         Copy Operational Directive
                     </button>
 
-                    {/* Project Selector (if multiple) */}
-                    {commercialProjects.length > 1 && (
-                        <div className="flex gap-2">
-                            {commercialProjects.map(p => (
-                                <button
-                                    key={p.id}
-                                    onClick={() => setSelectedProject(p)}
-                                    className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${selectedProject.id === p.id ? 'bg-amber-100 text-amber-800 ring-2 ring-amber-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
-                                >
-                                    {p.title}
-                                </button>
-                            ))}
-                        </div>
-                    )}
+                    {/* Project Selector Tabs */}
+                    <div className="flex bg-gray-100/50 p-1 rounded-full gap-1">
+                        {commercialProjects.map(p => (
+                            <button
+                                key={p.id}
+                                onClick={() => setSelectedProject(p)}
+                                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${selectedProject.id === p.id
+                                        ? 'bg-white text-amber-600 border-gray-200 shadow-sm'
+                                        : 'bg-transparent text-gray-400 border-transparent hover:text-gray-600'
+                                    }`}
+                            >
+                                {p.title}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -383,10 +384,10 @@ ${Object.entries(data.checklist || {}).map(([key, val]) => `- [${val ? 'x' : ' '
 
                 {/* Right Column: Launch Checklist (Controller) */}
                 <div className="space-y-10">
-                    <section className={`transition-all duration-500 ${isLaunchReady ? 'bg-emerald-50 border-emerald-200' : 'bg-gray-900 text-white'} border rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden`}>
-                        {!isLaunchReady && <div className="absolute top-0 right-0 w-32 h-32 bg-gray-800 rounded-bl-full opacity-50 -z-0" />}
+                    <section className={`transition-all duration-500 ${isLaunchReady ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'} border rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden`}>
+                        {!isLaunchReady && <div className="absolute top-0 right-0 w-32 h-32 bg-amber-100 rounded-bl-full opacity-50 -z-0" />}
 
-                        <h3 className={`text-sm font-bold uppercase tracking-widest mb-6 relative z-10 flex items-center gap-2 ${isLaunchReady ? 'text-emerald-700' : 'text-gray-500'}`}>
+                        <h3 className={`text-sm font-bold uppercase tracking-widest mb-6 relative z-10 flex items-center gap-2 ${isLaunchReady ? 'text-emerald-700' : 'text-amber-900/40'}`}>
                             <Rocket size={16} /> Launch Readiness
                         </h3>
 
@@ -408,28 +409,28 @@ ${Object.entries(data.checklist || {}).map(([key, val]) => `- [${val ? 'x' : ' '
                                     className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left group
                                         ${isLaunchReady
                                             ? 'hover:bg-emerald-100 text-emerald-900'
-                                            : 'hover:bg-gray-800 text-gray-400'}
+                                            : 'hover:bg-white/60 text-gray-600'}
                                     `}
                                 >
                                     <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all 
                                         ${data.checklist?.[item.id]
-                                            ? (isLaunchReady ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-amber-500 border-amber-500 text-black')
-                                            : (isLaunchReady ? 'border-emerald-300' : 'border-gray-600 text-transparent group-hover:border-gray-500')
+                                            ? (isLaunchReady ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-amber-500 border-amber-500 text-white')
+                                            : (isLaunchReady ? 'border-emerald-300' : 'border-amber-300 text-transparent group-hover:border-amber-400')
                                         }
                                     `}>
                                         <Check size={12} strokeWidth={3} />
                                     </div>
-                                    <span className={`text-sm font-light transition-colors ${data.checklist?.[item.id] ? (isLaunchReady ? 'font-medium' : 'text-gray-200 decoration-amber-500/50') : ''}`}>{item.label}</span>
+                                    <span className={`text-sm font-light transition-colors ${data.checklist?.[item.id] ? (isLaunchReady ? 'font-medium' : 'text-amber-900 font-medium') : ''}`}>{item.label}</span>
                                 </button>
                             ))}
                         </div>
 
-                        <div className={`mt-8 pt-8 border-t ${isLaunchReady ? 'border-emerald-200' : 'border-gray-800'}`}>
-                            <div className={`flex items-center justify-between text-xs mb-2 ${isLaunchReady ? 'text-emerald-600' : 'text-gray-500'}`}>
+                        <div className={`mt-8 pt-8 border-t ${isLaunchReady ? 'border-emerald-200' : 'border-amber-200'}`}>
+                            <div className={`flex items-center justify-between text-xs mb-2 ${isLaunchReady ? 'text-emerald-600' : 'text-amber-700'}`}>
                                 <span>Readiness</span>
                                 <span>{checklistProgress} / 6</span>
                             </div>
-                            <div className={`w-full h-1 rounded-full overflow-hidden ${isLaunchReady ? 'bg-emerald-200' : 'bg-gray-800'}`}>
+                            <div className={`w-full h-1 rounded-full overflow-hidden ${isLaunchReady ? 'bg-emerald-200' : 'bg-amber-200/50'}`}>
                                 <div
                                     className={`h-full transition-all duration-500 ${isLaunchReady ? 'bg-emerald-500' : 'bg-amber-500'}`}
                                     style={{ width: `${(checklistProgress / 6) * 100}%` }}
