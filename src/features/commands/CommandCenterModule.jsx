@@ -8,8 +8,6 @@ import StageSelector from './components/StageSelector';
 import CommandList from './components/CommandList';
 import CommandForm from './components/CommandForm';
 import CategoryRenameModal from './components/CategoryRenameModal';
-import LibraryImportModal from './components/LibraryImportModal';
-import LibraryImportModal from './components/LibraryImportModal';
 import { SharePublishModal, ShareBrowserModal } from '../share';
 import { useTranslation } from '../i18n';
 
@@ -296,142 +294,140 @@ const CommandCenterModule = () => {
                                 )}
                             </div>
                         </div>
+                        <h3 className="text-3xl md:text-4xl font-thin text-gray-900 mb-2">{t(`devStages.${activeStage}.title`, DEV_STAGES[activeStage - 1].title)}</h3>
+                        <p className="text-gray-400 font-light max-w-lg leading-relaxed text-sm md:text-base">
+                            {t(`devStages.${activeStage}.desc`, DEV_STAGES[activeStage - 1].desc)}
+                        </p>
                     </div>
-                    <h3 className="text-3xl md:text-4xl font-thin text-gray-900 mb-2">{t(`devStages.${activeStage}.title`, DEV_STAGES[activeStage - 1].title)}</h3>
-                    <p className="text-gray-400 font-light max-w-lg leading-relaxed text-sm md:text-base">
-                        {t(`devStages.${activeStage}.desc`, DEV_STAGES[activeStage - 1].desc)}
-                    </p>
-                </div>
-                <div className="flex flex-col items-end gap-4 w-full md:w-auto mt-4 md:mt-0">
-                    <div className="flex gap-2 w-full md:w-auto justify-end">
-                        {/* Community Button */}
-                        <button
-                            onClick={() => setIsCommunityBrowsing(true)}
-                            className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-100 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
-                            title={t('commands.browseCommunity')}
-                        >
-                            <Globe2 size={18} />
-                            <span className="hidden md:inline font-medium text-sm">{t('commands.community')}</span>
-                        </button>
-
-                        {/* Import Button */}
-                        <button
-                            onClick={() => setIsImporting(true)}
-                            className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-white text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
-                            title={t('commands.importFromLibrary')}
-                        >
-                            <Library size={18} />
-                            <span className="hidden md:inline font-medium text-sm">{t('commands.library')}</span>
-                        </button>
-
-                        {/* New Command Button */}
-                        <button
-                            onClick={() => {
-                                setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [], category: 'general' }); // Clear for new
-                                setNewTag({ label: '', value: '' });
-                                setEditingTagId(null);
-                                setIsAdding(true);
-                            }}
-                            className="flex-1 md:flex-initial group flex items-center justify-center gap-2 md:gap-3 p-3 md:px-6 md:py-3 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap min-w-[3.5rem]"
-                        >
+                    <div className="flex flex-col items-end gap-4 w-full md:w-auto mt-4 md:mt-0">
+                        <div className="flex gap-2 w-full md:w-auto justify-end">
+                            {/* Community Button */}
+                            <button
+                                onClick={() => setIsCommunityBrowsing(true)}
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-100 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+                                title={t('commands.browseCommunity')}
                             >
-                            <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
-                            <span className="font-medium tracking-wide">{t('commands.newCommand')}</span>
-                        </button>
-                    </div>
+                                <Globe2 size={18} />
+                                <span className="hidden md:inline font-medium text-sm">{t('commands.community')}</span>
+                            </button>
 
-                    <div className="flex gap-2 w-full md:w-auto justify-between md:justify-end">
-                        <div className="flex gap-2 w-full md:w-auto">
-                            {/* Category Filter Pills - Dot Ribbon */}
-                            <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full overflow-x-auto no-scrollbar scrollbar-hide flex-1 md:flex-none md:max-w-[300px] xl:max-w-none shadow-inner border border-gray-200/50">
-                                <button
-                                    onClick={() => setSelectedCategory('all')}
-                                    className={`
+                            {/* Import Button */}
+                            <button
+                                onClick={() => setIsImporting(true)}
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-white text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+                                title={t('commands.importFromLibrary')}
+                            >
+                                <Library size={18} />
+                                <span className="hidden md:inline font-medium text-sm">{t('commands.library')}</span>
+                            </button>
+
+                            {/* New Command Button */}
+                            <button
+                                onClick={() => {
+                                    setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [], category: 'general' }); // Clear for new
+                                    setNewTag({ label: '', value: '' });
+                                    setEditingTagId(null);
+                                    setIsAdding(true);
+                                }}
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 md:gap-3 p-3 md:px-6 md:py-3 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap min-w-[3.5rem]"
+                            >
+                                <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
+                                <span className="font-medium tracking-wide">{t('commands.newCommand')}</span>
+                            </button>
+                        </div>
+
+                        <div className="flex gap-2 w-full md:w-auto justify-between md:justify-end">
+                            <div className="flex gap-2 w-full md:w-auto">
+                                {/* Category Filter Pills - Dot Ribbon */}
+                                <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full overflow-x-auto no-scrollbar scrollbar-hide flex-1 md:flex-none md:max-w-[300px] xl:max-w-none shadow-inner border border-gray-200/50">
+                                    <button
+                                        onClick={() => setSelectedCategory('all')}
+                                        className={`
                                         w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold transition-all shrink-0
                                         ${selectedCategory === 'all'
-                                            ? 'bg-white text-gray-900 shadow-md scale-110 z-10'
-                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white/50'}
+                                                ? 'bg-white text-gray-900 shadow-md scale-110 z-10'
+                                                : 'text-gray-400 hover:text-gray-600 hover:bg-white/50'}
                                     `}
-                                    title={t('common.all')}
-                                >
-                                    {t('common.all').toUpperCase()}
-                                </button>
-                                <div className="w-px h-4 bg-gray-300/50 mx-1" />
-                                {categories.map(cat => (
-                                    <div key={cat.id} className="relative group/cat">
-                                        <button
-                                            onClick={() => setSelectedCategory(cat.id)}
-                                            onContextMenu={(e) => {
-                                                e.preventDefault();
-                                                setRenamingCategory({ id: cat.id, currentName: cat.label, color: cat.color });
-                                                setRenameValue(cat.label);
-                                            }}
-                                            className={`
+                                        title={t('common.all')}
+                                    >
+                                        {t('common.all').toUpperCase()}
+                                    </button>
+                                    <div className="w-px h-4 bg-gray-300/50 mx-1" />
+                                    {categories.map(cat => (
+                                        <div key={cat.id} className="relative group/cat">
+                                            <button
+                                                onClick={() => setSelectedCategory(cat.id)}
+                                                onContextMenu={(e) => {
+                                                    e.preventDefault();
+                                                    setRenamingCategory({ id: cat.id, currentName: cat.label, color: cat.color });
+                                                    setRenameValue(cat.label);
+                                                }}
+                                                className={`
                                                 w-8 h-8 flex items-center justify-center rounded-full transition-all shrink-0 relative
                                                 ${selectedCategory === cat.id
-                                                    ? 'bg-white shadow-md scale-110 z-10 ring-2 ring-gray-100'
-                                                    : 'hover:bg-white/50 hover:scale-105'}
+                                                        ? 'bg-white shadow-md scale-110 z-10 ring-2 ring-gray-100'
+                                                        : 'hover:bg-white/50 hover:scale-105'}
                                             `}
-                                        >
-                                            <div className={`w-3 h-3 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')} ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-transparent' : ''}`} />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
+                                            >
+                                                <div className={`w-3 h-3 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')} ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-transparent' : ''}`} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
 
-                            <div className="relative group shrink-0">
-                                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
-                                <input
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    placeholder={t('common.search')}
-                                    className="pl-9 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white rounded-full text-sm border border-transparent hover:border-gray-200 focus:border-emerald-200 outline-none w-10 focus:w-40 md:focus:w-60 transition-all shadow-inner placeholder:text-transparent focus:placeholder:text-gray-300 cursor-pointer focus:cursor-text"
-                                />
+                                <div className="relative group shrink-0">
+                                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
+                                    <input
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        placeholder={t('common.search')}
+                                        className="pl-9 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white rounded-full text-sm border border-transparent hover:border-gray-200 focus:border-emerald-200 outline-none w-10 focus:w-40 md:focus:w-60 transition-all shadow-inner placeholder:text-transparent focus:placeholder:text-gray-300 cursor-pointer focus:cursor-text"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <AnimatePresence mode="popLayout">
+                    <CommandForm
+                        isAdding={isAdding}
+                        newCmd={newCmd}
+                        setNewCmd={setNewCmd}
+                        newTag={newTag}
+                        setNewTag={setNewTag}
+                        editingTagId={editingTagId}
+                        setEditingTagId={setEditingTagId}
+                        categories={categories}
+                        handleAdd={handleAdd}
+                        handleAddTag={handleAddTag}
+                        setIsAdding={setIsAdding}
+                    />
+                </AnimatePresence>
+
+                <CommandList
+                    visibleCommands={visibleCommands}
+                    stageCommands={stageCommands}
+                    handleReorder={handleReorder}
+                    isSearching={isSearching}
+                    isAdding={isAdding}
+                    isImporting={isImporting}
+                    activeStage={activeStage}
+                    categories={categories}
+                    handleEdit={handleEdit}
+                    handleCopy={handleCopy}
+                    handleRemove={handleRemove}
+                    handleShare={handleShare}
+                    setNewCmd={setNewCmd}
+                    setIsAdding={setIsAdding}
+                    setIsImporting={setIsImporting}
+                    copiedId={copiedId}
+                    commands={commands}
+                    setCommands={setCommands}
+                />
             </div>
 
-            <AnimatePresence mode="popLayout">
-                <CommandForm
-                    isAdding={isAdding}
-                    newCmd={newCmd}
-                    setNewCmd={setNewCmd}
-                    newTag={newTag}
-                    setNewTag={setNewTag}
-                    editingTagId={editingTagId}
-                    setEditingTagId={setEditingTagId}
-                    categories={categories}
-                    handleAdd={handleAdd}
-                    handleAddTag={handleAddTag}
-                    setIsAdding={setIsAdding}
-                />
-            </AnimatePresence>
-
-            <CommandList
-                visibleCommands={visibleCommands}
-                stageCommands={stageCommands}
-                handleReorder={handleReorder}
-                isSearching={isSearching}
-                isAdding={isAdding}
-                isImporting={isImporting}
-                activeStage={activeStage}
-                categories={categories}
-                handleEdit={handleEdit}
-                handleCopy={handleCopy}
-                handleRemove={handleRemove}
-                handleShare={handleShare}
-                setNewCmd={setNewCmd}
-                setIsAdding={setIsAdding}
-                setIsImporting={setIsImporting}
-                copiedId={copiedId}
-                commands={commands}
-                setCommands={setCommands}
-            />
-        </div>
-
-            {/* Modals */ }
+            {/* Modals */}
             <CategoryRenameModal
                 renamingCategory={renamingCategory}
                 setRenamingCategory={setRenamingCategory}
