@@ -453,25 +453,30 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                 </button>
                                 <div className={`w-px h-4 bg-${activeTheme}-200 mx-1`} />
                                 {/* Move to Stage Buttons */}
-                                <div className="flex items-center gap-0.5 bg-white/50 rounded-lg p-0.5">
-                                    {[1, 2, 3, 4, 5].filter(s => s !== activeStage).map(stage => (
-                                        <button
-                                            key={stage}
-                                            onClick={() => handleBulkMove(stage)}
-                                            disabled={selectedIds.size === 0}
-                                            className={`w-7 h-7 rounded-md text-xs font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed
-                                                ${stage === 1 ? 'hover:bg-emerald-100 hover:text-emerald-700' : ''}
-                                                ${stage === 2 ? 'hover:bg-blue-100 hover:text-blue-700' : ''}
-                                                ${stage === 3 ? 'hover:bg-violet-100 hover:text-violet-700' : ''}
-                                                ${stage === 4 ? 'hover:bg-amber-100 hover:text-amber-700' : ''}
-                                                ${stage === 5 ? 'hover:bg-rose-100 hover:text-rose-700' : ''}
-                                                text-gray-500
-                                            `}
-                                            title={`Move to Stage ${stage}`}
-                                        >
-                                            {stage}
-                                        </button>
-                                    ))}
+                                <div className="flex items-center gap-1">
+                                    <span className="text-xs text-gray-400 mr-1 flex items-center gap-1">
+                                        <ArrowRight size={12} /> Move
+                                    </span>
+                                    {DEV_STAGES.filter(s => s.id !== activeStage).map(stage => {
+                                        const stageColors = {
+                                            1: 'hover:bg-emerald-100 hover:text-emerald-700 hover:border-emerald-200',
+                                            2: 'hover:bg-blue-100 hover:text-blue-700 hover:border-blue-200',
+                                            3: 'hover:bg-violet-100 hover:text-violet-700 hover:border-violet-200',
+                                            4: 'hover:bg-amber-100 hover:text-amber-700 hover:border-amber-200',
+                                            5: 'hover:bg-rose-100 hover:text-rose-700 hover:border-rose-200'
+                                        };
+                                        return (
+                                            <button
+                                                key={stage.id}
+                                                onClick={() => handleBulkMove(stage.id)}
+                                                disabled={selectedIds.size === 0}
+                                                className={`px-2 py-1 rounded-md text-[10px] font-medium border border-transparent transition-all disabled:opacity-30 disabled:cursor-not-allowed text-gray-500 bg-white/50 ${stageColors[stage.id]}`}
+                                                title={`Move to ${stage.label}`}
+                                            >
+                                                {stage.label.split(' ')[0]}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                                 <div className={`w-px h-4 bg-${activeTheme}-200 mx-1`} />
                                 <button
