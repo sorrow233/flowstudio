@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://flowstudio.catzz.work/favicon.svg" width="80" alt="Flow Studio Logo"/>
+  <img src="https://flowstudio.catzz.work/apple-touch-icon.png" width="80" alt="Flow Studio Logo"/>
 </p>
 
 <h1 align="center">Flow Studio</h1>
