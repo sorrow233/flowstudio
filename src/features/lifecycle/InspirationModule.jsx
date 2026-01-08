@@ -126,9 +126,8 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                             <Check size={12} strokeWidth={3} />
                             <span>{t('common.copied')}</span>
                         </motion.div>
-                        </motion.div>
                     )}
-        </AnimatePresence>
+                </AnimatePresence>
             </motion.div >
         </div >
     );
