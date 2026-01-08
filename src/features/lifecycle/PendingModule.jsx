@@ -122,7 +122,7 @@ const PendingModule = () => {
         return { scale: 1.1, opacity: 1, color: 'text-emerald-600' };
     };
 
-    const getTreeVisual = (stage = 1) => {
+    const getTreeVisual = (stage = 1, projectId = '') => {
         const stages = [
             { color: 'text-emerald-300', scale: 0.9, icon: Sprout, label: 'Seedling' },
             { color: 'text-emerald-400', scale: 1.1, icon: Sprout, label: 'Sapling' },
@@ -130,6 +130,20 @@ const PendingModule = () => {
             { color: 'text-emerald-600', scale: 1.1, icon: TreeDeciduous, label: 'Mature Tree' },
             { color: 'text-emerald-700', scale: 1.2, icon: TreePine, label: 'Ancient' },
         ];
+
+        // Advanced Stage (>= 6): Special mature trees
+        if (stage >= 6) {
+            const advancedTrees = [
+                { color: 'text-pink-400', scale: 1.4, icon: TreeDeciduous, label: '🌸 Cherry Blossom', emoji: '🌸' },
+                { color: 'text-orange-500', scale: 1.4, icon: TreeDeciduous, label: '🍁 Maple', emoji: '🍁' },
+                { color: 'text-yellow-500', scale: 1.4, icon: TreeDeciduous, label: '🍂 Ginkgo', emoji: '🍂' },
+                { color: 'text-emerald-600', scale: 1.4, icon: TreePine, label: '🌲 Cedar', emoji: '🌲' },
+            ];
+            // Deterministic random based on projectId for consistency
+            const hash = projectId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            return advancedTrees[hash % advancedTrees.length];
+        }
+
         if (stage > stages.length) return stages[stages.length - 1];
         return stages[stage - 1] || stages[0];
     };
@@ -221,18 +235,23 @@ const PendingModule = () => {
                             </div>
                             <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 no-scrollbar snap-x">
                                 {primaryProjects.map(p => {
-                                    const visual = getTreeVisual(p.subStage || 1);
+                                    const visual = getTreeVisual(p.subStage || 1, p.id);
                                     const isHoly = p.hasHolyGlow;
+                                    const isAdvanced = (p.subStage || 1) >= 6;
 
                                     return (
                                         <motion.div
                                             key={p.id}
                                             layoutId={`nursery-${p.id}`}
                                             className={`
-                                                min-w-[140px] snap-start bg-gradient-to-b from-white to-white 
+                                                snap-start bg-gradient-to-b from-white to-white 
                                                 border rounded-2xl p-4 flex flex-col items-center justify-between text-center 
-                                                hover:shadow-sm transition-all cursor-default h-[160px] relative overflow-hidden
-                                                ${isHoly ? 'border-violet-200 shadow-[0_0_15px_rgba(139,92,246,0.15)] ring-1 ring-violet-100' : 'border-emerald-100'}
+                                                hover:shadow-lg transition-all cursor-default relative overflow-hidden
+                                                ${isAdvanced
+                                                    ? 'min-w-[180px] h-[200px] border-amber-200 shadow-[0_0_20px_rgba(251,191,36,0.15)] ring-1 ring-amber-100'
+                                                    : 'min-w-[140px] h-[160px]'}
+                                                ${isHoly && !isAdvanced ? 'border-violet-200 shadow-[0_0_15px_rgba(139,92,246,0.15)] ring-1 ring-violet-100' : ''}
+                                                ${!isHoly && !isAdvanced ? 'border-emerald-100' : ''}
                                             `}
                                         >
                                             {/* Holy Glow Animation */}
@@ -244,22 +263,41 @@ const PendingModule = () => {
                                                 />
                                             )}
 
+                                            {/* Advanced Golden Glow */}
+                                            {isAdvanced && (
+                                                <motion.div
+                                                    animate={{ opacity: [0.2, 0.4, 0.2] }}
+                                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                                    className="absolute inset-0 bg-gradient-to-tr from-amber-50/60 via-transparent to-orange-50/40 pointer-events-none"
+                                                />
+                                            )}
+
                                             <div className="flex-1 flex items-center justify-center w-full relative">
                                                 <motion.div
-                                                    className={`relative z-10 ${visual.color} ${isHoly ? 'drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' : ''}`}
+                                                    className={`relative z-10 ${visual.color} ${isHoly ? 'drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' : ''} ${isAdvanced ? 'drop-shadow-[0_0_12px_rgba(251,191,36,0.4)]' : ''}`}
                                                     animate={{ scale: visual.scale }}
                                                 >
-                                                    <visual.icon size={32} strokeWidth={1.5} />
+                                                    {isAdvanced && visual.emoji ? (
+                                                        <span className="text-4xl">{visual.emoji}</span>
+                                                    ) : (
+                                                        <visual.icon size={isAdvanced ? 48 : 32} strokeWidth={1.5} />
+                                                    )}
                                                 </motion.div>
-                                                <div className="absolute bottom-2 w-8 h-1 bg-emerald-900/10 rounded-full blur-sm" />
+                                                <div className={`absolute bottom-2 ${isAdvanced ? 'w-12' : 'w-8'} h-1 bg-emerald-900/10 rounded-full blur-sm`} />
                                             </div>
                                             <div className="w-full relative z-10">
-                                                <h4 className="text-xs font-medium text-gray-700 line-clamp-1 w-full mb-2">{p.title}</h4>
-                                                <div className="flex items-center gap-1.5 justify-center">
-                                                    <div className="w-full bg-gray-100 h-1 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${((p.subStage || 1) / 5) * 100}%` }} />
+                                                <h4 className={`font-medium text-gray-700 line-clamp-1 w-full mb-2 ${isAdvanced ? 'text-sm' : 'text-xs'}`}>{p.title}</h4>
+                                                {isAdvanced ? (
+                                                    <div className="flex items-center gap-1 justify-center text-[10px] text-amber-600 font-bold uppercase tracking-widest">
+                                                        <span>⭐ Advanced</span>
                                                     </div>
-                                                </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-1.5 justify-center">
+                                                        <div className="w-full bg-gray-100 h-1 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${((p.subStage || 1) / 5) * 100}%` }} />
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </motion.div>
                                     );
