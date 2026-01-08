@@ -1,3 +1,6 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import zh from './locales/zh';
+import en from './locales/en';
 import ja from './locales/ja';
 import ko from './locales/ko';
 

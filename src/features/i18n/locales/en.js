@@ -31,6 +31,8 @@ export default {
         allCategories: 'All Categories',
         loading: 'Loading...',
         noData: 'No data',
+        lightMode: 'Light Mode',
+        darkMode: 'Dark Mode',
     },
 
     // Inspiration Module

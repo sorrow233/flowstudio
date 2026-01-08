@@ -31,6 +31,8 @@ export default {
         allCategories: '所有分类',
         loading: '加载中...',
         noData: '暂无数据',
+        lightMode: '亮色模式',
+        darkMode: '暗色模式',
     },
 
     // 灵感模块
