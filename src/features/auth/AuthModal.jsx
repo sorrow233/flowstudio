@@ -77,9 +77,9 @@ const AuthModal = ({ isOpen, onClose }) => {
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.9, opacity: 0 }}
-                    className="relative bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-sm text-center p-8"
+                    className="relative bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-2xl w-full max-w-sm text-center p-8"
                 >
-                    <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
                         <X size={20} className="text-gray-400" />
                     </button>
 
@@ -87,15 +87,15 @@ const AuthModal = ({ isOpen, onClose }) => {
                         <span className="text-2xl font-bold">{user.email?.[0]?.toUpperCase()}</span>
                     </div>
 
-                    <h2 className="text-xl font-medium text-gray-900 mb-1">Welcome Back</h2>
-                    <p className="text-sm text-gray-500 mb-8">{user.email}</p>
+                    <h2 className="text-xl font-medium text-gray-900 dark:text-gray-100 mb-1">Welcome Back</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">{user.email}</p>
 
                     <button
                         onClick={() => {
                             logout();
                             onClose();
                         }}
-                        className="w-full py-3 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl font-medium transition-colors"
+                        className="w-full py-3 bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-800/40 rounded-xl font-medium transition-colors"
                     >
                         Sign Out
                     </button>
@@ -130,34 +130,34 @@ const AuthModal = ({ isOpen, onClose }) => {
                 <div className="p-8">
                     <div className="flex justify-between items-center mb-8">
                         <div>
-                            <h2 className="text-2xl font-light text-gray-900 leading-tight">
+                            <h2 className="text-2xl font-light text-gray-900 dark:text-gray-100 leading-tight">
                                 {isLogin ? 'Welcome Back' : 'Join Flow Studio'}
                             </h2>
-                            <p className="text-gray-400 text-sm mt-1">
+                            <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">
                                 {isLogin ? 'Sync your workspace across devices' : 'Start your cloud journey'}
                             </p>
                         </div>
-                        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                        <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
                             <X size={20} className="text-gray-400" />
                         </button>
                     </div>
 
                     {error && (
-                        <div className="mb-6 p-4 bg-red-50 text-red-500 text-sm rounded-xl border border-red-100 flex items-start gap-2">
+                        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 text-sm rounded-xl border border-red-100 dark:border-red-800 flex items-start gap-2">
                             <span>⚠️</span> {error}
                         </div>
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Email</label>
+                            <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">Email</label>
                             <div className="relative">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none text-gray-700"
+                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none text-gray-700 dark:text-gray-200"
                                     placeholder="name@example.com"
                                     required
                                 />
@@ -165,14 +165,14 @@ const AuthModal = ({ isOpen, onClose }) => {
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Password</label>
+                            <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">Password</label>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                 <input
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none text-gray-700"
+                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none text-gray-700 dark:text-gray-200"
                                     placeholder="••••••••"
                                     required
                                 />
@@ -182,7 +182,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-4 bg-gray-900 text-white rounded-xl font-medium tracking-wide hover:bg-black transition-all flex items-center justify-center gap-2 shadow-lg shadow-gray-900/20 mt-4 disabled:opacity-70"
+                            className="w-full py-4 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-xl font-medium tracking-wide hover:bg-black dark:hover:bg-white transition-all flex items-center justify-center gap-2 shadow-lg shadow-gray-900/20 dark:shadow-gray-100/10 mt-4 disabled:opacity-70"
                         >
                             {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
                             {!loading && <ArrowRight size={18} />}
@@ -190,15 +190,15 @@ const AuthModal = ({ isOpen, onClose }) => {
                     </form>
 
                     <div className="my-6 flex items-center gap-4">
-                        <div className="h-px bg-gray-100 flex-1" />
-                        <span className="text-xs text-gray-400 font-mono">OR</span>
-                        <div className="h-px bg-gray-100 flex-1" />
+                        <div className="h-px bg-gray-100 dark:bg-gray-700 flex-1" />
+                        <span className="text-xs text-gray-400 dark:text-gray-500 font-mono">OR</span>
+                        <div className="h-px bg-gray-100 dark:bg-gray-700 flex-1" />
                     </div>
 
                     <button
                         type="button"
                         onClick={handleGoogleLogin}
-                        className="w-full py-3 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2"
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -212,7 +212,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                     <div className="mt-8 text-center">
                         <button
                             onClick={() => setIsLogin(!isLogin)}
-                            className="text-sm text-gray-500 hover:text-gray-900 underline underline-offset-4"
+                            className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 underline underline-offset-4"
                         >
                             {isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in"}
                         </button>

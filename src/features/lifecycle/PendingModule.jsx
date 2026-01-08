@@ -137,8 +137,8 @@ const PendingModule = () => {
             <div className={`transition-all duration-500 flex-col ${selectedProject ? 'hidden md:flex md:w-[350px] opacity-100' : 'flex w-full'}`}>
                 <div className="mb-8 flex justify-between items-end">
                     <div>
-                        <h2 className="text-2xl font-light tracking-wide text-gray-900">Idea Staging</h2>
-                        <p className="text-xs font-mono text-gray-400 mt-1 uppercase tracking-widest">Validate before you build</p>
+                        <h2 className="text-2xl font-light tracking-wide text-gray-900 dark:text-gray-100">Idea Staging</h2>
+                        <p className="text-xs font-mono text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-widest">Validate before you build</p>
                     </div>
 
                 </div>
@@ -151,12 +151,12 @@ const PendingModule = () => {
                                 key={project.id}
                                 onClick={() => setSelectedProject(project)}
                                 className={`
-                                    group cursor-pointer bg-white border rounded-xl relative transition-all duration-300 overflow-hidden
+                                    group cursor-pointer bg-white dark:bg-gray-900 border rounded-xl relative transition-all duration-300 overflow-hidden
                                     ${selectedProject?.id === project.id
-                                        ? 'border-gray-900 shadow-xl shadow-gray-200 ring-1 ring-gray-900 scale-[1.02]'
+                                        ? 'border-gray-900 dark:border-gray-100 shadow-xl shadow-gray-200 dark:shadow-gray-900 ring-1 ring-gray-900 dark:ring-gray-100 scale-[1.02]'
                                         : project.hasHolyGlow
                                             ? 'border-transparent shadow-[0_0_0_1px_rgba(16,185,129,0.3)] hover:shadow-[0_0_15px_rgba(16,185,129,0.2)]'
-                                            : 'border-gray-100 hover:border-gray-300 hover:shadow-md'}
+                                            : 'border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-md dark:hover:shadow-gray-900/50'}
                                 `}
                             >
                                 {/* Holy Flowing Border Animation */}
@@ -182,10 +182,10 @@ const PendingModule = () => {
                                     <div className="flex justify-between items-start mb-3">
                                         <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors 
                                             ${project.hasHolyGlow
-                                                ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100'
+                                                ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-100 dark:ring-emerald-700'
                                                 : project.score === 4
-                                                    ? 'bg-emerald-50 text-emerald-500'
-                                                    : 'bg-gray-50 text-gray-400'
+                                                    ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500 dark:text-emerald-400'
+                                                    : 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
                                             }
                                         `}>
                                             <Sprout size={18} />
@@ -205,15 +205,15 @@ const PendingModule = () => {
 
                         {/* Add Input */}
                         <div className="relative group">
-                            <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-50 rounded-xl blur opacity-25 group-hover:opacity-50 transition-opacity" />
-                            <div className="relative bg-white border border-dashed border-gray-300 rounded-xl p-2 flex items-center gap-3 hover:border-gray-400 transition-colors">
-                                <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+                            <div className="absolute inset-0 bg-gradient-to-r from-gray-100 dark:from-gray-800 to-gray-50 dark:to-gray-900 rounded-xl blur opacity-25 group-hover:opacity-50 transition-opacity" />
+                            <div className="relative bg-white dark:bg-gray-900 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-2 flex items-center gap-3 hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+                                <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500">
                                     <Plus size={20} strokeWidth={1.5} />
                                 </div>
                                 <input
                                     type="text"
                                     placeholder="Plant a new seed..."
-                                    className="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder:text-gray-400 font-light h-full"
+                                    className="flex-1 bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 font-light h-full"
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && e.target.value?.trim()) {
                                             const newP = {
@@ -235,11 +235,11 @@ const PendingModule = () => {
 
                     {/* Nursery (Primary Projects) */}
                     {primaryProjects.length > 0 && (
-                        <div className="pt-8 border-t border-gray-100">
+                        <div className="pt-8 border-t border-gray-100 dark:border-gray-800">
                             <div className="mb-4 flex items-center gap-2">
                                 <Sun size={16} className="text-amber-400" />
-                                <h3 className="text-sm font-medium text-gray-900 uppercase tracking-widest">Nursery</h3>
-                                <span className="text-xs text-gray-400 font-mono hidden sm:inline-block">({primaryProjects.length} Growing)</span>
+                                <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 uppercase tracking-widest">Nursery</h3>
+                                <span className="text-xs text-gray-400 dark:text-gray-500 font-mono hidden sm:inline-block">({primaryProjects.length} Growing)</span>
                             </div>
                             <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 no-scrollbar snap-x">
                                 {primaryProjects.map(p => {
@@ -366,7 +366,7 @@ const PendingModule = () => {
             </AnimatePresence>
 
             {!selectedProject && (
-                <div className="hidden md:flex flex-1 flex-col items-center justify-center text-gray-300">
+                <div className="hidden md:flex flex-1 flex-col items-center justify-center text-gray-300 dark:text-gray-600">
                     <p>选择一颗种子</p>
                 </div>
             )}

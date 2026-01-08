@@ -70,7 +70,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                 transition={{ x: { type: "spring", stiffness: 500, damping: 30 } }}
                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                 layout
-                className={`group relative bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] hover:border-gray-200 transition-all duration-300 cursor-pointer active:scale-[0.99] ${isCompleted ? 'opacity-50' : ''}`}
+                className={`group relative bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.5)] hover:border-gray-200 dark:hover:border-gray-600 transition-all duration-300 cursor-pointer active:scale-[0.99] ${isCompleted ? 'opacity-50' : ''}`}
             >
                 <div className="flex items-start gap-3">
                     {/* Color Status Dot */}
@@ -78,7 +78,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                         <div className={`w-2.5 h-2.5 rounded-full ${getDotColor(idea.id)} shadow-sm transition-transform duration-200 ${isCompleted ? 'scale-75 opacity-50' : ''}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <div className={`text-gray-700 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans select-none transition-all duration-200 ${isCompleted ? 'line-through text-gray-400' : ''}`}>
+                        <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans select-none transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
                             {(() => {
                                 // Parser for [Tag] pattern in saved ideas
                                 const parts = idea.content.split(/(\[.*?\])/g);
@@ -88,7 +88,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                                         return (
                                             <span
                                                 key={index}
-                                                className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-emerald-50 text-emerald-600 rounded-md text-[11px] font-medium align-middle border border-emerald-100/50 shadow-sm transform -translate-y-0.5"
+                                                className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-md text-[11px] font-medium align-middle border border-emerald-100/50 dark:border-emerald-700/50 shadow-sm transform -translate-y-0.5"
                                             >
                                                 {tagName}
                                             </span>
@@ -99,13 +99,13 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                             })()}
                         </div>
                         {/* Date/Time - compact, directly under content */}
-                        <div className="mt-2 text-[11px] text-gray-400 font-medium">
+                        <div className="mt-2 text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                             {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
                                 year: 'numeric',
                                 month: 'short',
                                 day: 'numeric',
                             })}
-                            <span className="mx-1.5 text-gray-300">·</span>
+                            <span className="mx-1.5 text-gray-300 dark:text-gray-600">·</span>
                             {new Date(idea.timestamp || Date.now()).toLocaleTimeString(undefined, {
                                 hour: '2-digit',
                                 minute: '2-digit'
@@ -121,7 +121,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
-                            className="absolute top-3 right-3 bg-emerald-50 text-emerald-600 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 shadow-sm border border-emerald-100"
+                            className="absolute top-3 right-3 bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 shadow-sm border border-emerald-100 dark:border-emerald-700"
                         >
                             <Check size={12} strokeWidth={3} />
                             <span>{t('common.copied')}</span>
@@ -256,28 +256,28 @@ const InspirationModule = () => {
             {/* Header Section */}
             <div className="mb-14 text-center md:text-left">
                 <div className="inline-flex items-center justify-center md:justify-start gap-2 mb-3">
-                    <div className="p-2 bg-gray-50 rounded-xl">
+                    <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl">
                         <Sparkles className="w-5 h-5 text-amber-500" />
                     </div>
-                    <h2 className="text-3xl font-light text-gray-900 tracking-tight">
+                    <h2 className="text-3xl font-light text-gray-900 dark:text-gray-100 tracking-tight">
                         {t('inspiration.title')}
                     </h2>
                 </div>
-                <p className="text-gray-500 text-base font-light tracking-wide max-w-md mx-auto md:mx-0 leading-relaxed">
+                <p className="text-gray-500 dark:text-gray-400 text-base font-light tracking-wide max-w-md mx-auto md:mx-0 leading-relaxed">
                     {t('inspiration.subtitle')}
                 </p>
             </div>
 
             {/* Input Section */}
             <div className="relative mb-20 group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                <div className="relative bg-white rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] group-hover:border-gray-200">
+                <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 dark:from-gray-800 via-gray-50 dark:via-gray-900 to-gray-100 dark:to-gray-800 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-700 overflow-hidden transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] group-hover:border-gray-200 dark:group-hover:border-gray-600">
 
                     <textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder={t('inspiration.placeholder')}
-                        className="w-full bg-transparent text-lg text-gray-800 placeholder:text-gray-300 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed"
+                        className="w-full bg-transparent text-lg text-gray-800 dark:text-gray-100 placeholder:text-gray-300 dark:placeholder:text-gray-600 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed"
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                                 handleAdd();
@@ -291,12 +291,12 @@ const InspirationModule = () => {
                         <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2 mr-4 mask-linear-fade">
                             {allProjectTags.length > 0 && (
                                 <>
-                                    <Hash size={14} className="text-gray-300 flex-shrink-0" />
+                                    <Hash size={14} className="text-gray-300 dark:text-gray-600 flex-shrink-0" />
                                     {allProjectTags.map((tag) => (
                                         <button
                                             key={tag}
                                             onClick={() => handleTagClick(tag)}
-                                            className="flex-shrink-0 px-3 py-1 bg-emerald-50/80 hover:bg-emerald-100 text-emerald-600 hover:text-emerald-700 rounded-full text-[11px] font-medium transition-colors border border-emerald-100/50 hover:border-emerald-200 whitespace-nowrap shadow-sm"
+                                            className="flex-shrink-0 px-3 py-1 bg-emerald-50/80 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-800/50 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 rounded-full text-[11px] font-medium transition-colors border border-emerald-100/50 dark:border-emerald-700/50 hover:border-emerald-200 dark:hover:border-emerald-600 whitespace-nowrap shadow-sm"
                                         >
                                             {tag}
                                         </button>
@@ -306,13 +306,13 @@ const InspirationModule = () => {
                         </div>
 
                         <div className="flex items-center gap-3 flex-shrink-0">
-                            <span className="text-[10px] text-gray-300 font-mono hidden md:inline-block">
+                            <span className="text-[10px] text-gray-300 dark:text-gray-600 font-mono hidden md:inline-block">
                                 {t('inspiration.cmdEnter')}
                             </span>
                             <button
                                 onClick={handleAdd}
                                 disabled={!input.trim()}
-                                className="flex items-center justify-center p-3 bg-gray-900 text-white rounded-xl hover:bg-black disabled:opacity-30 disabled:hover:bg-gray-900 transition-all duration-300 active:scale-95 shadow-lg shadow-gray-200"
+                                className="flex items-center justify-center p-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-xl hover:bg-black dark:hover:bg-white disabled:opacity-30 disabled:hover:bg-gray-900 dark:disabled:hover:bg-gray-100 transition-all duration-300 active:scale-95 shadow-lg shadow-gray-200 dark:shadow-gray-900"
                             >
                                 <ArrowRight size={18} strokeWidth={2} />
                             </button>
@@ -341,10 +341,10 @@ const InspirationModule = () => {
                         animate={{ opacity: 1 }}
                         className="py-32 text-center"
                     >
-                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Sparkles className="text-gray-300" size={24} />
+                        <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Sparkles className="text-gray-300 dark:text-gray-600" size={24} />
                         </div>
-                        <p className="text-gray-400 text-sm font-light tracking-wide">
+                        <p className="text-gray-400 dark:text-gray-500 text-sm font-light tracking-wide">
                             {t('inspiration.emptyState')}
                         </p>
                     </motion.div>
@@ -358,15 +358,15 @@ const InspirationModule = () => {
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 50 }}
-                        className="fixed bottom-10 right-10 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-4 z-50"
+                        className="fixed bottom-10 right-10 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-6 py-3 rounded-xl shadow-2xl flex items-center gap-4 z-50"
                     >
                         <span className="text-sm font-medium">{t('inspiration.ideaDeleted')}</span>
                         <button
                             onClick={handleUndo}
-                            className="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-2"
+                            className="text-sm font-bold text-emerald-400 dark:text-emerald-600 hover:text-emerald-300 dark:hover:text-emerald-500 transition-colors flex items-center gap-2"
                         >
                             <span>{t('common.undo')}</span>
-                            <kbd className="text-[10px] bg-gray-700 px-1.5 py-0.5 rounded text-gray-300 font-mono">⌘Z</kbd>
+                            <kbd className="text-[10px] bg-gray-700 dark:bg-gray-300 px-1.5 py-0.5 rounded text-gray-300 dark:text-gray-700 font-mono">⌘Z</kbd>
                         </button>
                     </motion.div>
                 )}

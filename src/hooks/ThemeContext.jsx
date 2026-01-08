@@ -7,10 +7,7 @@ export const ThemeProvider = ({ children }) => {
         // Check localStorage first
         const saved = localStorage.getItem('flowstudio_theme');
         if (saved) return saved;
-        // Fall back to system preference
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            return 'dark';
-        }
+        // Default to light mode (user can toggle)
         return 'light';
     });
 
