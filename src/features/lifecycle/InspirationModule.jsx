@@ -6,7 +6,103 @@ import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
 
 const STORAGE_KEY = 'flowstudio_inspiration_ideas';
 
+// Extracted Item Component to manage local drag state
+const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
+    const [isDragging, setIsDragging] = useState(false);
+
+    return (
+        <div className="relative">
+            {/* Swipe Background (Delete Action) 
+                Only visible when dragging to prevent flash during entry animation 
+            */}
+            <div
+                className={`absolute inset-0 bg-red-500 rounded-xl flex items-center justify-end pr-6 -z-10 transition-opacity duration-200 ${isDragging ? 'opacity-100' : 'opacity-0'}`}
+            >
+                <Trash2 className="text-white" size={20} />
+            </div>
+
+            <motion.div
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={{ right: 0.1, left: 0.7 }}
+                onDragStart={() => setIsDragging(true)}
+                onDragEnd={(e, info) => {
+                    setIsDragging(false);
+                    // More forgiving threshold and velocity check
+                    if (info.offset.x < -80 || info.velocity.x < -400) {
+                        onRemove(idea.id);
+                    }
+                }}
+                onClick={() => onCopy(idea.content, idea.id)}
+                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                animate={{
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    x: 0
+                }}
+                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                layout
+                className="group relative bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] hover:border-gray-200 transition-all duration-300 cursor-pointer active:scale-[0.99]"
+            >
+                <div className="flex justify-between items-start gap-6">
+                    <div className="text-gray-700 text-base font-light leading-7 whitespace-pre-wrap flex-grow font-sans select-none">
+                        {(() => {
+                            // Parser for [Tag] pattern in saved ideas
+                            const parts = idea.content.split(/(\[.*?\])/g);
+                            return parts.map((part, index) => {
+                                if (part.match(/^\[(.*?)\]$/)) {
+                                    const tagName = part.slice(1, -1); // Remove [ and ]
+                                    return (
+                                        <span
+                                            key={index}
+                                            className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-emerald-50 text-emerald-600 rounded-md text-[11px] font-medium align-middle border border-emerald-100/50 shadow-sm transform -translate-y-0.5"
+                                        >
+                                            {tagName}
+                                        </span>
+                                    );
+                                }
+                                return <span key={index}>{part}</span>;
+                            });
+                        })()}
+                    </div>
+
+                    {/* Copied Indicator */}
+                    <AnimatePresence>
+                        {copiedId === idea.id && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                className="absolute top-4 right-4 bg-emerald-50 text-emerald-600 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 shadow-sm border border-emerald-100"
+                            >
+                                <Check size={12} strokeWidth={3} />
+                                <span>COPIED</span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
+                    <span className="text-[10px] text-gray-400 font-medium tracking-wider uppercase">
+                        {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                        })}
+                        <span className="mx-2 text-gray-200">|</span>
+                        {new Date(idea.timestamp || Date.now()).toLocaleTimeString(undefined, {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}
+                    </span>
+                </div>
+            </motion.div>
+        </div>
+    );
+};
+
 const InspirationModule = () => {
+    // ... (rest of component logic remains same until return)
     // Sync
     const { doc } = useSyncStore('flowstudio_v1');
     const {
@@ -179,87 +275,13 @@ const InspirationModule = () => {
             <div className="space-y-6">
                 <AnimatePresence mode="popLayout">
                     {ideas.sort((a, b) => b.timestamp - a.timestamp).map((idea) => (
-                        <div key={idea.id} className="relative">
-                            {/* Swipe Background (Delete Action) */}
-                            <div className="absolute inset-0 bg-red-500 rounded-xl flex items-center justify-end pr-6 -z-10">
-                                <Trash2 className="text-white" size={20} />
-                            </div>
-
-                            <motion.div
-                                drag="x"
-                                dragConstraints={{ left: 0, right: 0 }}
-                                dragElastic={{ right: 0.1, left: 0.7 }}
-                                onDragEnd={(e, info) => {
-                                    // More forgiving threshold and velocity check
-                                    if (info.offset.x < -80 || info.velocity.x < -400) {
-                                        handleRemove(idea.id);
-                                    }
-                                }}
-                                onClick={() => handleCopy(idea.content, idea.id)}
-                                initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                                animate={{
-                                    opacity: 1,
-                                    y: 0,
-                                    scale: 1,
-                                    x: 0
-                                }}
-                                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                                layout
-                                className="group relative bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] hover:border-gray-200 transition-all duration-300 cursor-pointer active:scale-[0.99]"
-                            >
-                                <div className="flex justify-between items-start gap-6">
-                                    <div className="text-gray-700 text-base font-light leading-7 whitespace-pre-wrap flex-grow font-sans select-none">
-                                        {(() => {
-                                            // Parser for [Tag] pattern in saved ideas
-                                            const parts = idea.content.split(/(\[.*?\])/g);
-                                            return parts.map((part, index) => {
-                                                if (part.match(/^\[(.*?)\]$/)) {
-                                                    const tagName = part.slice(1, -1); // Remove [ and ]
-                                                    return (
-                                                        <span
-                                                            key={index}
-                                                            className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-emerald-50 text-emerald-600 rounded-md text-[11px] font-medium align-middle border border-emerald-100/50 shadow-sm transform -translate-y-0.5"
-                                                        >
-                                                            {tagName}
-                                                        </span>
-                                                    );
-                                                }
-                                                return <span key={index}>{part}</span>;
-                                            });
-                                        })()}
-                                    </div>
-
-                                    {/* Copied Indicator */}
-                                    <AnimatePresence>
-                                        {copiedId === idea.id && (
-                                            <motion.div
-                                                initial={{ opacity: 0, scale: 0.8 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                exit={{ opacity: 0, scale: 0.8 }}
-                                                className="absolute top-4 right-4 bg-emerald-50 text-emerald-600 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 shadow-sm border border-emerald-100"
-                                            >
-                                                <Check size={12} strokeWidth={3} />
-                                                <span>COPIED</span>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
-                                <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
-                                    <span className="text-[10px] text-gray-400 font-medium tracking-wider uppercase">
-                                        {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
-                                            year: 'numeric',
-                                            month: 'short',
-                                            day: 'numeric',
-                                        })}
-                                        <span className="mx-2 text-gray-200">|</span>
-                                        {new Date(idea.timestamp || Date.now()).toLocaleTimeString(undefined, {
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </span>
-                                </div>
-                            </motion.div>
-                        </div>
+                        <InspirationItem
+                            key={idea.id}
+                            idea={idea}
+                            onRemove={handleRemove}
+                            onCopy={handleCopy}
+                            copiedId={copiedId}
+                        />
                     ))}
                 </AnimatePresence>
 
