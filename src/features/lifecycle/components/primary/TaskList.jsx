@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
-import { Check, Trash2, ExternalLink, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, CheckSquare, Globe, Edit2, RefreshCw } from 'lucide-react';
+import { Check, Trash2, ExternalLink, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, CheckSquare, Globe, Edit2, RefreshCw, ListChecks, Copy, X } from 'lucide-react';
 import { COMMAND_CATEGORIES, STAGE_EMPTY_STATES, DEV_STAGES } from '../../../../utils/constants';
 
 const CATEGORY_ICONS = {
@@ -13,7 +13,7 @@ const CATEGORY_ICONS = {
 };
 
 // Separated Task Item Component to handle individual drag controls properly
-const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskId, onToggle, onDelete, handleCopy, startEditing, isEditing, editValue, setEditValue, saveEdit, availableCommands, onUpdateTask, themeColor }) => {
+const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskId, onToggle, onDelete, handleCopy, startEditing, isEditing, editValue, setEditValue, saveEdit, availableCommands, onUpdateTask, themeColor, isSelectionMode, isSelected, onSelect }) => {
     const dragControls = useDragControls();
 
     // Long Press Logic
@@ -26,6 +26,9 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
         // Prevent default only if needed, but here we want to allow potential swipes
         startPos.current = { x: e.clientX, y: e.clientY };
         isLongPress.current = false;
+
+        // Disable drag/long-press in selection mode
+        if (isSelectionMode) return;
 
         longPressTimer.current = setTimeout(() => {
             isLongPress.current = true;
@@ -112,12 +115,12 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
     // Dynamic Color Classes
     const getCheckboxStyle = () => {
         const base = `shrink-0 flex items-center justify-center transition-all duration-300 border-2`;
-        // Unified size w-6 h-6 (24px) for both, distinguishing only by shape (circle vs square)
-        const shape = task.isCommand ? 'w-6 h-6 rounded-full' : 'w-6 h-6 rounded-lg';
+        // Unified smaller size w-4 h-4 (16px) for both, distinguishing only by shape (circle vs square)
+        const shape = task.isCommand ? 'w-4 h-4 rounded-full' : 'w-4 h-4 rounded-lg';
 
         if (task.done) {
             // Completed state
-            return `${base} ${shape} ${theme.main} text-white ${!task.isCommand ? 'scale-110' : ''}`;
+            return `${base} ${shape} ${theme.main} text-white`;
         }
 
         // Idle state
@@ -134,7 +137,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
         <Reorder.Item
             value={task}
             id={task.id}
-            dragListener={false} // Disable auto-drag for the whole item to allow swipe
+            dragListener={!isSelectionMode} // Disable auto-drag for the whole item to allow swipe
             dragControls={dragControls} // Pass controls to the handle
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{
@@ -149,7 +152,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
             onPointerLeave={handlePointerUp}
         >
             <motion.div
-                drag="x"
+                drag={isSelectionMode ? false : "x"}
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={{ right: 0.05, left: 0.5 }}
                 onDragEnd={(e, info) => {
@@ -160,25 +163,33 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                 }}
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
+                onClick={isSelectionMode ? onSelect : undefined}
                 className={`
                     group flex items-center gap-4 p-5 rounded-2xl transition-all border relative overflow-hidden select-none touch-pan-y
+                    ${isSelectionMode && isSelected
+                        ? `border-${themeColor}-400 ring-1 ring-${themeColor}-400 bg-${themeColor}-50`
+                        : ''}
                     ${isGrabbing ? `shadow-md ring-1 ${theme.grab}` : ''}
-                    ${isMandatory && !task.done
+                    ${!isSelectionMode && isMandatory && !task.done
                         ? 'bg-white border-red-100 shadow-sm shadow-red-100 hover:border-red-200'
-                        : isMandatory && task.done
+                        : !isSelectionMode && isMandatory && task.done
                             ? 'bg-emerald-50/50 border-emerald-100 opacity-60'
-                            : isLink
+                            : !isSelectionMode && isLink
                                 ? 'bg-white border-blue-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5'
-                                : task.done
+                                : !isSelectionMode && task.done
                                     ? 'bg-gray-50 border-gray-100 opacity-60'
-                                    : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5'
+                                    : !isSelectionMode && !isSelected
+                                        ? 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5'
+                                        : ''
                     }
                 `}
                 onDoubleClick={() => {
-                    if (task.isCommand) {
-                        onToggle(projectId, task.id);
-                    } else {
-                        startEditing(task);
+                    if (!isSelectionMode) {
+                        if (task.isCommand) {
+                            onToggle(projectId, task.id);
+                        } else {
+                            startEditing(task);
+                        }
                     }
                 }}
             >
@@ -198,8 +209,8 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                         onClick={(e) => { e.stopPropagation(); onToggle(projectId, task.id); }}
                         className={getCheckboxStyle()}
                     >
-                        {/* Slightly adjusted size for command (12) to match w-6 box */}
-                        <Check size={task.isCommand ? 12 : 14} strokeWidth={3} />
+                        {/* Icon size adjusted for 16px checkbox */}
+                        <Check size={10} strokeWidth={3} />
                     </button>
                 )}
 
@@ -333,6 +344,10 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
 
     const [localTasks, setLocalTasks] = useState([]);
 
+    // Multi-select State
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedIds, setSelectedIds] = useState(new Set());
+
     useEffect(() => {
         const filtered = tasks?.filter(t => (t.stage || 1) === activeStage) || [];
         const currentIds = localTasks.map(t => t.id).join(',');
@@ -341,6 +356,60 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
             setLocalTasks(filtered);
         }
     }, [tasks, activeStage]);
+
+    // Reset selection when stage changes
+    useEffect(() => {
+        setIsSelectionMode(false);
+        setSelectedIds(new Set());
+    }, [activeStage]);
+
+    const toggleSelection = (id) => {
+        const newSelected = new Set(selectedIds);
+        if (newSelected.has(id)) {
+            newSelected.delete(id);
+        } else {
+            newSelected.add(id);
+        }
+        setSelectedIds(newSelected);
+    };
+
+    const handleSelectAll = () => {
+        if (selectedIds.size === localTasks.length) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(localTasks.map(t => t.id)));
+        }
+    };
+
+    // Bulk Actions
+    const handleBulkDelete = () => {
+        if (selectedIds.size === 0) return;
+        if (confirm(`Delete ${selectedIds.size} items?`)) {
+            selectedIds.forEach(id => onDelete(projectId, id));
+            setIsSelectionMode(false);
+            setSelectedIds(new Set());
+        }
+    };
+
+    const handleBulkToggle = () => {
+        if (selectedIds.size === 0) return;
+        selectedIds.forEach(id => onToggle(projectId, id));
+        setIsSelectionMode(false);
+        setSelectedIds(new Set());
+    };
+
+    const handleBulkCopy = () => {
+        if (selectedIds.size === 0) return;
+        // Filter tasks to preserve order
+        const selectedTasks = localTasks.filter(t => selectedIds.has(t.id));
+        const textToCopy = selectedTasks
+            .map(t => t.commandContent || t.text)
+            .join('\n');
+
+        navigator.clipboard.writeText(textToCopy);
+        setIsSelectionMode(false);
+        setSelectedIds(new Set());
+    };
 
     const handleReorder = (newOrder) => {
         setLocalTasks(newOrder);
@@ -418,6 +487,10 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                         availableCommands={availableCommands}
                                         onUpdateTask={onUpdateTask}
                                         themeColor={activeTheme}
+                                        // Selection Props
+                                        isSelectionMode={isSelectionMode}
+                                        isSelected={selectedIds.has(task.id)}
+                                        onSelect={() => toggleSelection(task.id)}
                                     />
                                 ))}
                             </Reorder.Group>
@@ -445,63 +518,140 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                 </div>
             </div>
 
-            {/* Input Footer */}
+            {/* Input Footer / Bulk Actions */}
             <div className="p-8 pt-4 bg-white/90 backdrop-blur-md shrink-0 border-t border-gray-100/50 relative z-20">
-                <div className="relative group shadow-xl shadow-gray-200/50 rounded-2xl bg-white ring-1 ring-gray-100 focus-within:ring-2 focus-within:ring-gray-900 transition-all hover:shadow-2xl hover:shadow-gray-200/50">
-                    <input
-                        type="text"
-                        value={newTaskInput}
-                        onChange={(e) => setNewTaskInput(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && onAddTask(projectId)}
-                        placeholder={`Add a task to ${stageInfo?.label || 'stage'}...`}
-                        className="w-full bg-transparent border-0 rounded-2xl py-4 pl-14 pr-4 transition-all outline-none placeholder:text-gray-300 text-lg font-light text-gray-800"
-                    />
-
-                    {/* Category Selector */}
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                        <button
-                            onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-400 hover:text-gray-900 transition-all"
+                <AnimatePresence mode="wait">
+                    {isSelectionMode ? (
+                        <motion.div
+                            key="bulk-actions"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            className={`flex items-center justify-between bg-${activeTheme}-50/50 border border-${activeTheme}-100 rounded-2xl p-2 px-4 shadow-lg shadow-${activeTheme}-100/20`}
                         >
-                            {(() => {
-                                const activeCat = COMMAND_CATEGORIES.find(c => c.id === newTaskCategory);
-                                const ActiveIcon = CATEGORY_ICONS[activeCat?.icon] || LayoutGrid;
-                                return <ActiveIcon size={18} className={activeCat?.color.split(' ')[1]} />
-                            })()}
-                        </button>
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => handleSelectAll()}
+                                    className={`text-xs font-bold uppercase tracking-wider text-${activeTheme}-600 hover:text-${activeTheme}-700 px-2 py-1 rounded transition-colors`}
+                                >
+                                    {selectedIds.size === localTasks.length ? 'Deselect All' : 'Select All'}
+                                </button>
+                                <span className={`text-sm font-medium text-${activeTheme}-900`}>
+                                    {selectedIds.size} Selected
+                                </span>
+                            </div>
 
-                        <AnimatePresence>
-                            {isCategoryOpen && (
-                                <>
-                                    <div className="fixed inset-0 z-40" onClick={() => setIsCategoryOpen(false)} />
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute bottom-full left-0 mb-3 p-1.5 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 flex flex-col gap-1 min-w-[140px]"
-                                    >
-                                        {COMMAND_CATEGORIES.map(cat => {
-                                            const Icon = CATEGORY_ICONS[cat.icon] || LayoutGrid;
-                                            return (
-                                                <button
-                                                    key={cat.id}
-                                                    onClick={() => { setNewTaskCategory(cat.id); setIsCategoryOpen(false); }}
-                                                    className={`
-                                                        px-3 py-2 rounded-lg transition-all flex items-center gap-3 w-full text-left
-                                                        ${newTaskCategory === cat.id ? 'bg-gray-900 text-white' : 'hover:bg-gray-50 text-gray-500 hover:text-gray-900'}
-                                                    `}
-                                                >
-                                                    <Icon size={14} />
-                                                    <span className="text-xs font-medium">{cat.label}</span>
-                                                </button>
-                                            )
-                                        })}
-                                    </motion.div>
-                                </>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </div>
+                            <div className="flex items-center gap-1">
+                                <button
+                                    onClick={handleBulkDelete}
+                                    disabled={selectedIds.size === 0}
+                                    className={`p-2 rounded-lg hover:bg-white text-red-500 hover:text-red-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
+                                    title="Delete Selected"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                                <div className={`w-px h-4 bg-${activeTheme}-200 mx-1`} />
+                                <button
+                                    onClick={handleBulkToggle}
+                                    disabled={selectedIds.size === 0}
+                                    className={`p-2 rounded-lg hover:bg-white text-${activeTheme}-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
+                                    title="Mark Done/Undone"
+                                >
+                                    <CheckSquare size={18} />
+                                </button>
+                                <button
+                                    onClick={handleBulkCopy}
+                                    disabled={selectedIds.size === 0}
+                                    className={`p-2 rounded-lg hover:bg-white text-${activeTheme}-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
+                                    title="Copy Content"
+                                >
+                                    <Copy size={18} />
+                                </button>
+                                <div className={`w-px h-4 bg-${activeTheme}-200 mx-1`} />
+                                <button
+                                    onClick={() => setIsSelectionMode(false)}
+                                    className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all"
+                                    title="Cancel"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="input"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            className="relative group shadow-xl shadow-gray-200/50 rounded-2xl bg-white ring-1 ring-gray-100 focus-within:ring-2 focus-within:ring-gray-900 transition-all hover:shadow-2xl hover:shadow-gray-200/50 flex items-center"
+                        >
+                            <input
+                                type="text"
+                                value={newTaskInput}
+                                onChange={(e) => setNewTaskInput(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && onAddTask(projectId)}
+                                placeholder={`Add a task to ${stageInfo?.label || 'stage'}...`}
+                                className="flex-1 bg-transparent border-0 rounded-l-2xl py-4 pl-14 pr-4 transition-all outline-none placeholder:text-gray-300 text-lg font-light text-gray-800"
+                            />
+
+                            {/* Category Selector */}
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                                <button
+                                    onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-400 hover:text-gray-900 transition-all"
+                                >
+                                    {(() => {
+                                        const activeCat = COMMAND_CATEGORIES.find(c => c.id === newTaskCategory);
+                                        const ActiveIcon = CATEGORY_ICONS[activeCat?.icon] || LayoutGrid;
+                                        return <ActiveIcon size={18} className={activeCat?.color.split(' ')[1]} />
+                                    })()}
+                                </button>
+
+                                <AnimatePresence>
+                                    {isCategoryOpen && (
+                                        <>
+                                            <div className="fixed inset-0 z-40" onClick={() => setIsCategoryOpen(false)} />
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                className="absolute bottom-full left-0 mb-3 p-1.5 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 flex flex-col gap-1 min-w-[140px]"
+                                            >
+                                                {COMMAND_CATEGORIES.map(cat => {
+                                                    const Icon = CATEGORY_ICONS[cat.icon] || LayoutGrid;
+                                                    return (
+                                                        <button
+                                                            key={cat.id}
+                                                            onClick={() => {
+                                                                setNewTaskCategory(cat.id);
+                                                                setIsCategoryOpen(false);
+                                                            }}
+                                                            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${newTaskCategory === cat.id ? 'bg-gray-50 text-gray-900 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'}`}
+                                                        >
+                                                            <Icon size={16} className={cat.color.split(' ')[1]} />
+                                                            {cat.label}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </motion.div>
+                                        </>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            {/* Multi-select Toggle */}
+                            <div className="pr-2 border-l border-gray-100 pl-2">
+                                <button
+                                    onClick={() => setIsSelectionMode(true)}
+                                    className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-all"
+                                    title="Multi-select"
+                                >
+                                    <ListChecks size={20} strokeWidth={1.5} />
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );
