@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
-import { Check, Trash2, ExternalLink, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, CheckSquare, Globe, Edit2, GripVertical, RefreshCw } from 'lucide-react';
+import { Check, Trash2, ExternalLink, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, CheckSquare, Globe, Edit2, RefreshCw } from 'lucide-react';
 import { COMMAND_CATEGORIES, STAGE_EMPTY_STATES, DEV_STAGES } from '../../../../utils/constants';
 
 const CATEGORY_ICONS = {
@@ -15,6 +15,40 @@ const CATEGORY_ICONS = {
 // Separated Task Item Component to handle individual drag controls properly
 const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskId, onToggle, onDelete, handleCopy, startEditing, isEditing, editValue, setEditValue, saveEdit, availableCommands, onUpdateTask }) => {
     const dragControls = useDragControls();
+
+    // Long Press Logic
+    const longPressTimer = useRef(null);
+    const isLongPress = useRef(false);
+    const startPos = useRef({ x: 0, y: 0 });
+
+    const handlePointerDown = (e) => {
+        // Prevent default only if needed, but here we want to allow potential swipes
+        startPos.current = { x: e.clientX, y: e.clientY };
+        isLongPress.current = false;
+
+        longPressTimer.current = setTimeout(() => {
+            isLongPress.current = true;
+            if (navigator.vibrate) navigator.vibrate(50);
+            dragControls.start(e);
+        }, 500); // 500ms long press threshold
+    };
+
+    const handlePointerMove = (e) => {
+        if (longPressTimer.current && !isLongPress.current) {
+            const moveX = Math.abs(e.clientX - startPos.current.x);
+            const moveY = Math.abs(e.clientY - startPos.current.y);
+            // Cancel if moved more than 10px (swipe/scroll intent)
+            if (moveX > 10 || moveY > 10) {
+                clearTimeout(longPressTimer.current);
+            }
+        }
+    };
+
+    const handlePointerUp = () => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+        }
+    };
 
     // Check for updates
     const sourceCommand = task.isCommand && availableCommands?.find(c => c.id === task.commandId);
@@ -40,6 +74,10 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                         onDelete(projectId, task.id);
                     }
                 }}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerLeave={handlePointerUp}
                 className={`
                     group flex items-center gap-4 p-5 rounded-2xl transition-all border relative overflow-hidden select-none touch-pan-y
                     ${isMandatory && !task.done
@@ -60,13 +98,6 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                     <Trash2 size={16} />
                 </motion.div>
 
-                {/* Drag Handle */}
-                <div
-                    className="text-gray-200 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing transition-opacity touch-none p-1 -ml-2"
-                    onPointerDown={(e) => dragControls.start(e)}
-                >
-                    <GripVertical size={16} />
-                </div>
 
                 {/* Leading Icon/Check */}
                 {isUtility || isLink ? (
