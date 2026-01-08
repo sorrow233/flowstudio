@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import Spotlight from './shared/Spotlight';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
     Sparkles,
@@ -41,42 +42,46 @@ const Navbar = () => {
 
     return (
         <div className="flex justify-center w-full px-4 pt-10 pb-4 relative z-50">
-            <nav className="bg-white border border-gray-100 rounded-full px-2 py-2 flex items-center gap-2 shadow-sm overflow-x-auto no-scrollbar max-w-full">
-                {tabs.map((tab) => {
-                    const Icon = tab.icon;
-                    // Check if current path starts with tab path (simple active check)
-                    const isActive = location.pathname.startsWith(tab.path);
+            <nav className="bg-white border border-gray-100 rounded-full shadow-sm overflow-hidden max-w-full relative">
+                <Spotlight className="flex items-center gap-2 px-2 py-2" spotColor="rgba(16, 185, 129, 0.1)" size={300}>
+                    {tabs.map((tab) => {
+                        const Icon = tab.icon;
+                        // Check if current path starts with tab path (simple active check)
+                        const isActive = location.pathname.startsWith(tab.path);
 
-                    return (
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => navigate(tab.path)}
+                                className={`
+                    relative flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40
+                    ${isActive ? 'text-gray-900 bg-gray-50/50' : 'text-gray-400 hover:text-gray-600'}
+                  `}
+                            >
+                                <Icon size={16} strokeWidth={isActive ? 2 : 1.5} />
+                                <span className={`text-sm ${isActive ? 'font-medium' : 'font-light'}`}>{tab.label}</span>
+                            </button>
+                        );
+                    })}
+
+                    <div className="w-px h-6 bg-gray-100 mx-1 relative z-40" />
+
+                    <div className="relative z-40">
                         <button
-                            key={tab.id}
-                            onClick={() => navigate(tab.path)}
-                            className={`
-                relative flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 whitespace-nowrap
-                ${isActive ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'}
-              `}
+                            onClick={() => setIsAuthModalOpen(true)}
+                            className="focus:outline-none"
                         >
-                            <Icon size={16} strokeWidth={isActive ? 2 : 1.5} />
-                            <span className={`text-sm ${isActive ? 'font-medium' : 'font-light'}`}>{tab.label}</span>
+                            {user ? (
+                                <SyncStatus status={status} pendingCount={pendingCount} />
+                            ) : (
+                                <div className="flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 whitespace-nowrap bg-gray-900 text-white hover:bg-black">
+                                    <Cloud size={16} />
+                                    <span className="text-sm">Cloud Sync</span>
+                                </div>
+                            )}
                         </button>
-                    );
-                })}
-
-                <div className="w-px h-6 bg-gray-100 mx-1" />
-
-                <button
-                    onClick={() => setIsAuthModalOpen(true)}
-                    className="focus:outline-none"
-                >
-                    {user ? (
-                        <SyncStatus status={status} pendingCount={pendingCount} />
-                    ) : (
-                        <div className="flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 whitespace-nowrap bg-gray-900 text-white hover:bg-black">
-                            <Cloud size={16} />
-                            <span className="text-sm">Cloud Sync</span>
-                        </div>
-                    )}
-                </button>
+                    </div>
+                </Spotlight>
             </nav>
 
             <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
