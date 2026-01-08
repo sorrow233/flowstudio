@@ -230,7 +230,7 @@ const PrimaryDevModule = () => {
         }];
 
         handleUpdateProject(selectedProject.id, { tasks: newTasks });
-        setCommandModalOpen(false);
+        // Modal stays open - user can import multiple commands consecutively
 
         if (tag) {
             navigator.clipboard.writeText(tag.value || command.content);
