@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, Reorder } from 'framer-motion';
-import { Terminal, Library, ChevronRight, GripVertical, Check, Copy, Trash2, Sparkles, Link as LinkIcon, Command, Globe, Tag, FileText } from 'lucide-react';
+import { Terminal, Library, ChevronRight, GripVertical, Check, Copy, Trash2, Sparkles, Link as LinkIcon, Command, Globe, Tag, FileText, Share2 } from 'lucide-react';
 
 const CommandList = ({
     visibleCommands,
@@ -14,6 +14,7 @@ const CommandList = ({
     handleEdit,
     handleCopy,
     handleRemove,
+    handleShare,
     setNewCmd,
     setIsAdding,
     setIsImporting,
@@ -136,6 +137,13 @@ const CommandList = ({
 
                                     {/* Actions */}
                                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleShare?.(cmd); }}
+                                            className="p-2 hover:bg-violet-50 rounded-xl text-gray-400 hover:text-violet-600 transition-colors"
+                                            title="分享到社区"
+                                        >
+                                            <Share2 size={18} />
+                                        </button>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); handleEdit(cmd); }}
                                             className="p-2 hover:bg-gray-100 rounded-xl text-gray-400 hover:text-gray-900 transition-colors"

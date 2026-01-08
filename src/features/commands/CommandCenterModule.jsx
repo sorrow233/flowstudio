@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Plus, Search, Library } from 'lucide-react';
+import { Plus, Search, Library, Globe2 } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES, COMMAND_CATEGORIES } from '../../utils/constants';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -9,6 +9,7 @@ import CommandList from './components/CommandList';
 import CommandForm from './components/CommandForm';
 import CategoryRenameModal from './components/CategoryRenameModal';
 import LibraryImportModal from './components/LibraryImportModal';
+import { SharePublishModal, ShareBrowserModal } from '../share';
 
 const CommandCenterModule = () => {
     const [commands, setCommands] = useState([]);
@@ -16,6 +17,8 @@ const CommandCenterModule = () => {
     const [selectedCategory, setSelectedCategory] = useState('all'); // Category Filter
     const [isAdding, setIsAdding] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
+    const [isCommunityBrowsing, setIsCommunityBrowsing] = useState(false);
+    const [sharingCommand, setSharingCommand] = useState(null);
     const [search, setSearch] = useState('');
     const [copiedId, setCopiedId] = useState(null);
 
@@ -158,6 +161,22 @@ const CommandCenterModule = () => {
         setIsImporting(false);
     };
 
+    const handleCommunityImport = (cmd) => {
+        // Import from community share
+        const command = {
+            id: uuidv4(),
+            ...cmd,
+            stageIds: [activeStage],
+            createdAt: Date.now()
+        };
+        setCommands([command, ...commands]);
+        setIsCommunityBrowsing(false);
+    };
+
+    const handleShare = (cmd) => {
+        setSharingCommand(cmd);
+    };
+
     const handleEdit = (cmd) => {
         setNewCmd({
             id: cmd.id,
@@ -281,6 +300,16 @@ const CommandCenterModule = () => {
                     </div>
                     <div className="flex flex-col items-end gap-4">
                         <div className="flex gap-2">
+                            {/* Community Button */}
+                            <button
+                                onClick={() => setIsCommunityBrowsing(true)}
+                                className="group flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-violet-50 to-fuchsia-50 text-violet-600 border border-violet-200 rounded-2xl hover:from-violet-100 hover:to-fuchsia-100 transition-all shadow-sm hover:shadow-md"
+                                title="浏览社区分享"
+                            >
+                                <Globe2 size={18} />
+                                <span className="font-medium text-sm">社区</span>
+                            </button>
+
                             {/* Import Button */}
                             <button
                                 onClick={() => setIsImporting(true)}
@@ -392,6 +421,7 @@ const CommandCenterModule = () => {
                     handleEdit={handleEdit}
                     handleCopy={handleCopy}
                     handleRemove={handleRemove}
+                    handleShare={handleShare}
                     setNewCmd={setNewCmd}
                     setIsAdding={setIsAdding}
                     setIsImporting={setIsImporting}
@@ -413,6 +443,18 @@ const CommandCenterModule = () => {
                 setIsImporting={setIsImporting}
                 importableCommands={importableCommands}
                 handleImport={handleImport}
+            />
+
+            <ShareBrowserModal
+                isOpen={isCommunityBrowsing}
+                onClose={() => setIsCommunityBrowsing(false)}
+                onImport={handleCommunityImport}
+            />
+
+            <SharePublishModal
+                isOpen={!!sharingCommand}
+                onClose={() => setSharingCommand(null)}
+                command={sharingCommand}
             />
         </div >
     );

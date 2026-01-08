@@ -21,6 +21,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
     const isLongPress = useRef(false);
     const startPos = useRef({ x: 0, y: 0 });
     const [isGrabbing, setIsGrabbing] = useState(false);
+    const lastClickTimeRef = useRef(0); // For manual double-click detection
 
     const handlePointerDown = (e) => {
         // Prevent default only if needed, but here we want to allow potential swipes
@@ -175,7 +176,26 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                 }}
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
-                onClick={isSelectionMode ? onSelect : undefined}
+                onClick={(e) => {
+                    if (isSelectionMode) {
+                        onSelect();
+                        return;
+                    }
+                    // Manual double-click detection (Framer Motion drag conflicts with native dblclick)
+                    const now = Date.now();
+                    const DOUBLE_CLICK_THRESHOLD = 300;
+                    if (lastClickTimeRef.current && (now - lastClickTimeRef.current < DOUBLE_CLICK_THRESHOLD)) {
+                        // Double click detected
+                        if (task.isCommand) {
+                            onToggle(projectId, task.id);
+                        } else {
+                            startEditing(task);
+                        }
+                        lastClickTimeRef.current = 0; // Reset
+                    } else {
+                        lastClickTimeRef.current = now;
+                    }
+                }}
                 className={`
                     group flex items-center gap-4 p-5 rounded-2xl transition-all border relative overflow-hidden select-none touch-pan-y
                     ${isSelectionMode && isSelected
@@ -195,15 +215,6 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                                         : ''
                     }
                 `}
-                onDoubleClick={() => {
-                    if (!isSelectionMode) {
-                        if (task.isCommand) {
-                            onToggle(projectId, task.id);
-                        } else {
-                            startEditing(task);
-                        }
-                    }
-                }}
             >
                 {/* Slide Action Context (Behind content) */}
                 <motion.div className="absolute inset-y-0 right-0 bg-red-500 -z-10 flex items-center justify-end pr-5 text-white font-bold uppercase tracking-wider text-xs pointer-events-none" style={{ width: '100%', x: '100%' }}>
