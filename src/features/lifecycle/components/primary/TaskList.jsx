@@ -13,7 +13,7 @@ const CATEGORY_ICONS = {
 };
 
 // Separated Task Item Component to handle individual drag controls properly
-const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskId, onToggle, onDelete, handleCopy, startEditing, isEditing, editValue, setEditValue, saveEdit, availableCommands, onUpdateTask }) => {
+const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskId, onToggle, onDelete, handleCopy, startEditing, isEditing, editValue, setEditValue, saveEdit, availableCommands, onUpdateTask, themeColor }) => {
     const dragControls = useDragControls();
 
     // Long Press Logic
@@ -57,6 +57,26 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
     const sourceCommand = task.isCommand && availableCommands?.find(c => c.id === task.commandId);
     const isOutdated = sourceCommand && (sourceCommand.content !== task.commandContent || sourceCommand.title !== task.text);
 
+    // Dynamic Color Classes
+    const getCheckboxStyle = () => {
+        const base = `shrink-0 flex items-center justify-center transition-all duration-300 border-2`;
+        const shape = task.isCommand ? 'w-5 h-5 rounded-full' : 'w-6 h-6 rounded-lg';
+
+        if (task.done) {
+            // Completed state: Filled with theme color
+            return `${base} ${shape} bg-${themeColor}-500 border-${themeColor}-500 text-white ${!task.isCommand ? 'scale-110' : ''}`;
+        }
+
+        // Idle state: Hollow
+        if (task.isCommand) {
+            return `${base} ${shape} border-${themeColor}-300 hover:border-${themeColor}-400 bg-transparent text-transparent hover:bg-${themeColor}-50`;
+        } else {
+            // Default Task Idle
+            if (isMandatory) return `${base} ${shape} border-red-200 text-transparent hover:border-red-400 bg-red-50`;
+            return `${base} ${shape} border-gray-200 text-transparent group-hover:border-gray-400 hover:bg-gray-50`;
+        }
+    };
+
     return (
         <Reorder.Item
             value={task}
@@ -89,7 +109,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                 onPointerMove={handlePointerMove}
                 className={`
                     group flex items-center gap-4 p-5 rounded-2xl transition-all border relative overflow-hidden select-none touch-pan-y
-                    ${isGrabbing ? 'border-violet-300 shadow-md ring-1 ring-violet-100 bg-violet-50/10' : ''}
+                    ${isGrabbing ? `border-${themeColor}-300 shadow-md ring-1 ring-${themeColor}-100 bg-${themeColor}-50/10` : ''}
                     ${isMandatory && !task.done
                         ? 'bg-white border-red-100 shadow-sm shadow-red-100 hover:border-red-200'
                         : isMandatory && task.done
@@ -123,13 +143,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                 ) : (
                     <button
                         onClick={(e) => { e.stopPropagation(); onToggle(projectId, task.id); }}
-                        className={`
-                            shrink-0 flex items-center justify-center transition-all duration-300
-                            ${task.isCommand
-                                ? `w-5 h-5 rounded-full border-2 ${task.done ? 'bg-violet-500 border-violet-500 text-white' : 'border-violet-300 hover:border-violet-400 bg-transparent text-transparent hover:bg-violet-50'}`
-                                : `w-6 h-6 rounded-lg border-2 ${task.done ? 'bg-emerald-500 border-emerald-500 text-white scale-110' : isMandatory ? 'border-red-200 text-transparent hover:border-red-400 bg-red-50' : 'border-gray-200 text-transparent group-hover:border-gray-400 hover:bg-gray-50'}`
-                            }
-                        `}
+                        className={getCheckboxStyle()}
                     >
                         <Check size={task.isCommand ? 10 : 14} strokeWidth={3} />
                     </button>
@@ -145,7 +159,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                             onChange={(e) => setEditValue(e.target.value)}
                             onBlur={() => saveEdit(task.id)}
                             onKeyDown={(e) => e.key === 'Enter' && saveEdit(task.id)}
-                            className="w-full bg-white border border-emerald-200 rounded px-2 py-1 text-base focus:ring-2 focus:ring-emerald-100 outline-none"
+                            className={`w-full bg-white border border-${themeColor}-200 rounded px-2 py-1 text-base focus:ring-2 focus:ring-${themeColor}-100 outline-none`}
                         />
                     ) : (
 
@@ -159,7 +173,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                             }}
                         >
                             <div className="flex items-center gap-2">
-                                <span className={`text-base font-medium transition-all truncate ${task.done ? (task.isCommand ? 'opacity-60 line-through decoration-2 decoration-violet-500/30 text-gray-400' : 'opacity-50 line-through decoration-emerald-500/30') : 'text-gray-700'}`}>
+                                <span className={`text-base font-medium transition-all truncate ${task.done ? `opacity-60 line-through decoration-2 decoration-${themeColor}-500/30 text-gray-400` : 'text-gray-700'}`}>
                                     {task.text}
                                 </span>
                                 {isOutdated && (
@@ -238,7 +252,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                     {!task.isCommand && !isEditing && (
                         <button
                             onClick={(e) => { e.stopPropagation(); startEditing(task); }}
-                            className="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors"
+                            className={`p-2 text-gray-400 hover:text-${themeColor}-500 hover:bg-${themeColor}-50 rounded-lg transition-colors`}
                         >
                             <Edit2 size={16} />
                         </button>
@@ -283,6 +297,16 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
 
     const stageInfo = DEV_STAGES.find(s => s.id === activeStage);
     const emptyState = STAGE_EMPTY_STATES[activeStage];
+
+    // Stage Themes Mapping
+    const STAGE_THEMES = {
+        1: 'emerald',
+        2: 'blue',
+        3: 'violet',
+        4: 'amber',
+        5: 'rose'
+    };
+    const activeTheme = STAGE_THEMES[activeStage] || 'emerald';
 
     const handleCopy = (id, content) => {
         navigator.clipboard.writeText(content);
@@ -339,6 +363,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                         saveEdit={saveEdit}
                                         availableCommands={availableCommands}
                                         onUpdateTask={onUpdateTask}
+                                        themeColor={activeTheme}
                                     />
                                 ))}
                             </Reorder.Group>
