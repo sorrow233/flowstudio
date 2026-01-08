@@ -14,10 +14,16 @@ import { db } from '../../lib/firebase';
 const SESSION_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 
 /**
- * SyncEngine - Simplified & Robust
+ * SyncEngine - No Shadow Doc Version
  * 
- * Key principle: Shadow Doc always equals Main Doc AFTER initialization.
- * Only user-initiated local changes (not remote updates) should create diffs.
+ * Key change: Instead of maintaining a Shadow Doc (which fails due to Yjs clientID issues),
+ * we simply track whether we have pending local changes using a flag.
+ * 
+ * Strategy:
+ * 1. All remote updates are applied with origin='remote'
+ * 2. Local changes (origin !== 'remote') set a "dirty" flag
+ * 3. Push sends ALL local state (not a diff) - simpler and more reliable
+ * 4. After push, clear the dirty flag
  */
 export class SyncEngine {
     constructor(docId, userId, initialData = {}) {
@@ -31,23 +37,25 @@ export class SyncEngine {
         this.listeners = new Set();
 
         this.doc = new Y.Doc();
-        this.shadowDoc = new Y.Doc();
 
         this.isPushing = false;
-        this.isReady = false;  // Only true after BOTH sources loaded
+        this.isDirty = false;  // Simple flag: true if local changes exist
+        this.isReady = false;
         this.isIndexedDBLoaded = false;
         this.isServerLoaded = false;
         this.unsubscribes = [];
         this.pushTimeout = null;
         this.processedUpdateIds = new Set();
 
+        // Track latest known server state vector for comparison
+        this.lastSyncedStateVector = null;
+
         this.init();
     }
 
     init() {
-        console.info(`[SyncEngine] Init: ${this.docId}, session: ${this.sessionId.slice(0, 8)}`);
+        console.info(`[SyncEngine] Init: ${this.docId}`);
 
-        // 1. IndexedDB
         this.localProvider = new IndexeddbPersistence(this.docId, this.doc);
         this.localProvider.on('synced', () => {
             console.info(`[SyncEngine] IndexedDB synced.`);
@@ -56,12 +64,10 @@ export class SyncEngine {
             this.tryReady();
         });
 
-        // 2. Network
         window.addEventListener('online', () => {
-            if (this.isReady) this.schedulePush();
+            if (this.isReady && this.isDirty) this.schedulePush();
         });
 
-        // 3. Firestore
         if (this.userId) {
             this.connectFirestore();
         } else {
@@ -70,10 +76,10 @@ export class SyncEngine {
             this.tryReady();
         }
 
-        // 4. Local changes - ONLY trigger push for non-remote changes AFTER ready
+        // Track local changes
         this.doc.on('update', (update, origin) => {
             if (origin !== 'remote' && this.isReady) {
-                console.debug("[SyncEngine] Local change detected.");
+                this.isDirty = true;
                 this.setStatus('syncing');
                 this.schedulePush();
             }
@@ -86,14 +92,13 @@ export class SyncEngine {
         const q = query(updatesColl, orderBy('createdAt', 'asc'));
 
         const unsub = onSnapshot(q, (snapshot) => {
-            const updates = [];
+            let appliedCount = 0;
 
             snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
                     const docId = change.doc.id;
                     const data = change.doc.data();
 
-                    // Skip our own updates
                     if (this.processedUpdateIds.has(docId) || data.sessionId === this.sessionId) {
                         this.processedUpdateIds.add(docId);
                         return;
@@ -101,7 +106,9 @@ export class SyncEngine {
 
                     if (data.update) {
                         try {
-                            updates.push(Uint8Array.from(atob(data.update), c => c.charCodeAt(0)));
+                            const update = Uint8Array.from(atob(data.update), c => c.charCodeAt(0));
+                            Y.applyUpdate(this.doc, update, 'remote');
+                            appliedCount++;
                         } catch (e) {
                             console.error("[SyncEngine] Parse error:", e);
                         }
@@ -109,12 +116,8 @@ export class SyncEngine {
                 }
             });
 
-            if (updates.length > 0) {
-                console.info(`[SyncEngine] Applying ${updates.length} remote updates.`);
-                updates.forEach(u => {
-                    Y.applyUpdate(this.doc, u, 'remote');
-                    Y.applyUpdate(this.shadowDoc, u);
-                });
+            if (appliedCount > 0) {
+                console.info(`[SyncEngine] Applied ${appliedCount} remote updates.`);
             }
 
             if (!this.isServerLoaded) {
@@ -133,52 +136,43 @@ export class SyncEngine {
         this.unsubscribes.push(unsub);
     }
 
-    /**
-     * Called when either source finishes loading.
-     * When BOTH are ready, sync Shadow to Main and mark as ready.
-     */
     tryReady() {
-        if (this.isReady) return;  // Already done
-        if (!this.isServerLoaded || !this.isIndexedDBLoaded) return;  // Not both yet
-
-        // Sync Shadow to Main's current state
-        const fullState = Y.encodeStateAsUpdate(this.doc);
-        Y.applyUpdate(this.shadowDoc, fullState);
+        if (this.isReady) return;
+        if (!this.isServerLoaded || !this.isIndexedDBLoaded) return;
 
         this.isReady = true;
-        console.info("[SyncEngine] Ready! Shadow synced to Main.");
+        this.lastSyncedStateVector = Y.encodeStateVector(this.doc);
 
-        // Now check if there are any local changes that need pushing
-        // (There shouldn't be, but just in case)
-        const diff = Y.encodeStateAsUpdate(this.doc, Y.encodeStateVector(this.shadowDoc));
-        if (diff.byteLength > 0) {
-            console.warn(`[SyncEngine] Unexpected diff after ready: ${diff.byteLength} bytes. Pushing...`);
-            this.setStatus('syncing');
-            this.schedulePush();
-        } else {
-            console.info("[SyncEngine] No pending changes. Synced!");
-            this.setStatus('synced');
-        }
+        console.info("[SyncEngine] Ready!");
+        this.setStatus('synced');
     }
 
     schedulePush() {
         clearTimeout(this.pushTimeout);
-        this.pushTimeout = setTimeout(() => this.tryPush(), 1500);
+        this.pushTimeout = setTimeout(() => this.tryPush(), 2000);
     }
 
     async tryPush() {
-        if (this.isPushing || !navigator.onLine) return;
-
-        const sv = Y.encodeStateVector(this.shadowDoc);
-        const diff = Y.encodeStateAsUpdate(this.doc, sv);
-
-        if (diff.byteLength === 0) {
-            this.setStatus('synced');
+        if (this.isPushing || !navigator.onLine || !this.isDirty) {
+            if (!this.isDirty) this.setStatus('synced');
             return;
         }
 
         try {
             this.isPushing = true;
+
+            // Send incremental update from last synced state
+            const diff = this.lastSyncedStateVector
+                ? Y.encodeStateAsUpdate(this.doc, this.lastSyncedStateVector)
+                : Y.encodeStateAsUpdate(this.doc);
+
+            if (diff.byteLength === 0) {
+                console.info("[SyncEngine] No changes to push.");
+                this.isDirty = false;
+                this.setStatus('synced');
+                return;
+            }
+
             console.info(`[SyncEngine] Pushing ${diff.byteLength} bytes...`);
 
             const updatesColl = collection(db, `users/${this.userId}/rooms/${this.docId}/updates`);
@@ -193,15 +187,11 @@ export class SyncEngine {
             });
 
             console.info("[SyncEngine] Push success!");
-            Y.applyUpdate(this.shadowDoc, diff);
 
-            // Check again
-            const newDiff = Y.encodeStateAsUpdate(this.doc, Y.encodeStateVector(this.shadowDoc));
-            if (newDiff.byteLength > 0) {
-                this.schedulePush();
-            } else {
-                this.setStatus('synced');
-            }
+            // Update our reference point
+            this.lastSyncedStateVector = Y.encodeStateVector(this.doc);
+            this.isDirty = false;
+            this.setStatus('synced');
 
         } catch (error) {
             console.error("[SyncEngine] Push failed:", error);
