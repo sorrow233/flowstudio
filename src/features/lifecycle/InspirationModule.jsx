@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Trash2, ArrowRight, Copy, Check, Sparkles } from 'lucide-react';
+import { Send, Trash2, ArrowRight, Copy, Check, Sparkles, Hash, Tag } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
@@ -14,6 +14,10 @@ const InspirationModule = () => {
         addProject: addIdea,
         removeProject: removeIdea
     } = useSyncedProjects(doc, 'inspiration');
+
+    // Fetch existing projects for tags
+    const { projects: primaryProjects } = useSyncedProjects(doc, 'primary_projects');
+    const { projects: pendingProjects } = useSyncedProjects(doc, 'pending_projects');
 
     const [input, setInput] = useState('');
     const [copiedId, setCopiedId] = useState(null);
@@ -64,6 +68,17 @@ const InspirationModule = () => {
         }
     };
 
+    const handleTagClick = (projectTitle) => {
+        const tag = `[${projectTitle}] `;
+        setInput(prev => prev + tag);
+    };
+
+    // Combine and sort projects for tags
+    const allProjectTags = [...(primaryProjects || []), ...(pendingProjects || [])]
+        .map(p => p.title)
+        .filter(t => t && t.trim().length > 0)
+        .sort();
+
     return (
         <div className="max-w-4xl mx-auto pt-14 px-6 md:px-10 pb-32">
             {/* Header Section */}
@@ -85,6 +100,23 @@ const InspirationModule = () => {
             <div className="relative mb-20 group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
                 <div className="relative bg-white rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] group-hover:border-gray-200">
+
+                    {/* Project Tags Bar */}
+                    {allProjectTags.length > 0 && (
+                        <div className="flex items-center gap-2 overflow-x-auto py-3 px-4 border-b border-gray-50 no-scrollbar">
+                            <Hash size={14} className="text-gray-300 flex-shrink-0" />
+                            {allProjectTags.map((tag) => (
+                                <button
+                                    key={tag}
+                                    onClick={() => handleTagClick(tag)}
+                                    className="flex-shrink-0 px-3 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-500 hover:text-emerald-600 rounded-full text-xs font-medium transition-colors border border-transparent hover:border-emerald-100"
+                                >
+                                    {tag}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
                     <textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
