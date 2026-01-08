@@ -125,6 +125,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                                 {isOutdated && (
                                     <button
                                         onClick={(e) => {
+                                            e.preventDefault();
                                             e.stopPropagation();
                                             onUpdateTask(projectId, task.id, {
                                                 text: sourceCommand.title,
@@ -132,7 +133,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                                                 commandTags: sourceCommand.tags || []
                                             });
                                         }}
-                                        className="p-1 text-amber-500 bg-amber-50 rounded-full hover:bg-amber-100 transition-colors animate-pulse"
+                                        className="p-1 text-amber-500 bg-amber-50 rounded-full hover:bg-amber-100 transition-colors animate-pulse z-10 relative"
                                         title="Update to latest version"
                                     >
                                         <RefreshCw size={12} />
