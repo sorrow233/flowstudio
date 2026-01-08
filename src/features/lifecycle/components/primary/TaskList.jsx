@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
 import { Check, Trash2, ExternalLink, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, CheckSquare, Globe, Edit2, RefreshCw, ListChecks, Copy, X, ChevronDown, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { COMMAND_CATEGORIES, STAGE_EMPTY_STATES, DEV_STAGES } from '../../../../utils/constants';
+import TaskItem from './TaskItem';
 
 const CATEGORY_ICONS = {
     'LayoutGrid': LayoutGrid,

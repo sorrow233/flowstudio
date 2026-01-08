@@ -117,10 +117,10 @@ const ShareBrowserModal = ({ isOpen, onClose, onImport }) => {
                         onClick={e => e.stopPropagation()}
                     >
                         {/* Header */}
-                        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-violet-50 via-fuchsia-50 to-pink-50">
+                        <div className="p-6 border-b border-gray-100 bg-gray-50">
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-violet-200">
+                                    <div className="w-12 h-12 rounded-2xl bg-gray-900 flex items-center justify-center text-white">
                                         <Globe2 size={24} />
                                     </div>
                                     <div>
@@ -146,7 +146,7 @@ const ShareBrowserModal = ({ isOpen, onClose, onImport }) => {
                                     placeholder="搜索命令..."
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-violet-100 transition-all outline-none text-sm"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-gray-200 transition-all outline-none text-sm"
                                 />
                             </div>
 
@@ -197,7 +197,7 @@ const ShareBrowserModal = ({ isOpen, onClose, onImport }) => {
                         <div className="flex-1 overflow-y-auto p-4 bg-gray-50/50">
                             {isLoading && shares.length === 0 ? (
                                 <div className="flex items-center justify-center py-20">
-                                    <Loader2 size={32} className="animate-spin text-violet-500" />
+                                    <Loader2 size={32} className="animate-spin text-gray-400" />
                                 </div>
                             ) : filteredShares.length === 0 ? (
                                 <div className="text-center py-20 text-gray-400">
@@ -219,19 +219,19 @@ const ShareBrowserModal = ({ isOpen, onClose, onImport }) => {
                                                 layout
                                                 initial={{ opacity: 0, y: 20 }}
                                                 animate={{ opacity: 1, y: 0 }}
-                                                className="group bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-lg hover:shadow-violet-100/50 hover:border-violet-200 transition-all"
+                                                className="group bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-lg hover:shadow-gray-100/50 hover:border-gray-200 transition-all"
                                             >
                                                 {/* Header */}
                                                 <div className="flex items-start justify-between mb-3">
                                                     <div className="flex items-center gap-3">
                                                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${share.command.type === 'link'
                                                             ? 'bg-blue-50 text-blue-500'
-                                                            : 'bg-gray-50 text-gray-500 group-hover:bg-violet-50 group-hover:text-violet-500'
+                                                            : 'bg-gray-50 text-gray-500 group-hover:bg-gray-100 group-hover:text-gray-700'
                                                             } transition-colors`}>
                                                             {share.command.type === 'link' ? <LinkIcon size={18} /> : <Terminal size={18} />}
                                                         </div>
                                                         <div>
-                                                            <h4 className="font-medium text-gray-900 group-hover:text-violet-700 transition-colors">
+                                                            <h4 className="font-medium text-gray-900 group-hover:text-gray-700 transition-colors">
                                                                 {share.command.title}
                                                             </h4>
                                                             <div className="flex items-center gap-2 mt-0.5">
@@ -283,7 +283,7 @@ const ShareBrowserModal = ({ isOpen, onClose, onImport }) => {
                                                     <button
                                                         onClick={() => handleImport(share)}
                                                         disabled={importingId === share.id}
-                                                        className="px-4 py-2 bg-violet-50 text-violet-600 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-violet-500 hover:text-white transition-colors flex items-center gap-2 disabled:opacity-50"
+                                                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-gray-900 hover:text-white transition-colors flex items-center gap-2 disabled:opacity-50"
                                                     >
                                                         {importingId === share.id ? (
                                                             <Loader2 size={14} className="animate-spin" />

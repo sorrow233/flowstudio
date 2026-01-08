@@ -81,10 +81,10 @@ const SharePublishModal = ({ isOpen, onClose, command }) => {
                         onClick={e => e.stopPropagation()}
                     >
                         {/* Header */}
-                        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-violet-50 to-fuchsia-50">
+                        <div className="p-6 border-b border-gray-100 bg-gray-50">
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white">
+                                    <div className="w-10 h-10 rounded-xl bg-gray-900 flex items-center justify-center text-white">
                                         <Share2 size={20} />
                                     </div>
                                     <div>
@@ -153,7 +153,7 @@ const SharePublishModal = ({ isOpen, onClose, command }) => {
                                         <button
                                             onClick={handlePublish}
                                             disabled={isPublishing || !user}
-                                            className="flex-1 px-4 py-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white rounded-xl font-medium hover:from-violet-600 hover:to-fuchsia-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="flex-1 px-4 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-black transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {isPublishing ? (
                                                 <>

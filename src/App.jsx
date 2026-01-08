@@ -10,6 +10,7 @@ import FinalDevModule from './features/lifecycle/FinalDevModule';
 import AdvancedDevModule from './features/lifecycle/AdvancedDevModule';
 import CommercialModule from './features/lifecycle/CommercialModule';
 import CommandCenterModule from './features/commands/CommandCenterModule';
+import ShareViewPage from './features/share/components/ShareViewPage';
 
 import { Toaster } from 'sonner';
 import { KeymapProvider, ShortcutHelpModal, useBrowserIntercept } from './features/shortcuts';
@@ -38,6 +39,7 @@ function App() {
                                 <Route path="/advanced" element={<AdvancedDevModule />} />
                                 <Route path="/commercial" element={<CommercialModule />} />
                                 <Route path="/commands" element={<CommandCenterModule />} />
+                                <Route path="/share/:id" element={<ShareViewPage />} />
                                 <Route path="*" element={<Navigate to="/" replace />} />
                             </Routes>
                         </ErrorBoundary>
