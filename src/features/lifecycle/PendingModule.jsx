@@ -278,12 +278,11 @@ const PendingModule = () => {
                                             key={p.id}
                                             layoutId={`nursery-${p.id}`}
                                             className={`
-                                                snap-start 
-                                                border rounded-xl flex flex-col items-center justify-end text-center 
-                                                hover:shadow-xl transition-all duration-500 cursor-default relative overflow-hidden group
+                                                snap-start relative overflow-hidden group transition-all duration-500 cursor-default
+                                                flex flex-col text-center
                                                 ${isAdvanced
-                                                    ? 'bg-white min-w-[200px] w-[200px] h-[260px] p-0 border-amber-100/50 shadow-[0_10px_40px_-10px_rgba(251,191,36,0.15)]'
-                                                    : 'bg-gradient-to-b from-white to-gray-50/50 min-w-[140px] h-[160px] p-4 border-gray-100'}
+                                                    ? 'bg-gradient-to-b from-gray-50 to-white min-w-[240px] w-[240px] h-[320px] rounded-[32px] border-amber-100/50 shadow-[0_20px_40px_-12px_rgba(251,191,36,0.15)] justify-between pt-6'
+                                                    : 'bg-gradient-to-b from-white to-gray-50/50 min-w-[140px] h-[160px] p-4 border rounded-xl border-gray-100 items-center justify-end'}
                                                 ${isHoly && !isAdvanced ? 'border-violet-200 shadow-[0_0_15px_rgba(139,92,246,0.15)] ring-1 ring-violet-100' : ''}
                                                 ${!isHoly && !isAdvanced ? 'border-emerald-100' : ''}
                                             `}
@@ -300,75 +299,76 @@ const PendingModule = () => {
                                             {/* Advanced Background Effects */}
                                             {isAdvanced && (
                                                 <>
-                                                    {/* Subtle Ambient Light */}
-                                                    <div className={`absolute inset-0 opacity-40 bg-gradient-to-b ${visual.label.includes('Sakura') ? 'from-pink-50/50' :
-                                                            visual.label.includes('Maple') ? 'from-orange-50/50' :
-                                                                visual.label.includes('Cedar') ? 'from-emerald-50/50' :
-                                                                    'from-amber-50/50'
-                                                        } to-transparent pointer-events-none`} />
+                                                    <div className={`absolute inset-0 opacity-30 bg-gradient-to-b ${visual.label.includes('Sakura') ? 'from-pink-100/40' :
+                                                            visual.label.includes('Maple') ? 'from-orange-100/40' :
+                                                                visual.label.includes('Cedar') ? 'from-emerald-100/40' :
+                                                                    'from-amber-100/40'
+                                                        } via-transparent to-transparent pointer-events-none`} />
 
-                                                    {/* Floating Particles/Glow */}
-                                                    <motion.div
-                                                        animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.1, 1] }}
-                                                        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                                                        className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(255,255,255,0.8),transparent_70%)] pointer-events-none mix-blend-overlay"
-                                                    />
+                                                    {isHoly && (
+                                                        <motion.div
+                                                            animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.1, 1] }}
+                                                            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                                                            className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.15),transparent_60%)] pointer-events-none mix-blend-overlay"
+                                                        />
+                                                    )}
                                                 </>
                                             )}
 
-                                            {/* Tree Image Container */}
-                                            <div className={`flex-1 flex items-end justify-center w-full relative ${isAdvanced ? 'pb-8' : 'pb-0'} z-10`}>
+                                            {/* Top Section: Title and Tag (Only for Advanced) */}
+                                            {isAdvanced && (
+                                                <div className="w-full relative z-20 px-4 flex flex-col items-center gap-2">
+                                                    <div className={`
+                                                        flex items-center gap-1.5 justify-center 
+                                                        text-[11px] font-bold uppercase tracking-widest 
+                                                        py-1.5 px-4 rounded-full w-fit 
+                                                        bg-white/80 backdrop-blur-md
+                                                        ${visual.border} ${visual.text} border
+                                                        shadow-sm
+                                                    `}>
+                                                        <span>{visual.label}</span>
+                                                    </div>
+                                                    <h4 className="font-semibold text-gray-800 w-full line-clamp-2 text-base leading-tight">
+                                                        {p.title}
+                                                    </h4>
+                                                </div>
+                                            )}
+
+                                            {/* Tree Image Container - Bottom Aligned */}
+                                            <div className={`flex-1 flex items-end justify-center w-full relative z-10 ${isAdvanced ? 'pb-0' : 'pb-0'}`}>
                                                 <motion.div
                                                     className={`relative flex items-center justify-center ${!isAdvanced && visual.color}`}
-                                                    animate={{ scale: visual.scale || 1, y: [0, -5, 0] }}
-                                                    transition={{
-                                                        scale: { duration: 0 },
-                                                        y: { duration: 6, repeat: Infinity, ease: "easeInOut" }
-                                                    }}
+                                                    animate={isAdvanced ? { y: [0, -8, 0] } : { scale: visual.scale || 1 }}
+                                                    transition={isAdvanced ? { duration: 6, repeat: Infinity, ease: "easeInOut" } : {}}
                                                 >
                                                     {isAdvanced ? (
-                                                        <>
-                                                            {/* Actual Image - masked at the bottom to fade into the card */}
-                                                            <div className="relative" style={{ maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)' }}>
-                                                                <img
-                                                                    src={visual.img}
-                                                                    alt={visual.label}
-                                                                    className="max-w-[190px] max-h-[190px] w-auto h-auto object-contain relative z-20"
-                                                                    style={{ filter: 'contrast(1.05) saturate(1.05)' }}
-                                                                />
-                                                            </div>
-                                                        </>
+                                                        <div className="relative flex flex-col items-center justify-end w-full">
+                                                            <img
+                                                                src={visual.img}
+                                                                alt={visual.label}
+                                                                className="w-[200px] h-auto object-contain relative z-20 transform translate-y-4"
+                                                                style={{ filter: 'contrast(1.05) saturate(1.05)' }}
+                                                            />
+                                                            {/* Enhanced Ground Shadow */}
+                                                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-40 h-8 bg-amber-900/10 blur-2xl rounded-full z-10 mix-blend-multiply" />
+                                                        </div>
                                                     ) : (
                                                         <visual.icon size={32} strokeWidth={1.5} />
                                                     )}
                                                 </motion.div>
                                             </div>
 
-                                            {/* Title and Label */}
-                                            <div className={`w-full relative z-20 ${isAdvanced ? 'pb-4 px-3' : ''}`}>
-                                                <h4 className={`font-medium text-gray-700 w-full mb-1.5 truncate ${isAdvanced ? 'text-sm tracking-wide' : 'text-xs'}`}>
-                                                    {p.title}
-                                                </h4>
-                                                {isAdvanced ? (
-                                                    <div className={`
-                                                        flex items-center gap-1.5 justify-center 
-                                                        text-[10px] font-bold uppercase tracking-widest 
-                                                        py-1.5 px-3 rounded-full mx-auto w-fit 
-                                                        border bg-white/50 backdrop-blur-sm
-                                                        ${visual.border} ${visual.text}
-                                                        shadow-sm
-                                                        group-hover:scale-105 transition-transform
-                                                    `}>
-                                                        <span>{visual.label}</span>
-                                                    </div>
-                                                ) : (
+                                            {/* Bottom Section: Title/Progress (Only for Regular) */}
+                                            {!isAdvanced && (
+                                                <div className="w-full relative z-20">
+                                                    <h4 className="font-medium text-gray-700 line-clamp-1 w-full mb-2 text-xs">{p.title}</h4>
                                                     <div className="flex items-center gap-1.5 justify-center">
                                                         <div className="w-full bg-gray-100 h-1 rounded-full overflow-hidden">
                                                             <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${((p.subStage || 1) / 5) * 100}%` }} />
                                                         </div>
                                                     </div>
-                                                )}
-                                            </div>
+                                                </div>
+                                            )}
                                         </motion.div>
                                     );
                                 })}
