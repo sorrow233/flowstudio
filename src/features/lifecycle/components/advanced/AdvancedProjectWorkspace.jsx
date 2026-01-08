@@ -426,34 +426,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
                         currentModules={modules}
                     />
 
-                    {/* Undo Toast - Refined */}
-                    <AnimatePresence>
-                        {showUndo && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: 20, scale: 0.9 }}
-                                className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 bg-gray-900/90 backdrop-blur-md text-white px-6 py-3 rounded-2xl shadow-2xl ring-1 ring-white/10"
-                            >
-                                <div className="flex items-center gap-3 border-r border-white/10 pr-4">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                    <span className="text-xs font-medium tracking-wide">
-                                        {history.length > 0 ? `Change applied` : 'Updated'}
-                                    </span>
-                                </div>
 
-                                <button
-                                    onClick={handleUndo}
-                                    className="text-xs font-bold text-blue-300 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2"
-                                >
-                                    Undo {history.length > 1 && <span className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">{history.length}</span>}
-                                </button>
-                                <button onClick={() => setShowUndo(false)} className="text-gray-500 hover:text-white transition-colors ml-2">
-                                    <X size={14} />
-                                </button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
 
                     <ModuleLibraryModal
                         isOpen={isLibraryOpen}
