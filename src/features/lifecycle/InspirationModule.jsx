@@ -101,44 +101,50 @@ const InspirationModule = () => {
                 <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
                 <div className="relative bg-white rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] group-hover:border-gray-200">
 
-                    {/* Project Tags Bar */}
-                    {allProjectTags.length > 0 && (
-                        <div className="flex items-center gap-2 overflow-x-auto py-3 px-4 border-b border-gray-50 no-scrollbar">
-                            <Hash size={14} className="text-gray-300 flex-shrink-0" />
-                            {allProjectTags.map((tag) => (
-                                <button
-                                    key={tag}
-                                    onClick={() => handleTagClick(tag)}
-                                    className="flex-shrink-0 px-3 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-500 hover:text-emerald-600 rounded-full text-xs font-medium transition-colors border border-transparent hover:border-emerald-100"
-                                >
-                                    {tag}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-
                     <textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder="记录一闪而过的念头..."
-                        className="w-full bg-transparent text-lg text-gray-800 placeholder:text-gray-300 outline-none p-6 min-h-[140px] resize-none font-light leading-relaxed"
+                        className="w-full bg-transparent text-lg text-gray-800 placeholder:text-gray-300 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed"
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                                 handleAdd();
                             }
                         }}
                     />
-                    <div className="absolute bottom-4 right-4 flex items-center gap-3">
-                        <span className="text-[10px] text-gray-300 font-mono hidden md:inline-block">
-                            CMD + ENTER TO SAVE
-                        </span>
-                        <button
-                            onClick={handleAdd}
-                            disabled={!input.trim()}
-                            className="flex items-center justify-center p-3 bg-gray-900 text-white rounded-xl hover:bg-black disabled:opacity-30 disabled:hover:bg-gray-900 transition-all duration-300 active:scale-95 shadow-lg shadow-gray-200"
-                        >
-                            <ArrowRight size={18} strokeWidth={2} />
-                        </button>
+
+                    {/* Bottom Action Area */}
+                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                        {/* Project Tags Bar */}
+                        <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2 mr-4 mask-linear-fade">
+                            {allProjectTags.length > 0 && (
+                                <>
+                                    <Hash size={14} className="text-gray-300 flex-shrink-0" />
+                                    {allProjectTags.map((tag) => (
+                                        <button
+                                            key={tag}
+                                            onClick={() => handleTagClick(tag)}
+                                            className="flex-shrink-0 px-3 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-400 hover:text-emerald-600 rounded-full text-[10px] font-medium transition-colors border border-transparent hover:border-emerald-100 whitespace-nowrap"
+                                        >
+                                            {tag}
+                                        </button>
+                                    ))}
+                                </>
+                            )}
+                        </div>
+
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                            <span className="text-[10px] text-gray-300 font-mono hidden md:inline-block">
+                                CMD + ENTER
+                            </span>
+                            <button
+                                onClick={handleAdd}
+                                disabled={!input.trim()}
+                                className="flex items-center justify-center p-3 bg-gray-900 text-white rounded-xl hover:bg-black disabled:opacity-30 disabled:hover:bg-gray-900 transition-all duration-300 active:scale-95 shadow-lg shadow-gray-200"
+                            >
+                                <ArrowRight size={18} strokeWidth={2} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
