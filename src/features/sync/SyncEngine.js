@@ -1,29 +1,33 @@
 import * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import {
-    collection,
     doc,
     setDoc,
+    getDoc,
     onSnapshot,
-    query,
-    orderBy,
     serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
 const SESSION_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 
+// 防抖时间：10秒（减少写入频率）
+const PUSH_DEBOUNCE_MS = 10000;
+
+// 最小推送间隔：30秒（即使有多次变更，也至少等待30秒）
+const MIN_PUSH_INTERVAL_MS = 30000;
+
 /**
- * SyncEngine - No Shadow Doc Version
+ * SyncEngine v2 - 单文档同步版本
  * 
- * Key change: Instead of maintaining a Shadow Doc (which fails due to Yjs clientID issues),
- * we simply track whether we have pending local changes using a flag.
+ * 核心优化：
+ * 1. 使用单个文档存储完整状态，而非无限增长的 updates 子集合
+ * 2. 监听单个文档而非整个集合，大幅减少读取次数
+ * 3. 使用版本号防止并发冲突
+ * 4. 更长的防抖时间减少写入次数
  * 
- * Strategy:
- * 1. All remote updates are applied with origin='remote'
- * 2. Local changes (origin !== 'remote') set a "dirty" flag
- * 3. Push sends ALL local state (not a diff) - simpler and more reliable
- * 4. After push, clear the dirty flag
+ * 数据结构：
+ * users/{userId}/rooms/{docId} -> { state: base64, version: number, updatedAt: timestamp, sessionId: string }
  */
 export class SyncEngine {
     constructor(docId, userId, initialData = {}) {
@@ -39,16 +43,22 @@ export class SyncEngine {
         this.doc = new Y.Doc();
 
         this.isPushing = false;
-        this.isDirty = false;  // Simple flag: true if local changes exist
+        this.isDirty = false;
         this.isReady = false;
         this.isIndexedDBLoaded = false;
         this.isServerLoaded = false;
         this.unsubscribes = [];
         this.pushTimeout = null;
-        this.processedUpdateIds = new Set();
 
-        // Track latest known server state vector for comparison
-        this.lastSyncedStateVector = null;
+        // 版本控制
+        this.localVersion = 0;
+        this.remoteVersion = 0;
+
+        // 推送节流
+        this.lastPushTime = 0;
+
+        // 防止处理自己的更新
+        this.lastPushedSessionId = null;
 
         this.init();
     }
@@ -86,38 +96,50 @@ export class SyncEngine {
         });
     }
 
+    /**
+     * 连接 Firestore - 监听单个文档而非集合
+     */
     connectFirestore() {
         this.setStatus('syncing');
-        const updatesColl = collection(db, `users/${this.userId}/rooms/${this.docId}/updates`);
-        const q = query(updatesColl, orderBy('createdAt', 'asc'));
 
-        const unsub = onSnapshot(q, (snapshot) => {
-            let appliedCount = 0;
+        // 单个文档路径，不再使用 updates 子集合
+        const stateDocRef = doc(db, `users/${this.userId}/rooms`, this.docId);
 
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === 'added') {
-                    const docId = change.doc.id;
-                    const data = change.doc.data();
-
-                    if (this.processedUpdateIds.has(docId) || data.sessionId === this.sessionId) {
-                        this.processedUpdateIds.add(docId);
-                        return;
-                    }
-
-                    if (data.update) {
-                        try {
-                            const update = Uint8Array.from(atob(data.update), c => c.charCodeAt(0));
-                            Y.applyUpdate(this.doc, update, 'remote');
-                            appliedCount++;
-                        } catch (e) {
-                            console.error("[SyncEngine] Parse error:", e);
-                        }
-                    }
+        const unsub = onSnapshot(stateDocRef, (snapshot) => {
+            if (!snapshot.exists()) {
+                // 文档不存在，首次同步
+                console.info("[SyncEngine] No remote state, starting fresh.");
+                if (!this.isServerLoaded) {
+                    this.isServerLoaded = true;
+                    this.tryReady();
                 }
-            });
+                return;
+            }
 
-            if (appliedCount > 0) {
-                console.info(`[SyncEngine] Applied ${appliedCount} remote updates.`);
+            const data = snapshot.data();
+
+            // 跳过自己刚刚推送的更新
+            if (data.sessionId === this.sessionId && data.version === this.localVersion) {
+                console.info("[SyncEngine] Skipping own update.");
+                if (!this.isServerLoaded) {
+                    this.isServerLoaded = true;
+                    this.tryReady();
+                }
+                return;
+            }
+
+            // 更新远程版本号
+            this.remoteVersion = data.version || 0;
+
+            // 应用远程状态
+            if (data.state) {
+                try {
+                    const remoteState = Uint8Array.from(atob(data.state), c => c.charCodeAt(0));
+                    Y.applyUpdate(this.doc, remoteState, 'remote');
+                    console.info(`[SyncEngine] Applied remote state, version: ${this.remoteVersion}`);
+                } catch (e) {
+                    console.error("[SyncEngine] Failed to apply remote state:", e);
+                }
             }
 
             if (!this.isServerLoaded) {
@@ -141,19 +163,35 @@ export class SyncEngine {
         if (!this.isServerLoaded || !this.isIndexedDBLoaded) return;
 
         this.isReady = true;
-        this.lastSyncedStateVector = Y.encodeStateVector(this.doc);
+        this.localVersion = this.remoteVersion;
 
         console.info("[SyncEngine] Ready!");
         this.setStatus('synced');
     }
 
+    /**
+     * 智能防抖推送
+     * - 基础防抖：10秒
+     * - 最小间隔：30秒（防止频繁推送）
+     */
     schedulePush() {
         clearTimeout(this.pushTimeout);
-        this.pushTimeout = setTimeout(() => this.tryPush(), 2000);
+
+        const now = Date.now();
+        const timeSinceLastPush = now - this.lastPushTime;
+
+        // 计算下次推送的延迟时间
+        let delay = PUSH_DEBOUNCE_MS;
+        if (timeSinceLastPush < MIN_PUSH_INTERVAL_MS) {
+            // 如果距离上次推送不足30秒，延长等待时间
+            delay = Math.max(delay, MIN_PUSH_INTERVAL_MS - timeSinceLastPush);
+        }
+
+        this.pushTimeout = setTimeout(() => this.tryPush(), delay);
     }
 
     async tryPush() {
-        if (this.isPushing || !navigator.onLine || !this.isDirty) {
+        if (this.isPushing || !navigator.onLine || !this.isDirty || !this.userId) {
             if (!this.isDirty) this.setStatus('synced');
             return;
         }
@@ -161,41 +199,43 @@ export class SyncEngine {
         try {
             this.isPushing = true;
 
-            // Send incremental update from last synced state
-            const diff = this.lastSyncedStateVector
-                ? Y.encodeStateAsUpdate(this.doc, this.lastSyncedStateVector)
-                : Y.encodeStateAsUpdate(this.doc);
+            // 编码完整状态（而非增量）
+            const fullState = Y.encodeStateAsUpdate(this.doc);
 
-            if (diff.byteLength === 0) {
-                console.info("[SyncEngine] No changes to push.");
+            if (fullState.byteLength === 0) {
+                console.info("[SyncEngine] No state to push.");
                 this.isDirty = false;
                 this.setStatus('synced');
                 return;
             }
 
-            console.info(`[SyncEngine] Pushing ${diff.byteLength} bytes...`);
+            // 增加本地版本号
+            const newVersion = Math.max(this.localVersion, this.remoteVersion) + 1;
 
-            const updatesColl = collection(db, `users/${this.userId}/rooms/${this.docId}/updates`);
-            const newDocRef = doc(updatesColl);
-            this.processedUpdateIds.add(newDocRef.id);
+            console.info(`[SyncEngine] Pushing ${fullState.byteLength} bytes, version: ${newVersion}...`);
 
-            await setDoc(newDocRef, {
-                update: btoa(String.fromCharCode.apply(null, diff)),
-                createdAt: serverTimestamp(),
+            const stateDocRef = doc(db, `users/${this.userId}/rooms`, this.docId);
+
+            await setDoc(stateDocRef, {
+                state: btoa(String.fromCharCode.apply(null, fullState)),
+                version: newVersion,
+                updatedAt: serverTimestamp(),
                 userId: this.userId,
                 sessionId: this.sessionId
             });
 
             console.info("[SyncEngine] Push success!");
 
-            // Update our reference point
-            this.lastSyncedStateVector = Y.encodeStateVector(this.doc);
+            this.localVersion = newVersion;
+            this.lastPushTime = Date.now();
             this.isDirty = false;
             this.setStatus('synced');
 
         } catch (error) {
             console.error("[SyncEngine] Push failed:", error);
             this.setStatus('offline');
+            // 失败后重试
+            this.schedulePush();
         } finally {
             this.isPushing = false;
         }
