@@ -91,7 +91,13 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                                     : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5'
                     }
                 `}
-                onDoubleClick={() => !task.isCommand && startEditing(task)}
+                onDoubleClick={() => {
+                    if (task.isCommand) {
+                        onToggle(projectId, task.id);
+                    } else {
+                        startEditing(task);
+                    }
+                }}
             >
                 {/* Slide Action Context (Behind content) */}
                 <motion.div className="absolute inset-y-0 right-0 bg-red-500 -z-10 flex items-center justify-end pr-5 text-white font-bold uppercase tracking-wider text-xs pointer-events-none" style={{ width: '100%', x: '100%' }}>
@@ -100,14 +106,9 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
 
 
                 {/* Leading Icon/Check */}
-                {isUtility || isLink ? (
-                    <div className={`
-                        w-10 h-10 flex items-center justify-center transition-all rounded-xl shadow-sm shrink-0
-                        ${isLink
-                            ? 'bg-blue-50 text-blue-500 group-hover:bg-blue-100'
-                            : 'bg-gray-50 text-gray-400 group-hover:bg-gray-900 group-hover:text-white'}
-                    `}>
-                        {copiedTaskId === task.id ? <Check size={20} className="animate-bounce" /> : (isLink ? <Globe size={20} /> : <Terminal size={20} />)}
+                {isLink ? (
+                    <div className="w-10 h-10 flex items-center justify-center transition-all rounded-xl shadow-sm shrink-0 bg-blue-50 text-blue-500 group-hover:bg-blue-100">
+                        {isLink ? <Globe size={20} /> : <Terminal size={20} />}
                     </div>
                 ) : (
                     <button
@@ -115,10 +116,12 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                         className={`
                             w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 shrink-0
                             ${task.done
-                                ? 'bg-emerald-500 border-emerald-500 text-white scale-110'
+                                ? (task.isCommand ? 'bg-violet-500 border-violet-500 text-white scale-110' : 'bg-emerald-500 border-emerald-500 text-white scale-110')
                                 : isMandatory
                                     ? 'border-red-200 text-transparent hover:border-red-400 bg-red-50 hover:bg-red-100'
-                                    : 'border-gray-200 text-transparent group-hover:border-gray-400 hover:bg-gray-50'
+                                    : task.isCommand
+                                        ? 'border-violet-200 text-transparent hover:border-violet-400 hover:bg-violet-50'
+                                        : 'border-gray-200 text-transparent group-hover:border-gray-400 hover:bg-gray-50'
                             }
                         `}
                     >
@@ -150,7 +153,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                             }}
                         >
                             <div className="flex items-center gap-2">
-                                <span className={`text-base font-medium transition-all ${task.done ? 'opacity-50 line-through decoration-emerald-500/30' : 'text-gray-700'}`}>
+                                <span className={`text-base font-medium transition-all ${task.done ? (task.isCommand ? 'opacity-40 line-through decoration-violet-500/30 text-gray-400' : 'opacity-50 line-through decoration-emerald-500/30') : 'text-gray-700'}`}>
                                     {task.text}
                                 </span>
                                 {isOutdated && (
