@@ -6,7 +6,7 @@ import { STORAGE_KEYS, getRandomProjectImage, COMMAND_CATEGORIES } from '../../u
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
-import UndoRedoButtons from '../../components/shared/UndoRedoButtons';
+
 import Spotlight from '../../components/shared/Spotlight';
 import { SakuraTree, MapleTree, GinkgoTree, CedarTree } from '../../components/illustrations/TreeIllustrations';
 
@@ -161,12 +161,7 @@ const PendingModule = () => {
                         <h2 className="text-2xl font-light tracking-wide text-gray-900">Idea Staging</h2>
                         <p className="text-xs font-mono text-gray-400 mt-1 uppercase tracking-widest">Validate before you build</p>
                     </div>
-                    <UndoRedoButtons
-                        onUndo={undo}
-                        onRedo={redo}
-                        canUndo={canUndo}
-                        canRedo={canRedo}
-                    />
+
                 </div>
 
                 <div className="flex-1 flex flex-col gap-8 overflow-y-auto no-scrollbar pb-20">
@@ -300,9 +295,9 @@ const PendingModule = () => {
                                             {isAdvanced && (
                                                 <>
                                                     <div className={`absolute inset-0 opacity-30 bg-gradient-to-b ${visual.label.includes('Sakura') ? 'from-pink-100/40' :
-                                                            visual.label.includes('Maple') ? 'from-orange-100/40' :
-                                                                visual.label.includes('Cedar') ? 'from-emerald-100/40' :
-                                                                    'from-amber-100/40'
+                                                        visual.label.includes('Maple') ? 'from-orange-100/40' :
+                                                            visual.label.includes('Cedar') ? 'from-emerald-100/40' :
+                                                                'from-amber-100/40'
                                                         } via-transparent to-transparent pointer-events-none`} />
 
                                                     {isHoly && (

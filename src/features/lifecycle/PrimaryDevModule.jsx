@@ -11,7 +11,7 @@ import ImportCommandModal from './components/primary/ImportCommandModal';
 import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
 import confetti from 'canvas-confetti';
 import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
-import UndoRedoButtons from '../../components/shared/UndoRedoButtons';
+
 import Spotlight from '../../components/shared/Spotlight';
 
 const PrimaryDevModule = () => {
@@ -289,12 +289,7 @@ const PrimaryDevModule = () => {
                     <p className="text-gray-400 text-sm font-light tracking-wide">Execution & Engineering</p>
                 </div>
                 <div className="flex items-center gap-4 text-right">
-                    <UndoRedoButtons
-                        onUndo={undo}
-                        onRedo={redo}
-                        canUndo={canUndo}
-                        canRedo={canRedo}
-                    />
+
                     <div>
                         <span className="text-3xl font-thin text-gray-900">{activeProjects.length}</span>
                         <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">Active</span>
