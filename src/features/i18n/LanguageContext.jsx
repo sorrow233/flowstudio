@@ -1,0 +1,141 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import zh from './locales/zh';
+import en from './locales/en';
+
+const STORAGE_KEY = 'flowstudio_language';
+
+// 可用语言
+const locales = { zh, en };
+
+// 默认语言
+const DEFAULT_LANGUAGE = 'zh';
+
+// 语言上下文
+const LanguageContext = createContext(null);
+
+/**
+ * 检测用户浏览器语言
+ * @returns {string} 语言代码 (zh | en)
+ */
+const detectLanguage = () => {
+    // 1. 优先使用 localStorage 保存的语言偏好
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && locales[saved]) {
+        return saved;
+    }
+
+    // 2. 检测浏览器语言
+    const browserLang = navigator.language || navigator.userLanguage || '';
+
+    // 中文优先匹配
+    if (browserLang.startsWith('zh')) {
+        return 'zh';
+    }
+
+    // 英文匹配
+    if (browserLang.startsWith('en')) {
+        return 'en';
+    }
+
+    // 3. 默认返回中文
+    return DEFAULT_LANGUAGE;
+};
+
+/**
+ * 获取嵌套对象中的值
+ * @param {object} obj - 对象
+ * @param {string} path - 路径 (如 'navbar.inspiration')
+ * @returns {string} 值或路径本身（未找到时）
+ */
+const getNestedValue = (obj, path) => {
+    const keys = path.split('.');
+    let result = obj;
+
+    for (const key of keys) {
+        if (result && typeof result === 'object' && key in result) {
+            result = result[key];
+        } else {
+            // 未找到，返回路径本身作为 fallback
+            console.warn(`[i18n] Missing translation: ${path}`);
+            return path;
+        }
+    }
+
+    return result;
+};
+
+/**
+ * 语言提供者组件
+ */
+export const LanguageProvider = ({ children }) => {
+    const [language, setLanguageState] = useState(() => detectLanguage());
+
+    // 同步语言到 localStorage
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEY, language);
+    }, [language]);
+
+    // 切换语言
+    const setLanguage = (lang) => {
+        if (locales[lang]) {
+            setLanguageState(lang);
+        } else {
+            console.warn(`[i18n] Unsupported language: ${lang}`);
+        }
+    };
+
+    // 切换到下一个语言（用于简单切换按钮）
+    const toggleLanguage = () => {
+        setLanguageState(prev => prev === 'zh' ? 'en' : 'zh');
+    };
+
+    // 获取翻译
+    const t = (key, fallback) => {
+        const translations = locales[language];
+        const value = getNestedValue(translations, key);
+
+        // 如果返回的是路径本身，说明未找到，使用 fallback
+        if (value === key && fallback) {
+            return fallback;
+        }
+
+        return value;
+    };
+
+    const value = {
+        language,
+        setLanguage,
+        toggleLanguage,
+        t,
+        // 暴露当前语言资源（某些场景可能需要直接访问）
+        translations: locales[language],
+    };
+
+    return (
+        <LanguageContext.Provider value={value}>
+            {children}
+        </LanguageContext.Provider>
+    );
+};
+
+/**
+ * 使用语言上下文的 Hook
+ */
+export const useLanguage = () => {
+    const context = useContext(LanguageContext);
+    if (!context) {
+        throw new Error('useLanguage must be used within a LanguageProvider');
+    }
+    return context;
+};
+
+/**
+ * 简化的翻译 Hook
+ * @returns {{ t: function, language: string }}
+ */
+export const useTranslation = () => {
+    const { t, language, toggleLanguage, setLanguage } = useLanguage();
+    return { t, language, toggleLanguage, setLanguage };
+};
+
+export default LanguageContext;
