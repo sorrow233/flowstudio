@@ -124,25 +124,36 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
 
                                 {/* Command Tags */}
                                 {(task.commandTags && task.commandTags.length > 0) && (
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {task.commandTags.map(tag => (
-                                            <button
-                                                key={tag.id}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleCopy(`${task.id}-${tag.id}`, tag.value);
-                                                }}
-                                                className="group/tag flex items-center gap-1 px-2 py-0.5 bg-gray-50 hover:bg-emerald-100 text-gray-500 hover:text-emerald-700 rounded text-[10px] font-medium border border-gray-200 hover:border-emerald-200 transition-all relative overflow-hidden"
-                                            >
-                                                <Tag size={8} className="opacity-60" />
-                                                {tag.label}
-                                                {copiedTaskId === `${task.id}-${tag.id}` && (
-                                                    <div className="absolute inset-0 bg-emerald-500 text-white flex items-center justify-center">
-                                                        <Check size={10} strokeWidth={3} />
-                                                    </div>
-                                                )}
-                                            </button>
-                                        ))}
+                                    <div className="flex flex-wrap gap-1.5 mt-1">
+                                        {task.commandTags.map(tag => {
+                                            // Simple color rotation matching ImportCommandModal
+                                            const colors = [
+                                                'bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100',
+                                                'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100',
+                                                'bg-violet-50 text-violet-700 border-violet-100 hover:bg-violet-100',
+                                                'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100 hover:bg-fuchsia-100'
+                                            ];
+                                            const colorClass = colors[tag.label.length % colors.length];
+
+                                            return (
+                                                <button
+                                                    key={tag.id}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleCopy(`${task.id}-${tag.id}`, tag.value);
+                                                    }}
+                                                    className={`group/tag flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border transition-all relative overflow-hidden ${colorClass}`}
+                                                >
+                                                    <Tag size={8} className="opacity-70" />
+                                                    {tag.label}
+                                                    {copiedTaskId === `${task.id}-${tag.id}` && (
+                                                        <div className="absolute inset-0 bg-emerald-500 text-white flex items-center justify-center">
+                                                            <Check size={8} />
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>
