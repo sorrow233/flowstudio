@@ -73,11 +73,13 @@ const Navbar = () => {
                     {user ? (
                         <>
                             {status === 'synced' && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
-                            {status === 'syncing' && <RefreshCw size={14} className="animate-spin text-emerald-500" />}
-                            {status === 'offline' && <WifiOff size={14} className="text-gray-400" />}
+                            {status === 'syncing' && <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />}
+                            {status === 'offline' && <div className="w-2 h-2 rounded-full bg-gray-400" />}
 
-                            <span className="text-sm font-medium">
-                                {status === 'synced' ? 'Synced' : status === 'syncing' ? 'Syncing...' : 'Offline'}
+                            <span className={`text-sm font-medium ${status === 'synced' ? 'text-emerald-700' :
+                                    status === 'syncing' ? 'text-yellow-700' : 'text-gray-500'
+                                }`}>
+                                {status === 'synced' ? 'Synced' : status === 'syncing' ? 'Saving...' : 'Offline'}
                             </span>
                         </>
                     ) : (
