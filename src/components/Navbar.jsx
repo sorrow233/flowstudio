@@ -13,13 +13,15 @@ import {
     Cloud,
     Wifi,
     WifiOff,
-    RefreshCw
+    RefreshCw,
+    Settings
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../features/auth/AuthContext';
 import AuthModal from '../features/auth/AuthModal';
 import { useSyncStore } from '../features/sync/useSyncStore';
 import SyncStatus from '../features/sync/SyncStatus';
+import { DataManagementModal } from '../features/settings';
 
 const tabs = [
     { id: 'inspiration', label: 'Inspiration', icon: Sparkles, path: '/inspiration' },
@@ -36,6 +38,7 @@ const Navbar = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [isDataModalOpen, setIsDataModalOpen] = useState(false);
 
     // Get Sync Status
     const { status, pendingCount } = useSyncStore('flowstudio_v1');
@@ -67,6 +70,15 @@ const Navbar = () => {
 
                         <div className="w-px h-6 bg-gray-100 mx-1 relative z-40 shrink-0" />
 
+                        {/* Settings Button */}
+                        <button
+                            onClick={() => setIsDataModalOpen(true)}
+                            className="relative flex items-center justify-center w-9 h-9 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all z-40 shrink-0"
+                            title="数据管理"
+                        >
+                            <Settings size={18} strokeWidth={1.5} />
+                        </button>
+
                         <div className="relative z-40 shrink-0">
                             <button
                                 onClick={() => setIsAuthModalOpen(true)}
@@ -87,6 +99,7 @@ const Navbar = () => {
             </nav>
 
             <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+            <DataManagementModal isOpen={isDataModalOpen} onClose={() => setIsDataModalOpen(false)} />
         </div>
     );
 };
