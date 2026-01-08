@@ -104,92 +104,92 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                             className="w-full bg-white border border-emerald-200 rounded px-2 py-1 text-base focus:ring-2 focus:ring-emerald-100 outline-none"
                         />
                     ) : (
-                    ): (
-                            <div 
-                            className = {`flex flex-col gap-1 ${task.isCommand ? 'cursor-pointer' : ''}`}
-                    onClick={(e) => {
-                        if (task.isCommand && handleCopy) {
-                            e.stopPropagation();
-                            handleCopy(task.id, task.commandContent || task.text);
-                        }
-                    }}
+
+                        <div
+                            className={`flex flex-col gap-1 ${task.isCommand ? 'cursor-pointer' : ''}`}
+                            onClick={(e) => {
+                                if (task.isCommand && handleCopy) {
+                                    e.stopPropagation();
+                                    handleCopy(task.id, task.commandContent || task.text);
+                                }
+                            }}
                         >
-                    <span className={`text-base font-medium transition-all ${task.done ? 'opacity-50 line-through decoration-emerald-500/30' : 'text-gray-700'}`}>
-                        {task.text}
-                    </span>
-
-                    {/* Tags Row */}
-                    <div className="flex flex-wrap items-center gap-2">
-                        {isMandatory && (
-                            <span className="text-[10px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-red-100">
-                                Mandatory
+                            <span className={`text-base font-medium transition-all ${task.done ? 'opacity-50 line-through decoration-emerald-500/30' : 'text-gray-700'}`}>
+                                {task.text}
                             </span>
-                        )}
-                        {isLink && (
-                            <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-blue-100 flex items-center gap-1">
-                                <ExternalLink size={8} /> Link
-                            </span>
-                        )}
 
-                        {/* Command Tags */}
-                        {(task.commandTags && task.commandTags.length > 0) && (
-                            <div className="flex flex-wrap gap-1.5 mt-1">
-                                {task.commandTags.map(tag => {
-                                    // Simple color rotation matching ImportCommandModal
-                                    const colors = [
-                                        'bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100',
-                                        'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100',
-                                        'bg-violet-50 text-violet-700 border-violet-100 hover:bg-violet-100',
-                                        'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100 hover:bg-fuchsia-100'
-                                    ];
-                                    const colorClass = colors[tag.label.length % colors.length];
+                            {/* Tags Row */}
+                            <div className="flex flex-wrap items-center gap-2">
+                                {isMandatory && (
+                                    <span className="text-[10px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-red-100">
+                                        Mandatory
+                                    </span>
+                                )}
+                                {isLink && (
+                                    <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-blue-100 flex items-center gap-1">
+                                        <ExternalLink size={8} /> Link
+                                    </span>
+                                )}
 
-                                    return (
-                                        <button
-                                            key={tag.id}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleCopy(`${task.id}-${tag.id}`, tag.value);
-                                            }}
-                                            className={`group/tag flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border transition-all relative overflow-hidden ${colorClass}`}
-                                        >
-                                            <Tag size={8} className="opacity-70" />
-                                            {tag.label}
-                                            {copiedTaskId === `${task.id}-${tag.id}` && (
-                                                <div className="absolute inset-0 bg-emerald-500 text-white flex items-center justify-center">
-                                                    <Check size={8} />
-                                                </div>
-                                            )}
-                                        </button>
-                                    );
-                                })}
+                                {/* Command Tags */}
+                                {(task.commandTags && task.commandTags.length > 0) && (
+                                    <div className="flex flex-wrap gap-1.5 mt-1">
+                                        {task.commandTags.map(tag => {
+                                            // Simple color rotation matching ImportCommandModal
+                                            const colors = [
+                                                'bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100',
+                                                'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100',
+                                                'bg-violet-50 text-violet-700 border-violet-100 hover:bg-violet-100',
+                                                'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100 hover:bg-fuchsia-100'
+                                            ];
+                                            const colorClass = colors[tag.label.length % colors.length];
+
+                                            return (
+                                                <button
+                                                    key={tag.id}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleCopy(`${task.id}-${tag.id}`, tag.value);
+                                                    }}
+                                                    className={`group/tag flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border transition-all relative overflow-hidden ${colorClass}`}
+                                                >
+                                                    <Tag size={8} className="opacity-70" />
+                                                    {tag.label}
+                                                    {copiedTaskId === `${task.id}-${tag.id}` && (
+                                                        <div className="absolute inset-0 bg-emerald-500 text-white flex items-center justify-center">
+                                                            <Check size={8} />
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
-                </div>
+                        </div>
                     )}
-            </div>
+                </div>
 
-            {/* Actions */}
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                {!task.isCommand && !isEditing && (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); startEditing(task); }}
-                        className="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors"
-                    >
-                        <Edit2 size={16} />
-                    </button>
+                {/* Actions */}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                    {!task.isCommand && !isEditing && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); startEditing(task); }}
+                            className="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors"
+                        >
+                            <Edit2 size={16} />
+                        </button>
+                    )}
+
+                </div>
+
+                {/* Copied Feedback Badge */}
+                {task.isCommand && copiedTaskId === task.id && (
+                    <span className="absolute top-2 right-2 text-[9px] uppercase font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full animate-pulse">
+                        Copied
+                    </span>
                 )}
-
-            </div>
-
-            {/* Copied Feedback Badge */}
-            {task.isCommand && copiedTaskId === task.id && (
-                <span className="absolute top-2 right-2 text-[9px] uppercase font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full animate-pulse">
-                    Copied
-                </span>
-            )}
-        </motion.div>
+            </motion.div>
         </Reorder.Item >
     );
 };
