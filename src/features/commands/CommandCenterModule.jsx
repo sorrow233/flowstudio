@@ -9,6 +9,8 @@ import CommandList from './components/CommandList';
 import CommandForm from './components/CommandForm';
 import CategoryRenameModal from './components/CategoryRenameModal';
 import { SharePublishModal, ShareBrowserModal } from '../share';
+import LibraryImportModal from './components/LibraryImportModal';
+
 import { useTranslation } from '../i18n';
 
 const CommandCenterModule = () => {
