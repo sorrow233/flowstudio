@@ -68,63 +68,64 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                 transition={{ x: { type: "spring", stiffness: 500, damping: 30 } }}
                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                 layout
-                className={`group relative bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] hover:border-gray-200 transition-all duration-300 cursor-pointer active:scale-[0.99] ${isCompleted ? 'opacity-50' : ''}`}
+                className={`group relative bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] hover:border-gray-200 transition-all duration-300 cursor-pointer active:scale-[0.99] ${isCompleted ? 'opacity-50' : ''}`}
             >
-                <div className="flex justify-between items-start gap-6">
+                <div className="flex items-start gap-3">
                     {/* Color Status Dot */}
-                    <div className="flex-shrink-0 pt-1.5">
-                        <div className={`w-3 h-3 rounded-full ${getDotColor(idea.id)} shadow-sm ring-2 ring-white transition-transform duration-200 ${isCompleted ? 'scale-75 opacity-50' : ''}`} />
+                    <div className="flex-shrink-0 mt-1.5">
+                        <div className={`w-2.5 h-2.5 rounded-full ${getDotColor(idea.id)} shadow-sm transition-transform duration-200 ${isCompleted ? 'scale-75 opacity-50' : ''}`} />
                     </div>
-                    <div className={`text-gray-700 text-base font-light leading-7 whitespace-pre-wrap flex-grow font-sans select-none transition-all duration-200 ${isCompleted ? 'line-through text-gray-400' : ''}`}>
-                        {(() => {
-                            // Parser for [Tag] pattern in saved ideas
-                            const parts = idea.content.split(/(\[.*?\])/g);
-                            return parts.map((part, index) => {
-                                if (part.match(/^\[(.*?)\]$/)) {
-                                    const tagName = part.slice(1, -1); // Remove [ and ]
-                                    return (
-                                        <span
-                                            key={index}
-                                            className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-emerald-50 text-emerald-600 rounded-md text-[11px] font-medium align-middle border border-emerald-100/50 shadow-sm transform -translate-y-0.5"
-                                        >
-                                            {tagName}
-                                        </span>
-                                    );
-                                }
-                                return <span key={index}>{part}</span>;
-                            });
-                        })()}
+                    <div className="flex-1 min-w-0">
+                        <div className={`text-gray-700 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans select-none transition-all duration-200 ${isCompleted ? 'line-through text-gray-400' : ''}`}>
+                            {(() => {
+                                // Parser for [Tag] pattern in saved ideas
+                                const parts = idea.content.split(/(\[.*?\])/g);
+                                return parts.map((part, index) => {
+                                    if (part.match(/^\[(.*?)\]$/)) {
+                                        const tagName = part.slice(1, -1); // Remove [ and ]
+                                        return (
+                                            <span
+                                                key={index}
+                                                className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-emerald-50 text-emerald-600 rounded-md text-[11px] font-medium align-middle border border-emerald-100/50 shadow-sm transform -translate-y-0.5"
+                                            >
+                                                {tagName}
+                                            </span>
+                                        );
+                                    }
+                                    return <span key={index}>{part}</span>;
+                                })
+                            })()}
+                        </div>
+                        {/* Date/Time - compact, directly under content */}
+                        <div className="mt-2 text-[11px] text-gray-400 font-medium">
+                            {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                            })}
+                            <span className="mx-1.5 text-gray-300">·</span>
+                            {new Date(idea.timestamp || Date.now()).toLocaleTimeString(undefined, {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}
+                        </div>
                     </div>
+                </div>
 
-                    {/* Copied Indicator */}
-                    <AnimatePresence>
-                        {copiedId === idea.id && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.8 }}
-                                className="absolute top-4 right-4 bg-emerald-50 text-emerald-600 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 shadow-sm border border-emerald-100"
-                            >
-                                <Check size={12} strokeWidth={3} />
-                                <span>COPIED</span>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-                <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
-                    <span className="text-[10px] text-gray-400 font-medium tracking-wider uppercase">
-                        {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                        })}
-                        <span className="mx-2 text-gray-200">|</span>
-                        {new Date(idea.timestamp || Date.now()).toLocaleTimeString(undefined, {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })}
-                    </span>
-                </div>
+                {/* Copied Indicator */}
+                <AnimatePresence>
+                    {copiedId === idea.id && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            className="absolute top-3 right-3 bg-emerald-50 text-emerald-600 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 shadow-sm border border-emerald-100"
+                        >
+                            <Check size={12} strokeWidth={3} />
+                            <span>COPIED</span>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </motion.div>
         </div>
     );
