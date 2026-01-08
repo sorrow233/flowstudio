@@ -2,7 +2,8 @@ import * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import {
     collection,
-    addDoc,
+    doc,
+    setDoc,
     onSnapshot,
     query,
     orderBy,
@@ -16,11 +17,15 @@ import { db } from '../../lib/firebase';
 const SESSION_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 
 /**
- * SyncEngine - Fixed Version
+ * SyncEngine - Final Robust Version
  * 
- * Key Fix: Use session-based filtering to prevent re-applying our own pushes.
- * Each update document includes a `sessionId` field.
- * onSnapshot skips updates from the current session.
+ * Strategy:
+ * 1. Pre-generate Doc ID: We know the ID *before* we send the request.
+ * 2. Block-list: Add this ID to `processedUpdateIds` immediately.
+ * 3. Session ID: Double-check filter as backup.
+ * 
+ * This combination eliminates the race condition where `onSnapshot` sees the new doc
+ * before `addDoc` returns the ID.
  */
 export class SyncEngine {
     constructor(docId, userId, initialData = {}) {
@@ -44,6 +49,9 @@ export class SyncEngine {
         this.isServerLoaded = false;
         this.unsubscribes = [];
         this.pushTimeout = null;
+
+        // De-duplication Set
+        this.processedUpdateIds = new Set();
 
         // Init
         this.init();
@@ -105,13 +113,25 @@ export class SyncEngine {
 
             snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
+                    const docId = change.doc.id;
                     const data = change.doc.data();
 
-                    // KEY FIX: Skip updates from our own session
-                    if (data.sessionId === this.sessionId) {
-                        console.debug(`[SyncEngine] Skipping own update (session match).`);
+                    // FILTER 1: Processed IDs (Pre-emptive)
+                    if (this.processedUpdateIds.has(docId)) {
+                        console.debug(`[SyncEngine] Filter: Blocked own update ID: ${docId}`);
                         return;
                     }
+
+                    // FILTER 2: Session ID (Backup)
+                    if (data.sessionId === this.sessionId) {
+                        console.debug(`[SyncEngine] Filter: Blocked own session: ${data.sessionId}`);
+                        // Add to processed set just in case
+                        this.processedUpdateIds.add(docId);
+                        return;
+                    }
+
+                    // Debug log to see what we ARE accepting
+                    // console.debug(`[SyncEngine] Accepting update: ${docId}, session: ${data.sessionId}`);
 
                     if (data.update) {
                         try {
@@ -132,7 +152,7 @@ export class SyncEngine {
                     updatesToApply.forEach(u => Y.applyUpdate(this.doc, u, 'remote'));
                 }, 'remote');
 
-                // Apply to Shadow Doc (to keep it in sync with remote state)
+                // Apply to Shadow Doc
                 this.shadowDoc.transact(() => {
                     updatesToApply.forEach(u => Y.applyUpdate(this.shadowDoc, u));
                 });
@@ -141,13 +161,13 @@ export class SyncEngine {
             // Mark server as loaded
             if (!this.isServerLoaded) {
                 this.isServerLoaded = true;
-                console.info("[SyncEngine] Server loaded. Checking for pending changes...");
+                console.info("[SyncEngine] Server loaded.");
             }
 
             this.checkForPendingChanges();
 
         }, (error) => {
-            console.error("[SyncEngine] Firestore Error:", error.code, error.message);
+            console.error("[SyncEngine] Firestore Error:", error.code);
             this.isServerLoaded = true;
             this.setStatus('offline');
         });
@@ -159,6 +179,9 @@ export class SyncEngine {
         if (this.isPushing || !this.hasPendingChanges || !navigator.onLine) {
             return;
         }
+
+        const PUSH_TIMEOUT_MS = 15000;
+        let timeoutId;
 
         try {
             this.isPushing = true;
@@ -172,31 +195,50 @@ export class SyncEngine {
                 this.hasPendingChanges = false;
                 this.pendingCount = 0;
                 this.setStatus('synced');
+                this.isPushing = false;
                 return;
             }
 
             console.info(`[SyncEngine] Pushing ${diff.byteLength} bytes...`);
 
-            // Send to Firestore with sessionId
-            const updateStr = btoa(String.fromCharCode.apply(null, diff));
+            // 1. Generate ID locally
             const updatesColl = collection(db, `users/${this.userId}/rooms/${this.docId}/updates`);
+            const newDocRef = doc(updatesColl); // Auto-generated ID, but now we know it!
 
-            await addDoc(updatesColl, {
-                update: updateStr,
-                createdAt: serverTimestamp(),
-                userId: this.userId,
-                sessionId: this.sessionId  // KEY: Include session ID
+            // 2. Block this ID immediately
+            this.processedUpdateIds.add(newDocRef.id);
+            console.debug(`[SyncEngine] Generated Push ID: ${newDocRef.id} (Blocked locally)`);
+
+            // 3. Send
+            const updateStr = btoa(String.fromCharCode.apply(null, diff));
+
+            const timeoutPromise = new Promise((_, reject) => {
+                timeoutId = setTimeout(() => {
+                    reject(new Error("Push Timeout"));
+                }, PUSH_TIMEOUT_MS);
             });
+
+            await Promise.race([
+                setDoc(newDocRef, {
+                    update: updateStr,
+                    createdAt: serverTimestamp(),
+                    userId: this.userId,
+                    sessionId: this.sessionId
+                }),
+                timeoutPromise
+            ]);
+            clearTimeout(timeoutId);
 
             console.info("[SyncEngine] Push Success!");
 
-            // Update Shadow to match what we just pushed
+            // 4. Update Shadow
             Y.applyUpdate(this.shadowDoc, diff);
 
-            // Re-check for any remaining changes
+            // 5. Re-check
             this.checkForPendingChanges();
 
         } catch (error) {
+            clearTimeout(timeoutId);
             console.error(`[SyncEngine] Push Failed:`, error);
             this.setStatus('offline');
         } finally {
@@ -246,7 +288,7 @@ export class SyncEngine {
 
     setStatus(newStatus) {
         if (this.status !== newStatus) {
-            console.info(`[SyncEngine] Status: ${this.status} -> ${newStatus}`);
+            // console.info(`[SyncEngine] Status: ${this.status} -> ${newStatus}`);
             this.status = newStatus;
             this.notifyListeners();
         }

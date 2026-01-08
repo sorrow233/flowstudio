@@ -152,7 +152,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
             onPointerLeave={handlePointerUp}
         >
             <motion.div
-                drag={isSelectionMode ? false : "x"}
+                drag={(isSelectionMode || isEditing) ? false : "x"}
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={{ right: 0.05, left: 0.5 }}
                 onDragEnd={(e, info) => {
