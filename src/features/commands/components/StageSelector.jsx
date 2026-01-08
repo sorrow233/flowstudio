@@ -12,10 +12,35 @@ const STAGE_ICONS = {
 };
 
 const StageSelector = ({ activeStage, setActiveStage, commands }) => {
+    const scrollContainerRef = React.useRef(null);
+    const activeBtnRef = React.useRef(null);
+
+    React.useEffect(() => {
+        if (activeBtnRef.current && scrollContainerRef.current) {
+            const container = scrollContainerRef.current;
+            const btn = activeBtnRef.current;
+
+            // Simple scroll into view logic for horizontal list
+            const containerLeft = container.getBoundingClientRect().left;
+            const btnLeft = btn.getBoundingClientRect().left;
+            const offset = btnLeft - containerLeft;
+
+            // Center the button if possible, or at least ensure visibility
+            const scrollLeft = container.scrollLeft + offset - (container.clientWidth / 2) + (btn.clientWidth / 2);
+
+            container.scrollTo({
+                left: scrollLeft,
+                behavior: 'smooth'
+            });
+        }
+    }, [activeStage]);
+
     return (
-    return (
-        <div className="w-full md:w-72 shrink-0 flex flex-row md:flex-col gap-2 py-4 overflow-x-auto md:overflow-visible no-scrollbar">
-            <div className="mb-0 md:mb-10 px-0 md:px-4 shrink-0 flex items-center md:block mr-4 md:mr-0">
+        <div
+            ref={scrollContainerRef}
+            className="w-full md:w-72 shrink-0 flex flex-row md:flex-col gap-2 py-4 overflow-x-auto md:overflow-visible no-scrollbar scroll-smooth snap-x snap-mandatory"
+        >
+            <div className="mb-0 md:mb-10 px-0 md:px-4 shrink-0 flex items-center md:block mr-4 md:mr-0 snap-center">
                 <h2 className="text-xl md:text-2xl font-thin text-gray-900 flex items-center gap-3 tracking-tight whitespace-nowrap">
                     <div className="w-8 h-8 md:w-10 md:h-10 bg-gray-900 text-white rounded-xl flex items-center justify-center shadow-lg shadow-gray-200">
                         <Terminal size={20} />
@@ -38,11 +63,12 @@ const StageSelector = ({ activeStage, setActiveStage, commands }) => {
                     return (
                         <button
                             key={stage.id}
+                            ref={isActive ? activeBtnRef : null}
                             onClick={() => setActiveStage(stage.id)}
                             className={`
                                 shrink-0 flex items-center justify-between p-3 md:p-4 rounded-2xl transition-all duration-300 group relative overflow-hidden
                                 ${isActive ? 'bg-white shadow-xl shadow-gray-200/50 scale-100 md:scale-105 z-10' : 'hover:bg-white/50 hover:pl-5 text-gray-500'}
-                                min-w-[160px] md:min-w-0 md:w-full
+                                min-w-[160px] md:min-w-0 md:w-full snap-center
                             `}
                         >
                             <div className="flex items-center gap-3 md:gap-4 relative z-10 show-full">
@@ -82,7 +108,6 @@ const StageSelector = ({ activeStage, setActiveStage, commands }) => {
                 })}
             </div>
         </div>
-    );
     );
 };
 

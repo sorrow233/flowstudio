@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Code2, ExternalLink, Trash2, Check, Rocket, Sparkles, Trophy, Star, X } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
+import { useNavigate } from 'react-router-dom';
 
 // Import New Modular Components
 import StageNavigation from './components/primary/StageNavigation';
@@ -51,6 +52,7 @@ const PrimaryDevModule = () => {
     const { addProject: addFinalProject } = useSyncedProjects(doc, 'final_projects');
 
     useUndoShortcuts(undo, redo);
+    const navigate = useNavigate();
 
     // --- Global State ---
     const [selectedProject, setSelectedProject] = useState(null);
@@ -285,8 +287,12 @@ const PrimaryDevModule = () => {
         // Close modal after delay
         setTimeout(() => {
             setShowGraduationChecklist(false);
-            setSelectedProject(null);
             setGraduationChecks({}); // Reset
+
+            // Navigate to Commercial Module for pricing setup
+            navigate('/commercial', { state: { projectId: selectedProject.id } });
+
+            setSelectedProject(null);
         }, 1500);
     };
 

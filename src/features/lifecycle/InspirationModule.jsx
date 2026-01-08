@@ -164,7 +164,7 @@ const InspirationModule = () => {
                             <div className="flex justify-between items-start gap-6">
                                 <div className="text-gray-700 text-base font-light leading-7 whitespace-pre-wrap flex-grow font-sans">
                                     {(() => {
-                                        // Simple parser for [Tag] pattern
+                                        // Parser for [Tag] pattern in saved ideas
                                         const parts = idea.content.split(/(\[.*?\])/g);
                                         return parts.map((part, index) => {
                                             if (part.match(/^\[(.*?)\]$/)) {
