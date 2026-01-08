@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /shared_commands/{shareId} {
+      // Anyone can read shared commands
+      allow read: if true;
+      
+      // Only authenticated users can create
+      allow create: if request.auth != null;
+      
+      // Only the author can update/delete their own shares
+      // Exception: Anyone can increment the downloads counter
+      allow update: if request.auth != null && (
+        resource.data.author.uid == request.auth.uid || 
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['downloads']))
+      );
+      
+      allow delete: if request.auth != null && resource.data.author.uid == request.auth.uid;
+    }
+  }
+}

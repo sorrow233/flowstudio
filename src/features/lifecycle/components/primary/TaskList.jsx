@@ -188,7 +188,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                 onPointerDown={disableReorder ? undefined : handlePointerDown}
                 onPointerMove={disableReorder ? undefined : handlePointerMove}
                 onClick={(e) => {
-                    if (isSelectionMode) {
+                    if (isSelectionMode || e.shiftKey || e.metaKey || e.ctrlKey) {
                         onSelect(e);
                         return;
                     }

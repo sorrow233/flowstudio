@@ -44,6 +44,11 @@ const ShareBrowserModal = ({ isOpen, onClose, onImport }) => {
             setHasMore(result.hasMore);
         } catch (err) {
             console.error('Load shares error:', err);
+            if (err.code === 'permission-denied') {
+                // Ideally show a toast or UI message, for now logging is the first step, 
+                // but let's make it clearer in the console at least.
+                console.error('Permission denied. Please ensure firestore.rules are deployed.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -150,8 +155,8 @@ const ShareBrowserModal = ({ isOpen, onClose, onImport }) => {
                                 <button
                                     onClick={() => setSelectedCategory('all')}
                                     className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${selectedCategory === 'all'
-                                            ? 'bg-white text-gray-900 shadow-md scale-110'
-                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white/50'
+                                        ? 'bg-white text-gray-900 shadow-md scale-110'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white/50'
                                         }`}
                                 >
                                     ALL
@@ -164,8 +169,8 @@ const ShareBrowserModal = ({ isOpen, onClose, onImport }) => {
                                             <button
                                                 onClick={() => setSelectedCategory(cat.id)}
                                                 className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${selectedCategory === cat.id
-                                                        ? 'bg-white shadow-md scale-110'
-                                                        : 'hover:bg-white/50 hover:scale-105'
+                                                    ? 'bg-white shadow-md scale-110'
+                                                    : 'hover:bg-white/50 hover:scale-105'
                                                     }`}
                                             >
                                                 <div className={`w-3 h-3 rounded-full ${cat.color.split(' ')[0]}`} />
@@ -220,8 +225,8 @@ const ShareBrowserModal = ({ isOpen, onClose, onImport }) => {
                                                 <div className="flex items-start justify-between mb-3">
                                                     <div className="flex items-center gap-3">
                                                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${share.command.type === 'link'
-                                                                ? 'bg-blue-50 text-blue-500'
-                                                                : 'bg-gray-50 text-gray-500 group-hover:bg-violet-50 group-hover:text-violet-500'
+                                                            ? 'bg-blue-50 text-blue-500'
+                                                            : 'bg-gray-50 text-gray-500 group-hover:bg-violet-50 group-hover:text-violet-500'
                                                             } transition-colors`}>
                                                             {share.command.type === 'link' ? <LinkIcon size={18} /> : <Terminal size={18} />}
                                                         </div>
