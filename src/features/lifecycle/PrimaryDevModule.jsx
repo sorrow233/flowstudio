@@ -10,6 +10,8 @@ import ProjectWorkspaceHeader from './components/primary/ProjectWorkspaceHeader'
 import ImportCommandModal from './components/primary/ImportCommandModal';
 import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
 import confetti from 'canvas-confetti';
+import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
+import UndoRedoButtons from '../../components/shared/UndoRedoButtons';
 
 const PrimaryDevModule = () => {
     // --- Sync Integration ---
@@ -19,43 +21,12 @@ const PrimaryDevModule = () => {
         updateProject,
         removeProject: deleteProject,
         undo,
-        redo
+        redo,
+        canUndo,
+        canRedo
     } = useSyncedProjects(doc, 'primary_projects');
 
-    // --- Keyboard Shortcuts for Undo/Redo ---
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            // Only trigger if we are NOT in an input/textarea to avoid conflicting with native text undo,
-            // UNLESS the focus is on the body/main container.
-            // Actually, for a global app undo, we often want to override or handle carefully.
-            // For now, let's keep it global but maybe check if activeElement is an input?
-            // Standard behavior: if specific input is focused, browser handles text undo. 
-            // If we preventDefault, we block text undo. 
-            // Better approach: Only handle if not in input, OR if input is empty? 
-            // Simple approach for now: Global handler, but be careful with inputs.
-            // Let's rely on event bubbling check?
-
-            const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
-            if (isInput) return; // Let browser handle text undo/redo inside inputs
-
-            if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
-                if (e.shiftKey) {
-                    e.preventDefault();
-                    redo && redo();
-                } else {
-                    e.preventDefault();
-                    undo && undo();
-                }
-            }
-            if ((e.ctrlKey) && e.key === 'y') {
-                e.preventDefault();
-                redo && redo();
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [undo, redo]);
+    useUndoShortcuts(undo, redo);
 
     // --- Global State ---
     const [selectedProject, setSelectedProject] = useState(null);
@@ -316,9 +287,17 @@ const PrimaryDevModule = () => {
                     <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">Production Pipeline</h2>
                     <p className="text-gray-400 text-sm font-light tracking-wide">Execution & Engineering</p>
                 </div>
-                <div className="text-right">
-                    <span className="text-3xl font-thin text-gray-900">{activeProjects.length}</span>
-                    <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">Active</span>
+                <div className="flex items-center gap-4 text-right">
+                    <UndoRedoButtons
+                        onUndo={undo}
+                        onRedo={redo}
+                        canUndo={canUndo}
+                        canRedo={canRedo}
+                    />
+                    <div>
+                        <span className="text-3xl font-thin text-gray-900">{activeProjects.length}</span>
+                        <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">Active</span>
+                    </div>
                 </div>
             </div>
 

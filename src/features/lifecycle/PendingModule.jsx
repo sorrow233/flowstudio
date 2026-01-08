@@ -5,7 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { STORAGE_KEYS, getRandomProjectImage, COMMAND_CATEGORIES } from '../../utils/constants';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
-import { toast } from 'sonner'; // Assuming sonner is used, or console if not available
+import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
+import UndoRedoButtons from '../../components/shared/UndoRedoButtons';
 
 // 灵魂四问 (Soul Questions - Final Polish)
 const QUESTIONS = [
@@ -48,39 +49,12 @@ const PendingModule = () => {
         removeProject: deleteProject,
         updateProject,
         undo,
-        redo
+        redo,
+        canUndo,
+        canRedo
     } = useSyncedProjects(doc, 'pending_projects');
 
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            // Check for Ctrl+Z or Cmd+Z
-            if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
-                if (e.shiftKey) {
-                    // Redo (Shift + Ctrl/Cmd + Z)
-                    e.preventDefault();
-                    if (redo) {
-                        redo();
-                        // Optional: toast('Redo', { position: 'bottom-center' });
-                    }
-                } else {
-                    // Undo
-                    e.preventDefault();
-                    if (undo) {
-                        undo();
-                        // Optional: toast('Undo', { position: 'bottom-center' });
-                    }
-                }
-            }
-            // Check for Ctrl+Y (Redo on Windows commonly)
-            if ((e.ctrlKey) && e.key === 'y') {
-                e.preventDefault();
-                if (redo) redo();
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [undo, redo]);
+    useUndoShortcuts(undo, redo);
 
     const {
         projects: primaryProjects
@@ -163,9 +137,17 @@ const PendingModule = () => {
         <div className="max-w-7xl mx-auto pt-8 px-6 h-full flex gap-10">
             {/* Left Column: Stream & Nursery */}
             <div className={`transition-all duration-500 flex flex-col ${selectedProject ? 'w-[350px] opacity-100' : 'w-full'}`}>
-                <div className="mb-8">
-                    <h2 className="text-2xl font-light tracking-wide text-gray-900">Idea Staging</h2>
-                    <p className="text-xs font-mono text-gray-400 mt-1 uppercase tracking-widest">Validate before you build</p>
+                <div className="mb-8 flex justify-between items-end">
+                    <div>
+                        <h2 className="text-2xl font-light tracking-wide text-gray-900">Idea Staging</h2>
+                        <p className="text-xs font-mono text-gray-400 mt-1 uppercase tracking-widest">Validate before you build</p>
+                    </div>
+                    <UndoRedoButtons
+                        onUndo={undo}
+                        onRedo={redo}
+                        canUndo={canUndo}
+                        canRedo={canRedo}
+                    />
                 </div>
 
                 <div className="flex-1 flex flex-col gap-8 overflow-y-auto no-scrollbar pb-20">

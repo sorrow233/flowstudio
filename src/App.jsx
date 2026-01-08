@@ -11,11 +11,14 @@ import AdvancedDevModule from './features/lifecycle/AdvancedDevModule';
 import CommercialModule from './features/lifecycle/CommercialModule';
 import CommandCenterModule from './features/commands/CommandCenterModule';
 
+import { Toaster } from 'sonner';
+
 function App() {
     const location = useLocation();
 
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-gray-50/50">
+            <Toaster position="top-right" richColors />
             <Navbar />
 
             <main className="flex-1 overflow-y-auto w-full no-scrollbar">
