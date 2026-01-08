@@ -124,7 +124,7 @@ const InspirationModule = () => {
                                         <button
                                             key={tag}
                                             onClick={() => handleTagClick(tag)}
-                                            className="flex-shrink-0 px-3 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-400 hover:text-emerald-600 rounded-full text-[10px] font-medium transition-colors border border-transparent hover:border-emerald-100 whitespace-nowrap"
+                                            className="flex-shrink-0 px-3 py-1 bg-emerald-50/80 hover:bg-emerald-100 text-emerald-600 hover:text-emerald-700 rounded-full text-[11px] font-medium transition-colors border border-emerald-100/50 hover:border-emerald-200 whitespace-nowrap shadow-sm"
                                         >
                                             {tag}
                                         </button>
