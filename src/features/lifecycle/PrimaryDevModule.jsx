@@ -14,6 +14,26 @@ import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
 
 import Spotlight from '../../components/shared/Spotlight';
 
+// Default card background images - randomly selected per project
+const DEFAULT_CARD_BACKGROUNDS = [
+    'https://blog.catzz.work/file/1767894017691_jean-carlo-emer-dUB0ECAfVaU-unsplash.webp',
+    'https://blog.catzz.work/file/1767894022389_raymond-yeung-3ABZ_Uc0Ie0-unsplash.webp',
+    'https://blog.catzz.work/file/1767894025264_tsuyoshi-kozu-a8WZxtfrgs4-unsplash.webp',
+    'https://blog.catzz.work/file/1767894020358_david-becker-Lcckkgmyf9A-unsplash.webp',
+];
+
+// Deterministic random selection based on project ID
+const getDefaultBackground = (projectId) => {
+    if (!projectId) return DEFAULT_CARD_BACKGROUNDS[0];
+    let hash = 0;
+    for (let i = 0; i < projectId.length; i++) {
+        hash = ((hash << 5) - hash) + projectId.charCodeAt(i);
+        hash |= 0;
+    }
+    return DEFAULT_CARD_BACKGROUNDS[Math.abs(hash) % DEFAULT_CARD_BACKGROUNDS.length];
+};
+
+
 const PrimaryDevModule = () => {
     // --- Sync Integration ---
     const { doc } = useSyncStore('flowstudio_v1');
@@ -340,14 +360,14 @@ const PrimaryDevModule = () => {
                             >
                                 {/* Card Background */}
                                 <div className="absolute inset-0 z-0 h-48">
-                                    {project.bgImage ? (
-                                        <div className="w-full h-full relative">
-                                            <img src={project.bgImage} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent" />
-                                        </div>
-                                    ) : (
-                                        <div className="w-full h-full bg-gradient-to-br from-gray-50 to-white" />
-                                    )}
+                                    <div className="w-full h-full relative">
+                                        <img
+                                            src={project.bgImage || getDefaultBackground(project.id)}
+                                            alt=""
+                                            className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent" />
+                                    </div>
                                 </div>
 
                                 <div className="p-8 relative z-10 flex flex-col h-full">
