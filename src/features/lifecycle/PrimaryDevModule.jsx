@@ -304,67 +304,103 @@ const PrimaryDevModule = () => {
 
             {/* Active Project Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
-                {activeProjects.map((project) => (
-                    <motion.div
-                        layoutId={`primary-card-${project.id}`}
-                        key={project.id}
-                        onClick={() => handleSelectProject(project)}
-                        className="group bg-white border border-gray-100 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-gray-200/50 transition-all cursor-pointer relative h-[360px] flex flex-col ring-1 ring-transparent hover:ring-gray-100"
-                    >
-                        <Spotlight className="w-full h-full" spotColor="rgba(16, 185, 129, 0.2)">
-                            {/* Card Background */}
-                            <div className="absolute inset-0 z-0 h-48">
-                                {project.bgImage ? (
-                                    <div className="w-full h-full relative">
-                                        <img src={project.bgImage} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent" />
-                                    </div>
-                                ) : (
-                                    <div className="w-full h-full bg-gradient-to-br from-gray-50 to-white" />
-                                )}
-                            </div>
+                {activeProjects.map((project) => {
+                    const isHoly = project.hasHolyGlow;
 
-                            <div className="p-8 relative z-10 flex flex-col h-full">
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className="w-12 h-12 bg-white/80 backdrop-blur text-gray-900 rounded-2xl flex items-center justify-center shadow-sm border border-white/50 group-hover:scale-105 transition-transform">
-                                        <Code2 size={24} strokeWidth={1.5} />
-                                    </div>
-                                    {project.link && (
-                                        <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 text-gray-500 hover:text-gray-900 transition-colors bg-white/50 backdrop-blur rounded-full hover:bg-white">
-                                            <ExternalLink size={16} />
-                                        </a>
+                    return (
+                        <motion.div
+                            layoutId={`primary-card-${project.id}`}
+                            key={project.id}
+                            onClick={() => handleSelectProject(project)}
+                            className={`group bg-white border rounded-[2rem] overflow-hidden hover:shadow-2xl transition-all cursor-pointer relative h-[360px] flex flex-col
+                                ${isHoly
+                                    ? 'border-transparent shadow-[0_0_0_2px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]'
+                                    : 'border-gray-100 hover:shadow-gray-200/50 ring-1 ring-transparent hover:ring-gray-100'}
+                            `}
+                        >
+                            {/* Holy Flowing Border Animation */}
+                            {isHoly && (
+                                <motion.div
+                                    className="absolute inset-0 rounded-[2rem] pointer-events-none z-50"
+                                    style={{
+                                        background: 'linear-gradient(90deg, transparent, rgba(16,185,129,0.4), transparent)',
+                                        backgroundSize: '200% 100%',
+                                    }}
+                                    animate={{
+                                        backgroundPosition: ['200% 0', '-200% 0'],
+                                    }}
+                                    transition={{
+                                        duration: 3,
+                                        repeat: Infinity,
+                                        ease: 'linear',
+                                    }}
+                                    initial={{ opacity: 0 }}
+                                    whileHover={{ opacity: 1 }}
+                                />
+                            )}
+
+                            <Spotlight
+                                className="w-full h-full"
+                                spotColor={isHoly ? "rgba(59, 130, 246, 0.15)" : "rgba(16, 185, 129, 0.2)"}
+                            >
+                                {/* Card Background */}
+                                <div className="absolute inset-0 z-0 h-48">
+                                    {project.bgImage ? (
+                                        <div className="w-full h-full relative">
+                                            <img src={project.bgImage} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent" />
+                                        </div>
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-gray-50 to-white" />
                                     )}
                                 </div>
 
-                                <div className="mt-8">
-                                    <h3 className="text-2xl font-light text-gray-900 mb-2 line-clamp-1 group-hover:text-emerald-900 transition-colors">{project.title}</h3>
-                                    <p className="text-sm text-gray-500 line-clamp-2 min-h-[2.5em] leading-relaxed">{project.desc || 'No description provided.'}</p>
-                                </div>
-
-                                <div className="mt-auto pt-6 border-t border-gray-100/50">
-                                    {/* Mini Stage Visualization */}
-                                    <div className="flex items-center gap-1.5 mb-3">
-                                        {[1, 2, 3, 4, 5].map(step => (
-                                            <div
-                                                key={step}
-                                                className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-emerald-500 shadow-sm shadow-emerald-200' : 'bg-gray-100'}`}
-                                            />
-                                        ))}
-                                    </div>
-                                    <div className="flex justify-between items-center text-xs font-mono text-gray-400 uppercase tracking-wider">
-                                        <div className="flex items-center gap-2">
-                                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                            <span>Stage {project.subStage || 1}</span>
+                                <div className="p-8 relative z-10 flex flex-col h-full">
+                                    <div className="flex justify-between items-start mb-6">
+                                        <div className={`w-12 h-12 backdrop-blur rounded-2xl flex items-center justify-center shadow-sm border transition-transform group-hover:scale-105
+                                            ${isHoly ? 'bg-emerald-50/80 border-emerald-200/50 text-emerald-700' : 'bg-white/80 border-white/50 text-gray-900'}
+                                        `}>
+                                            <Code2 size={24} strokeWidth={1.5} />
                                         </div>
-                                        <span className="text-gray-900 font-medium">
-                                            {project.stageNames?.[project.subStage || 1] || DEV_STAGES[(project.subStage || 1) - 1]?.label}
-                                        </span>
+                                        {project.link && (
+                                            <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 text-gray-500 hover:text-gray-900 transition-colors bg-white/50 backdrop-blur rounded-full hover:bg-white">
+                                                <ExternalLink size={16} />
+                                            </a>
+                                        )}
+                                    </div>
+
+                                    <div className="mt-8">
+                                        <h3 className={`text-2xl font-light mb-2 line-clamp-1 transition-colors
+                                            ${isHoly ? 'text-emerald-900 group-hover:text-emerald-700' : 'text-gray-900 group-hover:text-emerald-900'}
+                                        `}>{project.title}</h3>
+                                        <p className="text-sm text-gray-500 line-clamp-2 min-h-[2.5em] leading-relaxed">{project.desc || 'No description provided.'}</p>
+                                    </div>
+
+                                    <div className="mt-auto pt-6 border-t border-gray-100/50">
+                                        {/* Mini Stage Visualization */}
+                                        <div className="flex items-center gap-1.5 mb-3">
+                                            {[1, 2, 3, 4, 5].map(step => (
+                                                <div
+                                                    key={step}
+                                                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-emerald-500 shadow-sm shadow-emerald-200' : 'bg-gray-100'}`}
+                                                />
+                                            ))}
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs font-mono text-gray-400 uppercase tracking-wider">
+                                            <div className="flex items-center gap-2">
+                                                <span className={`w-2 h-2 rounded-full animate-pulse ${isHoly ? 'bg-blue-500' : 'bg-emerald-500'}`} />
+                                                <span>Stage {project.subStage || 1}</span>
+                                            </div>
+                                            <span className="text-gray-900 font-medium">
+                                                {project.stageNames?.[project.subStage || 1] || DEV_STAGES[(project.subStage || 1) - 1]?.label}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </Spotlight>
-                    </motion.div>
-                ))}
+                            </Spotlight>
+                        </motion.div>
+                    );
+                })}
 
                 {/* Empty State */}
                 {activeProjects.length === 0 && (
