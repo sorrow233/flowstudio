@@ -112,7 +112,8 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
     // Dynamic Color Classes
     const getCheckboxStyle = () => {
         const base = `shrink-0 flex items-center justify-center transition-all duration-300 border-2`;
-        const shape = task.isCommand ? 'w-5 h-5 rounded-full' : 'w-6 h-6 rounded-lg';
+        // Unified size w-6 h-6 (24px) for both, distinguishing only by shape (circle vs square)
+        const shape = task.isCommand ? 'w-6 h-6 rounded-full' : 'w-6 h-6 rounded-lg';
 
         if (task.done) {
             // Completed state
@@ -128,7 +129,6 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
             return `${base} ${shape} border-gray-200 text-transparent group-hover:border-gray-400 hover:bg-gray-50`;
         }
     };
-
 
     return (
         <Reorder.Item
@@ -198,7 +198,8 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
                         onClick={(e) => { e.stopPropagation(); onToggle(projectId, task.id); }}
                         className={getCheckboxStyle()}
                     >
-                        <Check size={task.isCommand ? 10 : 14} strokeWidth={3} />
+                        {/* Slightly adjusted size for command (12) to match w-6 box */}
+                        <Check size={task.isCommand ? 12 : 14} strokeWidth={3} />
                     </button>
                 )}
 
