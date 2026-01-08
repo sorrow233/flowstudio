@@ -13,7 +13,8 @@ const VISUAL_VIBES = [
 
 const ProjectWorkspaceHeader = ({
     project, activeStage, isCollapsed, isEditing, editForm,
-    setEditForm, onSaveEdit, onCancelEdit, onStartEdit, onClose, onDelete, onImportCommand, onToggleCollapse
+    setEditForm, onSaveEdit, onCancelEdit, onStartEdit, onClose, onDelete, onImportCommand, onToggleCollapse,
+    ...props
 }) => {
 
     // Get info for current stage to show in header title if needed, 
@@ -22,6 +23,7 @@ const ProjectWorkspaceHeader = ({
 
     return (
         <motion.div
+            {...props}
             className="relative shrink-0 flex flex-col justify-end overflow-hidden transition-all duration-500 bg-gray-900 group"
             animate={{
                 height: isCollapsed ? 120 : 320,

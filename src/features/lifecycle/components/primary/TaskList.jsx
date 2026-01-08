@@ -179,7 +179,7 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
     );
 };
 
-const TaskList = ({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask, onUpdateTask, newTaskInput, setNewTaskInput, newTaskCategory, setNewTaskCategory, onScroll, onReorder, onImportCommand }) => {
+const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask, onUpdateTask, newTaskInput, setNewTaskInput, newTaskCategory, setNewTaskCategory, onScroll, onReorder, onImportCommand }, ref) => {
     const [copiedTaskId, setCopiedTaskId] = useState(null);
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const [editingTaskId, setEditingTaskId] = useState(null);
@@ -229,6 +229,7 @@ const TaskList = ({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask
 
             {/* Scrollable List */}
             <div
+                ref={ref}
                 className="flex-1 overflow-y-auto px-8 pb-4 custom-scrollbar"
                 onScroll={onScroll}
             >
@@ -345,6 +346,9 @@ const TaskList = ({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask
             </div>
         </div>
     );
-};
+});
+
+TaskItem.displayName = 'TaskItem';
+TaskList.displayName = 'TaskList';
 
 export default TaskList;

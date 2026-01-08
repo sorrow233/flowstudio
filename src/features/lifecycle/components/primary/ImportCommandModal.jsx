@@ -12,7 +12,7 @@ const CATEGORY_ICONS = {
     'Beaker': Beaker
 };
 
-const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage }) => {
+const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCategory }) => {
     const [categories, setCategories] = useState(COMMAND_CATEGORIES);
     const [commands, setCommands] = useState([]); // BUG FIX: Missing state
     const [importCategory, setImportCategory] = useState('all'); // BUG FIX: Missing state
@@ -90,15 +90,23 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage }) => {
                         <div>
                             <h4 className="font-medium text-gray-900 group-hover:text-emerald-700 transition-colors text-sm flex items-center gap-2">
                                 {cmd.title}
-                                {currentStage && cmd.stageIds?.includes(currentStage) && (
-                                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 uppercase tracking-wider">
-                                        Recommended
+                                {currentStage && cmd.stageIds?.includes(currentStage) && projectCategory && cmd.category === projectCategory ? (
+                                    <span className="flex items-center gap-1 text-[10px] font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-100 uppercase tracking-wider shadow-sm shadow-violet-200/50">
+                                        <Sparkles size={10} fill="currentColor" /> Perfect Match
                                     </span>
-                                )}
-                                {projectCategory && cmd.category === projectCategory && (
-                                    <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100 uppercase tracking-wider">
-                                        Preferred
-                                    </span>
+                                ) : (
+                                    <>
+                                        {currentStage && cmd.stageIds?.includes(currentStage) && (
+                                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 uppercase tracking-wider">
+                                                Stage Critical
+                                            </span>
+                                        )}
+                                        {projectCategory && cmd.category === projectCategory && (
+                                            <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100 uppercase tracking-wider">
+                                                Domain Preferred
+                                            </span>
+                                        )}
+                                    </>
                                 )}
                             </h4>
                             <div className="flex items-center gap-2 mt-1">

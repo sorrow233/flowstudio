@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus, TreeDeciduous, TreePine, Image as ImageIcon, Sparkles, RefreshCw, Feather, Scroll } from 'lucide-react';
+import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus, TreeDeciduous, TreePine, Image as ImageIcon, Sparkles, RefreshCw, Feather, Scroll, LayoutGrid, Monitor, Server, Database, Container, Beaker, Terminal, Globe, Smartphone, Cloud, Box, Cpu } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { STORAGE_KEYS, getRandomProjectImage, COMMAND_CATEGORIES } from '../../utils/constants';
 import { useSync } from '../sync/SyncContext';
@@ -463,25 +463,73 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                 )}
             </div>
 
-            {/* Category Selection Section - NEW */}
-            <div className="max-w-2xl mx-auto w-full relative z-20 mt-8 bg-white rounded-3xl p-6 border border-gray-100">
-                <h4 className="text-xs font-medium text-gray-400 tracking-widest uppercase mb-4 text-center">Select Code Domain</h4>
-                <div className="flex flex-wrap justify-center gap-3">
-                    {COMMAND_CATEGORIES.filter(c => c.id !== 'general').map(cat => ( // Filter out general if desired, or keep it
-                        <button
-                            key={cat.id}
-                            onClick={() => setSelectedCategory(cat.id)}
-                            className={`
-                                flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all border
-                                ${selectedCategory === cat.id
-                                    ? 'bg-gray-900 text-white border-gray-900 shadow-lg scale-105'
-                                    : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:border-gray-300'
-                                }
-                            `}
-                        >
-                            <span>{cat.label}</span>
-                        </button>
-                    ))}
+            {/* Choose Your Path - Category Selection */}
+            <div className="max-w-2xl mx-auto w-full relative z-20 mt-8">
+                <div className="flex items-center justify-center gap-2 mb-6">
+                    <Sparkles size={14} className="text-emerald-400" />
+                    <h4 className="text-xs font-medium text-gray-400 tracking-[0.2em] uppercase">Choose Your Path</h4>
+                    <Sparkles size={14} className="text-emerald-400" />
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {COMMAND_CATEGORIES.filter(c => c.id !== 'general').map(cat => {
+                        // Map icon string to component
+                        const IconComponent = {
+                            'LayoutGrid': LayoutGrid,
+                            'Monitor': Monitor,
+                            'Server': Server,
+                            'Database': Database,
+                            'Container': Container,
+                            'Beaker': Beaker,
+                            'Terminal': Terminal,
+                            'Globe': Globe,
+                            'Smartphone': Smartphone,
+                            'Cloud': Cloud,
+                            'Box': Box,
+                            'Cpu': Cpu
+                        }[cat.icon] || LayoutGrid;
+
+                        const isSelected = selectedCategory === cat.id;
+
+                        return (
+                            <button
+                                key={cat.id}
+                                onClick={() => setSelectedCategory(cat.id)}
+                                className={`
+                                    relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-300 group
+                                    ${isSelected
+                                        ? 'bg-gray-900 border-gray-900 shadow-xl shadow-gray-200 scale-105 z-10'
+                                        : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-1'
+                                    }
+                                `}
+                            >
+                                <div className={`
+                                    w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-colors
+                                    ${isSelected
+                                        ? 'bg-white/10 text-white'
+                                        : 'bg-gray-50 text-gray-400 group-hover:bg-emerald-50 group-hover:text-emerald-500'
+                                    }
+                                `}>
+                                    <IconComponent size={20} strokeWidth={1.5} />
+                                </div>
+                                <span className={`
+                                    text-xs font-medium tracking-wide transition-colors
+                                    ${isSelected ? 'text-white' : 'text-gray-600 group-hover:text-gray-900'}
+                                `}>
+                                    {cat.label}
+                                </span>
+
+                                {isSelected && (
+                                    <motion.div
+                                        layoutId="category-check"
+                                        className="absolute top-2 right-2 text-white/50"
+                                    >
+                                        <CheckCircle2 size={14} />
+                                    </motion.div>
+                                )}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 

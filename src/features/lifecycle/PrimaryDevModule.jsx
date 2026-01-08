@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Code2, ExternalLink, Trash2, Check, Rocket, Sparkles, Trophy, Star, X } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
@@ -39,6 +39,15 @@ const PrimaryDevModule = () => {
     // --- Graduation State ---
     const [showGraduationChecklist, setShowGraduationChecklist] = useState(false);
     const [graduationChecks, setGraduationChecks] = useState({});
+
+    // --- Scroll Handling Ref ---
+    const taskListRef = useRef(null);
+
+    const handleHeaderWheel = (e) => {
+        if (taskListRef.current) {
+            taskListRef.current.scrollTop += e.deltaY;
+        }
+    };
 
     const GRADUATION_PILLARS = [
         { id: 'audience', label: 'Have I truly understood who I am building for?' },
@@ -386,6 +395,7 @@ const PrimaryDevModule = () => {
                                 onDelete={(e) => handleDeleteProject(e, selectedProject.id)}
                                 onImportCommand={() => setCommandModalOpen(true)}
                                 onToggleCollapse={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
+                                onWheel={handleHeaderWheel}
                             />
 
                             <div
@@ -417,6 +427,7 @@ const PrimaryDevModule = () => {
                                     )}
 
                                     <TaskList
+                                        ref={taskListRef}
                                         tasks={selectedProject.tasks}
                                         projectId={selectedProject.id}
                                         activeStage={viewStage}
@@ -434,7 +445,7 @@ const PrimaryDevModule = () => {
                                             const scrollTop = e.currentTarget.scrollTop;
                                             if (scrollTop > 10 && !isHeaderCollapsed) {
                                                 setIsHeaderCollapsed(true);
-                                            } else if (scrollTop === 0 && isHeaderCollapsed) {
+                                            } else if (scrollTop <= 10 && isHeaderCollapsed) {
                                                 setIsHeaderCollapsed(false);
                                             }
                                         }}
