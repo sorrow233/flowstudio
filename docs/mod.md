@@ -12,8 +12,8 @@
         - `InspirationModule.jsx`: 灵感阶段，负责记录和管理初步的创意。
         - `PendingModule.jsx`: 孵化/待办阶段，包含项目树状可视化成长逻辑。
         - `PrimaryDevModule.jsx`: 初级开发阶段，核心开发界面之一。
-        - `AdvancedDevModule.jsx`: 高级开发阶段，用于更复杂的系统架构设计。
         - `FinalDevModule.jsx`: 最终开发阶段，交付前的收尾。
+        - `AdvancedDevModule.jsx`: 高级开发阶段，用于更复杂的系统架构设计。
         - `CommercialModule.jsx`: 商业化阶段，发布和商业化逻辑。
     - **Primary Development 子功能**:
         - `TaskList`: 任务列表管理。
