@@ -49,7 +49,35 @@ const PrimaryDevModule = () => {
     } = useSyncedProjects(doc, 'primary_projects');
 
     // Also connect to Final Projects to push graduated projects there
-    const { addProject: addFinalProject } = useSyncedProjects(doc, 'final_projects');
+    const { addProject: addFinalProject, projects: finalProjectsList } = useSyncedProjects(doc, 'final_projects');
+
+    // --- Legacy Migration: Auto-sync existing Advanced projects to Final Module ---
+    useEffect(() => {
+        if (!projects || !finalProjectsList) return;
+
+        // Find projects that are Advanced in Primary but missing in Final
+        const advancedLegacyProjects = projects.filter(p => (p.subStage || 1) >= 6);
+
+        advancedLegacyProjects.forEach(primary => {
+            const expectedFinalId = `${primary.id}-final`;
+            const existsInFinal = finalProjectsList.some(final => final.id === expectedFinalId);
+
+            if (!existsInFinal) {
+                console.log(`[Migration] Syncing legacy advanced project to Final: ${primary.title}`);
+                addFinalProject({
+                    id: expectedFinalId,
+                    title: primary.title,
+                    desc: primary.desc,
+                    link: primary.link,
+                    bgImage: primary.bgImage,
+                    subStage: 1, // Start at Stage 1
+                    tasks: [],
+                    createdAt: Date.now(),
+                    originProjectId: primary.id
+                });
+            }
+        });
+    }, [projects, finalProjectsList, addFinalProject]);
 
     useUndoShortcuts(undo, redo);
     const navigate = useNavigate();

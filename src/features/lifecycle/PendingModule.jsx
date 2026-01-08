@@ -438,12 +438,22 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
             exit={{ opacity: 0, x: 50 }}
             className="flex-1 bg-white border border-gray-100 rounded-[2.5rem] p-4 md:p-10 shadow-2xl shadow-gray-200/50 overflow-y-auto no-scrollbar relative flex flex-col z-10"
         >
-            <button
-                onClick={onClose}
-                className="absolute top-8 right-8 p-3 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors z-30"
-            >
-                <X size={20} className="text-gray-400" />
-            </button>
+            <div className="absolute top-8 right-8 flex gap-2 z-30">
+                {/* Mobile Back Button */}
+                <button
+                    onClick={onClose}
+                    className="md:hidden p-3 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center"
+                >
+                    <ArrowRight className="rotate-180 text-gray-500" size={20} />
+                </button>
+                {/* Desktop Close Button */}
+                <button
+                    onClick={onClose}
+                    className="hidden md:block p-3 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                    <X size={20} className="text-gray-400" />
+                </button>
+            </div>
 
             <div className="absolute top-0 left-0 right-0 h-48 bg-gray-50 overflow-hidden rounded-t-[2.5rem] z-0">
                 {project.bgImage ? (

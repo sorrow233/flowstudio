@@ -153,71 +153,86 @@ const InspirationModule = () => {
             <div className="space-y-6">
                 <AnimatePresence mode="popLayout">
                     {ideas.sort((a, b) => b.timestamp - a.timestamp).map((idea) => (
-                        <motion.div
-                            key={idea.id}
-                            initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                            layout
-                            className="group relative bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] hover:border-gray-200 transition-all duration-300"
-                        >
-                            <div className="flex justify-between items-start gap-6">
-                                <div className="text-gray-700 text-base font-light leading-7 whitespace-pre-wrap flex-grow font-sans">
-                                    {(() => {
-                                        // Parser for [Tag] pattern in saved ideas
-                                        const parts = idea.content.split(/(\[.*?\])/g);
-                                        return parts.map((part, index) => {
-                                            if (part.match(/^\[(.*?)\]$/)) {
-                                                const tagName = part.slice(1, -1); // Remove [ and ]
-                                                return (
-                                                    <span
-                                                        key={index}
-                                                        className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-emerald-50 text-emerald-600 rounded-md text-[11px] font-medium align-middle border border-emerald-100/50 shadow-sm transform -translate-y-0.5"
-                                                    >
-                                                        {tagName}
-                                                    </span>
-                                                );
-                                            }
-                                            return <span key={index}>{part}</span>;
-                                        });
-                                    })()}
-                                </div>
-                                <div className="flex flex-col items-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                    <button
-                                        onClick={() => handleCopy(idea.content, idea.id)}
-                                        className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
-                                        title="Copy to clipboard"
-                                    >
-                                        {copiedId === idea.id ? (
-                                            <Check size={16} className="text-emerald-500" strokeWidth={2} />
-                                        ) : (
-                                            <Copy size={16} strokeWidth={1.5} />
+                        <div key={idea.id} className="relative">
+                            {/* Swipe Background (Delete Action) */}
+                            <div className="absolute inset-0 bg-red-500 rounded-xl flex items-center justify-end pr-6 -z-10">
+                                <Trash2 className="text-white" size={20} />
+                            </div>
+
+                            <motion.div
+                                drag="x"
+                                dragConstraints={{ left: 0, right: 0 }}
+                                dragElastic={{ right: 0.05, left: 0.5 }}
+                                onDragEnd={(e, info) => {
+                                    if (info.offset.x < -100) {
+                                        removeIdea(idea.id);
+                                    }
+                                }}
+                                onClick={() => handleCopy(idea.content, idea.id)}
+                                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                                animate={{
+                                    opacity: 1,
+                                    y: 0,
+                                    scale: 1,
+                                    x: 0
+                                }}
+                                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                                layout
+                                className="group relative bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] hover:border-gray-200 transition-all duration-300 cursor-pointer active:scale-[0.99]"
+                            >
+                                <div className="flex justify-between items-start gap-6">
+                                    <div className="text-gray-700 text-base font-light leading-7 whitespace-pre-wrap flex-grow font-sans select-none">
+                                        {(() => {
+                                            // Parser for [Tag] pattern in saved ideas
+                                            const parts = idea.content.split(/(\[.*?\])/g);
+                                            return parts.map((part, index) => {
+                                                if (part.match(/^\[(.*?)\]$/)) {
+                                                    const tagName = part.slice(1, -1); // Remove [ and ]
+                                                    return (
+                                                        <span
+                                                            key={index}
+                                                            className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-emerald-50 text-emerald-600 rounded-md text-[11px] font-medium align-middle border border-emerald-100/50 shadow-sm transform -translate-y-0.5"
+                                                        >
+                                                            {tagName}
+                                                        </span>
+                                                    );
+                                                }
+                                                return <span key={index}>{part}</span>;
+                                            });
+                                        })()}
+                                    </div>
+
+                                    {/* Copied Indicator */}
+                                    <AnimatePresence>
+                                        {copiedId === idea.id && (
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0.8 }}
+                                                className="absolute top-4 right-4 bg-emerald-50 text-emerald-600 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 shadow-sm border border-emerald-100"
+                                            >
+                                                <Check size={12} strokeWidth={3} />
+                                                <span>COPIED</span>
+                                            </motion.div>
                                         )}
-                                    </button>
-                                    <button
-                                        onClick={() => removeIdea(idea.id)}
-                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                        title="Delete"
-                                    >
-                                        <Trash2 size={16} strokeWidth={1.5} />
-                                    </button>
+                                    </AnimatePresence>
                                 </div>
-                            </div>
-                            <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
-                                <span className="text-[10px] text-gray-400 font-medium tracking-wider uppercase">
-                                    {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                    })}
-                                    <span className="mx-2 text-gray-200">|</span>
-                                    {new Date(idea.timestamp || Date.now()).toLocaleTimeString(undefined, {
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}
-                                </span>
-                            </div>
-                        </motion.div>
+                                <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
+                                    <span className="text-[10px] text-gray-400 font-medium tracking-wider uppercase">
+                                        {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                        })}
+                                        <span className="mx-2 text-gray-200">|</span>
+                                        {new Date(idea.timestamp || Date.now()).toLocaleTimeString(undefined, {
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </span>
+                                </div>
+                            </motion.div>
+                        </div>
                     ))}
                 </AnimatePresence>
 

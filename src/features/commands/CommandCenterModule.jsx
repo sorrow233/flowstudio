@@ -298,26 +298,26 @@ const CommandCenterModule = () => {
                             {DEV_STAGES[activeStage - 1].desc}
                         </p>
                     </div>
-                    <div className="flex flex-col-reverse md:flex-col items-end gap-4 w-full md:w-auto">
-                        <div className="flex flex-wrap md:flex-nowrap gap-2 w-full md:w-auto justify-end">
+                    <div className="flex flex-col items-end gap-4 w-full md:w-auto mt-4 md:mt-0">
+                        <div className="flex gap-2 w-full md:w-auto justify-end">
                             {/* Community Button */}
                             <button
                                 onClick={() => setIsCommunityBrowsing(true)}
-                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-violet-50 to-fuchsia-50 text-violet-600 border border-violet-200 rounded-2xl hover:from-violet-100 hover:to-fuchsia-100 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-gradient-to-r from-violet-50 to-fuchsia-50 text-violet-600 border border-violet-200 rounded-2xl hover:from-violet-100 hover:to-fuchsia-100 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
                                 title="浏览社区分享"
                             >
                                 <Globe2 size={18} />
-                                <span className="font-medium text-sm">社区</span>
+                                <span className="hidden md:inline font-medium text-sm">社区</span>
                             </button>
 
                             {/* Import Button */}
                             <button
                                 onClick={() => setIsImporting(true)}
-                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 px-5 py-3 bg-white text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-white text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
                                 title="Import from Global Library"
                             >
                                 <Library size={18} />
-                                <span className="font-medium text-sm">Library</span>
+                                <span className="hidden md:inline font-medium text-sm">Library</span>
                             </button>
 
                             {/* New Command Button */}
@@ -328,7 +328,7 @@ const CommandCenterModule = () => {
                                     setEditingTagId(null);
                                     setIsAdding(true);
                                 }}
-                                className="flex-1 md:flex-initial group flex items-center justify-center gap-3 px-6 py-3 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap"
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 md:gap-3 p-3 md:px-6 md:py-3 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap min-w-[3.5rem]"
                             >
                                 <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
                                 <span className="font-medium tracking-wide">New</span>
@@ -338,7 +338,7 @@ const CommandCenterModule = () => {
                         <div className="flex gap-2 w-full md:w-auto justify-between md:justify-end">
                             <div className="flex gap-2 w-full md:w-auto">
                                 {/* Category Filter Pills - Dot Ribbon */}
-                                <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full overflow-x-auto no-scrollbar scrollbar-hide max-w-[200px] md:max-w-[300px] xl:max-w-none shadow-inner border border-gray-200/50">
+                                <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full overflow-x-auto no-scrollbar scrollbar-hide flex-1 md:flex-none md:max-w-[300px] xl:max-w-none shadow-inner border border-gray-200/50">
                                     <button
                                         onClick={() => setSelectedCategory('all')}
                                         className={`
@@ -370,22 +370,17 @@ const CommandCenterModule = () => {
                                             >
                                                 <div className={`w-3 h-3 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')} ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-transparent' : ''}`} />
                                             </button>
-
-                                            {/* Tooltip */}
-                                            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] rounded opacity-0 group-hover/cat:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 font-medium tracking-wide">
-                                                {cat.label}
-                                            </div>
                                         </div>
                                     ))}
                                 </div>
 
-                                <div className="relative group">
-                                    <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
+                                <div className="relative group shrink-0">
+                                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
                                     <input
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
                                         placeholder="Search..."
-                                        className="pl-10 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white rounded-full text-sm border border-transparent hover:border-gray-200 focus:border-emerald-200 outline-none w-10 focus:w-60 transition-all shadow-inner placeholder:text-transparent focus:placeholder:text-gray-300 cursor-pointer focus:cursor-text"
+                                        className="pl-9 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white rounded-full text-sm border border-transparent hover:border-gray-200 focus:border-emerald-200 outline-none w-10 focus:w-40 md:focus:w-60 transition-all shadow-inner placeholder:text-transparent focus:placeholder:text-gray-300 cursor-pointer focus:cursor-text"
                                     />
                                 </div>
                             </div>
