@@ -112,7 +112,9 @@ export class SyncEngine {
                     if (data.update) {
                         try {
                             const update = Uint8Array.from(atob(data.update), c => c.charCodeAt(0));
+                            // Apply to BOTH Main and Shadow
                             Y.applyUpdate(this.doc, update, 'remote');
+                            Y.applyUpdate(this.shadowDoc, update);
                             appliedCount++;
                         } catch (e) {
                             console.error("[SyncEngine] Parse error:", e);
