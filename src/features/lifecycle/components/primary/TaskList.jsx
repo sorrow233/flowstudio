@@ -128,213 +128,200 @@ const TaskItem = ({ task, projectId, isMandatory, isLink, isUtility, copiedTaskI
             return `${base} ${shape} border-gray-200 text-transparent group-hover:border-gray-400 hover:bg-gray-50`;
         }
     };
-    if (task.done) {
-        // Completed state: Filled with theme color
-        return `${base} ${shape} bg-${themeColor}-500 border-${themeColor}-500 text-white ${!task.isCommand ? 'scale-110' : ''}`;
-    }
 
-    // Idle state: Hollow
-    if (task.isCommand) {
-        return `${base} ${shape} border-${themeColor}-300 hover:border-${themeColor}-400 bg-transparent text-transparent hover:bg-${themeColor}-50`;
-    } else {
-        // Default Task Idle
-        if (isMandatory) return `${base} ${shape} border-red-200 text-transparent hover:border-red-400 bg-red-50`;
-        return `${base} ${shape} border-gray-200 text-transparent group-hover:border-gray-400 hover:bg-gray-50`;
-    }
-};
 
-return (
-    <Reorder.Item
-        value={task}
-        id={task.id}
-        dragListener={false} // Disable auto-drag for the whole item to allow swipe
-        dragControls={dragControls} // Pass controls to the handle
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{
-            opacity: 1,
-            scale: isGrabbing ? 1.02 : 1,
-            y: 0,
-            transition: { scale: { duration: 0.2 } }
-        }}
-        exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-        className="relative"
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
-    >
-        <motion.div
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={{ right: 0.05, left: 0.5 }}
-            onDragEnd={(e, info) => {
-                if (info.offset.x < -100 || info.velocity.x < -500) {
-                    onDelete(projectId, task.id);
-                }
-                setIsGrabbing(false);
+    return (
+        <Reorder.Item
+            value={task}
+            id={task.id}
+            dragListener={false} // Disable auto-drag for the whole item to allow swipe
+            dragControls={dragControls} // Pass controls to the handle
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{
+                opacity: 1,
+                scale: isGrabbing ? 1.02 : 1,
+                y: 0,
+                transition: { scale: { duration: 0.2 } }
             }}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            className={`
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+            className="relative"
+            onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerUp}
+        >
+            <motion.div
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={{ right: 0.05, left: 0.5 }}
+                onDragEnd={(e, info) => {
+                    if (info.offset.x < -100 || info.velocity.x < -500) {
+                        onDelete(projectId, task.id);
+                    }
+                    setIsGrabbing(false);
+                }}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                className={`
                     group flex items-center gap-4 p-5 rounded-2xl transition-all border relative overflow-hidden select-none touch-pan-y
                     ${isGrabbing ? `shadow-md ring-1 ${theme.grab}` : ''}
                     ${isMandatory && !task.done
-                    ? 'bg-white border-red-100 shadow-sm shadow-red-100 hover:border-red-200'
-                    : isMandatory && task.done
-                        ? 'bg-emerald-50/50 border-emerald-100 opacity-60'
-                        : isLink
-                            ? 'bg-white border-blue-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5'
-                            : task.done
-                                ? 'bg-gray-50 border-gray-100 opacity-60'
-                                : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5'
-                }
+                        ? 'bg-white border-red-100 shadow-sm shadow-red-100 hover:border-red-200'
+                        : isMandatory && task.done
+                            ? 'bg-emerald-50/50 border-emerald-100 opacity-60'
+                            : isLink
+                                ? 'bg-white border-blue-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5'
+                                : task.done
+                                    ? 'bg-gray-50 border-gray-100 opacity-60'
+                                    : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5'
+                    }
                 `}
-            onDoubleClick={() => {
-                if (task.isCommand) {
-                    onToggle(projectId, task.id);
-                } else {
-                    startEditing(task);
-                }
-            }}
-        >
-            {/* Slide Action Context (Behind content) */}
-            <motion.div className="absolute inset-y-0 right-0 bg-red-500 -z-10 flex items-center justify-end pr-5 text-white font-bold uppercase tracking-wider text-xs pointer-events-none" style={{ width: '100%', x: '100%' }}>
-                <Trash2 size={16} />
-            </motion.div>
+                onDoubleClick={() => {
+                    if (task.isCommand) {
+                        onToggle(projectId, task.id);
+                    } else {
+                        startEditing(task);
+                    }
+                }}
+            >
+                {/* Slide Action Context (Behind content) */}
+                <motion.div className="absolute inset-y-0 right-0 bg-red-500 -z-10 flex items-center justify-end pr-5 text-white font-bold uppercase tracking-wider text-xs pointer-events-none" style={{ width: '100%', x: '100%' }}>
+                    <Trash2 size={16} />
+                </motion.div>
 
 
-            {/* Leading Icon/Check */}
-            {isLink ? (
-                <div className="w-10 h-10 flex items-center justify-center transition-all rounded-xl shadow-sm shrink-0 bg-blue-50 text-blue-500 group-hover:bg-blue-100">
-                    {isLink ? <Globe size={20} /> : <Terminal size={20} />}
-                </div>
-            ) : (
-                <button
-                    onClick={(e) => { e.stopPropagation(); onToggle(projectId, task.id); }}
-                    className={getCheckboxStyle()}
-                >
-                    <Check size={task.isCommand ? 10 : 14} strokeWidth={3} />
-                </button>
-            )}
-
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-                {isEditing ? (
-                    <input
-                        autoFocus
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={() => saveEdit(task.id)}
-                        onKeyDown={(e) => e.key === 'Enter' && saveEdit(task.id)}
-                        className={`w-full bg-white border rounded px-2 py-1 text-base focus:ring-2 outline-none ${theme.inputBorder} ${theme.inputRing}`}
-                    />
-                ) : (
-
-                    <div
-                        className={`flex flex-col gap-1 ${task.isCommand ? 'cursor-pointer' : ''}`}
-                        onClick={(e) => {
-                            if (task.isCommand && handleCopy) {
-                                e.stopPropagation();
-                                handleCopy(task.id, task.commandContent || task.text);
-                            }
-                        }}
-                    >
-                        <div className="flex items-center gap-2">
-                            <span className={`text-base font-medium transition-all truncate ${task.done ? `opacity-60 line-through decoration-2 text-gray-400 ${theme.decoration}` : 'text-gray-700'}`}>
-                                {task.text}
-                            </span>
-                            {isOutdated && (
-                                <button
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        onUpdateTask(projectId, task.id, {
-                                            text: sourceCommand.title,
-                                            commandContent: sourceCommand.content,
-                                            commandTags: sourceCommand.tags || []
-                                        });
-                                    }}
-                                    className="shrink-0 p-1 text-amber-500 bg-amber-50 rounded-full hover:bg-amber-100 transition-colors animate-pulse z-10"
-                                    title="Update available"
-                                >
-                                    <RefreshCw size={10} />
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Tags Row */}
-                        <div className="flex flex-wrap items-center gap-2">
-                            {isMandatory && (
-                                <span className="text-[10px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-red-100">
-                                    Mandatory
-                                </span>
-                            )}
-                            {isLink && (
-                                <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-blue-100 flex items-center gap-1">
-                                    <ExternalLink size={8} /> Link
-                                </span>
-                            )}
-
-                            {/* Command Tags */}
-                            {(task.commandTags && task.commandTags.length > 0) && (
-                                <div className="flex flex-wrap gap-1.5 mt-1">
-                                    {task.commandTags.map(tag => {
-                                        // Simple color rotation matching ImportCommandModal
-                                        const colors = [
-                                            'bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100',
-                                            'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100',
-                                            'bg-violet-50 text-violet-700 border-violet-100 hover:bg-violet-100',
-                                            'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100 hover:bg-fuchsia-100'
-                                        ];
-                                        const colorClass = colors[tag.label.length % colors.length];
-
-                                        return (
-                                            <button
-                                                key={tag.id}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleCopy(`${task.id}-${tag.id}`, tag.value);
-                                                }}
-                                                className={`group/tag flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border transition-all relative overflow-hidden ${colorClass}`}
-                                            >
-                                                <Tag size={8} className="opacity-70" />
-                                                {tag.label}
-                                                {copiedTaskId === `${task.id}-${tag.id}` && (
-                                                    <div className="absolute inset-0 bg-emerald-500 text-white flex items-center justify-center">
-                                                        <Check size={8} />
-                                                    </div>
-                                                )}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
+                {/* Leading Icon/Check */}
+                {isLink ? (
+                    <div className="w-10 h-10 flex items-center justify-center transition-all rounded-xl shadow-sm shrink-0 bg-blue-50 text-blue-500 group-hover:bg-blue-100">
+                        {isLink ? <Globe size={20} /> : <Terminal size={20} />}
                     </div>
-                )}
-            </div>
-
-            {/* Actions */}
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                {!task.isCommand && !isEditing && (
+                ) : (
                     <button
-                        onClick={(e) => { e.stopPropagation(); startEditing(task); }}
-                        className={`p-2 text-gray-400 rounded-lg transition-colors ${theme.action}`}
+                        onClick={(e) => { e.stopPropagation(); onToggle(projectId, task.id); }}
+                        className={getCheckboxStyle()}
                     >
-                        <Edit2 size={16} />
+                        <Check size={task.isCommand ? 10 : 14} strokeWidth={3} />
                     </button>
                 )}
 
-            </div>
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                    {isEditing ? (
+                        <input
+                            autoFocus
+                            type="text"
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onBlur={() => saveEdit(task.id)}
+                            onKeyDown={(e) => e.key === 'Enter' && saveEdit(task.id)}
+                            className={`w-full bg-white border rounded px-2 py-1 text-base focus:ring-2 outline-none ${theme.inputBorder} ${theme.inputRing}`}
+                        />
+                    ) : (
 
-            {/* Copied Feedback Badge */}
-            {task.isCommand && copiedTaskId === task.id && (
-                <span className="absolute top-2 right-2 text-[9px] uppercase font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full animate-pulse">
-                    Copied
-                </span>
-            )}
-        </motion.div>
-    </Reorder.Item >
-);
+                        <div
+                            className={`flex flex-col gap-1 ${task.isCommand ? 'cursor-pointer' : ''}`}
+                            onClick={(e) => {
+                                if (task.isCommand && handleCopy) {
+                                    e.stopPropagation();
+                                    handleCopy(task.id, task.commandContent || task.text);
+                                }
+                            }}
+                        >
+                            <div className="flex items-center gap-2">
+                                <span className={`text-base font-medium transition-all truncate ${task.done ? `opacity-60 line-through decoration-2 text-gray-400 ${theme.decoration}` : 'text-gray-700'}`}>
+                                    {task.text}
+                                </span>
+                                {isOutdated && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            onUpdateTask(projectId, task.id, {
+                                                text: sourceCommand.title,
+                                                commandContent: sourceCommand.content,
+                                                commandTags: sourceCommand.tags || []
+                                            });
+                                        }}
+                                        className="shrink-0 p-1 text-amber-500 bg-amber-50 rounded-full hover:bg-amber-100 transition-colors animate-pulse z-10"
+                                        title="Update available"
+                                    >
+                                        <RefreshCw size={10} />
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Tags Row */}
+                            <div className="flex flex-wrap items-center gap-2">
+                                {isMandatory && (
+                                    <span className="text-[10px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-red-100">
+                                        Mandatory
+                                    </span>
+                                )}
+                                {isLink && (
+                                    <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-blue-100 flex items-center gap-1">
+                                        <ExternalLink size={8} /> Link
+                                    </span>
+                                )}
+
+                                {/* Command Tags */}
+                                {(task.commandTags && task.commandTags.length > 0) && (
+                                    <div className="flex flex-wrap gap-1.5 mt-1">
+                                        {task.commandTags.map(tag => {
+                                            // Simple color rotation matching ImportCommandModal
+                                            const colors = [
+                                                'bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100',
+                                                'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100',
+                                                'bg-violet-50 text-violet-700 border-violet-100 hover:bg-violet-100',
+                                                'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100 hover:bg-fuchsia-100'
+                                            ];
+                                            const colorClass = colors[tag.label.length % colors.length];
+
+                                            return (
+                                                <button
+                                                    key={tag.id}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleCopy(`${task.id}-${tag.id}`, tag.value);
+                                                    }}
+                                                    className={`group/tag flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border transition-all relative overflow-hidden ${colorClass}`}
+                                                >
+                                                    <Tag size={8} className="opacity-70" />
+                                                    {tag.label}
+                                                    {copiedTaskId === `${task.id}-${tag.id}` && (
+                                                        <div className="absolute inset-0 bg-emerald-500 text-white flex items-center justify-center">
+                                                            <Check size={8} />
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Actions */}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                    {!task.isCommand && !isEditing && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); startEditing(task); }}
+                            className={`p-2 text-gray-400 rounded-lg transition-colors ${theme.action}`}
+                        >
+                            <Edit2 size={16} />
+                        </button>
+                    )}
+
+                </div>
+
+                {/* Copied Feedback Badge */}
+                {task.isCommand && copiedTaskId === task.id && (
+                    <span className="absolute top-2 right-2 text-[9px] uppercase font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full animate-pulse">
+                        Copied
+                    </span>
+                )}
+            </motion.div>
+        </Reorder.Item >
+    );
 };
 
 const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask, onUpdateTask, newTaskInput, setNewTaskInput, newTaskCategory, setNewTaskCategory, onScroll, onReorder, onImportCommand, availableCommands }, ref) => {
