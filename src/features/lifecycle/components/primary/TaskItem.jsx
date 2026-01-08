@@ -135,10 +135,11 @@ const TaskItem = ({
     const theme = COLOR_MAP[themeColor] || COLOR_MAP.emerald;
 
     const getCheckboxStyle = () => {
+        const shapeClass = task.isCommand ? 'rounded-full' : 'rounded-md';
         if (task.done) {
-            return `w-5 h-5 rounded-md flex items-center justify-center transition-all ${theme.main} text-white shadow-sm scale-100`;
+            return `w-5 h-5 ${shapeClass} flex items-center justify-center transition-all ${theme.main} text-white shadow-sm scale-100`;
         }
-        return `w-5 h-5 rounded-md border-2 ${theme.border} bg-white transition-all shadow-sm hover:scale-105 active:scale-95 group-hover:border-opacity-100`;
+        return `w-5 h-5 ${shapeClass} border-2 ${theme.border} bg-white transition-all shadow-sm hover:scale-105 active:scale-95 group-hover:border-opacity-100`;
     };
 
     // Wrapper component based on disableReorder
@@ -230,7 +231,7 @@ const TaskItem = ({
 
                 {/* Leading Icon/Check */}
                 {isLink ? (
-                    <div className="w-10 h-10 flex items-center justify-center transition-all rounded-xl shadow-sm shrink-0 bg-blue-50 text-blue-500 group-hover:bg-blue-100">
+                    <div className="w-10 h-10 flex items-center justify-center transition-all rounded-full shadow-sm shrink-0 bg-blue-50 text-blue-500 group-hover:bg-blue-100">
                         {isLink ? <Globe size={20} /> : <Terminal size={20} />}
                     </div>
                 ) : (
