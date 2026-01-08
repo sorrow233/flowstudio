@@ -1,127 +1,162 @@
-# Flow Studio 深度技术文档
+# 📘 Flow Studio 系统架构深度文档
 
-本文档旨在详尽记录 Flow Studio 的代码库功能、设计细节及构建逻辑。
-
-## 1. 全局设计与构建逻辑
-
-### 1.1 设计哲学
-Flow Studio 采用 **模块化生命周期驱动 (Lifecycle-Driven Modular Architecture)** 的设计模式。
-- **核心理念**：将一个抽象的“项目”看作一个有生命的对象，从“灵感 (Inspiration)”萌芽，经历“孵化 (Pending)”和“开发 (Development)”，最终走向“商业化 (Commercial)”。
-- **构建逻辑**：
-    - 应用的状态流转由 `ProjectContext` 和 `StageNavigation` 控制。
-    - **页面搭建**：不仅仅是路由跳转，而是基于当前项目的 `stage` 属性动态渲染对应的 Feature Module。这种设计避免了传统的 SPA 路由割裂感，让用户感觉是在同一个工作台上打磨同一个作品。
-
-### 1.2 全局视觉系统 (Visual System)
-我们的视觉设计追求“高级感”与“动态交互”，核心配色数据源于 `tailwind.config.js` 及 CSS 变量。
-
-#### **色彩系统 (Color Palette)**
-用户界面主要采用 **Rose (玫瑰色)** 系列作为主色调，传达热情与创造力。
-
-**Tailwind Rose 系列配置 (Brand Colors):**
-- `rose-50`: `#fff1f2` (极淡背景)
-- `rose-100`: `#ffe4e6` (淡雅背景)
-- `rose-200`: `#fecdd3` (交互弱反馈)
-- `rose-300`: `#fda4af` (装饰性边框)
-- `rose-400`: `#fb7185` (次要按钮/高亮)
-- `rose-500`: `#f43f5e` (主要品牌色，平衡点)
-- `rose-600`: `#e11d48` (主要交互色，Hover 态)
-- `rose-700`: `#be123c` (深色强调)
-- `rose-800`: `#9f1239` (文字/重视觉元素)
-- `rose-900`: `#881337` (极深装饰)
-
-**CSS 变量定义 (`index.css`):**
-- `--bg-primary`: `#ffffff` (卡片/主内容背景)
-- `--bg-secondary`: `#f8f9fa` (应用整体背景，营造层次感)
-- `--text-primary`: `#1a1a1a` (主要正文，高对比度)
-- `--text-secondary`: `#666666` (次要信息，低干扰)
-
-#### **字体栈 (Typography)**
-优先使用现代化无衬线字体，确保多语言环境下的阅读体验：
-`font-family: "Outfit", "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;`
+本文档详尽记录了 Flow Studio 的核心设计哲学、全生命周期架构、视觉系统及关键模块实现逻辑。旨在为开发者提供一个**清晰、可视、深度**的代码地图。
 
 ---
 
-## 2. 核心业务模块详解 (Core Modules)
+## 1. 🏗 全局架构设计 (System Architecture)
 
-### 2.1 Lifecycle Components (生命周期组件)
+### 1.1 核心设计哲学
+Flow Studio 不仅仅是一个项目管理工具，它是一个**“有机的孵化器”**。
+- **有机生长 (Organic Growth)**: 项目不再是冷冰冰的列表项，而是像植物一样经历萌芽、生长、开花的过程。
+- **模块化驱动 (Lifecycle-Based Modular)**: 不同的生命周期阶段对应完全独立的 Feature Module，防止界面臃肿，让开发者专注于当下的任务。
+- **离线优先 (Local-First)**: 数据优先存储在本地，通过 Yjs 实现静默的云端同步，确保极致的响应速度。
+
+### 1.2 架构概览 (Architecture Diagram)
+
+```mermaid
+graph TD
+    User((开发者/用户)) --> Navbar[全局导航 Navbar]
+    
+    subgraph Core_State [核心状态管理]
+        Auth[AuthContext]
+        Sync[SyncContext (Yjs)]
+        Project[ProjectContext]
+    end
+    
+    Navbar --> Auth
+    Navbar --> Sync
+    
+    subgraph Lifecycle_System [生命周期流转系统]
+        direction TB
+        Stage0[Inspiration 灵感] -->|孵化| Stage1[Pending 待办]
+        Stage1 -->|毕业| Stage2[Development 开发]
+        Stage2 -->|发布| Stage3[Commercial 商业化]
+    end
+
+    Sync <-->|CRDT 同步| Supabase[(Cloudflare/Supabase)]
+    Project --> Lifecycle_System
+```
+
+---
+
+## 2. 🎨 全局视觉与交互系统 (Visual System)
+
+我们的设计语言追求**“高级感 (Premium)”**与**“生命力 (Vitality)”**。
+
+### 2.1 Rose 色彩系统 (Brand Colors)
+我们选用 **Rose (玫瑰色)** 传达热情与创造力。以下是精确的 Tailwind 色值配置：
+
+| Token | Hex Value | 用途说明 |
+| :--- | :--- | :--- |
+| `rose-50` | `#fff1f2` | 极淡背景，用于大面积留白 |
+| `rose-100` | `#ffe4e6` | 次要背景，Card Hover 态 |
+| `rose-200` | `#fecdd3` | 弱交互边框 |
+| `rose-300` | `#fda4af` | 装饰性元素 |
+| `rose-400` | `#fb7185` | 次要按钮 / 高亮提示 |
+| **`rose-500`** | **`#f43f5e`** | **主要品牌色，平衡视觉重心** |
+| `rose-600` | `#e11d48` | 主要交互色 (Button Hover) |
+| `rose-700` | `#be123c` | 深色强调文本 |
+| `rose-800` | `#9f1239` | 标题文本 (Dark Mode 适配) |
+| `rose-900` | `#881337` | 极深色块，用于页脚或强调 |
+
+### 2.2 定义层 CSS 变量
+定义于 `src/index.css`，用于实现全局的一致性与潜在的 Dark Mode 切换能力。
+
+```css
+:root {
+    --bg-primary:   #ffffff;  /* 卡片、弹窗背景 */
+    --bg-secondary: #f8f9fa;  /* 应用底层背景 */
+    --text-primary: #1a1a1a;  /* 主要内容文本 */
+    --text-secondary: #666666; /* 辅助说明文本 */
+}
+```
+
+---
+
+## 3. 🧩 核心业务模块详解 (Core Modules)
+
+### 3.1 🌱 Lifecycle Components (生命周期)
 路径: `src/features/lifecycle`
-这是应用的心脏，根据项目阶段加载不同界面。
 
-#### **InspirationModule (灵感阶段)**
-- **功能**：捕捉稍纵即逝的想法。
-- **设计细节**：采用极简输入框，减少干扰。
+#### **PendingModule (孵化阶段)**
+这是项目的“胚胎期”。我们不仅是记录待办，更是**强制思考**。
 
-#### **PendingModule (孵化/待办阶段)**
-路径: `src/features/lifecycle/PendingModule.jsx`
-- **功能**：通过问答形式评估项目价值，决定是否继续投入。
-- **核心函数**：
-    - **`handleAnswer(projectId, questionId, value)`**: 记录用户对“长期价值”或“利他之心”的思考。设计初衷是强迫开发者冷静下来思考项目的意义。
-    - **`getSaplingState(score)`**: 核心视觉逻辑。根据项目的评估分数，返回树苗的生长状态。分数越高，树苗越茂盛。这是为了直观反馈项目的“生命力”。
-    - **`getTreeVisual(stage)`**: 根据项目阶段（Stage > 1）返回对应的树木 SVG 或图片。确保即便到了后期，用户也能在列表中看到项目的成长历史。
-    - **`handleGraduate(project)`**: “毕业”逻辑。当用户确认项目可行时，将其状态从 Pending 推进到 Development，像毕业典礼一样充满仪式感。
+- **核心功能**: 
+  - **价值拷问 (Unique Insight)**: 用户必须回答关于“长期价值”和“利他之心”的问题。
+  - **树苗可视化 (Visual Growth)**: 随着回答的深入，树苗会视觉上长大。
 
-#### **Primary/Advanced Development (开发阶段)**
-- **PrimaryDevModule**: 专注于执行。包含 `TaskList`（任务清单）和 `CommandList`（指令调用）。
-- **AdvancedDevModule**: 专注于架构。用于总览系统设计。
+- **关键函数解析**:
+| 函数名 | 核心逻辑与设计意图 |
+| :--- | :--- |
+| `handleAnswer(projectId, qId, val)` | **逻辑**: 更新项目的元数据 `metadata.answers`。<br>**意图**: 将“思考”量化为数据，作为项目是否值得开发的判断依据。 |
+| `getSaplingState(score)` | **逻辑**: 根据 `score` (0-100) 返回 `seed` -> `sprout` -> `sapling`。<br>**意图**: 即时反馈 (Instant Feedback)，让用户感知到投入带来的变化。 |
+| `handleGraduate(project)` | **逻辑**: 将项目 `stage` 字段从 1 (Pending) 更新为 2 (Dev)。<br>**意图**: 充满仪式感的“毕业”，标志着从构思转向执行。 |
 
 #### **CommercialModule (商业化阶段)**
 路径: `src/features/lifecycle/CommercialModule.jsx`
-- **功能**：制定商业模式。
-- **页面搭建**：利用 `UpdateStrategy` 卡片展示多种变现模式（Freemium, Ads 等）。
-- **核心函数**：
-    - **`handleUpdate(updates)`**: 将选定的商业策略同步回项目数据中心。设计原因是为了让商业决策和代码开发紧密绑定，不脱离实际。
 
-### 2.2 Command Center (指令中心)
+- **核心功能**: 帮助开发者选择合适的变现路径。
+- **关键数据结构**:
+    ```javascript
+    const STRATEGIES = [
+        { id: 'freemium', title: 'Freemium', desc: '免费增值模式' },
+        { id: 'ads', title: 'Ad-Supported', desc: '广告变现' }
+    ];
+    ```
+- **构建逻辑**: 
+    - 使用 `UpdateStrategy` 组件渲染卡片网格。
+    - 点击卡片触发 `handleUpdate`，将商业模式直接写入项目配置，与代码逻辑解耦但数据绑定。
+
+### 3.2 🛠 Command Center (指令中心)
 路径: `src/features/commands`
-**核心定位**：开发者的“兵工厂”。用户在此存储常用的 Prompt、代码片段或工作流指令。
 
-#### **CommandCenterModule.jsx**
-- **构建逻辑**：左侧为分类导航，右侧为指令列表卡片。
-- **核心函数**：
-    - **`handleAdd()`**: 创建新指令。
-    - **`handleImport(cmd)`**: 将选中的指令“导入”到当前活跃的项目开发计划中。这是连接“知识库”与“工作台”的桥梁。
-    - **`handleCopy(id, content)`**: 一键复制指令内容。做了防抖和 Toast 反馈，优化用户体验。
-    - **`handleReorder(reorderedCommands)`**: 拖拽排序逻辑。允许用户自定义指令优先级。
+**定位**: 开发者的“外脑”与“兵工厂”。
 
-### 2.3 Authentication (用户认证)
-路径: `src/features/auth`
-
-#### **AuthModal.jsx**
-- **功能**：处理登录与注册。
-- **核心函数**：
-    - **`validateEmailDomain(email)`**: 这是一个细微的安全设计。检查邮箱后缀，确保符合系统允许的域名列表（如有）。
-    - **`handleGoogleLogin()`**: 集成 OAuth 登录流。
-    - **`handleSubmit(e)`**: 传统的表单提交处理，包含错误状态管理。
+- **CommandCenterModule.jsx**:
+  - **拖拽排序**: 利用 `dnd-kit` 或即兴的数组重排逻辑，实现指令优先级的自定义。
+  - **一键导入**: `handleImport` 函数将指令从“库”中复制到当前活跃的“项目任务”中。
+  - **设计细节**: 
+    - 所有的指令都有 `category` 属性。
+    - 侧边栏的分类重命名功能 (`CategoryRenameModal`) 允许用户建立自己的知识体系。
 
 ---
 
-## 3. 分布式同步架构 (Synchronization)
+## 4. 🔄 分布式同步引擎 (Sync Engine)
 
-### 3.1 Sync Engine (基于 Yjs)
+### 4.1 技术选型
 路径: `src/features/sync`
-我们不依赖单纯的 HTTP API CURD，而是采用 **CRDT (Conflict-free Replicated Data Type)** 技术实现多端实时同步。
+我们放弃了传统的 REST API，拥抱 **Local-First** 架构。
 
-#### **useSyncStore.js**
-- **设计原因**：为了支持离线优先 (Local-First) 和多设备无缝切换。
-- **核心函数**：
-    - **`useSyncedProjects(doc, arrayName)`**: 
-        - 监听 Y.Array 的变化。
-        - 自动将 Yjs 的二进制数据变更映射为 React 状态 (useState)，触发界面更新。
-    - **`updateProject(id, updates)`**: 
-        - **原子操作**：在 Yjs 事务 (Transaction) 中执行更新，确保数据一致性。
-        - 相比普通 API 调用，这种方式不需要等待服务器响应即可在本地乐观更新 UI。
-    - **`useDataMigration()`**: 
-        - 负责处理从旧版 LocalStorage 数据到 Yjs 结构的迁移。这是一个一次性的“摆渡人”逻辑。
+### 4.2 SyncEngine (SyncEngine.js)
+```mermaid
+sequenceDiagram
+    participant UI as React UI (Hooks)
+    participant Yjs as Yjs Doc (Local)
+    participant Worker as Sync Worker
+    participant Cloud as Cloudflare KV
+
+    UI->>Yjs: 1. updateProject(local)
+    Note right of UI: UI 立即更新 (Optimistic)
+    Yjs->>Worker: 2. 触发 'update' 事件
+    Worker->>Cloud: 3. WebSocket / API 推送二进制 Diff
+    Cloud-->>Worker: 4. 返回其他客户端的更新
+    Worker-->>Yjs: 5. 合并 (Merge)
+    Yjs-->>UI: 6. 触发 useSyncedProjects 重渲染
+```
+
+- **核心组件**:
+  - **`useSyncedProjects` Hook**: 
+    - 这里不仅是获取数据，还负责将 `Y.Array` 的复杂操作封装成简单的 React API (`add`, `remove`, `update`)。
+    - 它屏蔽了 CRDT 的复杂性，让上层业务逻辑像操作普通数组一样简单。
 
 ---
 
-## 4. 全局组件 (Global UI)
-- **Navbar**: 
-    - 不仅仅是导航，它集成了 `SyncStatus`（同步状态指示灯）。
-    - **设计细节**：当数据正在同步时显示动画，同步完成显示静止图标。让用户对数据安全有感知。
-- **StageNavigation**:
-    - 位于页面底部或侧边，作为“时间轴”导航，引导用户在项目的不同生命周期之间穿梭。
+## 5. 🚀 总结
 
----
+Flow Studio 的代码库是一个**高度内聚、低耦合**的有机体：
+1. **视觉上**：通过 Rose 色系和动态 SVG 反馈，打造“不仅好用，而且动人”的体验。
+2. **逻辑上**：严格遵循生命周期，让代码结构清晰可维护。
+3. **数据上**：利用 Yjs 实现无感同步，顺应 Local-First 的现代 Web 趋势。
 
-> **总结**：Flow Studio 的每一行代码，从颜色变量的定义到 Yjs 的同步逻辑，都是为了服务于“让创造更有机、更流畅”这一核心目标。
+> **Next Step**: 如果需要新增生命周期阶段，只需在 `src/features/lifecycle` 创建新文件并在 `StageNavigation` 注册即可。
