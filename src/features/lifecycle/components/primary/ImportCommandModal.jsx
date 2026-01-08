@@ -78,10 +78,10 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                 key={cmd.id}
                 onClick={() => onImport(cmd)}
                 className={`group bg-white border p-4 rounded-xl hover:shadow-lg hover:shadow-emerald-500/5 cursor-pointer transition-all relative ${isGrouped
-                        ? 'border-emerald-100/50 hover:border-emerald-300'
-                        : currentStage && cmd.stageIds?.includes(currentStage)
-                            ? 'border-emerald-200 ring-1 ring-emerald-50'
-                            : 'border-gray-100 hover:border-emerald-300'
+                    ? 'border-emerald-100/50 hover:border-emerald-300'
+                    : currentStage && cmd.stageIds?.includes(currentStage)
+                        ? 'border-emerald-200 ring-1 ring-emerald-50'
+                        : 'border-gray-100 hover:border-emerald-300'
                     }`}
             >
                 <div className="flex justify-between items-center">
@@ -116,13 +116,28 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                                     <CatIcon size={8} /> {cmd.category || 'general'}
                                 </span>
                                 {cmd.tags && cmd.tags.length > 0 && (
-                                    <div className="flex gap-1">
-                                        {cmd.tags.slice(0, 3).map(tag => (
-                                            <span key={tag.id} className="text-[10px] text-gray-400 flex items-center gap-0.5">
-                                                <Tag size={8} /> {tag.label}
+                                    <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                        {cmd.tags.slice(0, 3).map(tag => {
+                                            // Simple color rotation based on tag length/char for variety if no specific color
+                                            const colors = [
+                                                'bg-blue-50 text-blue-700 border-blue-100',
+                                                'bg-indigo-50 text-indigo-700 border-indigo-100',
+                                                'bg-violet-50 text-violet-700 border-violet-100',
+                                                'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100'
+                                            ];
+                                            const colorClass = colors[tag.label.length % colors.length];
+
+                                            return (
+                                                <span key={tag.id} className={`text-[10px] font-medium px-2 py-0.5 rounded-md border flex items-center gap-1 ${colorClass}`}>
+                                                    <Tag size={8} className="opacity-70" /> {tag.label}
+                                                </span>
+                                            );
+                                        })}
+                                        {cmd.tags.length > 3 && (
+                                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100">
+                                                +{cmd.tags.length - 3}
                                             </span>
-                                        ))}
-                                        {cmd.tags.length > 3 && <span className="text-[10px] text-gray-400">+{cmd.tags.length - 3}</span>}
+                                        )}
                                     </div>
                                 )}
                             </div>
