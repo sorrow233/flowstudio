@@ -264,6 +264,14 @@ const PendingModule = () => {
                                                 ${!isHoly && !isAdvanced ? 'border-emerald-100 dark:border-emerald-900/30' : ''}
                                             `}
                                         >
+                                            {/* Delete Button - shown on hover */}
+                                            <button
+                                                onClick={(e) => handleDelete(e, p.id)}
+                                                className="absolute top-2 right-2 z-50 opacity-0 group-hover:opacity-100 p-1.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 dark:hover:text-red-400 rounded-full transition-all shadow-sm"
+                                            >
+                                                <X size={14} />
+                                            </button>
+
                                             {/* Holy Glow Animation for regular items */}
                                             {isHoly && !isAdvanced && (
                                                 <motion.div
