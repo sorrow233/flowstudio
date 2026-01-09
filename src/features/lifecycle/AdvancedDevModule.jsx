@@ -72,39 +72,42 @@ const AdvancedDevModule = () => {
                             layoutId={`advanced-card-${project.id}`}
                             key={project.id}
                             onClick={() => setSelectedProject(project)}
-                            className="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-red-900/5 dark:hover:shadow-red-900/20 transition-all cursor-pointer relative h-[320px] flex flex-col ring-1 ring-transparent hover:ring-red-50 dark:hover:ring-red-900/30"
+                            className="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[1.5rem] overflow-hidden hover:shadow-xl hover:shadow-red-900/5 dark:hover:shadow-red-900/10 transition-all duration-500 cursor-pointer relative h-[240px] flex flex-col ring-1 ring-transparent hover:ring-red-50 dark:hover:ring-red-900/20 hover:-translate-y-1"
                         >
-                            {/* Card Background */}
-                            <div className="absolute inset-0 z-0 h-40">
+                            {/* Card Background - Subtle & Cinematic */}
+                            <div className="absolute inset-0 z-0 h-32">
                                 {project.bgImage ? (
                                     <div className="w-full h-full relative">
-                                        <img src={project.bgImage} alt="" className="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700" />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent" />
+                                        <img src={project.bgImage} alt="" className="w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 transition-all duration-700" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent dark:from-gray-900 dark:via-gray-900/60" />
                                     </div>
                                 ) : (
-                                    <div className="w-full h-full bg-gradient-to-br from-red-50 to-white dark:from-red-950 dark:to-gray-900" />
+                                    <div className="w-full h-full bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900" />
                                 )}
                             </div>
 
-                            <div className="p-8 relative z-10 flex flex-col h-full mt-auto">
-                                <div className="mb-auto pt-12">
-                                    <div className="w-12 h-12 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl flex items-center justify-center shadow-sm border border-gray-100 dark:border-gray-700 mb-6 group-hover:scale-110 transition-transform duration-300">
-                                        <Network size={24} strokeWidth={1.5} />
+                            <div className="p-6 relative z-10 flex flex-col h-full mt-auto">
+                                <div className="mb-auto pt-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="p-2 bg-white/80 dark:bg-black/50 backdrop-blur-sm rounded-xl border border-gray-100 dark:border-white/10 shadow-sm">
+                                            <Network size={16} className="text-gray-700 dark:text-gray-300" strokeWidth={1.5} />
+                                        </div>
+                                        {progress === 100 && <Trophy size={16} className="text-yellow-500" />}
                                     </div>
-                                    <h3 className="text-2xl font-light text-gray-900 dark:text-white mb-2 line-clamp-1 group-hover:text-red-900 dark:group-hover:text-red-400 transition-colors">
+
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1 line-clamp-1 group-hover:text-red-900 dark:group-hover:text-red-400 transition-colors">
                                         {project.title}
                                     </h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{project.desc || 'No description provided.'}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">{project.desc || 'No description provided.'}</p>
                                 </div>
 
-                                <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
-                                    <div className="flex items-center gap-2 text-gray-500">
-                                        <Box size={14} />
-                                        <span className="text-xs font-medium">{taskCount} Items</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full">
-                                        <Activity size={12} />
-                                        <span className="text-xs font-bold">{progress}% Done</span>
+                                <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-800/50 flex justify-between items-center text-xs">
+                                    <span className="text-gray-400 font-medium">{taskCount} Items</span>
+                                    <div className="relative w-16 h-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                        <div
+                                            className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-red-400 to-red-500 rounded-full transition-all duration-1000"
+                                            style={{ width: `${progress}%` }}
+                                        />
                                     </div>
                                 </div>
                             </div>
