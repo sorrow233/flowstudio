@@ -18,7 +18,7 @@ import { useTranslation } from '../i18n';
 const CommandCenterModule = () => {
     const [commands, setCommands] = useState([]);
     const [activeStage, setActiveStage] = useState(1);
-    const [selectedCategory, setSelectedCategory] = useState('all'); // Category Filter
+    const [selectedCategory, setSelectedCategory] = useState('general'); // Category Filter
     const [isAdding, setIsAdding] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
     const [isCommunityBrowsing, setIsCommunityBrowsing] = useState(false);
@@ -258,7 +258,7 @@ const CommandCenterModule = () => {
             c.title.toLowerCase().includes(search.toLowerCase()) ||
             c.content.toLowerCase().includes(search.toLowerCase());
 
-        const matchesCategory = selectedCategory === 'all' || (c.category || 'general') === selectedCategory;
+        const matchesCategory = (c.category || 'general') === selectedCategory;
 
         return matchesSearch && matchesCategory;
     });
@@ -345,19 +345,6 @@ const CommandCenterModule = () => {
                                 {/* Category Filter Pills - Dot Ribbon */}
 
                                 <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full overflow-x-auto no-scrollbar scrollbar-hide flex-1 md:flex-none md:max-w-[300px] xl:max-w-none shadow-inner border border-gray-200/50">
-                                    <button
-                                        onClick={() => setSelectedCategory('all')}
-                                        className={`
-                                        w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold transition-all shrink-0
-                                        ${selectedCategory === 'all'
-                                                ? 'bg-white text-gray-900 shadow-md scale-110 z-10'
-                                                : 'text-gray-400 hover:text-gray-600 hover:bg-white/50'}
-                                    `}
-                                        title={t('common.all')}
-                                    >
-                                        {t('common.all').toUpperCase()}
-                                    </button>
-                                    <div className="w-px h-4 bg-gray-300/50 mx-1" />
                                     {categories.map(cat => (
                                         <div key={cat.id} className="relative group/cat">
                                             <button
