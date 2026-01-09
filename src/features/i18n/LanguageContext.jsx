@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useSync } from '../sync/SyncContext';
+import { useSyncedMap } from '../sync/useSyncStore';
 import zh from './locales/zh';
 import en from './locales/en';
 import ja from './locales/ja';
@@ -20,11 +22,11 @@ const LanguageContext = createContext(null);
  * @returns {string} 语言代码 (zh | en | ja | ko)
  */
 const detectLanguage = () => {
-    // 1. 优先使用 localStorage 保存的语言偏好
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && locales[saved]) {
-        return saved;
-    }
+    // 1. 优先使用 localStorage 保存的语言偏好 (This logic is now moved to LanguageProvider)
+    // const saved = localStorage.getItem(STORAGE_KEY);
+    // if (saved && locales[saved]) {
+    //     return saved;
+    // }
 
     // 2. 检测浏览器语言
     const browserLang = navigator.language || navigator.userLanguage || '';

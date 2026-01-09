@@ -11,7 +11,7 @@ const AdvancedDevModule = () => {
     const navigate = useNavigate();
     // --- Data Layer ---
     const { doc } = useSync();
-    const { projects: allProjects, updateProject } = useSyncedProjects(doc, 'all_projects');
+    const { projects: allProjects, updateProject, removeProject } = useSyncedProjects(doc, 'all_projects');
 
     // Filter for Modules (formerly Final/Culmination)
     const finalProjects = React.useMemo(() =>
@@ -120,6 +120,7 @@ const AdvancedDevModule = () => {
                             project={liveProject}
                             onClose={() => setSelectedProject(null)}
                             updateProject={updateProject}
+                            onDeleteProject={removeProject}
                             onGraduate={() => {
                                 if (confirm('Ready to launch this project commercially?')) {
                                     updateProject(selectedProject.id, { stage: 'commercial', subStage: 1 });

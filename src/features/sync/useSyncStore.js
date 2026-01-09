@@ -3,7 +3,7 @@ import { useAuth } from '../auth/AuthContext';
 import { SyncEngine } from './SyncEngine';
 
 // Re-export hooks for backward compatibility or cleaner imports
-export { useYMap } from './hooks/useYMap';
+export { useSyncedMap } from './hooks/useSyncedMap';
 export { useSyncedProjects, useProjectMigration } from './hooks/useSyncedProjects';
 export { useDataMigration } from './hooks/useDataMigration';
 

@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useSync } from '../features/sync/SyncContext';
+import { useSyncedMap } from '../features/sync/useSyncStore';
 
 const ThemeContext = createContext();
 
@@ -11,33 +13,48 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }) {
-    const [isDark, setIsDark] = useState(() => {
-        // 从 localStorage 读取主题设置，默认为 light
-        const saved = localStorage.getItem('theme');
-        if (saved) {
-            return saved === 'dark';
-        }
-        // 或检测系统偏好
-        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // Sync
+    const { doc } = useSync();
+    const { data, set } = useSyncedMap(doc, 'user_preferences');
+
+    // Default to light, but use synced value if present
+    const syncedTheme = data.theme;
+
+    // Initialize state (fallback to local if not yet synced, but primarily trust sync)
+    const [theme, setTheme] = useState(() => {
+        // Initial load priority: Sync > Local > Light
+        // Note: Sync data might be empty on first render, handled in useEffect
+        return localStorage.getItem('theme') || 'light';
     });
 
+    // When sync data arrives, update state
     useEffect(() => {
-        // 更新 document 的 class
-        if (isDark) {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
+        if (syncedTheme && syncedTheme !== theme) {
+            setTheme(syncedTheme);
         }
-    }, [isDark]);
+    }, [syncedTheme, theme]); // Added theme to dependencies to prevent infinite loop if syncedTheme is initially undefined
 
-    const toggleTheme = () => setIsDark(prev => !prev);
+    useEffect(() => {
+        const root = window.document.documentElement;
+        root.classList.remove('light', 'dark');
+        root.classList.add(theme);
+        // Backup to local storage for offline/fast load
+        localStorage.setItem('theme', theme);
+
+        // Push to sync if different (and doc is ready)
+        if (doc && theme !== syncedTheme) {
+            set('theme', theme);
+        }
+    }, [theme, doc, set, syncedTheme]);
+
+    const toggleTheme = () => {
+        setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    };
 
     const value = {
-        isDark,
+        isDark: theme === 'dark', // Derive isDark from theme state
         toggleTheme,
-        setTheme: (dark) => setIsDark(dark),
+        setTheme: (newTheme) => setTheme(newTheme), // Allow setting theme directly
     };
 
     return (

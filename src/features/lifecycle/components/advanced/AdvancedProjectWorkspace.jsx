@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Network, Sparkles, Activity, Zap, CheckCircle2, X, Plus, Box, AlignJustify, Grid, LayoutGrid, List, Trophy } from 'lucide-react';
+
 import { v4 as uuidv4 } from 'uuid';
 import ModuleGrid from './ModuleGrid';
 import ModuleList from './ModuleList';
 import ArchitectureImportModal from './ArchitectureImportModal';
 import ModuleDetailModal from './ModuleDetailModal';
 import ModuleLibraryModal from './ModuleLibraryModal';
+import ProjectSettingsModal from './ProjectSettingsModal';
+import { Network, Sparkles, Activity, Zap, CheckCircle2, X, Plus, Box, AlignJustify, Grid, LayoutGrid, List, Trophy, Settings } from 'lucide-react';
+
 
 const CATEGORIES = [
     { id: 'frontend', label: 'Frontend', aliases: ['frontend', '前端'] },
@@ -19,9 +22,11 @@ const CATEGORIES = [
     { id: 'devops', label: 'DevOps', aliases: ['devops', '运维'] },
 ];
 
-const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate }) => {
+const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate, onDeleteProject }) => {
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
     const [editingModule, setEditingModule] = useState(null);
     const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
@@ -127,6 +132,13 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
 
     const handleModuleClick = (module) => {
         setEditingModule(module);
+    };
+
+    const handleDeleteProject = (projectId) => {
+        if (onDeleteProject) {
+            onDeleteProject(projectId);
+            onClose();
+        }
     };
 
     // --- System Health Calculation ---
@@ -239,6 +251,14 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                 title="AI Architect Import"
                             >
                                 <Sparkles size={20} />
+                            </button>
+                            <div className="h-8 w-px bg-gray-100 dark:bg-gray-800 mx-1" />
+                            <button
+                                onClick={() => setIsSettingsOpen(true)}
+                                className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-50 dark:hover:text-white dark:hover:bg-gray-800 rounded-xl transition-all"
+                                title="Project Settings"
+                            >
+                                <Settings size={20} />
                             </button>
                             <button
                                 onClick={handleCreateModule}
@@ -422,6 +442,14 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                         isOpen={isLibraryOpen}
                         onClose={() => setIsLibraryOpen(false)}
                         onAddModule={handleAddFromLibrary}
+                    />
+
+                    <ProjectSettingsModal
+                        isOpen={isSettingsOpen}
+                        onClose={() => setIsSettingsOpen(false)}
+                        project={project}
+                        onUpdate={updateProject}
+                        onDelete={handleDeleteProject}
                     />
                 </div>
             </motion.div>

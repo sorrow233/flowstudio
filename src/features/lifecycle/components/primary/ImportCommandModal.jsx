@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, ChevronDown, Filter, Sparkles, Flag } from 'lucide-react';
+import { X, Search, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, ChevronDown, Filter, Sparkles, Flag, Check } from 'lucide-react';
 import { STORAGE_KEYS, COMMAND_CATEGORIES, DEV_STAGES } from '../../../../utils/constants';
+import { useSync } from '../../../sync/SyncContext';
+import { useSyncedProjects } from '../../../sync/useSyncStore';
 
 const CATEGORY_ICONS = {
     'LayoutGrid': LayoutGrid,
@@ -68,9 +70,16 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
     const [commands, setCommands] = useState([]); // BUG FIX: Missing state
     const [importCategory, setImportCategory] = useState('all'); // BUG FIX: Missing state
     const [importSearch, setImportSearch] = useState(''); // BUG FIX: Missing state
+    const [importedIds, setImportedIds] = useState(new Set());
+
+    const handleImport = (cmd) => {
+        onImport(cmd);
+        setImportedIds(prev => new Set(prev).add(cmd.id));
+    };
 
     useEffect(() => {
         if (isOpen) {
+            setImportedIds(new Set());
             const savedCmds = localStorage.getItem(STORAGE_KEYS.COMMANDS);
             if (savedCmds) setCommands(JSON.parse(savedCmds));
 
@@ -127,7 +136,7 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
         return (
             <div
                 key={cmd.id}
-                onClick={() => onImport(cmd)}
+                onClick={() => handleImport(cmd)}
                 className={`group bg-white border p-4 rounded-xl ${themeClasses.hoverShadow} cursor-pointer transition-all relative ${isGrouped
                     ? `${themeClasses.border}`
                     : currentStage && cmd.stageIds?.includes(currentStage)
@@ -194,9 +203,20 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                             </div>
                         </div>
                     </div>
-                    {/* Hidden hover action */}
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className={`text-xs font-medium ${themeClasses.addBtn} px-2 py-1 rounded`}>Add +</span>
+                    {/* Action Button: "Add +" or Checkmark */}
+                    <div className={`${importedIds.has(cmd.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+                        {importedIds.has(cmd.id) ? (
+                            <motion.span
+                                initial={{ scale: 0.5, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                className={`text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-100 px-2.5 py-1 rounded flex items-center gap-1.5`}
+                            >
+                                <Check size={14} strokeWidth={2.5} />
+                                <span className="hidden sm:inline">Added</span>
+                            </motion.span>
+                        ) : (
+                            <span className={`text-xs font-medium ${themeClasses.addBtn} px-2 py-1 rounded`}>Add +</span>
+                        )}
                     </div>
                 </div>
             </div>
