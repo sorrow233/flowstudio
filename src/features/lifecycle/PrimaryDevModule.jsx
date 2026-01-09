@@ -75,20 +75,9 @@ const PrimaryDevModule = () => {
     const [newTaskInput, setNewTaskInput] = useState('');
     const [newTaskCategory, setNewTaskCategory] = useState('general');
     const [commandModalOpen, setCommandModalOpen] = useState(false);
-    const [availableCommands, setAvailableCommands] = useState([]);
 
-    // Load commands for sync check
-    useEffect(() => {
-        const loadCommands = () => {
-            const savedCmds = localStorage.getItem(STORAGE_KEYS.COMMANDS);
-            if (savedCmds) {
-                setAvailableCommands(JSON.parse(savedCmds));
-            }
-        };
-        loadCommands();
-        window.addEventListener('focus', loadCommands);
-        return () => window.removeEventListener('focus', loadCommands);
-    }, []);
+    // Sync: Load Commands
+    const { projects: availableCommands } = useSyncedProjects(doc, 'all_commands');
 
     // --- Graduation State ---
     const [showGraduationChecklist, setShowGraduationChecklist] = useState(false);

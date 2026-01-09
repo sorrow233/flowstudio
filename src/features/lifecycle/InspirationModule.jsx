@@ -15,6 +15,16 @@ const getNextAutoColorIndex = (totalCount) => {
     return groupIndex % COLOR_CONFIG.length;
 };
 
+// Hook for auto-resizing textarea
+const useAutoResizeTextArea = (ref, value) => {
+    useEffect(() => {
+        if (ref.current) {
+            ref.current.style.height = 'auto';
+            ref.current.style.height = ref.current.scrollHeight + 'px';
+        }
+    }, [ref, value]);
+};
+
 const InspirationModule = () => {
     // Sync
     const { doc } = useSync();
@@ -31,7 +41,7 @@ const InspirationModule = () => {
         allProjects.filter(p => (p.stage || 'inspiration') === 'inspiration'),
         [allProjects]);
 
-    // Fetch existing projects for tags from the same allProjects array
+    // Fetch existing projects for tags
     const primaryProjects = useMemo(() =>
         allProjects.filter(p => p.stage === 'primary'),
         [allProjects]);
@@ -43,10 +53,25 @@ const InspirationModule = () => {
     const [selectedColorIndex, setSelectedColorIndex] = useState(null);
     const [copiedId, setCopiedId] = useState(null);
     const [deletedIdeas, setDeletedIdeas] = useState([]);
-    const [scrollTop, setScrollTop] = useState(0);
     const textareaRef = useRef(null);
 
-    // Legacy Migration logic removed as it's now handled by useProjectMigration hook in SyncProvider
+    // Autocomplete State
+    const [showAutocomplete, setShowAutocomplete] = useState(false);
+    const [cursorPosition, setCursorPosition] = useState(0);
+    const [autocompleteQuery, setAutocompleteQuery] = useState('');
+    const [autocompleteIndex, setAutocompleteIndex] = useState(0);
+
+
+    // Use auto-resize hook
+    useAutoResizeTextArea(textareaRef, input);
+
+    // Combine and sort projects for tags (Memoized)
+    const allProjectTags = useMemo(() => {
+        return [...(primaryProjects || []), ...(pendingProjects || [])]
+            .map(p => p.title)
+            .filter(t => t && t.trim().length > 0)
+            .sort();
+    }, [primaryProjects, pendingProjects]);
 
     // Cleanup undo stack after 5s of inactivity
     useEffect(() => {
@@ -87,6 +112,8 @@ const InspirationModule = () => {
         };
         addIdea(newIdea);
         setInput('');
+        // Reset height
+        if (textareaRef.current) textareaRef.current.style.height = 'auto';
     };
 
     const handleUpdateColor = (id, newColorIndex) => {
@@ -130,15 +157,87 @@ const InspirationModule = () => {
     const handleTagClick = (projectTitle) => {
         const tag = `[${projectTitle}] `;
         setInput(prev => prev + tag);
-        // Focus textarea after tag click
         textareaRef.current?.focus();
     };
 
-    const handleTextareaScroll = (e) => {
-        setScrollTop(e.target.scrollTop);
+
+    // --- Autocomplete Logic ---
+    const handleInputChange = (e) => {
+        const newValue = e.target.value;
+        const newCursorPos = e.target.selectionStart;
+        setInput(newValue);
+        setCursorPosition(e.target.selectionStart);
+
+        // Check for trigger character '['
+        // logic: find the last occurrence of '[' before cursor
+        const textBeforeCursor = newValue.substring(0, newCursorPos);
+        const lastOpenBracketIndex = textBeforeCursor.lastIndexOf('[');
+
+        if (lastOpenBracketIndex !== -1) {
+            // Check if there is a closing bracket ']' after it before cursor
+            const textSinceBracket = textBeforeCursor.substring(lastOpenBracketIndex + 1);
+            if (!textSinceBracket.includes(']')) {
+                // We are inside a potential tag
+                setAutocompleteQuery(textSinceBracket);
+                setShowAutocomplete(true);
+                setAutocompleteIndex(0);
+                return;
+            }
+        }
+        setShowAutocomplete(false);
+    };
+
+    const filteredTags = useMemo(() => {
+        if (!autocompleteQuery) return allProjectTags;
+        return allProjectTags.filter(tag =>
+            tag.toLowerCase().includes(autocompleteQuery.toLowerCase())
+        );
+    }, [allProjectTags, autocompleteQuery]);
+
+    const insertTag = (tag) => {
+        // Find position of last '['
+        const textBeforeCursor = input.substring(0, cursorPosition);
+        const lastOpenBracketIndex = textBeforeCursor.lastIndexOf('[');
+        if (lastOpenBracketIndex !== -1) {
+            const textAfterCursor = input.substring(cursorPosition);
+            const newText = input.substring(0, lastOpenBracketIndex) + `[${tag}] ` + textAfterCursor;
+            setInput(newText);
+            setShowAutocomplete(false);
+            // Focus and set cursor
+            setTimeout(() => {
+                if (textareaRef.current) {
+                    textareaRef.current.focus();
+                    // Position after: [tag] + space
+                    const newPos = lastOpenBracketIndex + tag.length + 3; // +2 for [], +1 for space
+                    textareaRef.current.setSelectionRange(newPos, newPos);
+                }
+            }, 0);
+        }
     };
 
     const handleKeyDown = (e) => {
+        if (showAutocomplete && filteredTags.length > 0) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setAutocompleteIndex(prev => (prev + 1) % filteredTags.length);
+                return;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setAutocompleteIndex(prev => (prev - 1 + filteredTags.length) % filteredTags.length);
+                return;
+            }
+            if (e.key === 'Enter' || e.key === 'Tab') {
+                e.preventDefault();
+                insertTag(filteredTags[autocompleteIndex]);
+                return;
+            }
+            if (e.key === 'Escape') {
+                setShowAutocomplete(false);
+                return;
+            }
+        }
+
         // 1. Submit: Cmd+Enter or Ctrl+Enter
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
             e.preventDefault();
@@ -151,43 +250,21 @@ const InspirationModule = () => {
             const { selectionStart, selectionEnd } = textareaRef.current;
             if (selectionStart === selectionEnd) {
                 const textBefore = input.substring(0, selectionStart);
-                // Regex to check if we are right after a tag like [Tag] 
                 const tagMatch = textBefore.match(/\[[^\]\n]+\] $/); // Matches "[Tag] " at the end
                 if (tagMatch) {
                     const tagFull = tagMatch[0];
                     const newText = input.substring(0, selectionStart - tagFull.length) + input.substring(selectionEnd);
                     setInput(newText);
-                    // Move cursor back
                     setTimeout(() => {
                         textareaRef.current.setSelectionRange(selectionStart - tagFull.length, selectionStart - tagFull.length);
                     }, 0);
                     e.preventDefault();
-                } else {
-                    // Also check for tag without trailing space [Tag]|
-                    const tagMatchNoSpace = textBefore.match(/\[[^\]\n]+\]$/);
-                    if (tagMatchNoSpace) {
-                        const tagFull = tagMatchNoSpace[0];
-                        const newText = input.substring(0, selectionStart - tagFull.length) + input.substring(selectionEnd);
-                        setInput(newText);
-                        setTimeout(() => {
-                            textareaRef.current.setSelectionRange(selectionStart - tagFull.length, selectionStart - tagFull.length);
-                        }, 0);
-                        e.preventDefault();
-                    }
                 }
             }
         }
     };
 
-    // Combine and sort projects for tags (Memoized)
-    const allProjectTags = useMemo(() => {
-        return [...(primaryProjects || []), ...(pendingProjects || [])]
-            .map(p => p.title)
-            .filter(t => t && t.trim().length > 0)
-            .sort();
-    }, [primaryProjects, pendingProjects]);
-
-    // Sort ideas by timestamp (memoized to prevent mutation)
+    // Sort ideas by timestamp (memoized)
     const sortedIdeas = useMemo(() => {
         return [...ideas].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     }, [ideas]);
@@ -210,23 +287,59 @@ const InspirationModule = () => {
             </div>
 
             {/* Input Section */}
-            <div className="relative mb-20 group">
+            <div className="relative mb-20 group z-30">
                 <Spotlight className="rounded-2xl transition-all duration-300 focus-within:ring-1 focus-within:ring-pink-300 dark:focus-within:ring-pink-500 focus-within:shadow-[0_0_30px_-5px_rgba(244,114,182,0.4)]" spotColor="rgba(244, 114, 182, 0.12)">
                     <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 dark:from-gray-800 via-gray-50 dark:via-gray-900 to-gray-100 dark:to-gray-800 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                    <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] group-hover:border-gray-200 dark:group-hover:border-gray-700">
+                    <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 overflow-visible transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] group-hover:border-gray-200 dark:group-hover:border-gray-700">
 
                         {/* Rich Preview Layer */}
-                        <InputRichPreview text={input} scrollTop={scrollTop} />
+                        {/* Note: scrollTop is no longer needed with auto-grow, passing 0 */}
+                        <InputRichPreview text={input} scrollTop={0} />
 
                         <textarea
                             ref={textareaRef}
                             value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onScroll={handleTextareaScroll}
+                            onChange={handleInputChange}
                             onKeyDown={handleKeyDown}
                             placeholder={input ? '' : t('inspiration.placeholder')}
-                            className="w-full bg-transparent text-lg text-transparent caret-gray-800 dark:caret-gray-200 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed relative z-10"
+                            className="w-full bg-transparent text-lg text-transparent caret-gray-800 dark:caret-gray-200 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed relative z-10 overflow-hidden"
+                            style={{ fontFamily: 'inherit' }}
                         />
+
+                        {/* Autocomplete Popover */}
+                        <AnimatePresence>
+                            {showAutocomplete && filteredTags.length > 0 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    className="absolute left-6 z-50 bg-white dark:bg-gray-900 rounded-lg shadow-xl shadow-pink-100 dark:shadow-pink-900/10 border border-gray-100 dark:border-gray-800 p-1 min-w-[200px] max-h-[200px] overflow-y-auto"
+                                    style={{
+                                        top: 'auto', // Dynamic positioning would require more complex calc, ensuring it shows below input or "near cursor"
+                                        bottom: '80px' // Show above toolbar
+                                    }}
+                                >
+                                    <div className="px-2 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                        Link Project
+                                    </div>
+                                    {filteredTags.map((tag, index) => (
+                                        <button
+                                            key={tag}
+                                            onClick={() => insertTag(tag)}
+                                            className={`
+                                                w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center gap-2
+                                                ${index === autocompleteIndex
+                                                    ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-300'
+                                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}
+                                            `}
+                                        >
+                                            <Hash size={12} className="opacity-50" />
+                                            {tag}
+                                        </button>
+                                    ))}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
                         {/* Bottom Action Area */}
                         <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-4 z-20">
@@ -252,7 +365,7 @@ const InspirationModule = () => {
                                                 <button
                                                     key={tag}
                                                     onClick={() => handleTagClick(tag)}
-                                                    className="flex-shrink-0 px-3 py-1 bg-pink-50/50 dark:bg-pink-900/20 hover:bg-pink-100/50 dark:hover:bg-pink-800/40 text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 rounded-full text-[11px] font-medium transition-all duration-300 border border-pink-100/50 dark:border-pink-800/30 hover:border-pink-200 dark:hover:border-pink-700/50 whitespace-nowrap shadow-sm hover:shadow-[0_0_15px_rgba(244,114,182,0.4)] hover:scale-105"
+                                                    className="flex-shrink-0 px-2 py-1 bg-gray-50 dark:bg-gray-800 hover:bg-pink-50 dark:hover:bg-pink-900/20 text-gray-500 hover:text-pink-600 dark:text-gray-400 dark:hover:text-pink-400 rounded-md text-[11px] font-medium transition-all duration-300 border border-transparent hover:border-pink-100 dark:hover:border-pink-800/30 whitespace-nowrap"
                                                 >
                                                     {tag}
                                                 </button>

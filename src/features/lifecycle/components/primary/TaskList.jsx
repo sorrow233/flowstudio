@@ -206,11 +206,17 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
     };
     const theme = THEME_STYLES[themeColor] || THEME_STYLES.purple;
 
-    // Use passed themeColor for activeTheme unless strictly needed for stage-specifics.
-    // Ideally we want the UI frame to follow the module theme (Red for Advanced), 
-    // even if the stage concept inside has its own color.
-    // For consistency with User request "Advanced Module = Red", we force the themeColor passed down.
-    const activeTheme = themeColor; // Override STAGE_THEMES logic for the generic UI items
+    // Stage Themes Mapping (Restored for Task Content)
+    const STAGE_THEMES = {
+        1: 'purple',
+        2: 'blue',
+        3: 'violet',
+        4: 'amber',
+        5: 'rose',
+        6: 'purple'
+    };
+    // Active theme for CONTENT (Task Items) should follow the stage color
+    const activeTheme = STAGE_THEMES[activeStage] || 'purple';
 
 
     const handleCopy = (id, content) => {

@@ -74,16 +74,19 @@ export const parseRichText = (text) => {
         if (part.startsWith('[') && part.endsWith(']')) {
             const tagName = part.slice(1, -1);
             return (
+            return (
                 <span
                     key={index}
-                    className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-pink-50/50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 rounded-md text-[11px] font-medium align-middle border border-pink-100/50 dark:border-pink-800/30 shadow-sm transform -translate-y-0.5"
+                    className="inline-flex items-center px-1.5 py-0.5 mx-1 first:ml-0 bg-pink-100/50 dark:bg-pink-500/20 text-pink-600 dark:text-pink-300 rounded-[6px] text-[0.9em] font-normal align-baseline border border-pink-200/50 dark:border-pink-500/30 shadow-[0_1px_2px_rgba(244,114,182,0.1)] select-none transform translate-y-[-1px]"
                 >
+                    <span className="opacity-50 mr-0.5">#</span>
                     {tagName}
                 </span>
             );
-        }
-        // Plain text
-        return <span key={index}>{part}</span>;
+            );
+}
+// Plain text
+return <span key={index}>{part}</span>;
     });
 };
 

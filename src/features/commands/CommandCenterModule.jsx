@@ -16,78 +16,81 @@ import { useTranslation } from '../i18n';
 
 
 const CommandCenterModule = () => {
-    const [commands, setCommands] = useState([]);
-    const [activeStage, setActiveStage] = useState(1);
-    const [selectedCategory, setSelectedCategory] = useState('general'); // Category Filter
-    const [isAdding, setIsAdding] = useState(false);
-    const [isImporting, setIsImporting] = useState(false);
-    const [isCommunityBrowsing, setIsCommunityBrowsing] = useState(false);
-    const [sharingCommand, setSharingCommand] = useState(null);
-    const [search, setSearch] = useState('');
-    const [copiedId, setCopiedId] = useState(null);
+    const { doc } = useSync();
 
-    const { t } = useTranslation();
+    // Sync: Commands
+    const {
+        projects: commands,
+        addProject: addCommand,
+        updateProject: updateCommand,
+        removeProject: deleteCommand
+    } = useSyncedProjects(doc, 'all_commands');
 
-    // Form State
-    const [newCmd, setNewCmd] = useState({ title: '', content: '', type: 'utility', url: '', tags: [], category: 'general' });
-    const [newTag, setNewTag] = useState({ label: '', value: '' });
-    const [editingTagId, setEditingTagId] = useState(null); // Track which tag is being edited
+    // Sync: Categories
+    const {
+        projects: syncedCategories,
+        addProject: addCategory,
+        updateProject: updateCat
+    } = useSyncedProjects(doc, 'command_categories');
 
-    // Category State (with custom names)
-    const [categories, setCategories] = useState(COMMAND_CATEGORIES);
-    // Custom Rename Modal State
-    const [renamingCategory, setRenamingCategory] = useState(null); // { id, currentName, color }
-    const [renameValue, setRenameValue] = useState('');
+    // Merge default categories with synced custom categories
+    // We treat 'command_categories' not as a full replacement, but as where we store CUSTOM modifications or entirely new ones.
+    // However, to keep it simple, we can just sync the entire category list.
+    // If syncedCategories is empty, we use defaults.
+    const categories = syncedCategories.length > 0 ? syncedCategories : COMMAND_CATEGORIES;
 
-
-
-    // Initial Load of Categories from localStorage
+    // DATA MIGRATION: LocalStorage -> Sync
     useEffect(() => {
-        const savedCats = localStorage.getItem('flowstudio_categories_custom');
-        if (savedCats) {
-            const parsedCats = JSON.parse(savedCats);
-            // MERGE LOGIC: Keep custom labels, but enforce new system colors/icons
-            const mergedCats = COMMAND_CATEGORIES.map(defaultCat => {
-                const userCat = parsedCats.find(pc => pc.id === defaultCat.id);
-                return userCat ? { ...defaultCat, label: userCat.label } : defaultCat;
-            });
-            setCategories(mergedCats);
+        if (!doc) return;
+
+        // Migrate Commands
+        const localCmds = localStorage.getItem(STORAGE_KEYS.COMMANDS);
+        if (localCmds && commands.length === 0) {
+            try {
+                const parsed = JSON.parse(localCmds);
+                console.info('[CommandCenter] Migrating commands from localStorage to Sync...');
+                parsed.forEach(cmd => {
+                    // Ensure basic fields
+                    const migratedCmd = {
+                        ...cmd,
+                        stageIds: cmd.stageIds || (cmd.stageId ? [cmd.stageId] : []),
+                        tags: cmd.tags || [],
+                        category: cmd.category || 'general'
+                    };
+                    addCommand(migratedCmd);
+                });
+                // Optional: Clear local storage after successful migration? 
+                // localStorage.removeItem(STORAGE_KEYS.COMMANDS);
+            } catch (e) {
+                console.error('Migration failed:', e);
+            }
         }
-    }, []);
 
-    // Save Categories when changed
-    const updateCategoryName = (id, newName) => {
-        const updated = categories.map(c => c.id === id ? { ...c, label: newName } : c);
-        setCategories(updated);
-        localStorage.setItem('flowstudio_categories_custom', JSON.stringify(updated));
-    };
-
-    useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEYS.COMMANDS);
-        if (saved) {
-            let parsed = JSON.parse(saved);
-
-            // DATA MIGRATION: Ensure all commands have stageIds array
-            const migrated = parsed.map(c => {
-                let updated = { ...c };
-                if (!updated.stageIds) {
-                    updated.stageIds = updated.stageId ? [updated.stageId] : [];
-                }
-                if (!updated.tags) {
-                    updated.tags = [];
-                }
-                if (!updated.category) {
-                    updated.category = 'general';
-                }
-                return updated;
-            });
-            setCommands(migrated);
+        // Migrate Categories
+        const localCats = localStorage.getItem('flowstudio_categories_custom');
+        if (localCats && syncedCategories.length === 0) {
+            try {
+                const parsed = JSON.parse(localCats);
+                console.info('[CommandCenter] Migrating categories from localStorage to Sync...');
+                parsed.forEach(cat => {
+                    addCategory(cat);
+                });
+            } catch (e) {
+                console.error('Category migration failed:', e);
+            }
+        } else if (!localCats && syncedCategories.length === 0) {
+            // If completely fresh, seed with defaults to Sync so they are editable globally
+            // Or we can just leave them empty and fall back to COMMAND_CATEGORIES.
+            // But if user wants to rename "General", we need it in Sync.
+            // Let's seed defaults into Sync if it's empty to allow renaming.
+            // Check if we have effectively "connected" (maybe wait a sec? SyncEngine handles this)
+            // For now, let's just stick to migrating if LocalStorage exists.
         }
-    }, []);
 
-    useEffect(() => {
-        localStorage.setItem(STORAGE_KEYS.COMMANDS, JSON.stringify(commands));
-    }, [commands]);
+    }, [doc, commands.length, syncedCategories.length]);
+
+    // No longer writing to localStorage effects
+
 
     const handleAdd = () => {
         if (!newCmd.title.trim()) return;
