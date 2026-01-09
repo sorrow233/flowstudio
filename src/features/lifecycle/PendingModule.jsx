@@ -110,12 +110,17 @@ const PendingModule = () => {
     };
 
     const handleDelete = (e, id) => {
-        e.stopPropagation();
+        if (e) e.stopPropagation();
         openConfirm({
-            title: '删除想法',
-            message: '确定要放弃这颗种子吗？',
-            confirmText: '删除',
-            onConfirm: () => deleteProject(id)
+            title: '移除这颗种子？',
+            message: '此操作无法撤销。这颗种子将回归虚无，等待下一次灵感的迸发。',
+            confirmText: '移除',
+            icon: TreePine,
+            variant: 'danger',
+            onConfirm: () => {
+                deleteProject(id);
+                setManagingProject(null);
+            }
         });
     }
 
@@ -279,6 +284,7 @@ const PendingModule = () => {
                                             key={p.id}
                                             layoutId={`nursery-${p.id}`}
                                             onDoubleClick={() => setManagingProject(p)}
+                                            title="双击进行管理 (Double click to manage)"
                                             className={`
                                                 snap-start relative overflow-hidden group transition-all duration-500 cursor-default select-none
                                                 flex flex-col text-center
@@ -399,7 +405,7 @@ const PendingModule = () => {
                 project={managingProject}
                 isOpen={!!managingProject}
                 onClose={() => setManagingProject(null)}
-                onDelete={deleteProject}
+                onDelete={(id) => handleDelete(null, id)}
             />
             <ConfirmDialogComponent />
         </div>
