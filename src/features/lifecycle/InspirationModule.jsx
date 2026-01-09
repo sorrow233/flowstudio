@@ -369,15 +369,16 @@ const InspirationModule = () => {
                     />
 
                     {/* Bottom Action Area */}
-                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-4 flex-1 min-w-0">
                             {/* Minimal Color Picker */}
-                            <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50/50 dark:bg-gray-800/50 rounded-full border border-gray-100/50 dark:border-gray-700/50 backdrop-blur-sm">
+                            <div className="flex items-center gap-1.5 px-2 py-1.5 bg-gray-50/50 dark:bg-gray-800/50 rounded-full border border-gray-100/50 dark:border-gray-700/50 backdrop-blur-sm flex-shrink-0">
                                 {COLOR_CONFIG.map((conf, index) => (
                                     <button
                                         key={conf.id}
                                         onClick={() => setSelectedColorIndex(index)}
                                         className={`w-3 h-3 rounded-full transition-all duration-300 ${conf.dot} ${index === selectedColorIndex ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 ring-gray-400 dark:ring-gray-500 scale-110' : 'opacity-40 hover:opacity-100 hover:scale-110'}`}
+                                        title={conf.id}
                                     />
                                 ))}
                             </div>
@@ -399,19 +400,19 @@ const InspirationModule = () => {
                                     </>
                                 )}
                             </div>
+                        </div>
 
-                            <div className="flex items-center gap-3 flex-shrink-0">
-                                <span className="text-[10px] text-gray-300 dark:text-gray-600 font-mono hidden md:inline-block">
-                                    {t('inspiration.cmdEnter')}
-                                </span>
-                                <button
-                                    onClick={handleAdd}
-                                    disabled={!input.trim()}
-                                    className="flex items-center justify-center p-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl hover:bg-black dark:hover:bg-gray-100 disabled:opacity-30 transition-all duration-300 active:scale-95 shadow-lg shadow-gray-200 dark:shadow-gray-900"
-                                >
-                                    <ArrowRight size={18} strokeWidth={2} />
-                                </button>
-                            </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                            <span className="text-[10px] text-gray-300 dark:text-gray-600 font-mono hidden md:inline-block">
+                                {t('inspiration.cmdEnter')}
+                            </span>
+                            <button
+                                onClick={handleAdd}
+                                disabled={!input.trim()}
+                                className="flex items-center justify-center p-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl hover:bg-black dark:hover:bg-gray-100 disabled:opacity-30 transition-all duration-300 active:scale-95 shadow-lg shadow-gray-200 dark:shadow-gray-900"
+                            >
+                                <ArrowRight size={18} strokeWidth={2} />
+                            </button>
                         </div>
                     </div>
                 </div>
