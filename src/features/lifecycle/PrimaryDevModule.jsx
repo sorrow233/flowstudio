@@ -64,7 +64,7 @@ const PrimaryDevModule = () => {
     const [selectedProject, setSelectedProject] = useState(null);
 
     // --- UI/Interaction State ---
-    const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+    const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(true);
     const [viewStage, setViewStage] = useState(1);
 
     // --- Edit Mode State ---
@@ -85,6 +85,7 @@ const PrimaryDevModule = () => {
 
     // --- Scroll Handling Ref ---
     const taskListRef = useRef(null);
+    const hasScrolledDown = useRef(false);
 
     const handleHeaderWheel = (e) => {
         if (taskListRef.current) {
@@ -99,7 +100,7 @@ const PrimaryDevModule = () => {
         { id: 'ready', label: 'Am I ready to leave the nursery and face the real world?' }
     ];
 
-    // Sync selectedProject with latest data
+    // Sync selectedProject with latest data and reset scroll state
     useEffect(() => {
         if (selectedProject) {
             const current = projects.find(p => p.id === selectedProject.id);
@@ -109,7 +110,9 @@ const PrimaryDevModule = () => {
                 setSelectedProject(null);
             }
         }
-    }, [projects]);
+        // Reset scroll tracking when closing/switching projects
+        hasScrolledDown.current = false;
+    }, [selectedProject?.id, projects]);
 
     // When opening a project, set view to current progress
     const handleSelectProject = (project) => {
@@ -129,7 +132,6 @@ const PrimaryDevModule = () => {
 
     // --- Project Filtering ---
     const activeProjects = projects;
-    const finalProjects = []; // No longer showing graduated projects in Primary dashboard
 
 
     // --- Project Handlers ---
@@ -251,7 +253,7 @@ const PrimaryDevModule = () => {
     };
 
     // --- Graduation Logic ---
-    const handleGraduateToFinal = () => {
+    const handleGraduateToAdvanced = () => {
         if (!allPillarsChecked) return;
 
         // Trigger Confetti
@@ -273,7 +275,7 @@ const PrimaryDevModule = () => {
             setShowGraduationChecklist(false);
             setGraduationChecks({}); // Reset
 
-            // Navigate to Final Module for setup
+            // Navigate to Advanced Module for setup
             navigate('/advanced', { state: { projectId: selectedProject.id } });
 
             setSelectedProject(null);
@@ -440,45 +442,7 @@ const PrimaryDevModule = () => {
             </div>
 
 
-            {/* Final / Graduated Section */}
-            {
-                finalProjects.length > 0 && (
-                    <div className="mt-20 border-t border-gray-100 pt-10">
-                        <div className="mb-8 flex items-center gap-3">
-                            <div className="p-2 bg-emerald-50 rounded-lg text-emerald-500">
-                                <Trophy size={20} />
-                            </div>
-                            <h3 className="text-xl font-light text-gray-900 tracking-tight">Final Development</h3>
-                            <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">{finalProjects.length}</span>
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {finalProjects.map((project) => (
-                                <motion.div
-                                    key={project.id}
-                                    layoutId={`primary-card-${project.id}`} // Keep animation
-                                    onClick={() => handleSelectProject(project)}
-                                    className="group bg-white dark:bg-gray-900 border border-amber-100/50 dark:border-amber-900/30 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-amber-100/50 dark:hover:shadow-amber-900/20 transition-all cursor-pointer relative h-[300px] flex flex-col opacity-80 hover:opacity-100"
-                                >
-                                    <Spotlight className="w-full h-full" spotColor="rgba(251, 191, 36, 0.15)">
-                                        <div className="absolute inset-0 z-0 h-32 bg-amber-50/30">
-                                            {project.bgImage && <img src={project.bgImage} className="w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 transition-all" />}
-                                        </div>
-                                        <div className="p-8 relative z-10 flex flex-col h-full mt-16">
-                                            <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-1">{project.title}</h3>
-                                            <div className="flex items-center gap-2 text-amber-600 text-xs font-bold uppercase tracking-widest mb-4">
-                                                <Star size={12} fill="currentColor" />
-                                                <span>Advanced Phase</span>
-                                            </div>
-                                            <p className="text-sm text-gray-400 line-clamp-2">{project.desc}</p>
-                                        </div>
-                                    </Spotlight>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
-                )
-            }
 
 
             {/* Project Workspace Modal */}
@@ -514,7 +478,6 @@ const PrimaryDevModule = () => {
 
                             <div
                                 className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30 dark:bg-gray-950/50"
-                                onClick={() => !isHeaderCollapsed && setIsHeaderCollapsed(true)}
                             >
                                 {/* Left Sidebar: Stage Navigation */}
                                 <StageNavigation
@@ -559,8 +522,12 @@ const PrimaryDevModule = () => {
                                         availableCommands={availableCommands}
                                         onScroll={(e) => {
                                             const scrollTop = e.currentTarget.scrollTop;
-                                            if (scrollTop > 10 && !isHeaderCollapsed) {
+                                            if (scrollTop > 50) hasScrolledDown.current = true;
+
+                                            if (scrollTop > 20 && !isHeaderCollapsed) {
                                                 setIsHeaderCollapsed(true);
+                                            } else if (scrollTop <= 5 && isHeaderCollapsed && hasScrolledDown.current) {
+                                                setIsHeaderCollapsed(false);
                                             }
                                         }}
                                     />
@@ -637,7 +604,7 @@ const PrimaryDevModule = () => {
 
                                             <div className="flex justify-center">
                                                 <button
-                                                    onClick={handleGraduateToFinal}
+                                                    onClick={handleGraduateToAdvanced}
                                                     disabled={!allPillarsChecked}
                                                     className={`
                                                         px-12 py-5 rounded-2xl font-bold text-sm uppercase tracking-[0.2em] transition-all duration-500 flex items-center gap-3

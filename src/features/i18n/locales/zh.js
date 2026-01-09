@@ -6,7 +6,6 @@ export default {
         pending: '萌芽',
         primary: '开发',
         advanced: '进阶',
-        final: '模块',
         commercial: '商业化',
         command: '蓝图',
         cloudSync: '云同步',
@@ -47,7 +46,7 @@ export default {
         cmdEnter: 'CMD + ENTER',
     },
 
-    // 待定模块 (Renamed to Sprouting/萌芽)
+    // 待定模块
     pending: {
         title: '萌芽',
         subtitle: '静待生长的项目构思',
@@ -68,30 +67,20 @@ export default {
         addTask: '添加任务',
     },
 
-    // 进阶优化 (原终稿)
+    // 进阶优化
     advanced: {
-        title: '进阶优化',
-        subtitle: '核心功能之外的深度性能优化与体验打磨',
+        title: '进阶空间',
+        subtitle: '设计自定义流程与高级架构。',
         emptyState: '暂无进阶项目',
-        stageOptimization: '底层优化',
-        stageNewModule: '模块演进',
-        stageBugFix: '深度修复',
         createProject: '新建项目',
         projectName: '项目名称...',
         create: '创建',
         total: '总计',
         noProjectsTitle: '暂无进阶项目',
-        noProjectsDesc: '创建项目以开始优化与功能完善',
+        noProjectsDesc: '创建项目以开始自定义架构流程',
         createFirst: '+ 创建首个项目',
-        newProjectDefaultTitle: '新的进阶优化项目',
-        newProjectDefaultDesc: '优化、功能与修复',
-    },
-
-    // 模块 (原终稿/进阶)
-    final: {
-        title: '模块',
-        subtitle: '全局查看并管理项目功能模块',
-        emptyState: '暂无模块',
+        newProjectDefaultTitle: '新的进阶项目',
+        newProjectDefaultDesc: '自定义工作流',
     },
 
     // 商业化模块
@@ -202,7 +191,6 @@ export default {
             unlocked: '增长引擎已激活',
             unlockedDesc: '您可以随时重新生成指令以更新配置。',
         }
-
     },
 
     // 命令中心
@@ -242,7 +230,7 @@ export default {
         },
         2: {
             label: '功能',
-            title: '核心逻辑',
+            title: '核心 logic',
             desc: '实现主要业务逻辑、数据流和状态管理',
         },
         3: {
@@ -259,25 +247,6 @@ export default {
             label: '完成',
             title: '生产就绪',
             desc: '最终QA、构建验证和生产环境部署',
-        },
-    },
-
-    // 终稿阶段（3阶段）
-    finalStages: {
-        1: {
-            label: '优化',
-            title: '模块优化',
-            desc: '分析现有实现、识别瓶颈、优化代码以提升性能和可读性',
-        },
-        2: {
-            label: '新模块',
-            title: '功能追加',
-            desc: '规划并实现新模块或功能，确保与现有系统无缝集成',
-        },
-        3: {
-            label: '修复',
-            title: '缺陷解决',
-            desc: '识别、复现并解决报告的Bug，确保系统稳定性和可靠性',
         },
     },
 
@@ -313,7 +282,6 @@ export default {
         database: '数据库',
         devops: 'DevOps',
         testing: '测试',
-        final: '终稿',
     },
 
     // 灵魂四问

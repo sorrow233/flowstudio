@@ -197,19 +197,24 @@ const CommandCenterModule = () => {
         setTimeout(() => setCopiedId(null), 2000);
     };
 
-    const handleReorder = (reorderedVisibleCommands) => {
-        if (!doc) return;
+    const handleReorder = (reorderedIds) => {
+        if (!doc || !reorderedIds || reorderedIds.length === 0) return;
+
         doc.transact(() => {
-            reorderedVisibleCommands.forEach((cmd, index) => {
-                updateCommand(cmd.id, { order: index });
+            // Map the new order back to the original commands
+            // We give them safe, sequential order indices
+            reorderedIds.forEach((id, index) => {
+                updateCommand(id, { order: index });
             });
         });
     };
 
     // Filter commands for current stage
-    const stageCommands = commands.filter(c =>
-        c.stageIds?.includes(activeStage)
-    );
+    const stageCommands = useMemo(() => {
+        return commands
+            .filter(c => c.stageIds?.includes(activeStage))
+            .sort((a, b) => (a.order || 0) - (b.order || 0));
+    }, [commands, activeStage]);
 
     // For Import Modal: Commands from ANY stage but current
     const importableCommands = commands.filter(c =>
