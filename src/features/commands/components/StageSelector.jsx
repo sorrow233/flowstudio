@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Layers, MonitorPlay, Bug, Lightbulb, Flag, Terminal } from 'lucide-react';
+import { Layers, MonitorPlay, Bug, Lightbulb, Flag, Terminal, Gem } from 'lucide-react';
 import { DEV_STAGES } from '../../../utils/constants';
 
 const STAGE_ICONS = {
@@ -8,7 +8,8 @@ const STAGE_ICONS = {
     2: MonitorPlay,
     3: Bug,
     4: Lightbulb,
-    5: Flag
+    5: Flag,
+    6: Gem  // Commercial stage
 };
 
 const STAGE_THEMES = {
@@ -17,6 +18,7 @@ const STAGE_THEMES = {
     3: 'bg-violet-500 text-white shadow-violet-200',
     4: 'bg-amber-500 text-white shadow-amber-200',
     5: 'bg-rose-500 text-white shadow-rose-200',
+    6: 'bg-yellow-500 text-white shadow-yellow-200',  // Commercial stage
 };
 
 const StageSelector = ({ activeStage, setActiveStage, commands }) => {
