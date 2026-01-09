@@ -18,13 +18,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
         <BrowserRouter>
             <AuthProvider>
-                <ThemeProvider>
-                    <SettingsProvider>
-                        <SyncProvider>
+                <SyncProvider>
+                    <ThemeProvider>
+                        <SettingsProvider>
                             <App />
-                        </SyncProvider>
-                    </SettingsProvider>
-                </ThemeProvider>
+                        </SettingsProvider>
+                    </ThemeProvider>
+                </SyncProvider>
             </AuthProvider>
         </BrowserRouter>
     </React.StrictMode>,

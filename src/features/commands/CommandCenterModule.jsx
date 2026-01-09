@@ -37,7 +37,20 @@ const CommandCenterModule = () => {
     } = useSyncedProjects(doc, 'command_categories');
 
     // Merge default categories with synced custom categories
-    const categories = syncedCategories.length > 0 ? syncedCategories : COMMAND_CATEGORIES;
+    // Robustly merge: Use default config as base (for colors/icons) and overlay synced data (for renamed labels)
+    // Always ensure all default categories exist, plus any extra custom ones from sync
+    const categories = React.useMemo(() => {
+        // 1. Map over defaults and override with synced data if present
+        const mergedDefaults = COMMAND_CATEGORIES.map(defaultCat => {
+            const syncedCat = syncedCategories.find(sc => sc.id === defaultCat.id);
+            return syncedCat ? { ...defaultCat, ...syncedCat } : defaultCat;
+        });
+
+        // 2. Find any synced categories that are NOT in defaults (purely custom)
+        const customSynced = syncedCategories.filter(sc => !COMMAND_CATEGORIES.some(dc => dc.id === sc.id));
+
+        return [...mergedDefaults, ...customSynced];
+    }, [syncedCategories]);
 
     // --- UI State ---
     const [activeStage, setActiveStage] = useState(1);
@@ -371,7 +384,7 @@ const CommandCenterModule = () => {
                                         className="px-3 py-1.5 rounded-full bg-white dark:bg-gray-900 text-xs font-bold text-gray-700 dark:text-gray-200 shadow-sm shrink-0 border border-gray-100 dark:border-gray-700 flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors select-none"
                                         title={t('commands.renameHint') || "Double click to rename"}
                                     >
-                                        <div className={`w-2 h-2 rounded-full ${categories.find(c => c.id === selectedCategory)?.color.split(' ')[0].replace('bg-', 'bg-')}`} />
+                                        <div className={`w-2 h-2 rounded-full ${categories.find(c => c.id === selectedCategory)?.color?.split(' ')[0] || 'bg-gray-400'}`} />
                                         {categories.find(c => c.id === selectedCategory)?.label || 'Category'}
                                     </div>
                                     <div className="w-px h-4 bg-gray-300/50 mx-1" />
@@ -392,7 +405,7 @@ const CommandCenterModule = () => {
                                                         : 'hover:bg-white/50 dark:hover:bg-gray-700/50 hover:scale-105'}
                                             `}
                                             >
-                                                <div className={`w-3 h-3 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')} ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-transparent' : ''}`} />
+                                                <div className={`w-3 h-3 rounded-full ${cat.color?.split(' ')[0] || 'bg-gray-400'} ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-transparent' : ''}`} />
                                             </button>
                                         </div>
                                     ))}

@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useSync } from '../features/sync/SyncContext';
+import { useSyncedMap } from '../features/sync/useSyncStore';
 
 const STORAGE_KEY = 'flow_settings_advanced';
 
@@ -13,17 +15,42 @@ export const useSettings = () => {
 };
 
 export const SettingsProvider = ({ children }) => {
-    const [showAdvancedFeatures, setShowAdvancedFeatures] = useState(() => {
+    // Sync
+    const { doc } = useSync();
+    const { data: preferences, set } = useSyncedMap(doc, 'user_preferences');
+
+    // Local state as fallback/optimistic
+    const [localShow, setLocalShow] = useState(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
         return saved ? JSON.parse(saved) : false;
     });
 
+    // Determine effective value: Sync takes precedence if available
+    const showAdvancedFeatures = preferences?.showAdvancedFeatures ?? localShow;
+
+    // Sync from cloud to local
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(showAdvancedFeatures));
-    }, [showAdvancedFeatures]);
+        if (preferences?.showAdvancedFeatures !== undefined) {
+            setLocalShow(preferences.showAdvancedFeatures);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences.showAdvancedFeatures));
+        }
+    }, [preferences?.showAdvancedFeatures]);
 
     const toggleAdvancedFeatures = () => {
-        setShowAdvancedFeatures(prev => !prev);
+        const newValue = !showAdvancedFeatures;
+        setLocalShow(newValue);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newValue));
+        if (doc) {
+            set('showAdvancedFeatures', newValue);
+        }
+    };
+
+    const setShowAdvancedFeatures = (value) => {
+        setLocalShow(value);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+        if (doc) {
+            set('showAdvancedFeatures', value);
+        }
     };
 
     const value = {
