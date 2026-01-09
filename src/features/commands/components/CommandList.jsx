@@ -189,17 +189,17 @@ const CommandList = ({
                 ) : (
                     !isAdding && !isImporting && (
                         <div className="flex flex-col items-center justify-center py-32 text-center select-none">
-                            <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 animate-pulse">
-                                <Terminal size={32} className="text-gray-300" />
+                            <div className="w-24 h-24 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                                <Terminal size={32} className="text-gray-300 dark:text-gray-600" />
                             </div>
-                            <h4 className="text-lg font-medium text-gray-900 mb-2">No Commands Configured</h4>
-                            <p className="text-gray-400 max-w-sm mx-auto mb-8">
+                            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Commands Configured</h4>
+                            <p className="text-gray-400 dark:text-gray-500 max-w-sm mx-auto mb-8">
                                 Stage {activeStage} is waiting for orders.
                             </p>
                             <div className="flex gap-4">
                                 <button
                                     onClick={() => setIsImporting(true)}
-                                    className="text-gray-500 font-medium hover:text-gray-700 flex items-center gap-2 hover:gap-3 transition-all"
+                                    className="text-gray-500 dark:text-gray-400 font-medium hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-2 hover:gap-3 transition-all"
                                 >
                                     <Library size={16} /> Open Library
                                 </button>
@@ -208,7 +208,7 @@ const CommandList = ({
                                         setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [], category: 'general' });
                                         setIsAdding(true);
                                     }}
-                                    className="text-emerald-600 font-medium hover:text-emerald-700 flex items-center gap-2 hover:gap-3 transition-all"
+                                    className="text-emerald-600 dark:text-emerald-500 font-medium hover:text-emerald-700 dark:hover:text-emerald-400 flex items-center gap-2 hover:gap-3 transition-all"
                                 >
                                     Create Command <ChevronRight size={16} />
                                 </button>

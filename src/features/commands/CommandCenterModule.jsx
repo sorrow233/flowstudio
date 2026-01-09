@@ -274,8 +274,8 @@ const CommandCenterModule = () => {
     return (
         <div className="max-w-7xl mx-auto pt-8 px-4 md:px-6 h-full md:h-[calc(100vh-4rem)] flex flex-col md:flex-row gap-4 md:gap-8">
             {/* Ambient Background */}
-            <div className="fixed inset-0 -z-10 bg-gray-50/50 pointer-events-none" />
-            <div className="fixed top-0 left-0 w-full h-96 bg-gradient-to-b from-gray-100 to-transparent -z-10 opacity-50" />
+            <div className="fixed inset-0 -z-10 bg-gray-50/50 dark:bg-gray-950 pointer-events-none" />
+            <div className="fixed top-0 left-0 w-full h-96 bg-gradient-to-b from-gray-100 to-transparent dark:from-gray-900 dark:to-transparent -z-10 opacity-50" />
 
             {/* Sidebar / Stage Select */}
             <StageSelector
@@ -286,7 +286,7 @@ const CommandCenterModule = () => {
             />
 
             {/* Main Content */}
-            <div className="flex-1 bg-white/80 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-4 md:p-10 shadow-2xl shadow-gray-200/50 flex flex-col relative overflow-hidden ring-1 ring-gray-100/50">
+            <div className="flex-1 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-white/20 dark:border-gray-800 rounded-[2.5rem] p-4 md:p-10 shadow-2xl shadow-gray-200/50 dark:shadow-none flex flex-col relative overflow-hidden ring-1 ring-gray-100/50 dark:ring-gray-800">
                 {/* Decorative Elements */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-50/50 to-transparent blur-3xl -z-10 pointer-events-none" />
 
@@ -308,7 +308,7 @@ const CommandCenterModule = () => {
                             {/* Community Button */}
                             <button
                                 onClick={() => setIsCommunityBrowsing(true)}
-                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-100 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
                                 title={t('commands.browseCommunity')}
                             >
                                 <Globe2 size={18} />
@@ -318,7 +318,7 @@ const CommandCenterModule = () => {
                             {/* Import Button */}
                             <button
                                 onClick={() => setIsImporting(true)}
-                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-white text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
                                 title={t('commands.importFromLibrary')}
                             >
                                 <Library size={18} />
@@ -333,7 +333,7 @@ const CommandCenterModule = () => {
                                     setEditingTagId(null);
                                     setIsAdding(true);
                                 }}
-                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 md:gap-3 p-3 md:px-6 md:py-3 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap min-w-[3.5rem]"
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 md:gap-3 p-3 md:px-6 md:py-3 bg-gray-900 dark:bg-emerald-600 text-white rounded-2xl hover:bg-black dark:hover:bg-emerald-500 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap min-w-[3.5rem]"
                             >
                                 <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
                                 <span className="font-medium tracking-wide">{t('commands.newCommand')}</span>
@@ -345,7 +345,7 @@ const CommandCenterModule = () => {
 
                                 {/* Category Filter Pills - Dot Ribbon */}
 
-                                <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full overflow-x-auto no-scrollbar scrollbar-hide flex-1 md:flex-none md:max-w-[300px] xl:max-w-none shadow-inner border border-gray-200/50">
+                                <div className="flex items-center gap-2 p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-x-auto no-scrollbar scrollbar-hide flex-1 md:flex-none md:max-w-[300px] xl:max-w-none shadow-inner border border-gray-200/50 dark:border-gray-700">
                                     {/* Category Label */}
                                     <div
                                         onDoubleClick={() => {
@@ -355,7 +355,7 @@ const CommandCenterModule = () => {
                                                 setRenameValue(cat.label);
                                             }
                                         }}
-                                        className="px-3 py-1.5 rounded-full bg-white text-xs font-bold text-gray-700 shadow-sm shrink-0 border border-gray-100 flex items-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors select-none"
+                                        className="px-3 py-1.5 rounded-full bg-white dark:bg-gray-900 text-xs font-bold text-gray-700 dark:text-gray-200 shadow-sm shrink-0 border border-gray-100 dark:border-gray-700 flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors select-none"
                                         title={t('commands.renameHint') || "Double click to rename"}
                                     >
                                         <div className={`w-2 h-2 rounded-full ${categories.find(c => c.id === selectedCategory)?.color.split(' ')[0].replace('bg-', 'bg-')}`} />
@@ -375,8 +375,8 @@ const CommandCenterModule = () => {
                                                 className={`
                                                 w-8 h-8 flex items-center justify-center rounded-full transition-all shrink-0 relative
                                                 ${selectedCategory === cat.id
-                                                        ? 'bg-white shadow-md scale-110 z-10 ring-2 ring-gray-100'
-                                                        : 'hover:bg-white/50 hover:scale-105'}
+                                                        ? 'bg-white dark:bg-gray-900 shadow-md scale-110 z-10 ring-2 ring-gray-100 dark:ring-gray-700'
+                                                        : 'hover:bg-white/50 dark:hover:bg-gray-700/50 hover:scale-105'}
                                             `}
                                             >
                                                 <div className={`w-3 h-3 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')} ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-transparent' : ''}`} />
@@ -391,7 +391,7 @@ const CommandCenterModule = () => {
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
                                         placeholder={t('common.search')}
-                                        className="pl-9 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white rounded-full text-sm border border-transparent hover:border-gray-200 focus:border-emerald-200 outline-none w-10 focus:w-40 md:focus:w-60 transition-all shadow-inner placeholder:text-transparent focus:placeholder:text-gray-300 cursor-pointer focus:cursor-text"
+                                        className="pl-9 pr-4 py-2.5 bg-gray-50/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 focus:bg-white dark:focus:bg-gray-800 rounded-full text-sm text-gray-900 dark:text-gray-100 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-emerald-200 outline-none w-10 focus:w-40 md:focus:w-60 transition-all shadow-inner placeholder:text-transparent focus:placeholder:text-gray-300 dark:focus:placeholder:text-gray-500 cursor-pointer focus:cursor-text"
                                     />
                                 </div>
                             </div>

@@ -23,9 +23,9 @@ const CommandItem = ({
     const getBorderClass = () => {
         if (isSelectionMode && selectedIds.has(cmd.id)) return 'border-emerald-400 ring-1 ring-emerald-400 bg-emerald-50/50';
         if (!isSelectionMode) {
-            if (cmd.type === 'mandatory') return 'border-red-100 hover:border-red-200';
-            if (cmd.type === 'link') return 'border-blue-100 hover:border-blue-200';
-            if (cmd.type === 'utility') return 'border-gray-100 hover:border-emerald-100';
+            if (cmd.type === 'mandatory') return 'border-red-100 hover:border-red-200 dark:border-red-900/30 dark:hover:border-red-800/50';
+            if (cmd.type === 'link') return 'border-blue-100 hover:border-blue-200 dark:border-blue-900/30 dark:hover:border-blue-800/50';
+            if (cmd.type === 'utility') return 'border-gray-100 hover:border-emerald-100 dark:border-gray-800 dark:hover:border-emerald-900/30';
         }
         return '';
     };
@@ -40,7 +40,7 @@ const CommandItem = ({
             onClick={onClick}
             onDoubleClick={onDoubleClick}
             className={`
-                group bg-white border rounded-2xl p-4 transition-all duration-300 flex flex-col relative overflow-hidden select-none
+                group bg-white dark:bg-gray-900 border rounded-2xl p-4 transition-all duration-300 flex flex-col relative overflow-hidden select-none
                 ${getBorderClass()}
                 ${isSelectionMode ? 'cursor-pointer' : ''}
             `}
@@ -68,9 +68,9 @@ const CommandItem = ({
                 {/* Icon Box */}
                 <div className={`
                     w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-500
-                    ${cmd.type === 'mandatory' ? 'bg-red-50 text-red-500 group-hover:bg-red-100' : ''}
-                    ${cmd.type === 'link' ? 'bg-blue-50 text-blue-500 group-hover:bg-blue-100' : ''}
-                    ${cmd.type === 'utility' ? 'bg-gray-50 text-gray-400 group-hover:bg-emerald-50 group-hover:text-emerald-600' : ''}
+                    ${cmd.type === 'mandatory' ? 'bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 group-hover:bg-red-100 dark:group-hover:bg-red-900/50' : ''}
+                    ${cmd.type === 'link' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50' : ''}
+                    ${cmd.type === 'utility' ? 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-900/30 group-hover:text-emerald-600 dark:group-hover:text-emerald-400' : ''}
                 `}>
                     {cmd.type === 'link' ? <LinkIcon size={20} /> : <Command size={20} />}
                 </div>
@@ -78,7 +78,7 @@ const CommandItem = ({
                 {/* Text Content */}
                 <div className="flex-1 min-w-0 py-1">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <h4 className="font-medium text-gray-900 truncate">{cmd.title}</h4>
+                        <h4 className="font-medium text-gray-900 dark:text-white truncate">{cmd.title}</h4>
                         {cmd.type === 'mandatory' && (
                             <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase tracking-wider">MANDATORY</span>
                         )}

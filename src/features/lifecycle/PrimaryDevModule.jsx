@@ -349,7 +349,7 @@ const PrimaryDevModule = () => {
                             onClick={() => handleSelectProject(project)}
                             className={`group bg-white dark:bg-gray-900 border rounded-[2rem] overflow-hidden hover:shadow-2xl transition-all cursor-pointer relative h-[360px] flex flex-col
                                 ${isHoly
-                                    ? 'border-transparent shadow-[0_0_0_2px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]'
+                                    ? 'border-transparent shadow-[0_0_0_2px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.2)]'
                                     : 'border-gray-100 dark:border-gray-800 hover:shadow-gray-200/50 dark:hover:shadow-gray-900/50 ring-1 ring-transparent hover:ring-gray-100 dark:hover:ring-gray-800'}
                             `}
                         >
@@ -358,7 +358,7 @@ const PrimaryDevModule = () => {
                                 <motion.div
                                     className="absolute inset-0 rounded-[2rem] pointer-events-none z-50"
                                     style={{
-                                        background: 'linear-gradient(90deg, transparent, rgba(16,185,129,0.4), transparent)',
+                                        background: 'linear-gradient(90deg, transparent, rgba(168,85,247,0.4), transparent)',
                                         backgroundSize: '200% 100%',
                                     }}
                                     animate={{
@@ -376,7 +376,7 @@ const PrimaryDevModule = () => {
 
                             <Spotlight
                                 className="w-full h-full"
-                                spotColor={isHoly ? "rgba(59, 130, 246, 0.15)" : "rgba(16, 185, 129, 0.2)"}
+                                spotColor={isHoly ? "rgba(59, 130, 246, 0.15)" : "rgba(168, 85, 247, 0.2)"}
                             >
                                 {/* Card Background */}
                                 <div className="absolute inset-0 z-0 h-48">
@@ -393,7 +393,7 @@ const PrimaryDevModule = () => {
                                 <div className="p-8 relative z-10 flex flex-col h-full">
                                     <div className="flex justify-between items-start mb-6">
                                         <div className={`w-12 h-12 backdrop-blur rounded-2xl flex items-center justify-center shadow-sm border transition-transform group-hover:scale-105
-                                            ${isHoly ? 'bg-emerald-50/80 border-emerald-200/50 text-emerald-700' : 'bg-white/80 dark:bg-gray-800/80 border-white/50 dark:border-gray-700/50 text-gray-900 dark:text-white'}
+                                            ${isHoly ? 'bg-purple-50/80 border-purple-200/50 text-purple-700' : 'bg-white/80 dark:bg-gray-800/80 border-white/50 dark:border-gray-700/50 text-gray-900 dark:text-white'}
                                         `}>
                                             <Code2 size={24} strokeWidth={1.5} />
                                         </div>
@@ -406,7 +406,7 @@ const PrimaryDevModule = () => {
 
                                     <div className="mt-8">
                                         <h3 className={`text-2xl font-light mb-2 line-clamp-1 transition-colors
-                                            ${isHoly ? 'text-emerald-900 group-hover:text-emerald-700' : 'text-gray-900 dark:text-white group-hover:text-emerald-900 dark:group-hover:text-emerald-400'}
+                                            ${isHoly ? 'text-purple-900 group-hover:text-purple-700' : 'text-gray-900 dark:text-white group-hover:text-purple-900 dark:group-hover:text-purple-400'}
                                         `}>{project.title}</h3>
                                         <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 min-h-[2.5em] leading-relaxed">{project.desc || 'No description provided.'}</p>
                                     </div>
@@ -417,13 +417,13 @@ const PrimaryDevModule = () => {
                                             {[1, 2, 3, 4, 5].map(step => (
                                                 <div
                                                     key={step}
-                                                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-emerald-500 shadow-sm shadow-emerald-200' : 'bg-gray-100 dark:bg-gray-800'}`}
+                                                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-purple-500 shadow-sm shadow-purple-200' : 'bg-gray-100 dark:bg-gray-800'}`}
                                                 />
                                             ))}
                                         </div>
                                         <div className="flex justify-between items-center text-xs font-mono text-gray-400 uppercase tracking-wider">
                                             <div className="flex items-center gap-2">
-                                                <span className={`w-2 h-2 rounded-full animate-pulse ${isHoly ? 'bg-blue-500' : 'bg-emerald-500'}`} />
+                                                <span className={`w-2 h-2 rounded-full animate-pulse ${isHoly ? 'bg-blue-500' : 'bg-purple-500'}`} />
                                                 <span>Stage {project.subStage || 1}</span>
                                             </div>
                                             <span className="text-gray-900 dark:text-white font-medium">

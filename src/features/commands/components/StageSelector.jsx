@@ -51,14 +51,14 @@ const StageSelector = ({ activeStage, setActiveStage, commands, selectedCategory
             className="w-full md:w-72 shrink-0 flex flex-row md:flex-col gap-2 py-4 overflow-x-auto md:overflow-visible no-scrollbar scroll-smooth snap-x snap-mandatory"
         >
             <div className="mb-0 md:mb-10 px-0 md:px-4 shrink-0 flex items-center md:block mr-4 md:mr-0 snap-center">
-                <h2 className="text-xl md:text-2xl font-thin text-gray-900 flex items-center gap-3 tracking-tight whitespace-nowrap">
-                    <div className="w-8 h-8 md:w-10 md:h-10 bg-gray-900 text-white rounded-xl flex items-center justify-center shadow-lg shadow-gray-200">
+                <h2 className="text-xl md:text-2xl font-thin text-gray-900 dark:text-white flex items-center gap-3 tracking-tight whitespace-nowrap">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl flex items-center justify-center shadow-lg shadow-gray-200 dark:shadow-none">
                         <Terminal size={20} />
                     </div>
                     <span className="hidden md:inline">Command Center</span>
                     <span className="md:hidden">Cmd Center</span>
                 </h2>
-                <p className="hidden md:block text-xs text-gray-400 mt-2 pl-1 font-light tracking-wide">
+                <p className="hidden md:block text-xs text-gray-400 dark:text-gray-500 mt-2 pl-1 font-light tracking-wide">
                     AI PROMPT ORCHESTRATION
                 </p>
             </div>
@@ -81,7 +81,7 @@ const StageSelector = ({ activeStage, setActiveStage, commands, selectedCategory
                             onClick={() => setActiveStage(stage.id)}
                             className={`
                                 shrink-0 flex items-center justify-between p-3 md:p-4 rounded-2xl transition-all duration-300 group relative overflow-hidden
-                                ${isActive ? 'bg-white shadow-xl shadow-gray-200/50 scale-100 md:scale-105 z-10' : 'hover:bg-white/50 hover:pl-5 text-gray-500'}
+                                ${isActive ? 'bg-white dark:bg-gray-800 shadow-xl shadow-gray-200/50 dark:shadow-none scale-100 md:scale-105 z-10' : 'hover:bg-white/50 dark:hover:bg-gray-800/50 hover:pl-5 text-gray-500 dark:text-gray-400'}
                                 min-w-[160px] md:min-w-0 md:w-full snap-center
                             `}
                         >
@@ -93,13 +93,13 @@ const StageSelector = ({ activeStage, setActiveStage, commands, selectedCategory
                                     <Icon size={16} />
                                 </div>
                                 <div className="text-left">
-                                    <div className={`text-sm font-medium ${isActive ? 'text-gray-900' : 'text-gray-600'}`}>
+                                    <div className={`text-sm font-medium ${isActive ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>
                                         {stage.label}
                                     </div>
                                     {isActive && (
                                         <motion.div
                                             layoutId="subtitle"
-                                            className={`text-[10px] font-mono hidden xl:block ${isActive ? 'text-gray-400' : 'text-gray-400'}`}
+                                            className={`text-[10px] font-mono hidden xl:block ${isActive ? 'text-gray-400 dark:text-gray-500' : 'text-gray-400'}`}
                                         >
                                             STAGE 0{stage.id}
                                         </motion.div>
@@ -107,21 +107,21 @@ const StageSelector = ({ activeStage, setActiveStage, commands, selectedCategory
                                 </div>
                             </div>
                             {count > 0 && (
-                                <span className={`text-[10px] font-mono px-2 py-1 rounded-full transition-colors ${isActive ? 'bg-gray-100 text-gray-900' : 'bg-gray-200/50 text-gray-400'}`}>
-                                    {count}
+                                { count }
                                 </span>
-                            )}
-                            {isActive && (
-                                <motion.div
-                                    layoutId="active-bg"
-                                    className="absolute inset-0 border-2 border-gray-100 rounded-2xl pointer-events-none"
-                                />
-                            )}
-                        </button>
-                    );
+                    )
+                }
+                            { isActive && (
+                        <motion.div
+                            layoutId="active-bg"
+                            className="absolute inset-0 border-2 border-gray-100 dark:border-gray-700 rounded-2xl pointer-events-none"
+                        />
+                    )}
+            </button>
+            );
                 })}
-            </div>
         </div>
+        </div >
     );
 };
 
