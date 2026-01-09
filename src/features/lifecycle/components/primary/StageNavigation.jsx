@@ -92,7 +92,10 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                         >
                             {/* Clickable Area for VIEWING */}
                             <div
-                                onClick={() => onViewChange(stage.id)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onViewChange(stage.id);
+                                }}
                                 className="flex items-center gap-3 cursor-pointer min-w-0 w-full"
                             >
                                 <div className={`
@@ -224,7 +227,10 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                     `}
                                 >
                                     <div
-                                        onClick={() => onViewChange(stage.id)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onViewChange(stage.id);
+                                        }}
                                         className="flex items-center gap-3 cursor-pointer min-w-0 w-full"
                                     >
                                         <div className={`

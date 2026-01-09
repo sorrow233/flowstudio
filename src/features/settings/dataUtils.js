@@ -1,11 +1,12 @@
 /**
  * 用户数据导入/导出工具函数
+ * IMPORTANT: This module now uses synced Y.Doc arrays for all data.
  */
 
 import * as Y from 'yjs';
 import { STORAGE_KEYS } from '../../utils/constants';
 
-const EXPORT_VERSION = '1.0';
+const EXPORT_VERSION = '2.0'; // Bumped version for new format
 
 /**
  * 收集并返回所有用户数据
@@ -17,56 +18,50 @@ export const exportAllData = (doc) => {
         version: EXPORT_VERSION,
         exportedAt: new Date().toISOString(),
         data: {
+            // Unified project storage
+            allProjects: [],
+            // Commands and categories
+            allCommands: [],
+            commandCategories: [],
+            // Legacy fields for backward compatibility (empty but present)
             pendingProjects: [],
             primaryProjects: [],
-            inspirations: [],  // 新增：灵感数据
+            inspirations: [],
             commands: [],
             customCategories: []
         }
     };
 
-    // 1. 从 Y.Doc 获取项目数据
-    if (doc) {
-        try {
-            const pendingArray = doc.getArray('pending_projects');
-            data.data.pendingProjects = pendingArray.toJSON();
-        } catch (e) {
-            console.warn('[Export] Failed to get pending_projects:', e);
-        }
-
-        try {
-            const primaryArray = doc.getArray('primary_projects');
-            data.data.primaryProjects = primaryArray.toJSON();
-        } catch (e) {
-            console.warn('[Export] Failed to get primary_projects:', e);
-        }
-
-        // 新增：导出灵感数据
-        try {
-            const inspirationArray = doc.getArray('inspiration');
-            data.data.inspirations = inspirationArray.toJSON();
-        } catch (e) {
-            console.warn('[Export] Failed to get inspiration:', e);
-        }
+    if (!doc) {
+        console.warn('[Export] No Y.Doc provided, returning empty data.');
+        return data;
     }
 
-    // 2. 从 localStorage 获取命令和分类
+    // 1. Export all_projects (unified storage)
     try {
-        const savedCmds = localStorage.getItem(STORAGE_KEYS.COMMANDS);
-        if (savedCmds) {
-            data.data.commands = JSON.parse(savedCmds);
-        }
+        const allProjectsArray = doc.getArray('all_projects');
+        data.data.allProjects = allProjectsArray.toJSON();
+        console.info(`[Export] Exported ${data.data.allProjects.length} projects from all_projects.`);
     } catch (e) {
-        console.warn('[Export] Failed to get commands:', e);
+        console.warn('[Export] Failed to get all_projects:', e);
     }
 
+    // 2. Export all_commands (synced commands)
     try {
-        const savedCats = localStorage.getItem('flowstudio_categories_custom');
-        if (savedCats) {
-            data.data.customCategories = JSON.parse(savedCats);
-        }
+        const commandsArray = doc.getArray('all_commands');
+        data.data.allCommands = commandsArray.toJSON();
+        console.info(`[Export] Exported ${data.data.allCommands.length} commands from all_commands.`);
     } catch (e) {
-        console.warn('[Export] Failed to get categories:', e);
+        console.warn('[Export] Failed to get all_commands:', e);
+    }
+
+    // 3. Export command_categories (synced categories)
+    try {
+        const categoriesArray = doc.getArray('command_categories');
+        data.data.commandCategories = categoriesArray.toJSON();
+        console.info(`[Export] Exported ${data.data.commandCategories.length} categories from command_categories.`);
+    } catch (e) {
+        console.warn('[Export] Failed to get command_categories:', e);
     }
 
     return data;
@@ -94,20 +89,29 @@ export const validateImportData = (data) => {
         return { valid: false, errors };
     }
 
-    const { pendingProjects, primaryProjects, commands, customCategories } = data.data;
+    const { allProjects, allCommands, commandCategories, pendingProjects, primaryProjects, commands, customCategories } = data.data;
 
+    // Check new format arrays
+    if (allProjects && !Array.isArray(allProjects)) {
+        errors.push('allProjects 必须是数组');
+    }
+    if (allCommands && !Array.isArray(allCommands)) {
+        errors.push('allCommands 必须是数组');
+    }
+    if (commandCategories && !Array.isArray(commandCategories)) {
+        errors.push('commandCategories 必须是数组');
+    }
+
+    // Check legacy format arrays (for backward compatibility)
     if (pendingProjects && !Array.isArray(pendingProjects)) {
         errors.push('pendingProjects 必须是数组');
     }
-
     if (primaryProjects && !Array.isArray(primaryProjects)) {
         errors.push('primaryProjects 必须是数组');
     }
-
     if (commands && !Array.isArray(commands)) {
         errors.push('commands 必须是数组');
     }
-
     if (customCategories && !Array.isArray(customCategories)) {
         errors.push('customCategories 必须是数组');
     }
@@ -122,79 +126,170 @@ export const validateImportData = (data) => {
  * @param {'merge' | 'replace'} mode - 导入模式
  */
 export const importData = (doc, data, mode = 'merge') => {
-    const { pendingProjects, primaryProjects, inspirations, commands, customCategories } = data.data;
+    const {
+        allProjects, allCommands, commandCategories,
+        // Legacy fields for backward compatibility
+        pendingProjects, primaryProjects, inspirations, commands, customCategories
+    } = data.data;
 
-    // 1. 导入 Y.Doc 项目数据
-    if (doc) {
-        doc.transact(() => {
-            // Pending Projects
-            if (pendingProjects && pendingProjects.length > 0) {
-                const yPending = doc.getArray('pending_projects');
-                if (mode === 'replace') {
-                    yPending.delete(0, yPending.length);
-                }
-                // 使用 Y.Map 以支持 CRDT
-                const yMaps = pendingProjects.map(p => {
-                    const yMap = new Y.Map();
-                    Object.entries(p).forEach(([k, v]) => yMap.set(k, v));
-                    return yMap;
-                });
-                yPending.push(yMaps);
-            }
-
-            // Primary Projects
-            if (primaryProjects && primaryProjects.length > 0) {
-                const yPrimary = doc.getArray('primary_projects');
-                if (mode === 'replace') {
-                    yPrimary.delete(0, yPrimary.length);
-                }
-                const yMaps = primaryProjects.map(p => {
-                    const yMap = new Y.Map();
-                    Object.entries(p).forEach(([k, v]) => yMap.set(k, v));
-                    return yMap;
-                });
-                yPrimary.push(yMaps);
-            }
-
-            // 新增：导入灵感数据
-            if (inspirations && inspirations.length > 0) {
-                const yInspiration = doc.getArray('inspiration');
-                if (mode === 'replace') {
-                    yInspiration.delete(0, yInspiration.length);
-                }
-                const yMaps = inspirations.map(i => {
-                    const yMap = new Y.Map();
-                    Object.entries(i).forEach(([k, v]) => yMap.set(k, v));
-                    return yMap;
-                });
-                yInspiration.push(yMaps);
-            }
-        });
+    if (!doc) {
+        console.error('[Import] No Y.Doc provided, cannot import.');
+        return;
     }
 
-    // 2. 导入 localStorage 数据
-    if (commands && commands.length > 0) {
-        if (mode === 'replace') {
-            localStorage.setItem(STORAGE_KEYS.COMMANDS, JSON.stringify(commands));
-        } else {
-            // 合并模式：去重合并
-            const existingCmds = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMMANDS) || '[]');
-            const existingIds = new Set(existingCmds.map(c => c.id));
-            const newCmds = commands.filter(c => !existingIds.has(c.id));
-            localStorage.setItem(STORAGE_KEYS.COMMANDS, JSON.stringify([...existingCmds, ...newCmds]));
+    doc.transact(() => {
+        // === NEW FORMAT: all_projects ===
+        if (allProjects && allProjects.length > 0) {
+            const yAllProjects = doc.getArray('all_projects');
+            if (mode === 'replace') {
+                yAllProjects.delete(0, yAllProjects.length);
+            }
+            const existingIds = new Set(yAllProjects.toJSON().map(p => p.id));
+            const newProjects = allProjects.filter(p => !existingIds.has(p.id));
+
+            const yMaps = newProjects.map(p => {
+                const yMap = new Y.Map();
+                Object.entries(p).forEach(([k, v]) => yMap.set(k, v));
+                return yMap;
+            });
+            if (yMaps.length > 0) {
+                yAllProjects.push(yMaps);
+                console.info(`[Import] Imported ${yMaps.length} projects to all_projects.`);
+            }
         }
-    }
 
-    if (customCategories && customCategories.length > 0) {
-        if (mode === 'replace') {
-            localStorage.setItem('flowstudio_categories_custom', JSON.stringify(customCategories));
-        } else {
-            const existingCats = JSON.parse(localStorage.getItem('flowstudio_categories_custom') || '[]');
-            const existingIds = new Set(existingCats.map(c => c.id));
+        // === NEW FORMAT: all_commands ===
+        if (allCommands && allCommands.length > 0) {
+            const yAllCommands = doc.getArray('all_commands');
+            if (mode === 'replace') {
+                yAllCommands.delete(0, yAllCommands.length);
+            }
+            const existingIds = new Set(yAllCommands.toJSON().map(c => c.id));
+            const newCommands = allCommands.filter(c => !existingIds.has(c.id));
+
+            const yMaps = newCommands.map(c => {
+                const yMap = new Y.Map();
+                Object.entries(c).forEach(([k, v]) => yMap.set(k, v));
+                return yMap;
+            });
+            if (yMaps.length > 0) {
+                yAllCommands.push(yMaps);
+                console.info(`[Import] Imported ${yMaps.length} commands to all_commands.`);
+            }
+        }
+
+        // === NEW FORMAT: command_categories ===
+        if (commandCategories && commandCategories.length > 0) {
+            const yCategories = doc.getArray('command_categories');
+            if (mode === 'replace') {
+                yCategories.delete(0, yCategories.length);
+            }
+            const existingIds = new Set(yCategories.toJSON().map(c => c.id));
+            const newCats = commandCategories.filter(c => !existingIds.has(c.id));
+
+            const yMaps = newCats.map(c => {
+                const yMap = new Y.Map();
+                Object.entries(c).forEach(([k, v]) => yMap.set(k, v));
+                return yMap;
+            });
+            if (yMaps.length > 0) {
+                yCategories.push(yMaps);
+                console.info(`[Import] Imported ${yMaps.length} categories to command_categories.`);
+            }
+        }
+
+        // === LEGACY FORMAT: Convert to new format ===
+        // Pending Projects -> all_projects with stage: 'pending'
+        if (pendingProjects && pendingProjects.length > 0) {
+            const yAllProjects = doc.getArray('all_projects');
+            const existingIds = new Set(yAllProjects.toJSON().map(p => p.id));
+            const newProjects = pendingProjects
+                .filter(p => !existingIds.has(p.id))
+                .map(p => ({ ...p, stage: 'pending' }));
+
+            const yMaps = newProjects.map(p => {
+                const yMap = new Y.Map();
+                Object.entries(p).forEach(([k, v]) => yMap.set(k, v));
+                return yMap;
+            });
+            if (yMaps.length > 0) {
+                yAllProjects.push(yMaps);
+                console.info(`[Import] Migrated ${yMaps.length} legacy pending projects.`);
+            }
+        }
+
+        // Primary Projects -> all_projects with stage: 'primary'
+        if (primaryProjects && primaryProjects.length > 0) {
+            const yAllProjects = doc.getArray('all_projects');
+            const existingIds = new Set(yAllProjects.toJSON().map(p => p.id));
+            const newProjects = primaryProjects
+                .filter(p => !existingIds.has(p.id))
+                .map(p => ({ ...p, stage: 'primary' }));
+
+            const yMaps = newProjects.map(p => {
+                const yMap = new Y.Map();
+                Object.entries(p).forEach(([k, v]) => yMap.set(k, v));
+                return yMap;
+            });
+            if (yMaps.length > 0) {
+                yAllProjects.push(yMaps);
+                console.info(`[Import] Migrated ${yMaps.length} legacy primary projects.`);
+            }
+        }
+
+        // Inspirations -> all_projects with stage: 'inspiration'
+        if (inspirations && inspirations.length > 0) {
+            const yAllProjects = doc.getArray('all_projects');
+            const existingIds = new Set(yAllProjects.toJSON().map(p => p.id));
+            const newProjects = inspirations
+                .filter(p => !existingIds.has(p.id))
+                .map(p => ({ ...p, stage: 'inspiration' }));
+
+            const yMaps = newProjects.map(p => {
+                const yMap = new Y.Map();
+                Object.entries(p).forEach(([k, v]) => yMap.set(k, v));
+                return yMap;
+            });
+            if (yMaps.length > 0) {
+                yAllProjects.push(yMaps);
+                console.info(`[Import] Migrated ${yMaps.length} legacy inspirations.`);
+            }
+        }
+
+        // Legacy commands -> all_commands
+        if (commands && commands.length > 0) {
+            const yAllCommands = doc.getArray('all_commands');
+            const existingIds = new Set(yAllCommands.toJSON().map(c => c.id));
+            const newCommands = commands.filter(c => !existingIds.has(c.id));
+
+            const yMaps = newCommands.map(c => {
+                const yMap = new Y.Map();
+                Object.entries(c).forEach(([k, v]) => yMap.set(k, v));
+                return yMap;
+            });
+            if (yMaps.length > 0) {
+                yAllCommands.push(yMaps);
+                console.info(`[Import] Migrated ${yMaps.length} legacy commands.`);
+            }
+        }
+
+        // Legacy customCategories -> command_categories
+        if (customCategories && customCategories.length > 0) {
+            const yCategories = doc.getArray('command_categories');
+            const existingIds = new Set(yCategories.toJSON().map(c => c.id));
             const newCats = customCategories.filter(c => !existingIds.has(c.id));
-            localStorage.setItem('flowstudio_categories_custom', JSON.stringify([...existingCats, ...newCats]));
+
+            const yMaps = newCats.map(c => {
+                const yMap = new Y.Map();
+                Object.entries(c).forEach(([k, v]) => yMap.set(k, v));
+                return yMap;
+            });
+            if (yMaps.length > 0) {
+                yCategories.push(yMaps);
+                console.info(`[Import] Migrated ${yMaps.length} legacy custom categories.`);
+            }
         }
-    }
+    });
 };
 
 /**
