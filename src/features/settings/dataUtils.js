@@ -2,6 +2,7 @@
  * 用户数据导入/导出工具函数
  */
 
+import * as Y from 'yjs';
 import { STORAGE_KEYS } from '../../utils/constants';
 
 const EXPORT_VERSION = '1.0';
@@ -134,7 +135,6 @@ export const importData = (doc, data, mode = 'merge') => {
                 }
                 // 使用 Y.Map 以支持 CRDT
                 const yMaps = pendingProjects.map(p => {
-                    const Y = doc.constructor; // 获取 Y 引用
                     const yMap = new Y.Map();
                     Object.entries(p).forEach(([k, v]) => yMap.set(k, v));
                     return yMap;
@@ -149,7 +149,6 @@ export const importData = (doc, data, mode = 'merge') => {
                     yPrimary.delete(0, yPrimary.length);
                 }
                 const yMaps = primaryProjects.map(p => {
-                    const Y = doc.constructor;
                     const yMap = new Y.Map();
                     Object.entries(p).forEach(([k, v]) => yMap.set(k, v));
                     return yMap;
@@ -164,7 +163,6 @@ export const importData = (doc, data, mode = 'merge') => {
                     yInspiration.delete(0, yInspiration.length);
                 }
                 const yMaps = inspirations.map(i => {
-                    const Y = doc.constructor;
                     const yMap = new Y.Map();
                     Object.entries(i).forEach(([k, v]) => yMap.set(k, v));
                     return yMap;
