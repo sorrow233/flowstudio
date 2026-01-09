@@ -6,8 +6,8 @@ import { Activity, X, Settings, ChevronRight, Menu, Plus } from 'lucide-react';
 import AdvancedStageNavigation from './AdvancedStageNavigation';
 import ProjectSettingsModal from './ProjectSettingsModal';
 import TaskList from '../primary/TaskList'; // Reusing Primary TaskList
-import { useSyncedProjects } from '../../sync/useSyncStore';
-import { useSync } from '../../sync/SyncContext';
+import { useSyncedProjects } from '../../../sync/useSyncStore';
+import { useSync } from '../../../sync/SyncContext';
 
 const DEFAULT_STAGES = [
     { id: 'design', name: 'Design', status: 'in-progress', color: '#EC4899' },
