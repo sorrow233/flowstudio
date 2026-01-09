@@ -1,9 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { motion, Reorder, AnimatePresence, useDragControls } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { Reorder, AnimatePresence, useDragControls } from 'framer-motion';
 import { Terminal, Library, ChevronRight, Copy, Trash2, ListChecks, X } from 'lucide-react';
 import CommandItem from './CommandItem';
 
-const ReorderableItem = ({ cmd, isSelectionMode, selectedIds, categories, handleEdit, handleCopy, handleRemove, handleShare, copiedId, handleShiftSelect }) => {
+// Internal Item Component - Clean and simple
+const DraggableCommandItem = ({
+    cmd,
+    isSelectionMode,
+    selectedIds,
+    categories,
+    handlers,
+    copiedId,
+    onDragEnd
+}) => {
     const dragControls = useDragControls();
 
     return (
@@ -11,6 +20,7 @@ const ReorderableItem = ({ cmd, isSelectionMode, selectedIds, categories, handle
             value={cmd.id}
             dragListener={false}
             dragControls={dragControls}
+            onDragEnd={onDragEnd}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -21,20 +31,20 @@ const ReorderableItem = ({ cmd, isSelectionMode, selectedIds, categories, handle
                 isSelectionMode={isSelectionMode}
                 selectedIds={selectedIds}
                 categories={categories}
-                handleEdit={handleEdit}
-                handleCopy={handleCopy}
-                handleRemove={handleRemove}
-                handleShare={handleShare}
+                handleEdit={handlers.handleEdit}
+                handleCopy={handlers.handleCopy}
+                handleRemove={handlers.handleRemove}
+                handleShare={handlers.handleShare}
                 copiedId={copiedId}
                 dragControls={dragControls}
                 onClick={(e) => {
                     if (isSelectionMode) {
-                        handleShiftSelect(cmd.id, e);
+                        handlers.handleShiftSelect(cmd.id, e);
                         return;
                     }
-                    handleCopy(cmd.id, cmd.content || cmd.url);
+                    handlers.handleCopy(cmd.id, cmd.content || cmd.url);
                 }}
-                onDoubleClick={() => !isSelectionMode && handleEdit(cmd)}
+                onDoubleClick={() => !isSelectionMode && handlers.handleEdit(cmd)}
             />
         </Reorder.Item>
     );
@@ -42,7 +52,7 @@ const ReorderableItem = ({ cmd, isSelectionMode, selectedIds, categories, handle
 
 const CommandList = ({
     visibleCommands,
-    stageCommands,
+    stageCommands, // Not used directly, visibleCommands is what we render
     handleReorder,
     isSearching,
     isAdding,
@@ -65,31 +75,50 @@ const CommandList = ({
     const [selectedIds, setSelectedIds] = useState(new Set());
     const [lastSelectedId, setLastSelectedId] = useState(null);
 
-    // Local state for reordering to ensure smooth visual feedback
+    // 1. Local Order State - The single source of truth for the list order while viewing
     const [orderedIds, setOrderedIds] = useState([]);
 
-    // Sync orderedIds with visibleCommands
+    // 2. Ref to track if we are currently dragging to prevent external sync interference
+    const isDraggingRef = useRef(false);
+
+    // 3. Sync local state with props (whenever visibleCommands changes from search/filtering/sycn)
+    // ONLY update if we are NOT dragging.
     useEffect(() => {
-        setOrderedIds(visibleCommands.map(c => c.id));
+        if (!isDraggingRef.current) {
+            setOrderedIds(visibleCommands.map(c => c.id));
+        }
     }, [visibleCommands]);
 
-    // Internal reorder handler for visual swap
-    const onInternalReorder = (newOrderedIds) => {
-        setOrderedIds(newOrderedIds);
-        handleReorder(newOrderedIds);
+    // 4. Handlers
+    const onReorder = (newOrder) => {
+        isDraggingRef.current = true; // Mark as dragging
+        setOrderedIds(newOrder); // Update visual state immediately
     };
 
-    // Reset selection when stage changes
+    const onDragEnd = () => {
+        isDraggingRef.current = false; // Drag finished
+        // Commit the new order to Yjs
+        handleReorder(orderedIds);
+    };
+
+    // Bundle handlers for cleaner props
+    const itemHandlers = {
+        handleEdit,
+        handleCopy,
+        handleRemove,
+        handleShare,
+        handleShiftSelect: (id, e) => handleShiftSelect(id, e)
+    };
+
+    // --- Selection Logic ---
     useEffect(() => {
         setIsSelectionMode(false);
         setSelectedIds(new Set());
         setLastSelectedId(null);
     }, [activeStage]);
 
-    // Keyboard shortcuts
     useEffect(() => {
         if (!isSelectionMode) return;
-
         const handleKeyDown = (e) => {
             if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
                 e.preventDefault();
@@ -101,33 +130,27 @@ const CommandList = ({
                 setLastSelectedId(null);
             }
         };
-
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isSelectionMode, visibleCommands]);
 
-    // Shift+click range selection
     const handleShiftSelect = (id, e) => {
         if (!e.shiftKey || !lastSelectedId) {
             toggleSelection(id);
             setLastSelectedId(id);
             return;
         }
-
-        const allIds = visibleCommands.map(c => c.id);
+        const allIds = visibleCommands.map(c => c.id); // Use visibleCommands for selection index logic
         const lastIdx = allIds.indexOf(lastSelectedId);
         const currentIdx = allIds.indexOf(id);
-
         if (lastIdx === -1 || currentIdx === -1) {
             toggleSelection(id);
             setLastSelectedId(id);
             return;
         }
-
         const start = Math.min(lastIdx, currentIdx);
         const end = Math.max(lastIdx, currentIdx);
         const rangeIds = allIds.slice(start, end + 1);
-
         const newSelected = new Set(selectedIds);
         rangeIds.forEach(rid => newSelected.add(rid));
         setSelectedIds(newSelected);
@@ -135,24 +158,17 @@ const CommandList = ({
 
     const toggleSelection = (id) => {
         const newSelected = new Set(selectedIds);
-        if (newSelected.has(id)) {
-            newSelected.delete(id);
-        } else {
-            newSelected.add(id);
-        }
+        if (newSelected.has(id)) newSelected.delete(id);
+        else newSelected.add(id);
         setSelectedIds(newSelected);
         setLastSelectedId(id);
     };
 
     const handleSelectAll = () => {
-        if (selectedIds.size === visibleCommands.length) {
-            setSelectedIds(new Set());
-        } else {
-            setSelectedIds(new Set(visibleCommands.map(c => c.id)));
-        }
+        if (selectedIds.size === visibleCommands.length) setSelectedIds(new Set());
+        else setSelectedIds(new Set(visibleCommands.map(c => c.id)));
     };
 
-    // Bulk actions
     const handleBulkDelete = () => {
         if (selectedIds.size === 0) return;
         if (confirm(`Delete ${selectedIds.size} commands?`)) {
@@ -173,22 +189,17 @@ const CommandList = ({
         setLastSelectedId(null);
     };
 
-    // Bulk move to another stage
     const handleBulkMove = (targetStage) => {
         if (selectedIds.size === 0 || !commands || !updateCommand) return;
-
         selectedIds.forEach(id => {
             const cmd = commands.find(c => c.id === id);
             if (!cmd) return;
-
             const newStageIds = [...(cmd.stageIds || [])];
             const currentIdx = newStageIds.indexOf(activeStage);
             if (currentIdx !== -1) newStageIds.splice(currentIdx, 1);
             if (!newStageIds.includes(targetStage)) newStageIds.push(targetStage);
-
             updateCommand(id, { stageIds: newStageIds });
         });
-
         setIsSelectionMode(false);
         setSelectedIds(new Set());
         setLastSelectedId(null);
@@ -202,25 +213,26 @@ const CommandList = ({
                     <Reorder.Group
                         axis="y"
                         values={orderedIds}
-                        onReorder={onInternalReorder}
+                        onReorder={onReorder}
                         className="space-y-3"
                     >
                         {orderedIds.map(id => {
+                            // Find the command object for this ID
+                            // Note: visibleCommands might be stale compared to orderedIds during drag, 
+                            // but we just need the content.
                             const cmd = visibleCommands.find(c => c.id === id);
                             if (!cmd) return null;
+
                             return (
-                                <ReorderableItem
+                                <DraggableCommandItem
                                     key={cmd.id}
                                     cmd={cmd}
                                     isSelectionMode={isSelectionMode}
                                     selectedIds={selectedIds}
                                     categories={categories}
-                                    handleEdit={handleEdit}
-                                    handleCopy={handleCopy}
-                                    handleRemove={handleRemove}
-                                    handleShare={handleShare}
+                                    handlers={itemHandlers}
                                     copiedId={copiedId}
-                                    handleShiftSelect={handleShiftSelect}
+                                    onDragEnd={onDragEnd}
                                 />
                             );
                         })}
@@ -261,12 +273,9 @@ const CommandList = ({
             <div className="shrink-0 pt-4 border-t border-gray-100">
                 <AnimatePresence mode="wait">
                     {isSelectionMode ? (
-                        <motion.div
+                        <div
                             key="bulk-actions"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 20 }}
-                            className="flex items-center justify-between bg-emerald-50/50 border border-emerald-100 rounded-2xl p-2 px-4 shadow-lg"
+                            className="flex items-center justify-between bg-emerald-50/50 border border-emerald-100 rounded-2xl p-2 px-4 shadow-lg animate-in slide-in-from-bottom-4 fade-in duration-200"
                         >
                             <div className="flex items-center gap-4">
                                 <button
@@ -332,14 +341,11 @@ const CommandList = ({
                                     <X size={18} />
                                 </button>
                             </div>
-                        </motion.div>
+                        </div>
                     ) : (
-                        <motion.div
+                        <div
                             key="toggle"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="flex justify-end"
+                            className="flex justify-end animate-in fade-in duration-200"
                         >
                             <button
                                 onClick={() => setIsSelectionMode(true)}
@@ -349,7 +355,7 @@ const CommandList = ({
                                 <ListChecks size={16} />
                                 <span className="text-xs font-medium">Multi-select</span>
                             </button>
-                        </motion.div>
+                        </div>
                     )}
                 </AnimatePresence>
             </div>
