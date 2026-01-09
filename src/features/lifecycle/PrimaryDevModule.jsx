@@ -100,19 +100,19 @@ const PrimaryDevModule = () => {
         { id: 'ready', label: 'Am I ready to leave the nursery and face the real world?' }
     ];
 
-    // Sync selectedProject with latest data and reset scroll state
+    // Sync selectedProject with latest data
     useEffect(() => {
         if (selectedProject) {
             const current = projects.find(p => p.id === selectedProject.id);
-            if (current) {
-                setSelectedProject(current);
-            } else {
-                setSelectedProject(null);
-            }
+            if (current) setSelectedProject(current);
         }
-        // Reset scroll tracking when closing/switching projects
+    }, [projects]);
+
+    // Reset UI state when switching or closing projects
+    useEffect(() => {
+        setIsHeaderCollapsed(true);
         hasScrolledDown.current = false;
-    }, [selectedProject?.id, projects]);
+    }, [selectedProject?.id]);
 
     // When opening a project, set view to current progress
     const handleSelectProject = (project) => {

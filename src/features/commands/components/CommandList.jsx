@@ -3,13 +3,12 @@ import { motion, Reorder, AnimatePresence, useDragControls } from 'framer-motion
 import { Terminal, Library, ChevronRight, Copy, Trash2, ListChecks, X } from 'lucide-react';
 import CommandItem from './CommandItem';
 
-const ReorderableItem = ({ cmd, isSelectionMode, selectedIds, categories, handleEdit, handleCopy, handleRemove, handleShare, copiedId, handleShiftSelect, onReorder }) => {
+const ReorderableItem = ({ cmd, isSelectionMode, selectedIds, categories, handleEdit, handleCopy, handleRemove, handleShare, copiedId, handleShiftSelect }) => {
     const dragControls = useDragControls();
-    const isDraggable = !isSelectionMode;
 
     return (
         <Reorder.Item
-            value={cmd}
+            value={cmd.id}
             dragListener={false}
             dragControls={dragControls}
             initial={{ opacity: 0, y: 10 }}
@@ -65,6 +64,20 @@ const CommandList = ({
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState(new Set());
     const [lastSelectedId, setLastSelectedId] = useState(null);
+
+    // Local state for reordering to ensure smooth visual feedback
+    const [orderedIds, setOrderedIds] = useState([]);
+
+    // Sync orderedIds with visibleCommands
+    useEffect(() => {
+        setOrderedIds(visibleCommands.map(c => c.id));
+    }, [visibleCommands]);
+
+    // Internal reorder handler for visual swap
+    const onInternalReorder = (newOrderedIds) => {
+        setOrderedIds(newOrderedIds);
+        handleReorder(newOrderedIds);
+    };
 
     // Reset selection when stage changes
     useEffect(() => {
@@ -188,25 +201,29 @@ const CommandList = ({
                 {visibleCommands.length > 0 ? (
                     <Reorder.Group
                         axis="y"
-                        values={visibleCommands}
-                        onReorder={handleReorder}
+                        values={orderedIds}
+                        onReorder={onInternalReorder}
                         className="space-y-3"
                     >
-                        {visibleCommands.map(cmd => (
-                            <ReorderableItem
-                                key={cmd.id}
-                                cmd={cmd}
-                                isSelectionMode={isSelectionMode}
-                                selectedIds={selectedIds}
-                                categories={categories}
-                                handleEdit={handleEdit}
-                                handleCopy={handleCopy}
-                                handleRemove={handleRemove}
-                                handleShare={handleShare}
-                                copiedId={copiedId}
-                                handleShiftSelect={handleShiftSelect}
-                            />
-                        ))}
+                        {orderedIds.map(id => {
+                            const cmd = visibleCommands.find(c => c.id === id);
+                            if (!cmd) return null;
+                            return (
+                                <ReorderableItem
+                                    key={cmd.id}
+                                    cmd={cmd}
+                                    isSelectionMode={isSelectionMode}
+                                    selectedIds={selectedIds}
+                                    categories={categories}
+                                    handleEdit={handleEdit}
+                                    handleCopy={handleCopy}
+                                    handleRemove={handleRemove}
+                                    handleShare={handleShare}
+                                    copiedId={copiedId}
+                                    handleShiftSelect={handleShiftSelect}
+                                />
+                            );
+                        })}
                     </Reorder.Group>
                 ) : (
                     !isAdding && !isImporting && (
