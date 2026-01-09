@@ -343,37 +343,40 @@ const CommandCenterModule = () => {
                         <div className="flex gap-2 w-full md:w-auto justify-between md:justify-end">
                             <div className="flex gap-2 w-full md:w-auto">
 
-                                {/* Selected Category Label (Left) */}
-                                <div className="hidden md:flex items-center px-4 py-1.5 bg-gray-100 rounded-full mr-2 min-w-[120px] justify-center shadow-inner border border-gray-200/50">
-                                    <span className={`text-sm font-medium ${categories.find(c => c.id === selectedCategory)?.color.replace('bg-', 'text-').replace('text-white', '') || 'text-gray-600'}`}>
-                                        {categories.find(c => c.id === selectedCategory)?.label || 'All'}
-                                    </span>
-                                </div>
+                                {/* Combined Category Bar (Label + Dots) */}
+                                <div className="flex items-center p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner border border-gray-200/50 dark:border-gray-700">
+                                    {/* Label Section */}
+                                    <div className="hidden md:flex items-center px-4 border-r border-gray-200 dark:border-gray-700 mr-2 min-w-[100px] justify-center">
+                                        <span className={`text-sm font-medium ${categories.find(c => c.id === selectedCategory)?.color.replace('bg-', 'text-').replace('text-white', '') || 'text-gray-600 dark:text-gray-300'
+                                            }`}>
+                                            {categories.find(c => c.id === selectedCategory)?.label || 'All'}
+                                        </span>
+                                    </div>
 
-                                {/* Category Filter Pills - Dot Ribbon */}
-
-                                <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full overflow-x-auto no-scrollbar scrollbar-hide flex-1 md:flex-none md:max-w-[300px] xl:max-w-none shadow-inner border border-gray-200/50">
-                                    {categories.map(cat => (
-                                        <div key={cat.id} className="relative group/cat">
-                                            <button
-                                                onClick={() => setSelectedCategory(cat.id)}
-                                                onContextMenu={(e) => {
-                                                    e.preventDefault();
-                                                    setRenamingCategory({ id: cat.id, currentName: cat.label, color: cat.color });
-                                                    setRenameValue(cat.label);
-                                                }}
-                                                title={cat.label}
-                                                className={`
-                                                w-8 h-8 flex items-center justify-center rounded-full transition-all shrink-0 relative
-                                                ${selectedCategory === cat.id
-                                                        ? 'bg-white shadow-md scale-110 z-10 ring-2 ring-gray-100'
-                                                        : 'hover:bg-white/50 hover:scale-105'}
-                                            `}
-                                            >
-                                                <div className={`w-3 h-3 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')} ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-transparent' : ''}`} />
-                                            </button>
-                                        </div>
-                                    ))}
+                                    {/* Dots Section */}
+                                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scrollbar-hide flex-1 md:flex-none md:max-w-[300px] xl:max-w-none">
+                                        {categories.map(cat => (
+                                            <div key={cat.id} className="relative group/cat">
+                                                <button
+                                                    onClick={() => setSelectedCategory(cat.id)}
+                                                    onContextMenu={(e) => {
+                                                        e.preventDefault();
+                                                        setRenamingCategory({ id: cat.id, currentName: cat.label, color: cat.color });
+                                                        setRenameValue(cat.label);
+                                                    }}
+                                                    title={cat.label}
+                                                    className={`
+                                                    w-8 h-8 flex items-center justify-center rounded-full transition-all shrink-0 relative
+                                                    ${selectedCategory === cat.id
+                                                            ? 'bg-white dark:bg-gray-700 shadow-md scale-110 z-10 ring-2 ring-gray-100 dark:ring-gray-600'
+                                                            : 'hover:bg-white/50 dark:hover:bg-gray-700/50 hover:scale-105'}
+                                                `}
+                                                >
+                                                    <div className={`w-3 h-3 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')} ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-transparent' : ''}`} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 {/* Search & Undo/Redo Container */}

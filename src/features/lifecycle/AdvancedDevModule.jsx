@@ -23,6 +23,7 @@ const AdvancedDevModule = () => {
     const projects = allProjects;
 
     const { t } = useTranslation();
+    const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
 
     // --- State ---
     const [selectedProject, setSelectedProject] = useState(null);
