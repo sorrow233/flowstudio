@@ -646,7 +646,7 @@ const PrimaryDevModule = () => {
 
                                             <div className="flex justify-center">
                                                 <button
-                                                    onClick={handleGraduateToAdvanced}
+                                                    onClick={handleGraduateToFinal}
                                                     disabled={!allPillarsChecked}
                                                     className={`
                                                         px-12 py-5 rounded-2xl font-bold text-sm uppercase tracking-[0.2em] transition-all duration-500 flex items-center gap-3
