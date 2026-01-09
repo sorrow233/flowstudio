@@ -91,6 +91,10 @@ const InspirationModule = () => {
         updateIdea(id, { colorIndex: newColorIndex });
     };
 
+    const handleUpdateNote = (id, note) => {
+        updateIdea(id, { note });
+    };
+
     const handleToggleComplete = (id, completed) => {
         updateIdea(id, { completed });
     };
@@ -282,6 +286,7 @@ const InspirationModule = () => {
                             onRemove={handleRemove}
                             onCopy={handleCopy}
                             onUpdateColor={handleUpdateColor}
+                            onUpdateNote={handleUpdateNote}
                             onToggleComplete={handleToggleComplete}
                             copiedId={copiedId}
                         />

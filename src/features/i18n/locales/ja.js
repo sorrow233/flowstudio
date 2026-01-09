@@ -26,6 +26,7 @@ export default {
         copy: 'コピー',
         copied: 'コピーしました',
         search: '検索...',
+        notePlaceholder: 'メモを追加...',
         new: '新規',
         all: 'すべて',
         allCategories: '全カテゴリ',

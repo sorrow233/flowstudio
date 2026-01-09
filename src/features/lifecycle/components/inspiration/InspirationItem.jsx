@@ -87,8 +87,11 @@ export const parseRichText = (text) => {
     });
 };
 
-const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComplete, copiedId }) => {
+const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, onToggleComplete, copiedId }) => {
     const [isDragging, setIsDragging] = React.useState(false);
+    const [isEditingNote, setIsEditingNote] = React.useState(false);
+    const [noteDraft, setNoteDraft] = React.useState(idea.note || '');
+    const inputRef = React.useRef(null);
     const { t } = useTranslation();
 
     const config = getColorConfig(idea.colorIndex || 0);
@@ -100,55 +103,99 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComple
         onToggleComplete(idea.id, !isCompleted);
     };
 
-    return (
-        <div className="relative">
-            {/* Swipe Background (Delete Action) */}
-            <div
-                className={`absolute inset-0 bg-red-500 rounded-xl flex items-center justify-end pr-6 -z-10 transition-opacity duration-200 ${isDragging ? 'opacity-100' : 'opacity-0'}`}
-            >
-                <Trash2 className="text-white" size={20} />
-            </div>
+    const handleDotClick = (e) => {
+        e.stopPropagation();
+        setIsEditingNote(true);
+    };
 
-            <motion.div
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={{ right: 0.05, left: 0.5 }}
-                onDragStart={() => setIsDragging(true)}
-                onDragEnd={(e, info) => {
-                    setIsDragging(false);
-                    if (info.offset.x < -150 || info.velocity.x < -800) {
-                        onRemove(idea.id);
-                    }
-                }}
+    const handleNoteSave = () => {
+        if (noteDraft.trim() !== (idea.note || '')) {
+            onUpdateNote(idea.id, noteDraft.trim());
+        }
+        setIsEditingNote(false);
+    };
+
+    const handleNoteKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleNoteSave();
+        }
+        if (e.key === 'Escape') {
+            setIsEditingNote(false);
+            setNoteDraft(idea.note || '');
+        }
+    };
+
+    return (
+        <motion.div
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={{ right: 0.05, left: 0.5 }}
+            onDragStart={() => setIsDragging(true)}
+            onDragEnd={(e, info) => {
+                setIsDragging(false);
+                if (info.offset.x < -150 || info.velocity.x < -800) {
+                    onRemove(idea.id);
+                }
+            }}
+            initial={{ opacity: 0, y: 20, scale: 0.98 }}
+            animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                x: 0
+            }}
+            transition={{ x: { type: "spring", stiffness: 500, damping: 30 } }}
+            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+            layout
+            className="relative group flex items-start gap-4 mb-4"
+        >
+            {/* Main Card Component */}
+            <div
+                className={`
+                    relative flex-1 bg-white dark:bg-gray-900 rounded-xl p-5 
+                    border border-gray-100 dark:border-gray-800 shadow-sm 
+                    transition-all duration-500 cursor-pointer active:scale-[0.99]
+                    ${isDragging ? '' : `hover:shadow-[0_0_20px_rgba(244,114,182,0.2)] hover:border-pink-200 dark:hover:border-pink-800/50`}
+                    ${isCompleted ? 'opacity-50' : ''}
+                `}
                 onClick={() => {
                     if (!window.getSelection().toString()) {
                         onCopy(idea.content, idea.id);
                     }
                 }}
                 onDoubleClick={handleDoubleClick}
-                initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                animate={{
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    x: 0
-                }}
-                transition={{ x: { type: "spring", stiffness: 500, damping: 30 } }}
-                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                layout
-                className={`
-                    group relative bg-white dark:bg-gray-900 rounded-xl p-5 
-                    border border-gray-100 dark:border-gray-800 shadow-sm 
-                    transition-all duration-500 cursor-pointer active:scale-[0.99]
-                    ${isDragging ? '' : `hover:shadow-[0_0_20px_rgba(244,114,182,0.2)] hover:border-pink-200 dark:hover:border-pink-800/50`}
-                    ${isCompleted ? 'opacity-50' : ''}
-                `}
             >
+                {/* Swipe Background (Delete Action) */}
+                <div
+                    className={`absolute inset-0 bg-red-500 rounded-xl flex items-center justify-end pr-6 -z-10 transition-opacity duration-200 ${isDragging ? 'opacity-100' : 'opacity-0'}`}
+                >
+                    <Trash2 className="text-white" size={20} />
+                </div>
+
                 <div className="flex items-start gap-3">
-                    {/* Color Status Dot - Click to cycle colors */}
-                    <div className="flex-shrink-0 mt-1.5">
-                        <div className={`w-2.5 h-2.5 rounded-full ${config.dot} shadow-sm ${isCompleted ? 'opacity-50' : ''}`} />
+                    {/* Color Status Dot - Click to Edit Note */}
+                    <div className="flex-shrink-0 mt-1.5 relative z-10">
+                        <div
+                            onClick={handleDotClick}
+                            className={`w-2.5 h-2.5 rounded-full ${config.dot} shadow-sm ${isCompleted ? 'opacity-50' : ''} cursor-pointer hover:scale-125 transition-transform duration-200`}
+                        />
+                        {/* Note Input Popover */}
+                        {isEditingNote && (
+                            <div className="absolute top-6 left-0 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl shadow-pink-100/50 dark:shadow-pink-900/20 border border-pink-100 dark:border-pink-800 p-2 min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
+                                <input
+                                    ref={input => input && input.focus()}
+                                    value={noteDraft}
+                                    onChange={(e) => setNoteDraft(e.target.value)}
+                                    onBlur={handleNoteSave}
+                                    onKeyDown={handleNoteKeyDown}
+                                    placeholder={t('common.notePlaceholder', 'Add a note...')}
+                                    className="w-full text-xs text-gray-700 dark:text-gray-200 bg-transparent outline-none placeholder:text-gray-400"
+                                />
+                            </div>
+                        )}
                     </div>
+
                     <div className="flex-1 min-w-0">
                         <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
                             {parseRichText(idea.content)}
@@ -183,8 +230,17 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComple
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </motion.div>
-        </div>
+            </div>
+
+            {/* Note Display - Outside the Card */}
+            {idea.note && (
+                <div className="w-[140px] pt-4 flex-shrink-0 animate-in fade-in slide-in-from-left-4 duration-500">
+                    <p className="text-[12px] font-medium text-pink-300 dark:text-pink-300/80 leading-relaxed italic break-words select-text">
+                        {idea.note}
+                    </p>
+                </div>
+            )}
+        </motion.div>
     );
 };
 

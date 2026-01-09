@@ -26,6 +26,7 @@ export default {
         copy: '복사',
         copied: '복사됨',
         search: '검색...',
+        notePlaceholder: '노트 추가...',
         new: '새로 만들기',
         all: '전체',
         allCategories: '모든 카테고리',

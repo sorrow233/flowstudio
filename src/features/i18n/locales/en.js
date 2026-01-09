@@ -26,6 +26,7 @@ export default {
         copy: 'Copy',
         copied: 'Copied',
         search: 'Search...',
+        notePlaceholder: 'Add a note...',
         new: 'New',
         profile: 'Profile',
         all: 'All',
