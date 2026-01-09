@@ -208,8 +208,12 @@ export const useDataMigration = (doc) => {
         const migrate = () => {
             // 1. Check if migration already ran
             if (localStorage.getItem(MIGRATION_KEY)) {
-                // Migration done, check if we need to seed default template
-                seedDefaultTemplateIfEmpty();
+                // 老用户：迁移已完成，不需要加载默认模板
+                // 直接标记 DEFAULT_TEMPLATE_KEY 防止后续误触发
+                if (!localStorage.getItem(DEFAULT_TEMPLATE_KEY)) {
+                    localStorage.setItem(DEFAULT_TEMPLATE_KEY, 'true');
+                    console.info("[DefaultTemplate] 老用户跳过默认模板加载");
+                }
                 return;
             }
 
