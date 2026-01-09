@@ -420,7 +420,7 @@ const InspirationModule = () => {
                     />
 
                     {/* Bottom Action Area */}
-                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-4">
+                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-4 z-20">
                         <div className="flex items-center gap-4 flex-1 min-w-0">
                             {/* Minimal Color Picker */}
                             <div className="flex items-center gap-1.5 px-2 py-1.5 bg-gray-50/50 dark:bg-gray-800/50 rounded-full border border-gray-100/50 dark:border-gray-700/50 backdrop-blur-sm flex-shrink-0">
