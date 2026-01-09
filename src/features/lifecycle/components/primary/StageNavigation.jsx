@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, MonitorPlay, Container, Flower2, Flag, Check, Lock, Terminal, CheckSquare } from 'lucide-react';
+import { Layers, MonitorPlay, Container, Lightbulb, Flag, Check, Lock, Terminal, CheckSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { DEV_STAGES } from '../../../../utils/constants';
 
@@ -7,7 +7,7 @@ const STAGE_ICONS = {
     1: Layers,
     2: MonitorPlay,
     3: Container,
-    4: Flower2,
+    4: Lightbulb,
     5: Flag
 };
 
