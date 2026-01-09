@@ -11,6 +11,8 @@ import CategoryRenameModal from './components/CategoryRenameModal';
 import { SharePublishModal, ShareBrowserModal } from '../share';
 import LibraryImportModal from './components/LibraryImportModal';
 
+import { useSync } from '../sync/SyncContext';
+import { useSyncedProjects } from '../sync/useSyncStore';
 import { useTranslation } from '../i18n';
 
 
