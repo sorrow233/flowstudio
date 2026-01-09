@@ -183,18 +183,8 @@ const CommandCenterModule = () => {
     };
 
     const handleRemove = (id) => {
-        const command = commands.find(c => c.id === id);
-        if (!command) return;
-
-        const isLastInstance = command.stageIds.length <= 1;
-
-        if (confirm(isLastInstance ? t('commands.deleteConfirmLast') : t('commands.deleteConfirmStage'))) {
-            if (isLastInstance) {
-                deleteCommand(id);
-            } else {
-                updateCommand(id, { stageIds: command.stageIds.filter(sid => sid !== activeStage) });
-            }
-        }
+        // Simple delete - just remove the command
+        deleteCommand(id);
     };
 
     const handleCopy = (id, content) => {
