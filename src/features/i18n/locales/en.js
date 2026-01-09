@@ -5,8 +5,8 @@ export default {
         inspiration: 'Inspiration',
         pending: 'Pending',
         primary: 'Primary',
-        advanced: 'Final',
-        final: 'Advanced',
+        advanced: 'Advanced',
+        final: 'Final',
         commercial: 'Commercial',
         command: 'Command',
         cloudSync: 'Cloud Sync',
@@ -67,15 +67,8 @@ export default {
         addTask: 'Add Task',
     },
 
-    // Final Dev (formerly Advanced)
-    advanced: {
-        title: 'Final Integration',
-        subtitle: 'The concluding phase of core system integration.',
-        emptyState: 'No final projects',
-    },
-
     // Advanced Refinement (formerly Final)
-    final: {
+    advanced: {
         title: 'Advanced Refinement',
         subtitle: 'Deep performance optimization and experience polishing beyond the core.',
         emptyState: 'No advanced projects',
@@ -86,11 +79,18 @@ export default {
         projectName: 'Project Name...',
         create: 'Create',
         total: 'TOTAL',
-        noProjectsTitle: 'No Final Projects',
+        noProjectsTitle: 'No Advanced Projects',
         noProjectsDesc: 'Create a project to start optimization and polishing',
         createFirst: '+ Create First Project',
-        newProjectDefaultTitle: 'New Final Dev Project',
+        newProjectDefaultTitle: 'New Advanced Project',
         newProjectDefaultDesc: 'Optimization, features & fixes',
+    },
+
+    // Final Dev (formerly Advanced)
+    final: {
+        title: 'Final Integration',
+        subtitle: 'The concluding phase of core system integration.',
+        emptyState: 'No final projects',
     },
 
     // Commercial Module

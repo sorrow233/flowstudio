@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Network, Sparkles, Activity, Zap, CheckCircle2, X, Plus, Box, AlignJustify, Grid, LayoutGrid, List } from 'lucide-react';
+import { Network, Sparkles, Activity, Zap, CheckCircle2, X, Plus, Box, AlignJustify, Grid, LayoutGrid, List, Trophy } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import ModuleGrid from './ModuleGrid';
 import ModuleList from './ModuleList';
@@ -19,7 +19,7 @@ const CATEGORIES = [
     { id: 'devops', label: 'DevOps', aliases: ['devops', '运维'] },
 ];
 
-const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
+const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate }) => {
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [isLibraryOpen, setIsLibraryOpen] = useState(false);
     const [editingModule, setEditingModule] = useState(null);
@@ -199,6 +199,14 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject }) => {
 
                         {/* Controls */}
                         <div className="flex items-center gap-3">
+                            <button
+                                onClick={onGraduate}
+                                className="px-4 py-2 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-900 rounded-xl text-xs font-bold uppercase tracking-wider hover:shadow-md transition-all flex items-center gap-2 mr-4"
+                            >
+                                <Trophy size={14} />
+                                Launch Commercial
+                            </button>
+
                             {/* View Toggles */}
                             <div className="flex bg-gray-50 rounded-xl p-1 mr-2">
                                 <button

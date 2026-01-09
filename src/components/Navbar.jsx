@@ -43,18 +43,18 @@ const Navbar = () => {
     const { isDark, toggleTheme } = useTheme();
     const { t } = useTranslation();
 
-    // 主流程：灵感 → 命令 → 待定 → 开发 → 进阶
+    // 主流程：灵感 → 命令 → 待定 → 开发
     const mainTabs = [
         { id: 'inspiration', label: t('navbar.inspiration'), icon: tabIcons.inspiration, path: '/inspiration' },
         { id: 'command', label: t('navbar.command'), icon: tabIcons.command, path: '/commands' },
         { id: 'pending', label: t('navbar.pending'), icon: tabIcons.pending, path: '/pending' },
         { id: 'primary', label: t('navbar.primary'), icon: tabIcons.primary, path: '/primary' },
-        { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' },
     ];
 
-    // 额外流程：终稿和商业化（不在主开发流程中）
+    // 额外流程：进阶 -> 终稿 -> 商业化
     const extraTabs = [
-        { id: 'final', label: t('navbar.final'), icon: tabIcons.final, path: '/final' },
+        { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' }, // Icon: Zap? No, Advanced=Zap
+        { id: 'final', label: t('navbar.final'), icon: tabIcons.final, path: '/final' }, // Icon: Check
         { id: 'commercial', label: t('navbar.commercial'), icon: tabIcons.commercial, path: '/commercial' },
     ];
 

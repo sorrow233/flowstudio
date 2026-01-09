@@ -50,9 +50,9 @@ const FinalDevModule = () => {
         canRedo
     } = useSyncedProjects(doc, 'all_projects');
 
-    // Filter projects for this module
+    // Filter projects for this module (Optimization Stage)
     const projects = React.useMemo(() =>
-        allProjects.filter(p => p.stage === 'final'),
+        allProjects.filter(p => p.stage === 'advanced'),
         [allProjects]);
 
     useUndoShortcuts(undo, redo);
@@ -141,7 +141,7 @@ const FinalDevModule = () => {
             desc: '新的最终开发项目',
             subStage: 1,
             tasks: [],
-            stage: 'final' // Set stage
+            stage: 'advanced' // Set stage to Advanced (Optimization)
         };
         addProject(newProject);
         setNewProjectTitle('');
@@ -300,7 +300,7 @@ const FinalDevModule = () => {
             <div className="mb-12 flex justify-between items-end">
                 <div>
                     <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">进阶优化阶段</h2>
-                    <p className="text-gray-400 text-sm font-light tracking-wide">深度性能优化与体验打磨</p>
+                    <p className="text-gray-400 text-sm font-light tracking-wide">核心功能之外的深度性能优化与体验打磨</p>
                 </div>
                 <div className="flex items-center gap-4 text-right">
                     {isCreatingProject ? (
@@ -514,6 +514,23 @@ const FinalDevModule = () => {
 
                                 {/* Right Content: Task List */}
                                 <div className="flex-1 flex flex-col relative w-full overflow-hidden">
+                                    {/* Graduation Button (Optimization -> Final) */}
+                                    {viewStage === 3 && (selectedProject.subStage || 1) >= 4 && (
+                                        <div className="px-6 pt-6 -mb-4">
+                                            <button
+                                                onClick={() => {
+                                                    if (confirm('Ready to graduate to Final Integration?')) {
+                                                        updateProject(selectedProject.id, { stage: 'final', subStage: 1 });
+                                                        setSelectedProject(null);
+                                                    }
+                                                }}
+                                                className="w-full py-3 bg-gradient-to-r from-indigo-100 to-blue-100 rounded-xl text-indigo-800 font-bold uppercase tracking-widest text-xs shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Trophy size={16} /> Graduate to Final Integration
+                                            </button>
+                                        </div>
+                                    )}
+
                                     <TaskList
                                         ref={taskListRef}
                                         tasks={selectedProject.tasks}

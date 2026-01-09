@@ -4,15 +4,17 @@ import { Network, Sparkles, FolderDot, Box, Activity, Trophy } from 'lucide-reac
 import { useSyncedProjects } from '../sync/useSyncStore';
 import { useSync } from '../sync/SyncContext';
 import AdvancedProjectWorkspace from './components/advanced/AdvancedProjectWorkspace';
+import { useNavigate } from 'react-router-dom';
 
 const AdvancedDevModule = () => {
+    const navigate = useNavigate();
     // --- Data Layer ---
     const { doc } = useSync();
     const { projects: allProjects, updateProject } = useSyncedProjects(doc, 'all_projects');
 
-    // Filter for Final Projects (stage: 'final' covers both primary graduates and direct creates)
+    // Filter for Final Projects (Culmination Stage)
     const finalProjects = React.useMemo(() =>
-        allProjects.filter(p => p.stage === 'final' || (p.subStage || 1) >= 6),
+        allProjects.filter(p => p.stage === 'final'),
         [allProjects]);
 
     // For compatibility with some local variables if they exist
@@ -42,7 +44,7 @@ const AdvancedDevModule = () => {
             <div className="mb-12 flex justify-between items-end">
                 <div>
                     <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">终稿整合阶段</h2>
-                    <p className="text-gray-400 text-sm font-light tracking-wide">核心逻辑与系统整合的最终交付</p>
+                    <p className="text-gray-400 text-sm font-light tracking-wide">项目核心逻辑与系统整合的最终阶段</p>
                 </div>
                 <div className="text-right">
                     <span className="text-3xl font-thin text-gray-900">{finalProjects.length}</span>
@@ -115,6 +117,13 @@ const AdvancedDevModule = () => {
                             project={liveProject}
                             onClose={() => setSelectedProject(null)}
                             updateProject={updateProject}
+                            onGraduate={() => {
+                                if (confirm('Ready to launch this project commercially?')) {
+                                    updateProject(selectedProject.id, { stage: 'commercial', subStage: 1 });
+                                    setSelectedProject(null);
+                                    navigate('/commercial');
+                                }
+                            }}
                         />
                     );
                 })()}

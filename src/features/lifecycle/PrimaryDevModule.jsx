@@ -272,12 +272,10 @@ const PrimaryDevModule = () => {
             colors: ['#10B981', '#34D399', '#FBBF24', '#ffffff']
         });
 
-        // Graduation: Transition stage from primary to final
+        // Graduation: Transition stage from primary to advanced (Optimization)
         updateProject(selectedProject.id, {
-            stage: 'final',
-            subStage: 1, // Reset subStage for the new phase if desired, or keep at 6?
-            // The user's previous logic set subStage: 1 for Final module.
-            // Let's stick with that for continuity of their workflow.
+            stage: 'advanced',
+            subStage: 1, // Reset subStage for the new phase
         });
 
         // Close modal after delay

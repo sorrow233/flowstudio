@@ -5,8 +5,8 @@ export default {
         inspiration: '인스피레이션',
         pending: '보류',
         primary: '메인 개발',
-        advanced: '최종',
-        final: '고급',
+        advanced: '고급',
+        final: '최종',
         commercial: '상용화',
         command: '명령',
         cloudSync: '클라우드 동기화',
@@ -66,15 +66,8 @@ export default {
         addTask: '작업 추가',
     },
 
-    // 최종 개발 (구 고급)
-    advanced: {
-        title: '최종 통합',
-        subtitle: '프로젝트 핵심 로직 및 시스템 통합의 최종 단계',
-        emptyState: '최종 프로젝트가 없습니다',
-    },
-
     // 고급 최적화 (구 최종)
-    final: {
+    advanced: {
         title: '고급 최적화',
         subtitle: '핵심 기능 그 이상의 딥한 성능 최적화와 경험 다듬기',
         emptyState: '고급 프로젝트가 없습니다',
@@ -85,11 +78,18 @@ export default {
         projectName: '프로젝트 이름...',
         create: '생성',
         total: '합계',
-        noProjectsTitle: '최종 프로젝트 없음',
+        noProjectsTitle: '고급 프로젝트 없음',
         noProjectsDesc: '최적화 및 완성을 시작하려면 프로젝트를 생성하세요',
         createFirst: '+ 첫 프로젝트 생성',
-        newProjectDefaultTitle: '새 최종 개발 프로젝트',
+        newProjectDefaultTitle: '새 고급 개발 프로젝트',
         newProjectDefaultDesc: '최적화, 기능 및 수정',
+    },
+
+    // 최종 개발 (구 고급)
+    final: {
+        title: '최종 통합',
+        subtitle: '프로젝트 핵심 로직 및 시스템 통합의 최종 단계',
+        emptyState: '최종 프로젝트가 없습니다',
     },
 
     // Commercial Module

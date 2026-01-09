@@ -79,7 +79,7 @@ const CommercialModule = () => {
     const [selectedProject, setSelectedProject] = useState(null);
 
     const commercialProjects = React.useMemo(() => {
-        return allProjects.filter(p => p.stage === 'final' || (p.subStage || 1) >= 6);
+        return allProjects.filter(p => p.stage === 'commercial');
     }, [allProjects]);
 
     useEffect(() => {
