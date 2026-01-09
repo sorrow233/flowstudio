@@ -5,7 +5,6 @@
  * 1. 每小时自动备份完整数据到 localStorage
  * 2. 保留最多3天（72个小时备份点）的历史数据
  * 3. 仅在在线状态时执行备份
- * 4. 页面卸载时保存最后一次备份
  */
 
 import { useEffect, useRef, useCallback } from 'react';
@@ -13,6 +12,9 @@ import { exportAllData } from '../settings/dataUtils';
 
 // 备份间隔：1小时
 const BACKUP_INTERVAL_MS = 60 * 60 * 1000;
+
+// 最小备份间隔：5分钟（防止重复备份）
+const MIN_BACKUP_INTERVAL_MS = 5 * 60 * 1000;
 
 // 保留天数：3天 = 72小时
 const MAX_BACKUP_AGE_MS = 3 * 24 * 60 * 60 * 1000;
@@ -46,6 +48,23 @@ export const getLatestBackup = () => {
     return backups.reduce((latest, current) =>
         current.timestamp > latest.timestamp ? current : latest
     );
+};
+
+/**
+ * 获取上次备份时间
+ * @returns {number} 时间戳，如果无备份返回0
+ */
+const getLastBackupTime = () => {
+    try {
+        const stored = localStorage.getItem(BACKUP_STORAGE_KEY);
+        if (stored) {
+            const { lastBackupTime } = JSON.parse(stored);
+            return lastBackupTime || 0;
+        }
+    } catch (e) {
+        // ignore
+    }
+    return 0;
 };
 
 /**
@@ -96,12 +115,23 @@ const cleanupOldBackups = (backups) => {
 /**
  * 执行备份
  * @param {Y.Doc} doc - Y.Doc 实例
+ * @param {boolean} force - 是否强制备份（忽略最小间隔）
  * @returns {boolean} 是否成功
  */
-export const performBackup = (doc) => {
+export const performBackup = (doc, force = false) => {
     if (!doc) {
         console.warn('[LocalBackup] No Y.Doc provided, skipping backup.');
         return false;
+    }
+
+    // 防重检查：5分钟内不重复备份
+    if (!force) {
+        const lastTime = getLastBackupTime();
+        const elapsed = Date.now() - lastTime;
+        if (elapsed < MIN_BACKUP_INTERVAL_MS) {
+            console.info(`[LocalBackup] Skipping backup, last backup was ${Math.round(elapsed / 1000)}s ago (min interval: ${MIN_BACKUP_INTERVAL_MS / 1000}s).`);
+            return false;
+        }
     }
 
     try {
@@ -138,13 +168,14 @@ export const performBackup = (doc) => {
 export const useLocalBackup = (doc) => {
     const intervalRef = useRef(null);
     const docRef = useRef(doc);
+    const initializedRef = useRef(false);
 
     // 保持 doc 引用更新
     useEffect(() => {
         docRef.current = doc;
     }, [doc]);
 
-    // 检查是否应该执行备份
+    // 检查是否应该执行备份（基于1小时间隔）
     const shouldBackup = useCallback(() => {
         // 检查在线状态
         if (!navigator.onLine) {
@@ -153,18 +184,13 @@ export const useLocalBackup = (doc) => {
         }
 
         // 检查距离上次备份的时间
-        try {
-            const stored = localStorage.getItem(BACKUP_STORAGE_KEY);
-            if (stored) {
-                const { lastBackupTime } = JSON.parse(stored);
-                const elapsed = Date.now() - lastBackupTime;
-                // 如果距离上次备份不足50分钟，跳过（允许一些误差）
-                if (elapsed < BACKUP_INTERVAL_MS - 10 * 60 * 1000) {
-                    return false;
-                }
+        const lastTime = getLastBackupTime();
+        if (lastTime > 0) {
+            const elapsed = Date.now() - lastTime;
+            // 如果距离上次备份不足50分钟，跳过
+            if (elapsed < BACKUP_INTERVAL_MS - 10 * 60 * 1000) {
+                return false;
             }
-        } catch (e) {
-            // 解析失败，继续备份
         }
 
         return true;
@@ -174,38 +200,35 @@ export const useLocalBackup = (doc) => {
     useEffect(() => {
         if (!doc) return;
 
-        // 初始化时检查是否需要立即备份
+        // 防止 Effect 重复初始化
+        if (initializedRef.current) return;
+        initializedRef.current = true;
+
+        // 初始化时检查是否需要备份
         const initialCheck = () => {
-            try {
-                const stored = localStorage.getItem(BACKUP_STORAGE_KEY);
-                if (!stored) {
-                    // 首次备份延迟1分钟执行，避免页面加载时数据未完全同步
-                    setTimeout(() => {
-                        if (docRef.current && navigator.onLine) {
-                            performBackup(docRef.current);
-                        }
-                    }, 60 * 1000);
-                } else {
-                    const { lastBackupTime } = JSON.parse(stored);
-                    const elapsed = Date.now() - lastBackupTime;
-                    // 如果超过1小时没备份，立即备份
-                    if (elapsed >= BACKUP_INTERVAL_MS) {
-                        performBackup(doc);
-                    }
-                }
-            } catch (e) {
-                // 首次备份
+            const lastTime = getLastBackupTime();
+            if (lastTime === 0) {
+                // 首次备份延迟1分钟执行
+                console.info('[LocalBackup] First backup scheduled in 1 minute.');
                 setTimeout(() => {
                     if (docRef.current && navigator.onLine) {
                         performBackup(docRef.current);
                     }
                 }, 60 * 1000);
+            } else {
+                const elapsed = Date.now() - lastTime;
+                if (elapsed >= BACKUP_INTERVAL_MS) {
+                    // 超过1小时没备份，立即备份
+                    performBackup(doc);
+                } else {
+                    console.info(`[LocalBackup] Last backup was ${Math.round(elapsed / 60000)} minutes ago, next backup in ${Math.round((BACKUP_INTERVAL_MS - elapsed) / 60000)} minutes.`);
+                }
             }
         };
 
         initialCheck();
 
-        // 设置定时器
+        // 设置定时器（每小时检查一次）
         intervalRef.current = setInterval(() => {
             if (shouldBackup() && docRef.current) {
                 performBackup(docRef.current);
@@ -220,22 +243,15 @@ export const useLocalBackup = (doc) => {
             }
         };
 
-        // 页面卸载前保存最后一次备份
-        const handleBeforeUnload = () => {
-            if (docRef.current && navigator.onLine) {
-                performBackup(docRef.current);
-            }
-        };
-
         window.addEventListener('online', handleOnline);
-        window.addEventListener('beforeunload', handleBeforeUnload);
 
         return () => {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
             }
             window.removeEventListener('online', handleOnline);
-            window.removeEventListener('beforeunload', handleBeforeUnload);
+            initializedRef.current = false;
         };
     }, [doc, shouldBackup]);
 };
+
