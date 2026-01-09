@@ -107,20 +107,20 @@ const StageSelector = ({ activeStage, setActiveStage, commands, selectedCategory
                                 </div>
                             </div>
                             {count > 0 && (
-                                { count }
+                                <span className="ml-auto bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold">
+                                    {count}
                                 </span>
-                    )
-                }
-                            { isActive && (
-                        <motion.div
-                            layoutId="active-bg"
-                            className="absolute inset-0 border-2 border-gray-100 dark:border-gray-700 rounded-2xl pointer-events-none"
-                        />
-                    )}
-            </button>
-            );
+                            )}
+                            {isActive && (
+                                <motion.div
+                                    layoutId="active-bg"
+                                    className="absolute inset-0 border-2 border-gray-100 dark:border-gray-700 rounded-2xl pointer-events-none"
+                                />
+                            )}
+                        </button>
+                    );
                 })}
-        </div>
+            </div>
         </div >
     );
 };
