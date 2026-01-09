@@ -60,10 +60,22 @@ const Navbar = () => {
 
     const { status } = useSync();
 
+    // Dynamic Spotlight Color based on active tab
+    const getSpotlightColor = () => {
+        const path = location.pathname;
+        if (path.startsWith('/inspiration')) return isDark ? "rgba(244, 114, 182, 0.15)" : "rgba(244, 114, 182, 0.12)"; // Pink
+        if (path.startsWith('/pending')) return isDark ? "rgba(16, 185, 129, 0.15)" : "rgba(16, 185, 129, 0.1)"; // Green
+        if (path.startsWith('/primary')) return isDark ? "rgba(168, 85, 247, 0.15)" : "rgba(168, 85, 247, 0.1)"; // Purple
+        if (path.startsWith('/advanced')) return isDark ? "rgba(239, 68, 68, 0.15)" : "rgba(239, 68, 68, 0.1)"; // Red
+        if (path.startsWith('/commercial')) return isDark ? "rgba(245, 158, 11, 0.15)" : "rgba(245, 158, 11, 0.1)"; // Amber
+        if (path.startsWith('/commands')) return isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)"; // Neutral
+        return isDark ? "rgba(16, 185, 129, 0.15)" : "rgba(16, 185, 129, 0.1)"; // Default to Green
+    };
+
     return (
         <div className="flex justify-center w-full px-4 pt-10 pb-4 relative z-50">
             <nav className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-full shadow-sm max-w-[95vw] md:max-w-full relative mx-auto">
-                <Spotlight spotColor={isDark ? "rgba(16, 185, 129, 0.15)" : "rgba(16, 185, 129, 0.1)"} size={300} className="rounded-full">
+                <Spotlight spotColor={getSpotlightColor()} size={300} className="rounded-full">
                     <div className="flex items-center gap-1 md:gap-2 px-1.5 py-1.5 md:px-2 md:py-2 overflow-x-auto no-scrollbar mask-linear-fade">
                         {/* 主流程 */}
                         {mainTabs.map((tab) => {

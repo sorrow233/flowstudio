@@ -146,16 +146,8 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComple
             >
                 <div className="flex items-start gap-3">
                     {/* Color Status Dot - Click to cycle colors */}
-                    <div
-                        className="flex-shrink-0 mt-1.5 cursor-pointer"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            const currentIndex = typeof idea.colorIndex === 'number' ? idea.colorIndex : 0;
-                            const nextIndex = (currentIndex + 1) % COLOR_CONFIG.length;
-                            onUpdateColor(idea.id, nextIndex);
-                        }}
-                    >
-                        <div className={`w-2.5 h-2.5 rounded-full ${config.dot} shadow-sm transition-transform duration-200 hover:scale-125 ${isCompleted ? 'scale-75 opacity-50' : ''}`} />
+                    <div className="flex-shrink-0 mt-1.5">
+                        <div className={`w-2.5 h-2.5 rounded-full ${config.dot} shadow-sm ${isCompleted ? 'opacity-50' : ''}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
