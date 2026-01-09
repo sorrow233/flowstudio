@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { useSyncStore, useDataMigration, useProjectMigration } from './useSyncStore';
 import { useAuth } from '../auth/AuthContext';
+import { useLocalBackup } from './LocalBackupService';
 
 const SyncContext = createContext(null);
 
@@ -15,6 +16,9 @@ export const SyncProvider = ({ children, docId = 'flowstudio_v1' }) => {
     // Run migration only once at the root level
     // Pass isLoggedIn so seeding is skipped for logged-in users (their data will sync from server)
     useDataMigration(doc, isLoggedIn);
+
+    // 启用本地定时备份：每小时同步一次完整数据，保留3天
+    useLocalBackup(doc);
 
     // Migrate projects to unified storage
     useProjectMigration(doc, 'all_projects', [
