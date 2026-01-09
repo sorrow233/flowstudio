@@ -23,7 +23,7 @@ const AdvancedDevModule = () => {
     const projects = allProjects;
 
     const { t } = useTranslation();
-    const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
+    const { openConfirm, ConfirmDialogComponent } = useConfirmDialog(); // Fix: Import ConfirmDialog hook
 
     // --- State ---
     const [selectedProject, setSelectedProject] = useState(null);
