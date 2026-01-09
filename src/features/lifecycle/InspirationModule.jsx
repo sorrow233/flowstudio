@@ -237,7 +237,7 @@ const InspirationModule = () => {
                                         <button
                                             key={conf.id}
                                             onClick={() => setSelectedColorIndex(prev => prev === index ? null : index)}
-                                            className={`w-3 h-3 rounded-full transition-all duration-300 ${conf.dot} ${index === selectedColorIndex ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 ring-gray-400 dark:ring-gray-500 scale-110' : 'opacity-40 hover:opacity-100 hover:scale-110'}`}
+                                            className={`relative w-3 h-3 rounded-full transition-all duration-300 ${conf.dot} ${index === selectedColorIndex ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 ring-gray-400 dark:ring-gray-500 scale-110' : 'opacity-40 hover:opacity-100 hover:scale-110'} after:absolute after:-inset-2`}
                                             title={conf.id}
                                         />
                                     ))}
@@ -319,7 +319,7 @@ const InspirationModule = () => {
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 50 }}
-                        className="fixed bottom-10 right-10 bg-pink-50 dark:bg-pink-900 text-pink-900 dark:text-pink-50 px-6 py-3 rounded-xl shadow-2xl shadow-pink-100 dark:shadow-pink-900/20 border border-pink-100 dark:border-pink-800 flex items-center gap-4 z-50"
+                        className="fixed bottom-24 left-6 right-6 md:bottom-10 md:left-auto md:right-10 md:w-auto bg-pink-50 dark:bg-pink-900 text-pink-900 dark:text-pink-50 px-6 py-3 rounded-xl shadow-2xl shadow-pink-100 dark:shadow-pink-900/20 border border-pink-100 dark:border-pink-800 flex items-center justify-between md:justify-start gap-4 z-50"
                     >
                         <span className="text-sm font-medium">
                             {t('inspiration.ideaDeleted')}

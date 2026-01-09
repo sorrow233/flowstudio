@@ -148,7 +148,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
             transition={{ x: { type: "spring", stiffness: 500, damping: 30 } }}
             exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
             layout
-            className="relative group flex items-start gap-4 mb-4"
+            className="relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4"
         >
             {/* Main Card Component */}
             <div
@@ -234,7 +234,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
 
             {/* Note Display - Outside the Card */}
             {idea.note && (
-                <div className="w-[140px] pt-4 flex-shrink-0 animate-in fade-in slide-in-from-left-4 duration-500">
+                <div className="w-full md:w-[140px] pt-1 md:pt-4 pl-4 md:pl-0 flex-shrink-0 animate-in fade-in slide-in-from-left-4 duration-500">
                     <p className="text-[12px] font-medium text-pink-300 dark:text-pink-300/80 leading-relaxed italic break-words select-text">
                         {idea.note}
                     </p>
