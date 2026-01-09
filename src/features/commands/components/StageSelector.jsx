@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Layers, MonitorPlay, Bug, Sparkles, Flag, Terminal } from 'lucide-react';
+import { Layers, MonitorPlay, Bug, Sparkles, Flag, Terminal, Gem } from 'lucide-react';
 import { DEV_STAGES } from '../../../utils/constants';
 
 const STAGE_ICONS = {
@@ -8,7 +8,17 @@ const STAGE_ICONS = {
     2: MonitorPlay,
     3: Bug,
     4: Sparkles,
-    5: Flag
+    5: Flag,
+    6: Gem
+};
+
+const STAGE_THEMES = {
+    1: 'bg-blue-500 text-white shadow-blue-200',
+    2: 'bg-emerald-500 text-white shadow-emerald-200',
+    3: 'bg-violet-500 text-white shadow-violet-200',
+    4: 'bg-amber-500 text-white shadow-amber-200',
+    5: 'bg-rose-500 text-white shadow-rose-200',
+    6: 'bg-yellow-400 text-white shadow-yellow-100',
 };
 
 const StageSelector = ({ activeStage, setActiveStage, commands }) => {
@@ -74,7 +84,7 @@ const StageSelector = ({ activeStage, setActiveStage, commands }) => {
                             <div className="flex items-center gap-3 md:gap-4 relative z-10 show-full">
                                 <div className={`
                                     w-8 h-8 rounded-lg flex items-center justify-center transition-colors
-                                    ${isActive ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-white'}
+                                    ${isActive ? STAGE_THEMES[stage.id] : 'bg-gray-100 text-gray-400 group-hover:bg-white'}
                                 `}>
                                     <Icon size={16} />
                                 </div>
@@ -85,7 +95,7 @@ const StageSelector = ({ activeStage, setActiveStage, commands }) => {
                                     {isActive && (
                                         <motion.div
                                             layoutId="subtitle"
-                                            className="text-[10px] text-gray-400 font-mono hidden xl:block"
+                                            className={`text-[10px] font-mono hidden xl:block ${isActive ? 'text-gray-400' : 'text-gray-400'}`}
                                         >
                                             STAGE 0{stage.id}
                                         </motion.div>

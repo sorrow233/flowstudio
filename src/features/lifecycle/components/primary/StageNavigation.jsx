@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, MonitorPlay, Container, Flower2, Flag, Check, Lock, Terminal, CheckSquare } from 'lucide-react';
+import { Layers, MonitorPlay, Container, Flower2, Flag, Check, Lock, Terminal, CheckSquare, Gem } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { DEV_STAGES } from '../../../../utils/constants';
 
@@ -8,7 +8,8 @@ const STAGE_ICONS = {
     2: MonitorPlay,
     3: Container,
     4: Flower2,
-    5: Flag
+    5: Flag,
+    6: Gem
 };
 
 const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleComplete, customStageNames = {}, onRenameStage, stageStats = {}, stages = DEV_STAGES }) => {
@@ -154,11 +155,12 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                                 ? 'bg-emerald-500 shadow-emerald-200 ring-2 ring-emerald-100'
                                                 : (() => {
                                                     const stageColors = {
-                                                        1: 'bg-slate-300',
-                                                        2: 'bg-blue-300',
-                                                        3: 'bg-violet-300',
-                                                        4: 'bg-amber-300',
-                                                        5: 'bg-rose-300'
+                                                        1: 'bg-blue-400',
+                                                        2: 'bg-emerald-400',
+                                                        3: 'bg-violet-400',
+                                                        4: 'bg-amber-400',
+                                                        5: 'bg-rose-400',
+                                                        6: 'bg-yellow-400'
                                                     };
                                                     return stageColors[stage.id] || 'bg-gray-300';
                                                 })()
