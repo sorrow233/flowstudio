@@ -92,6 +92,24 @@ const AuthModal = ({ isOpen, onClose }) => {
                     <h2 className="text-xl font-medium text-gray-900 mb-1">Welcome Back</h2>
                     <p className="text-sm text-gray-500 mb-8">{user.email}</p>
 
+                    <div className="w-full mb-6 text-left">
+                        <div
+                            onClick={toggleAdvancedFeatures}
+                            className="w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all flex items-center gap-3 cursor-pointer group select-none border border-gray-100"
+                        >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${showAdvancedFeatures ? 'bg-amber-100' : 'bg-gray-200'}`}>
+                                <Zap size={16} className={showAdvancedFeatures ? 'text-amber-600' : 'text-gray-500'} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm text-gray-900">Unlock Advanced</div>
+                                <div className="text-xs text-gray-400 truncate">Modules & Commercial</div>
+                            </div>
+                            <div className={`w-8 h-4 rounded-full p-0.5 transition-colors relative ${showAdvancedFeatures ? 'bg-amber-500' : 'bg-gray-300'}`}>
+                                <div className={`w-3 h-3 rounded-full bg-white shadow-sm transition-transform ${showAdvancedFeatures ? 'translate-x-4' : 'translate-x-0'}`} />
+                            </div>
+                        </div>
+                    </div>
+
                     <button
                         onClick={() => {
                             logout();
