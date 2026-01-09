@@ -1,54 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Send, Trash2, ArrowRight, Copy, Check, Lightbulb, Hash, Tag } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { ArrowRight, Lightbulb, Hash } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import { useTranslation } from '../i18n';
-
-const STORAGE_KEY = 'flowstudio_inspiration_ideas';
-
-// Refined Color Configuration for "Elegant and Faint" look
-const COLOR_CONFIG = [
-    {
-        id: 'emerald',
-        dot: 'bg-emerald-400',
-        glow: 'group-hover:ring-emerald-500/10 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.05)]',
-        border: 'hover:border-emerald-200 dark:hover:border-emerald-800/50'
-    },
-    {
-        id: 'amber',
-        dot: 'bg-amber-400',
-        glow: 'group-hover:ring-amber-500/10 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.05)]',
-        border: 'hover:border-amber-200 dark:hover:border-amber-800/50'
-    },
-    {
-        id: 'violet',
-        dot: 'bg-violet-400',
-        glow: 'group-hover:ring-violet-500/10 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.05)]',
-        border: 'hover:border-violet-200 dark:hover:border-violet-800/50'
-    },
-    {
-        id: 'blue',
-        dot: 'bg-blue-400',
-        glow: 'group-hover:ring-blue-500/10 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.05)]',
-        border: 'hover:border-blue-200 dark:hover:border-blue-800/50'
-    },
-    {
-        id: 'rose',
-        dot: 'bg-rose-400',
-        glow: 'group-hover:ring-rose-500/10 group-hover:shadow-[0_0_20px_rgba(244,63,94,0.05)]',
-        border: 'hover:border-rose-200 dark:hover:border-rose-800/50'
-    },
-    {
-        id: 'lime',
-        dot: 'bg-lime-400',
-        glow: 'group-hover:ring-lime-500/10 group-hover:shadow-[0_0_20px_rgba(132,204,22,0.05)]',
-        border: 'hover:border-lime-200 dark:hover:border-lime-800/50'
-    },
-];
-
-const getColorConfig = (index) => COLOR_CONFIG[index % COLOR_CONFIG.length];
+import InspirationItem, { COLOR_CONFIG, getColorConfig } from './components/inspiration/InspirationItem';
+import InputRichPreview from './components/inspiration/InputRichPreview';
 
 // Auto color logic: Every 3 items, switch to next color
 const getNextAutoColorIndex = (totalCount) => {
@@ -56,211 +14,7 @@ const getNextAutoColorIndex = (totalCount) => {
     return groupIndex % COLOR_CONFIG.length;
 };
 
-// Extracted Item Component to manage local drag state
-const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) => {
-    const [isDragging, setIsDragging] = useState(false);
-    const [isCompleted, setIsCompleted] = useState(false);
-    const { t } = useTranslation();
-
-    const config = getColorConfig(idea.colorIndex || 0);
-
-    // Handle double click to toggle completion (strikethrough)
-    const handleDoubleClick = (e) => {
-        e.stopPropagation();
-        setIsCompleted(prev => !prev);
-    };
-
-    return (
-        <div className="relative">
-            {/* Swipe Background (Delete Action) 
-                Only visible when dragging to prevent flash during entry animation 
-            */}
-            <div
-                className={`absolute inset-0 bg-red-500 rounded-xl flex items-center justify-end pr-6 -z-10 transition-opacity duration-200 ${isDragging ? 'opacity-100' : 'opacity-0'}`}
-            >
-                <Trash2 className="text-white" size={20} />
-            </div>
-
-            <motion.div
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={{ right: 0.05, left: 0.5 }}
-                onDragStart={() => setIsDragging(true)}
-                onDragEnd={(e, info) => {
-                    setIsDragging(false);
-                    // Higher threshold: need to drag further or swipe faster
-                    if (info.offset.x < -150 || info.velocity.x < -800) {
-                        onRemove(idea.id);
-                    }
-                }}
-                onClick={() => {
-                    if (!window.getSelection().toString()) {
-                        onCopy(idea.content, idea.id);
-                    }
-                }}
-                onDoubleClick={handleDoubleClick}
-                initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                animate={{
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    x: 0
-                }}
-                transition={{ x: { type: "spring", stiffness: 500, damping: 30 } }}
-                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                layout
-                className={`
-                    group relative bg-white dark:bg-gray-900 rounded-xl p-5 
-                    border border-gray-100 dark:border-gray-800 shadow-sm 
-                    transition-all duration-500 cursor-pointer active:scale-[0.99]
-                    ${isDragging ? '' : `hover:shadow-md ${config.border} hover:ring-1 ring-inset ${config.glow}`}
-                    ${isCompleted ? 'opacity-50' : ''}
-                `}
-            >
-                <div className="flex items-start gap-3">
-                    {/* Color Status Dot - Click to cycle colors */}
-                    <div
-                        className="flex-shrink-0 mt-1.5 cursor-pointer"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            // Cycle to next color
-                            const currentIndex = typeof idea.colorIndex === 'number' ? idea.colorIndex : 0;
-                            const nextIndex = (currentIndex + 1) % COLOR_CONFIG.length;
-                            onUpdateColor(idea.id, nextIndex);
-                        }}
-                    >
-                        <div className={`w-2.5 h-2.5 rounded-full ${config.dot} shadow-sm transition-transform duration-200 hover:scale-125 ${isCompleted ? 'scale-75 opacity-50' : ''}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
-                            {(() => {
-                                // Light-weight Markdown Parser for **bold**, `code`, and [Tag]
-                                const parseRichText = (text) => {
-                                    // Split by delimiters: **...**, `...`, [ ... ]
-                                    // Using capturing groups to keep delimiters in the array
-                                    // Note: Order matters. Check code first, then bold, then tag.
-                                    const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\])/g);
-
-                                    return parts.map((part, index) => {
-                                        // Inline Code: `...`
-                                        if (part.startsWith('`') && part.endsWith('`')) {
-                                            return (
-                                                <code key={index} className="bg-blue-50/50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded text-[13px] font-mono text-blue-600 dark:text-blue-400 mx-0.5 border border-blue-100/50 dark:border-blue-800/30">
-                                                    {part.slice(1, -1)}
-                                                </code>
-                                            );
-                                        }
-                                        // Bold: **...**
-                                        if (part.startsWith('**') && part.endsWith('**')) {
-                                            return (
-                                                <span key={index} className="font-bold text-gray-900 dark:text-gray-100 mx-0.5">
-                                                    {part.slice(2, -2)}
-                                                </span>
-                                            );
-                                        }
-                                        // Tag: [...]
-                                        if (part.startsWith('[') && part.endsWith(']')) {
-                                            const tagName = part.slice(1, -1);
-                                            return (
-                                                <span
-                                                    key={index}
-                                                    className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-md text-[11px] font-medium align-middle border border-blue-100/50 dark:border-blue-800/30 shadow-sm transform -translate-y-0.5"
-                                                >
-                                                    {tagName}
-                                                </span>
-                                            );
-                                        }
-                                        // Plain text
-                                        return <span key={index}>{part}</span>;
-                                    });
-                                };
-
-                                return parseRichText(idea.content);
-                            })()}
-                        </div>
-                        {/* Date/Time - compact, directly under content */}
-                        <div className="mt-2 text-[11px] text-gray-400 dark:text-gray-500 font-medium">
-                            {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                            })}
-                            <span className="mx-1.5 text-gray-300 dark:text-gray-600">·</span>
-                            {new Date(idea.timestamp || Date.now()).toLocaleTimeString(undefined, {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            })}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Copied Indicator */}
-                <AnimatePresence>
-                    {copiedId === idea.id && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            className="absolute top-3 right-3 bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 shadow-sm border border-emerald-100 dark:border-emerald-800"
-                        >
-                            <Check size={12} strokeWidth={3} />
-                            <span>{t('common.copied')}</span>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </motion.div >
-        </div >
-    );
-};
-
-// Rich input preview to render tags in textarea
-const InputRichPreview = ({ text, scrollTop }) => {
-    const parseRichText = (text) => {
-        const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\])/g);
-        return parts.map((part, index) => {
-            if (part.startsWith('`') && part.endsWith('`')) {
-                return (
-                    <code key={index} className="bg-blue-50/50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded text-[13px] font-mono text-blue-600 dark:text-blue-400 mx-0.5 border border-blue-100/50 dark:border-blue-800/30">
-                        {part.slice(1, -1)}
-                    </code>
-                );
-            }
-            if (part.startsWith('**') && part.endsWith('**')) {
-                return (
-                    <span key={index} className="font-bold text-gray-900 dark:text-gray-100 mx-0.5">
-                        {part.slice(2, -2)}
-                    </span>
-                );
-            }
-            if (part.startsWith('[') && part.endsWith(']')) {
-                const tagName = part.slice(1, -1);
-                return (
-                    <span
-                        key={index}
-                        className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-md text-[11px] font-medium align-middle border border-blue-100/50 dark:border-blue-800/30 shadow-sm transform -translate-y-0.5"
-                    >
-                        {tagName}
-                    </span>
-                );
-            }
-            return <span key={index}>{part}</span>;
-        });
-    };
-
-    return (
-        <div
-            className="absolute inset-0 p-6 pb-20 pointer-events-none text-lg leading-relaxed whitespace-pre-wrap font-light break-words overflow-hidden text-gray-800 dark:text-gray-100 opacity-100"
-            style={{
-                marginTop: `-${scrollTop}px`, // Sync scroll by shifting content
-            }}
-        >
-            {parseRichText(text)}
-        </div>
-    );
-};
-
 const InspirationModule = () => {
-    // ... (rest of component logic remains same until return)
     // Sync
     const { doc } = useSync();
     const { t } = useTranslation();
@@ -280,7 +34,7 @@ const InspirationModule = () => {
     const [copiedId, setCopiedId] = useState(null);
     const [deletedIdea, setDeletedIdea] = useState(null);
     const [scrollTop, setScrollTop] = useState(0);
-    const textareaRef = React.useRef(null);
+    const textareaRef = useRef(null);
 
     // Migration: LocalStorage -> Yjs
     useEffect(() => {
@@ -296,7 +50,6 @@ const InspirationModule = () => {
                     if (yArray.length === 0) {
                         localIdeas.forEach(idea => addIdea(idea));
                     }
-                    // Clear local storage after migration? Or keep as backup? 
                     // Let's rename key to avoid re-migration
                     localStorage.setItem(STORAGE_KEY + '_migrated', 'true');
                     localStorage.removeItem(STORAGE_KEY);
@@ -430,11 +183,13 @@ const InspirationModule = () => {
         }
     };
 
-    // Combine and sort projects for tags
-    const allProjectTags = [...(primaryProjects || []), ...(pendingProjects || [])]
-        .map(p => p.title)
-        .filter(t => t && t.trim().length > 0)
-        .sort();
+    // Combine and sort projects for tags (Memoized)
+    const allProjectTags = useMemo(() => {
+        return [...(primaryProjects || []), ...(pendingProjects || [])]
+            .map(p => p.title)
+            .filter(t => t && t.trim().length > 0)
+            .sort();
+    }, [primaryProjects, pendingProjects]);
 
     return (
         <div className="max-w-4xl mx-auto pt-14 px-6 md:px-10 pb-32">
