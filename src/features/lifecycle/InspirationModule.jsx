@@ -247,9 +247,13 @@ const InputRichPreview = ({ text }) => {
     };
 
     return (
-        <div className="absolute inset-0 p-6 pb-20 pointer-events-none text-lg leading-relaxed whitespace-pre-wrap font-light break-words overflow-hidden text-gray-800 dark:text-gray-100 opacity-100">
+        <div
+            className="absolute inset-0 p-6 pb-20 pointer-events-none text-lg leading-relaxed whitespace-pre-wrap font-light break-words overflow-hidden text-gray-800 dark:text-gray-100 opacity-100"
+            style={{
+                marginTop: `-${scrollTop}px`, // Sync scroll by shifting content
+            }}
+        >
             {parseRichText(text)}
-            {/* Hidden cursor mimic to keep spacing if needed, but not required with overlay */}
         </div>
     );
 };
@@ -274,6 +278,8 @@ const InspirationModule = () => {
     const [selectedColorIndex, setSelectedColorIndex] = useState(null);
     const [copiedId, setCopiedId] = useState(null);
     const [deletedIdea, setDeletedIdea] = useState(null);
+    const [scrollTop, setScrollTop] = useState(0);
+    const textareaRef = React.useRef(null);
 
     // Migration: LocalStorage -> Yjs
     useEffect(() => {
@@ -374,6 +380,53 @@ const InspirationModule = () => {
     const handleTagClick = (projectTitle) => {
         const tag = `[${projectTitle}] `;
         setInput(prev => prev + tag);
+        // Focus textarea after tag click
+        textareaRef.current?.focus();
+    };
+
+    const handleTextareaScroll = (e) => {
+        setScrollTop(e.target.scrollTop);
+    };
+
+    const handleKeyDown = (e) => {
+        // 1. Submit: Cmd+Enter or Ctrl+Enter
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            handleAdd();
+            return;
+        }
+
+        // 2. Atom Delete: If backspace at the end of a tag, delete the whole tag
+        if (e.key === 'Backspace' && textareaRef.current) {
+            const { selectionStart, selectionEnd } = textareaRef.current;
+            if (selectionStart === selectionEnd) {
+                const textBefore = input.substring(0, selectionStart);
+                // Regex to check if we are right after a tag like [Tag] 
+                const tagMatch = textBefore.match(/\[[^\]\n]+\] $/); // Matches "[Tag] " at the end
+                if (tagMatch) {
+                    const tagFull = tagMatch[0];
+                    const newText = input.substring(0, selectionStart - tagFull.length) + input.substring(selectionEnd);
+                    setInput(newText);
+                    // Move cursor back
+                    setTimeout(() => {
+                        textareaRef.current.setSelectionRange(selectionStart - tagFull.length, selectionStart - tagFull.length);
+                    }, 0);
+                    e.preventDefault();
+                } else {
+                    // Also check for tag without trailing space [Tag]|
+                    const tagMatchNoSpace = textBefore.match(/\[[^\]\n]+\]$/);
+                    if (tagMatchNoSpace) {
+                        const tagFull = tagMatchNoSpace[0];
+                        const newText = input.substring(0, selectionStart - tagFull.length) + input.substring(selectionEnd);
+                        setInput(newText);
+                        setTimeout(() => {
+                            textareaRef.current.setSelectionRange(selectionStart - tagFull.length, selectionStart - tagFull.length);
+                        }, 0);
+                        e.preventDefault();
+                    }
+                }
+            }
+        }
     };
 
     // Combine and sort projects for tags
@@ -405,18 +458,16 @@ const InspirationModule = () => {
                 <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] group-hover:border-gray-200 dark:group-hover:border-gray-700">
 
                     {/* Rich Preview Layer */}
-                    <InputRichPreview text={input} />
+                    <InputRichPreview text={input} scrollTop={scrollTop} />
 
                     <textarea
+                        ref={textareaRef}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
+                        onScroll={handleTextareaScroll}
+                        onKeyDown={handleKeyDown}
                         placeholder={input ? '' : t('inspiration.placeholder')}
                         className="w-full bg-transparent text-lg text-transparent caret-gray-800 dark:caret-gray-200 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed relative z-10"
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                                handleAdd();
-                            }
-                        }}
                     />
 
                     {/* Bottom Action Area */}
