@@ -342,7 +342,7 @@ const FinalDevModule = () => {
                                     if (e.key === 'Enter') handleCreateProject();
                                     if (e.key === 'Escape') { setIsCreatingProject(false); setNewProjectTitle(''); }
                                 }}
-                                placeholder="项目名称..."
+                                placeholder="流程名称..."
                                 className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 focus:border-indigo-300 dark:focus:border-indigo-700 outline-none w-48 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                             />
                             <button
@@ -364,7 +364,7 @@ const FinalDevModule = () => {
                             onClick={() => setIsCreatingProject(true)}
                             className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
                         >
-                            <Plus size={16} /> 新建项目
+                            <Plus size={16} /> 新建流程
                         </button>
                     )}
                     <div>
