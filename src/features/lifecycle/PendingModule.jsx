@@ -132,7 +132,7 @@ const PendingModule = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto pt-8 px-4 md:px-6 h-full flex flex-col md:flex-row gap-4 md:gap-10">
+        <div className="w-full pt-8 h-full flex flex-col md:flex-row gap-4 md:gap-10 overflow-hidden">
             {/* Left Column: Stream & Nursery */}
             <div className={`transition-all duration-500 flex-col ${selectedProject ? 'hidden md:flex md:w-[350px] opacity-100' : 'flex w-full'}`}>
                 <div className="mb-8 flex justify-between items-end">
