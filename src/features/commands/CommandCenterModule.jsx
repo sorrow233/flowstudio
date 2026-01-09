@@ -272,7 +272,7 @@ const CommandCenterModule = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto pt-8 px-4 md:px-6 h-full md:h-[calc(100vh-4rem)] flex flex-col md:flex-row gap-4 md:gap-8">
+        <div className="max-w-7xl mx-auto pt-8 px-4 md:px-6 min-h-[100dvh] pb-safe md:h-[calc(100vh-4rem)] md:min-h-0 flex flex-col md:flex-row gap-4 md:gap-8">
             {/* Ambient Background */}
             <div className="fixed inset-0 -z-10 bg-gray-50/50 pointer-events-none" />
             <div className="fixed top-0 left-0 w-full h-96 bg-gradient-to-b from-gray-100 to-transparent -z-10 opacity-50" />

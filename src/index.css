@@ -64,3 +64,15 @@ body {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
+/* iOS Safe Area Bottom Padding */
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Mobile viewport fix for iOS Safari */
+@supports (height: 100dvh) {
+    .min-h-dvh {
+        min-height: 100dvh;
+    }
+}

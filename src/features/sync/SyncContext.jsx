@@ -1,14 +1,20 @@
 import React, { createContext, useContext } from 'react';
 import { useSyncStore, useDataMigration, useProjectMigration } from './useSyncStore';
+import { useAuth } from '../auth/AuthContext';
 
 const SyncContext = createContext(null);
 
 export const SyncProvider = ({ children, docId = 'flowstudio_v1' }) => {
     // Single source of truth for the connection
     const { doc, status, update } = useSyncStore(docId);
+    const { user } = useAuth();
+
+    // Determine if user is logged in
+    const isLoggedIn = !!user;
 
     // Run migration only once at the root level
-    useDataMigration(doc);
+    // Pass isLoggedIn so seeding is skipped for logged-in users (their data will sync from server)
+    useDataMigration(doc, isLoggedIn);
 
     // Migrate projects to unified storage
     useProjectMigration(doc, 'all_projects', [
