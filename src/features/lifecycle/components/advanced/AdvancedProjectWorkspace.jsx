@@ -144,7 +144,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
 
             <motion.div
                 layoutId={`advanced-card-${project.id}`}
-                className="w-full h-full md:w-[98vw] md:h-[96vh] bg-white dark:bg-black rounded-none md:rounded-[3rem] shadow-2xl overflow-hidden relative z-10 flex flex-col md:flex-row ring-1 ring-white/10"
+                className="w-full h-full md:w-[90vw] md:max-w-[1400px] md:h-[85vh] bg-white dark:bg-black rounded-none md:rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10 flex flex-col md:flex-row ring-1 ring-white/10"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Sidebar - Reused AdvancedStageNavigation but passing taskCounts */}
