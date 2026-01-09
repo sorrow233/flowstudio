@@ -202,6 +202,8 @@ export default {
         browseCommunity: '浏览社区分享',
         importFromLibrary: '从全局库导入',
         stage: '阶段',
+        switchToGrouped: '切换到分组视图',
+        switchToList: '切换到列表视图',
     },
 
     // 开发阶段（5阶段）

@@ -201,6 +201,8 @@ export default {
         browseCommunity: 'Browse community shares',
         importFromLibrary: 'Import from Global Library',
         stage: 'Stage',
+        switchToGrouped: 'Switch to Grouped View',
+        switchToList: 'Switch to List View',
     },
 
     // Dev Stages (5 stages)

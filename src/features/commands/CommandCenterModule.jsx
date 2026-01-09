@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Plus, Search, Library, Globe2 } from 'lucide-react';
+import { Plus, Search, Library, Globe2, Layers, List as ListIcon } from 'lucide-react';
+
 import { STORAGE_KEYS, DEV_STAGES, COMMAND_CATEGORIES } from '../../utils/constants';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -23,6 +24,8 @@ const CommandCenterModule = () => {
     const [sharingCommand, setSharingCommand] = useState(null);
     const [search, setSearch] = useState('');
     const [copiedId, setCopiedId] = useState(null);
+    const [viewMode, setViewMode] = useState('list'); // 'list' or 'grouped'
+
     const { t } = useTranslation();
 
     // Form State
@@ -340,7 +343,22 @@ const CommandCenterModule = () => {
 
                         <div className="flex gap-2 w-full md:w-auto justify-between md:justify-end">
                             <div className="flex gap-2 w-full md:w-auto">
+                                {/* View Toggle */}
+                                <button
+                                    onClick={() => setViewMode(prev => prev === 'list' ? 'grouped' : 'list')}
+                                    className={`
+                                        w-10 h-10 flex items-center justify-center rounded-full transition-all shrink-0
+                                        ${viewMode === 'grouped'
+                                            ? 'bg-emerald-100 text-emerald-600 shadow-inner'
+                                            : 'bg-white text-gray-400 hover:text-gray-600 hover:bg-gray-50 border border-gray-200/50 shadow-sm'}
+                                    `}
+                                    title={viewMode === 'list' ? t('commands.switchToGrouped') : t('commands.switchToList')}
+                                >
+                                    {viewMode === 'list' ? <Layers size={18} /> : <ListIcon size={18} />}
+                                </button>
+
                                 {/* Category Filter Pills - Dot Ribbon */}
+
                                 <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full overflow-x-auto no-scrollbar scrollbar-hide flex-1 md:flex-none md:max-w-[300px] xl:max-w-none shadow-inner border border-gray-200/50">
                                     <button
                                         onClick={() => setSelectedCategory('all')}
@@ -426,6 +444,7 @@ const CommandCenterModule = () => {
                     copiedId={copiedId}
                     commands={commands}
                     setCommands={setCommands}
+                    viewMode={viewMode}
                 />
             </div>
 
