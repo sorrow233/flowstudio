@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { LayoutGrid, Monitor, Server, Database, Container, Beaker, CheckSquare, ListChecks, Copy, X, ChevronDown, ChevronRight, CheckCircle2, Trash2, ArrowRight, Terminal } from 'lucide-react';
+import { LayoutGrid, Monitor, Server, Database, Container, Beaker, CheckSquare, ListChecks, Copy, X, ChevronDown, ChevronRight, CheckCircle2, Trash2, ArrowRight, Terminal, Flag } from 'lucide-react';
 import { COMMAND_CATEGORIES, STAGE_EMPTY_STATES, DEV_STAGES } from '../../../../utils/constants';
 import TaskItem from './TaskItem';
 
@@ -10,7 +10,8 @@ const CATEGORY_ICONS = {
     'Server': Server,
     'Database': Database,
     'Container': Container,
-    'Beaker': Beaker
+    'Beaker': Beaker,
+    'Flag': Flag
 };
 
 
