@@ -44,10 +44,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                 {/* Circuit Line Background - Desktop Only */}
                 <div className="absolute left-[27px] top-6 bottom-6 w-0.5 bg-gray-100/80 z-0 overflow-hidden rounded-full hidden md:block">
                     {/* Progress Line - Based on Actual Progress, not View */}
-                    <div
-                        className="w-full bg-emerald-500/30 transition-all duration-700 ease-in-out absolute top-0"
-                        style={{ height: `${Math.min(((currentProgress - 1) / (stages.length - 1)) * 100, 100)}%` }}
-                    />
+
                 </div>
 
                 {stages.map((stage) => {
