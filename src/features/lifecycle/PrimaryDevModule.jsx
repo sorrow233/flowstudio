@@ -64,7 +64,7 @@ const PrimaryDevModule = () => {
     const [selectedProject, setSelectedProject] = useState(null);
 
     // --- UI/Interaction State ---
-    const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
+    const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
     const [viewStage, setViewStage] = useState(1);
 
     // --- Edit Mode State ---

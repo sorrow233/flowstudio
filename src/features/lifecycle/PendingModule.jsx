@@ -132,9 +132,9 @@ const PendingModule = () => {
     };
 
     return (
-        <div className="w-full pt-28 md:pt-8 h-[100dvh] md:h-full flex flex-col md:flex-row gap-4 md:gap-10 overflow-hidden">
+        <div className="w-full pt-4 md:pt-8 h-auto md:h-full flex flex-col md:flex-row gap-4 md:gap-10 overflow-visible md:overflow-hidden">
             {/* Left Column: Stream & Nursery */}
-            <div className={`transition-all duration-500 flex-col ${selectedProject ? 'hidden md:flex md:w-[350px] opacity-100' : 'flex w-full'} h-full`}>
+            <div className={`transition-all duration-500 flex-col ${selectedProject ? 'hidden md:flex md:w-[350px] opacity-100' : 'flex w-full'} h-auto md:h-full`}>
                 <div className="flex-none mb-6 px-4 md:px-0 flex justify-between items-end">
                     <div>
                         <h2 className="text-2xl font-light tracking-wide text-gray-900 dark:text-white">Idea Staging</h2>
@@ -143,7 +143,7 @@ const PendingModule = () => {
 
                 </div>
 
-                <div className="flex-1 flex flex-col gap-8 overflow-y-auto no-scrollbar pb-32 md:pb-20 px-4 md:px-0">
+                <div className="flex-1 flex flex-col gap-8 overflow-visible md:overflow-y-auto no-scrollbar pb-32 md:pb-20 px-4 md:px-0">
                     <div className="space-y-4">
                         {projects.map(project => (
                             <motion.div
