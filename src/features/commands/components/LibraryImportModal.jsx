@@ -8,10 +8,6 @@ const LibraryImportModal = ({
     setIsImporting,
     importableCommands,
     handleImport,
-    isImporting,
-    setIsImporting,
-    importableCommands,
-    handleImport,
 }) => {
     const { t } = useTranslation();
 
@@ -44,37 +40,37 @@ const LibraryImportModal = ({
 
                         <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
                             {importableCommands.length > 0 ? (
-                                importableCommands.map(cmd => {
-                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                        <h4 className="font-medium text-gray-900 truncate">{cmd.title}</h4>
-                                                        {/* Stage badges */}
-                                                        <div className="flex gap-1">
-                                                            {cmd.stageIds?.map(sid => (
-                                                                <span key={sid} className="px-1.5 py-0.5 bg-gray-100 text-gray-500 text-[9px] font-bold rounded">
-                                                                    S{sid}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                    <p className="text-xs text-gray-400 font-mono line-clamp-1">{cmd.url || cmd.content}</p>
+                                importableCommands.map(cmd => (
+                                    <div key={cmd.id || Math.random()} className="flex justify-between items-center p-3 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors border border-gray-100">
+                                        <div className="flex-1 min-w-0 mr-4">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <h4 className="font-medium text-gray-900 truncate">{cmd.title}</h4>
+                                                {/* Stage badges */}
+                                                <div className="flex gap-1">
+                                                    {cmd.stageIds?.map(sid => (
+                                                        <span key={sid} className="px-1.5 py-0.5 bg-gray-100 text-gray-500 text-[9px] font-bold rounded">
+                                                            S{sid}
+                                                        </span>
+                                                    ))}
                                                 </div>
                                             </div>
-                                            <button
-                                                onClick={() => handleImport(cmd)}
-                                                className="px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-emerald-500 hover:text-white transition-colors flex items-center gap-2 shrink-0 ml-3"
-                                            >
-                                                <Download size={14} /> {t('common.add')}
-                                            </button>
+                                            <p className="text-xs text-gray-400 font-mono line-clamp-1">{cmd.url || cmd.content}</p>
                                         </div>
-    );
-})
+                                        <button
+                                            onClick={() => handleImport(cmd)}
+                                            className="px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-emerald-500 hover:text-white transition-colors flex items-center gap-2 shrink-0 ml-3"
+                                        >
+                                            <Download size={14} /> {t('common.add')}
+                                        </button>
+                                    </div>
+                                ))
                             ) : (
-    <div className="text-center py-12 text-gray-400">
-        <Library size={48} className="mx-auto mb-4 opacity-20" />
-        <p>{t('commands.noImportable')}</p>
-        <p className="text-xs mt-2">{t('commands.noImportableHint')}</p>
-    </div>
-)}
+                                <div className="text-center py-12 text-gray-400">
+                                    <Library size={48} className="mx-auto mb-4 opacity-20" />
+                                    <p>{t('commands.noImportable')}</p>
+                                    <p className="text-xs mt-2">{t('commands.noImportableHint')}</p>
+                                </div>
+                            )}
                         </div >
                     </motion.div >
                 </div >
