@@ -32,7 +32,7 @@ const ModuleList = ({ modules, onModuleClick, onDeleteModule }) => {
     return (
         <div className="space-y-2">
             {/* Header */}
-            <div className="grid grid-cols-12 gap-4 px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100">
+            <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100">
                 <div className="col-span-1">Icon</div>
                 <div className="col-span-4">Module Name</div>
                 <div className="col-span-2">Stage</div>
@@ -61,30 +61,33 @@ const ModuleList = ({ modules, onModuleClick, onDeleteModule }) => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
                             onClick={() => onModuleClick(module)}
-                            className="group grid grid-cols-12 gap-4 items-center px-6 py-4 bg-white border border-gray-50 rounded-2xl hover:shadow-lg hover:border-gray-100 transition-all cursor-pointer ring-1 ring-transparent hover:ring-gray-50"
+                            className="group flex flex-col md:grid md:grid-cols-12 gap-4 items-start md:items-center px-6 py-4 bg-white border border-gray-50 rounded-2xl hover:shadow-lg hover:border-gray-100 transition-all cursor-pointer ring-1 ring-transparent hover:ring-gray-50 relative"
                         >
                             {/* Icon */}
-                            <div className="col-span-1">
-                                <div className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
+                            <div className="col-span-12 md:col-span-1 flex items-center gap-3 md:gap-0">
+                                <div className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center group-hover:bg-red-50 group-hover:text-red-600 transition-colors shrink-0">
                                     <Icon size={18} />
+                                </div>
+                                <div className="md:hidden flex-1">
+                                    <h3 className="font-medium text-gray-900">{module.name}</h3>
                                 </div>
                             </div>
 
                             {/* Name & Desc */}
-                            <div className="col-span-4">
-                                <h3 className="font-medium text-gray-900">{module.name}</h3>
+                            <div className="col-span-12 md:col-span-4 pl-12 md:pl-0 -mt-10 md:mt-0 w-full">
+                                <h3 className="hidden md:block font-medium text-gray-900">{module.name}</h3>
                                 <p className="text-xs text-gray-400 truncate pr-4">{module.description || 'No description'}</p>
                             </div>
 
                             {/* Stage */}
-                            <div className="col-span-2">
+                            <div className="col-span-6 md:col-span-2 pl-12 md:pl-0">
                                 <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide ${stageInfo.color}`}>
                                     {stageInfo.label}
                                 </span>
                             </div>
 
                             {/* Progress */}
-                            <div className="col-span-3">
+                            <div className="col-span-6 md:col-span-3">
                                 <div className="flex items-center gap-3">
                                     <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                                         <div
@@ -97,7 +100,7 @@ const ModuleList = ({ modules, onModuleClick, onDeleteModule }) => {
                             </div>
 
                             {/* Actions */}
-                            <div className="col-span-2 flex justify-end items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="absolute top-4 right-4 md:static col-span-12 md:col-span-2 flex justify-end items-center gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                                 <div className="p-2 text-gray-400 hover:text-red-600 transition-colors">
                                     <Edit2 size={16} />
                                 </div>
