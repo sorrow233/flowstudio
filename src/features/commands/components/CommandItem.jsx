@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { GripVertical, Check, Copy, Trash2, Pencil, Link as LinkIcon, Command, Globe, Tag, FileText, Share2 } from 'lucide-react';
+import { Check, Copy, Trash2, Pencil, Link as LinkIcon, Command, Globe, Tag, FileText, Share2 } from 'lucide-react';
 
 const CommandItem = ({
     cmd,
@@ -53,11 +53,7 @@ const CommandItem = ({
                     `}>
                         {selectedIds.has(cmd.id) && <Check size={12} strokeWidth={3} />}
                     </div>
-                ) : dragListener && !isSearching && (
-                    <div className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-400 p-2 -ml-2">
-                        <GripVertical size={16} />
-                    </div>
-                )}
+                ) : null}
 
                 {/* Category Badge */}
                 {cmd.category && cmd.category !== 'general' && (
