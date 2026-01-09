@@ -461,10 +461,10 @@ const FinalDevModule = () => {
                                         <div className="flex justify-between items-center text-xs font-mono text-gray-400 uppercase tracking-wider">
                                             <div className="flex items-center gap-2">
                                                 <span className={`w-2 h-2 rounded-full animate-pulse ${isHoly ? 'bg-blue-500' : 'bg-indigo-500'}`} />
-                                                <span>Step {project.subStage || 1}</span>
+                                                <span>{(project.tasks || []).filter(t => !t.done).length} Tasks</span>
                                             </div>
                                             <span className="text-gray-900 dark:text-white font-medium">
-                                                {project.stageNames?.[project.subStage || 1] || FINAL_STAGES[(project.subStage || 1) - 1]?.label}
+                                                Active
                                             </span>
                                         </div>
                                     </div>
