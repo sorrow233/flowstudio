@@ -99,6 +99,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComple
     // Handle double click to toggle completion (persisted)
     const handleDoubleClick = (e) => {
         e.stopPropagation();
+        triggerHaptic('light');
         onToggleComplete(idea.id, !isCompleted);
     };
 
@@ -171,6 +172,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComple
                             e.stopPropagation();
                             const currentIndex = typeof idea.colorIndex === 'number' ? idea.colorIndex : 0;
                             const nextIndex = (currentIndex + 1) % COLOR_CONFIG.length;
+                            triggerHaptic('light');
                             onUpdateColor(idea.id, nextIndex);
                         }}
                     >

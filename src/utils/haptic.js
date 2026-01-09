@@ -11,22 +11,23 @@ let hapticElement = null;
 let hapticLabel = null;
 
 /**
- * 初始化 iOS 触觉反馈元素（隐藏）
+ * 初始化 iOS 触觉反馈元素（隐藏但存在于视口内）
  */
 const initIOSHaptic = () => {
-    if (hapticElement) return;
+    if (hapticElement || typeof document === 'undefined') return;
 
     // 创建隐藏的 switch checkbox
     hapticElement = document.createElement('input');
     hapticElement.type = 'checkbox';
-    hapticElement.setAttribute('switch', ''); // iOS 18+ switch 属性
+    hapticElement.setAttribute('switch', ''); // iOS 18+ 特有属性
     hapticElement.id = 'ios-haptic-trigger';
-    hapticElement.style.cssText = 'position:fixed;left:-9999px;opacity:0;pointer-events:none;';
+    // 确保在视口内但不可见
+    hapticElement.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;pointer-events:none;z-index:-1;';
 
     // 创建对应的 label
     hapticLabel = document.createElement('label');
     hapticLabel.htmlFor = 'ios-haptic-trigger';
-    hapticLabel.style.cssText = 'position:fixed;left:-9999px;opacity:0;pointer-events:none;';
+    hapticLabel.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;pointer-events:none;z-index:-1;';
 
     document.body.appendChild(hapticElement);
     document.body.appendChild(hapticLabel);
@@ -37,8 +38,8 @@ const initIOSHaptic = () => {
  * @param {string} type - 反馈类型: 'light' | 'medium' | 'heavy'
  */
 export const triggerHaptic = (type = 'light') => {
-    // 尝试 Android/通用震动 API
-    if (navigator.vibrate) {
+    // 1. 尝试 Android/通用震动 API
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
         switch (type) {
             case 'light':
                 navigator.vibrate(10);
@@ -55,14 +56,14 @@ export const triggerHaptic = (type = 'light') => {
         return;
     }
 
-    // iOS Safari workaround (iOS 18+)
+    // 2. iOS Safari workaround (iOS 18+)
     try {
         initIOSHaptic();
         if (hapticLabel) {
             hapticLabel.click();
         }
     } catch (e) {
-        // 静默失败 - 设备不支持
+        // 静默失败
     }
 };
 
