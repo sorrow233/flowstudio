@@ -8,10 +8,15 @@ import AdvancedProjectWorkspace from './components/advanced/AdvancedProjectWorks
 const AdvancedDevModule = () => {
     // --- Data Layer ---
     const { doc } = useSync();
-    const { projects, updateProject } = useSyncedProjects(doc, 'primary_projects');
+    const { projects: allProjects, updateProject } = useSyncedProjects(doc, 'all_projects');
 
-    // Filter for Final Projects (Stage 6+)
-    const finalProjects = projects.filter(p => (p.subStage || 1) >= 6);
+    // Filter for Final Projects (stage: 'final' covers both primary graduates and direct creates)
+    const finalProjects = React.useMemo(() =>
+        allProjects.filter(p => p.stage === 'final' || (p.subStage || 1) >= 6),
+        [allProjects]);
+
+    // For compatibility with some local variables if they exist
+    const projects = allProjects;
 
     // --- State ---
     const [selectedProject, setSelectedProject] = useState(null);

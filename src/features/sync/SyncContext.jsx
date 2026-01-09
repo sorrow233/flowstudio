@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { useSyncStore, useDataMigration } from './useSyncStore';
+import { useSyncStore, useDataMigration, useProjectMigration } from './useSyncStore';
 
 const SyncContext = createContext(null);
 
@@ -9,6 +9,14 @@ export const SyncProvider = ({ children, docId = 'flowstudio_v1' }) => {
 
     // Run migration only once at the root level
     useDataMigration(doc);
+
+    // Migrate projects to unified storage
+    useProjectMigration(doc, 'all_projects', [
+        'inspiration',
+        'pending_projects',
+        'primary_projects',
+        'final_projects'
+    ]);
 
     return (
         <SyncContext.Provider value={{ doc, status, update }}>

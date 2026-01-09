@@ -71,16 +71,16 @@ const CommercialModule = () => {
     const { t } = useTranslation();
     const { doc } = useSync();
     const {
-        projects,
+        projects: allProjects,
         updateProject
-    } = useSyncedProjects(doc, 'primary_projects');
+    } = useSyncedProjects(doc, 'all_projects');
 
     const location = useLocation();
     const [selectedProject, setSelectedProject] = useState(null);
 
     const commercialProjects = React.useMemo(() => {
-        return projects.filter(p => (p.subStage || 1) >= 6);
-    }, [projects]);
+        return allProjects.filter(p => p.stage === 'final' || (p.subStage || 1) >= 6);
+    }, [allProjects]);
 
     useEffect(() => {
         if (commercialProjects.length > 0) {

@@ -40,15 +40,20 @@ const FinalDevModule = () => {
     // --- Sync Integration (using 'final_projects' key) ---
     const { doc } = useSync();
     const {
-        projects,
-        addProject, // Need addProject for Final module specific creation
+        projects: allProjects,
+        addProject,
         updateProject,
         removeProject: deleteProject,
         undo,
         redo,
         canUndo,
         canRedo
-    } = useSyncedProjects(doc, 'final_projects');
+    } = useSyncedProjects(doc, 'all_projects');
+
+    // Filter projects for this module
+    const projects = React.useMemo(() =>
+        allProjects.filter(p => p.stage === 'final'),
+        [allProjects]);
 
     useUndoShortcuts(undo, redo);
 
@@ -132,12 +137,11 @@ const FinalDevModule = () => {
         if (!newProjectTitle.trim()) return;
 
         const newProject = {
-            id: Date.now().toString(),
             title: newProjectTitle.trim(),
             desc: '新的最终开发项目',
             subStage: 1,
             tasks: [],
-            createdAt: Date.now()
+            stage: 'final' // Set stage
         };
         addProject(newProject);
         setNewProjectTitle('');

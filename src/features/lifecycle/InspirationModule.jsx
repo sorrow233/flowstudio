@@ -19,15 +19,24 @@ const InspirationModule = () => {
     const { doc } = useSync();
     const { t } = useTranslation();
     const {
-        projects: ideas,
+        projects: allProjects,
         addProject: addIdea,
         removeProject: removeIdea,
         updateProject: updateIdea
-    } = useSyncedProjects(doc, 'inspiration');
+    } = useSyncedProjects(doc, 'all_projects');
 
-    // Fetch existing projects for tags
-    const { projects: primaryProjects } = useSyncedProjects(doc, 'primary_projects');
-    const { projects: pendingProjects } = useSyncedProjects(doc, 'pending_projects');
+    // Filter for ideas (stage: 'inspiration')
+    const ideas = useMemo(() =>
+        allProjects.filter(p => (p.stage || 'inspiration') === 'inspiration'),
+        [allProjects]);
+
+    // Fetch existing projects for tags from the same allProjects array
+    const primaryProjects = useMemo(() =>
+        allProjects.filter(p => p.stage === 'primary'),
+        [allProjects]);
+    const pendingProjects = useMemo(() =>
+        allProjects.filter(p => p.stage === 'pending'),
+        [allProjects]);
 
     const [input, setInput] = useState('');
     const [selectedColorIndex, setSelectedColorIndex] = useState(null);
@@ -36,29 +45,7 @@ const InspirationModule = () => {
     const [scrollTop, setScrollTop] = useState(0);
     const textareaRef = useRef(null);
 
-    // Migration: LocalStorage -> Yjs
-    useEffect(() => {
-        const STORAGE_KEY = 'flowstudio_inspiration_ideas';
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved && doc) {
-            try {
-                const localIdeas = JSON.parse(saved);
-                if (Array.isArray(localIdeas) && localIdeas.length > 0) {
-                    console.info("Migrating Inspiration ideas to Sync...");
-                    // We only migrate if Sync data is empty to avoid duplicates
-                    const yArray = doc.getArray('inspiration');
-                    if (yArray.length === 0) {
-                        localIdeas.forEach(idea => addIdea(idea));
-                    }
-                    // Let's rename key to avoid re-migration
-                    localStorage.setItem(STORAGE_KEY + '_migrated', 'true');
-                    localStorage.removeItem(STORAGE_KEY);
-                }
-            } catch (e) {
-                console.error("Migration failed", e);
-            }
-        }
-    }, [doc, addIdea]);
+    // Legacy Migration logic removed as it's now handled by useProjectMigration hook in SyncProvider
 
     // Cleanup undo toast after 5s
     useEffect(() => {
@@ -90,10 +77,10 @@ const InspirationModule = () => {
     const handleAdd = () => {
         if (!input.trim()) return;
         const newIdea = {
-            id: uuidv4(),
             content: input.trim(),
             timestamp: Date.now(),
             colorIndex: selectedColorIndex !== null ? selectedColorIndex : getNextAutoColorIndex(ideas.length),
+            stage: 'inspiration', // Explicitly set stage
         };
         addIdea(newIdea);
         setInput('');

@@ -40,49 +40,21 @@ const PrimaryDevModule = () => {
     // --- Sync Integration ---
     const { doc } = useSync();
     const {
-        projects,
+        projects: allProjects,
         updateProject,
         removeProject: deleteProject,
         undo,
         redo,
         canUndo,
         canRedo
-    } = useSyncedProjects(doc, 'primary_projects');
+    } = useSyncedProjects(doc, 'all_projects');
 
-    // Also connect to Final Projects to push graduated projects there
-    const { addProject: addFinalProject, projects: finalProjectsList } = useSyncedProjects(doc, 'final_projects');
+    // Filter projects for this module
+    const projects = React.useMemo(() =>
+        allProjects.filter(p => p.stage === 'primary' || p.stage === 'final'),
+        [allProjects]);
 
-    // --- Legacy Migration: Auto-sync existing Advanced projects to Final Module ---
-    useEffect(() => {
-        if (!projects || !finalProjectsList) return;
-
-        // Find projects that are Advanced in Primary but missing in Final
-        const advancedLegacyProjects = projects.filter(p => (p.subStage || 1) >= 6);
-
-        advancedLegacyProjects.forEach(primary => {
-            const expectedFinalId = `${primary.id}-final`;
-            // Check for ID match OR Title match (to prevent duplicates if user manually created it)
-            const existsInFinal = finalProjectsList.some(final =>
-                final.id === expectedFinalId ||
-                final.title === primary.title // Stronger check
-            );
-
-            if (!existsInFinal) {
-                console.log(`[Migration] Syncing legacy advanced project to Final: ${primary.title}`);
-                addFinalProject({
-                    id: expectedFinalId,
-                    title: primary.title,
-                    desc: primary.desc,
-                    link: primary.link,
-                    bgImage: primary.bgImage,
-                    subStage: 1, // Start at Stage 1
-                    tasks: [],
-                    createdAt: Date.now(),
-                    originProjectId: primary.id
-                });
-            }
-        });
-    }, [projects, finalProjectsList, addFinalProject]);
+    // Legacy Migration removed as it's now handled by global migration hook
 
     useUndoShortcuts(undo, redo);
     const navigate = useNavigate();
@@ -300,29 +272,13 @@ const PrimaryDevModule = () => {
             colors: ['#10B981', '#34D399', '#FBBF24', '#ffffff']
         });
 
-        // 1. DUPLICATE TO FINAL DEV MODULE (only if not already there)
-        const expectedFinalId = `${selectedProject.id}-final`;
-        const alreadyInFinal = finalProjectsList?.some(p =>
-            p.id === expectedFinalId || p.title === selectedProject.title
-        );
-
-        if (!alreadyInFinal) {
-            const finalProject = {
-                id: expectedFinalId,
-                title: selectedProject.title,
-                desc: selectedProject.desc,
-                link: selectedProject.link,
-                bgImage: selectedProject.bgImage,
-                subStage: 1, // Start at Stage 1 (Optimization)
-                tasks: [],   // Start fresh with tasks for Final phase
-                createdAt: Date.now(),
-                originProjectId: selectedProject.id // Traceability
-            };
-            addFinalProject(finalProject);
-        }
-
-        // 2. UPDATE PRIMARY TO ADVANCED STAGE
-        handleUpdateProject(selectedProject.id, { subStage: 6 });
+        // Graduation: Transition stage from primary to final
+        updateProject(selectedProject.id, {
+            stage: 'final',
+            subStage: 1, // Reset subStage for the new phase if desired, or keep at 6?
+            // The user's previous logic set subStage: 1 for Final module.
+            // Let's stick with that for continuity of their workflow.
+        });
 
         // Close modal after delay
         setTimeout(() => {

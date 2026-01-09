@@ -25,7 +25,7 @@ const PendingModule = () => {
     const { doc } = useSync();
 
     const {
-        projects,
+        projects: allProjects,
         addProject,
         removeProject: deleteProject,
         updateProject,
@@ -33,13 +33,17 @@ const PendingModule = () => {
         redo,
         canUndo,
         canRedo
-    } = useSyncedProjects(doc, 'pending_projects');
+    } = useSyncedProjects(doc, 'all_projects');
 
-    useUndoShortcuts(undo, redo);
+    // Filter for pending projects
+    const projects = React.useMemo(() =>
+        allProjects.filter(p => p.stage === 'pending'),
+        [allProjects]);
 
-    const {
-        projects: primaryProjects
-    } = useSyncedProjects(doc, 'primary_projects');
+    // Filter for primary projects (Nursery)
+    const primaryProjects = React.useMemo(() =>
+        allProjects.filter(p => p.stage === 'primary'),
+        [allProjects]);
 
     const [selectedProject, setSelectedProject] = useState(null);
 
@@ -67,25 +71,21 @@ const PendingModule = () => {
     };
 
     const handleGraduate = (project, category = 'general') => {
-        deleteProject(project.id);
+        const hasReason = project.foundingReason && project.foundingReason.trim().length > 0;
+
+        // Graduate: simply change stage and set initial primary data
+        updateProject(project.id, {
+            stage: 'primary',
+            category,
+            graduatedAt: Date.now(),
+            subStage: 1,
+            progress: 0,
+            tasks: project.tasks || [],
+            hasHolyGlow: hasReason,
+            bgImage: project.bgImage || getRandomProjectImage()
+        });
+
         setSelectedProject(null);
-
-        if (doc) {
-            const primaryList = doc.getArray('primary_projects');
-            const hasReason = project.foundingReason && project.foundingReason.trim().length > 0;
-
-            const newPrimary = {
-                ...project,
-                category,
-                graduatedAt: Date.now(),
-                subStage: 1,
-                progress: 0,
-                tasks: [],
-                hasHolyGlow: hasReason,
-                bgImage: project.bgImage || getRandomProjectImage()
-            };
-            primaryList.unshift([newPrimary]);
-        }
     };
 
     const handleDelete = (e, id) => {
@@ -217,14 +217,17 @@ const PendingModule = () => {
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && e.target.value?.trim()) {
                                             const newP = {
-                                                id: uuidv4(),
                                                 title: e.target.value.trim(),
                                                 desc: '一句话描述这个创想...',
                                                 score: 0,
-                                                answers: {}
+                                                answers: {},
+                                                stage: 'pending' // Explicitly set stage
                                             };
                                             addProject(newP);
-                                            setSelectedProject(newP);
+                                            // Note: addProject now returns nothing, but we'll find it in projects
+                                            // For now, we rely on the list update. 
+                                            // If we need immediate selection, we might need a way to get the generated ID.
+                                            // However, the standard behavior is projects will update and user can click.
                                             e.target.value = '';
                                         }
                                     }}
