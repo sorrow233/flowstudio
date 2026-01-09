@@ -51,7 +51,7 @@ const PrimaryDevModule = () => {
 
     // Filter projects for this module
     const projects = React.useMemo(() =>
-        allProjects.filter(p => p.stage === 'primary' || p.stage === 'final'),
+        allProjects.filter(p => (p.stage || 'primary') === 'primary'),
         [allProjects]);
 
     // Legacy Migration removed as it's now handled by global migration hook
@@ -138,8 +138,8 @@ const PrimaryDevModule = () => {
 
 
     // --- Project Filtering ---
-    const activeProjects = projects.filter(p => (p.subStage || 1) < 6);
-    const finalProjects = projects.filter(p => (p.subStage || 1) >= 6);
+    const activeProjects = projects;
+    const finalProjects = []; // No longer showing graduated projects in Primary dashboard
 
 
     // --- Project Handlers ---
@@ -533,7 +533,6 @@ const PrimaryDevModule = () => {
                                     customStageNames={selectedProject.stageNames || {}}
                                     onRenameStage={handleRenameStage}
                                     stageStats={stageStats}
-                                    extraStages={EXTRA_STAGES}
                                 />
 
                                 {/* Right Content: Task List */}
