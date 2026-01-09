@@ -31,7 +31,7 @@ const tabIcons = {
     primary: Code2,
     advanced: Zap,
     final: CheckCircle2,
-    final: CheckCircle2,
+
     command: Terminal,
 };
 
