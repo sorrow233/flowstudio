@@ -60,10 +60,11 @@ const AdvancedDevModule = () => {
             {/* Project Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {finalProjects.map((project) => {
-                    const modules = project.modules || [];
-                    const moduleCount = modules.length;
-                    const progress = moduleCount > 0
-                        ? Math.round(modules.reduce((acc, m) => acc + (m.progress || 0), 0) / moduleCount)
+                    const tasks = project.tasks || [];
+                    const taskCount = tasks.length;
+                    const doneCount = tasks.filter(t => t.done).length;
+                    const progress = taskCount > 0
+                        ? Math.round((doneCount / taskCount) * 100)
                         : 0;
 
                     return (
@@ -99,11 +100,11 @@ const AdvancedDevModule = () => {
                                 <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
                                     <div className="flex items-center gap-2 text-gray-500">
                                         <Box size={14} />
-                                        <span className="text-xs font-medium">{moduleCount} Modules</span>
+                                        <span className="text-xs font-medium">{taskCount} Items</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full">
                                         <Activity size={12} />
-                                        <span className="text-xs font-bold">{progress}% Health</span>
+                                        <span className="text-xs font-bold">{progress}% Done</span>
                                     </div>
                                 </div>
                             </div>

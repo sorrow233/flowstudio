@@ -1,51 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
-import { Network, Sparkles, Activity, Zap, CheckCircle2, X, Plus, Box, AlignJustify, Grid, LayoutGrid, List, Trophy, Settings, ChevronRight, Menu } from 'lucide-react';
+import { Activity, X, Settings, ChevronRight, Menu, Plus } from 'lucide-react';
 
 import AdvancedStageNavigation from './AdvancedStageNavigation';
-import ModuleGrid from './ModuleGrid';
-import ModuleList from './ModuleList';
-import ArchitectureImportModal from './ArchitectureImportModal';
-import ModuleDetailModal from './ModuleDetailModal';
-import ModuleLibraryModal from './ModuleLibraryModal';
 import ProjectSettingsModal from './ProjectSettingsModal';
+import TaskList from '../primary/TaskList'; // Reusing Primary TaskList
+import { useSyncedProjects } from '../../sync/useSyncStore';
+import { useSync } from '../../sync/SyncContext';
 
 const DEFAULT_STAGES = [
-    { id: 'design', name: 'Design', status: 'in-progress', color: '#EC4899', icon: 'pen-tool' },
-    { id: 'development', name: 'Development', status: 'pending', color: '#3B82F6', icon: 'code' },
-    { id: 'polish', name: 'Polish', status: 'pending', color: '#F59E0B', icon: 'sparkles' }
+    { id: 'design', name: 'Design', status: 'in-progress', color: '#EC4899' },
+    { id: 'development', name: 'Development', status: 'pending', color: '#3B82F6' },
+    { id: 'polish', name: 'Polish', status: 'pending', color: '#F59E0B' }
 ];
 
-const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate, onDeleteProject }) => {
+const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeleteProject }) => {
+    const { doc } = useSync();
+
     // Stage Management
     const stages = (project.customStages && project.customStages.length > 0) ? project.customStages : DEFAULT_STAGES;
     const [activeStageId, setActiveStageId] = useState(stages[0]?.id);
+    const activeStage = stages.find(s => s.id === activeStageId) || stages[0];
 
     // UI State
-    const [isImportOpen, setIsImportOpen] = useState(false);
-    const [isLibraryOpen, setIsLibraryOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const [editingModule, setEditingModule] = useState(null);
-    const [viewMode, setViewMode] = useState('grid');
-    const [newGoalInput, setNewGoalInput] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [newTaskInput, setNewTaskInput] = useState('');
+    const [newTaskCategory, setNewTaskCategory] = useState('general');
 
-    // Calculate module counts
-    const moduleCounts = (project.modules || []).reduce((acc, m) => {
-        const sId = m.stageId || stages[0]?.id;
-        acc[sId] = (acc[sId] || 0) + 1;
+    // Force sync state for real-time updates
+    const { projects: allCommands } = useSyncedProjects(doc, 'all_commands');
+
+    // Update handlers wrapper
+    const handleUpdateProject = (id, updates) => {
+        updateProject(id, updates);
+    };
+
+    // Calculate task counts per stage for sidebar
+    const taskCounts = (project.tasks || []).reduce((acc, t) => {
+        const sId = t.stageId || stages[0]?.id;
+        if (!t.done) {
+            acc[sId] = (acc[sId] || 0) + 1;
+        }
         return acc;
     }, {});
 
-    // Last Edited Logic
-    const [lastEdited, setLastEdited] = useState(null);
-
-    useEffect(() => {
-        if (project.updatedAt) {
-            setLastEdited(new Date(project.updatedAt));
-        }
-    }, [project.updatedAt]);
 
     // Ensure active stage is valid
     useEffect(() => {
@@ -56,108 +56,85 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate,
         }
     }, [stages, activeStageId]);
 
-    const activeStage = stages.find(s => s.id === activeStageId);
-    const modules = project.modules || [];
+    // --- Task Handlers (Mirrored from PrimaryDevModule) ---
 
-    // Filter modules by stage
-    // Fallback: if module has no stageId, show it in the first stage
-    const filteredModules = modules.filter(m => {
-        if (m.stageId) return m.stageId === activeStageId;
-        return activeStageId === stages[0]?.id;
-    });
+    // Note: We use 'stageId' (string) for Advanced, unlike 'stage' (number) in Primary.
+    // TaskList handles filtering by 'activeStage' prop. 
+    // We need to ensure TaskList compares correctly. PROBABLY TaskList expects 'activeStage' to be what matches task.stage.
+    // In Primary: activeStage is 1 (int). task.stage is 1 (int).
+    // In Advanced: activeStageId is 'design' (string). task.stageId is 'design' (string).
+    // TaskList prop is 'activeStage'. Inside TaskList: `t.stage || 1 === activeStage`.
+    // Wait, TaskList uses `t.stage || 1`.
 
-    // --- Actions ---
+    // We should adapt the tasks to use `stage` property to store the stage ID, or update TaskList to handle `stageId`.
+    // Let's use `stage` property on tasks to store the custom stage ID string.
 
-    const pushSnapshot = () => {
-        setLastEdited(new Date());
+    const handleAddTask = (projectId) => {
+        if (!newTaskInput.trim()) return;
+
+        const newTasks = [...(project.tasks || []), {
+            id: Date.now(),
+            text: newTaskInput,
+            done: false,
+            category: newTaskCategory,
+            stage: activeStageId, // Storing ID string here
+            createdAt: new Date().toISOString()
+        }];
+        handleUpdateProject(projectId, { tasks: newTasks });
+        setNewTaskInput('');
     };
 
+    const handleDeleteTask = (projectId, taskId) => {
+        const updatedTasks = (project.tasks || []).filter(t => t.id !== taskId);
+        handleUpdateProject(projectId, { tasks: updatedTasks });
+    };
+
+    const handleToggleTask = (projectId, taskId) => {
+        const updatedTasks = (project.tasks || []).map(t =>
+            t.id === taskId ? { ...t, done: !t.done } : t
+        );
+        handleUpdateProject(projectId, { tasks: updatedTasks });
+    };
+
+    const handleUpdateTask = (projectId, taskId, updates) => {
+        const updatedTasks = (project.tasks || []).map(t =>
+            t.id === taskId ? { ...t, ...updates } : t
+        );
+        handleUpdateProject(projectId, { tasks: updatedTasks });
+    };
+
+    const handleReorderTasks = (newOrder, stageId) => {
+        // Filter out tasks of OTHER stages
+        const otherTasks = (project.tasks || []).filter(t => (t.stage || stages[0].id) !== stageId);
+        const mergedTasks = [...otherTasks, ...newOrder];
+        handleUpdateProject(project.id, { tasks: mergedTasks });
+    };
+
+    // --- Stage Handlers ---
     const handleUpdateStages = (newStages) => {
-        pushSnapshot();
-        updateProject(project.id, { customStages: newStages });
-        // If current active stage was deleted, switch to the first one
+        handleUpdateProject(project.id, { customStages: newStages });
         if (activeStageId && !newStages.find(s => s.id === activeStageId)) {
             setActiveStageId(newStages[0]?.id);
         }
     };
 
-    const handleImportModules = (newModulesDesc) => {
-        pushSnapshot();
-        const enhancedModules = newModulesDesc.map(m => ({
-            id: uuidv4(),
-            ...m,
-            stageId: activeStageId, // Link to current stage
-            progress: 0,
-            tasks: []
-        }));
-        const updatedModules = [...modules, ...enhancedModules];
-        updateProject(project.id, { modules: updatedModules });
-    };
+    const handleMoveTaskToStage = (taskIdString, targetStageId) => {
+        // taskId comes from DragDrop dataTransfer, usually string
+        const taskId = parseInt(taskIdString);
+        if (!taskId || !targetStageId) return;
 
-    const handleAddGoal = () => {
-        if (!newGoalInput.trim()) return;
-        pushSnapshot();
-
-        const newModule = {
-            id: uuidv4(),
-            name: newGoalInput,
-            description: '',
-            category: 'goal',
-            stageId: activeStageId,
-            progress: 0,
-            tasks: [],
-            createdAt: new Date().toISOString()
-        };
-
-        const updatedModules = [...modules, newModule];
-        updateProject(project.id, { modules: updatedModules });
-        setNewGoalInput('');
-    };
-
-    const handleAddFromLibrary = (newModules) => {
-        pushSnapshot();
-        const enhanced = newModules.map(m => ({ ...m, stageId: activeStageId }));
-        const updatedModules = [...modules, ...enhanced];
-        updateProject(project.id, { modules: updatedModules });
-    };
-
-    const handleUpdateModule = (moduleId, updates) => {
-        pushSnapshot();
-        const updatedModules = modules.map(m =>
-            m.id === moduleId ? { ...m, ...updates } : m
+        const updatedTasks = (project.tasks || []).map(t =>
+            t.id === taskId ? { ...t, stage: targetStageId } : t
         );
-        updateProject(project.id, { modules: updatedModules });
+        handleUpdateProject(project.id, { tasks: updatedTasks });
     };
 
-    const handleDeleteModule = (moduleId) => {
-        pushSnapshot();
-        const updatedModules = modules.filter(m => m.id !== moduleId);
-        updateProject(project.id, { modules: updatedModules });
-        setEditingModule(null);
-    };
 
-    const handleDeleteProject = (projectId) => {
-        if (onDeleteProject) {
-            onDeleteProject(projectId);
-            onClose();
-        }
-    };
-
-    const handleMoveModuleToStage = (moduleId, targetStageId) => {
-        if (!moduleId || !targetStageId) return;
-        pushSnapshot();
-        const updatedModules = modules.map(m =>
-            m.id === moduleId ? { ...m, stageId: targetStageId } : m
-        );
-        updateProject(project.id, { modules: updatedModules });
-    };
-
-    // --- System Health Calculation for Header ---
-    const totalCurrentStageModules = filteredModules.length;
-    const avgProgress = totalCurrentStageModules > 0
-        ? Math.round(filteredModules.reduce((acc, m) => acc + (m.progress || 0), 0) / totalCurrentStageModules)
-        : 0;
-    const stableModules = filteredModules.filter(m => m.progress === 100).length;
+    // Stats
+    const currentStageTasks = (project.tasks || []).filter(t => (t.stage || stages[0].id) === activeStageId);
+    const completedTasks = currentStageTasks.filter(t => t.done).length;
+    const totalTasks = currentStageTasks.length;
+    const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-0 pointer-events-auto">
@@ -172,32 +149,32 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate,
                 className="w-full h-full md:w-[98vw] md:h-[96vh] bg-white dark:bg-black rounded-none md:rounded-[3rem] shadow-2xl overflow-hidden relative z-10 flex flex-col md:flex-row ring-1 ring-white/10"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Left Sidebar: Custom Stages */}
-                {/* Mobile Sidebar (Drawer) */}
+                {/* Sidebar - Reused AdvancedStageNavigation but passing taskCounts */}
                 <AdvancedStageNavigation
                     stages={stages}
                     activeStageId={activeStageId}
                     onChangeStage={setActiveStageId}
                     onUpdateStages={handleUpdateStages}
-                    moduleCounts={moduleCounts}
-                    onMoveModule={handleMoveModuleToStage}
+                    moduleCounts={taskCounts} // Passing task counts
+                    onMoveModule={handleMoveTaskToStage} // Reuse prop name but logic is task move
+                    isMobile={false}
+                    className="hidden md:block"
+                />
+
+                {/* Mobile Sidebar */}
+                <AdvancedStageNavigation
+                    stages={stages}
+                    activeStageId={activeStageId}
+                    onChangeStage={setActiveStageId}
+                    onUpdateStages={handleUpdateStages}
+                    moduleCounts={taskCounts}
+                    onMoveModule={handleMoveTaskToStage}
                     isMobile={true}
                     isOpen={isSidebarOpen}
                     onClose={() => setIsSidebarOpen(false)}
                 />
 
-                {/* Desktop Sidebar */}
-                <AdvancedStageNavigation
-                    stages={stages}
-                    activeStageId={activeStageId}
-                    onChangeStage={setActiveStageId}
-                    onUpdateStages={handleUpdateStages}
-                    moduleCounts={moduleCounts}
-                    onMoveModule={handleMoveModuleToStage}
-                    isMobile={false}
-                />
-
-                {/* Main Content Area */}
+                {/* Main Content */}
                 <div className="flex-1 flex flex-col h-full bg-white dark:bg-[#0A0A0A] relative overflow-hidden">
                     {/* Header */}
                     <div className="px-8 py-6 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-white/50 dark:bg-black/50 backdrop-blur-md">
@@ -211,147 +188,60 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate,
                                 <h2 className="text-2xl font-light text-gray-900 dark:text-white tracking-tight">
                                     {activeStage ? activeStage.name : 'Pipeline'}
                                 </h2>
-                                {/* Quick Stats */}
                                 <div className="flex items-center gap-3 px-3 py-1 bg-gray-50 dark:bg-white/5 rounded-full border border-gray-100 dark:border-white/5">
                                     <Activity size={12} className="text-gray-400" />
-                                    <span className="text-xs font-mono text-gray-500">{avgProgress}%</span>
+                                    <span className="text-xs font-mono text-gray-500">{progress}%</span>
                                     <div className="w-px h-3 bg-gray-200 dark:bg-white/10" />
-                                    <span className="text-xs font-mono text-gray-500">{stableModules}/{totalCurrentStageModules}</span>
+                                    <span className="text-xs font-mono text-gray-500">{completedTasks}/{totalTasks}</span>
                                 </div>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-2 md:gap-4">
-                            {/* Mobile Menu Trigger */}
-                            <button
-                                onClick={() => setIsSidebarOpen(true)}
-                                className="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-                            >
+                            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
                                 <Menu size={20} />
                             </button>
-                            <div className="flex bg-gray-50 dark:bg-white/5 rounded-xl p-1">
-                                <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-white/10 text-red-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}><LayoutGrid size={16} /></button>
-                                <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-white/10 text-red-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}><List size={16} /></button>
-                            </div>
 
-                            <button
-                                onClick={() => setIsLibraryOpen(true)}
-                                className="px-4 py-2 bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors flex items-center gap-2"
-                            >
-                                <Box size={14} />
-                                Library
-                            </button>
-
-                            <button
-                                onClick={() => setIsImportOpen(true)}
-                                className="p-2.5 bg-red-50 dark:bg-red-900/10 text-red-600 rounded-xl hover:scale-105 transition-transform"
-                                title="AI Import"
-                            >
-                                <Sparkles size={20} />
-                            </button>
-                            <button
-                                onClick={() => setIsSettingsOpen(true)}
-                                className="p-2.5 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                            >
+                            <button onClick={() => setIsSettingsOpen(true)} className="p-2.5 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                                 <Settings size={20} />
                             </button>
-                            <button
-                                onClick={onClose}
-                                className="p-2.5 text-gray-300 hover:text-gray-500"
-                            >
+                            <button onClick={onClose} className="p-2.5 text-gray-300 hover:text-gray-500">
                                 <X size={20} />
                             </button>
                         </div>
                     </div>
 
-                    {/* Canvas Area */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-12">
-                        {stages.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center text-center max-w-sm mx-auto">
-                                <div className="w-20 h-20 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center mb-6">
-                                    <Network size={32} className="text-gray-300" strokeWidth={1} />
-                                </div>
-                                <h3 className="text-xl font-light text-gray-900 dark:text-white mb-2">Wait, no stages?</h3>
-                                <p className="text-sm text-gray-400 leading-relaxed">Please add a stage in the sidebar to begin.</p>
-                            </div>
-                        ) : filteredModules.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center text-center opacity-40">
-                                <Box size={48} className="text-gray-200 mb-4" strokeWidth={1} />
-                                <p className="text-sm font-light">No modules in this stage.</p>
-                            </div>
-                        ) : (
-                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                {viewMode === 'grid' ? (
-                                    <ModuleGrid
-                                        modules={filteredModules}
-                                        onModuleClick={setEditingModule}
-                                    />
-                                ) : (
-                                    <ModuleList
-                                        modules={filteredModules}
-                                        onModuleClick={setEditingModule}
-                                        onDeleteModule={handleDeleteModule}
-                                    />
-                                )}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Quick Input Bar */}
-                    <div className="p-8 border-t border-gray-100 dark:border-white/5 absolute bottom-0 left-0 right-0 bg-white/80 dark:bg-[#0A0A0A]/80 backdrop-blur-md z-20">
-                        <div className="max-w-4xl mx-auto relative group">
-                            <input
-                                type="text"
-                                value={newGoalInput}
-                                onChange={(e) => setNewGoalInput(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleAddGoal()}
-                                placeholder={`Add a module to ${activeStage?.name || 'stage'}...`}
-                                className="w-full bg-gray-50 dark:bg-[#111] border border-gray-100 dark:border-white/5 rounded-[1.5rem] pl-6 pr-16 py-4 text-lg font-light focus:ring-4 focus:ring-red-500/5 transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400"
-                            />
-                            <div className="absolute right-3 top-2.5 flex items-center gap-2">
-                                <button
-                                    onClick={handleAddGoal}
-                                    className="w-10 h-10 bg-white dark:bg-gray-800 rounded-xl flex items-center justify-center text-gray-300 hover:text-red-500 hover:shadow-lg transition-all"
-                                >
-                                    <Plus size={20} />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Modals */}
-                <AnimatePresence>
-                    {editingModule && (
-                        <ModuleDetailModal
-                            isOpen={!!editingModule}
-                            module={editingModule}
-                            onClose={() => setEditingModule(null)}
-                            onUpdate={handleUpdateModule}
-                            onDelete={handleDeleteModule}
+                    {/* Task List Area */}
+                    <div className="flex-1 overflow-hidden relative flex flex-col">
+                        <TaskList
+                            tasks={project.tasks || []}
+                            projectId={project.id}
+                            activeStage={activeStageId} // Passing string ID
+                            onToggle={handleToggleTask}
+                            onDelete={handleDeleteTask}
+                            onAddTask={handleAddTask}
+                            onUpdateTask={handleUpdateTask}
+                            onReorder={handleReorderTasks}
+                            newTaskInput={newTaskInput}
+                            setNewTaskInput={setNewTaskInput}
+                            newTaskCategory={newTaskCategory}
+                            setNewTaskCategory={setNewTaskCategory}
+                            availableCommands={allCommands}
+                            // onImportCommand={() => {}} // TODO: Add Command Import logic if needed
+                            themeColor={activeStage?.color ? 'custom' : 'red'}
                         />
-                    )}
-                </AnimatePresence>
+                    </div>
 
-                <ArchitectureImportModal
-                    isOpen={isImportOpen}
-                    onClose={() => setIsImportOpen(false)}
-                    onImport={handleImportModules}
-                    currentModules={modules}
-                />
-
-                <ModuleLibraryModal
-                    isOpen={isLibraryOpen}
-                    onClose={() => setIsLibraryOpen(false)}
-                    onAddModule={handleAddFromLibrary}
-                />
+                    {/* Quick Input (Redundant if TaskList has input? Primary TaskList HAS input at bottom) */}
+                    {/* Primary TaskList renders input at bottom. So we don't need another one. */}
+                </div>
 
                 <ProjectSettingsModal
                     isOpen={isSettingsOpen}
                     onClose={() => setIsSettingsOpen(false)}
                     project={project}
-                    onUpdate={updateProject}
-                    onDelete={handleDeleteProject}
+                    onUpdate={handleUpdateProject}
+                    onDelete={(id) => { onDeleteProject(id); onClose(); }}
                 />
             </motion.div>
         </div>
