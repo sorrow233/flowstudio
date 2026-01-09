@@ -134,6 +134,7 @@ const Navbar = () => {
                             const isActive = location.pathname.startsWith(tab.path);
 
                             // Define active colors for each tab
+                            // Define active colors for each tab
                             const activeColors = {
                                 inspiration: 'text-pink-400 dark:text-pink-300',
                                 pending: 'text-green-500 dark:text-green-400',
@@ -175,7 +176,7 @@ const Navbar = () => {
                                     // Define active colors for each tab
                                     const activeColors = {
                                         final: 'text-gray-900 dark:text-white',
-                                        commercial: 'text-yellow-500 dark:text-yellow-400',
+                                        commercial: 'text-amber-500 dark:text-amber-400',
                                     };
 
                                     const activeColorClass = activeColors[tab.id] || 'text-gray-900 dark:text-white';
