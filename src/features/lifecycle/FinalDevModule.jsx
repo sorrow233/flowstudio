@@ -359,7 +359,7 @@ const FinalDevModule = () => {
                             className={`group bg-white dark:bg-gray-900 border rounded-[2rem] overflow-hidden hover:shadow-2xl transition-all cursor-pointer relative h-[360px] flex flex-col
                                 ${isHoly
                                     ? 'border-transparent shadow-[0_0_0_2px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]'
-                                    : 'border-gray-100 dark:border-gray-800 hover:shadow-gray-200/50 dark:hover:shadow-gray-900 ring-1 ring-transparent hover:ring-gray-100 dark:hover:ring-gray-700'}
+                                    : 'border-gray-100 dark:border-gray-800 hover:shadow-red-900/10 dark:hover:shadow-red-900/20 ring-1 ring-transparent hover:ring-red-50 dark:hover:ring-red-900/30'}
                             `}
                         >
                             {/* Holy Flowing Border Animation */}
@@ -385,7 +385,7 @@ const FinalDevModule = () => {
 
                             <Spotlight
                                 className="w-full h-full"
-                                spotColor={isHoly ? "rgba(59, 130, 246, 0.15)" : "rgba(16, 185, 129, 0.2)"}
+                                spotColor={isHoly ? "rgba(59, 130, 246, 0.15)" : "rgba(220, 38, 38, 0.1)"}
                             >
                                 {/* Card Background */}
                                 <div className="absolute inset-0 z-0 h-48">
@@ -401,8 +401,8 @@ const FinalDevModule = () => {
 
                                 <div className="p-8 relative z-10 flex flex-col h-full">
                                     <div className="flex justify-between items-start mb-6">
-                                        <div className={`w-12 h-12 backdrop-blur rounded-2xl flex items-center justify-center shadow-sm border transition-transform group-hover:scale-105
-                                            ${isHoly ? 'bg-emerald-50/80 dark:bg-emerald-900/30 border-emerald-200/50 dark:border-emerald-700/30 text-emerald-700 dark:text-emerald-400' : 'bg-white/80 dark:bg-gray-800/80 border-white/50 dark:border-white/10 text-gray-900 dark:text-white'}
+                                        <div className={`w-12 h-12 backdrop-blur rounded-2xl flex items-center justify-center shadow-sm border transition-transform group-hover:scale-110 duration-300
+                                            ${isHoly ? 'bg-emerald-50/80 dark:bg-emerald-900/30 border-emerald-200/50 dark:border-emerald-700/30 text-emerald-700 dark:text-emerald-400' : 'bg-white/80 dark:bg-gray-800/80 border-white/50 dark:border-white/10 text-gray-900 dark:text-white group-hover:text-red-900 dark:group-hover:text-red-400'}
                                         `}>
                                             <Code2 size={24} strokeWidth={1.5} />
                                         </div>
@@ -415,7 +415,7 @@ const FinalDevModule = () => {
 
                                     <div className="mt-8">
                                         <h3 className={`text-2xl font-light mb-2 line-clamp-1 transition-colors
-                                            ${isHoly ? 'text-emerald-900 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300' : 'text-gray-900 dark:text-white group-hover:text-emerald-900 dark:group-hover:text-emerald-400'}
+                                            ${isHoly ? 'text-emerald-900 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300' : 'text-gray-900 dark:text-white group-hover:text-red-900 dark:group-hover:text-red-400'}
                                         `}>{project.title}</h3>
                                         <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 min-h-[2.5em] leading-relaxed">{project.desc || 'No description provided.'}</p>
                                     </div>
@@ -426,7 +426,7 @@ const FinalDevModule = () => {
                                             {[1, 2, 3].map(step => (
                                                 <div
                                                     key={step}
-                                                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-indigo-500 shadow-sm shadow-indigo-200 dark:shadow-indigo-900/30' : 'bg-gray-100 dark:bg-gray-800'}`}
+                                                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-red-500 shadow-sm shadow-red-200 dark:shadow-red-900/30' : 'bg-gray-100 dark:bg-gray-800'}`}
                                                 />
                                             ))}
                                         </div>
@@ -494,6 +494,7 @@ const FinalDevModule = () => {
                                 onToggleCollapse={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
                                 onWheel={handleHeaderWheel}
                                 stages={FINAL_STAGES} // Pass custom stages as 'stages' prop
+                                themeColor="red"
                             />
 
                             <div
