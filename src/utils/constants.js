@@ -36,12 +36,18 @@ export const DEV_STAGES = [
         label: 'Completion',
         title: 'Production Readiness',
         desc: 'Final QA, build verification, and deployment to production.',
-    },
+    }
+];
+
+// 额外阶段（不属于主开发流程）
+export const EXTRA_STAGES = [
     {
         id: 6,
         label: 'Commercial',
         title: 'Market Readiness',
         desc: 'Final polish, monetization setup, and launch preparation.',
+        icon: 'Gem',
+        color: 'yellow'
     }
 ];
 

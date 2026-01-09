@@ -43,12 +43,17 @@ const Navbar = () => {
     const { isDark, toggleTheme } = useTheme();
     const { t } = useTranslation();
 
-    const tabs = [
+    // 主流程：灵感 → 命令 → 待定 → 开发 → 进阶
+    const mainTabs = [
         { id: 'inspiration', label: t('navbar.inspiration'), icon: tabIcons.inspiration, path: '/inspiration' },
         { id: 'command', label: t('navbar.command'), icon: tabIcons.command, path: '/commands' },
         { id: 'pending', label: t('navbar.pending'), icon: tabIcons.pending, path: '/pending' },
         { id: 'primary', label: t('navbar.primary'), icon: tabIcons.primary, path: '/primary' },
         { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' },
+    ];
+
+    // 额外流程：终稿和商业化（不在主开发流程中）
+    const extraTabs = [
         { id: 'final', label: t('navbar.final'), icon: tabIcons.final, path: '/final' },
         { id: 'commercial', label: t('navbar.commercial'), icon: tabIcons.commercial, path: '/commercial' },
     ];
@@ -60,7 +65,8 @@ const Navbar = () => {
             <nav className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-full shadow-sm max-w-[95vw] md:max-w-full relative mx-auto">
                 <Spotlight spotColor={isDark ? "rgba(16, 185, 129, 0.15)" : "rgba(16, 185, 129, 0.1)"} size={300} className="rounded-full">
                     <div className="flex items-center gap-1 md:gap-2 px-1.5 py-1.5 md:px-2 md:py-2 overflow-x-auto no-scrollbar mask-linear-fade">
-                        {tabs.map((tab) => {
+                        {/* 主流程 */}
+                        {mainTabs.map((tab) => {
                             const Icon = tab.icon;
                             const isActive = location.pathname.startsWith(tab.path);
 
@@ -73,6 +79,31 @@ const Navbar = () => {
                                         ${isActive
                                             ? 'text-gray-900 dark:text-white bg-gray-50/50 dark:bg-gray-800'
                                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}
+                                    `}
+                                >
+                                    <Icon size={16} strokeWidth={isActive ? 2 : 1.5} className="w-4 h-4 md:w-4 md:h-4" />
+                                    <span className={`text-xs md:text-sm ${isActive ? 'font-medium' : 'font-light'}`}>{tab.label}</span>
+                                </button>
+                            );
+                        })}
+
+                        {/* 分割线 - 主流程与其他流程分界 */}
+                        <div className="w-px h-5 md:h-6 bg-gray-200 dark:bg-gray-600 mx-1 md:mx-2 relative z-40 shrink-0" />
+
+                        {/* 其他流程（终稿、商业化） */}
+                        {extraTabs.map((tab) => {
+                            const Icon = tab.icon;
+                            const isActive = location.pathname.startsWith(tab.path);
+
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => navigate(tab.path)}
+                                    className={`
+                                        relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40 shrink-0
+                                        ${isActive
+                                            ? 'text-gray-900 dark:text-white bg-gray-50/50 dark:bg-gray-800'
+                                            : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}
                                     `}
                                 >
                                     <Icon size={16} strokeWidth={isActive ? 2 : 1.5} className="w-4 h-4 md:w-4 md:h-4" />
