@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Check, X, Trash2, Layout, Sparkles, Activity } from 'lucide-react';
+import { Plus, Check, X, Trash2, Edit2, Layers, Box, Terminal } from 'lucide-react';
 
 const AdvancedStageNavigation = ({ stages = [], activeStageId, onChangeStage, onUpdateStages }) => {
     const [isAdding, setIsAdding] = useState(false);
     const [newStageName, setNewStageName] = useState('');
+    const [editingStageId, setEditingStageId] = useState(null);
+    const [editingName, setEditingName] = useState('');
+    const editInputRef = useRef(null);
 
     const handleAdd = () => {
         if (!newStageName.trim()) return;
@@ -12,7 +15,7 @@ const AdvancedStageNavigation = ({ stages = [], activeStageId, onChangeStage, on
             id: Date.now().toString(),
             name: newStageName,
             status: 'pending',
-            color: '#FF4D4D' // Red theme
+            dotColor: '#A855F7' // Default purple dot like screenshot
         };
         onUpdateStages([...stages, newStage]);
         setNewStageName('');
@@ -30,128 +33,130 @@ const AdvancedStageNavigation = ({ stages = [], activeStageId, onChangeStage, on
         }
     };
 
-    const toggleStatus = (e, stage) => {
+    const startEditing = (e, stage) => {
         e.stopPropagation();
-        const cycle = { 'pending': 'in-progress', 'in-progress': 'completed', 'completed': 'pending' };
-        handleUpdateStage(stage.id, { status: cycle[stage.status] });
+        setEditingStageId(stage.id);
+        setEditingName(stage.name);
     };
 
+    const saveEdit = () => {
+        if (editingName.trim()) {
+            handleUpdateStage(editingStageId, { name: editingName });
+        }
+        setEditingStageId(null);
+    };
+
+    useEffect(() => {
+        if (editingStageId && editInputRef.current) {
+            editInputRef.current.focus();
+        }
+    }, [editingStageId]);
+
     return (
-        <div className="w-[340px] border-r border-gray-100 dark:border-white/5 bg-gray-50/30 dark:bg-black/40 backdrop-blur-3xl flex flex-col h-full relative z-20">
+        <div className="w-[380px] border-r border-gray-100 dark:border-white/5 bg-gray-50/20 dark:bg-[#0D0D0D] flex flex-col h-full relative z-20">
             <div className="p-10 flex-1 overflow-y-auto custom-scrollbar">
-                <div className="flex items-center gap-3 mb-12">
-                    <div className="w-8 h-px bg-red-500/30" />
-                    <h3 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.4em]">Flow Pipeline</h3>
+                <div className="mb-10">
+                    <h3 className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em]">Pipeline Stages</h3>
                 </div>
 
-                <div className="space-y-6 relative">
-                    {/* Vertical Line Connector */}
-                    <div className="absolute left-[27px] top-6 bottom-6 w-px bg-gradient-to-b from-gray-100 via-gray-100 to-transparent dark:from-white/5 dark:via-white/5 dark:to-transparent" />
-
+                <div className="space-y-4 relative">
                     <AnimatePresence mode="popLayout">
-                        {stages.map((stage) => {
+                        {stages.map((stage, index) => {
                             const isActive = activeStageId === stage.id;
-                            const statusColor = stage.status === 'completed' ? 'emerald' : stage.status === 'in-progress' ? 'blue' : 'gray';
 
                             return (
                                 <motion.div
                                     layout
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
                                     onClick={() => onChangeStage(stage.id)}
                                     key={stage.id}
                                     className={`
-                                        group relative z-10 p-5 rounded-[2rem] cursor-pointer transition-all flex items-center gap-5 border
+                                        group relative z-10 p-5 rounded-[1.5rem] cursor-pointer transition-all flex items-center gap-5
                                         ${isActive
-                                            ? 'bg-white dark:bg-white/5 shadow-2xl shadow-red-500/10 border-white/50 dark:border-white/10 scale-[1.05]'
-                                            : 'bg-transparent border-transparent hover:bg-white/40 dark:hover:bg-white/5 hover:border-white/20'}
+                                            ? 'bg-[#12121A] dark:bg-[#1A1A24] shadow-2xl shadow-black/20'
+                                            : 'hover:bg-gray-100 dark:hover:bg-white/5'}
                                     `}
                                 >
-                                    {/* Status Indicator */}
-                                    <button
-                                        onClick={(e) => toggleStatus(e, stage)}
-                                        className={`
-                                            w-14 h-14 rounded-2xl flex items-center justify-center transition-all shrink-0 shadow-inner
-                                            ${stage.status === 'completed' ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500' :
-                                                stage.status === 'in-progress' ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-500' :
-                                                    'bg-gray-100 dark:bg-white/5 text-gray-300'}
-                                        `}
-                                    >
-                                        {stage.status === 'completed' ? <Check size={20} strokeWidth={3} /> :
-                                            stage.status === 'in-progress' ? <Activity size={20} className="animate-pulse" /> :
-                                                <Layout size={20} strokeWidth={1} />}
-                                    </button>
+                                    {/* Connection Line */}
+                                    {index < stages.length - 1 && (
+                                        <div className="absolute left-[34px] top-[4.5rem] w-px h-6 bg-gray-200 dark:bg-gray-800 -z-10" />
+                                    )}
 
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className={`text-sm font-bold truncate ${isActive ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
-                                            {stage.name}
-                                        </h4>
-                                        <span className={`text-[10px] font-bold uppercase tracking-widest mt-1 block opacity-50 ${isActive ? 'text-red-500' : 'text-gray-400'}`}>
-                                            {stage.status}
-                                        </span>
+                                    {/* Icon Circle */}
+                                    <div className={`
+                                        w-12 h-12 rounded-full flex items-center justify-center transition-all shrink-0 border
+                                        ${isActive
+                                            ? 'bg-[#21212B] border-white/10 text-white'
+                                            : 'bg-white dark:bg-[#151515] border-gray-100 dark:border-white/5 text-gray-400'}
+                                    `}>
+                                        {index === 0 ? <Layers size={20} /> : index === 1 ? <Terminal size={20} /> : <Box size={20} />}
                                     </div>
 
-                                    {/* Actions */}
-                                    <button
-                                        onClick={(e) => handleDeleteStage(e, stage.id)}
-                                        className="opacity-0 group-hover:opacity-100 p-2 text-gray-300 hover:text-red-500 transition-all"
-                                    >
-                                        <X size={14} />
-                                    </button>
+                                    <div className="flex-1 min-w-0">
+                                        {editingStageId === stage.id ? (
+                                            <input
+                                                ref={editInputRef}
+                                                value={editingName}
+                                                onChange={(e) => setEditingName(e.target.value)}
+                                                onBlur={saveEdit}
+                                                onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
+                                                className="bg-transparent text-sm font-bold text-white border-b border-red-500 outline-none w-full"
+                                            />
+                                        ) : (
+                                            <>
+                                                <h4 className={`text-sm font-bold truncate ${isActive ? 'text-white' : 'text-gray-900 dark:text-gray-400'}`}>
+                                                    {stage.name}
+                                                </h4>
+                                                <span className={`text-[10px] font-medium mt-0.5 block ${isActive ? 'text-gray-400' : 'text-gray-400 opacity-60'}`}>
+                                                    {stage.status === 'in-progress' ? 'In Progress' : stage.status === 'completed' ? 'Completed' : 'Pending'}
+                                                </span>
+                                            </>
+                                        )}
+                                    </div>
 
-                                    {/* Active Glow */}
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="active-glow"
-                                            className="absolute -inset-1 bg-red-500/5 rounded-[2.2rem] blur-xl -z-10"
-                                        />
-                                    )}
+                                    {/* Action Dot / Status */}
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-2.5 h-2.5 rounded-full`} style={{ backgroundColor: stage.dotColor || '#A855F7' }} />
+
+                                        <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button onClick={(e) => startEditing(e, stage)} className="text-gray-400 hover:text-white transition-colors"><Edit2 size={12} /></button>
+                                            <button onClick={(e) => handleDeleteStage(e, stage.id)} className="text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={12} /></button>
+                                        </div>
+                                    </div>
                                 </motion.div>
                             );
                         })}
                     </AnimatePresence>
                 </div>
 
-                <div className="mt-12">
+                <div className="mt-8">
                     {isAdding ? (
-                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+                        <div className="space-y-3 bg-white dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5">
                             <input
                                 autoFocus
                                 type="text"
                                 value={newStageName}
                                 onChange={(e) => setNewStageName(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-                                placeholder="Stage Name"
-                                className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl px-5 py-4 text-sm focus:ring-4 focus:ring-red-500/5 transition-all outline-none shadow-inner"
+                                placeholder="Stage Name..."
+                                className="w-full bg-transparent text-sm font-medium outline-none p-1 border-b border-gray-200 dark:border-white/10"
                             />
-                            <div className="flex gap-2">
-                                <button onClick={handleAdd} className="flex-1 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] shadow-lg">Confirm</button>
-                                <button onClick={() => setIsAdding(false)} className="px-4 py-3 bg-gray-50 dark:bg-white/5 rounded-xl text-gray-400 hover:text-gray-600"><X size={16} /></button>
+                            <div className="flex gap-2 pt-2">
+                                <button onClick={handleAdd} className="flex-1 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-[10px] font-bold uppercase tracking-widest">Add</button>
+                                <button onClick={() => setIsAdding(false)} className="p-2 text-gray-400"><X size={16} /></button>
                             </div>
-                        </motion.div>
+                        </div>
                     ) : (
                         <button
                             onClick={() => setIsAdding(true)}
-                            className="w-full py-5 border border-dashed border-gray-200 dark:border-white/10 rounded-[2rem] flex items-center justify-center gap-2 text-gray-400 hover:text-red-500 hover:border-red-200 dark:hover:border-red-900/50 hover:bg-white/50 dark:hover:bg-white/5 transition-all group"
+                            className="w-full py-4 border-2 border-dashed border-gray-200 dark:border-white/5 rounded-2xl flex items-center justify-center gap-2 text-gray-300 hover:text-gray-500 hover:border-gray-300 dark:hover:border-white/10 transition-all font-medium text-sm"
                         >
-                            <Plus size={18} className="group-hover:rotate-90 transition-transform duration-500" />
-                            <span className="text-xs font-bold uppercase tracking-widest">Add Milestone</span>
+                            <Plus size={18} />
+                            Add Milestone
                         </button>
                     )}
-                </div>
-            </div>
-
-            {/* Bottom Footer Attribution */}
-            <div className="p-8 px-10 border-t border-gray-100 dark:border-white/5">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center">
-                        <Sparkles size={14} className="text-white dark:text-gray-900" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-bold text-gray-900 dark:text-white leading-none">Flow Studio</p>
-                        <p className="text-[9px] text-gray-400 font-medium">Infinite Workflows</p>
-                    </div>
                 </div>
             </div>
         </div>

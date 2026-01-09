@@ -1,7 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { motion, Reorder, AnimatePresence } from 'framer-motion';
-import { Terminal, Library, ChevronRight, Copy, Trash2, ListChecks, X } from 'lucide-react';
-import CommandItem from './CommandItem';
+// Wrapper to manage drag controls for each item
+const DraggableItem = ({ cmd, children, dragListener }) => {
+    const controls = useDragControls();
+    return (
+        <Reorder.Item
+            value={cmd}
+            dragListener={dragListener}
+            dragControls={controls}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="relative"
+        >
+            {React.cloneElement(children, { dragControls: controls })}
+        </Reorder.Item>
+    );
+};
 
 const CommandList = ({
     visibleCommands,
@@ -143,6 +156,9 @@ const CommandList = ({
         setLastSelectedId(null);
     };
 
+    // We only allow reordering if we are viewing ALL commands in the stage (no search/selection)
+    const canReorder = !isSearching && !isSelectionMode;
+
     return (
         <div className="flex-1 flex flex-col overflow-hidden">
             {/* Command List */}
@@ -150,16 +166,15 @@ const CommandList = ({
                 {visibleCommands.length > 0 ? (
                     <Reorder.Group
                         axis="y"
-                        values={stageCommands}
+                        values={visibleCommands} // MUST match the items being mapped for Reorder to work
                         onReorder={handleReorder}
                         className="space-y-3"
                     >
                         {visibleCommands.map(cmd => (
-                            <Reorder.Item
+                            <DraggableItem
                                 key={cmd.id}
-                                value={cmd}
-                                dragListener={!isSearching && !isSelectionMode}
-                                className="relative"
+                                cmd={cmd}
+                                dragListener={false} // Use handle instead
                             >
                                 <CommandItem
                                     cmd={cmd}
@@ -170,10 +185,7 @@ const CommandList = ({
                                     handleCopy={handleCopy}
                                     handleRemove={handleRemove}
                                     handleShare={handleShare}
-                                    handleShiftSelect={handleShiftSelect}
                                     copiedId={copiedId}
-                                    isSearching={isSearching}
-                                    dragListener={!isSearching && !isSelectionMode}
                                     onClick={(e) => {
                                         if (isSelectionMode) {
                                             handleShiftSelect(cmd.id, e);
@@ -183,7 +195,7 @@ const CommandList = ({
                                     }}
                                     onDoubleClick={() => !isSelectionMode && handleEdit(cmd)}
                                 />
-                            </Reorder.Item>
+                            </DraggableItem>
                         ))}
                     </Reorder.Group>
                 ) : (

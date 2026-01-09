@@ -302,7 +302,15 @@ const InspirationModule = () => {
                             onKeyDown={handleKeyDown}
                             placeholder={input ? '' : t('inspiration.placeholder')}
                             className="w-full bg-transparent text-lg text-gray-900 dark:text-gray-100 caret-pink-500 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed relative z-10 overflow-hidden break-words placeholder:text-gray-400/50"
-                            style={{ fontFamily: 'inherit', WebkitTextFillColor: 'transparent' }}
+                            style={{
+                                fontFamily: 'inherit',
+                                WebkitTextFillColor: 'transparent',
+                                lineHeight: '1.625',
+                                letterSpacing: 'normal',
+                                fontVariantLigatures: 'none',
+                                WebkitFontSmoothing: 'antialiased',
+                                MozOsxFontSmoothing: 'grayscale',
+                            }}
                             autoComplete="off"
                             autoCorrect="off"
                             spellCheck="false"

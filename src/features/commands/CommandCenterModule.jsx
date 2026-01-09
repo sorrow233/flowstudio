@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Library, Globe2, Pencil, Trash2, X, Check } from 'lucide-react';
+import { Plus, Search, Library, Globe2, Pencil, Trash2, X, Check, Undo2, Redo2 } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES, COMMAND_CATEGORIES } from '../../utils/constants';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -27,7 +27,11 @@ const CommandCenterModule = () => {
         projects: commands,
         addProject: addCommand,
         updateProject: updateCommand,
-        removeProject: deleteCommand
+        removeProject: deleteCommand,
+        undo,
+        redo,
+        canUndo,
+        canRedo
     } = useSyncedProjects(doc, 'all_commands');
 
     // Sync: Categories
@@ -193,9 +197,12 @@ const CommandCenterModule = () => {
         setTimeout(() => setCopiedId(null), 2000);
     };
 
-    const handleReorder = (reorderedStageCommands) => {
-        reorderedStageCommands.forEach((cmd, index) => {
-            updateCommand(cmd.id, { order: index });
+    const handleReorder = (reorderedVisibleCommands) => {
+        if (!doc) return;
+        doc.transact(() => {
+            reorderedVisibleCommands.forEach((cmd, index) => {
+                updateCommand(cmd.id, { order: index });
+            });
         });
     };
 
@@ -302,6 +309,26 @@ const CommandCenterModule = () => {
 
                         <div className="flex gap-2 w-full md:w-auto justify-between md:justify-end">
                             <div className="flex gap-2 w-full md:w-auto">
+
+                                {/* Undo/Redo Buttons */}
+                                <div className="hidden md:flex items-center gap-1 bg-gray-100 rounded-full p-1 mr-2">
+                                    <button
+                                        onClick={undo}
+                                        disabled={!canUndo}
+                                        className="p-1.5 rounded-full hover:bg-white text-gray-400 disabled:opacity-30 disabled:hover:bg-transparent hover:text-gray-700 transition-all"
+                                        title="Undo"
+                                    >
+                                        <Undo2 size={16} />
+                                    </button>
+                                    <button
+                                        onClick={redo}
+                                        disabled={!canRedo}
+                                        className="p-1.5 rounded-full hover:bg-white text-gray-400 disabled:opacity-30 disabled:hover:bg-transparent hover:text-gray-700 transition-all"
+                                        title="Redo"
+                                    >
+                                        <Redo2 size={16} />
+                                    </button>
+                                </div>
 
                                 {/* Category Filter Pills - Dot Ribbon */}
 
