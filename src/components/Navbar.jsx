@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import Spotlight from './shared/Spotlight';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-    Sparkles,
+    Flower2,
     Clock,
     Code2,
     CheckCircle2,
@@ -25,7 +25,7 @@ import { useTheme } from '../hooks/ThemeContext';
 import { useTranslation } from '../features/i18n';
 
 const tabIcons = {
-    inspiration: Sparkles,
+    inspiration: Flower2,
     pending: Clock,
     primary: Code2,
     advanced: Zap,

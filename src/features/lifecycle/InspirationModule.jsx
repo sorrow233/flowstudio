@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Trash2, ArrowRight, Copy, Check, Sparkles, Hash, Tag } from 'lucide-react';
+import { Send, Trash2, ArrowRight, Copy, Check, Flower2, Hash, Tag } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
@@ -283,7 +283,7 @@ const InspirationModule = () => {
             <div className="mb-14 text-center md:text-left">
                 <div className="inline-flex items-center justify-center md:justify-start gap-2 mb-3">
                     <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                        <Sparkles className="w-5 h-5 text-amber-500" />
+                        <Flower2 className="w-5 h-5 text-amber-500" />
                     </div>
                     <h2 className="text-3xl font-light text-gray-900 dark:text-white tracking-tight">
                         {t('inspiration.title')}
@@ -368,7 +368,7 @@ const InspirationModule = () => {
                         className="py-32 text-center"
                     >
                         <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Sparkles className="text-gray-300 dark:text-gray-600" size={24} />
+                            <Flower2 className="text-gray-300 dark:text-gray-600" size={24} />
                         </div>
                         <p className="text-gray-400 dark:text-gray-500 text-sm font-light tracking-wide">
                             {t('inspiration.emptyState')}

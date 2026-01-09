@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { GripVertical, Check, Copy, Trash2, Sparkles, Link as LinkIcon, Command, Globe, Tag, FileText, Share2 } from 'lucide-react';
+import { GripVertical, Check, Copy, Trash2, Pencil, Link as LinkIcon, Command, Globe, Tag, FileText, Share2 } from 'lucide-react';
 
 const CommandItem = ({
     cmd,
@@ -151,7 +151,7 @@ const CommandItem = ({
                             className="p-2 hover:bg-gray-100 rounded-xl text-gray-400 hover:text-gray-900 transition-colors"
                             title="Edit"
                         >
-                            <Sparkles size={18} />
+                            <Pencil size={18} />
                         </button>
                         <button
                             onClick={(e) => { e.stopPropagation(); handleCopy(cmd.id, cmd.content || cmd.url); }}
