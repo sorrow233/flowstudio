@@ -79,7 +79,9 @@ const CommercialModule = () => {
     const [selectedProject, setSelectedProject] = useState(null);
 
     const commercialProjects = React.useMemo(() => {
-        return allProjects.filter(p => p.stage === 'commercial');
+        // Show all projects that have graduated from Primary (Development)
+        // This includes 'advanced', 'final', 'commercial', or 'modules'
+        return allProjects.filter(p => ['advanced', 'final', 'commercial', 'modules'].includes(p.stage));
     }, [allProjects]);
 
     useEffect(() => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Terminal, Unlock, CheckCircle2, Copy, Sparkles, Lock } from 'lucide-react';
+import { Terminal, Unlock, CheckCircle2, Copy, Coins, Lock } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 
 const AiConfigurationPanel = ({ onCopy, onUnlock, isLaunched }) => {
@@ -9,8 +9,8 @@ const AiConfigurationPanel = ({ onCopy, onUnlock, isLaunched }) => {
     return (
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 h-full flex flex-col">
             <div className="mb-6 flex items-center gap-3 border-b border-gray-100 dark:border-gray-700 pb-4">
-                <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl text-white shadow-lg shadow-indigo-200 dark:shadow-none">
-                    <Sparkles size={20} />
+                <div className="p-2 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-xl text-white shadow-lg shadow-amber-200 dark:shadow-none">
+                    <Coins size={20} />
                 </div>
                 <div>
                     <h3 className="font-bold text-gray-900 dark:text-gray-100 text-lg">
@@ -34,7 +34,7 @@ const AiConfigurationPanel = ({ onCopy, onUnlock, isLaunched }) => {
                                 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
                                 ${isLaunched || step < 4
                                     ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-                                    : 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'}
+                                    : 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'}
                             `}>
                                 {isLaunched && step !== 4 ? <CheckCircle2 size={14} /> : step}
                             </div>

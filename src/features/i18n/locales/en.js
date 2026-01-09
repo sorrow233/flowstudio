@@ -4,9 +4,9 @@ export default {
     navbar: {
         inspiration: 'Inspiration',
         pending: 'Pending',
-        primary: 'Primary',
+        primary: 'Development',
         advanced: 'Advanced',
-        final: 'Final',
+        final: 'Modules',
         commercial: 'Commercial',
         command: 'Command',
         cloudSync: 'Cloud Sync',
@@ -58,7 +58,7 @@ export default {
 
     // Primary Dev Module
     primary: {
-        title: 'Primary Dev',
+        title: 'Development',
         subtitle: 'Projects currently under active development',
         emptyState: 'No projects in development',
         tasks: 'Tasks',
@@ -86,11 +86,11 @@ export default {
         newProjectDefaultDesc: 'Optimization, features & fixes',
     },
 
-    // Final Dev (formerly Advanced)
+    // Final Dev (Renamed to Modules)
     final: {
-        title: 'Final Integration',
-        subtitle: 'The concluding phase of core system integration.',
-        emptyState: 'No final projects',
+        title: 'Modules',
+        subtitle: 'Global view of project modules and architecture.',
+        emptyState: 'No modular projects',
     },
 
     // Commercial Module

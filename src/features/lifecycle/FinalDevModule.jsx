@@ -52,7 +52,7 @@ const FinalDevModule = () => {
 
     // Filter projects for this module (Optimization Stage)
     const projects = React.useMemo(() =>
-        allProjects.filter(p => p.stage === 'advanced'),
+        allProjects.filter(p => ['advanced', 'final', 'commercial', 'modules'].includes(p.stage)),
         [allProjects]);
 
     useUndoShortcuts(undo, redo);

@@ -15,12 +15,12 @@ const GrowthPhase = ({ channels, activeChannelIds, onToggleChannel }) => {
             className="h-full flex flex-col"
         >
             <div className="bg-gradient-to-br from-gray-900 to-gray-800 dark:from-black dark:to-gray-950 rounded-[3rem] p-10 text-white flex-1 relative overflow-hidden shadow-2xl">
-                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-emerald-500/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-amber-500/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
                 <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-8 text-emerald-400">
+                    <div className="flex items-center gap-3 mb-8 text-amber-400">
                         <Megaphone size={32} />
-                        <span className="text-sm font-bold uppercase tracking-widest border px-3 py-1 rounded-full border-emerald-500/50 bg-emerald-500/10">
+                        <span className="text-sm font-bold uppercase tracking-widest border px-3 py-1 rounded-full border-amber-500/50 bg-amber-500/10">
                             {t('commercial.growthPhase')}
                         </span>
                     </div>
@@ -36,7 +36,7 @@ const GrowthPhase = ({ channels, activeChannelIds, onToggleChannel }) => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-white/5 backdrop-blur border border-white/10 rounded-3xl p-6">
-                            <h4 className="font-bold text-emerald-400 mb-4 flex items-center gap-2">
+                            <h4 className="font-bold text-amber-400 mb-4 flex items-center gap-2">
                                 <Rocket size={16} /> {t('commercial.activeChannels')}
                             </h4>
                             <div className="space-y-2">
@@ -49,7 +49,7 @@ const GrowthPhase = ({ channels, activeChannelIds, onToggleChannel }) => {
                                             className={`
                                                 w-full flex items-center justify-between p-3 rounded-xl border transition-all duration-200
                                                 ${isActive
-                                                    ? 'bg-emerald-500/20 border-emerald-500/50 text-white'
+                                                    ? 'bg-amber-500/20 border-amber-500/50 text-white'
                                                     : 'bg-white/5 border-transparent hover:bg-white/10 text-gray-400'}
                                             `}
                                         >
@@ -57,7 +57,7 @@ const GrowthPhase = ({ channels, activeChannelIds, onToggleChannel }) => {
                                                 <channel.icon size={16} />
                                                 <span className="text-sm font-medium">{t(`commercial.marketing.${channel.id}`)}</span>
                                             </div>
-                                            {isActive && <Check size={14} className="text-emerald-400" />}
+                                            {isActive && <Check size={14} className="text-amber-400" />}
                                         </button>
                                     );
                                 })}

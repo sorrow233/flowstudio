@@ -12,9 +12,9 @@ const AdvancedDevModule = () => {
     const { doc } = useSync();
     const { projects: allProjects, updateProject } = useSyncedProjects(doc, 'all_projects');
 
-    // Filter for Final Projects (Culmination Stage)
+    // Filter for Modules (formerly Final/Culmination)
     const finalProjects = React.useMemo(() =>
-        allProjects.filter(p => p.stage === 'final'),
+        allProjects.filter(p => ['advanced', 'final', 'commercial', 'modules'].includes(p.stage)),
         [allProjects]);
 
     // For compatibility with some local variables if they exist
