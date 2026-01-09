@@ -86,13 +86,13 @@ const TaskItem = ({
     // Explicit Color Mapping for Tailwind (Dynamic template literals don't work reliably with JIT/Purge)
     const COLOR_MAP = {
         emerald: {
-            main: 'bg-emerald-500 border-emerald-500',
-            border: 'border-emerald-300 hover:border-emerald-400 hover:bg-emerald-50',
-            decoration: 'decoration-emerald-500/30',
-            inputBorder: 'border-emerald-200',
-            inputRing: 'focus:ring-emerald-100',
-            grab: 'border-emerald-300 ring-emerald-100 bg-emerald-50/10',
-            action: 'hover:text-emerald-500 hover:bg-emerald-50'
+            main: 'bg-purple-500 border-purple-500',
+            border: 'border-purple-300 hover:border-purple-400 hover:bg-purple-50',
+            decoration: 'decoration-purple-500/30',
+            inputBorder: 'border-purple-200',
+            inputRing: 'focus:ring-purple-100',
+            grab: 'border-purple-300 ring-purple-100 bg-purple-50/10',
+            action: 'hover:text-purple-500 hover:bg-purple-50'
         },
         blue: {
             main: 'bg-blue-500 border-blue-500',
@@ -132,7 +132,7 @@ const TaskItem = ({
         }
     };
 
-    const theme = COLOR_MAP[themeColor] || COLOR_MAP.emerald;
+    const theme = COLOR_MAP[themeColor] || COLOR_MAP.purple;
 
     const getCheckboxStyle = () => {
         const shapeClass = task.isCommand ? 'rounded-full' : 'rounded-md';
@@ -212,13 +212,13 @@ const TaskItem = ({
                     ${!isSelectionMode && isMandatory && !task.done
                         ? 'bg-white border-red-100 shadow-sm shadow-red-100 hover:border-red-200'
                         : !isSelectionMode && isMandatory && task.done
-                            ? 'bg-emerald-50/50 border-emerald-100 opacity-60'
+                            ? 'bg-purple-50/50 border-purple-100 opacity-60'
                             : !isSelectionMode && isLink
                                 ? 'bg-white border-blue-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5'
                                 : !isSelectionMode && task.done
                                     ? 'bg-gray-50 border-gray-100 opacity-60 dark:bg-gray-900/40 dark:border-gray-800'
                                     : !isSelectionMode && !isSelected
-                                        ? 'bg-white dark:bg-gray-800/40 border-gray-100 dark:border-gray-700/50 hover:border-emerald-200 dark:hover:border-emerald-800 hover:shadow-lg hover:shadow-emerald-500/5'
+                                        ? 'bg-white dark:bg-gray-800/40 border-gray-100 dark:border-gray-700/50 hover:border-purple-200 dark:hover:border-purple-800 hover:shadow-lg hover:shadow-purple-500/5'
                                         : ''
                     }
                 `}
@@ -314,7 +314,7 @@ const TaskItem = ({
                                                     <Tag size={8} className="opacity-70" />
                                                     {tag.label}
                                                     {copiedTaskId === `${task.id}-${tag.id}` && (
-                                                        <div className="absolute inset-0 bg-emerald-500 text-white flex items-center justify-center">
+                                                        <div className="absolute inset-0 bg-purple-500 text-white flex items-center justify-center">
                                                             <Check size={8} />
                                                         </div>
                                                     )}
@@ -330,7 +330,7 @@ const TaskItem = ({
 
                 {/* Copied Feedback Badge */}
                 {task.isCommand && copiedTaskId === task.id && (
-                    <span className="absolute top-2 right-2 text-[9px] uppercase font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full animate-pulse">
+                    <span className="absolute top-2 right-2 text-[9px] uppercase font-bold text-purple-500 bg-purple-50 px-2 py-0.5 rounded-full animate-pulse">
                         Copied
                     </span>
                 )}

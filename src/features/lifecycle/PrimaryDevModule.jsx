@@ -678,6 +678,7 @@ const PrimaryDevModule = () => {
                 onImport={handleLinkCommand}
                 currentStage={viewStage}
                 projectCategory={selectedProject?.category}
+                themeColor="purple"
             />
         </div >
     );

@@ -13,7 +13,37 @@ const CATEGORY_ICONS = {
     'Flag': Flag
 };
 
-const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCategory, stages = DEV_STAGES }) => {
+const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCategory, stages = DEV_STAGES, themeColor = 'emerald' }) => {
+    // Dynamic color classes based on theme
+    const themeClasses = themeColor === 'purple' ? {
+        border: 'border-purple-100/50 hover:border-purple-300',
+        activeBorder: 'border-purple-200 ring-1 ring-purple-50',
+        hoverShadow: 'hover:shadow-purple-500/5',
+        icon: 'bg-purple-50 text-purple-600',
+        iconHover: 'group-hover:bg-purple-50 group-hover:text-purple-600',
+        titleHover: 'group-hover:text-purple-700',
+        badge: 'text-purple-600 bg-purple-50 border-purple-100',
+        addBtn: 'text-purple-600 bg-purple-50',
+        recommendedBg: 'border-purple-100 bg-purple-50/50',
+        recommendedLine: 'from-purple-400 to-violet-400',
+        recommendedTitle: 'text-purple-800',
+        recommendedIcon: 'text-purple-500',
+        searchRing: 'focus:ring-purple-100'
+    } : {
+        border: 'border-emerald-100/50 hover:border-emerald-300',
+        activeBorder: 'border-emerald-200 ring-1 ring-emerald-50',
+        hoverShadow: 'hover:shadow-emerald-500/5',
+        icon: 'bg-emerald-50 text-emerald-600',
+        iconHover: 'group-hover:bg-emerald-50 group-hover:text-emerald-600',
+        titleHover: 'group-hover:text-emerald-700',
+        badge: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+        addBtn: 'text-emerald-600 bg-emerald-50',
+        recommendedBg: 'border-emerald-100 bg-emerald-50/50',
+        recommendedLine: 'from-emerald-400 to-teal-400',
+        recommendedTitle: 'text-emerald-800',
+        recommendedIcon: 'text-emerald-500',
+        searchRing: 'focus:ring-emerald-100'
+    };
     const [categories, setCategories] = useState(COMMAND_CATEGORIES);
     const [commands, setCommands] = useState([]); // BUG FIX: Missing state
     const [importCategory, setImportCategory] = useState('all'); // BUG FIX: Missing state
@@ -78,20 +108,20 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
             <div
                 key={cmd.id}
                 onClick={() => onImport(cmd)}
-                className={`group bg-white border p-4 rounded-xl hover:shadow-lg hover:shadow-emerald-500/5 cursor-pointer transition-all relative ${isGrouped
-                    ? 'border-emerald-100/50 hover:border-emerald-300'
+                className={`group bg-white border p-4 rounded-xl ${themeClasses.hoverShadow} cursor-pointer transition-all relative ${isGrouped
+                    ? `${themeClasses.border}`
                     : currentStage && cmd.stageIds?.includes(currentStage)
-                        ? 'border-emerald-200 ring-1 ring-emerald-50'
-                        : 'border-gray-100 hover:border-emerald-300'
+                        ? themeClasses.activeBorder
+                        : `border-gray-100 hover:border-${themeColor}-300`
                     }`}
             >
                 <div className="flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${cmd.category === 'backend' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-50 text-gray-500 group-hover:bg-emerald-50 group-hover:text-emerald-600'} transition-colors`}>
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${cmd.category === 'backend' ? themeClasses.icon : `bg-gray-50 text-gray-500 ${themeClasses.iconHover}`} transition-colors`}>
                             <Terminal size={18} />
                         </div>
                         <div>
-                            <h4 className="font-medium text-gray-900 group-hover:text-emerald-700 transition-colors text-sm flex items-center gap-2">
+                            <h4 className={`font-medium text-gray-900 ${themeClasses.titleHover} transition-colors text-sm flex items-center gap-2`}>
                                 {cmd.title}
                                 {currentStage && cmd.stageIds?.includes(currentStage) && projectCategory && cmd.category === projectCategory ? (
                                     <span className="flex items-center gap-1 text-[10px] font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-100 uppercase tracking-wider shadow-sm shadow-violet-200/50">
@@ -100,7 +130,7 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                                 ) : (
                                     <>
                                         {currentStage && cmd.stageIds?.includes(currentStage) && (
-                                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 uppercase tracking-wider">
+                                            <span className={`text-[10px] font-bold ${themeClasses.badge} px-1.5 py-0.5 rounded border uppercase tracking-wider`}>
                                                 Stage Critical
                                             </span>
                                         )}
@@ -146,7 +176,7 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                     </div>
                     {/* Hidden hover action */}
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded">Add +</span>
+                        <span className={`text-xs font-medium ${themeClasses.addBtn} px-2 py-1 rounded`}>Add +</span>
                     </div>
                 </div>
             </div>
@@ -190,7 +220,7 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                                     placeholder="Search commands..."
                                     value={importSearch}
                                     onChange={e => setImportSearch(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-100 transition-all outline-none text-sm"
+                                    className={`w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 ${themeClasses.searchRing} transition-all outline-none text-sm`}
                                 />
                             </div>
 
@@ -236,12 +266,12 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                         <div className="flex-1 overflow-y-auto p-4 bg-gray-50/30 custom-scrollbar">
                             <div className="grid grid-cols-1 gap-3">
                                 {recommendedCommands.length > 0 && (
-                                    <div className="mb-6 p-1 rounded-3xl border border-emerald-100 bg-emerald-50/50 relative overflow-hidden">
-                                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-teal-400 opacity-50" />
+                                    <div className={`mb-6 p-1 rounded-3xl border ${themeClasses.recommendedBg} relative overflow-hidden`}>
+                                        <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${themeClasses.recommendedLine} opacity-50`} />
 
                                         <div className="p-4 pb-2">
-                                            <h4 className="text-xs font-bold text-emerald-800 uppercase tracking-widest flex items-center gap-2">
-                                                <Sparkles size={14} className="text-emerald-500" />
+                                            <h4 className={`text-xs font-bold ${themeClasses.recommendedTitle} uppercase tracking-widest flex items-center gap-2`}>
+                                                <Sparkles size={14} className={themeClasses.recommendedIcon} />
                                                 Recommended for {stages.find(s => s.id === currentStage)?.label || 'Current Stage'}
                                             </h4>
                                         </div>
