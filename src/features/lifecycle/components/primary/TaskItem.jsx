@@ -85,7 +85,7 @@ const TaskItem = ({
 
     // Explicit Color Mapping for Tailwind (Dynamic template literals don't work reliably with JIT/Purge)
     const COLOR_MAP = {
-        emerald: {
+        purple: {
             main: 'bg-purple-500 border-purple-500',
             border: 'border-purple-300 hover:border-purple-400 hover:bg-purple-50',
             decoration: 'decoration-purple-500/30',
@@ -93,6 +93,15 @@ const TaskItem = ({
             inputRing: 'focus:ring-purple-100',
             grab: 'border-purple-300 ring-purple-100 bg-purple-50/10',
             action: 'hover:text-purple-500 hover:bg-purple-50'
+        },
+        emerald: {
+            main: 'bg-emerald-500 border-emerald-500',
+            border: 'border-emerald-300 hover:border-emerald-400 hover:bg-emerald-50',
+            decoration: 'decoration-emerald-500/30',
+            inputBorder: 'border-emerald-200',
+            inputRing: 'focus:ring-emerald-100',
+            grab: 'border-emerald-300 ring-emerald-100 bg-emerald-50/10',
+            action: 'hover:text-emerald-500 hover:bg-emerald-50'
         },
         blue: {
             main: 'bg-blue-500 border-blue-500',
