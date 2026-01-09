@@ -42,42 +42,44 @@ const InspirationModule = () => {
     const [input, setInput] = useState('');
     const [selectedColorIndex, setSelectedColorIndex] = useState(null);
     const [copiedId, setCopiedId] = useState(null);
-    const [deletedIdea, setDeletedIdea] = useState(null);
+    const [deletedIdeas, setDeletedIdeas] = useState([]);
     const [scrollTop, setScrollTop] = useState(0);
     const textareaRef = useRef(null);
 
     // Legacy Migration logic removed as it's now handled by useProjectMigration hook in SyncProvider
 
-    // Cleanup undo toast after 5s
+    // Cleanup undo stack after 5s of inactivity
     useEffect(() => {
-        if (deletedIdea) {
+        if (deletedIdeas.length > 0) {
             const timer = setTimeout(() => {
-                setDeletedIdea(null);
+                setDeletedIdeas([]);
             }, 5000);
             return () => clearTimeout(timer);
         }
-    }, [deletedIdea]);
+    }, [deletedIdeas]);
 
     // Keyboard shortcut: Cmd+Z to undo
     useEffect(() => {
         const handleKeyDown = (e) => {
             // Cmd+Z or Ctrl+Z to undo
             if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
-                if (deletedIdea) {
+                if (deletedIdeas.length > 0) {
                     e.preventDefault();
-                    addIdea(deletedIdea);
-                    setDeletedIdea(null);
+                    const lastDeleted = deletedIdeas[deletedIdeas.length - 1];
+                    addIdea(lastDeleted);
+                    setDeletedIdeas(prev => prev.slice(0, -1));
                 }
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [deletedIdea, addIdea]);
+    }, [deletedIdeas, addIdea]);
 
     const handleAdd = () => {
         if (!input.trim()) return;
         const newIdea = {
+            id: uuidv4(), // Generate ID here to ensure uniqueness if re-added
             content: input.trim(),
             timestamp: Date.now(),
             colorIndex: selectedColorIndex !== null ? selectedColorIndex : getNextAutoColorIndex(ideas.length),
@@ -112,15 +114,16 @@ const InspirationModule = () => {
     const handleRemove = (id) => {
         const idea = ideas.find(i => i.id === id);
         if (idea) {
-            setDeletedIdea(idea);
+            setDeletedIdeas(prev => [...prev, idea]);
             removeIdea(id);
         }
     };
 
     const handleUndo = () => {
-        if (deletedIdea) {
-            addIdea(deletedIdea);
-            setDeletedIdea(null);
+        if (deletedIdeas.length > 0) {
+            const lastDeleted = deletedIdeas[deletedIdeas.length - 1];
+            addIdea(lastDeleted);
+            setDeletedIdeas(prev => prev.slice(0, -1));
         }
     };
 
@@ -311,14 +314,17 @@ const InspirationModule = () => {
 
             {/* Undo Toast */}
             <AnimatePresence>
-                {deletedIdea && (
+                {deletedIdeas.length > 0 && (
                     <motion.div
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 50 }}
                         className="fixed bottom-10 right-10 bg-pink-50 dark:bg-pink-900 text-pink-900 dark:text-pink-50 px-6 py-3 rounded-xl shadow-2xl shadow-pink-100 dark:shadow-pink-900/20 border border-pink-100 dark:border-pink-800 flex items-center gap-4 z-50"
                     >
-                        <span className="text-sm font-medium">{t('inspiration.ideaDeleted')}</span>
+                        <span className="text-sm font-medium">
+                            {t('inspiration.ideaDeleted')}
+                            {deletedIdeas.length > 1 && <span className="ml-1 opacity-70">({deletedIdeas.length})</span>}
+                        </span>
                         <button
                             onClick={handleUndo}
                             className="text-sm font-bold text-pink-500 dark:text-pink-300 hover:text-pink-400 dark:hover:text-pink-200 transition-colors flex items-center gap-2"
