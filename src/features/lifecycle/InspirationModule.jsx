@@ -7,81 +7,38 @@ import { useTranslation } from '../i18n';
 
 const STORAGE_KEY = 'flowstudio_inspiration_ideas';
 
-// Enhanced Color Palette with Glow/Bg definitions
-const COLOR_PALETTE = [
-    {
-        id: 'emerald',
-        dot: 'bg-emerald-400',
-        bg: 'bg-emerald-50 dark:bg-emerald-900/10',
-        border: 'border-emerald-100 dark:border-emerald-800/50',
-        hoverBorder: 'hover:border-emerald-300 dark:hover:border-emerald-700',
-        hoverShadow: 'hover:shadow-[0_8px_30px_-12px_rgba(16,185,129,0.2)] dark:hover:shadow-[0_8px_30px_-12px_rgba(16,185,129,0.1)]',
-        ring: 'hover:ring-emerald-500/20'
-    },
-    {
-        id: 'amber',
-        dot: 'bg-amber-400',
-        bg: 'bg-amber-50 dark:bg-amber-900/10',
-        border: 'border-amber-100 dark:border-amber-800/50',
-        hoverBorder: 'hover:border-amber-300 dark:hover:border-amber-700',
-        hoverShadow: 'hover:shadow-[0_8px_30px_-12px_rgba(245,158,11,0.2)] dark:hover:shadow-[0_8px_30px_-12px_rgba(245,158,11,0.1)]',
-        ring: 'hover:ring-amber-500/20'
-    },
-    {
-        id: 'violet',
-        dot: 'bg-violet-400',
-        bg: 'bg-violet-50 dark:bg-violet-900/10',
-        border: 'border-violet-100 dark:border-violet-800/50',
-        hoverBorder: 'hover:border-violet-300 dark:hover:border-violet-700',
-        hoverShadow: 'hover:shadow-[0_8px_30px_-12px_rgba(139,92,246,0.2)] dark:hover:shadow-[0_8px_30px_-12px_rgba(139,92,246,0.1)]',
-        ring: 'hover:ring-violet-500/20'
-    },
-    {
-        id: 'blue',
-        dot: 'bg-blue-400',
-        bg: 'bg-blue-50 dark:bg-blue-900/10',
-        border: 'border-blue-100 dark:border-blue-800/50',
-        hoverBorder: 'hover:border-blue-300 dark:hover:border-blue-700',
-        hoverShadow: 'hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.2)] dark:hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.1)]',
-        ring: 'hover:ring-blue-500/20'
-    },
-    {
-        id: 'rose',
-        dot: 'bg-rose-400',
-        bg: 'bg-rose-50 dark:bg-rose-900/10',
-        border: 'border-rose-100 dark:border-rose-800/50',
-        hoverBorder: 'hover:border-rose-300 dark:hover:border-rose-700',
-        hoverShadow: 'hover:shadow-[0_8px_30px_-12px_rgba(244,63,94,0.2)] dark:hover:shadow-[0_8px_30px_-12px_rgba(244,63,94,0.1)]',
-        ring: 'hover:ring-rose-500/20'
-    },
-    {
-        id: 'lime',
-        dot: 'bg-lime-400',
-        bg: 'bg-lime-50 dark:bg-lime-900/10',
-        border: 'border-lime-100 dark:border-lime-800/50',
-        hoverBorder: 'hover:border-lime-300 dark:hover:border-lime-700',
-        hoverShadow: 'hover:shadow-[0_8px_30px_-12px_rgba(132,204,22,0.2)] dark:hover:shadow-[0_8px_30px_-12px_rgba(132,204,22,0.1)]',
-        ring: 'hover:ring-lime-500/20'
-    },
+// Color palette for status dots
+const DOT_COLORS = [
+    'bg-gradient-to-br from-emerald-400 to-teal-500',
+    'bg-gradient-to-br from-amber-400 to-orange-500',
+    'bg-gradient-to-br from-violet-400 to-purple-500',
+    'bg-gradient-to-br from-sky-400 to-blue-500',
+    'bg-gradient-to-br from-rose-400 to-pink-500',
+    'bg-gradient-to-br from-lime-400 to-green-500',
 ];
 
-const getTheme = (index) => {
-    return COLOR_PALETTE[index % COLOR_PALETTE.length];
+// Get consistent color based on idea id or explicit colorIndex
+const getDotColor = (id, colorIndex) => {
+    // If colorIndex is provided and valid, use it
+    if (typeof colorIndex === 'number' && DOT_COLORS[colorIndex]) {
+        return DOT_COLORS[colorIndex];
+    }
+    // Fallback to deterministic hash
+    const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return DOT_COLORS[hash % DOT_COLORS.length];
 };
 
-// Backwards compatibility for colorIndex
-const getDotColorClass = (index) => {
-    return getTheme(index).dot;
+// Auto color logic: Every 3 items, switch to next color
+const getNextAutoColorIndex = (totalCount) => {
+    const groupIndex = Math.floor(totalCount / 3);
+    return groupIndex % DOT_COLORS.length;
 };
-
 
 // Extracted Item Component to manage local drag state
 const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
     const { t } = useTranslation();
-
-    const theme = getTheme(idea.colorIndex || 0);
 
     // Handle double click to toggle completion (strikethrough)
     const handleDoubleClick = (e) => {
@@ -128,15 +85,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                 transition={{ x: { type: "spring", stiffness: 500, damping: 30 } }}
                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                 layout
-                className={`
-                    group relative rounded-xl p-5 
-                    transition-all duration-300 cursor-pointer active:scale-[0.99]
-                    border shadow-sm
-                    ${theme.bg}
-                    ${theme.border}
-                    ${isDragging ? '' : `${theme.hoverBorder} ${theme.hoverShadow} hover:ring-1 ${theme.ring}`}
-                    ${isCompleted ? 'opacity-50' : ''}
-                `}
+                className={`group relative bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.4)] hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-300 cursor-pointer active:scale-[0.99] ${isCompleted ? 'opacity-50' : ''}`}
             >
                 <div className="flex items-start gap-3">
                     {/* Color Status Dot - Click to cycle colors */}
@@ -146,11 +95,11 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                             e.stopPropagation();
                             // Cycle to next color
                             const currentIndex = typeof idea.colorIndex === 'number' ? idea.colorIndex : 0;
-                            const nextIndex = (currentIndex + 1) % COLOR_PALETTE.length;
+                            const nextIndex = (currentIndex + 1) % DOT_COLORS.length;
                             onUpdateColor(idea.id, nextIndex);
                         }}
                     >
-                        <div className={`w-2.5 h-2.5 rounded-full ${theme.dot} shadow-sm transition-transform duration-200 hover:scale-125 ${isCompleted ? 'scale-75 opacity-50' : ''}`} />
+                        <div className={`w-2.5 h-2.5 rounded-full ${getDotColor(idea.id, idea.colorIndex)} shadow-sm transition-transform duration-200 hover:scale-125 ${isCompleted ? 'scale-75 opacity-50' : ''}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
@@ -166,7 +115,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                                         // Inline Code: `...`
                                         if (part.startsWith('`') && part.endsWith('`')) {
                                             return (
-                                                <code key={index} className="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[13px] font-mono text-emerald-600 dark:text-emerald-400 mx-0.5 border border-white/20">
+                                                <code key={index} className="bg-emerald-50 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded text-[13px] font-mono text-emerald-600 dark:text-emerald-400 mx-0.5 border border-emerald-100 dark:border-emerald-800/50">
                                                     {part.slice(1, -1)}
                                                 </code>
                                             );
@@ -185,7 +134,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                                             return (
                                                 <span
                                                     key={index}
-                                                    className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-white/60 dark:bg-black/20 text-emerald-600 dark:text-emerald-400 rounded-md text-[11px] font-medium align-middle border border-emerald-100/50 dark:border-emerald-800/50 shadow-sm transform -translate-y-0.5"
+                                                    className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-md text-[11px] font-medium align-middle border border-emerald-100/50 dark:border-emerald-800/50 shadow-sm transform -translate-y-0.5"
                                                 >
                                                     {tagName}
                                                 </span>
@@ -200,7 +149,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                             })()}
                         </div>
                         {/* Date/Time - compact, directly under content */}
-                        <div className="mt-2 text-[11px] text-gray-400 dark:text-gray-500 font-medium opacity-80">
+                        <div className="mt-2 text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                             {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
                                 year: 'numeric',
                                 month: 'short',
@@ -222,7 +171,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
-                            className="absolute top-3 right-3 bg-white/80 dark:bg-black/50 backdrop-blur-sm text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 shadow-sm border border-emerald-100 dark:border-emerald-800"
+                            className="absolute top-3 right-3 bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 shadow-sm border border-emerald-100 dark:border-emerald-800"
                         >
                             <Check size={12} strokeWidth={3} />
                             <span>{t('common.copied')}</span>
@@ -251,7 +200,6 @@ const InspirationModule = () => {
     const { projects: pendingProjects } = useSyncedProjects(doc, 'pending_projects');
 
     const [input, setInput] = useState('');
-    const [selectedColorIndex, setSelectedColorIndex] = useState(0); // Default to first color
     const [copiedId, setCopiedId] = useState(null);
     const [deletedIdea, setDeletedIdea] = useState(null);
 
@@ -313,16 +261,10 @@ const InspirationModule = () => {
             id: uuidv4(),
             content: input.trim(),
             timestamp: Date.now(),
-            colorIndex: selectedColorIndex, // Use selected color
+            colorIndex: getNextAutoColorIndex(ideas.length), // Auto color based on count
         };
         addIdea(newIdea);
         setInput('');
-
-        // Optional: Cycle color after add? Or keep selected? 
-        // Keeping selected seems more intentional.
-        // But maybe randomizing initially is fun?
-        // Let's auto-cycle for variety if user hasn't explicitly picked?
-        // For now, simple: stick to what user picked.
     };
 
     const handleUpdateColor = (id, newColorIndex) => {
@@ -404,36 +346,22 @@ const InspirationModule = () => {
 
                     {/* Bottom Action Area */}
                     <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            {/* Color Selector */}
-                            <div className="flex items-center gap-1.5 p-1.5 bg-gray-50 dark:bg-gray-800 rounded-full border border-gray-100 dark:border-gray-700">
-                                {COLOR_PALETTE.map((theme, index) => (
-                                    <button
-                                        key={theme.id}
-                                        onClick={() => setSelectedColorIndex(index)}
-                                        className={`w-4 h-4 rounded-full transition-all duration-300 ${theme.dot} ${index === selectedColorIndex ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-gray-900 ring-gray-400 dark:ring-gray-500 scale-110' : 'hover:scale-110 opacity-60 hover:opacity-100'}`}
-                                        title={theme.id.charAt(0).toUpperCase() + theme.id.slice(1)}
-                                    />
-                                ))}
-                            </div>
-
-                            {/* Project Tags Bar */}
-                            <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2 mask-linear-fade">
-                                {allProjectTags.length > 0 && (
-                                    <>
-                                        <Hash size={14} className="text-gray-300 dark:text-gray-600 flex-shrink-0" />
-                                        {allProjectTags.map((tag) => (
-                                            <button
-                                                key={tag}
-                                                onClick={() => handleTagClick(tag)}
-                                                className="flex-shrink-0 px-3 py-1 bg-emerald-50/80 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-800/50 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 rounded-full text-[11px] font-medium transition-colors border border-emerald-100/50 dark:border-emerald-800/50 hover:border-emerald-200 dark:hover:border-emerald-700 whitespace-nowrap shadow-sm"
-                                            >
-                                                {tag}
-                                            </button>
-                                        ))}
-                                    </>
-                                )}
-                            </div>
+                        {/* Project Tags Bar */}
+                        <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2 mr-4 mask-linear-fade">
+                            {allProjectTags.length > 0 && (
+                                <>
+                                    <Hash size={14} className="text-gray-300 dark:text-gray-600 flex-shrink-0" />
+                                    {allProjectTags.map((tag) => (
+                                        <button
+                                            key={tag}
+                                            onClick={() => handleTagClick(tag)}
+                                            className="flex-shrink-0 px-3 py-1 bg-emerald-50/80 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-800/50 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 rounded-full text-[11px] font-medium transition-colors border border-emerald-100/50 dark:border-emerald-800/50 hover:border-emerald-200 dark:hover:border-emerald-700 whitespace-nowrap shadow-sm"
+                                        >
+                                            {tag}
+                                        </button>
+                                    ))}
+                                </>
+                            )}
                         </div>
 
                         <div className="flex items-center gap-3 flex-shrink-0">
