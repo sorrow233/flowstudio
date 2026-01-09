@@ -48,7 +48,7 @@ const ProjectWorkspaceHeader = ({
             {...props}
             className="relative shrink-0 flex flex-col justify-end overflow-hidden transition-all duration-500 bg-white dark:bg-gray-900 group"
             animate={{
-                height: isCollapsed ? (window.innerWidth < 768 ? 130 : 120) : (window.innerWidth < 768 ? 200 : 320),
+                height: isCollapsed ? (window.innerWidth < 768 ? 130 : 120) : (window.innerWidth < 768 ? 'auto' : 320),
             }}
         >
             {/* Background Image Logic */}
@@ -94,7 +94,7 @@ const ProjectWorkspaceHeader = ({
             </div>
 
             {/* Content Area */}
-            <div className="relative z-20 p-6 md:p-8 pb-10 w-full max-w-7xl mx-auto flex flex-col md:flex-row justify-end md:justify-between items-start md:items-end gap-6 md:gap-0 h-full">
+            <div className="relative z-20 p-6 md:p-8 pb-12 w-full max-w-7xl mx-auto flex flex-col md:flex-row justify-end md:justify-between items-start md:items-end gap-6 md:gap-0 h-full">
                 <div className="w-full">
                     {isEditing ? (
                         // EDIT FORM (Simplified inline)
