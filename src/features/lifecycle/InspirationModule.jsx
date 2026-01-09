@@ -294,7 +294,6 @@ const InspirationModule = () => {
 
                         {/* Rich Preview Layer */}
                         {/* Note: scrollTop is no longer needed with auto-grow, passing 0 */}
-                        <InputRichPreview text={input} scrollTop={0} />
 
                         <textarea
                             ref={textareaRef}
@@ -302,8 +301,11 @@ const InspirationModule = () => {
                             onChange={handleInputChange}
                             onKeyDown={handleKeyDown}
                             placeholder={input ? '' : t('inspiration.placeholder')}
-                            className="w-full bg-transparent text-lg text-transparent caret-gray-800 dark:caret-gray-200 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed relative z-10 overflow-hidden"
+                            className="w-full bg-transparent text-lg text-gray-900 dark:text-gray-100 caret-pink-500 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed relative z-10 overflow-hidden break-words placeholder:text-gray-400/50"
                             style={{ fontFamily: 'inherit' }}
+                            autoComplete="off"
+                            autoCorrect="off"
+                            spellCheck="false"
                         />
 
                         {/* Autocomplete Popover */}
