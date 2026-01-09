@@ -136,7 +136,7 @@ const Navbar = () => {
                             // Define active colors for each tab
                             // Define active colors for each tab
                             const activeColors = {
-                                inspiration: 'text-pink-400 dark:text-pink-300',
+                                inspiration: '!text-pink-400 dark:!text-pink-300',
                                 pending: 'text-green-500 dark:text-green-400',
                                 primary: 'text-purple-500 dark:text-purple-400',
                                 advanced: 'text-red-500 dark:text-red-400',
