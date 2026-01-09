@@ -262,7 +262,7 @@ const InspirationModule = () => {
                                 <button
                                     onClick={handleAdd}
                                     disabled={!input.trim()}
-                                    className="flex items-center justify-center p-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl hover:bg-black dark:hover:bg-gray-100 disabled:opacity-30 transition-all duration-300 active:scale-95 shadow-lg shadow-gray-200 dark:shadow-gray-900"
+                                    className="flex items-center justify-center p-3 bg-pink-400 dark:bg-pink-500 text-white rounded-xl hover:bg-pink-500 dark:hover:bg-pink-400 disabled:opacity-30 transition-all duration-300 active:scale-95 shadow-lg shadow-pink-200 dark:shadow-pink-900/20"
                                 >
                                     <ArrowRight size={18} strokeWidth={2} />
                                 </button>
