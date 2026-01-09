@@ -162,13 +162,13 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComple
                             {parseRichText(idea.content)}
                         </div>
                         {/* Date/Time */}
-                        <div className="mt-2 text-[11px] text-pink-300/60 dark:text-pink-500/40 font-medium group-hover:text-pink-300/90 dark:group-hover:text-pink-500/80 transition-colors">
+                        <div className="mt-2 text-[11px] text-pink-300/30 dark:text-pink-500/30 font-medium group-hover:text-pink-300/80 dark:group-hover:text-pink-500/80 transition-colors">
                             {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
                                 year: 'numeric',
                                 month: 'short',
                                 day: 'numeric',
                             })}
-                            <span className="mx-1.5 text-pink-200/50 dark:text-pink-800/50">·</span>
+                            <span className="mx-1.5 text-pink-200/20 dark:text-pink-800/20">·</span>
                             {new Date(idea.timestamp || Date.now()).toLocaleTimeString(undefined, {
                                 hour: '2-digit',
                                 minute: '2-digit'

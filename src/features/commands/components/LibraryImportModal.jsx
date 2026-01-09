@@ -71,12 +71,13 @@ const LibraryImportModal = ({
                                     <p className="text-xs mt-2">{t('commands.noImportableHint')}</p>
                                 </div>
                             )}
-                        </div >
-                    </motion.div >
-                </div >
+                        </div>
+                    </motion.div>
+                </div>
             )}
-        </AnimatePresence >
+        </AnimatePresence>
     );
 };
 
 export default LibraryImportModal;
+
