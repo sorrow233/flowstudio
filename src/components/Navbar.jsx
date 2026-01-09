@@ -70,6 +70,18 @@ const Navbar = () => {
                             const Icon = tab.icon;
                             const isActive = location.pathname.startsWith(tab.path);
 
+                            // Define active colors for each tab
+                            const activeColors = {
+                                inspiration: 'text-pink-500 dark:text-pink-400',
+                                pending: 'text-green-500 dark:text-green-400',
+                                primary: 'text-purple-500 dark:text-purple-400',
+                                advanced: 'text-red-500 dark:text-red-400',
+                                commercial: 'text-amber-500 dark:text-amber-400',
+                                command: 'text-gray-900 dark:text-white', // Invariant black/white
+                            };
+
+                            const activeColorClass = activeColors[tab.id] || 'text-gray-900 dark:text-white';
+
                             return (
                                 <button
                                     key={tab.id}
@@ -77,7 +89,7 @@ const Navbar = () => {
                                     className={`
                                         relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40 shrink-0
                                         ${isActive
-                                            ? 'text-gray-900 dark:text-white bg-gray-50/50 dark:bg-gray-800'
+                                            ? `${activeColorClass} bg-gray-50/50 dark:bg-gray-800`
                                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}
                                     `}
                                 >
@@ -95,6 +107,14 @@ const Navbar = () => {
                             const Icon = tab.icon;
                             const isActive = location.pathname.startsWith(tab.path);
 
+                            // Define active colors for each tab
+                            const activeColors = {
+                                final: 'text-gray-900 dark:text-white',
+                                commercial: 'text-yellow-500 dark:text-yellow-400',
+                            };
+
+                            const activeColorClass = activeColors[tab.id] || 'text-gray-900 dark:text-white';
+
                             return (
                                 <button
                                     key={tab.id}
@@ -102,7 +122,7 @@ const Navbar = () => {
                                     className={`
                                         relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40 shrink-0
                                         ${isActive
-                                            ? 'text-gray-900 dark:text-white bg-gray-50/50 dark:bg-gray-800'
+                                            ? `${activeColorClass} bg-gray-50/50 dark:bg-gray-800`
                                             : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}
                                     `}
                                 >
