@@ -229,7 +229,8 @@ export default {
         globalLibrary: '全局指令库',
         importFromOther: '从其他阶段/配置导入',
         noImportable: '暂无可导入的指令',
-        noImportableHint: '仅 Utility 和 Link 类型可跨阶段共享',
+        noImportableHint: '只有工具和链接类型可以全局共享',
+        renameHint: '双击重命名',
     },
 
     // 开发阶段（5阶段）

@@ -202,6 +202,8 @@ export default {
         browseCommunity: 'コミュニティの共有を閲覧',
         importFromLibrary: 'グローバルライブラリからインポート',
         stage: 'ステージ',
+        noImportableHint: 'ユーティリティとリンクタイプのみグローバルに共有できます',
+        renameHint: 'ダブルクリックで名前を変更',
     },
 
     // Development Stages (5 Stages)

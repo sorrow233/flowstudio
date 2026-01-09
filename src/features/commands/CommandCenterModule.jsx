@@ -88,44 +88,8 @@ const CommandCenterModule = () => {
         }
     };
 
-    // DATA MIGRATION: LocalStorage -> Sync
-    useEffect(() => {
-        if (!doc) return;
-
-        // Migrate Commands
-        const localCmds = localStorage.getItem(STORAGE_KEYS.COMMANDS);
-        if (localCmds && commands.length === 0) {
-            try {
-                const parsed = JSON.parse(localCmds);
-                console.info('[CommandCenter] Migrating commands from localStorage to Sync...');
-                parsed.forEach(cmd => {
-                    const migratedCmd = {
-                        ...cmd,
-                        stageIds: cmd.stageIds || (cmd.stageId ? [cmd.stageId] : []),
-                        tags: cmd.tags || [],
-                        category: cmd.category || 'general'
-                    };
-                    addCommand(migratedCmd);
-                });
-            } catch (e) {
-                console.error('Migration failed:', e);
-            }
-        }
-
-        // Migrate Categories
-        const localCats = localStorage.getItem('flowstudio_categories_custom');
-        if (localCats && syncedCategories.length === 0) {
-            try {
-                const parsed = JSON.parse(localCats);
-                console.info('[CommandCenter] Migrating categories from localStorage to Sync...');
-                parsed.forEach(cat => {
-                    addCategory(cat);
-                });
-            } catch (e) {
-                console.error('Category migration failed:', e);
-            }
-        }
-    }, [doc, commands.length, syncedCategories.length]);
+    // DATA MIGRATION: Handled by useDataMigration hook globally
+    // No code needed here.
 
 
     const handleAdd = () => {

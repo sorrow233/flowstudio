@@ -214,6 +214,7 @@ export default {
         importFromOther: 'Import from other stages/profiles',
         noImportable: 'No commands available to import',
         noImportableHint: 'Only Utility and Link types can be shared globally',
+        renameHint: 'Double click to rename',
     },
 
     // Dev Stages (5 stages)

@@ -202,6 +202,7 @@ export default {
         browseCommunity: '커뮤니티 공유 찾아보기',
         importFromLibrary: '전역 라이브러리에서 가져오기',
         stage: '단계',
+        renameHint: '더블 클릭하여 이름 변경',
     },
 
     // Development Stages (5 Stages)
