@@ -28,7 +28,7 @@ const ProjectWorkspaceHeader = ({
             {...props}
             className="relative shrink-0 flex flex-col justify-end overflow-hidden transition-all duration-500 bg-white dark:bg-gray-900 group"
             animate={{
-                height: isCollapsed ? 120 : 320,
+                height: isCollapsed ? (window.innerWidth < 768 ? 130 : 120) : (window.innerWidth < 768 ? 200 : 320),
             }}
         >
             {/* Background Image Logic */}
@@ -60,7 +60,7 @@ const ProjectWorkspaceHeader = ({
 
             {/* Top Toolbar */}
             <div
-                className={`absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-30 transition-all duration-300 ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                className={`absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-start z-30 transition-all duration-300 ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
             >
                 <button
                     onClick={onClose}
@@ -122,7 +122,7 @@ const ProjectWorkspaceHeader = ({
                                         </a>
                                     )}
                                 </motion.div>
-                                <motion.h1 layout className={`font-thin text-gray-900 dark:text-white leading-none tracking-tighter break-words ${isCollapsed ? 'text-3xl md:text-4xl' : 'text-4xl md:text-6xl mb-4'}`}>
+                                <motion.h1 layout className={`font-thin text-gray-900 dark:text-white leading-none tracking-tighter break-words ${isCollapsed ? 'text-2xl md:text-4xl' : 'text-3xl md:text-6xl mb-2 md:mb-4'}`}>
                                     {project.title}
                                 </motion.h1>
                                 {!isCollapsed && (

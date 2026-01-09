@@ -248,8 +248,11 @@ const TaskItem = ({
                         onClick={(e) => { e.stopPropagation(); onToggle(projectId, task.id); }}
                         className={getCheckboxStyle()}
                     >
-                        {/* Only show check icon when task is done */}
-                        {task.done && <Check size={10} strokeWidth={3} />}
+                        {/* Hit Area Wrapper */}
+                        <div className="p-2 -m-2 cursor-pointer flex items-center justify-center">
+                            {/* Only show check icon when task is done */}
+                            {task.done && <Check size={10} strokeWidth={3} />}
+                        </div>
                     </button>
                 )}
 

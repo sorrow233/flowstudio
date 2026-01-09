@@ -55,7 +55,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
         setEditValue('');
     };
     return (
-        <div className="w-full md:w-80 bg-white dark:bg-gray-900 border-b md:border-b-0 md:border-r border-gray-100 dark:border-gray-800 p-4 md:p-8 overflow-x-auto md:overflow-y-auto shrink-0 custom-scrollbar relative flex md:block gap-4 md:gap-0 items-center md:items-stretch no-scrollbar">
+        <div className="w-full md:w-80 bg-white dark:bg-gray-900 border-b md:border-b-0 md:border-r border-gray-100 dark:border-gray-800 p-2 md:p-8 overflow-x-auto md:overflow-y-auto shrink-0 custom-scrollbar relative flex md:block gap-2 md:gap-0 items-center md:items-stretch no-scrollbar">
             <h3 className="text-xs font-mono text-gray-400 uppercase tracking-widest md:mb-8 px-2 hidden md:block">Pipeline Stages</h3>
 
             <div className="flex md:block gap-4 md:gap-0 md:space-y-4 relative w-full md:w-auto">

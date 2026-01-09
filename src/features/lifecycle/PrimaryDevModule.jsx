@@ -495,7 +495,7 @@ const PrimaryDevModule = () => {
             {/* Project Workspace Modal */}
             <AnimatePresence>
                 {selectedProject && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-10 pointer-events-auto">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 sm:p-10 pointer-events-auto">
                         <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-md"
@@ -503,7 +503,7 @@ const PrimaryDevModule = () => {
                         />
                         <motion.div
                             layoutId={`primary-card-${selectedProject.id}`}
-                            className="w-full max-w-6xl bg-white dark:bg-gray-950 rounded-[3rem] shadow-2xl overflow-hidden relative z-10 h-[90vh] flex flex-col ring-1 ring-gray-100 dark:ring-gray-800"
+                            className="w-full max-w-6xl bg-white dark:bg-gray-950 rounded-none md:rounded-[3rem] shadow-2xl overflow-hidden relative z-10 h-[100dvh] md:h-[90vh] flex flex-col ring-1 ring-gray-100 dark:ring-gray-800"
                             onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
                         >
                             <ProjectWorkspaceHeader
