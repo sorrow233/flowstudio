@@ -14,10 +14,11 @@ const STAGE_ICONS = {
 
 const STAGE_THEMES = {
     1: 'bg-emerald-500 text-white shadow-emerald-200',
-    2: 'bg-blue-500 text-white shadow-blue-200',
+    2: 'bg-gray-900 text-white shadow-gray-200',
     3: 'bg-violet-500 text-white shadow-violet-200',
-    4: 'bg-amber-500 text-white shadow-amber-200',
+    4: 'bg-blue-500 text-white shadow-blue-200',
     5: 'bg-rose-500 text-white shadow-rose-200',
+    6: 'bg-amber-500 text-white shadow-amber-200'
 };
 
 const StageSelector = ({ activeStage, setActiveStage, commands }) => {
