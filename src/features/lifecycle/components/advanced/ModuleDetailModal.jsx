@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Save, Activity, Check } from 'lucide-react';
+import { useConfirmDialog } from '../../../../components/shared/ConfirmDialog';
 
 const STAGE_LABELS = {
     1: 'Prototype',
@@ -13,6 +14,7 @@ const STAGE_LABELS = {
 const ModuleDetailModal = ({ isOpen, onClose, module, onUpdate, onDelete }) => {
     const [localModule, setLocalModule] = useState(module);
     const [hasChanges, setHasChanges] = useState(false);
+    const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
 
     useEffect(() => {
         setLocalModule(module);
@@ -136,7 +138,12 @@ const ModuleDetailModal = ({ isOpen, onClose, module, onUpdate, onDelete }) => {
                 <div className="p-6 border-t border-gray-50 bg-gray-50/50 flex justify-between items-center">
                     <button
                         onClick={() => {
-                            if (confirm("Confirm delete module?")) onDelete(module.id);
+                            openConfirm({
+                                title: 'Delete Module',
+                                message: 'Are you sure you want to remove this module?',
+                                confirmText: 'Remove',
+                                onConfirm: () => onDelete(module.id)
+                            });
                         }}
                         className="p-3 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors flex items-center gap-2"
                     >
@@ -157,7 +164,9 @@ const ModuleDetailModal = ({ isOpen, onClose, module, onUpdate, onDelete }) => {
                     </button>
                 </div>
             </motion.div>
-        </div>
+            </motion.div>
+            <ConfirmDialogComponent />
+        </div >
     );
 };
 

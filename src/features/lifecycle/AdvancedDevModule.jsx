@@ -5,6 +5,7 @@ import { useSyncedProjects } from '../sync/useSyncStore';
 import { useSync } from '../sync/SyncContext';
 import AdvancedProjectWorkspace from './components/advanced/AdvancedProjectWorkspace';
 import { useNavigate } from 'react-router-dom';
+import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { useTranslation } from '../i18n';
 
 const AdvancedDevModule = () => {
@@ -122,16 +123,24 @@ const AdvancedDevModule = () => {
                             updateProject={updateProject}
                             onDeleteProject={removeProject}
                             onGraduate={() => {
-                                if (confirm('Ready to launch this project commercially?')) {
-                                    updateProject(selectedProject.id, { stage: 'commercial', subStage: 1 });
-                                    setSelectedProject(null);
-                                    navigate('/commercial');
-                                }
+                                openConfirm({
+                                    title: 'Launch Project',
+                                    message: 'Ready to launch this project commercially?',
+                                    confirmText: 'Launch',
+                                    variant: 'info',
+                                    icon: Trophy,
+                                    onConfirm: () => {
+                                        updateProject(selectedProject.id, { stage: 'commercial', subStage: 1 });
+                                        setSelectedProject(null);
+                                        navigate('/commercial');
+                                    }
+                                });
                             }}
                         />
                     );
                 })()}
             </AnimatePresence>
+            <ConfirmDialogComponent />
         </div>
     );
 };

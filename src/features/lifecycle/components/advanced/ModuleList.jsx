@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit2, Trash2, Check, Clock, Box, Shield, Globe, Server, Database, Layout, Activity, ChevronRight } from 'lucide-react';
+import { useConfirmDialog } from '../../../../components/shared/ConfirmDialog';
 
 const STAGE_LABELS = {
     1: { label: 'Prototype', color: 'bg-gray-100 text-gray-500' },
@@ -21,6 +22,8 @@ const MODULE_ICONS = {
 };
 
 const ModuleList = ({ modules, onModuleClick, onDeleteModule }) => {
+    const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
+
     if (modules.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-gray-300 border-2 border-dashed border-gray-100 rounded-[2rem]">
@@ -107,7 +110,12 @@ const ModuleList = ({ modules, onModuleClick, onDeleteModule }) => {
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        if (confirm('Delete module?')) onDeleteModule(module.id);
+                                        openConfirm({
+                                            title: 'Delete Module',
+                                            message: `Delete ${module.name}?`,
+                                            confirmText: 'Delete',
+                                            onConfirm: () => onDeleteModule(module.id)
+                                        });
                                     }}
                                     className="p-2 text-gray-300 hover:text-red-500 transition-colors"
                                 >
@@ -119,6 +127,7 @@ const ModuleList = ({ modules, onModuleClick, onDeleteModule }) => {
                     );
                 })}
             </AnimatePresence>
+            <ConfirmDialogComponent />
         </div>
     );
 };

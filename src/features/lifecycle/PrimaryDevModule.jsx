@@ -13,6 +13,7 @@ import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import confetti from 'canvas-confetti';
 import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
+import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { useTranslation } from '../i18n';
 
 import Spotlight from '../../components/shared/Spotlight';
@@ -70,6 +71,7 @@ const PrimaryDevModule = () => {
     // --- Edit Mode State ---
     const [isEditingProject, setIsEditingProject] = useState(false);
     const [editForm, setEditForm] = useState({});
+    const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
 
     // --- Task/Command State ---
     const [newTaskInput, setNewTaskInput] = useState('');
@@ -134,10 +136,15 @@ const PrimaryDevModule = () => {
     // --- Project Handlers ---
     const handleDeleteProject = (e, id) => {
         e.stopPropagation();
-        if (confirm('Delete project?')) {
-            deleteProject(id);
-            if (selectedProject?.id === id) setSelectedProject(null);
-        }
+        openConfirm({
+            title: 'Delete Project',
+            message: 'Are you sure you want to delete this project?',
+            confirmText: 'Delete',
+            onConfirm: () => {
+                deleteProject(id);
+                if (selectedProject?.id === id) setSelectedProject(null);
+            }
+        });
     };
 
     const handleUpdateProject = (id, updates) => {
@@ -665,6 +672,7 @@ const PrimaryDevModule = () => {
                 projectCategory={selectedProject?.category}
                 themeColor="purple"
             />
+            <ConfirmDialogComponent />
         </div >
     );
 };

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit2, Check, X, MoreVertical, Trash2 } from 'lucide-react';
+import { useConfirmDialog } from '../../../../components/shared/ConfirmDialog';
 
 const AdvancedStageNavigation = ({ stages = [], activeStageId, onChangeStage, onUpdateStages }) => {
     const [isAdding, setIsAdding] = useState(false);
@@ -26,10 +27,15 @@ const AdvancedStageNavigation = ({ stages = [], activeStageId, onChangeStage, on
 
     const handleDeleteStage = (e, id) => {
         e.stopPropagation();
-        if (confirm('Delete this stage?')) {
-            onUpdateStages(stages.filter(s => s.id !== id));
-        }
+        openConfirm({
+            title: 'Delete Stage',
+            message: 'Are you sure you want to delete this stage?',
+            confirmText: 'Delete',
+            onConfirm: () => onUpdateStages(stages.filter(s => s.id !== id))
+        });
     };
+
+    const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
 
     const toggleStatus = (e, stage) => {
         e.stopPropagation();
@@ -127,6 +133,7 @@ const AdvancedStageNavigation = ({ stages = [], activeStageId, onChangeStage, on
                     )}
                 </div>
             </div>
+            <ConfirmDialogComponent />
         </div>
     );
 };

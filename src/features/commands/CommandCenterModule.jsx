@@ -13,14 +13,18 @@ import LibraryImportModal from './components/LibraryImportModal';
 
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
+import { useSyncedProjects } from '../sync/useSyncStore';
 import { useTranslation } from '../i18n';
+import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
 
 
 
 const CommandCenterModule = () => {
     // --- Sync Integration ---
     const { doc } = useSync();
+    const { doc } = useSync();
     const { t } = useTranslation();
+    const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
 
     // Sync: Commands
     const {
@@ -136,7 +140,13 @@ const CommandCenterModule = () => {
             // Add new tag
             // Prevent duplicates based on label (optional, but good for sanity)
             if (newCmd.tags.some(t => t.label.toLowerCase() === newTag.label.trim().toLowerCase())) {
-                alert(t('commands.tagExists'));
+                openConfirm({
+                    title: 'Tag Exists',
+                    message: t('commands.tagExists'),
+                    variant: 'info',
+                    confirmText: 'OK',
+                    cancelText: 'Cancel'
+                });
                 return;
             }
 
@@ -333,24 +343,11 @@ const CommandCenterModule = () => {
                         <div className="flex gap-2 w-full md:w-auto justify-between md:justify-end">
                             <div className="flex gap-2 w-full md:w-auto">
 
-                                {/* Undo/Redo Buttons */}
-                                <div className="hidden md:flex items-center gap-1 bg-gray-100 rounded-full p-1 mr-2">
-                                    <button
-                                        onClick={undo}
-                                        disabled={!canUndo}
-                                        className="p-1.5 rounded-full hover:bg-white text-gray-400 disabled:opacity-30 disabled:hover:bg-transparent hover:text-gray-700 transition-all"
-                                        title="Undo"
-                                    >
-                                        <Undo2 size={16} />
-                                    </button>
-                                    <button
-                                        onClick={redo}
-                                        disabled={!canRedo}
-                                        className="p-1.5 rounded-full hover:bg-white text-gray-400 disabled:opacity-30 disabled:hover:bg-transparent hover:text-gray-700 transition-all"
-                                        title="Redo"
-                                    >
-                                        <Redo2 size={16} />
-                                    </button>
+                                {/* Selected Category Label (Left) */}
+                                <div className="hidden md:flex items-center px-4 py-1.5 bg-gray-100 rounded-full mr-2 min-w-[120px] justify-center shadow-inner border border-gray-200/50">
+                                    <span className={`text-sm font-medium ${categories.find(c => c.id === selectedCategory)?.color.replace('bg-', 'text-').replace('text-white', '') || 'text-gray-600'}`}>
+                                        {categories.find(c => c.id === selectedCategory)?.label || 'All'}
+                                    </span>
                                 </div>
 
                                 {/* Category Filter Pills - Dot Ribbon */}
@@ -379,14 +376,37 @@ const CommandCenterModule = () => {
                                     ))}
                                 </div>
 
-                                <div className="relative group shrink-0">
-                                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
-                                    <input
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
-                                        placeholder={t('common.search')}
-                                        className="pl-9 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white rounded-full text-sm border border-transparent hover:border-gray-200 focus:border-emerald-200 outline-none w-10 focus:w-40 md:focus:w-60 transition-all shadow-inner placeholder:text-transparent focus:placeholder:text-gray-300 cursor-pointer focus:cursor-text"
-                                    />
+                                {/* Search & Undo/Redo Container */}
+                                <div className="flex items-center gap-2">
+                                    {/* Undo/Redo Buttons (Moved here) */}
+                                    <div className="hidden md:flex items-center gap-1">
+                                        <button
+                                            onClick={undo}
+                                            disabled={!canUndo}
+                                            className="p-2 rounded-full hover:bg-gray-100 text-gray-400 disabled:opacity-30 disabled:hover:bg-transparent hover:text-gray-700 transition-all"
+                                            title="Undo"
+                                        >
+                                            <Undo2 size={16} />
+                                        </button>
+                                        <button
+                                            onClick={redo}
+                                            disabled={!canRedo}
+                                            className="p-2 rounded-full hover:bg-gray-100 text-gray-400 disabled:opacity-30 disabled:hover:bg-transparent hover:text-gray-700 transition-all"
+                                            title="Redo"
+                                        >
+                                            <Redo2 size={16} />
+                                        </button>
+                                    </div>
+
+                                    <div className="relative group shrink-0">
+                                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
+                                        <input
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                            placeholder={t('common.search')}
+                                            className="pl-9 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white rounded-full text-sm border border-transparent hover:border-gray-200 focus:border-emerald-200 outline-none w-10 focus:w-40 md:focus:w-60 transition-all shadow-inner placeholder:text-transparent focus:placeholder:text-gray-300 cursor-pointer focus:cursor-text"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -460,6 +480,7 @@ const CommandCenterModule = () => {
                 onClose={() => setSharingCommand(null)}
                 command={sharingCommand}
             />
+            <ConfirmDialogComponent />
         </div >
     );
 };

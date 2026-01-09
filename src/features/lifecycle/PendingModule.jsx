@@ -5,12 +5,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { STORAGE_KEYS, getRandomProjectImage, COMMAND_CATEGORIES, QUESTIONS } from '../../utils/constants';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
+import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
 
 import Spotlight from '../../components/shared/Spotlight';
 import { SakuraTree, MapleTree, GinkgoTree, CedarTree } from '../../components/illustrations/TreeIllustrations';
 import ProjectDetailModal from './components/primary/ProjectDetailModal';
-import ProjectManagementPanel from './components/pending/ProjectManagementPanel';
+import ProjectManageModal from './components/pending/ProjectManageModal';
 
 
 
@@ -41,6 +42,8 @@ const PendingModule = () => {
         projects: syncedCategories,
     } = useSyncedProjects(doc, 'command_categories');
 
+    const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
+
     // Merge default categories with synced custom labels
     const categories = React.useMemo(() => {
         if (syncedCategories && syncedCategories.length > 0) {
@@ -63,7 +66,7 @@ const PendingModule = () => {
         [allProjects]);
 
     const [selectedProject, setSelectedProject] = useState(null);
-    const [showManagementPanel, setShowManagementPanel] = useState(false);
+    const [managingProject, setManagingProject] = useState(null);
 
     useEffect(() => {
         if (selectedProject) {
@@ -108,9 +111,12 @@ const PendingModule = () => {
 
     const handleDelete = (e, id) => {
         e.stopPropagation();
-        if (confirm('确定要放弃这颗种子吗？')) {
-            deleteProject(id);
-        }
+        openConfirm({
+            title: '删除想法',
+            message: '确定要放弃这颗种子吗？',
+            confirmText: '删除',
+            onConfirm: () => deleteProject(id)
+        });
     }
 
     const getSaplingState = (score) => {
@@ -257,19 +263,10 @@ const PendingModule = () => {
                     {/* Nursery (Primary Projects) */}
                     {primaryProjects.length > 0 && (
                         <div className="pt-8 border-t border-gray-100 dark:border-gray-800">
-                            <div className="mb-4 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Sun size={16} className="text-amber-400" />
-                                    <h3 className="text-sm font-medium text-gray-900 dark:text-white uppercase tracking-widest">Nursery</h3>
-                                    <span className="text-xs text-gray-400 dark:text-gray-500 font-mono hidden sm:inline-block">({primaryProjects.length} Growing)</span>
-                                </div>
-                                <button
-                                    onClick={() => setShowManagementPanel(true)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg transition-all"
-                                >
-                                    <Settings2 size={14} />
-                                    管理
-                                </button>
+                            <div className="mb-4 flex items-center gap-2">
+                                <Sun size={16} className="text-amber-400" />
+                                <h3 className="text-sm font-medium text-gray-900 dark:text-white uppercase tracking-widest">Nursery</h3>
+                                <span className="text-xs text-gray-400 dark:text-gray-500 font-mono hidden sm:inline-block">({primaryProjects.length} Growing)</span>
                             </div>
                             <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 md:-mx-2 md:px-2 no-scrollbar snap-x">
                                 {primaryProjects.map(p => {
@@ -281,8 +278,9 @@ const PendingModule = () => {
                                         <motion.div
                                             key={p.id}
                                             layoutId={`nursery-${p.id}`}
+                                            onDoubleClick={() => setManagingProject(p)}
                                             className={`
-                                                snap-start relative overflow-hidden group transition-all duration-500 cursor-default
+                                                snap-start relative overflow-hidden group transition-all duration-500 cursor-default select-none
                                                 flex flex-col text-center
                                                 ${isAdvanced
                                                     ? 'bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 min-w-[240px] w-[240px] h-[320px] rounded-[32px] border-amber-100/50 dark:border-amber-900/30 shadow-[0_20px_40px_-12px_rgba(251,191,36,0.15)] justify-between pt-6'
@@ -291,14 +289,6 @@ const PendingModule = () => {
                                                 ${!isHoly && !isAdvanced ? 'border-emerald-100 dark:border-emerald-900/30' : ''}
                                             `}
                                         >
-                                            {/* Delete Button - shown on hover */}
-                                            <button
-                                                onClick={(e) => handleDelete(e, p.id)}
-                                                className="absolute top-2 right-2 z-50 opacity-0 group-hover:opacity-100 p-1.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 dark:hover:text-red-400 rounded-full transition-all shadow-sm"
-                                            >
-                                                <X size={14} />
-                                            </button>
-
                                             {/* Holy Glow Animation for regular items */}
                                             {isHoly && !isAdvanced && (
                                                 <motion.div
@@ -404,19 +394,14 @@ const PendingModule = () => {
                 )}
             </AnimatePresence>
 
-            {!selectedProject && (
-                <div className="hidden md:flex flex-1 flex-col items-center justify-center text-gray-300">
-                    <p>选择一颗种子</p>
-                </div>
-            )}
-
-            {/* Project Management Panel */}
-            <ProjectManagementPanel
-                isOpen={showManagementPanel}
-                onClose={() => setShowManagementPanel(false)}
-                projects={allProjects}
-                onDeleteProject={deleteProject}
+            {/* Project Management Modal */}
+            <ProjectManageModal
+                project={managingProject}
+                isOpen={!!managingProject}
+                onClose={() => setManagingProject(null)}
+                onDelete={deleteProject}
             />
+            <ConfirmDialogComponent />
         </div>
     );
 };

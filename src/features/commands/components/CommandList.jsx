@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Reorder, AnimatePresence, useDragControls } from 'framer-motion';
 import { Terminal, Library, ChevronRight, Copy, Trash2, ListChecks, X } from 'lucide-react';
 import CommandItem from './CommandItem';
+import { useConfirmDialog } from '../../../../components/shared/ConfirmDialog';
 
 // Internal Item Component - Clean and simple
 const DraggableCommandItem = ({
@@ -71,6 +72,7 @@ const CommandList = ({
     commands,
     updateCommand,
 }) => {
+    const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
     // Multi-select state
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState(new Set());
@@ -178,12 +180,17 @@ const CommandList = ({
 
     const handleBulkDelete = () => {
         if (selectedIds.size === 0) return;
-        if (confirm(`Delete ${selectedIds.size} commands?`)) {
-            selectedIds.forEach(id => handleRemove(id));
-            setIsSelectionMode(false);
-            setSelectedIds(new Set());
-            setLastSelectedId(null);
-        }
+        openConfirm({
+            title: 'Delete Commands',
+            message: `Delete ${selectedIds.size} commands?`,
+            confirmText: 'Delete',
+            onConfirm: () => {
+                selectedIds.forEach(id => handleRemove(id));
+                setIsSelectionMode(false);
+                setSelectedIds(new Set());
+                setLastSelectedId(null);
+            }
+        });
     };
 
     const handleBulkCopy = () => {
@@ -214,6 +221,7 @@ const CommandList = ({
 
     return (
         <div className="flex-1 flex flex-col overflow-hidden">
+            <ConfirmDialogComponent />
             {/* Command List */}
             <div className="flex-1 overflow-y-auto pr-2 md:-mr-4 md:pr-6 pb-20 custom-scrollbar">
                 {visibleCommands.length > 0 ? (

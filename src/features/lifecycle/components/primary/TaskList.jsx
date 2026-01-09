@@ -3,6 +3,7 @@ import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { LayoutGrid, Monitor, Server, Database, Container, Beaker, CheckSquare, ListChecks, Copy, X, ChevronDown, ChevronRight, CheckCircle2, Trash2, ArrowRight, Terminal } from 'lucide-react';
 import { COMMAND_CATEGORIES, STAGE_EMPTY_STATES, DEV_STAGES } from '../../../../utils/constants';
 import TaskItem from './TaskItem';
+import { useConfirmDialog } from '../../../../components/shared/ConfirmDialog';
 
 const CATEGORY_ICONS = {
     'LayoutGrid': LayoutGrid,
@@ -19,6 +20,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const [editingTaskId, setEditingTaskId] = useState(null);
     const [editValue, setEditValue] = useState('');
+    const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
 
     const [localTasks, setLocalTasks] = useState([]);
 
@@ -124,11 +126,16 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
     // Bulk Actions
     const handleBulkDelete = () => {
         if (selectedIds.size === 0) return;
-        if (confirm(`Delete ${selectedIds.size} items?`)) {
-            selectedIds.forEach(id => onDelete(projectId, id));
-            setIsSelectionMode(false);
-            setSelectedIds(new Set());
-        }
+        openConfirm({
+            title: 'Delete Tasks',
+            message: `Delete ${selectedIds.size} items?`,
+            confirmText: 'Delete',
+            onConfirm: () => {
+                selectedIds.forEach(id => onDelete(projectId, id));
+                setIsSelectionMode(false);
+                setSelectedIds(new Set());
+            }
+        });
     };
 
     const handleBulkToggle = () => {
@@ -599,7 +606,9 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                         </motion.div>
                     )}
                 </AnimatePresence>
+                </AnimatePresence>
             </div>
+            <ConfirmDialogComponent />
         </div >
     );
 });
