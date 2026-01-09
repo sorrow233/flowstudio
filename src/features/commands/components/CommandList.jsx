@@ -179,6 +179,7 @@ const CommandList = ({
                                             handleShiftSelect(cmd.id, e);
                                             return;
                                         }
+                                        handleCopy(cmd.id, cmd.content || cmd.url);
                                     }}
                                     onDoubleClick={() => !isSelectionMode && handleEdit(cmd)}
                                 />

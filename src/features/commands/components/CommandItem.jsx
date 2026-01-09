@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, Copy, Trash2, Pencil, Link as LinkIcon, Command, Globe, Tag, FileText, Share2 } from 'lucide-react';
+import { Check, Trash2, Link as LinkIcon, Command, Globe, Tag, FileText, Share2 } from 'lucide-react';
 
 const CommandItem = ({
     cmd,
@@ -142,20 +142,7 @@ const CommandItem = ({
                         >
                             <Share2 size={18} />
                         </button>
-                        <button
-                            onClick={(e) => { e.stopPropagation(); handleEdit(cmd); }}
-                            className="p-2 hover:bg-gray-100 rounded-xl text-gray-400 hover:text-gray-900 transition-colors"
-                            title="Edit"
-                        >
-                            <Pencil size={18} />
-                        </button>
-                        <button
-                            onClick={(e) => { e.stopPropagation(); handleCopy(cmd.id, cmd.content || cmd.url); }}
-                            className="p-2 hover:bg-emerald-50 rounded-xl text-gray-400 hover:text-emerald-600 transition-colors relative"
-                            title="Copy Content"
-                        >
-                            {copiedId === cmd.id ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} />}
-                        </button>
+
                         <button
                             onClick={(e) => { e.stopPropagation(); handleRemove(cmd.id); }}
                             className="p-2 hover:bg-red-50 rounded-xl text-gray-400 hover:text-red-500 transition-colors"
