@@ -94,7 +94,7 @@ const ProjectWorkspaceHeader = ({
             </div>
 
             {/* Content Area */}
-            <div className="relative z-20 p-6 md:p-8 pb-12 w-full max-w-7xl mx-auto flex flex-col md:flex-row justify-end md:justify-between items-start md:items-end gap-6 md:gap-0 h-full">
+            <div className={`relative z-20 ${isCollapsed ? 'p-4 md:px-8 pb-6' : 'p-6 md:p-8 pb-12'} w-full max-w-7xl mx-auto flex flex-col md:flex-row justify-end md:justify-between items-start md:items-end gap-6 md:gap-0 h-full`}>
                 <div className="w-full">
                     {isEditing ? (
                         // EDIT FORM (Simplified inline)
