@@ -365,6 +365,7 @@ const CommandCenterModule = () => {
                                                     setRenamingCategory({ id: cat.id, currentName: cat.label, color: cat.color });
                                                     setRenameValue(cat.label);
                                                 }}
+                                                title={cat.label}
                                                 className={`
                                                 w-8 h-8 flex items-center justify-center rounded-full transition-all shrink-0 relative
                                                 ${selectedCategory === cat.id

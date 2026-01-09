@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus, TreeDeciduous, TreePine, Image as ImageIcon, Sparkles, RefreshCw, Feather, Scroll, LayoutGrid, Monitor, Server, Database, Container, Beaker, Terminal, Globe, Smartphone, Cloud, Box, Cpu } from 'lucide-react';
+import { Sprout, X, ArrowRight, Sun, Droplets, CheckCircle2, Plus, TreeDeciduous, TreePine, Image as ImageIcon, Sparkles, RefreshCw, Feather, Scroll, LayoutGrid, Monitor, Server, Database, Container, Beaker, Terminal, Globe, Smartphone, Cloud, Box, Cpu, Settings2 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { STORAGE_KEYS, getRandomProjectImage, COMMAND_CATEGORIES, QUESTIONS } from '../../utils/constants';
 import { useSync } from '../sync/SyncContext';
@@ -10,6 +10,7 @@ import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
 import Spotlight from '../../components/shared/Spotlight';
 import { SakuraTree, MapleTree, GinkgoTree, CedarTree } from '../../components/illustrations/TreeIllustrations';
 import ProjectDetailModal from './components/primary/ProjectDetailModal';
+import ProjectManagementPanel from './components/pending/ProjectManagementPanel';
 
 
 
@@ -46,6 +47,7 @@ const PendingModule = () => {
         [allProjects]);
 
     const [selectedProject, setSelectedProject] = useState(null);
+    const [showManagementPanel, setShowManagementPanel] = useState(false);
 
     useEffect(() => {
         if (selectedProject) {
@@ -239,10 +241,19 @@ const PendingModule = () => {
                     {/* Nursery (Primary Projects) */}
                     {primaryProjects.length > 0 && (
                         <div className="pt-8 border-t border-gray-100 dark:border-gray-800">
-                            <div className="mb-4 flex items-center gap-2">
-                                <Sun size={16} className="text-amber-400" />
-                                <h3 className="text-sm font-medium text-gray-900 dark:text-white uppercase tracking-widest">Nursery</h3>
-                                <span className="text-xs text-gray-400 dark:text-gray-500 font-mono hidden sm:inline-block">({primaryProjects.length} Growing)</span>
+                            <div className="mb-4 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Sun size={16} className="text-amber-400" />
+                                    <h3 className="text-sm font-medium text-gray-900 dark:text-white uppercase tracking-widest">Nursery</h3>
+                                    <span className="text-xs text-gray-400 dark:text-gray-500 font-mono hidden sm:inline-block">({primaryProjects.length} Growing)</span>
+                                </div>
+                                <button
+                                    onClick={() => setShowManagementPanel(true)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg transition-all"
+                                >
+                                    <Settings2 size={14} />
+                                    管理
+                                </button>
                             </div>
                             <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 md:-mx-2 md:px-2 no-scrollbar snap-x">
                                 {primaryProjects.map(p => {
@@ -381,6 +392,14 @@ const PendingModule = () => {
                     <p>选择一颗种子</p>
                 </div>
             )}
+
+            {/* Project Management Panel */}
+            <ProjectManagementPanel
+                isOpen={showManagementPanel}
+                onClose={() => setShowManagementPanel(false)}
+                projects={allProjects}
+                onDeleteProject={deleteProject}
+            />
         </div>
     );
 };
