@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Code2, ExternalLink, Trash2, Check, Rocket, Sparkles, Trophy, Star, X, Plus } from 'lucide-react';
-import { STORAGE_KEYS, FINAL_STAGES } from '../../utils/constants';
+import { Code2, ExternalLink, Trash2, Check, Rocket, Sparkles, Trophy, Star, X, Plus, CheckSquare, ListChecks, Copy, Terminal, ChevronDown, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { STORAGE_KEYS } from '../../utils/constants';
 
-// Reusing Primary Components (Assuming they are generic enough or we might need to duplicate/adapt if they have hardcoded 'Primary' logic)
-// Based on PrimaryDevModule imports:
-import StageNavigation from './components/primary/StageNavigation';
-import TaskList from './components/primary/TaskList';
+// Simplified: No stage navigation, tasks are independent
 import ProjectWorkspaceHeader from './components/primary/ProjectWorkspaceHeader';
 import ImportCommandModal from './components/primary/ImportCommandModal';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import confetti from 'canvas-confetti';
 import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
+import { Reorder } from 'framer-motion';
+import TaskItem from './components/primary/TaskItem';
+import { COMMAND_CATEGORIES } from '../../utils/constants';
+import { LayoutGrid, Monitor, Server, Database, Container, Beaker } from 'lucide-react';
 
 import Spotlight from '../../components/shared/Spotlight';
 
@@ -66,7 +67,6 @@ const FinalDevModule = () => {
 
     // --- UI/Interaction State ---
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
-    const [viewStage, setViewStage] = useState(1);
 
     // --- Edit Mode State ---
     const [isEditingProject, setIsEditingProject] = useState(false);
@@ -76,6 +76,14 @@ const FinalDevModule = () => {
     const [newTaskInput, setNewTaskInput] = useState('');
     const [newTaskCategory, setNewTaskCategory] = useState('general');
     const [commandModalOpen, setCommandModalOpen] = useState(false);
+    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+    const [copiedTaskId, setCopiedTaskId] = useState(null);
+    const [editingTaskId, setEditingTaskId] = useState(null);
+    const [editValue, setEditValue] = useState('');
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedIds, setSelectedIds] = useState(new Set());
+    const [lastSelectedId, setLastSelectedId] = useState(null);
+    const [isCompletedCollapsed, setIsCompletedCollapsed] = useState(true);
 
     // Sync: Load Commands
     const { projects: availableCommands } = useSyncedProjects(doc, 'all_commands');
@@ -101,10 +109,9 @@ const FinalDevModule = () => {
         }
     }, [projects]);
 
-    // When opening a project, set view to current progress
+    // When opening a project
     const handleSelectProject = (project) => {
         setSelectedProject(project);
-        setViewStage(project.subStage || 1);
     };
 
 
@@ -168,7 +175,7 @@ const FinalDevModule = () => {
         setIsEditingProject(false);
     };
 
-    // --- Task Handlers ---
+    // --- Task Handlers (Simplified: No stage binding) ---
     const handleAddTask = (projectId) => {
         if (!newTaskInput.trim()) return;
         const project = projects.find(p => p.id === projectId);
@@ -178,8 +185,8 @@ const FinalDevModule = () => {
             id: Date.now(),
             text: newTaskInput,
             done: false,
-            category: newTaskCategory,
-            stage: viewStage
+            category: newTaskCategory
+            // No stage field - tasks are independent
         }];
         handleUpdateProject(projectId, { tasks: newTasks });
         setNewTaskInput('');
@@ -209,18 +216,15 @@ const FinalDevModule = () => {
         handleUpdateProject(projectId, { tasks: updatedTasks });
     };
 
-    const handleReorderTasks = (newOrder, stageId) => {
+    const handleReorderTasks = (newOrder) => {
         const project = projects.find(p => p.id === selectedProject.id);
         if (!project) return;
-        const otherTasks = project.tasks.filter(t => (t.stage || 1) !== stageId);
-        const mergedTasks = [...otherTasks, ...newOrder];
-        handleUpdateProject(selectedProject.id, { tasks: mergedTasks });
+        handleUpdateProject(selectedProject.id, { tasks: newOrder });
     };
 
-    // --- Command Import Handler ---
+    // --- Command Import Handler (Simplified: No stage binding) ---
     const handleLinkCommand = (command, tag = null) => {
         const project = projects.find(p => p.id === selectedProject.id);
-        const currentStage = viewStage;
 
         const newTasks = [...(project.tasks || []), {
             id: Date.now(),
@@ -231,57 +235,92 @@ const FinalDevModule = () => {
             commandUrl: command.url,
             commandId: command.id,
             commandType: command.type || 'utility',
-            commandTags: command.tags || [],
-            stage: currentStage
+            commandTags: command.tags || []
+            // No stage field
         }];
 
         handleUpdateProject(selectedProject.id, { tasks: newTasks });
-        // Modal stays open - user can import multiple commands consecutively
 
         if (tag) {
             navigator.clipboard.writeText(tag.value || command.content);
         }
     };
 
-    // --- Stage Handler ---
-    const handleToggleStageComplete = (stageId, isComplete) => {
-        // If marking complete, move to next stage (stageId + 1)
-        // If marking incomplete (undo), move back to this stage (stageId)
-        const newSubStage = isComplete ? stageId + 1 : stageId;
-        handleUpdateProject(selectedProject.id, { subStage: newSubStage });
+    // Category icons mapping
+    const CATEGORY_ICONS = {
+        'LayoutGrid': LayoutGrid,
+        'Monitor': Monitor,
+        'Server': Server,
+        'Database': Database,
+        'Container': Container,
+        'Beaker': Beaker
+    };
 
-        // Auto-switch view for Final module? Maybe not strictly needed but good UX
-        if (isComplete && newSubStage <= 3) { // Max stage 3
-            setViewStage(newSubStage);
+    // Task helper functions
+    const allTasks = selectedProject?.tasks || [];
+    const pendingTasks = allTasks.filter(t => !t.done);
+    const completedTasks = allTasks.filter(t => t.done);
+
+    const handleCopy = (id, content) => {
+        navigator.clipboard.writeText(content);
+        setCopiedTaskId(id);
+        setTimeout(() => setCopiedTaskId(null), 2000);
+    };
+
+    const startEditingTask = (task) => {
+        setEditingTaskId(task.id);
+        setEditValue(task.text);
+    };
+
+    const saveEditTask = (taskId) => {
+        if (editValue.trim()) {
+            handleUpdateTask(selectedProject.id, taskId, { text: editValue });
+        }
+        setEditingTaskId(null);
+    };
+
+    const toggleSelection = (id) => {
+        const newSelected = new Set(selectedIds);
+        if (newSelected.has(id)) {
+            newSelected.delete(id);
+        } else {
+            newSelected.add(id);
+        }
+        setSelectedIds(newSelected);
+        setLastSelectedId(id);
+        if (!isSelectionMode) setIsSelectionMode(true);
+    };
+
+    const handleSelectAll = () => {
+        if (selectedIds.size === allTasks.length) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(allTasks.map(t => t.id)));
         }
     };
 
-
-    // --- Rename Stage Handler ---
-    const handleRenameStage = (stageId, newName) => {
-        const currentStageNames = selectedProject.stageNames || {};
-        const updatedStageNames = {
-            ...currentStageNames,
-            [stageId]: newName
-        };
-        handleUpdateProject(selectedProject.id, { stageNames: updatedStageNames });
+    const handleBulkDelete = () => {
+        if (selectedIds.size === 0) return;
+        if (confirm(`Delete ${selectedIds.size} items?`)) {
+            selectedIds.forEach(id => handleDeleteTask(selectedProject.id, id));
+            setIsSelectionMode(false);
+            setSelectedIds(new Set());
+        }
     };
 
-    // --- Stage Metadata Calculation ---
-    // Calculate counts for tasks and commands per stage to show as badges
-    const stageStats = React.useMemo(() => {
-        if (!selectedProject?.tasks) return {};
+    const handleBulkToggle = () => {
+        selectedIds.forEach(id => handleToggleTask(selectedProject.id, id));
+        setIsSelectionMode(false);
+        setSelectedIds(new Set());
+    };
 
-        const stats = {};
-        FINAL_STAGES.forEach(stage => {
-            const stageTasks = selectedProject.tasks.filter(t => (t.stage || 1) === stage.id);
-            stats[stage.id] = {
-                taskCount: stageTasks.filter(t => !t.isCommand && !t.done).length,
-                commandCount: stageTasks.filter(t => t.isCommand && !t.done).length
-            };
-        });
-        return stats;
-    }, [selectedProject?.tasks]);
+    const handleBulkCopy = () => {
+        const selectedTasks = allTasks.filter(t => selectedIds.has(t.id));
+        const textToCopy = selectedTasks.map(t => t.commandContent || t.text).join('\n');
+        navigator.clipboard.writeText(textToCopy);
+        setIsSelectionMode(false);
+        setSelectedIds(new Set());
+    };
 
     return (
         <div className="max-w-7xl mx-auto pt-10 px-6 pb-20">
@@ -459,17 +498,17 @@ const FinalDevModule = () => {
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-10 pointer-events-auto">
                         <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-white/80 backdrop-blur-md"
+                            className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-md"
                             onClick={() => { setSelectedProject(null); setIsEditingProject(false); }}
                         />
                         <motion.div
                             layoutId={`final-card-${selectedProject.id}`}
-                            className="w-full max-w-6xl bg-white dark:bg-gray-950 rounded-[3rem] shadow-2xl overflow-hidden relative z-10 h-[90vh] flex flex-col ring-1 ring-gray-100 dark:ring-gray-800"
-                            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+                            className="w-full max-w-4xl bg-white dark:bg-gray-950 rounded-[3rem] shadow-2xl overflow-hidden relative z-10 h-[90vh] flex flex-col ring-1 ring-gray-100 dark:ring-gray-800"
+                            onClick={(e) => e.stopPropagation()}
                         >
                             <ProjectWorkspaceHeader
                                 project={selectedProject}
-                                activeStage={viewStage}
+                                activeStage={1}
                                 isCollapsed={isHeaderCollapsed}
                                 isEditing={isEditingProject}
                                 editForm={editForm}
@@ -482,70 +521,279 @@ const FinalDevModule = () => {
                                 onImportCommand={() => setCommandModalOpen(true)}
                                 onToggleCollapse={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
                                 onWheel={handleHeaderWheel}
-                                stages={FINAL_STAGES} // Pass custom stages as 'stages' prop
                                 themeColor="red"
                             />
 
-                            <div
-                                className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30 dark:bg-gray-900/30"
-                                onClick={() => !isHeaderCollapsed && setIsHeaderCollapsed(true)}
-                            >
-                                {/* Left Sidebar: Stage Navigation */}
-                                <StageNavigation
-                                    viewStage={viewStage}
-                                    onViewChange={setViewStage}
-                                    currentProgress={selectedProject.subStage || 1}
-                                    onToggleComplete={handleToggleStageComplete}
-                                    customStageNames={selectedProject.stageNames || {}}
-                                    onRenameStage={handleRenameStage}
-                                    stageStats={stageStats}
-                                    stages={FINAL_STAGES} // Use FINAL_STAGES here
-                                    themeColor="red"
-                                />
+                            {/* Flat Task List (No Stages) */}
+                            <div className="flex-1 overflow-hidden flex flex-col bg-gray-50/30 dark:bg-gray-900/30">
+                                <div
+                                    ref={taskListRef}
+                                    className="flex-1 overflow-y-auto px-6 pb-4 custom-scrollbar"
+                                >
+                                    <div className="min-h-full flex flex-col pt-4 pb-20">
+                                        {allTasks.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {/* Pending Tasks - Reorderable */}
+                                                {pendingTasks.length > 0 && (
+                                                    <Reorder.Group
+                                                        axis="y"
+                                                        values={pendingTasks}
+                                                        onReorder={(newOrder) => {
+                                                            handleReorderTasks([...newOrder, ...completedTasks]);
+                                                        }}
+                                                        className="space-y-3"
+                                                    >
+                                                        {pendingTasks.map(task => (
+                                                            <TaskItem
+                                                                key={task.id}
+                                                                task={task}
+                                                                projectId={selectedProject.id}
+                                                                isMandatory={task.isCommand && task.commandType === 'mandatory'}
+                                                                isLink={task.isCommand && task.commandType === 'link'}
+                                                                isUtility={task.isCommand && task.commandType === 'utility'}
+                                                                copiedTaskId={copiedTaskId}
+                                                                onToggle={handleToggleTask}
+                                                                onDelete={handleDeleteTask}
+                                                                handleCopy={handleCopy}
+                                                                startEditing={startEditingTask}
+                                                                isEditing={editingTaskId === task.id}
+                                                                editValue={editValue}
+                                                                setEditValue={setEditValue}
+                                                                saveEdit={saveEditTask}
+                                                                availableCommands={availableCommands}
+                                                                onUpdateTask={handleUpdateTask}
+                                                                themeColor="red"
+                                                                isSelectionMode={isSelectionMode}
+                                                                isSelected={selectedIds.has(task.id)}
+                                                                onSelect={() => toggleSelection(task.id)}
+                                                            />
+                                                        ))}
+                                                    </Reorder.Group>
+                                                )}
 
-                                {/* Right Content: Task List */}
-                                <div className="flex-1 flex flex-col relative w-full overflow-hidden">
-                                    {/* Graduation Button (Optimization -> Final) */}
-                                    {viewStage === 3 && (selectedProject.subStage || 1) >= 4 && (
-                                        <div className="px-6 pt-6 -mb-4">
-                                            <button
-                                                onClick={() => {
-                                                    if (confirm('Ready to graduate to Final Integration?')) {
-                                                        updateProject(selectedProject.id, { stage: 'final', subStage: 1 });
-                                                        setSelectedProject(null);
-                                                    }
-                                                }}
-                                                className="w-full py-3 bg-gradient-to-r from-indigo-100 to-blue-100 rounded-xl text-indigo-800 font-bold uppercase tracking-widest text-xs shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
+                                                {/* Completed Tasks Section */}
+                                                {completedTasks.length > 0 && (
+                                                    <motion.div layout className="mt-4 pt-4 border-t border-dashed border-gray-200 dark:border-gray-700">
+                                                        <button
+                                                            onClick={() => setIsCompletedCollapsed(!isCompletedCollapsed)}
+                                                            className="w-full flex items-center gap-3 py-2.5 px-3 hover:bg-red-50/50 dark:hover:bg-red-900/20 rounded-xl transition-all group"
+                                                        >
+                                                            <motion.div
+                                                                animate={{ rotate: isCompletedCollapsed ? 0 : 90 }}
+                                                                className="flex items-center justify-center w-5 h-5 rounded-md bg-red-100/80 dark:bg-red-900/30 text-red-600 dark:text-red-400"
+                                                            >
+                                                                <ChevronRight size={12} strokeWidth={2.5} />
+                                                            </motion.div>
+                                                            <div className="flex items-center gap-2">
+                                                                <CheckCircle2 size={14} className="text-red-500" />
+                                                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">已完成</span>
+                                                            </div>
+                                                            <div className="flex-1" />
+                                                            <span className="text-[11px] tabular-nums px-2 py-0.5 rounded-md font-bold text-red-600/80 bg-red-50 dark:bg-red-900/30 dark:text-red-400">
+                                                                {completedTasks.length}
+                                                            </span>
+                                                        </button>
+
+                                                        <AnimatePresence initial={false}>
+                                                            {!isCompletedCollapsed && (
+                                                                <motion.div
+                                                                    initial={{ opacity: 0, height: 0 }}
+                                                                    animate={{ opacity: 1, height: 'auto' }}
+                                                                    exit={{ opacity: 0, height: 0 }}
+                                                                    className="overflow-hidden"
+                                                                >
+                                                                    <div className="space-y-2 pt-2 pb-2">
+                                                                        {completedTasks.map(task => (
+                                                                            <motion.div key={task.id}>
+                                                                                <TaskItem
+                                                                                    task={task}
+                                                                                    projectId={selectedProject.id}
+                                                                                    isMandatory={task.isCommand && task.commandType === 'mandatory'}
+                                                                                    isLink={task.isCommand && task.commandType === 'link'}
+                                                                                    isUtility={task.isCommand && task.commandType === 'utility'}
+                                                                                    copiedTaskId={copiedTaskId}
+                                                                                    onToggle={handleToggleTask}
+                                                                                    onDelete={handleDeleteTask}
+                                                                                    handleCopy={handleCopy}
+                                                                                    startEditing={startEditingTask}
+                                                                                    isEditing={editingTaskId === task.id}
+                                                                                    editValue={editValue}
+                                                                                    setEditValue={setEditValue}
+                                                                                    saveEdit={saveEditTask}
+                                                                                    availableCommands={availableCommands}
+                                                                                    onUpdateTask={handleUpdateTask}
+                                                                                    themeColor="red"
+                                                                                    isSelectionMode={isSelectionMode}
+                                                                                    isSelected={selectedIds.has(task.id)}
+                                                                                    onSelect={() => toggleSelection(task.id)}
+                                                                                    disableReorder={true}
+                                                                                />
+                                                                            </motion.div>
+                                                                        ))}
+                                                                    </div>
+                                                                </motion.div>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </motion.div>
+                                                )}
+
+                                                {/* All done message */}
+                                                {pendingTasks.length === 0 && completedTasks.length > 0 && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, scale: 0.95 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        className="flex flex-col items-center py-10 text-center"
+                                                    >
+                                                        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shadow-sm border bg-gradient-to-br from-red-50 to-orange-50 border-red-100/50">
+                                                            <CheckCircle2 size={24} className="text-red-500" />
+                                                        </div>
+                                                        <h4 className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-1">所有任务已完成</h4>
+                                                        <p className="text-xs text-gray-400 max-w-[200px]">继续添加新任务或导入指令</p>
+                                                    </motion.div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 opacity-60"
                                             >
-                                                <Trophy size={16} /> Graduate to Final Integration
-                                            </button>
-                                        </div>
-                                    )}
+                                                <div className="w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
+                                                    <CheckSquare size={32} className="text-gray-300 dark:text-gray-600" strokeWidth={1} />
+                                                </div>
+                                                <h4 className="text-xl font-light text-gray-900 dark:text-gray-100 mb-2">暂无任务</h4>
+                                                <p className="text-sm text-gray-400 dark:text-gray-500 max-w-xs leading-relaxed">添加任务或导入指令开始工作</p>
+                                                <button
+                                                    onClick={() => setCommandModalOpen(true)}
+                                                    className="mt-6 flex items-center gap-2 px-5 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 transition-all font-medium text-sm shadow-sm hover:shadow-md"
+                                                >
+                                                    <Terminal size={14} />
+                                                    <span>Import Command</span>
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                </div>
 
-                                    <TaskList
-                                        ref={taskListRef}
-                                        tasks={selectedProject.tasks}
-                                        projectId={selectedProject.id}
-                                        activeStage={viewStage}
-                                        onToggle={handleToggleTask}
-                                        onDelete={handleDeleteTask}
-                                        onAddTask={handleAddTask}
-                                        onUpdateTask={handleUpdateTask}
-                                        onReorder={handleReorderTasks}
-                                        newTaskInput={newTaskInput}
-                                        setNewTaskInput={setNewTaskInput}
-                                        newTaskCategory={newTaskCategory}
-                                        setNewTaskCategory={setNewTaskCategory}
-                                        onImportCommand={() => setCommandModalOpen(true)}
-                                        availableCommands={availableCommands}
-                                        onScroll={(e) => {
-                                            const scrollTop = e.currentTarget.scrollTop;
-                                            if (scrollTop > 10 && !isHeaderCollapsed) {
-                                                setIsHeaderCollapsed(true);
-                                            }
-                                        }}
-                                        themeColor="red"
-                                    />
+                                {/* Input Footer / Bulk Actions */}
+                                <div className="p-6 pt-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shrink-0 border-t border-gray-100/50 dark:border-gray-800/50 relative z-20">
+                                    <AnimatePresence mode="wait">
+                                        {isSelectionMode ? (
+                                            <motion.div
+                                                key="bulk-actions"
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 20 }}
+                                                className="flex items-center justify-between backdrop-blur border rounded-2xl p-2 px-4 shadow-lg bg-red-50/90 border-red-100 shadow-red-500/10"
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <button
+                                                        onClick={handleSelectAll}
+                                                        className="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded transition-colors text-red-600 hover:text-red-700"
+                                                    >
+                                                        {selectedIds.size === allTasks.length ? 'Deselect All' : 'Select All'}
+                                                    </button>
+                                                    <span className="text-sm font-medium text-red-900">
+                                                        {selectedIds.size} Selected
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center gap-1">
+                                                    <button onClick={handleBulkDelete} className="p-2 rounded-lg hover:bg-white text-red-500 hover:text-red-600 transition-all" title="Delete Selected">
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                    <div className="w-px h-4 mx-1 bg-red-200" />
+                                                    <button onClick={handleBulkToggle} className="p-2 rounded-lg hover:bg-white transition-all text-red-600 hover:text-red-700" title="Mark Done/Undone">
+                                                        <CheckSquare size={18} />
+                                                    </button>
+                                                    <button onClick={handleBulkCopy} className="p-2 rounded-lg hover:bg-white transition-all text-red-600 hover:text-red-700" title="Copy Content">
+                                                        <Copy size={18} />
+                                                    </button>
+                                                    <div className="w-px h-4 mx-1 bg-red-200" />
+                                                    <button
+                                                        onClick={() => setIsSelectionMode(false)}
+                                                        className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all"
+                                                        title="Cancel (Esc)"
+                                                    >
+                                                        <X size={18} />
+                                                    </button>
+                                                </div>
+                                            </motion.div>
+                                        ) : (
+                                            <motion.div
+                                                key="input"
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 20 }}
+                                                className="relative group rounded-2xl bg-white dark:bg-gray-800 ring-1 ring-gray-100 dark:ring-gray-700 transition-all hover:shadow-2xl flex items-center focus-within:ring-red-200 dark:focus-within:ring-red-800 focus-within:border-red-300 shadow-red-500/5 hover:shadow-red-500/10"
+                                            >
+                                                <input
+                                                    type="text"
+                                                    value={newTaskInput}
+                                                    onChange={(e) => setNewTaskInput(e.target.value)}
+                                                    onKeyDown={(e) => e.key === 'Enter' && handleAddTask(selectedProject.id)}
+                                                    placeholder="添加新任务..."
+                                                    className="flex-1 bg-transparent border-0 rounded-l-2xl py-4 pl-14 pr-4 transition-all outline-none placeholder:text-gray-300 dark:placeholder:text-gray-600 text-lg font-light text-gray-800 dark:text-white"
+                                                />
+
+                                                {/* Category Selector */}
+                                                <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                                                    <button
+                                                        onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                                                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-400 hover:text-gray-900 transition-all"
+                                                    >
+                                                        {(() => {
+                                                            const activeCat = COMMAND_CATEGORIES.find(c => c.id === newTaskCategory);
+                                                            const ActiveIcon = CATEGORY_ICONS[activeCat?.icon] || LayoutGrid;
+                                                            return <ActiveIcon size={18} className={activeCat?.color.split(' ')[1]} />;
+                                                        })()}
+                                                    </button>
+
+                                                    <AnimatePresence>
+                                                        {isCategoryOpen && (
+                                                            <>
+                                                                <div className="fixed inset-0 z-40" onClick={() => setIsCategoryOpen(false)} />
+                                                                <motion.div
+                                                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                                    className="absolute bottom-full left-0 mb-3 p-1.5 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 z-50 flex flex-col gap-1 min-w-[140px]"
+                                                                >
+                                                                    {COMMAND_CATEGORIES.map(cat => {
+                                                                        const Icon = CATEGORY_ICONS[cat.icon] || LayoutGrid;
+                                                                        return (
+                                                                            <button
+                                                                                key={cat.id}
+                                                                                onClick={() => {
+                                                                                    setNewTaskCategory(cat.id);
+                                                                                    setIsCategoryOpen(false);
+                                                                                }}
+                                                                                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${newTaskCategory === cat.id ? 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white font-medium' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200'}`}
+                                                                            >
+                                                                                <Icon size={16} className={cat.color.split(' ')[1]} />
+                                                                                {cat.label}
+                                                                            </button>
+                                                                        );
+                                                                    })}
+                                                                </motion.div>
+                                                            </>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </div>
+
+                                                {/* Multi-select Toggle */}
+                                                <div className="pr-2 border-l border-gray-100 pl-2">
+                                                    <button
+                                                        onClick={() => setIsSelectionMode(true)}
+                                                        className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-all"
+                                                        title="Multi-select"
+                                                    >
+                                                        <ListChecks size={20} strokeWidth={1.5} />
+                                                    </button>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             </div>
 
@@ -558,9 +806,8 @@ const FinalDevModule = () => {
                 isOpen={commandModalOpen}
                 onClose={() => setCommandModalOpen(false)}
                 onImport={handleLinkCommand}
-                currentStage={viewStage}
+                currentStage={1}
                 projectCategory={selectedProject?.category}
-                stages={FINAL_STAGES}
                 themeColor="red"
             />
         </div>
