@@ -190,7 +190,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
                                     onBlur={handleNoteSave}
                                     onKeyDown={handleNoteKeyDown}
                                     placeholder={t('common.notePlaceholder', 'Add a note...')}
-                                    className="w-full text-xs text-gray-700 dark:text-gray-200 bg-transparent outline-none placeholder:text-gray-400"
+                                    className="w-full text-base md:text-xs text-gray-700 dark:text-gray-200 bg-transparent outline-none placeholder:text-gray-400"
                                 />
                             </div>
                         )}
