@@ -167,7 +167,7 @@ const PrimaryDevModule = () => {
 
     // --- Project Filtering ---
     const activeProjects = projects.filter(p => (p.subStage || 1) < 6);
-    const advancedProjects = projects.filter(p => (p.subStage || 1) >= 6);
+    const finalProjects = projects.filter(p => (p.subStage || 1) >= 6);
 
 
     // --- Project Handlers ---
@@ -289,7 +289,7 @@ const PrimaryDevModule = () => {
     };
 
     // --- Graduation Logic ---
-    const handleGraduateToAdvanced = () => {
+    const handleGraduateToFinal = () => {
         if (!allPillarsChecked) return;
 
         // Trigger Confetti
@@ -329,8 +329,8 @@ const PrimaryDevModule = () => {
             setShowGraduationChecklist(false);
             setGraduationChecks({}); // Reset
 
-            // Navigate to Commercial Module for pricing setup
-            navigate('/commercial', { state: { projectId: selectedProject.id } });
+            // Navigate to Final Module for setup
+            navigate('/advanced', { state: { projectId: selectedProject.id } });
 
             setSelectedProject(null);
         }, 1500);
@@ -493,19 +493,19 @@ const PrimaryDevModule = () => {
             </div>
 
 
-            {/* Advanced / Graduated Section */}
-            {advancedProjects.length > 0 && (
+            {/* Final / Graduated Section */}
+            {finalProjects.length > 0 && (
                 <div className="mt-20 border-t border-gray-100 pt-10">
                     <div className="mb-8 flex items-center gap-3">
-                        <div className="p-2 bg-amber-50 rounded-lg text-amber-500">
+                        <div className="p-2 bg-emerald-50 rounded-lg text-emerald-500">
                             <Trophy size={20} />
                         </div>
-                        <h3 className="text-xl font-light text-gray-900 tracking-tight">Advanced Development</h3>
-                        <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">{advancedProjects.length}</span>
+                        <h3 className="text-xl font-light text-gray-900 tracking-tight">Final Development</h3>
+                        <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">{finalProjects.length}</span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {advancedProjects.map((project) => (
+                        {finalProjects.map((project) => (
                             <motion.div
                                 key={project.id}
                                 layoutId={`primary-card-${project.id}`} // Keep animation
@@ -529,7 +529,8 @@ const PrimaryDevModule = () => {
                         ))}
                     </div>
                 </div>
-            )}
+            )
+            }
 
 
             {/* Project Workspace Modal */}
@@ -720,7 +721,7 @@ const PrimaryDevModule = () => {
                 currentStage={viewStage}
                 projectCategory={selectedProject?.category}
             />
-        </div>
+        </div >
     );
 };
 

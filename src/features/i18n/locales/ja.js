@@ -5,8 +5,8 @@ export default {
         inspiration: 'インスピレーション',
         pending: '保留',
         primary: 'メイン開発',
-        advanced: '高度',
-        final: '最終',
+        advanced: '最終',
+        final: '高度',
         commercial: '商用化',
         command: 'コマンド',
         cloudSync: 'クラウド同期',
@@ -66,21 +66,21 @@ export default {
         addTask: 'タスクを追加',
     },
 
-    // Advanced Development Module
+    // 最終開発 (旧 高度)
     advanced: {
-        title: '高度な開発',
-        subtitle: 'より深い作業が必要な複雑なプロジェクト',
-        emptyState: '高度なプロジェクトはありません',
+        title: '最終統合',
+        subtitle: 'プロジェクトのコアロジックとシステム統合の最終段階',
+        emptyState: '最終プロジェクトはありません',
     },
 
-    // Final Development Module
+    // 高度な最適化 (旧 最終)
     final: {
-        title: '最終開発',
-        subtitle: '最終的な仕上げ段階に入ったプロジェクト',
-        emptyState: '最終段階のプロジェクトはありません',
-        stageOptimization: 'モジュール最適化',
-        stageNewModule: '新機能追加',
-        stageBugFix: 'バグ修正',
+        title: '高度な最適化',
+        subtitle: 'コア機能を超えたディープなパフォーマンス最適化と体験のブラッシュアップ',
+        emptyState: '高度なプロジェクトはありません',
+        stageOptimization: '低レベル最適化',
+        stageNewModule: 'モジュールの進化',
+        stageBugFix: '深度修正',
         createProject: '新規プロジェクト',
         projectName: 'プロジェクト名...',
         create: '作成',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, MonitorPlay, Container, Flower2, Flag, Check, Lock, Terminal, CheckSquare, Gem } from 'lucide-react';
+import { Layers, MonitorPlay, Container, Flower2, Flag, Check, Lock, Terminal, CheckSquare, CheckCircle2, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { DEV_STAGES } from '../../../../utils/constants';
 
@@ -9,7 +9,7 @@ const STAGE_ICONS = {
     3: Container,
     4: Flower2,
     5: Flag,
-    6: Gem
+    6: CheckCircle2
 };
 
 const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleComplete, customStageNames = {}, onRenameStage, stageStats = {}, stages = DEV_STAGES, extraStages = [] }) => {
@@ -160,7 +160,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                                         3: 'bg-violet-400',
                                                         4: 'bg-amber-400',
                                                         5: 'bg-rose-400',
-                                                        6: 'bg-yellow-400'
+                                                        6: 'bg-emerald-400'
                                                     };
                                                     return stageColors[stage.id] || 'bg-gray-300';
                                                 })()
@@ -191,7 +191,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                         {extraStages.map((stage) => {
                             const isViewActive = viewStage === stage.id;
                             const stats = stageStats[stage.id] || { taskCount: 0, commandCount: 0 };
-                            const Icon = STAGE_ICONS[stage.id] || Gem;
+                            const Icon = stage.id === 6 ? CheckCircle2 : (STAGE_ICONS[stage.id] || Zap);
 
                             return (
                                 <div

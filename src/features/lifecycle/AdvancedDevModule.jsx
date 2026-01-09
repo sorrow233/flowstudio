@@ -10,8 +10,8 @@ const AdvancedDevModule = () => {
     const { doc } = useSync();
     const { projects, updateProject } = useSyncedProjects(doc, 'primary_projects');
 
-    // Filter for Advanced Projects (Stage 6+)
-    const advancedProjects = projects.filter(p => (p.subStage || 1) >= 6);
+    // Filter for Final Projects (Stage 6+)
+    const finalProjects = projects.filter(p => (p.subStage || 1) >= 6);
 
     // --- State ---
     const [selectedProject, setSelectedProject] = useState(null);
@@ -23,7 +23,7 @@ const AdvancedDevModule = () => {
                 <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Trophy size={40} className="text-gray-300" strokeWidth={1} />
                 </div>
-                <h3 className="text-xl font-light text-gray-900 mb-2">No Advanced Projects Yet</h3>
+                <h3 className="text-xl font-light text-gray-900 mb-2">No Final Projects Yet</h3>
                 <p className="max-w-md mx-auto leading-relaxed">
                     Graduate projects from the Production Pipeline by completing all 5 stages and the Ascension Ritual.
                 </p>
@@ -36,18 +36,18 @@ const AdvancedDevModule = () => {
             {/* Header */}
             <div className="mb-12 flex justify-between items-end">
                 <div>
-                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">Rapid Iteration</h2>
-                    <p className="text-gray-400 text-sm font-light tracking-wide">Accelerate development with modular workflows</p>
+                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">终稿整合阶段</h2>
+                    <p className="text-gray-400 text-sm font-light tracking-wide">核心逻辑与系统整合的最终交付</p>
                 </div>
                 <div className="text-right">
-                    <span className="text-3xl font-thin text-gray-900">{advancedProjects.length}</span>
-                    <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">Projects</span>
+                    <span className="text-3xl font-thin text-gray-900">{finalProjects.length}</span>
+                    <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">Final Projects</span>
                 </div>
             </div>
 
             {/* Project Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {advancedProjects.map((project) => {
+                {finalProjects.map((project) => {
                     const modules = project.modules || [];
                     const moduleCount = modules.length;
                     const progress = moduleCount > 0

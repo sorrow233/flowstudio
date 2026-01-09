@@ -28,8 +28,8 @@ const tabIcons = {
     inspiration: Lightbulb,
     pending: Clock,
     primary: Code2,
-    advanced: Zap,
-    final: CheckCircle2,
+    advanced: CheckCircle2,
+    final: Zap,
     commercial: Briefcase,
     command: Terminal,
 };

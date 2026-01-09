@@ -295,8 +295,8 @@ const FinalDevModule = () => {
             {/* Dashboard Header */}
             <div className="mb-12 flex justify-between items-end">
                 <div>
-                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">最终开发阶段</h2>
-                    <p className="text-gray-400 text-sm font-light tracking-wide">优化、功能与修复</p>
+                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">进阶优化阶段</h2>
+                    <p className="text-gray-400 text-sm font-light tracking-wide">深度性能优化与体验打磨</p>
                 </div>
                 <div className="flex items-center gap-4 text-right">
                     {isCreatingProject ? (
@@ -448,8 +448,8 @@ const FinalDevModule = () => {
                         <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 opacity-50 animate-pulse">
                             <Sparkles size={40} className="text-gray-400" strokeWidth={1} />
                         </div>
-                        <span className="text-xl font-light text-gray-900 mb-2">暂无最终项目</span>
-                        <span className="text-sm text-gray-400 max-w-sm text-center leading-relaxed">创建项目以开始优化与功能完善</span>
+                        <span className="text-xl font-light text-gray-900 mb-2">暂无进阶项目</span>
+                        <span className="text-sm text-gray-400 max-w-sm text-center leading-relaxed">创建项目以开始深度优化与体验打磨</span>
                         <button
                             onClick={() => setIsCreatingProject(true)}
                             className="mt-6 text-indigo-500 hover:text-indigo-600 font-medium text-sm transition-colors"
