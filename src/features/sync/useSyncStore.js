@@ -306,6 +306,18 @@ export const useDataMigration = (doc) => {
                             });
                             yPrimary.push(yMaps);
                         }
+
+                        // 加载 Inspirations (灵感数据)
+                        if (DEFAULT_TEMPLATE.inspirations && DEFAULT_TEMPLATE.inspirations.length > 0) {
+                            const yInspiration = doc.getArray('inspiration');
+                            const yMaps = DEFAULT_TEMPLATE.inspirations.map(i => {
+                                const yMap = new Y.Map();
+                                Object.entries(i).forEach(([k, v]) => yMap.set(k, v));
+                                return yMap;
+                            });
+                            yInspiration.push(yMaps);
+                            console.info(`[DefaultTemplate] 加载了 ${DEFAULT_TEMPLATE.inspirations.length} 条灵感数据`);
+                        }
                     });
 
                     // 加载 Commands 到 localStorage

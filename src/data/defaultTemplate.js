@@ -5,6 +5,24 @@
  */
 
 export const DEFAULT_TEMPLATE = {
+    // 示例灵感数据
+    inspirations: [
+        {
+            id: "insp-001",
+            content: "[Flow Studio] 考虑添加项目模板功能，让用户可以快速创建常见类型的项目",
+            timestamp: Date.now() - 86400000 * 2 // 2天前
+        },
+        {
+            id: "insp-002",
+            content: "研究竞品的 Onboarding 流程，看看如何让新用户更快上手",
+            timestamp: Date.now() - 86400000 // 1天前
+        },
+        {
+            id: "insp-003",
+            content: "添加键盘快捷键提示，提升高级用户的效率",
+            timestamp: Date.now() - 3600000 // 1小时前
+        }
+    ],
     pendingProjects: [],
     primaryProjects: [
         {

@@ -18,6 +18,7 @@ export const exportAllData = (doc) => {
         data: {
             pendingProjects: [],
             primaryProjects: [],
+            inspirations: [],  // 新增：灵感数据
             commands: [],
             customCategories: []
         }
@@ -37,6 +38,14 @@ export const exportAllData = (doc) => {
             data.data.primaryProjects = primaryArray.toJSON();
         } catch (e) {
             console.warn('[Export] Failed to get primary_projects:', e);
+        }
+
+        // 新增：导出灵感数据
+        try {
+            const inspirationArray = doc.getArray('inspiration');
+            data.data.inspirations = inspirationArray.toJSON();
+        } catch (e) {
+            console.warn('[Export] Failed to get inspiration:', e);
         }
     }
 
@@ -112,7 +121,7 @@ export const validateImportData = (data) => {
  * @param {'merge' | 'replace'} mode - 导入模式
  */
 export const importData = (doc, data, mode = 'merge') => {
-    const { pendingProjects, primaryProjects, commands, customCategories } = data.data;
+    const { pendingProjects, primaryProjects, inspirations, commands, customCategories } = data.data;
 
     // 1. 导入 Y.Doc 项目数据
     if (doc) {
@@ -146,6 +155,21 @@ export const importData = (doc, data, mode = 'merge') => {
                     return yMap;
                 });
                 yPrimary.push(yMaps);
+            }
+
+            // 新增：导入灵感数据
+            if (inspirations && inspirations.length > 0) {
+                const yInspiration = doc.getArray('inspiration');
+                if (mode === 'replace') {
+                    yInspiration.delete(0, yInspiration.length);
+                }
+                const yMaps = inspirations.map(i => {
+                    const Y = doc.constructor;
+                    const yMap = new Y.Map();
+                    Object.entries(i).forEach(([k, v]) => yMap.set(k, v));
+                    return yMap;
+                });
+                yInspiration.push(yMaps);
             }
         });
     }
