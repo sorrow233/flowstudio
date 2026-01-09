@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowRight, Sun, Sparkles, CheckCircle2, Scroll, Feather, LayoutGrid, Monitor, Server, Database, Container, Beaker, Terminal, Globe, Smartphone, Cloud, Box, Cpu } from 'lucide-react';
+import { Sprout, X, ArrowRight, Sun, Sparkles, CheckCircle2, Scroll, Feather, LayoutGrid, Monitor, Server, Database, Container, Beaker, Terminal, Globe, Smartphone, Cloud, Box, Cpu } from 'lucide-react';
 import { COMMAND_CATEGORIES, QUESTIONS } from '../../../../utils/constants';
 
 const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }) => {
