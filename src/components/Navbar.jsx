@@ -127,7 +127,7 @@ const Navbar = () => {
         <div className="flex justify-center w-full px-4 pt-10 pb-4 relative z-50">
             <nav className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-full shadow-sm max-w-[95vw] md:max-w-full relative mx-auto">
                 <Spotlight spotColor={currentConfig.spotlight} size={300} className="rounded-full">
-                    <div className="flex items-center gap-1 md:gap-2 px-1.5 py-1.5 md:px-2 md:py-2 overflow-x-auto no-scrollbar mask-linear-fade">
+                    <div className="flex items-center gap-2 md:gap-6 px-2 py-2 md:px-4 md:py-3 overflow-x-auto no-scrollbar mask-linear-fade">
                         {/* 主流程 */}
                         {mainTabs.map((tab) => {
                             const Icon = tab.icon;
@@ -165,7 +165,7 @@ const Navbar = () => {
                         {/* 分割线 - 主流程与其他流程分界 */}
                         {showAdvancedFeatures && (
                             <>
-                                <div className="w-px h-5 md:h-6 bg-gray-200 dark:bg-gray-600 mx-1 md:mx-2 relative z-40 shrink-0" />
+                                <div className="w-px h-5 md:h-6 bg-gray-200 dark:bg-gray-600 mx-2 md:mx-4 relative z-40 shrink-0" />
 
                                 {/* 其他流程（终稿、商业化） */}
                                 {extraTabs.map((tab) => {
@@ -199,7 +199,7 @@ const Navbar = () => {
                             </>
                         )}
 
-                        <div className="w-px h-5 md:h-6 bg-gray-100 dark:bg-gray-700 mx-0.5 md:mx-1 relative z-40 shrink-0" />
+                        <div className="w-px h-5 md:h-6 bg-gray-100 dark:bg-gray-700 mx-2 md:mx-4 relative z-40 shrink-0" />
 
                         {/* Theme Toggle */}
                         <button
