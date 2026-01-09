@@ -19,6 +19,7 @@ import { useTranslation } from '../i18n';
 
 const CommandCenterModule = () => {
     const { doc } = useSync();
+    const { t } = useTranslation();
 
     // Sync: Commands
     const {
@@ -36,10 +37,43 @@ const CommandCenterModule = () => {
     } = useSyncedProjects(doc, 'command_categories');
 
     // Merge default categories with synced custom categories
-    // We treat 'command_categories' not as a full replacement, but as where we store CUSTOM modifications or entirely new ones.
-    // However, to keep it simple, we can just sync the entire category list.
-    // If syncedCategories is empty, we use defaults.
     const categories = syncedCategories.length > 0 ? syncedCategories : COMMAND_CATEGORIES;
+
+    // --- UI State ---
+    const [activeStage, setActiveStage] = useState(1);
+    const [selectedCategory, setSelectedCategory] = useState('general');
+    const [search, setSearch] = useState('');
+    const [copiedId, setCopiedId] = useState(null);
+
+    // --- Form State ---
+    const [isAdding, setIsAdding] = useState(false);
+    const [newCmd, setNewCmd] = useState({ title: '', content: '', type: 'utility', url: '', tags: [], category: 'general' });
+    const [newTag, setNewTag] = useState({ label: '', value: '' });
+    const [editingTagId, setEditingTagId] = useState(null);
+
+    // --- Modal State ---
+    const [isImporting, setIsImporting] = useState(false);
+    const [isCommunityBrowsing, setIsCommunityBrowsing] = useState(false);
+    const [sharingCommand, setSharingCommand] = useState(null);
+    const [renamingCategory, setRenamingCategory] = useState(null);
+    const [renameValue, setRenameValue] = useState('');
+
+    // Category rename handler
+    const updateCategoryName = (catId, newName) => {
+        // If categories are from default, we need to seed them first then update
+        if (syncedCategories.length === 0) {
+            // Seed defaults first
+            COMMAND_CATEGORIES.forEach(cat => {
+                if (cat.id === catId) {
+                    addCategory({ ...cat, label: newName });
+                } else {
+                    addCategory(cat);
+                }
+            });
+        } else {
+            updateCat(catId, { label: newName });
+        }
+    };
 
     // DATA MIGRATION: LocalStorage -> Sync
     useEffect(() => {
@@ -52,7 +86,6 @@ const CommandCenterModule = () => {
                 const parsed = JSON.parse(localCmds);
                 console.info('[CommandCenter] Migrating commands from localStorage to Sync...');
                 parsed.forEach(cmd => {
-                    // Ensure basic fields
                     const migratedCmd = {
                         ...cmd,
                         stageIds: cmd.stageIds || (cmd.stageId ? [cmd.stageId] : []),
@@ -61,8 +94,6 @@ const CommandCenterModule = () => {
                     };
                     addCommand(migratedCmd);
                 });
-                // Optional: Clear local storage after successful migration? 
-                // localStorage.removeItem(STORAGE_KEYS.COMMANDS);
             } catch (e) {
                 console.error('Migration failed:', e);
             }
@@ -80,18 +111,8 @@ const CommandCenterModule = () => {
             } catch (e) {
                 console.error('Category migration failed:', e);
             }
-        } else if (!localCats && syncedCategories.length === 0) {
-            // If completely fresh, seed with defaults to Sync so they are editable globally
-            // Or we can just leave them empty and fall back to COMMAND_CATEGORIES.
-            // But if user wants to rename "General", we need it in Sync.
-            // Let's seed defaults into Sync if it's empty to allow renaming.
-            // Check if we have effectively "connected" (maybe wait a sec? SyncEngine handles this)
-            // For now, let's just stick to migrating if LocalStorage exists.
         }
-
     }, [doc, commands.length, syncedCategories.length]);
-
-    // No longer writing to localStorage effects
 
 
     const handleAdd = () => {
@@ -103,29 +124,26 @@ const CommandCenterModule = () => {
 
         if (newCmd.id) {
             // Update existing
-            setCommands(commands.map(c => c.id === newCmd.id ? {
-                ...c,
+            updateCommand(newCmd.id, {
                 title: newCmd.title.trim(),
                 content: newCmd.content.trim(),
                 url: newCmd.url.trim(),
                 type: newCmd.type,
                 tags: newCmd.tags || [],
                 category: newCmd.category || 'general'
-            } : c));
+            });
         } else {
             // Create New
-            const command = {
-                id: uuidv4(),
+            addCommand({
                 title: newCmd.title.trim(),
                 content: newCmd.content.trim(),
                 url: newCmd.url.trim(),
                 type: newCmd.type,
                 tags: newCmd.tags || [],
                 category: newCmd.category || 'general',
-                stageIds: [activeStage], // Assign to current stage
+                stageIds: [activeStage],
                 createdAt: Date.now()
-            };
-            setCommands([command, ...commands]);
+            });
         }
 
         setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [], category: 'general' });
@@ -169,12 +187,7 @@ const CommandCenterModule = () => {
         const isInStage = cmd.stageIds?.includes(activeStage);
         if (!isInStage) {
             // Add stage
-            const updated = commands.map(c =>
-                c.id === cmd.id
-                    ? { ...c, stageIds: [...(c.stageIds || []), activeStage] }
-                    : c
-            );
-            setCommands(updated);
+            updateCommand(cmd.id, { stageIds: [...(cmd.stageIds || []), activeStage] });
         }
 
         setIsImporting(false);
@@ -182,13 +195,11 @@ const CommandCenterModule = () => {
 
     const handleCommunityImport = (cmd) => {
         // Import from community share
-        const command = {
-            id: uuidv4(),
+        addCommand({
             ...cmd,
             stageIds: [activeStage],
             createdAt: Date.now()
-        };
-        setCommands([command, ...commands]);
+        });
         setIsCommunityBrowsing(false);
     };
 
@@ -219,14 +230,10 @@ const CommandCenterModule = () => {
 
         if (confirm(isLastInstance ? t('commands.deleteConfirmLast') : t('commands.deleteConfirmStage'))) {
             if (isLastInstance) {
-                setCommands(commands.filter(c => c.id !== id));
+                deleteCommand(id);
             } else {
                 // Just remove the stageId
-                setCommands(commands.map(c =>
-                    c.id === id
-                        ? { ...c, stageIds: c.stageIds.filter(sid => sid !== activeStage) }
-                        : c
-                ));
+                updateCommand(id, { stageIds: command.stageIds.filter(sid => sid !== activeStage) });
             }
         }
     };
@@ -238,10 +245,11 @@ const CommandCenterModule = () => {
     };
 
     const handleReorder = (reorderedStageCommands) => {
-        // We need to merge reordered subset back into the main list without losing others
-        const stageIdsSet = new Set(reorderedStageCommands.map(c => c.id));
-        const others = commands.filter(c => !stageIdsSet.has(c.id));
-        setCommands([...reorderedStageCommands, ...others]);
+        // Reordering with Yjs requires updating each command's order field or re-inserting
+        // For now, we'll update each command with an order index
+        reorderedStageCommands.forEach((cmd, index) => {
+            updateCommand(cmd.id, { order: index });
+        });
     };
 
     // Filter commands for current stage
@@ -438,7 +446,6 @@ const CommandCenterModule = () => {
                     setIsImporting={setIsImporting}
                     copiedId={copiedId}
                     commands={commands}
-                    setCommands={setCommands}
                 />
             </div>
 
