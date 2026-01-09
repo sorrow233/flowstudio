@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, useDragControls } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Check, Trash2, Link as LinkIcon, Command, Globe, Tag, FileText, Share2, GripVertical } from 'lucide-react';
 
 const CommandItem = ({
@@ -27,7 +27,6 @@ const CommandItem = ({
 
     return (
         <motion.div
-            layout
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
@@ -51,6 +50,7 @@ const CommandItem = ({
                 ) : (
                     <div
                         onPointerDown={(e) => dragControls?.start(e)}
+                        style={{ touchAction: 'none' }}
                         className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors p-1 -ml-2 shrink-0"
                     >
                         <GripVertical size={18} />

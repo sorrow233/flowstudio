@@ -3,20 +3,40 @@ import { motion, Reorder, AnimatePresence, useDragControls } from 'framer-motion
 import { Terminal, Library, ChevronRight, Copy, Trash2, ListChecks, X } from 'lucide-react';
 import CommandItem from './CommandItem';
 
-// Wrapper to manage drag controls for each item
-const DraggableItem = ({ cmd, children, dragListener }) => {
-    const controls = useDragControls();
+const ReorderableItem = ({ cmd, isSelectionMode, selectedIds, categories, handleEdit, handleCopy, handleRemove, handleShare, copiedId, handleShiftSelect, onReorder }) => {
+    const dragControls = useDragControls();
+    const isDraggable = !isSelectionMode;
+
     return (
         <Reorder.Item
             value={cmd}
-            dragListener={dragListener}
-            dragControls={controls}
+            dragListener={false}
+            dragControls={dragControls}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             className="relative"
         >
-            {React.cloneElement(children, { dragControls: controls })}
+            <CommandItem
+                cmd={cmd}
+                isSelectionMode={isSelectionMode}
+                selectedIds={selectedIds}
+                categories={categories}
+                handleEdit={handleEdit}
+                handleCopy={handleCopy}
+                handleRemove={handleRemove}
+                handleShare={handleShare}
+                copiedId={copiedId}
+                dragControls={dragControls}
+                onClick={(e) => {
+                    if (isSelectionMode) {
+                        handleShiftSelect(cmd.id, e);
+                        return;
+                    }
+                    handleCopy(cmd.id, cmd.content || cmd.url);
+                }}
+                onDoubleClick={() => !isSelectionMode && handleEdit(cmd)}
+            />
         </Reorder.Item>
     );
 };
@@ -161,9 +181,6 @@ const CommandList = ({
         setLastSelectedId(null);
     };
 
-    // We only allow reordering if we are viewing ALL commands in the stage (no search/selection)
-    const canReorder = !isSearching && !isSelectionMode;
-
     return (
         <div className="flex-1 flex flex-col overflow-hidden">
             {/* Command List */}
@@ -171,36 +188,24 @@ const CommandList = ({
                 {visibleCommands.length > 0 ? (
                     <Reorder.Group
                         axis="y"
-                        values={visibleCommands} // MUST match the items being mapped for Reorder to work
+                        values={visibleCommands}
                         onReorder={handleReorder}
                         className="space-y-3"
                     >
                         {visibleCommands.map(cmd => (
-                            <DraggableItem
+                            <ReorderableItem
                                 key={cmd.id}
                                 cmd={cmd}
-                                dragListener={false} // Use handle instead
-                            >
-                                <CommandItem
-                                    cmd={cmd}
-                                    isSelectionMode={isSelectionMode}
-                                    selectedIds={selectedIds}
-                                    categories={categories}
-                                    handleEdit={handleEdit}
-                                    handleCopy={handleCopy}
-                                    handleRemove={handleRemove}
-                                    handleShare={handleShare}
-                                    copiedId={copiedId}
-                                    onClick={(e) => {
-                                        if (isSelectionMode) {
-                                            handleShiftSelect(cmd.id, e);
-                                            return;
-                                        }
-                                        handleCopy(cmd.id, cmd.content || cmd.url);
-                                    }}
-                                    onDoubleClick={() => !isSelectionMode && handleEdit(cmd)}
-                                />
-                            </DraggableItem>
+                                isSelectionMode={isSelectionMode}
+                                selectedIds={selectedIds}
+                                categories={categories}
+                                handleEdit={handleEdit}
+                                handleCopy={handleCopy}
+                                handleRemove={handleRemove}
+                                handleShare={handleShare}
+                                copiedId={copiedId}
+                                handleShiftSelect={handleShiftSelect}
+                            />
                         ))}
                     </Reorder.Group>
                 ) : (

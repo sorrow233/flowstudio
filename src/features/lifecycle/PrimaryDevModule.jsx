@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Code2, ExternalLink, Trash2, Check, Rocket, Sparkles, Trophy, Star, X } from 'lucide-react';
-import { STORAGE_KEYS, DEV_STAGES, EXTRA_STAGES } from '../../utils/constants';
+import { STORAGE_KEYS, DEV_STAGES } from '../../utils/constants';
 import { useNavigate } from 'react-router-dom';
 
 // Import New Modular Components
