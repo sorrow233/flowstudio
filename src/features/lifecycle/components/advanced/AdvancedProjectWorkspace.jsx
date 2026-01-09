@@ -8,6 +8,7 @@ import ProjectSettingsModal from './ProjectSettingsModal';
 import TaskList from '../primary/TaskList'; // Reusing Primary TaskList
 import { useSyncedProjects } from '../../../sync/useSyncStore';
 import { useSync } from '../../../sync/SyncContext';
+import { useTranslation } from '../../../i18n';
 
 const DEFAULT_STAGES = [
     { id: 'design', name: 'Design', status: 'in-progress', color: '#EC4899' },
@@ -17,6 +18,14 @@ const DEFAULT_STAGES = [
 
 const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeleteProject }) => {
     const { doc } = useSync();
+    const { t } = useTranslation();
+
+    const getStageName = (stage) => {
+        if (stage.id === 'design') return t('advanced.workspace.design');
+        if (stage.id === 'development') return t('advanced.workspace.development');
+        if (stage.id === 'polish') return t('advanced.workspace.polish');
+        return stage.name;
+    };
 
     // Stage Management
     const stages = (project.customStages && project.customStages.length > 0) ? project.customStages : DEFAULT_STAGES;
@@ -180,11 +189,11 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
                                     <h1 className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[200px]">{project.title}</h1>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <span className="text-xs text-gray-500 font-medium">{activeStage ? activeStage.name : 'Unknown Stage'}</span>
+                                    <span className="text-xs text-gray-500 font-medium">{activeStage ? getStageName(activeStage) : t('advanced.workspace.unknownStage')}</span>
                                     {progress > 0 && (
                                         <>
                                             <div className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
-                                            <span className="text-[10px] font-mono text-gray-400">{progress}% Complete</span>
+                                            <span className="text-[10px] font-mono text-gray-400">{progress}{t('advanced.workspace.complete')}</span>
                                         </>
                                     )}
                                 </div>

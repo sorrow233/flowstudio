@@ -3,10 +3,10 @@ export default {
     // Navbar
     navbar: {
         inspiration: '인스피레이션',
-        pending: '보류',
+        pending: '새싹',
         primary: '메인 개발',
         advanced: '고급',
-        final: '최종',
+        final: '모듈',
         commercial: '상용화',
         command: '청사진',
         cloudSync: '클라우드 동기화',
@@ -84,6 +84,38 @@ export default {
         createFirst: '+ 첫 프로젝트 생성',
         newProjectDefaultTitle: '새 고급 개발 프로젝트',
         newProjectDefaultDesc: '최적화, 기능 및 수정',
+        newProjectDefaultTitle: '새 고급 개발 프로젝트',
+        newProjectDefaultDesc: '최적화, 기능 및 수정',
+        finalProjects: '프로젝트',
+        items: '항목',
+        noDesc: '설명 없음',
+        launchProject: '프로젝트 출시',
+        launchConfirm: '이 프로젝트를 상용화하시겠습니까?',
+        launch: '출시',
+        workspace: {
+            design: '디자인',
+            development: '개발',
+            polish: '다듬기',
+            unknownStage: '알 수 없는 단계',
+            complete: '% 완료',
+        },
+        stage: {
+            pipeline: '파이프라인',
+            add: '단계 추가',
+            placeholder: '단계 이름...',
+            deleteTitle: '단계 삭제',
+            deleteConfirm: '이 단계를 삭제하시겠습니까?',
+            delete: '삭제',
+        },
+    },
+
+    // Project Management
+    project: {
+        advancedStage: '고급 단계',
+        nurseryStage: '새싹 단계',
+        pruneSeed: '이 새싹 다듬기',
+        keepGrowing: '취소하고 계속 키우기',
+        waitingForSprout: '첫 번째 영감의 싹이 트길 기다리는 중...',
     },
 
     // 최종 개발 (구 고급)
@@ -310,11 +342,11 @@ export default {
 
     // Sync Status
     sync: {
-        synced: '동기화됨',
-        syncing: '동기화 중...',
-        offline: '오프라인',
-        error: '동기화 오류',
-        pending: '동기화 대기 중',
+        synced: 'Synced',
+        syncing: 'Syncing...',
+        offline: 'Offline',
+        error: 'Sync Error',
+        pending: 'Pending',
     },
 
     // Auth

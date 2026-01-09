@@ -3,10 +3,10 @@ export default {
     // Navbar
     navbar: {
         inspiration: 'インスピレーション',
-        pending: '保留',
+        pending: '萌芽',
         primary: 'メイン開発',
         advanced: '高度',
-        final: '最終',
+        final: 'モジュール',
         commercial: '商用化',
         command: '青写真',
         cloudSync: 'クラウド同期',
@@ -84,6 +84,38 @@ export default {
         createFirst: '+ 最初のプロジェクトを作成',
         newProjectDefaultTitle: '新しい高度な開発プロジェクト',
         newProjectDefaultDesc: '最適化、機能、修正',
+        newProjectDefaultTitle: '新しい高度な開発プロジェクト',
+        newProjectDefaultDesc: '最適化、機能、修正',
+        finalProjects: 'プロジェクト',
+        items: 'アイテム',
+        noDesc: '説明なし',
+        launchProject: 'プロジェクトをローンチ',
+        launchConfirm: 'このプロジェクトを商用化しますか？',
+        launch: 'ローンチ',
+        workspace: {
+            design: 'デザイン',
+            development: '開発',
+            polish: '仕上げ',
+            unknownStage: '不明なステージ',
+            complete: '% 完了',
+        },
+        stage: {
+            pipeline: 'パイプライン',
+            add: 'ステージを追加',
+            placeholder: 'ステージ名...',
+            deleteTitle: 'ステージを削除',
+            deleteConfirm: 'このステージを削除してもよろしいですか？',
+            delete: '削除',
+        },
+    },
+
+    // Project Management
+    project: {
+        advancedStage: '高度なステージ',
+        nurseryStage: '萌芽ステージ',
+        pruneSeed: 'この芽を摘む',
+        keepGrowing: 'キャンセルして育て続ける',
+        waitingForSprout: '最初のインスピレーションの芽を待っています...',
     },
 
     // 最終開発 (旧 高度)
@@ -311,11 +343,11 @@ export default {
 
     // Sync Status
     sync: {
-        synced: '同期完了',
-        syncing: '同期中...',
-        offline: 'オフライン',
-        error: '同期エラー',
-        pending: '同期待機中',
+        synced: 'Synced',
+        syncing: 'Syncing...',
+        offline: 'Offline',
+        error: 'Sync Error',
+        pending: 'Pending',
     },
 
     // Auth

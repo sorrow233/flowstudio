@@ -2,12 +2,14 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Sprout, TreeDeciduous, TreePine } from 'lucide-react';
 import Spotlight from '../../../../components/shared/Spotlight';
+import { useTranslation } from '../../../i18n';
 
 /**
  * ProjectManageModal - 项目管理模态框
  * 修复了定位问题，确保在所有设备上垂直水平居中
  */
 const ProjectManageModal = ({ project, isOpen, onClose, onDelete }) => {
+    const { t } = useTranslation();
     if (!isOpen || !project) return null;
 
     const getStageIcon = (stage, subStage = 1) => {
@@ -87,7 +89,7 @@ const ProjectManageModal = ({ project, isOpen, onClose, onDelete }) => {
                                     {project.title}
                                 </h2>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed font-light font-mono min-h-[3em]">
-                                    {project.desc || 'Waiting for the first sprout of inspiration...'}
+                                    {project.desc || t('project.waitingForSprout')}
                                 </p>
 
                                 {/* Metadata Pills */}
@@ -99,7 +101,7 @@ const ProjectManageModal = ({ project, isOpen, onClose, onDelete }) => {
                                         ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900/30'
                                         : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/30'
                                         }`}>
-                                        {project.stage === 'advanced' ? 'Advanced Stage' : 'Nursery Stage'}
+                                        {project.stage === 'advanced' ? t('project.advancedStage') : t('project.nurseryStage')}
                                     </div>
                                 </div>
 
@@ -111,7 +113,7 @@ const ProjectManageModal = ({ project, isOpen, onClose, onDelete }) => {
                                     >
                                         <div className="relative flex items-center justify-center gap-2 text-red-600 dark:text-red-400 font-medium z-10">
                                             <Trash2 size={16} className="group-hover:scale-110 transition-transform duration-300" />
-                                            <span>Prune this Seed</span>
+                                            <span>{t('project.pruneSeed')}</span>
                                         </div>
                                         <div className="absolute inset-0 bg-red-100 dark:bg-red-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform scale-x-0 group-hover:scale-x-100 origin-left" />
                                     </button>
@@ -120,7 +122,7 @@ const ProjectManageModal = ({ project, isOpen, onClose, onDelete }) => {
                                         onClick={onClose}
                                         className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
                                     >
-                                        Cancel and keep growing
+                                        {t('project.keepGrowing')}
                                     </button>
                                 </div>
                             </Spotlight>

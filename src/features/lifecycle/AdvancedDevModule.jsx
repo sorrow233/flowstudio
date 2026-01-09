@@ -53,7 +53,7 @@ const AdvancedDevModule = () => {
                 </div>
                 <div className="text-right">
                     <span className="text-3xl font-thin text-gray-900">{finalProjects.length}</span>
-                    <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">Final Projects</span>
+                    <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">{t('advanced.finalProjects')}</span>
                 </div>
             </div>
 
@@ -98,11 +98,11 @@ const AdvancedDevModule = () => {
                                     <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1 line-clamp-1 group-hover:text-red-900 dark:group-hover:text-red-400 transition-colors">
                                         {project.title}
                                     </h3>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">{project.desc || 'No description provided.'}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">{project.desc || t('advanced.noDesc')}</p>
                                 </div>
 
                                 <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-800/50 flex justify-between items-center text-xs">
-                                    <span className="text-gray-400 font-medium">{taskCount} Items</span>
+                                    <span className="text-gray-400 font-medium">{taskCount} {t('advanced.items')}</span>
                                     <div className="relative w-16 h-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                                         <div
                                             className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-red-400 to-red-500 rounded-full transition-all duration-1000"
@@ -129,9 +129,9 @@ const AdvancedDevModule = () => {
                             onDeleteProject={removeProject}
                             onGraduate={() => {
                                 openConfirm({
-                                    title: 'Launch Project',
-                                    message: 'Ready to launch this project commercially?',
-                                    confirmText: 'Launch',
+                                    title: t('advanced.launchProject'),
+                                    message: t('advanced.launchConfirm'),
+                                    confirmText: t('advanced.launch'),
                                     variant: 'info',
                                     icon: Trophy,
                                     onConfirm: () => {

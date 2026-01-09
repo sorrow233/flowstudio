@@ -3,7 +3,7 @@ export default {
     // Navigation
     navbar: {
         inspiration: 'Inspiration',
-        pending: 'Pending',
+        pending: 'Sprout',
         primary: 'Development',
         advanced: 'Advanced',
         final: 'Modules',
@@ -85,6 +85,38 @@ export default {
         createFirst: '+ Create First Project',
         newProjectDefaultTitle: 'New Advanced Project',
         newProjectDefaultDesc: 'Optimization, features & fixes',
+        newProjectDefaultTitle: 'New Advanced Project',
+        newProjectDefaultDesc: 'Optimization, features & fixes',
+        finalProjects: 'Final Projects',
+        items: 'Items',
+        noDesc: 'No description provided.',
+        launchProject: 'Launch Project',
+        launchConfirm: 'Ready to launch this project commercially?',
+        launch: 'Launch',
+        workspace: {
+            design: 'Design',
+            development: 'Development',
+            polish: 'Polish',
+            unknownStage: 'Unknown Stage',
+            complete: '% Complete',
+        },
+        stage: {
+            pipeline: 'Pipeline',
+            add: 'Add Stage',
+            placeholder: 'Stage...',
+            deleteTitle: 'Delete Stage',
+            deleteConfirm: 'Are you sure you want to delete this stage?',
+            delete: 'Delete',
+        },
+    },
+
+    // Project Management
+    project: {
+        advancedStage: 'Advanced Stage',
+        nurseryStage: 'Sprout Stage',
+        pruneSeed: 'Prune this Seed',
+        keepGrowing: 'Cancel and keep growing',
+        waitingForSprout: 'Waiting for the first sprout of inspiration...',
     },
 
     // Final Dev (Renamed to Modules)

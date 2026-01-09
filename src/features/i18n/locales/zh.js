@@ -85,6 +85,38 @@ export default {
         createFirst: '+ 创建首个项目',
         newProjectDefaultTitle: '新的进阶优化项目',
         newProjectDefaultDesc: '优化、功能与修复',
+        newProjectDefaultTitle: '新的进阶优化项目',
+        newProjectDefaultDesc: '优化、功能与修复',
+        finalProjects: '项目总数',
+        items: '项',
+        noDesc: '暂无描述',
+        launchProject: '发布项目',
+        launchConfirm: '准备好将此项目商业化发布了吗？',
+        launch: '发布',
+        workspace: {
+            design: '设计',
+            development: '开发',
+            polish: '打磨',
+            unknownStage: '未知阶段',
+            complete: '% 完成',
+        },
+        stage: {
+            pipeline: '流程',
+            add: '添加阶段',
+            placeholder: '阶段名称...',
+            deleteTitle: '删除阶段',
+            deleteConfirm: '确定要删除此阶段吗？',
+            delete: '删除',
+        },
+    },
+
+    // 项目管理
+    project: {
+        advancedStage: '进阶阶段',
+        nurseryStage: '萌芽阶段',
+        pruneSeed: '修剪萌芽',
+        keepGrowing: '取消并继续生长',
+        waitingForSprout: '等待灵感的第一缕萌芽...',
     },
 
     // 模块 (原终稿/进阶)
@@ -338,11 +370,11 @@ export default {
 
     // 同步状态
     sync: {
-        synced: '已同步',
-        syncing: '同步中...',
-        offline: '离线',
-        error: '同步错误',
-        pending: '待同步',
+        synced: 'Synced',
+        syncing: 'Syncing...',
+        offline: 'Offline',
+        error: 'Sync Error',
+        pending: 'Pending',
     },
 
     // 认证
