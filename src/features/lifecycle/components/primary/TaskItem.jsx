@@ -239,8 +239,8 @@ const TaskItem = ({
                         onClick={(e) => { e.stopPropagation(); onToggle(projectId, task.id); }}
                         className={getCheckboxStyle()}
                     >
-                        {/* Icon size adjusted for 16px checkbox */}
-                        <Check size={10} strokeWidth={3} />
+                        {/* Only show check icon when task is done */}
+                        {task.done && <Check size={10} strokeWidth={3} />}
                     </button>
                 )}
 
