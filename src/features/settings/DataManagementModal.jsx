@@ -1,11 +1,12 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, Upload, FileJson, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { X, Download, Upload, FileJson, AlertCircle, CheckCircle2, Loader2, Zap, Settings as SettingsIcon, Database } from 'lucide-react';
 import { useSync } from '../sync/SyncContext';
+import { useSettings } from '../../hooks/SettingsContext';
 import { exportAllData, importData, validateImportData, downloadAsJson, readJsonFile } from './dataUtils';
 
 const DataManagementModal = ({ isOpen, onClose }) => {
-    const [mode, setMode] = useState('menu'); // 'menu' | 'importing' | 'preview'
+    const [mode, setMode] = useState('menu'); // 'menu' | 'importing' | 'preview' | 'settings'
     const [importFile, setImportFile] = useState(null);
     const [previewData, setPreviewData] = useState(null);
     const [importMode, setImportMode] = useState('merge'); // 'merge' | 'replace'
@@ -15,6 +16,7 @@ const DataManagementModal = ({ isOpen, onClose }) => {
     const fileInputRef = useRef(null);
 
     const { doc } = useSync();
+    const { showAdvancedFeatures, toggleAdvancedFeatures } = useSettings();
 
     const resetState = () => {
         setMode('menu');
@@ -150,11 +152,11 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                     <div className="flex justify-between items-center mb-6">
                         <div>
                             <h2 className="text-xl font-medium text-gray-900">
-                                {mode === 'menu' && '数据管理'}
+                                {mode === 'menu' && '设置'}
                                 {mode === 'preview' && '导入预览'}
                             </h2>
                             <p className="text-sm text-gray-400 mt-0.5">
-                                {mode === 'menu' && '备份或恢复您的工作区数据'}
+                                {mode === 'menu' && '管理应用偏好与数据'}
                                 {mode === 'preview' && '确认导入以下数据'}
                             </p>
                         </div>
@@ -184,43 +186,70 @@ const DataManagementModal = ({ isOpen, onClose }) => {
 
                     {/* Main Menu */}
                     {mode === 'menu' && (
-                        <div className="space-y-3">
-                            {/* Export Button */}
-                            <button
-                                onClick={handleExport}
-                                disabled={loading}
-                                className="w-full p-4 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all flex items-center gap-4 group"
-                            >
-                                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
-                                    <Download size={22} className="text-emerald-600" />
-                                </div>
-                                <div className="text-left">
-                                    <div className="font-medium text-gray-900">导出数据</div>
-                                    <div className="text-sm text-gray-400">下载所有项目和配置</div>
-                                </div>
-                            </button>
+                        <div className="space-y-6">
+                            {/* General Settings Section */}
+                            <div className="space-y-3">
+                                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-1">通用设置</h3>
 
-                            {/* Import Area */}
-                            <div
-                                onDragOver={handleDragOver}
-                                onDrop={handleDrop}
-                                onClick={() => fileInputRef.current?.click()}
-                                className="w-full p-6 border-2 border-dashed border-gray-200 hover:border-blue-300 rounded-2xl transition-all cursor-pointer flex flex-col items-center gap-3 group"
-                            >
-                                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
-                                    <Upload size={22} className="text-blue-600" />
+                                {/* Advanced Features Toggle */}
+                                <div
+                                    onClick={toggleAdvancedFeatures}
+                                    className="w-full p-4 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all flex items-center gap-4 cursor-pointer group select-none"
+                                >
+                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${showAdvancedFeatures ? 'bg-amber-100' : 'bg-gray-200'}`}>
+                                        <Zap size={22} className={showAdvancedFeatures ? 'text-amber-600' : 'text-gray-500'} />
+                                    </div>
+                                    <div className="flex-1 text-left">
+                                        <div className="font-medium text-gray-900">解锁高级功能</div>
+                                        <div className="text-sm text-gray-400">显示模块和商业化标签页</div>
+                                    </div>
+                                    <div className={`w-12 h-6 rounded-full p-1 transition-colors relative ${showAdvancedFeatures ? 'bg-amber-500' : 'bg-gray-300'}`}>
+                                        <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${showAdvancedFeatures ? 'translate-x-6' : 'translate-x-0'}`} />
+                                    </div>
                                 </div>
-                                <div className="text-center">
-                                    <div className="font-medium text-gray-900">导入数据</div>
-                                    <div className="text-sm text-gray-400">拖拽或点击选择 JSON 文件</div>
+                            </div>
+
+                            {/* Data Management Section */}
+                            <div className="space-y-3">
+                                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-1">数据管理</h3>
+
+                                {/* Export Button */}
+                                <button
+                                    onClick={handleExport}
+                                    disabled={loading}
+                                    className="w-full p-4 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all flex items-center gap-4 group"
+                                >
+                                    <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
+                                        <Download size={22} className="text-emerald-600" />
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="font-medium text-gray-900">导出数据</div>
+                                        <div className="text-sm text-gray-400">下载所有项目和配置</div>
+                                    </div>
+                                </button>
+
+                                {/* Import Area */}
+                                <div
+                                    onDragOver={handleDragOver}
+                                    onDrop={handleDrop}
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="w-full p-6 border-2 border-dashed border-gray-200 hover:border-blue-300 rounded-2xl transition-all cursor-pointer flex flex-col items-center gap-3 group"
+                                >
+                                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
+                                        <Upload size={22} className="text-blue-600" />
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="font-medium text-gray-900">导入数据</div>
+                                        <div className="text-sm text-gray-400">拖拽或点击选择 JSON 文件</div>
+                                    </div>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept=".json,application/json"
+                                        onChange={handleFileSelect}
+                                        className="hidden"
+                                    />
                                 </div>
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept=".json,application/json"
-                                    onChange={handleFileSelect}
-                                    className="hidden"
-                                />
                             </div>
                         </div>
                     )}

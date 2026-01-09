@@ -22,6 +22,7 @@ import { useSync } from '../features/sync/SyncContext';
 import SyncStatus from '../features/sync/SyncStatus';
 import { DataManagementModal } from '../features/settings';
 import { useTheme } from '../hooks/ThemeContext';
+import { useSettings } from '../hooks/SettingsContext';
 import { useTranslation } from '../features/i18n';
 
 const tabIcons = {
@@ -41,6 +42,7 @@ const Navbar = () => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isDataModalOpen, setIsDataModalOpen] = useState(false);
     const { isDark, toggleTheme } = useTheme();
+    const { showAdvancedFeatures } = useSettings();
     const { t } = useTranslation();
 
     // 主流程：灵感 → 命令 → 待定 → 开发 → 进阶
@@ -161,37 +163,41 @@ const Navbar = () => {
                         })}
 
                         {/* 分割线 - 主流程与其他流程分界 */}
-                        <div className="w-px h-5 md:h-6 bg-gray-200 dark:bg-gray-600 mx-1 md:mx-2 relative z-40 shrink-0" />
+                        {showAdvancedFeatures && (
+                            <>
+                                <div className="w-px h-5 md:h-6 bg-gray-200 dark:bg-gray-600 mx-1 md:mx-2 relative z-40 shrink-0" />
 
-                        {/* 其他流程（终稿、商业化） */}
-                        {extraTabs.map((tab) => {
-                            const Icon = tab.icon;
-                            const isActive = location.pathname.startsWith(tab.path);
+                                {/* 其他流程（终稿、商业化） */}
+                                {extraTabs.map((tab) => {
+                                    const Icon = tab.icon;
+                                    const isActive = location.pathname.startsWith(tab.path);
 
-                            // Define active colors for each tab
-                            const activeColors = {
-                                final: 'text-gray-900 dark:text-white',
-                                commercial: 'text-yellow-500 dark:text-yellow-400',
-                            };
+                                    // Define active colors for each tab
+                                    const activeColors = {
+                                        final: 'text-gray-900 dark:text-white',
+                                        commercial: 'text-yellow-500 dark:text-yellow-400',
+                                    };
 
-                            const activeColorClass = activeColors[tab.id] || 'text-gray-900 dark:text-white';
+                                    const activeColorClass = activeColors[tab.id] || 'text-gray-900 dark:text-white';
 
-                            return (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => navigate(tab.path)}
-                                    className={`
-                                        relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40 shrink-0
-                                        ${isActive
-                                            ? `${activeColorClass} bg-gray-50/50 dark:bg-gray-800`
-                                            : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}
-                                    `}
-                                >
-                                    <Icon size={16} strokeWidth={isActive ? 2 : 1.5} className="w-4 h-4 md:w-4 md:h-4" />
-                                    <span className={`text-xs md:text-sm ${isActive ? 'font-medium' : 'font-light'}`}>{tab.label}</span>
-                                </button>
-                            );
-                        })}
+                                    return (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => navigate(tab.path)}
+                                            className={`
+                                                relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40 shrink-0
+                                                ${isActive
+                                                    ? `${activeColorClass} bg-gray-50/50 dark:bg-gray-800`
+                                                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}
+                                            `}
+                                        >
+                                            <Icon size={16} strokeWidth={isActive ? 2 : 1.5} className="w-4 h-4 md:w-4 md:h-4" />
+                                            <span className={`text-xs md:text-sm ${isActive ? 'font-medium' : 'font-light'}`}>{tab.label}</span>
+                                        </button>
+                                    );
+                                })}
+                            </>
+                        )}
 
                         <div className="w-px h-5 md:h-6 bg-gray-100 dark:bg-gray-700 mx-0.5 md:mx-1 relative z-40 shrink-0" />
 
