@@ -137,8 +137,11 @@ const PendingModule = () => {
             <div className={`transition-all duration-500 flex-col ${selectedProject ? 'hidden md:flex md:w-[350px] opacity-100' : 'flex w-full'}`}>
                 <div className="mb-8 flex justify-between items-end">
                     <div>
-                        <h2 className="text-2xl font-light tracking-wide text-green-500 dark:text-green-400">Idea Staging</h2>
-                        <p className="text-xs font-mono text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-widest">Validate before you build</p>
+                        <h2 className="text-2xl font-light tracking-wide text-green-500 dark:text-green-400 flex items-center gap-2">
+                            <Sprout size={24} strokeWidth={1.5} />
+                            Idea Staging
+                        </h2>
+                        <p className="text-xs font-mono text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-widest pl-8">Validate before you build</p>
                     </div>
 
                 </div>

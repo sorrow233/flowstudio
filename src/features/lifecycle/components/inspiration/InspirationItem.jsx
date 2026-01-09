@@ -140,7 +140,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComple
                     group relative bg-white dark:bg-gray-900 rounded-xl p-5 
                     border border-gray-100 dark:border-gray-800 shadow-sm 
                     transition-all duration-500 cursor-pointer active:scale-[0.99]
-                    ${isDragging ? '' : `hover:shadow-md ${config.border} hover:ring-1 ring-inset ${config.glow}`}
+                    ${isDragging ? '' : `hover:shadow-[0_0_20px_rgba(244,114,182,0.2)] hover:border-pink-200 dark:hover:border-pink-800/50`}
                     ${isCompleted ? 'opacity-50' : ''}
                 `}
             >

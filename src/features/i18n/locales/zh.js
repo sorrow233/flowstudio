@@ -3,7 +3,7 @@ export default {
     // 导航栏
     navbar: {
         inspiration: '灵感',
-        pending: '待定',
+        pending: '萌芽',
         primary: '开发',
         advanced: '进阶',
         final: '模块',
@@ -46,11 +46,11 @@ export default {
         cmdEnter: 'CMD + ENTER',
     },
 
-    // 待定模块
+    // 待定模块 (Renamed to Sprouting/萌芽)
     pending: {
-        title: '待定项目',
-        subtitle: '等待启动的项目构思',
-        emptyState: '暂无待定项目',
+        title: '萌芽',
+        subtitle: '静待生长的项目构思',
+        emptyState: '暂无萌芽项目',
         addProject: '添加项目',
         projectName: '项目名称',
         projectDescription: '项目描述',
