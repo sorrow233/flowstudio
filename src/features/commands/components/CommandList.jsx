@@ -22,7 +22,6 @@ const CommandList = ({
     copiedId,
     commands,
     setCommands,
-    viewMode = 'list' // 'list' or 'grouped'
 }) => {
     // Multi-select state
     const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -144,85 +143,48 @@ const CommandList = ({
         setLastSelectedId(null);
     };
 
-    const renderCommand = (cmd, isDraggable = false) => {
-        const content = (
-            <CommandItem
-                cmd={cmd}
-                isSelectionMode={isSelectionMode}
-                selectedIds={selectedIds}
-                categories={categories}
-                handleEdit={handleEdit}
-                handleCopy={handleCopy}
-                handleRemove={handleRemove}
-                handleShare={handleShare}
-                handleShiftSelect={handleShiftSelect}
-                copiedId={copiedId}
-                isSearching={isSearching}
-                dragListener={isDraggable}
-                onClick={(e) => {
-                    if (isSelectionMode) {
-                        handleShiftSelect(cmd.id, e);
-                        return;
-                    }
-                }}
-                onDoubleClick={() => !isSelectionMode && handleEdit(cmd)}
-            />
-        );
-
-        if (isDraggable) {
-            return (
-                <Reorder.Item
-                    key={cmd.id}
-                    value={cmd}
-                    dragListener={!isSearching && !isSelectionMode}
-                    className="relative"
-                >
-                    {content}
-                </Reorder.Item>
-            );
-        }
-
-        return <div key={cmd.id}>{content}</div>;
-    };
-
     return (
         <div className="flex-1 flex flex-col overflow-hidden">
             {/* Command List */}
             <div className="flex-1 overflow-y-auto pr-2 md:-mr-4 md:pr-6 pb-20 custom-scrollbar">
                 {visibleCommands.length > 0 ? (
-                    viewMode === 'list' ? (
-                        <Reorder.Group
-                            axis="y"
-                            values={stageCommands}
-                            onReorder={handleReorder}
-                            className="space-y-3"
-                        >
-                            {visibleCommands.map(cmd => renderCommand(cmd, true))}
-                        </Reorder.Group>
-                    ) : (
-                        <div className="space-y-8">
-                            {categories.map(cat => {
-                                const catCommands = visibleCommands.filter(c => (c.category || 'general') === cat.id);
-                                if (catCommands.length === 0) return null;
-                                return (
-                                    <div key={cat.id} className="space-y-3">
-                                        <div className="flex items-center gap-2 px-2">
-                                            <div className={`w-2.5 h-2.5 rounded-full ${cat.color.split(' ')[0].replace('bg-', 'bg-')}`} />
-                                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                                                {cat.label}
-                                                <span className="ml-2 px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-400 text-[10px]">
-                                                    {catCommands.length}
-                                                </span>
-                                            </h3>
-                                        </div>
-                                        <div className="space-y-3">
-                                            {catCommands.map(cmd => renderCommand(cmd, false))}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )
+                    <Reorder.Group
+                        axis="y"
+                        values={stageCommands}
+                        onReorder={handleReorder}
+                        className="space-y-3"
+                    >
+                        {visibleCommands.map(cmd => (
+                            <Reorder.Item
+                                key={cmd.id}
+                                value={cmd}
+                                dragListener={!isSearching && !isSelectionMode}
+                                className="relative"
+                            >
+                                <CommandItem
+                                    cmd={cmd}
+                                    isSelectionMode={isSelectionMode}
+                                    selectedIds={selectedIds}
+                                    categories={categories}
+                                    handleEdit={handleEdit}
+                                    handleCopy={handleCopy}
+                                    handleRemove={handleRemove}
+                                    handleShare={handleShare}
+                                    handleShiftSelect={handleShiftSelect}
+                                    copiedId={copiedId}
+                                    isSearching={isSearching}
+                                    dragListener={!isSearching && !isSelectionMode}
+                                    onClick={(e) => {
+                                        if (isSelectionMode) {
+                                            handleShiftSelect(cmd.id, e);
+                                            return;
+                                        }
+                                    }}
+                                    onDoubleClick={() => !isSelectionMode && handleEdit(cmd)}
+                                />
+                            </Reorder.Item>
+                        ))}
+                    </Reorder.Group>
                 ) : (
                     !isAdding && !isImporting && (
                         <div className="flex flex-col items-center justify-center py-32 text-center select-none">
