@@ -39,6 +39,11 @@ const ModuleCard = ({ module, onClick }) => {
         <motion.div
             layoutId={`module-${module.id}`}
             onClick={onClick}
+            draggable={true}
+            onDragStart={(e) => {
+                e.dataTransfer.setData('moduleId', module.id);
+                e.dataTransfer.effectAllowed = 'move';
+            }}
             className="group bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between min-h-[160px]"
         >
             {/* Background Gradient based on category */}
