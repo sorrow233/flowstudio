@@ -197,8 +197,8 @@ const PendingModule = () => {
                                             <X size={14} />
                                         </button>
                                     </div>
-                                    <h3 className={`font-medium mb-1 line-clamp-1 transition-colors ${project.hasHolyGlow ? 'text-emerald-900' : 'text-gray-900'}`}>{project.title}</h3>
-                                    <p className="text-gray-400 text-xs font-light line-clamp-2">{project.desc}</p>
+                                    <h3 className={`font-medium mb-1 line-clamp-1 transition-colors ${project.hasHolyGlow ? 'text-emerald-900 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}`}>{project.title}</h3>
+                                    <p className="text-gray-400 dark:text-gray-500 text-xs font-light line-clamp-2">{project.desc}</p>
                                 </Spotlight>
                             </motion.div>
                         ))}
@@ -258,10 +258,10 @@ const PendingModule = () => {
                                                 snap-start relative overflow-hidden group transition-all duration-500 cursor-default
                                                 flex flex-col text-center
                                                 ${isAdvanced
-                                                    ? 'bg-gradient-to-b from-gray-50 to-white min-w-[240px] w-[240px] h-[320px] rounded-[32px] border-amber-100/50 shadow-[0_20px_40px_-12px_rgba(251,191,36,0.15)] justify-between pt-6'
-                                                    : 'bg-gradient-to-b from-white to-gray-50/50 min-w-[140px] h-[160px] p-4 border rounded-xl border-gray-100 items-center justify-end'}
-                                                ${isHoly && !isAdvanced ? 'border-violet-200 shadow-[0_0_15px_rgba(139,92,246,0.15)] ring-1 ring-violet-100' : ''}
-                                                ${!isHoly && !isAdvanced ? 'border-emerald-100' : ''}
+                                                    ? 'bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 min-w-[240px] w-[240px] h-[320px] rounded-[32px] border-amber-100/50 dark:border-amber-900/30 shadow-[0_20px_40px_-12px_rgba(251,191,36,0.15)] justify-between pt-6'
+                                                    : 'bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-800 dark:to-gray-900 min-w-[140px] h-[160px] p-4 border rounded-xl border-gray-100 dark:border-gray-700 items-center justify-end'}
+                                                ${isHoly && !isAdvanced ? 'border-violet-200 dark:border-violet-800 shadow-[0_0_15px_rgba(139,92,246,0.15)] ring-1 ring-violet-100 dark:ring-violet-900' : ''}
+                                                ${!isHoly && !isAdvanced ? 'border-emerald-100 dark:border-emerald-900/30' : ''}
                                             `}
                                         >
                                             {/* Holy Glow Animation for regular items */}
@@ -299,13 +299,13 @@ const PendingModule = () => {
                                                         flex items-center gap-1.5 justify-center 
                                                         text-[11px] font-bold uppercase tracking-widest 
                                                         py-1.5 px-4 rounded-full w-fit 
-                                                        bg-white/80 backdrop-blur-md
+                                                        bg-white/80 dark:bg-gray-800/80 backdrop-blur-md
                                                         ${visual.border} ${visual.text} border
                                                         shadow-sm
                                                     `}>
                                                         <span>{visual.label}</span>
                                                     </div>
-                                                    <h4 className="font-semibold text-gray-800 w-full line-clamp-2 text-base leading-tight">
+                                                    <h4 className="font-semibold text-gray-800 dark:text-gray-200 w-full line-clamp-2 text-base leading-tight">
                                                         {p.title}
                                                     </h4>
                                                 </div>
@@ -338,9 +338,9 @@ const PendingModule = () => {
                                             {/* Bottom Section: Title/Progress (Only for Regular) */}
                                             {!isAdvanced && (
                                                 <div className="w-full relative z-20">
-                                                    <h4 className="font-medium text-gray-700 line-clamp-1 w-full mb-2 text-xs">{p.title}</h4>
+                                                    <h4 className="font-medium text-gray-700 dark:text-gray-300 line-clamp-1 w-full mb-2 text-xs">{p.title}</h4>
                                                     <div className="flex items-center gap-1.5 justify-center">
-                                                        <div className="w-full bg-gray-100 h-1 rounded-full overflow-hidden">
+                                                        <div className="w-full bg-gray-100 dark:bg-gray-700 h-1 rounded-full overflow-hidden">
                                                             <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${((p.subStage || 1) / 5) * 100}%` }} />
                                                         </div>
                                                     </div>

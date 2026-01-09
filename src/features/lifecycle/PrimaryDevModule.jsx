@@ -347,10 +347,10 @@ const PrimaryDevModule = () => {
                             layoutId={`primary-card-${project.id}`}
                             key={project.id}
                             onClick={() => handleSelectProject(project)}
-                            className={`group bg-white border rounded-[2rem] overflow-hidden hover:shadow-2xl transition-all cursor-pointer relative h-[360px] flex flex-col
+                            className={`group bg-white dark:bg-gray-900 border rounded-[2rem] overflow-hidden hover:shadow-2xl transition-all cursor-pointer relative h-[360px] flex flex-col
                                 ${isHoly
                                     ? 'border-transparent shadow-[0_0_0_2px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]'
-                                    : 'border-gray-100 hover:shadow-gray-200/50 ring-1 ring-transparent hover:ring-gray-100'}
+                                    : 'border-gray-100 dark:border-gray-800 hover:shadow-gray-200/50 dark:hover:shadow-gray-900/50 ring-1 ring-transparent hover:ring-gray-100 dark:hover:ring-gray-800'}
                             `}
                         >
                             {/* Holy Flowing Border Animation */}
@@ -386,19 +386,19 @@ const PrimaryDevModule = () => {
                                             alt=""
                                             className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent dark:from-gray-900 dark:via-gray-900/60" />
                                     </div>
                                 </div>
 
                                 <div className="p-8 relative z-10 flex flex-col h-full">
                                     <div className="flex justify-between items-start mb-6">
                                         <div className={`w-12 h-12 backdrop-blur rounded-2xl flex items-center justify-center shadow-sm border transition-transform group-hover:scale-105
-                                            ${isHoly ? 'bg-emerald-50/80 border-emerald-200/50 text-emerald-700' : 'bg-white/80 border-white/50 text-gray-900'}
+                                            ${isHoly ? 'bg-emerald-50/80 border-emerald-200/50 text-emerald-700' : 'bg-white/80 dark:bg-gray-800/80 border-white/50 dark:border-gray-700/50 text-gray-900 dark:text-white'}
                                         `}>
                                             <Code2 size={24} strokeWidth={1.5} />
                                         </div>
                                         {project.link && (
-                                            <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 text-gray-500 hover:text-gray-900 transition-colors bg-white/50 backdrop-blur rounded-full hover:bg-white">
+                                            <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors bg-white/50 dark:bg-gray-800/50 backdrop-blur rounded-full hover:bg-white dark:hover:bg-gray-800">
                                                 <ExternalLink size={16} />
                                             </a>
                                         )}
@@ -406,18 +406,18 @@ const PrimaryDevModule = () => {
 
                                     <div className="mt-8">
                                         <h3 className={`text-2xl font-light mb-2 line-clamp-1 transition-colors
-                                            ${isHoly ? 'text-emerald-900 group-hover:text-emerald-700' : 'text-gray-900 group-hover:text-emerald-900'}
+                                            ${isHoly ? 'text-emerald-900 group-hover:text-emerald-700' : 'text-gray-900 dark:text-white group-hover:text-emerald-900 dark:group-hover:text-emerald-400'}
                                         `}>{project.title}</h3>
-                                        <p className="text-sm text-gray-500 line-clamp-2 min-h-[2.5em] leading-relaxed">{project.desc || 'No description provided.'}</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 min-h-[2.5em] leading-relaxed">{project.desc || 'No description provided.'}</p>
                                     </div>
 
-                                    <div className="mt-auto pt-6 border-t border-gray-100/50">
+                                    <div className="mt-auto pt-6 border-t border-gray-100/50 dark:border-gray-800/50">
                                         {/* Mini Stage Visualization */}
                                         <div className="flex items-center gap-1.5 mb-3">
                                             {[1, 2, 3, 4, 5].map(step => (
                                                 <div
                                                     key={step}
-                                                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-emerald-500 shadow-sm shadow-emerald-200' : 'bg-gray-100'}`}
+                                                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-emerald-500 shadow-sm shadow-emerald-200' : 'bg-gray-100 dark:bg-gray-800'}`}
                                                 />
                                             ))}
                                         </div>
@@ -426,7 +426,7 @@ const PrimaryDevModule = () => {
                                                 <span className={`w-2 h-2 rounded-full animate-pulse ${isHoly ? 'bg-blue-500' : 'bg-emerald-500'}`} />
                                                 <span>Stage {project.subStage || 1}</span>
                                             </div>
-                                            <span className="text-gray-900 font-medium">
+                                            <span className="text-gray-900 dark:text-white font-medium">
                                                 {project.stageNames?.[project.subStage || 1] || DEV_STAGES[(project.subStage || 1) - 1]?.label}
                                             </span>
                                         </div>
@@ -467,14 +467,14 @@ const PrimaryDevModule = () => {
                                 key={project.id}
                                 layoutId={`primary-card-${project.id}`} // Keep animation
                                 onClick={() => handleSelectProject(project)}
-                                className="group bg-white border border-amber-100/50 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-amber-100/50 transition-all cursor-pointer relative h-[300px] flex flex-col opacity-80 hover:opacity-100"
+                                className="group bg-white dark:bg-gray-900 border border-amber-100/50 dark:border-amber-900/30 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-amber-100/50 dark:hover:shadow-amber-900/20 transition-all cursor-pointer relative h-[300px] flex flex-col opacity-80 hover:opacity-100"
                             >
                                 <Spotlight className="w-full h-full" spotColor="rgba(251, 191, 36, 0.15)">
                                     <div className="absolute inset-0 z-0 h-32 bg-amber-50/30">
                                         {project.bgImage && <img src={project.bgImage} className="w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 transition-all" />}
                                     </div>
                                     <div className="p-8 relative z-10 flex flex-col h-full mt-16">
-                                        <h3 className="text-xl font-medium text-gray-900 mb-1">{project.title}</h3>
+                                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-1">{project.title}</h3>
                                         <div className="flex items-center gap-2 text-amber-600 text-xs font-bold uppercase tracking-widest mb-4">
                                             <Star size={12} fill="currentColor" />
                                             <span>Advanced Phase</span>

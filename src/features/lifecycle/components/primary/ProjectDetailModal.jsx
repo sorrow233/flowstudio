@@ -42,7 +42,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 50 }}
-            className="flex-1 bg-white border border-gray-100 rounded-[2.5rem] p-4 md:p-10 shadow-2xl shadow-gray-200/50 overflow-y-auto no-scrollbar relative flex flex-col z-10"
+            className="flex-1 bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] p-4 md:p-10 shadow-2xl shadow-gray-200/50 dark:shadow-none overflow-y-auto no-scrollbar relative flex flex-col z-10"
         >
             <div className="absolute top-8 right-8 flex gap-2 z-30">
                 {/* Mobile Back Button - Optimized for Drill-Down */}
@@ -61,14 +61,14 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                 </button>
             </div>
 
-            <div className="absolute top-0 left-0 right-0 h-48 bg-gray-50 overflow-hidden rounded-t-[2.5rem] z-0">
+            <div className="absolute top-0 left-0 right-0 h-48 bg-gray-50 dark:bg-gray-900 overflow-hidden rounded-t-[2.5rem] z-0">
                 {project.bgImage ? (
                     <>
                         <img src={project.bgImage} className="w-full h-full object-cover opacity-50" />
-                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white dark:to-gray-950" />
                     </>
                 ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-gray-50 to-white" />
+                    <div className="w-full h-full bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-950" />
                 )}
             </div>
 
@@ -87,7 +87,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                         value={localTitle}
                         onChange={(e) => setLocalTitle(e.target.value)}
                         onBlur={handleTitleBlur}
-                        className="w-full text-4xl md:text-5xl font-thin text-gray-900 text-center bg-transparent border-none focus:ring-0 placeholder:text-gray-300 mb-2"
+                        className="w-full text-4xl md:text-5xl font-thin text-gray-900 dark:text-white text-center bg-transparent border-none focus:ring-0 placeholder:text-gray-300 mb-2"
                         placeholder="无名项目"
                     />
                     <textarea
@@ -98,7 +98,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                             e.target.style.height = e.target.scrollHeight + 'px';
                         }}
                         onBlur={handleDescBlur}
-                        className="w-full text-base font-light text-center text-gray-500 bg-transparent resize-none border-none focus:ring-0 min-h-[3em]"
+                        className="w-full text-base font-light text-center text-gray-500 dark:text-gray-400 bg-transparent resize-none border-none focus:ring-0 min-h-[3em]"
                         placeholder="这个想法的原动力是什么？"
                     />
 
@@ -127,8 +127,8 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                             className={`
                                 relative rounded-2xl border transition-all duration-300 overflow-hidden
                                 ${isAnswered
-                                    ? 'p-4 bg-gray-50/50 border-gray-100' // Collapsed state
-                                    : 'p-6 bg-white border-gray-100 shadow-sm' // Active state
+                                    ? 'p-4 bg-gray-50/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800' // Collapsed state
+                                    : 'p-6 bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 shadow-sm' // Active state
                                 }
                             `}
                         >
@@ -139,7 +139,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                                         <div className={`p-1 rounded-full ${ans ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'}`}>
                                             {ans ? <CheckCircle2 size={14} /> : <X size={14} />}
                                         </div>
-                                        <span className={`text-sm font-medium ${ans ? 'text-emerald-900' : 'text-gray-500'}`}>
+                                        <span className={`text-sm font-medium ${ans ? 'text-emerald-900 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'}`}>
                                             {q.text}
                                         </span>
                                     </div>
@@ -163,7 +163,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                                                 Question {i + 1} / 4
                                             </h4>
-                                            <p className="text-xl text-gray-800 font-light leading-relaxed">{q.text}</p>
+                                            <p className="text-xl text-gray-800 dark:text-gray-200 font-light leading-relaxed">{q.text}</p>
                                         </div>
                                     </div>
 
@@ -173,7 +173,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                                                 e.stopPropagation();
                                                 onAnswer(project.id, q.id, true);
                                             }}
-                                            className="relative z-50 cursor-pointer flex-1 py-4 border border-emerald-100 rounded-xl text-sm font-medium tracking-wide transition-all bg-white text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100 active:scale-[0.98] group"
+                                            className="relative z-50 cursor-pointer flex-1 py-4 border border-emerald-100 dark:border-emerald-900/30 rounded-xl text-sm font-medium tracking-wide transition-all bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/50 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100 active:scale-[0.98] group"
                                         >
                                             <span className="group-hover:scale-110 inline-block transition-transform">YES</span>
                                         </button>
@@ -182,7 +182,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                                                 e.stopPropagation();
                                                 onAnswer(project.id, q.id, false);
                                             }}
-                                            className="relative z-50 cursor-pointer flex-1 py-4 border border-gray-100 rounded-xl text-sm font-medium tracking-wide transition-all bg-white text-gray-400 hover:bg-gray-50 hover:text-gray-600 hover:border-gray-200 active:scale-[0.98]"
+                                            className="relative z-50 cursor-pointer flex-1 py-4 border border-gray-100 dark:border-gray-800 rounded-xl text-sm font-medium tracking-wide transition-all bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 hover:border-gray-200 active:scale-[0.98]"
                                         >
                                             NO
                                         </button>
@@ -195,7 +195,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
             </div>
 
             {/* Sacred Reason Input (Fresh & Sacred Design - Faint Green) */}
-            <div className="max-w-2xl mx-auto w-full relative z-20 mt-12 bg-white rounded-3xl p-1">
+            <div className="max-w-2xl mx-auto w-full relative z-20 mt-12 bg-white dark:bg-gray-900 rounded-3xl p-1">
                 <div className="mb-4 flex items-center justify-between px-2">
                     <div className="flex items-center gap-2">
                         <Scroll size={16} className="text-emerald-300" />
@@ -214,11 +214,11 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                         onChange={(e) => setLocalVow(e.target.value)}
                         onBlur={handleVowBlur}
                         className={`
-                            relative w-full p-6 bg-white border rounded-2xl text-gray-700 placeholder:text-gray-300
+                            relative w-full p-6 bg-white dark:bg-gray-950 border rounded-2xl text-gray-700 dark:text-gray-300 placeholder:text-gray-300 dark:placeholder:text-gray-600
                             text-sm leading-relaxed min-h-[120px] resize-none transition-all duration-500 ease-out
                             ${project.foundingReason
-                                ? 'border-emerald-100 shadow-[0_0_40px_-10px_rgba(52,211,153,0.3)] focus:border-emerald-300 focus:shadow-[0_0_50px_-10px_rgba(16,185,129,0.4)]'
-                                : 'border-gray-100 focus:border-emerald-200 focus:shadow-[0_0_30px_-10px_rgba(52,211,153,0.2)]'
+                                ? 'border-emerald-100 dark:border-emerald-900/50 shadow-[0_0_40px_-10px_rgba(52,211,153,0.3)] focus:border-emerald-300 focus:shadow-[0_0_50px_-10px_rgba(16,185,129,0.4)]'
+                                : 'border-gray-100 dark:border-gray-800 focus:border-emerald-200 focus:shadow-[0_0_30px_-10px_rgba(52,211,153,0.2)]'
                             }
                             outline-none
                         `}
@@ -278,23 +278,23 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                                 className={`
                                     relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-300 group
                                     ${isSelected
-                                        ? 'bg-white border-emerald-500 shadow-xl shadow-emerald-500/10 scale-105 z-10 ring-1 ring-emerald-500'
-                                        : 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-1'
+                                        ? 'bg-white dark:bg-gray-900 border-emerald-500 shadow-xl shadow-emerald-500/10 scale-105 z-10 ring-1 ring-emerald-500'
+                                        : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-1'
                                     }
                                 `}
                             >
                                 <div className={`
                                     w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-colors
                                     ${isSelected
-                                        ? 'bg-emerald-50 text-emerald-600'
-                                        : 'bg-gray-50 text-gray-400 group-hover:bg-emerald-50 group-hover:text-emerald-500'
+                                        ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                                        : 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-600 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-900/30 group-hover:text-emerald-500 dark:group-hover:text-emerald-400'
                                     }
                                 `}>
                                     <IconComponent size={20} strokeWidth={1.5} />
                                 </div>
                                 <span className={`
                                     text-xs font-medium tracking-wide transition-colors
-                                    ${isSelected ? 'text-emerald-900 font-bold' : 'text-gray-600 group-hover:text-gray-900'}
+                                    ${isSelected ? 'text-emerald-900 dark:text-emerald-400 font-bold' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200'}
                                 `}>
                                     {cat.label}
                                 </span>
