@@ -1,19 +1,30 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Check, X, MoreVertical, Trash2 } from 'lucide-react';
+import { Plus, Check, X, Trash2 } from 'lucide-react';
 import { useConfirmDialog } from '../../../../components/shared/ConfirmDialog';
 
-const AdvancedStageNavigation = ({ stages = [], activeStageId, onChangeStage, onUpdateStages }) => {
+const AdvancedStageNavigation = ({
+    stages = [],
+    activeStageId,
+    onChangeStage,
+    onUpdateStages,
+    moduleCounts = {},
+    onMoveModule, // (moduleId, targetStageId) -> void
+    isMobile = false,
+    isOpen = false,
+    onClose
+}) => {
     const [isAdding, setIsAdding] = useState(false);
     const [newStageName, setNewStageName] = useState('');
+    const [dragOverStageId, setDragOverStageId] = useState(null);
 
     const handleAdd = () => {
         if (!newStageName.trim()) return;
         const newStage = {
             id: Date.now().toString(),
             name: newStageName,
-            status: 'pending', // pending | in-progress | completed
-            color: '#A855F7' // Default purple
+            status: 'pending',
+            color: '#A855F7'
         };
         onUpdateStages([...stages, newStage]);
         setNewStageName('');
@@ -47,23 +58,70 @@ const AdvancedStageNavigation = ({ stages = [], activeStageId, onChangeStage, on
         handleUpdateStage(stage.id, { status: nextStatus[stage.status] });
     };
 
-    return (
-        <div className="w-80 border-r border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-950/50 flex flex-col h-full overflow-hidden">
+    // --- Drag & Drop Logic ---
+    const handleDragOver = (e, stageId) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (stageId !== activeStageId) {
+            setDragOverStageId(stageId);
+        }
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverStageId(null);
+    };
+
+    const handleDrop = (e, stageId) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverStageId(null);
+        const moduleId = e.dataTransfer.getData('moduleId');
+        if (moduleId && onMoveModule && stageId !== activeStageId) {
+            onMoveModule(moduleId, stageId);
+        }
+    };
+
+    const SidebarContent = (
+        <div className="flex flex-col h-full overflow-hidden">
             <div className="p-6">
-                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-8">Pipeline Stages</h3>
+                <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Pipeline</h3>
+                    {isMobile && (
+                        <button onClick={onClose} className="p-2 -mr-2 text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                            <X size={20} />
+                        </button>
+                    )}
+                </div>
 
                 <div className="space-y-3">
                     {stages.map((stage) => {
                         const isActive = activeStageId === stage.id;
+                        const isDragOver = dragOverStageId === stage.id;
+                        const count = moduleCounts[stage.id] || 0;
+
                         return (
-                            <div key={stage.id} className="relative group">
+                            <div
+                                key={stage.id}
+                                className="relative group"
+                                onDragOver={(e) => handleDragOver(e, stage.id)}
+                                onDragLeave={handleDragLeave}
+                                onDrop={(e) => handleDrop(e, stage.id)}
+                            >
                                 <motion.div
-                                    onClick={() => onChangeStage(stage.id)}
+                                    layoutId={isActive ? "active-stage-bg" : undefined}
+                                    onClick={() => {
+                                        onChangeStage(stage.id);
+                                        if (isMobile && onClose) onClose();
+                                    }}
                                     className={`
-                                        relative z-10 p-4 rounded-2xl cursor-pointer transition-all flex items-center gap-4
+                                        relative z-10 p-4 rounded-2xl cursor-pointer transition-all flex items-center gap-4 border
                                         ${isActive
-                                            ? 'bg-white dark:bg-gray-900 shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-800 scale-[1.02]'
-                                            : 'hover:bg-white/50 dark:hover:bg-gray-900/50'}
+                                            ? 'bg-white dark:bg-gray-900 shadow-xl shadow-gray-200/50 dark:shadow-none border-gray-100 dark:border-gray-800 scale-[1.02]'
+                                            : isDragOver
+                                                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 scale-[1.02]'
+                                                : 'bg-transparent border-transparent hover:bg-white/50 dark:hover:bg-gray-900/50'}
                                     `}
                                 >
                                     {/* Connection Line (Visual only) */}
@@ -73,10 +131,10 @@ const AdvancedStageNavigation = ({ stages = [], activeStageId, onChangeStage, on
                                     <div
                                         onClick={(e) => toggleStatus(e, stage)}
                                         className={`
-                                            w-10 h-10 rounded-2xl border-2 flex items-center justify-center transition-all bg-gray-50 dark:bg-gray-800
+                                            w-10 h-10 rounded-2xl border-2 flex items-center justify-center transition-all shrink-0
                                             ${stage.status === 'completed' ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-500' :
                                                 stage.status === 'in-progress' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-500' :
-                                                    'border-gray-200 dark:border-gray-700 text-gray-300'}
+                                                    'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-300'}
                                         `}
                                     >
                                         {stage.status === 'completed' ? <Check size={18} strokeWidth={3} /> :
@@ -84,18 +142,25 @@ const AdvancedStageNavigation = ({ stages = [], activeStageId, onChangeStage, on
                                                 null}
                                     </div>
 
-                                    <div className="flex-1">
-                                        <h4 className={`text-sm font-bold ${isActive ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500'}`}>
-                                            {stage.name}
-                                        </h4>
-                                        <p className="text-[10px] text-gray-400 capitalize mt-0.5">
-                                            {stage.status === 'in-progress' ? 'In Progress' : stage.status}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-center">
+                                            <h4 className={`text-sm font-bold truncate ${isActive ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500'}`}>
+                                                {stage.name}
+                                            </h4>
+                                            {count > 0 && (
+                                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isActive ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300' : 'bg-gray-200/50 dark:bg-gray-800/50 text-gray-400'}`}>
+                                                    {count}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-[10px] text-gray-400 capitalize mt-0.5 truncate">
+                                            {isDragOver ? <span className="text-blue-500 font-bold">Drop to move</span> : (stage.status === 'in-progress' ? 'In Progress' : stage.status)}
                                         </p>
                                     </div>
 
                                     <button
                                         onClick={(e) => handleDeleteStage(e, stage.id)}
-                                        className="opacity-0 group-hover:opacity-100 p-2 text-gray-300 hover:text-red-500 transition-all"
+                                        className="opacity-0 group-hover:opacity-100 p-2 text-gray-300 hover:text-red-500 transition-all shrink-0"
                                     >
                                         <Trash2 size={14} />
                                     </button>
@@ -134,6 +199,39 @@ const AdvancedStageNavigation = ({ stages = [], activeStageId, onChangeStage, on
                 </div>
             </div>
             <ConfirmDialogComponent />
+        </div>
+    );
+
+    if (isMobile) {
+        return (
+            <AnimatePresence>
+                {isOpen && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={onClose}
+                            className="absolute inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+                        />
+                        <motion.div
+                            initial={{ x: '-100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '-100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                            className="absolute left-0 top-0 bottom-0 w-80 z-50 bg-white dark:bg-gray-950 border-r border-gray-100 dark:border-gray-800 md:hidden"
+                        >
+                            {SidebarContent}
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+        );
+    }
+
+    return (
+        <div className="hidden md:block w-80 border-r border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-950/50 h-full overflow-hidden">
+            {SidebarContent}
         </div>
     );
 };

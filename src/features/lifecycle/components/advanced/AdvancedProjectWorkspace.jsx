@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
-import { Network, Sparkles, Activity, Zap, CheckCircle2, X, Plus, Box, AlignJustify, Grid, LayoutGrid, List, Trophy, Settings, ChevronRight } from 'lucide-react';
+import { Network, Sparkles, Activity, Zap, CheckCircle2, X, Plus, Box, AlignJustify, Grid, LayoutGrid, List, Trophy, Settings, ChevronRight, Menu } from 'lucide-react';
 
 import AdvancedStageNavigation from './AdvancedStageNavigation';
 import ModuleGrid from './ModuleGrid';
@@ -29,6 +29,14 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate,
     const [editingModule, setEditingModule] = useState(null);
     const [viewMode, setViewMode] = useState('grid');
     const [newGoalInput, setNewGoalInput] = useState('');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    // Calculate module counts
+    const moduleCounts = (project.modules || []).reduce((acc, m) => {
+        const sId = m.stageId || stages[0]?.id;
+        acc[sId] = (acc[sId] || 0) + 1;
+        return acc;
+    }, {});
 
     // Last Edited Logic
     const [lastEdited, setLastEdited] = useState(null);
@@ -135,6 +143,15 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate,
         }
     };
 
+    const handleMoveModuleToStage = (moduleId, targetStageId) => {
+        if (!moduleId || !targetStageId) return;
+        pushSnapshot();
+        const updatedModules = modules.map(m =>
+            m.id === moduleId ? { ...m, stageId: targetStageId } : m
+        );
+        updateProject(project.id, { modules: updatedModules });
+    };
+
     // --- System Health Calculation for Header ---
     const totalCurrentStageModules = filteredModules.length;
     const avgProgress = totalCurrentStageModules > 0
@@ -156,11 +173,28 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate,
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Left Sidebar: Custom Stages */}
+                {/* Mobile Sidebar (Drawer) */}
                 <AdvancedStageNavigation
                     stages={stages}
                     activeStageId={activeStageId}
                     onChangeStage={setActiveStageId}
                     onUpdateStages={handleUpdateStages}
+                    moduleCounts={moduleCounts}
+                    onMoveModule={handleMoveModuleToStage}
+                    isMobile={true}
+                    isOpen={isSidebarOpen}
+                    onClose={() => setIsSidebarOpen(false)}
+                />
+
+                {/* Desktop Sidebar */}
+                <AdvancedStageNavigation
+                    stages={stages}
+                    activeStageId={activeStageId}
+                    onChangeStage={setActiveStageId}
+                    onUpdateStages={handleUpdateStages}
+                    moduleCounts={moduleCounts}
+                    onMoveModule={handleMoveModuleToStage}
+                    isMobile={false}
                 />
 
                 {/* Main Content Area */}
@@ -187,7 +221,14 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate,
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 md:gap-4">
+                            {/* Mobile Menu Trigger */}
+                            <button
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                            >
+                                <Menu size={20} />
+                            </button>
                             <div className="flex bg-gray-50 dark:bg-white/5 rounded-xl p-1">
                                 <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-white/10 text-red-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}><LayoutGrid size={16} /></button>
                                 <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-white/10 text-red-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}><List size={16} /></button>

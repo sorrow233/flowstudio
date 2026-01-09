@@ -64,6 +64,11 @@ const ModuleList = ({ modules, onModuleClick, onDeleteModule }) => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
                             onClick={() => onModuleClick(module)}
+                            draggable={true}
+                            onDragStart={(e) => {
+                                e.dataTransfer.setData('moduleId', module.id);
+                                e.dataTransfer.effectAllowed = 'move';
+                            }}
                             className="group flex flex-col md:grid md:grid-cols-12 gap-4 items-start md:items-center px-6 py-4 bg-white border border-gray-50 rounded-2xl hover:shadow-xl hover:shadow-red-500/10 hover:border-red-200 transition-all cursor-pointer ring-1 ring-transparent hover:ring-red-50 relative"
                         >
                             {/* Icon */}

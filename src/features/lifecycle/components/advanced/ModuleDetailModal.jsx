@@ -164,7 +164,7 @@ const ModuleDetailModal = ({ isOpen, onClose, module, onUpdate, onDelete }) => {
                     </button>
                 </div>
             </motion.div>
-            </motion.div>
+
             <ConfirmDialogComponent />
         </div >
     );
