@@ -69,6 +69,18 @@ export default {
         projectDescription: 'プロジェクトの説明',
     },
 
+    // Pending Module
+    pending: {
+        title: 'アイデアステージング',
+        subtitle: '構築前に検証',
+        removeConfirmTitle: 'この種を削除しますか？',
+        removeConfirmMessage: 'この操作は取り消せません。種は虚空に戻り、次のインスピレーションを待ちます。',
+        remove: '削除',
+        newSeedDesc: 'このアイデアを一文で説明...',
+        nursery: '育苗室',
+        growing: '成長中',
+    },
+
     // Primary Development Module
     primary: {
         title: '主力開発',

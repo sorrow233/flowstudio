@@ -70,6 +70,18 @@ export default {
         projectDescription: 'Project Description',
     },
 
+    // Pending Module
+    pending: {
+        title: 'Idea Staging',
+        subtitle: 'Validate before you build',
+        removeConfirmTitle: 'Remove this seed?',
+        removeConfirmMessage: 'This action cannot be undone. The seed will return to the void, awaiting the next spark of inspiration.',
+        remove: 'Remove',
+        newSeedDesc: 'Describe this idea in one sentence...',
+        nursery: 'Nursery',
+        growing: 'Growing',
+    },
+
     // Primary Dev Module
     primary: {
         title: 'Development',

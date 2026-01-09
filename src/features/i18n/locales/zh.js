@@ -70,6 +70,18 @@ export default {
         projectDescription: '项目描述',
     },
 
+    // 待定模块
+    pending: {
+        title: '创意孵化',
+        subtitle: '先验证，后构建',
+        removeConfirmTitle: '移除这颗种子？',
+        removeConfirmMessage: '此操作无法撤销。这颗种子将回归虚无，等待下一次灵感的迸发。',
+        remove: '移除',
+        newSeedDesc: '一句话描述这个创想...',
+        nursery: '育苗房',
+        growing: '成长中',
+    },
+
     // 主开发模块
     primary: {
         title: '开发',

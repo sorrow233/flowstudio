@@ -6,6 +6,7 @@ import { STORAGE_KEYS, getRandomProjectImage, COMMAND_CATEGORIES, QUESTIONS } fr
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
+import { useTranslation } from '../i18n';
 
 
 import Spotlight from '../../components/shared/Spotlight';
@@ -24,6 +25,7 @@ const VISUAL_VIBES = [
 ];
 
 const PendingModule = () => {
+    const { t } = useTranslation();
     const { doc } = useSync();
 
     const {
@@ -142,9 +144,9 @@ const PendingModule = () => {
     const handleDelete = (e, id) => {
         if (e) e.stopPropagation();
         openConfirm({
-            title: '移除这颗种子？',
-            message: '此操作无法撤销。这颗种子将回归虚无，等待下一次灵感的迸发。',
-            confirmText: '移除',
+            title: t('pending.removeConfirmTitle'),
+            message: t('pending.removeConfirmMessage'),
+            confirmText: t('pending.remove'),
             icon: TreePine,
             variant: 'danger',
             onConfirm: () => {
@@ -271,7 +273,7 @@ const PendingModule = () => {
                                 </div>
                                 <input
                                     type="text"
-                                    placeholder="Plant a new seed..."
+                                    placeholder={t('common.plantSeed')}
                                     className="flex-1 bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 font-light h-full"
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && e.target.value?.trim()) {

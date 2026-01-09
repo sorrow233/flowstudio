@@ -136,9 +136,9 @@ const PrimaryDevModule = () => {
     const handleDeleteProject = (e, id) => {
         e.stopPropagation();
         openConfirm({
-            title: 'Delete Project',
-            message: 'Are you sure you want to delete this project?',
-            confirmText: 'Delete',
+            title: t('common.deleteProject'),
+            message: t('common.deleteProjectConfirm'),
+            confirmText: t('common.delete'),
             onConfirm: () => {
                 deleteProject(id);
                 if (selectedProject?.id === id) setSelectedProject(null);

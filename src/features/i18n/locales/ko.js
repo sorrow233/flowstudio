@@ -69,6 +69,18 @@ export default {
         projectDescription: '프로젝트 설명',
     },
 
+    // Pending Module
+    pending: {
+        title: '아이디어 스테이징',
+        subtitle: '구축 전 검증',
+        removeConfirmTitle: '이 씨앗을 삭제하시겠습니까?',
+        removeConfirmMessage: '이 작업은 취소할 수 없습니다. 씨앗은 다음 영감을 기다리며 무로 돌아갑니다.',
+        remove: '삭제',
+        newSeedDesc: '이 아이디어를 한 문장으로 설명...',
+        nursery: '육묘실',
+        growing: '성장 중',
+    },
+
     // Primary Development Module
     primary: {
         title: '주력 개발',
