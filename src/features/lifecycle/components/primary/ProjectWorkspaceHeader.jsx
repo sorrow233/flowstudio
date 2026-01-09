@@ -98,7 +98,7 @@ const ProjectWorkspaceHeader = ({
                                             <button
                                                 key={i}
                                                 onClick={() => setEditForm({ ...editForm, bgImage: vibe })}
-                                                className={`w-6 h-6 rounded-full border-2 overflow-hidden transition-all shrink-0 ${editForm.bgImage === vibe ? 'border-emerald-500 scale-125' : 'border-transparent opacity-50 hover:opacity-100'}`}
+                                                className={`w-6 h-6 rounded-full border-2 overflow-hidden transition-all shrink-0 ${editForm.bgImage === vibe ? 'border-purple-500 scale-125' : 'border-transparent opacity-50 hover:opacity-100'}`}
                                             >
                                                 <img src={vibe} className="w-full h-full object-cover" />
                                             </button>
@@ -112,7 +112,7 @@ const ProjectWorkspaceHeader = ({
                         <div className="flex flex-col md:flex-row justify-end md:justify-between items-start md:items-end w-full gap-6">
                             <div className="w-full md:w-auto">
                                 <motion.div layout className="flex items-center gap-3 mb-2 opacity-80">
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-purple-500 text-white shadow-lg shadow-purple-500/20">
                                         {stageInfo?.label} Phase
                                     </span>
                                     {project.link && (

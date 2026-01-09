@@ -148,15 +148,15 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                         className={`
                                             w-2.5 h-2.5 rounded-full transition-all duration-300 shadow-sm
                                             ${isCompleted
-                                                ? 'bg-emerald-500 shadow-emerald-200 ring-2 ring-emerald-100'
+                                                ? 'bg-purple-500 shadow-purple-200 ring-2 ring-purple-100'
                                                 : (() => {
                                                     const stageColors = {
-                                                        1: 'bg-blue-400',
-                                                        2: 'bg-emerald-400',
+                                                        1: 'bg-purple-400',
+                                                        2: 'bg-blue-400',
                                                         3: 'bg-violet-400',
                                                         4: 'bg-amber-400',
                                                         5: 'bg-rose-400',
-                                                        6: 'bg-emerald-400'
+                                                        6: 'bg-purple-400'
                                                     };
                                                     return stageColors[stage.id] || 'bg-gray-300';
                                                 })()
