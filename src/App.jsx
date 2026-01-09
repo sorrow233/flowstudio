@@ -39,8 +39,8 @@ function App() {
                                         <Route path="/inspiration" element={<InspirationModule />} />
                                         <Route path="/pending" element={<PendingModule />} />
                                         <Route path="/primary" element={<PrimaryDevModule />} />
-                                        <Route path="/final" element={<AdvancedDevModule />} />
-                                        <Route path="/advanced" element={<FinalDevModule />} />
+                                        <Route path="/final" element={<FinalDevModule />} />
+                                        <Route path="/advanced" element={<AdvancedDevModule />} />
                                         <Route path="/commercial" element={<CommercialModule />} />
                                         <Route path="/commands" element={<CommandCenterModule />} />
                                         <Route path="/share/:id" element={<ShareViewPage />} />
