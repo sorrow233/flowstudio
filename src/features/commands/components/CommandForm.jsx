@@ -41,15 +41,15 @@ const CommandForm = ({
                     initial={{ opacity: 0, scale: 0.95, y: -20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                    className="bg-white border border-emerald-100 rounded-3xl p-8 mb-8 shadow-xl shadow-emerald-500/5 relative overflow-hidden max-h-[80vh] overflow-y-auto custom-scrollbar"
+                    className="bg-white dark:bg-gray-900 border border-emerald-100 dark:border-emerald-900/30 rounded-3xl p-8 mb-8 shadow-xl shadow-emerald-500/5 relative overflow-hidden max-h-[80vh] overflow-y-auto custom-scrollbar"
                 >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-full -z-10 opacity-50" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 dark:bg-emerald-900/10 rounded-bl-full -z-10 opacity-50" />
 
                     <div className="flex flex-col gap-6">
                         <div className="flex justify-between items-center">
-                            <h4 className="text-lg font-light text-gray-900">{newCmd.id ? 'Edit Command' : 'Create New Command'}</h4>
+                            <h4 className="text-lg font-light text-gray-900 dark:text-white">{newCmd.id ? 'Edit Command' : 'Create New Command'}</h4>
                             {/* Type Selector */}
-                            <div className="flex gap-2 p-1 bg-gray-100 rounded-xl w-fit">
+                            <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl w-fit">
                                 {[
                                     { id: 'utility', label: 'Utility (Copy)', icon: Copy },
                                     { id: 'mandatory', label: 'Mandatory (Task)', icon: Check },
@@ -61,8 +61,8 @@ const CommandForm = ({
                                         className={`
                                             flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all
                                             ${newCmd.type === type.id
-                                                ? 'bg-white shadow-sm text-gray-900'
-                                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}
+                                                ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white'
+                                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50'}
                                         `}
                                     >
                                         <type.icon size={14} />
@@ -114,7 +114,7 @@ const CommandForm = ({
 
                         {/* Title Input */}
                         <input
-                            className="w-full bg-transparent text-2xl font-light outline-none placeholder:text-gray-300 border-b border-transparent focus:border-gray-100 pb-2 transition-colors"
+                            className="w-full bg-transparent text-2xl font-light outline-none placeholder:text-gray-300 dark:placeholder:text-gray-600 border-b border-transparent focus:border-gray-100 dark:focus:border-gray-700 text-gray-900 dark:text-white pb-2 transition-colors"
                             placeholder="Command Title..."
                             autoFocus={!newCmd.id}
                             value={newCmd.title}
@@ -124,12 +124,12 @@ const CommandForm = ({
                         {/* Content Inputs based on Type */}
                         <div className="space-y-4">
                             {newCmd.type === 'link' && (
-                                <div className="relative rounded-2xl border border-gray-100 overflow-hidden bg-gray-50/30 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 transition-all">
-                                    <div className="absolute top-3 left-4 text-gray-300 pointer-events-none">
+                                <div className="relative rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden bg-gray-50/30 dark:bg-gray-800/30 focus-within:bg-white dark:focus-within:bg-gray-800 focus-within:ring-2 focus-within:ring-emerald-100 dark:focus-within:ring-emerald-900/30 transition-all">
+                                    <div className="absolute top-3 left-4 text-gray-300 dark:text-gray-600 pointer-events-none">
                                         <Globe size={16} />
                                     </div>
                                     <input
-                                        className="w-full bg-transparent p-3 pl-12 text-sm font-mono text-emerald-600 outline-none"
+                                        className="w-full bg-transparent p-3 pl-12 text-sm font-mono text-emerald-600 dark:text-emerald-400 outline-none"
                                         placeholder="https://..."
                                         value={newCmd.url}
                                         onChange={e => setNewCmd({ ...newCmd, url: e.target.value })}
@@ -137,12 +137,12 @@ const CommandForm = ({
                                 </div>
                             )}
 
-                            <div className="relative rounded-2xl border border-gray-100 overflow-hidden bg-gray-50/30 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 transition-all">
-                                <div className="absolute top-3 left-4 text-gray-300 pointer-events-none">
+                            <div className="relative rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden bg-gray-50/30 dark:bg-gray-800/30 focus-within:bg-white dark:focus-within:bg-gray-800 focus-within:ring-2 focus-within:ring-emerald-100 dark:focus-within:ring-emerald-900/30 transition-all">
+                                <div className="absolute top-3 left-4 text-gray-300 dark:text-gray-600 pointer-events-none">
                                     <Terminal size={16} />
                                 </div>
                                 <textarea
-                                    className="w-full bg-transparent p-4 pl-12 text-sm font-mono text-gray-600 outline-none resize-y min-h-[120px]"
+                                    className="w-full bg-transparent p-4 pl-12 text-sm font-mono text-gray-600 dark:text-gray-300 outline-none resize-y min-h-[120px]"
                                     placeholder={newCmd.type === 'link' ? "(Optional) Content to copy before opening URL..." : "Enter your system instruction or prompt here..."}
                                     value={newCmd.content}
                                     onChange={e => setNewCmd({ ...newCmd, content: e.target.value })}
@@ -170,8 +170,8 @@ const CommandForm = ({
                                             className={`
                                                 w-full border rounded-xl px-3 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400
                                                 ${editingTagId
-                                                    ? 'bg-amber-50 border-amber-200 focus:border-amber-300 focus:ring-2 focus:ring-amber-100 text-amber-900'
-                                                    : 'bg-gray-50 border-gray-100 focus:bg-white focus:border-emerald-200 focus:ring-2 focus:ring-emerald-50'}
+                                                    ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 focus:border-amber-300 focus:ring-2 focus:ring-amber-100 dark:focus:ring-amber-900/30 text-amber-900 dark:text-amber-100'
+                                                    : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 focus:bg-white dark:focus:bg-gray-700 focus:border-emerald-200 dark:focus:border-emerald-800 focus:ring-2 focus:ring-emerald-50 dark:focus:ring-emerald-900/20 text-gray-900 dark:text-gray-100'}
                                             `}
                                             placeholder="Label (e.g. 'Prod')"
                                             value={newTag.label}
@@ -189,8 +189,8 @@ const CommandForm = ({
                                             className={`
                                                 w-full border rounded-xl px-3 py-2.5 text-sm outline-none transition-all font-mono placeholder:text-gray-400
                                                 ${editingTagId
-                                                    ? 'bg-amber-50 border-amber-200 focus:border-amber-300 focus:ring-2 focus:ring-amber-100 text-amber-900'
-                                                    : 'bg-gray-50 border-gray-100 focus:bg-white focus:border-emerald-200 focus:ring-2 focus:ring-emerald-50 text-gray-600'}
+                                                    ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 focus:border-amber-300 focus:ring-2 focus:ring-amber-100 dark:focus:ring-amber-900/30 text-amber-900 dark:text-amber-100'
+                                                    : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 focus:bg-white dark:focus:bg-gray-700 focus:border-emerald-200 dark:focus:border-emerald-800 focus:ring-2 focus:ring-emerald-50 dark:focus:ring-emerald-900/20 text-gray-600 dark:text-gray-300'}
                                             `}
                                             placeholder="Content Override (Optional)"
                                             value={newTag.value}
@@ -210,8 +210,8 @@ const CommandForm = ({
                                             className={`
                                                 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all
                                                 ${editingTagId
-                                                    ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-200'
-                                                    : 'bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200'}
+                                                    ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-200 dark:shadow-none'
+                                                    : 'bg-gray-900 dark:bg-emerald-600 text-white hover:bg-black dark:hover:bg-emerald-500 shadow-lg shadow-gray-200 dark:shadow-none'}
                                                 disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed
                                             `}
                                         >
@@ -220,7 +220,7 @@ const CommandForm = ({
                                         {editingTagId && (
                                             <button
                                                 onClick={handleCancelTagEdit}
-                                                className="px-3 py-2.5 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 transition-colors"
+                                                className="px-3 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                                                 title="Cancel Edit"
                                             >
                                                 <X size={14} />
@@ -231,7 +231,7 @@ const CommandForm = ({
 
                                 {/* Added Tags List */}
                                 {(newCmd.tags && newCmd.tags.length > 0) && (
-                                    <div className="flex flex-wrap gap-2 mt-3 p-3 bg-gray-50/50 rounded-2xl border border-gray-100/50 min-h-[60px]">
+                                    <div className="flex flex-wrap gap-2 mt-3 p-3 bg-gray-50/50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-700/50 min-h-[60px]">
                                         {newCmd.tags.map(tag => (
                                             <div
                                                 key={tag.id}
@@ -240,7 +240,7 @@ const CommandForm = ({
                                                     group flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border cursor-pointer transition-all select-none
                                                     ${editingTagId === tag.id
                                                         ? 'bg-amber-100 text-amber-800 border-amber-300 ring-2 ring-amber-200 ring-offset-1'
-                                                        : 'bg-white text-gray-600 border-gray-200 hover:border-emerald-200 hover:text-emerald-600 hover:shadow-sm'}
+                                                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-emerald-200 dark:hover:border-emerald-800 hover:text-emerald-600 dark:hover:text-emerald-400 hover:shadow-sm'}
                                                 `}
                                             >
                                                 <Tag size={12} className={editingTagId === tag.id ? 'text-amber-600' : 'text-gray-400 group-hover:text-emerald-500'} />
@@ -271,7 +271,7 @@ const CommandForm = ({
                     <div className="flex justify-end gap-3 mt-8">
                         <button
                             onClick={() => setIsAdding(false)}
-                            className="px-6 py-2.5 text-sm text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                            className="px-6 py-2.5 text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors font-medium"
                         >
                             Cancel
                         </button>
