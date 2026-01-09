@@ -85,7 +85,6 @@ const PrimaryDevModule = () => {
 
     // --- Scroll Handling Ref ---
     const taskListRef = useRef(null);
-    const hasScrolledDown = useRef(false);
 
     const handleHeaderWheel = (e) => {
         if (taskListRef.current) {
@@ -111,7 +110,6 @@ const PrimaryDevModule = () => {
     // Reset UI state when switching or closing projects
     useEffect(() => {
         setIsHeaderCollapsed(true);
-        hasScrolledDown.current = false;
     }, [selectedProject?.id]);
 
     // When opening a project, set view to current progress
@@ -521,14 +519,7 @@ const PrimaryDevModule = () => {
                                         onImportCommand={() => setCommandModalOpen(true)}
                                         availableCommands={availableCommands}
                                         onScroll={(e) => {
-                                            const scrollTop = e.currentTarget.scrollTop;
-                                            if (scrollTop > 50) hasScrolledDown.current = true;
-
-                                            if (scrollTop > 20 && !isHeaderCollapsed) {
-                                                setIsHeaderCollapsed(true);
-                                            } else if (scrollTop <= 5 && isHeaderCollapsed && hasScrolledDown.current) {
-                                                setIsHeaderCollapsed(false);
-                                            }
+                                            // Manual control only, removed auto-collapse/expand on scroll
                                         }}
                                     />
                                 </div>
