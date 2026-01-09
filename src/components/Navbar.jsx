@@ -8,7 +8,7 @@ import {
     Code2,
     CheckCircle2,
     Zap,
-    Zap,
+
     Briefcase,
     Terminal,
     Cloud,
