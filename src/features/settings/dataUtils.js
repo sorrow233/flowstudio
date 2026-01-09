@@ -46,22 +46,54 @@ export const exportAllData = (doc) => {
         console.warn('[Export] Failed to get all_projects:', e);
     }
 
-    // 2. Export all_commands (synced commands)
+    // 2. Export all_commands (synced commands) - with localStorage fallback
     try {
         const commandsArray = doc.getArray('all_commands');
-        data.data.allCommands = commandsArray.toJSON();
-        console.info(`[Export] Exported ${data.data.allCommands.length} commands from all_commands.`);
+        const syncedCommands = commandsArray.toJSON();
+
+        // If Y.Doc is empty, fallback to localStorage
+        if (syncedCommands.length === 0) {
+            const localCommands = localStorage.getItem('flowstudio_commands');
+            if (localCommands) {
+                data.data.allCommands = JSON.parse(localCommands);
+                console.info(`[Export] Exported ${data.data.allCommands.length} commands from localStorage (fallback).`);
+            }
+        } else {
+            data.data.allCommands = syncedCommands;
+            console.info(`[Export] Exported ${data.data.allCommands.length} commands from all_commands.`);
+        }
     } catch (e) {
         console.warn('[Export] Failed to get all_commands:', e);
+        // Final fallback
+        const localCommands = localStorage.getItem('flowstudio_commands');
+        if (localCommands) {
+            data.data.allCommands = JSON.parse(localCommands);
+        }
     }
 
-    // 3. Export command_categories (synced categories)
+    // 3. Export command_categories (synced categories) - with localStorage fallback
     try {
         const categoriesArray = doc.getArray('command_categories');
-        data.data.commandCategories = categoriesArray.toJSON();
-        console.info(`[Export] Exported ${data.data.commandCategories.length} categories from command_categories.`);
+        const syncedCategories = categoriesArray.toJSON();
+
+        // If Y.Doc is empty, fallback to localStorage
+        if (syncedCategories.length === 0) {
+            const localCategories = localStorage.getItem('flowstudio_categories_custom');
+            if (localCategories) {
+                data.data.commandCategories = JSON.parse(localCategories);
+                console.info(`[Export] Exported ${data.data.commandCategories.length} categories from localStorage (fallback).`);
+            }
+        } else {
+            data.data.commandCategories = syncedCategories;
+            console.info(`[Export] Exported ${data.data.commandCategories.length} categories from command_categories.`);
+        }
     } catch (e) {
         console.warn('[Export] Failed to get command_categories:', e);
+        // Final fallback
+        const localCategories = localStorage.getItem('flowstudio_categories_custom');
+        if (localCategories) {
+            data.data.commandCategories = JSON.parse(localCategories);
+        }
     }
 
     return data;
