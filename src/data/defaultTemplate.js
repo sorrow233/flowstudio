@@ -8,37 +8,37 @@ export const DEFAULT_TEMPLATE = {
     inspirations: [
         {
             id: "welcome-001",
-            content: "👋 你好啊，我们是 FlowStudio 的开发团队（右滑删除此条）",
+            content: "你好啊，我们是 FlowStudio 的开发团队（右滑删除此条）",
             timestamp: Date.now()
         },
         {
             id: "guide-inspiration",
-            content: "💡 你可以在灵感发送你随时随地的想法，下载插件一键保存推特的推文，捕捉触动你的瞬间（点击复制按钮将这句内容一键保存到命令仓库）",
+            content: "你可以在灵感记录随时随地的想法，下载插件一键保存推特的推文，捕捉触动你的瞬间（点击卡片复制内容）",
             timestamp: Date.now() - 60000
         },
         {
             id: "guide-command",
-            content: "📝 你可以在命令中保存不同类别的指令，可以是开发、学习、目标，又或者只是简单记录想法（双击前面的圆点可以完成本条信息）",
+            content: "你可以在命令中保存不同类别的指令：开发、学习、目标，或者只是一些碎碎念（双击圆点标记已读）",
             timestamp: Date.now() - 120000
         },
         {
             id: "guide-flow",
-            content: "🌊 **Flow** 可以让你知道自己处于的流程中，以及怎么优化流动的方向",
+            content: "**Flow** 让你清晰地知道自己处于流程的哪个阶段，以及如何优化前进的方向",
             timestamp: Date.now() - 180000
         },
         {
             id: "guide-studio",
-            content: "🎯 **Studio** 能让你清晰的知道自己的目标，让你不再害怕失败，每次遇到的问题，都会变成下一次的惊艳",
+            content: "**Studio** 让你不再害怕失败——每次遇到的问题，都会变成下一次的惊艳",
             timestamp: Date.now() - 240000
         },
         {
             id: "hello-world",
-            content: "🌍 你好 | Hello | こんにちは | 안녕하세요",
+            content: "你好 | Hello | こんにちは | 안녕하세요",
             timestamp: Date.now() - 300000
         },
         {
             id: "start",
-            content: "🚀 **开始**",
+            content: "**开始吧**",
             timestamp: Date.now() - 360000
         }
     ],
