@@ -173,7 +173,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
     const stageInfo = DEV_STAGES.find(s => s.id === activeStage);
     const emptyState = STAGE_EMPTY_STATES[activeStage];
 
-    // Stage Themes Mapping
+
 
 
     const handleCopy = (id, content) => {
