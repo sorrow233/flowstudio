@@ -30,10 +30,10 @@ export const COLOR_CONFIG = [
         border: 'hover:border-blue-200 dark:hover:border-blue-800/50'
     },
     {
-        id: 'rose',
-        dot: 'bg-rose-400',
-        glow: 'group-hover:ring-rose-500/10 group-hover:shadow-[0_0_20px_rgba(244,63,94,0.05)]',
-        border: 'hover:border-rose-200 dark:hover:border-rose-800/50'
+        id: 'pink',
+        dot: 'bg-pink-400',
+        glow: 'group-hover:ring-pink-500/10 group-hover:shadow-[0_0_20px_rgba(244,114,182,0.05)]',
+        border: 'hover:border-pink-200 dark:hover:border-pink-800/50'
     },
     {
         id: 'lime',
