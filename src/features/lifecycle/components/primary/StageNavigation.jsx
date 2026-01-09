@@ -1,14 +1,24 @@
 import React from 'react';
-import { Layers, MonitorPlay, Container, Lightbulb, Flag, Check, Lock, Terminal, CheckSquare } from 'lucide-react';
+import { Layers, MonitorPlay, Container, Lightbulb, Flag, Check, Lock, Terminal, CheckSquare, Clock, Code2, Zap, Gem } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { DEV_STAGES } from '../../../../utils/constants';
 
 const STAGE_ICONS = {
-    1: Layers,
-    2: MonitorPlay,
-    3: Container,
-    4: Lightbulb,
-    5: Flag
+    1: Lightbulb,
+    2: Terminal,
+    3: Clock,
+    4: Code2,
+    5: Zap,
+    6: Gem
+};
+
+const STAGE_COLORS = {
+    1: 'bg-emerald-500 shadow-emerald-200 ring-emerald-500/20',
+    2: 'bg-gray-900 shadow-gray-200 ring-black/5',
+    3: 'bg-violet-500 shadow-violet-200 ring-violet-500/20',
+    4: 'bg-blue-500 shadow-blue-200 ring-blue-500/20',
+    5: 'bg-rose-500 shadow-rose-200 ring-rose-500/20',
+    6: 'bg-amber-500 shadow-amber-200 ring-amber-500/20'
 };
 
 const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleComplete, customStageNames = {}, onRenameStage, stageStats = {}, stages = DEV_STAGES }) => {
@@ -63,7 +73,10 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                             key={stage.id}
                             className={`
                                 relative z-10 flex items-center p-2 rounded-xl transition-all duration-300 group min-w-[260px] md:min-w-0
-                                ${isViewActive ? 'bg-gray-900 shadow-xl shadow-gray-200 ring-1 ring-black/5' : 'hover:bg-gray-50'}
+                                ${isViewActive
+                                    ? `${STAGE_COLORS[stage.id] || 'bg-gray-900'} shadow-xl ring-1 text-white`
+                                    : 'hover:bg-gray-50'
+                                }
                             `}
                         >
                             {/* Clickable Area for VIEWING */}
@@ -154,11 +167,12 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                                 ? 'bg-emerald-500 shadow-emerald-200 ring-2 ring-emerald-100'
                                                 : (() => {
                                                     const stageColors = {
-                                                        1: 'bg-slate-300',
-                                                        2: 'bg-blue-300',
+                                                        1: 'bg-emerald-300',
+                                                        2: 'bg-gray-500',
                                                         3: 'bg-violet-300',
-                                                        4: 'bg-amber-300',
-                                                        5: 'bg-rose-300'
+                                                        4: 'bg-blue-300',
+                                                        5: 'bg-rose-300',
+                                                        6: 'bg-amber-300'
                                                     };
                                                     return stageColors[stage.id] || 'bg-gray-300';
                                                 })()
