@@ -120,12 +120,25 @@ const DataManagementModal = ({ isOpen, onClose }) => {
     // 统计摘要
     const getDataSummary = useCallback(() => {
         if (!previewData?.data) return null;
-        const { pendingProjects, primaryProjects, commands, customCategories } = previewData.data;
+        const {
+            allProjects, allCommands, commandCategories,
+            pendingProjects, primaryProjects, commands, customCategories
+        } = previewData.data;
+
+        // Calculate counts from unified storage
+        let newPending = 0;
+        let newPrimary = 0;
+
+        if (Array.isArray(allProjects)) {
+            newPending = allProjects.filter(p => p.stage === 'pending').length;
+            newPrimary = allProjects.filter(p => !['pending', 'inspiration'].includes(p.stage)).length;
+        }
+
         return {
-            pending: pendingProjects?.length || 0,
-            primary: primaryProjects?.length || 0,
-            commands: commands?.length || 0,
-            categories: customCategories?.length || 0,
+            pending: (pendingProjects?.length || 0) + newPending,
+            primary: (primaryProjects?.length || 0) + newPrimary,
+            commands: (commands?.length || 0) + (allCommands?.length || 0),
+            categories: (customCategories?.length || 0) + (commandCategories?.length || 0),
         };
     }, [previewData]);
 
