@@ -74,9 +74,9 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                     ${isViewActive
                                         ? 'bg-white/20 text-white shadow-inner'
                                         : isCompleted
-                                            ? 'bg-emerald-100 text-emerald-600'
+                                            ? 'bg-purple-100 text-purple-600'
                                             : isCurrentProgress
-                                                ? 'bg-white dark:bg-gray-800 border-2 border-emerald-500 text-emerald-600 dark:text-emerald-400'
+                                                ? 'bg-white dark:bg-gray-800 border-2 border-purple-500 text-purple-600 dark:text-purple-400'
                                                 : 'bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600'
                                     }
                                 `}>
@@ -106,13 +106,13 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                     ) : (
                                         <div
                                             title="Double click to rename"
-                                            className={`text-sm font-bold tracking-tight transition-colors cursor-text ${isViewActive ? 'text-white' : isCompleted ? 'text-emerald-900 dark:text-emerald-400' : 'text-gray-600 dark:text-gray-400'}`}
+                                            className={`text-sm font-bold tracking-tight transition-colors cursor-text ${isViewActive ? 'text-white' : isCompleted ? 'text-purple-900 dark:text-purple-400' : 'text-gray-600 dark:text-gray-400'}`}
                                         >
                                             {customStageNames[stage.id] || stage.label}
                                         </div>
                                     )}
                                     <div className={`flex items-center gap-2 mt-0.5 text-[10px] truncate transition-colors ${isViewActive ? 'text-white/50' : 'text-gray-400'}`}>
-                                        <span className={isCompleted ? 'text-emerald-600/70' : ''}>{isCompleted ? 'Completed' : isCurrentProgress ? 'In Progress' : 'Pending'}</span>
+                                        <span className={isCompleted ? 'text-purple-600/70' : ''}>{isCompleted ? 'Completed' : isCurrentProgress ? 'In Progress' : 'Pending'}</span>
 
                                         {/* Content Badges */}
                                         {!isCompleted && (stats.commandCount > 0 || stats.taskCount > 0) && (

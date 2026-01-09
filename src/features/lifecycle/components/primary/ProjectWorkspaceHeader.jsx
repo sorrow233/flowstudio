@@ -142,7 +142,7 @@ const ProjectWorkspaceHeader = ({
                                         className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-white/10 text-white rounded-2xl backdrop-blur-md hover:bg-white/20 transition-all border border-white/5"
                                         title="View Founding Vow"
                                     >
-                                        <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)] animate-pulse" />
+                                        <div className=\"w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.8)] animate-pulse\" />
                                         <span className="text-xs font-medium tracking-widest uppercase inline">The Vow</span>
                                     </motion.button>
                                 )}

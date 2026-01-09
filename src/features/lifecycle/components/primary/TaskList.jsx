@@ -266,21 +266,21 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                         {/* Completed Section Header */}
                                         <button
                                             onClick={() => setIsCompletedCollapsed(!isCompletedCollapsed)}
-                                            className="w-full flex items-center gap-3 py-2.5 px-3 hover:bg-emerald-50/50 rounded-xl transition-all group"
+                                            className="w-full flex items-center gap-3 py-2.5 px-3 hover:bg-purple-50/50 rounded-xl transition-all group"
                                         >
                                             <motion.div
                                                 animate={{ rotate: isCompletedCollapsed ? 0 : 90 }}
                                                 transition={{ duration: 0.2 }}
-                                                className="flex items-center justify-center w-5 h-5 rounded-md bg-emerald-100/80 text-emerald-600"
+                                                className="flex items-center justify-center w-5 h-5 rounded-md bg-purple-100/80 text-purple-600"
                                             >
                                                 <ChevronRight size={12} strokeWidth={2.5} />
                                             </motion.div>
                                             <div className="flex items-center gap-2">
-                                                <CheckCircle2 size={14} className="text-emerald-500" />
+                                                <CheckCircle2 size={14} className="text-purple-500" />
                                                 <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">已完成</span>
                                             </div>
                                             <div className="flex-1" />
-                                            <span className="text-[11px] font-bold text-emerald-600/80 bg-emerald-50 px-2 py-0.5 rounded-md tabular-nums">
+                                            <span className="text-[11px] font-bold text-purple-600/80 bg-purple-50 px-2 py-0.5 rounded-md tabular-nums">
                                                 {completedTasks.length}
                                             </span>
                                         </button>
@@ -361,7 +361,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                         className="flex flex-col items-center py-10 text-center"
                                     >
                                         <motion.div
-                                            className="w-14 h-14 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-emerald-100/50"
+                                            className="w-14 h-14 bg-gradient-to-br from-purple-50 to-fuchsia-50 rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-purple-100/50"
                                             animate={{
                                                 scale: [1, 1.05, 1],
                                                 rotate: [0, 3, -3, 0]
@@ -372,7 +372,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                                 repeatDelay: 3
                                             }}
                                         >
-                                            <CheckCircle2 size={24} className="text-emerald-500" />
+                                            <CheckCircle2 size={24} className="text-purple-500" />
                                         </motion.div>
                                         <h4 className="text-base font-semibold text-gray-800 mb-1">阶段任务已完成</h4>
                                         <p className="text-xs text-gray-400 max-w-[200px]">所有任务都已完成，可以进入下一阶段</p>
