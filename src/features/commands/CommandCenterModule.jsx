@@ -201,9 +201,27 @@ const CommandCenterModule = () => {
         if (!doc || !reorderedIds || reorderedIds.length === 0) return;
 
         doc.transact(() => {
-            // Map the new order back to the original commands
-            // We give them safe, sequential order indices
-            reorderedIds.forEach((id, index) => {
+            // 1. Get current IDs of all commands in this stage (sorted)
+            const allStageIds = stageCommands.map(c => c.id);
+
+            // 2. Identify the indices of the visible items in the full list
+            const visibleIndices = [];
+            allStageIds.forEach((id, idx) => {
+                if (reorderedIds.includes(id)) {
+                    visibleIndices.push(idx);
+                }
+            });
+
+            // 3. Create a new full list of IDs
+            const newFullOrder = [...allStageIds];
+
+            // 4. Place the reordered items into the slots previously occupied by the visible items
+            visibleIndices.forEach((targetIdx, i) => {
+                newFullOrder[targetIdx] = reorderedIds[i];
+            });
+
+            // 5. Update the 'order' property for all items to reflect the new sequence
+            newFullOrder.forEach((id, index) => {
                 updateCommand(id, { order: index });
             });
         });

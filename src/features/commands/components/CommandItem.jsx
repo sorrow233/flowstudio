@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Trash2, Link as LinkIcon, Command, Globe, Tag, FileText, Share2, GripVertical } from 'lucide-react';
 
@@ -14,8 +14,41 @@ const CommandItem = ({
     copiedId,
     dragControls,
     onClick,
-    onDoubleClick
+    onDoubleClick,
+    onLongPress
 }) => {
+    const longPressTimer = useRef(null);
+    const startPos = useRef({ x: 0, y: 0 });
+
+    const handlePointerDown = (e) => {
+        if (isSelectionMode) return;
+        startPos.current = { x: e.clientX, y: e.clientY };
+        longPressTimer.current = setTimeout(() => {
+            onLongPress?.(cmd.id);
+            longPressTimer.current = null;
+        }, 500);
+    };
+
+    const handlePointerMove = (e) => {
+        if (longPressTimer.current) {
+            const dist = Math.sqrt(
+                Math.pow(e.clientX - startPos.current.x, 2) +
+                Math.pow(e.clientY - startPos.current.y, 2)
+            );
+            if (dist > 10) {
+                clearTimeout(longPressTimer.current);
+                longPressTimer.current = null;
+            }
+        }
+    };
+
+    const handlePointerUp = () => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = null;
+        }
+    };
+
     // Elegant, minimal styling logic
     const categoryInfo = categories.find(cat => cat.id === cmd.category);
 
@@ -38,6 +71,10 @@ const CommandItem = ({
             `}
             onClick={onClick}
             onDoubleClick={onDoubleClick}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
         >
             <div className="flex items-center gap-3 z-10">
                 {/* Drag Handle or Selection */}

@@ -45,6 +45,7 @@ const DraggableCommandItem = ({
                     handlers.handleCopy(cmd.id, cmd.content || cmd.url);
                 }}
                 onDoubleClick={() => !isSelectionMode && handlers.handleEdit(cmd)}
+                onLongPress={handlers.onLongPress}
             />
         </Reorder.Item>
     );
@@ -107,7 +108,13 @@ const CommandList = ({
         handleCopy,
         handleRemove,
         handleShare,
-        handleShiftSelect: (id, e) => handleShiftSelect(id, e)
+        handleShiftSelect: (id, e) => handleShiftSelect(id, e),
+        onLongPress: (id) => {
+            setIsSelectionMode(true);
+            setSelectedIds(new Set([id]));
+            setLastSelectedId(id);
+            if (navigator.vibrate) navigator.vibrate(50);
+        }
     };
 
     // --- Selection Logic ---
