@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import * as Y from 'yjs';
 import { useAuth } from '../auth/AuthContext';
 import { SyncEngine } from './SyncEngine';
+import { DEFAULT_TEMPLATE } from '../../data/defaultTemplate';
 
 // Global Map to store SyncEngines (one per docId)
 const engineMap = new Map();
@@ -196,15 +197,21 @@ export const useSyncedProjects = (doc, arrayName) => {
 
 // --- Data Migration Hook ---
 // Safely migrates data from localStorage to Y.Doc only once.
+// Also seeds default template data for new users.
 export const useDataMigration = (doc) => {
     useEffect(() => {
         if (!doc) return;
 
         const MIGRATION_KEY = 'flowstudio_migration_v1_completed';
+        const DEFAULT_TEMPLATE_KEY = 'flowstudio_default_template_seeded';
 
         const migrate = () => {
             // 1. Check if migration already ran
-            if (localStorage.getItem(MIGRATION_KEY)) return;
+            if (localStorage.getItem(MIGRATION_KEY)) {
+                // Migration done, check if we need to seed default template
+                seedDefaultTemplateIfEmpty();
+                return;
+            }
 
             console.info("[Migration] Starting one-time migration...");
             let hasMigrated = false;
@@ -253,11 +260,73 @@ export const useDataMigration = (doc) => {
                 console.error("[Migration] Failed primary:", e);
             }
 
-            // 4. Mark as completed
+            // 4. Mark migration as completed
             localStorage.setItem(MIGRATION_KEY, 'true');
             if (hasMigrated) {
                 console.info("[Migration] Completed.");
+            } else {
+                // No local data was migrated, check if we should seed default template
+                seedDefaultTemplateIfEmpty();
             }
+        };
+
+        // --- 默认模板加载逻辑 ---
+        // 如果用户是新用户且没有任何数据，则加载默认模板
+        const seedDefaultTemplateIfEmpty = () => {
+            // 已经加载过默认模板，跳过
+            if (localStorage.getItem(DEFAULT_TEMPLATE_KEY)) return;
+
+            const yPending = doc.getArray('pending_projects');
+            const yPrimary = doc.getArray('primary_projects');
+
+            // 检查是否有任何项目数据
+            const hasData = yPending.length > 0 || yPrimary.length > 0;
+
+            if (!hasData) {
+                console.info("[DefaultTemplate] 首次访问，加载默认模板数据...");
+
+                try {
+                    doc.transact(() => {
+                        // 加载 Pending Projects
+                        if (DEFAULT_TEMPLATE.pendingProjects && DEFAULT_TEMPLATE.pendingProjects.length > 0) {
+                            const yMaps = DEFAULT_TEMPLATE.pendingProjects.map(p => {
+                                const yMap = new Y.Map();
+                                Object.entries(p).forEach(([k, v]) => yMap.set(k, v));
+                                return yMap;
+                            });
+                            yPending.push(yMaps);
+                        }
+
+                        // 加载 Primary Projects
+                        if (DEFAULT_TEMPLATE.primaryProjects && DEFAULT_TEMPLATE.primaryProjects.length > 0) {
+                            const yMaps = DEFAULT_TEMPLATE.primaryProjects.map(p => {
+                                const yMap = new Y.Map();
+                                Object.entries(p).forEach(([k, v]) => yMap.set(k, v));
+                                return yMap;
+                            });
+                            yPrimary.push(yMaps);
+                        }
+                    });
+
+                    // 加载 Commands 到 localStorage
+                    if (DEFAULT_TEMPLATE.commands && DEFAULT_TEMPLATE.commands.length > 0) {
+                        localStorage.setItem('flowstudio_commands', JSON.stringify(DEFAULT_TEMPLATE.commands));
+                        console.info(`[DefaultTemplate] 加载了 ${DEFAULT_TEMPLATE.commands.length} 个指令模板`);
+                    }
+
+                    // 加载 Custom Categories
+                    if (DEFAULT_TEMPLATE.customCategories && DEFAULT_TEMPLATE.customCategories.length > 0) {
+                        localStorage.setItem('flowstudio_categories_custom', JSON.stringify(DEFAULT_TEMPLATE.customCategories));
+                    }
+
+                    console.info("[DefaultTemplate] 默认模板加载完成！");
+                } catch (e) {
+                    console.error("[DefaultTemplate] 加载默认模板失败:", e);
+                }
+            }
+
+            // 标记默认模板已处理（无论是否加载）
+            localStorage.setItem(DEFAULT_TEMPLATE_KEY, 'true');
         };
 
         // Run immediately.
