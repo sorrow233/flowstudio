@@ -89,7 +89,6 @@ export const parseRichText = (text) => {
 
 const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComplete, copiedId }) => {
     const [isDragging, setIsDragging] = React.useState(false);
-    const hasVibratedRef = React.useRef(false); // Prevent multiple vibrations
     const { t } = useTranslation();
 
     const config = getColorConfig(idea.colorIndex || 0);

@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
 import * as Y from 'yjs';
+import { v4 as uuidv4 } from 'uuid';
 
 // --- CRDT Array Hook (for Projects) ---
 export const useSyncedProjects = (doc, arrayName) => {
@@ -47,7 +47,13 @@ export const useSyncedProjects = (doc, arrayName) => {
         const yArray = doc.getArray(arrayName);
 
         const yMap = new Y.Map();
-        Object.entries(project).forEach(([key, value]) => {
+        const projectData = {
+            id: project.id || uuidv4(),
+            createdAt: project.createdAt || Date.now(),
+            ...project
+        };
+
+        Object.entries(projectData).forEach(([key, value]) => {
             yMap.set(key, value);
         });
 
@@ -106,4 +112,68 @@ export const useSyncedProjects = (doc, arrayName) => {
     }, []);
 
     return { projects, addProject, removeProject, updateProject, undo, redo, canUndo, canRedo };
+};
+
+/**
+ * Hook to migrate projects from multiple old arrays to a single unified array.
+ * This should be used once at the app level.
+ */
+export const useProjectMigration = (doc, unifiedArrayName, oldArrayNames) => {
+    useEffect(() => {
+        if (!doc || !unifiedArrayName || !oldArrayNames) return;
+
+        const unifiedArray = doc.getArray(unifiedArrayName);
+
+        // Use a transaction for the entire migration
+        doc.transact(() => {
+            // Check if migration has already been done or if unified array has data
+            // (We might want a more robust flag, but let's check old arrays content)
+
+            oldArrayNames.forEach(oldName => {
+                const oldArray = doc.getArray(oldName);
+                if (oldArray.length === 0) return;
+
+                console.info(`[Migration] Moving projects from ${oldName} to ${unifiedArrayName}...`);
+
+                const items = oldArray.toArray();
+                items.forEach(item => {
+                    const data = item instanceof Y.Map ? item.toJSON() : item;
+
+                    // Normalize data: ensure ID, add stage based on old name if missing
+                    let stage = data.stage;
+                    if (!stage) {
+                        if (oldName === 'inspiration') stage = 'inspiration';
+                        else if (oldName === 'pending_projects') stage = 'pending';
+                        else if (oldName === 'primary_projects') {
+                            // If subStage >= 6, it might be Advanced/Final, but usually 'primary_projects' stores primary.
+                            // If it's already graduated, it should be in final_projects or have higher subStage.
+                            stage = (data.subStage || 1) >= 6 ? 'final' : 'primary';
+                        }
+                        else if (oldName === 'final_projects') stage = 'final';
+                    }
+
+                    const normalized = {
+                        ...data,
+                        id: data.id || uuidv4(),
+                        stage: stage || 'primary'
+                    };
+
+                    // Check for duplicates in unifiedArray before adding
+                    const exists = unifiedArray.toArray().some(uItem => {
+                        const uId = uItem instanceof Y.Map ? uItem.get('id') : uItem.id;
+                        return uId === normalized.id;
+                    });
+
+                    if (!exists) {
+                        const yMap = new Y.Map();
+                        Object.entries(normalized).forEach(([k, v]) => yMap.set(k, v));
+                        unifiedArray.push([yMap]);
+                    }
+                });
+
+                // Clear old array to mark migration complete for this collection
+                oldArray.delete(0, oldArray.length);
+            });
+        });
+    }, [doc, unifiedArrayName, oldArrayNames]);
 };
