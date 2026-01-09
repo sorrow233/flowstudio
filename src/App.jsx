@@ -6,7 +6,6 @@ import ErrorBoundary from './components/ErrorBoundary';
 import InspirationModule from './features/lifecycle/InspirationModule';
 import PendingModule from './features/lifecycle/PendingModule';
 import PrimaryDevModule from './features/lifecycle/PrimaryDevModule';
-import FinalDevModule from './features/lifecycle/FinalDevModule';
 import AdvancedDevModule from './features/lifecycle/AdvancedDevModule';
 import CommercialModule from './features/lifecycle/CommercialModule';
 import CommandCenterModule from './features/commands/CommandCenterModule';
@@ -40,7 +39,6 @@ function App() {
                                         <Route path="/pending" element={<PendingModule />} />
                                         <Route path="/primary" element={<PrimaryDevModule />} />
                                         <Route path="/advanced" element={<AdvancedDevModule />} />
-                                        <Route path="/final" element={<FinalDevModule />} />
                                         <Route path="/commercial" element={<CommercialModule />} />
                                         <Route path="/commands" element={<CommandCenterModule />} />
                                         <Route path="/share/:id" element={<ShareViewPage />} />

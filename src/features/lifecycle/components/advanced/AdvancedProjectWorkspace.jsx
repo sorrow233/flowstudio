@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
-import { Sparkles, X, Plus, Box, LayoutGrid, List, Settings, ChevronLeft, ChevronUp, Terminal } from 'lucide-react';
+import { Sparkles, X, Plus, Box, LayoutGrid, List, Settings, ChevronLeft, ChevronUp, Terminal, Edit2 } from 'lucide-react';
 
 import AdvancedStageNavigation from './AdvancedStageNavigation';
 import ModuleGrid from './ModuleGrid';
@@ -11,7 +11,7 @@ import ModuleDetailModal from './ModuleDetailModal';
 import ModuleLibraryModal from './ModuleLibraryModal';
 import ProjectSettingsModal from './ProjectSettingsModal';
 
-const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate, onDeleteProject }) => {
+const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeleteProject }) => {
     // Stage Management
     const stages = project.customStages || [];
     const [activeStageId, setActiveStageId] = useState(stages.length > 0 ? stages[0].id : null);
@@ -118,7 +118,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate,
                 className="w-full h-full bg-white dark:bg-[#0A0A0A] md:rounded-[3rem] shadow-2xl overflow-hidden relative z-10 flex flex-col md:flex-row transition-all duration-700"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Left Sidebar: Custom Stages (Restyled to match screenshot) */}
+                {/* Left Sidebar: Custom Stages */}
                 <AdvancedStageNavigation
                     stages={stages}
                     activeStageId={activeStageId}
@@ -129,7 +129,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate,
                 {/* Main Content Area */}
                 <div className="flex-1 flex flex-col h-full bg-white dark:bg-[#121212] relative overflow-hidden">
 
-                    {/* Top UI Elements (Matching Screenshot) */}
+                    {/* Top UI Elements */}
                     <div className="p-12 pb-0 flex justify-between items-start">
                         <div className="space-y-6">
                             <button
@@ -167,7 +167,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate,
                         </div>
                     </div>
 
-                    {/* Canvas Area (Matching Screenshot Layout) */}
+                    {/* Canvas Area */}
                     <div className="flex-1 overflow-y-auto custom-scrollbar px-12 pt-8">
                         {stages.length === 0 ? (
                             <div className="h-full flex flex-col items-center justify-center text-center opacity-30">
@@ -215,7 +215,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate,
                         )}
                     </div>
 
-                    {/* Quick Input Bar (Matching screenshot) */}
+                    {/* Quick Input Bar */}
                     <div className="px-12 py-10 bg-gradient-to-t from-white via-white to-transparent dark:from-[#121212] dark:via-[#121212] absolute bottom-0 left-0 right-0">
                         <div className="max-w-4xl mx-auto relative group">
                             <input

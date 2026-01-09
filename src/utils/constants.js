@@ -39,38 +39,6 @@ export const DEV_STAGES = [
     }
 ];
 
-export const EXTRA_STAGES = [
-    {
-        id: 6,
-        label: 'Final',
-        title: 'Project Culmination',
-        desc: 'Final QA, build verification, and deployment to production.',
-        icon: 'CheckCircle2',
-        color: 'emerald'
-    }
-];
-
-export const FINAL_STAGES = [
-    {
-        id: 1,
-        label: 'Optimization',
-        title: 'Module Optimization',
-        desc: 'Analyze existing implementation, identify bottlenecks, and refine code for better performance and readability.',
-    },
-    {
-        id: 2,
-        label: 'New Module',
-        title: 'Feature Append',
-        desc: 'Plan and implement new modules or features, ensuring seamless integration with the existing system.',
-    },
-    {
-        id: 3,
-        label: 'Bug Fix',
-        title: 'Defect Resolution',
-        desc: 'Identify, reproduce, and resolve reported bugs to ensure system stability and reliability.',
-    }
-];
-
 export const STAGE_EMPTY_STATES = {
     1: {
         title: 'Architect\'s Blank Canvas',

@@ -54,9 +54,8 @@ const Navbar = () => {
         { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' },
     ];
 
-    // 额外流程：终稿 -> 商业化
+    // 额外流程：商业化
     const extraTabs = [
-        { id: 'final', label: t('navbar.final'), icon: tabIcons.final, path: '/final' }, // Icon: Check
         { id: 'commercial', label: t('navbar.commercial'), icon: tabIcons.commercial, path: '/commercial' },
     ];
 
@@ -167,14 +166,13 @@ const Navbar = () => {
                             <>
                                 <div className="w-px h-5 md:h-6 bg-gray-200 dark:bg-gray-600 mx-1 md:mx-2 relative z-40 shrink-0" />
 
-                                {/* 其他流程（终稿、商业化） */}
+                                {/* 其他流程（商业化） */}
                                 {extraTabs.map((tab) => {
                                     const Icon = tab.icon;
                                     const isActive = location.pathname.startsWith(tab.path);
 
                                     // Define active colors for each tab
                                     const activeColors = {
-                                        final: 'text-gray-900 dark:text-white',
                                         commercial: 'text-yellow-500 dark:text-yellow-400',
                                     };
 
