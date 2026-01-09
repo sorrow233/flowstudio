@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Trash2, Save, Image as ImageIcon } from 'lucide-react';
+import { useConfirmDialog } from '../../../../components/shared/ConfirmDialog';
 
 const ProjectSettingsModal = ({ isOpen, onClose, project, onUpdate, onDelete }) => {
     const [localProject, setLocalProject] = useState(project);
     const [hasChanges, setHasChanges] = useState(false);
+    const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
 
     useEffect(() => {
         setLocalProject(project);
@@ -116,9 +118,12 @@ const ProjectSettingsModal = ({ isOpen, onClose, project, onUpdate, onDelete }) 
                 <div className="p-6 border-t border-gray-50 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex justify-between items-center">
                     <button
                         onClick={() => {
-                            if (confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
-                                onDelete(project.id);
-                            }
+                            openConfirm({
+                                title: 'Delete Project',
+                                message: "Are you sure you want to delete this project? This action cannot be undone.",
+                                confirmText: 'Delete',
+                                onConfirm: () => onDelete(project.id)
+                            });
                         }}
                         className="p-3 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors flex items-center gap-2"
                     >
@@ -138,8 +143,9 @@ const ProjectSettingsModal = ({ isOpen, onClose, project, onUpdate, onDelete }) 
                         Save Changes
                     </button>
                 </div>
-            </motion.div>
-        </div>
+                <ConfirmDialogComponent />
+            </motion.div >
+        </div >
     );
 };
 

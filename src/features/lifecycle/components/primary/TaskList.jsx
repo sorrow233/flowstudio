@@ -606,7 +606,6 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                         </motion.div>
                     )}
                 </AnimatePresence>
-                </AnimatePresence>
             </div>
             <ConfirmDialogComponent />
         </div >

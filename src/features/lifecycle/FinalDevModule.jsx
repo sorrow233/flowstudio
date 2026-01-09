@@ -11,7 +11,9 @@ import { useSyncedProjects } from '../sync/useSyncStore';
 import confetti from 'canvas-confetti';
 import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
 import { Reorder } from 'framer-motion';
+import { Reorder } from 'framer-motion';
 import TaskItem from './components/primary/TaskItem';
+import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { COMMAND_CATEGORIES } from '../../utils/constants';
 import { LayoutGrid, Monitor, Server, Database, Container, Beaker } from 'lucide-react';
 
@@ -83,7 +85,10 @@ const FinalDevModule = () => {
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState(new Set());
     const [lastSelectedId, setLastSelectedId] = useState(null);
+    const [selectedIds, setSelectedIds] = useState(new Set());
+    const [lastSelectedId, setLastSelectedId] = useState(null);
     const [isCompletedCollapsed, setIsCompletedCollapsed] = useState(true);
+    const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
 
     // Sync: Load Commands
     const { projects: availableCommands } = useSyncedProjects(doc, 'all_commands');
@@ -148,10 +153,15 @@ const FinalDevModule = () => {
     // --- Project Handlers ---
     const handleDeleteProject = (e, id) => {
         e.stopPropagation();
-        if (confirm('Delete project?')) {
-            deleteProject(id);
-            if (selectedProject?.id === id) setSelectedProject(null);
-        }
+        openConfirm({
+            title: 'Delete Project',
+            message: 'Delete project?',
+            confirmText: 'Delete',
+            onConfirm: () => {
+                deleteProject(id);
+                if (selectedProject?.id === id) setSelectedProject(null);
+            }
+        });
     };
 
     const handleUpdateProject = (id, updates) => {
@@ -301,11 +311,16 @@ const FinalDevModule = () => {
 
     const handleBulkDelete = () => {
         if (selectedIds.size === 0) return;
-        if (confirm(`Delete ${selectedIds.size} items?`)) {
-            selectedIds.forEach(id => handleDeleteTask(selectedProject.id, id));
-            setIsSelectionMode(false);
-            setSelectedIds(new Set());
-        }
+        openConfirm({
+            title: 'Delete Tasks',
+            message: `Delete ${selectedIds.size} items?`,
+            confirmText: 'Delete',
+            onConfirm: () => {
+                selectedIds.forEach(id => handleDeleteTask(selectedProject.id, id));
+                setIsSelectionMode(false);
+                setSelectedIds(new Set());
+            }
+        });
     };
 
     const handleBulkToggle = () => {
@@ -797,10 +812,13 @@ const FinalDevModule = () => {
                                 </div>
                             </div>
 
+
+                            <ConfirmDialogComponent />
                         </motion.div>
                     </div>
-                )}
-            </AnimatePresence>
+                )
+                }
+            </AnimatePresence >
 
             <ImportCommandModal
                 isOpen={commandModalOpen}
@@ -810,7 +828,7 @@ const FinalDevModule = () => {
                 projectCategory={selectedProject?.category}
                 themeColor="red"
             />
-        </div>
+        </div >
     );
 };
 

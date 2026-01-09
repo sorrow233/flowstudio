@@ -13,7 +13,7 @@ import LibraryImportModal from './components/LibraryImportModal';
 
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
-import { useSyncedProjects } from '../sync/useSyncStore';
+
 import { useTranslation } from '../i18n';
 import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
 
@@ -22,7 +22,7 @@ import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
 const CommandCenterModule = () => {
     // --- Sync Integration ---
     const { doc } = useSync();
-    const { doc } = useSync();
+
     const { t } = useTranslation();
     const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
 
