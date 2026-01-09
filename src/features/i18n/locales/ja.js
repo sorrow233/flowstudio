@@ -310,6 +310,35 @@ export default {
         },
     },
 
+    // Task List
+    taskList: {
+        importCommand: 'コマンドをインポート',
+        completed: '完了',
+        stageTasksCompleted: 'ステージタスク完了',
+        stageTasksCompletedDesc: 'すべてのタスクが完了しました。次のステージに進めます',
+        selectAll: 'すべて選択',
+        deselectAll: '選択解除',
+        selected: '選択済み',
+        deleteSelected: '選択を削除',
+        move: '移動',
+        addTaskPlaceholder: '{stage}にタスクを追加...',
+    },
+
+    // Import Command Modal
+    importCommandModal: {
+        title: 'コマンドをインポート',
+        subtitle: '事前設定されたコマンドをタスクリストに追加します。',
+        searchPlaceholder: 'コマンドを検索...',
+        recommendedFor: '{stage}に推奨',
+        perfectMatch: '完璧な一致',
+        stageCritical: 'ステージクリティカル',
+        domainPreferred: 'ドメイン優先',
+        otherCommands: 'その他のコマンド',
+        noResults: 'フィルターに一致するコマンドが見つかりません。',
+        added: '追加済み',
+        add: '追加 +',
+    },
+
     // Command Categories
     categories: {
         general: '一般',

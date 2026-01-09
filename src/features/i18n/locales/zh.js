@@ -337,6 +337,35 @@ export default {
         },
     },
 
+    // 任务列表
+    taskList: {
+        importCommand: '导入命令',
+        completed: '已完成',
+        stageTasksCompleted: '阶段任务已完成',
+        stageTasksCompletedDesc: '所有任务都已完成，可以进入下一阶段',
+        selectAll: '全选',
+        deselectAll: '取消全选',
+        selected: '已选择',
+        deleteSelected: '删除所选',
+        move: '移动',
+        addTaskPlaceholder: '添加任务到{stage}...',
+    },
+
+    // 导入命令模态框
+    importCommandModal: {
+        title: '导入命令',
+        subtitle: '将预配置的命令添加到任务列表。',
+        searchPlaceholder: '搜索命令...',
+        recommendedFor: '推荐用于{stage}',
+        perfectMatch: '完美匹配',
+        stageCritical: '阶段关键',
+        domainPreferred: '领域优先',
+        otherCommands: '其他命令',
+        noResults: '未找到匹配的命令。',
+        added: '已添加',
+        add: '添加 +',
+    },
+
     // 命令分类
     categories: {
         general: '通用',

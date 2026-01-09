@@ -228,11 +228,11 @@ const TaskItem = ({
                         : ''}
                     ${isGrabbing ? `shadow-md ring-1 ${theme.grab}` : ''}
                     ${!isSelectionMode && isMandatory && !task.done
-                        ? 'bg-white border-red-100 shadow-sm shadow-red-100 hover:border-red-200'
+                        ? 'bg-white dark:bg-gray-900 border-red-100 dark:border-red-900/50 shadow-sm shadow-red-100 dark:shadow-red-900/20 hover:border-red-200 dark:hover:border-red-800'
                         : !isSelectionMode && isMandatory && task.done
-                            ? 'bg-purple-50/50 border-purple-100 opacity-60'
+                            ? 'bg-purple-50/50 dark:bg-purple-900/20 border-purple-100 dark:border-purple-800/50 opacity-60'
                             : !isSelectionMode && isLink
-                                ? 'bg-white border-blue-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5'
+                                ? 'bg-white dark:bg-gray-900 border-blue-100 dark:border-blue-900/50 hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-lg hover:shadow-blue-500/5'
                                 : !isSelectionMode && task.done
                                     ? 'bg-gray-50 border-gray-100 opacity-60 dark:bg-gray-900/40 dark:border-gray-800'
                                     : !isSelectionMode && !isSelected
@@ -249,7 +249,7 @@ const TaskItem = ({
 
                 {/* Leading Icon/Check */}
                 {isLink ? (
-                    <div className="w-10 h-10 flex items-center justify-center transition-all rounded-full shadow-sm shrink-0 bg-blue-50 text-blue-500 group-hover:bg-blue-100">
+                    <div className="w-10 h-10 flex items-center justify-center transition-all rounded-full shadow-sm shrink-0 bg-blue-50 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50">
                         {isLink ? <Globe size={20} /> : <Terminal size={20} />}
                     </div>
                 ) : (
@@ -300,12 +300,12 @@ const TaskItem = ({
                             {/* Tags Row */}
                             <div className="flex flex-wrap items-center gap-2">
                                 {isMandatory && (
-                                    <span className="text-[10px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-red-100">
+                                    <span className="text-[10px] font-bold bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 px-2 py-0.5 rounded-full uppercase tracking-wider border border-red-100 dark:border-red-800/50">
                                         Mandatory
                                     </span>
                                 )}
                                 {isLink && (
-                                    <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-blue-100 flex items-center gap-1">
+                                    <span className="text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400 px-2 py-0.5 rounded-full uppercase tracking-wider border border-blue-100 dark:border-blue-800/50 flex items-center gap-1">
                                         <ExternalLink size={8} /> Link
                                     </span>
                                 )}
@@ -316,10 +316,10 @@ const TaskItem = ({
                                         {task.commandTags.map(tag => {
                                             // Simple color rotation matching ImportCommandModal
                                             const colors = [
-                                                'bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100',
-                                                'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100',
-                                                'bg-violet-50 text-violet-700 border-violet-100 hover:bg-violet-100',
-                                                'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100 hover:bg-fuchsia-100'
+                                                'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-100 dark:border-blue-800/50 hover:bg-blue-100 dark:hover:bg-blue-900/50',
+                                                'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border-indigo-100 dark:border-indigo-800/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50',
+                                                'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 border-violet-100 dark:border-violet-800/50 hover:bg-violet-100 dark:hover:bg-violet-900/50',
+                                                'bg-fuchsia-50 dark:bg-fuchsia-900/30 text-fuchsia-700 dark:text-fuchsia-300 border-fuchsia-100 dark:border-fuchsia-800/50 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900/50'
                                             ];
                                             const colorClass = colors[tag.label.length % colors.length];
 

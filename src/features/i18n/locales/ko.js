@@ -309,6 +309,35 @@ export default {
         },
     },
 
+    // Task List
+    taskList: {
+        importCommand: '명령 가져오기',
+        completed: '완료',
+        stageTasksCompleted: '단계 작업 완료',
+        stageTasksCompletedDesc: '모든 작업이 완료되었습니다. 다음 단계로 진행하세요',
+        selectAll: '전체 선택',
+        deselectAll: '선택 해제',
+        selected: '선택됨',
+        deleteSelected: '선택 항목 삭제',
+        move: '이동',
+        addTaskPlaceholder: '{stage}에 작업 추가...',
+    },
+
+    // Import Command Modal
+    importCommandModal: {
+        title: '명령 가져오기',
+        subtitle: '사전 구성된 명령을 작업 목록에 추가합니다.',
+        searchPlaceholder: '명령 검색...',
+        recommendedFor: '{stage}에 추천',
+        perfectMatch: '완벽한 일치',
+        stageCritical: '단계 필수',
+        domainPreferred: '도메인 선호',
+        otherCommands: '기타 명령',
+        noResults: '필터와 일치하는 명령을 찾을 수 없습니다.',
+        added: '추가됨',
+        add: '추가 +',
+    },
+
     // Command Categories
     categories: {
         general: '일반',

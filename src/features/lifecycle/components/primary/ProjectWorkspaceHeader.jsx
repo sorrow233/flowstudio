@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, Terminal, Pencil, Save, X, Trash2, ArrowLeft, Image as ImageIcon, ChevronDown, Quote } from 'lucide-react';
 import { DEV_STAGES } from '../../../../utils/constants';
+import { useTranslation } from '../../../i18n';
 
 const VISUAL_VIBES = [
     'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop', // Tech Dark
@@ -18,6 +19,7 @@ const ProjectWorkspaceHeader = ({
     themeColor = 'purple',
     ...props
 }) => {
+    const { t } = useTranslation();
     const [showVow, setShowVow] = useState(false);
 
     // Theme Configuration
@@ -179,7 +181,7 @@ const ProjectWorkspaceHeader = ({
                                         className={`flex-1 md:flex-none flex items-center justify-center gap-3 px-4 md:px-6 py-3 md:py-4 bg-white text-gray-900 rounded-2xl shadow-2xl ${theme.button} transition-all font-medium whitespace-nowrap group`}
                                     >
                                         <Terminal size={18} className={`md:w-5 md:h-5 ${theme.icon} transition-colors`} />
-                                        <span className="inline">Import Command</span>
+                                        <span className="inline">{t('taskList.importCommand')}</span>
                                     </motion.button>
                                 </div>
                             </div>

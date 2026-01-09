@@ -4,6 +4,7 @@ import { X, Search, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Contai
 import { STORAGE_KEYS, COMMAND_CATEGORIES, DEV_STAGES } from '../../../../utils/constants';
 import { useSync } from '../../../sync/SyncContext';
 import { useSyncedProjects } from '../../../sync/useSyncStore';
+import { useTranslation } from '../../../i18n';
 
 const CATEGORY_ICONS = {
     'LayoutGrid': LayoutGrid,
@@ -16,6 +17,7 @@ const CATEGORY_ICONS = {
 };
 
 const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCategory, stages = DEV_STAGES, themeColor = 'emerald' }) => {
+    const { t } = useTranslation();
     const THEME_STYLES = {
         purple: {
             border: 'border-purple-100/50 hover:border-purple-300',
@@ -161,18 +163,18 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                                 {cmd.title}
                                 {currentStage && cmd.stageIds?.includes(currentStage) && projectCategory && cmd.category === projectCategory ? (
                                     <span className="flex items-center gap-1 text-[10px] font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-100 uppercase tracking-wider shadow-sm shadow-violet-200/50">
-                                        <Sparkles size={10} fill="currentColor" /> Perfect Match
+                                        <Sparkles size={10} fill="currentColor" /> {t('importCommandModal.perfectMatch')}
                                     </span>
                                 ) : (
                                     <>
                                         {currentStage && cmd.stageIds?.includes(currentStage) && (
                                             <span className={`text-[10px] font-bold ${themeClasses.badge} px-1.5 py-0.5 rounded border uppercase tracking-wider`}>
-                                                Stage Critical
+                                                {t('importCommandModal.stageCritical')}
                                             </span>
                                         )}
                                         {projectCategory && cmd.category === projectCategory && (
                                             <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100 uppercase tracking-wider">
-                                                Domain Preferred
+                                                {t('importCommandModal.domainPreferred')}
                                             </span>
                                         )}
                                     </>
@@ -219,10 +221,10 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                                 className={`text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-100 px-2.5 py-1 rounded flex items-center gap-1.5`}
                             >
                                 <Check size={14} strokeWidth={2.5} />
-                                <span className="hidden sm:inline">Added</span>
+                                <span className="hidden sm:inline">{t('importCommandModal.added')}</span>
                             </motion.span>
                         ) : (
-                            <span className={`text-xs font-medium ${themeClasses.addBtn} px-2 py-1 rounded`}>Add +</span>
+                            <span className={`text-xs font-medium ${themeClasses.addBtn} px-2 py-1 rounded`}>{t('importCommandModal.add')}</span>
                         )}
                     </div>
                 </div>
@@ -250,8 +252,8 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                         {/* Header */}
                         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                             <div>
-                                <h3 className="text-xl font-medium text-gray-900">Import Command</h3>
-                                <p className="text-sm text-gray-500 mt-1">Add pre-configured commands to your task list.</p>
+                                <h3 className="text-xl font-medium text-gray-900">{t('importCommandModal.title')}</h3>
+                                <p className="text-sm text-gray-500 mt-1">{t('importCommandModal.subtitle')}</p>
                             </div>
                             <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-900">
                                 <X size={20} />
@@ -264,7 +266,7 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                 <input
                                     type="text"
-                                    placeholder="Search commands..."
+                                    placeholder={t('importCommandModal.searchPlaceholder')}
                                     value={importSearch}
                                     onChange={e => setImportSearch(e.target.value)}
                                     className={`w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 ${themeClasses.searchRing} transition-all outline-none text-sm`}
@@ -319,7 +321,7 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                                         <div className="p-4 pb-2">
                                             <h4 className={`text-xs font-bold ${themeClasses.recommendedTitle} uppercase tracking-widest flex items-center gap-2`}>
                                                 <Sparkles size={14} className={themeClasses.recommendedIcon} />
-                                                Recommended for {stages.find(s => s.id === currentStage)?.label || 'Current Stage'}
+                                                {t('importCommandModal.recommendedFor', { stage: stages.find(s => s.id === currentStage)?.label || t('common.all') })}
                                             </h4>
                                         </div>
 
@@ -333,7 +335,7 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                                     <div>
                                         {recommendedCommands.length > 0 && (
                                             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 mt-2 px-2">
-                                                Other Commands
+                                                {t('importCommandModal.otherCommands')}
                                             </h4>
                                         )}
                                         <div className="grid grid-cols-1 gap-3">
@@ -344,7 +346,7 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                                 {filteredCommands.length === 0 && (
                                     <div className="text-center py-20 text-gray-400">
                                         <Search size={40} className="mx-auto mb-4 opacity-20" />
-                                        <p>No commands found matching filters.</p>
+                                        <p>{t('importCommandModal.noResults')}</p>
                                     </div>
                                 )}
                             </div>

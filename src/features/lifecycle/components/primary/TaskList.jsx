@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { LayoutGrid, Monitor, Server, Database, Container, Beaker, CheckSquare, ListChecks, Copy, X, ChevronDown, ChevronRight, CheckCircle2, Trash2, ArrowRight, Terminal } from 'lucide-react';
-import { COMMAND_CATEGORIES, STAGE_EMPTY_STATES, DEV_STAGES } from '../../../../utils/constants';
+import { COMMAND_CATEGORIES, DEV_STAGES } from '../../../../utils/constants';
 import TaskItem from './TaskItem';
 import { useConfirmDialog } from '../../../../components/shared/ConfirmDialog';
+import { useTranslation } from '../../../i18n';
 
 const CATEGORY_ICONS = {
     'LayoutGrid': LayoutGrid,
@@ -16,6 +17,7 @@ const CATEGORY_ICONS = {
 
 
 const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask, onUpdateTask, newTaskInput, setNewTaskInput, newTaskCategory, setNewTaskCategory, onScroll, onReorder, onImportCommand, availableCommands, themeColor = 'purple' }, ref) => {
+    const { t } = useTranslation();
     const [copiedTaskId, setCopiedTaskId] = useState(null);
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const [editingTaskId, setEditingTaskId] = useState(null);
@@ -170,6 +172,12 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
         setLastSelectedId(null);
     };
 
+    // Get translated empty state for current stage
+    const emptyState = {
+        title: t(`stageEmptyStates.${activeStage}.title`),
+        desc: t(`stageEmptyStates.${activeStage}.desc`)
+    };
+
     const handleReorder = (newOrder) => {
         setLocalTasks(newOrder);
         if (onReorder) {
@@ -178,7 +186,6 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
     };
 
     const stageInfo = DEV_STAGES.find(s => s.id === activeStage);
-    const emptyState = STAGE_EMPTY_STATES[activeStage];
 
     // Theme Configuration
     const THEME_STYLES = {
@@ -437,7 +444,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                     className="mt-6 flex items-center gap-2 px-5 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 transition-all font-medium text-sm shadow-sm hover:shadow-md"
                                 >
                                     <Terminal size={14} />
-                                    <span>Import Command</span>
+                                    <span>{t('taskList.importCommand')}</span>
                                 </button>
                             </motion.div>
                         )}

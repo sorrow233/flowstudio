@@ -321,6 +321,35 @@ export default {
         },
     },
 
+    // Task List
+    taskList: {
+        importCommand: 'Import Command',
+        completed: 'Completed',
+        stageTasksCompleted: 'Stage Tasks Completed',
+        stageTasksCompletedDesc: 'All tasks completed, proceed to next stage',
+        selectAll: 'Select All',
+        deselectAll: 'Deselect All',
+        selected: 'Selected',
+        deleteSelected: 'Delete Selected',
+        move: 'Move',
+        addTaskPlaceholder: 'Add a task to {stage}...',
+    },
+
+    // Import Command Modal
+    importCommandModal: {
+        title: 'Import Command',
+        subtitle: 'Add pre-configured commands to your task list.',
+        searchPlaceholder: 'Search commands...',
+        recommendedFor: 'Recommended for {stage}',
+        perfectMatch: 'Perfect Match',
+        stageCritical: 'Stage Critical',
+        domainPreferred: 'Domain Preferred',
+        otherCommands: 'Other Commands',
+        noResults: 'No commands found matching filters.',
+        added: 'Added',
+        add: 'Add +',
+    },
+
     // Command Categories
     categories: {
         general: 'General',

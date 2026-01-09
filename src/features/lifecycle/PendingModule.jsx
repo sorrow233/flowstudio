@@ -103,20 +103,13 @@ const PendingModule = () => {
         const hasReason = project.foundingReason && project.foundingReason.trim().length > 0;
 
         // 1. Get Template Commands for this category
-        // Filter commands that match the category AND are meant for Stage 1 (or all stages? usually Stage 1 is the starting point)
-        // For now, let's grab ALL commands for this category, but maybe we should respect stages?
-        // PrimaryDevModule usually starts at Stage 1. 
-        // Let's filter for commands that are EITHER stage 1 OR have no stage defined (defaults).
-        // Actually, the user request says "default have this category already configured every step things".
-        // So we should probably inject ALL commands for that category, mapped to their respective stages.
-
         const templateCommands = allCommands.filter(cmd =>
             (cmd.category || 'general') === category
         );
 
         // 2. Convert to Tasks
         const initialTasks = templateCommands.map(cmd => ({
-            id: uuidv4(), // Unique ID for the task instance
+            id: uuidv4(),
             text: cmd.title,
             done: false,
             isCommand: true,
@@ -125,8 +118,9 @@ const PendingModule = () => {
             commandId: cmd.id,
             commandType: cmd.type || 'utility',
             commandTags: cmd.tags || [],
-            stage: (cmd.stageIds && cmd.stageIds.length > 0) ? Math.min(...cmd.stageIds) : 1 // Assign to its first assigned stage, default to 1
+            stage: (cmd.stageIds && cmd.stageIds.length > 0) ? Math.min(...cmd.stageIds) : 1
         }));
+
 
         // Merge with any existing tasks (though pending projects usually have none, or user might have added some manually?)
         // Pending projects have `tasks` field? code says `project.tasks || []`.
