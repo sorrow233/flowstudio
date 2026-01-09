@@ -293,7 +293,7 @@ const InspirationModule = () => {
                     <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 overflow-visible transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] group-hover:border-gray-200 dark:group-hover:border-gray-700">
 
                         {/* Rich Preview Layer */}
-                        {/* Note: scrollTop is no longer needed with auto-grow, passing 0 */}
+                        <InputRichPreview text={input} scrollTop={0} />
 
                         <textarea
                             ref={textareaRef}
@@ -302,7 +302,7 @@ const InspirationModule = () => {
                             onKeyDown={handleKeyDown}
                             placeholder={input ? '' : t('inspiration.placeholder')}
                             className="w-full bg-transparent text-lg text-gray-900 dark:text-gray-100 caret-pink-500 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed relative z-10 overflow-hidden break-words placeholder:text-gray-400/50"
-                            style={{ fontFamily: 'inherit' }}
+                            style={{ fontFamily: 'inherit', WebkitTextFillColor: 'transparent' }}
                             autoComplete="off"
                             autoCorrect="off"
                             spellCheck="false"
