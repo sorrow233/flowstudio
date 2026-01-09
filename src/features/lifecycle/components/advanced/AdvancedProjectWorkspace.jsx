@@ -58,17 +58,6 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
 
     // --- Task Handlers (Mirrored from PrimaryDevModule) ---
 
-    // Note: We use 'stageId' (string) for Advanced, unlike 'stage' (number) in Primary.
-    // TaskList handles filtering by 'activeStage' prop. 
-    // We need to ensure TaskList compares correctly. PROBABLY TaskList expects 'activeStage' to be what matches task.stage.
-    // In Primary: activeStage is 1 (int). task.stage is 1 (int).
-    // In Advanced: activeStageId is 'design' (string). task.stageId is 'design' (string).
-    // TaskList prop is 'activeStage'. Inside TaskList: `t.stage || 1 === activeStage`.
-    // Wait, TaskList uses `t.stage || 1`.
-
-    // We should adapt the tasks to use `stage` property to store the stage ID, or update TaskList to handle `stageId`.
-    // Let's use `stage` property on tasks to store the custom stage ID string.
-
     const handleAddTask = (projectId) => {
         if (!newTaskInput.trim()) return;
 
@@ -176,75 +165,78 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
 
                 {/* Main Content */}
                 <div className="flex-1 flex flex-col h-full bg-white dark:bg-[#0A0A0A] relative overflow-hidden">
+                    {/* Header: Minimalist & Integrated */}
+                    <div className="px-6 py-4 border-b border-gray-50 dark:border-white/5 flex justify-between items-center bg-white/80 dark:bg-black/80 backdrop-blur-md sticky top-0 z-30">
+                        <div className="flex items-center gap-4">
+                            {/* Mobile Menu Trigger */}
+                            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+                                <Menu size={18} />
+                            </button>
 
-                    <div>
-                        <div className="flex items-center gap-2 mb-0.5 opacity-60 hover:opacity-100 transition-opacity">
-                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest cursor-default">Project</span>
-                            <ChevronRight size={10} className="text-gray-300" />
-                            <h1 className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[200px]">{project.title}</h1>
+                            <div>
+                                <div className="flex items-center gap-2 mb-0.5 opacity-60 hover:opacity-100 transition-opacity">
+                                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest cursor-default">Project</span>
+                                    <ChevronRight size={10} className="text-gray-300" />
+                                    <h1 className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[200px]">{project.title}</h1>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xs text-gray-500 font-medium">{activeStage ? activeStage.name : 'Unknown Stage'}</span>
+                                    {progress > 0 && (
+                                        <>
+                                            <div className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
+                                            <span className="text-[10px] font-mono text-gray-400">{progress}% Complete</span>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <span className="text-xs text-gray-500 font-medium">{activeStage ? activeStage.name : 'Unknown Stage'}</span>
-                            {progress > 0 && (
-                                <>
-                                    <div className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
-                                    <span className="text-[10px] font-mono text-gray-400">{progress}% Complete</span>
-                                </>
-                            )}
+
+                        <div className="flex items-center gap-1 md:gap-2">
+                            {/* Stats Pill - Only show if useful */}
+                            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-white/5 rounded-full border border-gray-100 dark:border-white/5 mr-2">
+                                <Activity size={10} className={progress === 100 ? "text-green-500" : "text-gray-400"} />
+                                <span className="text-[10px] font-mono text-gray-500">{completedTasks} / {totalTasks}</span>
+                            </div>
+
+                            <button onClick={() => setIsSettingsOpen(true)} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
+                                <Settings size={16} />
+                            </button>
+                            <button onClick={onClose} className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-all">
+                                <X size={18} />
+                            </button>
                         </div>
+                    </div>
+
+                    {/* Task List Area */}
+                    <div className="flex-1 overflow-hidden relative flex flex-col">
+                        <TaskList
+                            tasks={project.tasks || []}
+                            projectId={project.id}
+                            activeStage={activeStageId} // Passing string ID
+                            onToggle={handleToggleTask}
+                            onDelete={handleDeleteTask}
+                            onAddTask={handleAddTask}
+                            onUpdateTask={handleUpdateTask}
+                            onReorder={handleReorderTasks}
+                            newTaskInput={newTaskInput}
+                            setNewTaskInput={setNewTaskInput}
+                            newTaskCategory={newTaskCategory}
+                            setNewTaskCategory={setNewTaskCategory}
+                            availableCommands={allCommands}
+                            themeColor={activeStage?.color ? 'custom' : 'red'}
+                        />
                     </div>
                 </div>
 
-                <div className="flex items-center gap-1 md:gap-2">
-                    {/* Stats Pill - Only show if useful */}
-                    <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-white/5 rounded-full border border-gray-100 dark:border-white/5 mr-2">
-                        <Activity size={10} className={progress === 100 ? "text-green-500" : "text-gray-400"} />
-                        <span className="text-[10px] font-mono text-gray-500">{completedTasks} / {totalTasks}</span>
-                    </div>
-
-                    <button onClick={() => setIsSettingsOpen(true)} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
-                        <Settings size={16} />
-                    </button>
-                    <button onClick={onClose} className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-all">
-                        <X size={18} />
-                    </button>
-                </div>
+                <ProjectSettingsModal
+                    isOpen={isSettingsOpen}
+                    onClose={() => setIsSettingsOpen(false)}
+                    project={project}
+                    onUpdate={handleUpdateProject}
+                    onDelete={(id) => { onDeleteProject(id); onClose(); }}
+                />
+            </motion.div>
         </div>
-
-                        {/* Task List Area */ }
-    <div className="flex-1 overflow-hidden relative flex flex-col">
-        <TaskList
-            tasks={project.tasks || []}
-            projectId={project.id}
-            activeStage={activeStageId} // Passing string ID
-            onToggle={handleToggleTask}
-            onDelete={handleDeleteTask}
-            onAddTask={handleAddTask}
-            onUpdateTask={handleUpdateTask}
-            onReorder={handleReorderTasks}
-            newTaskInput={newTaskInput}
-            setNewTaskInput={setNewTaskInput}
-            newTaskCategory={newTaskCategory}
-            setNewTaskCategory={setNewTaskCategory}
-            availableCommands={allCommands}
-            // onImportCommand={() => {}} // TODO: Add Command Import logic if needed
-            themeColor={activeStage?.color ? 'custom' : 'red'}
-        />
-    </div>
-
-    {/* Quick Input (Redundant if TaskList has input? Primary TaskList HAS input at bottom) */ }
-    {/* Primary TaskList renders input at bottom. So we don't need another one. */ }
-                    </div >
-
-    <ProjectSettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        project={project}
-        onUpdate={handleUpdateProject}
-        onDelete={(id) => { onDeleteProject(id); onClose(); }}
-    />
-            </motion.div >
-        </div >
     );
 };
 
