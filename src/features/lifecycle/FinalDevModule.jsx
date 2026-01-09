@@ -11,7 +11,6 @@ import { useSyncedProjects } from '../sync/useSyncStore';
 import confetti from 'canvas-confetti';
 import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
 import { Reorder } from 'framer-motion';
-import { Reorder } from 'framer-motion';
 import TaskItem from './components/primary/TaskItem';
 import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { COMMAND_CATEGORIES } from '../../utils/constants';
@@ -83,8 +82,6 @@ const FinalDevModule = () => {
     const [editingTaskId, setEditingTaskId] = useState(null);
     const [editValue, setEditValue] = useState('');
     const [isSelectionMode, setIsSelectionMode] = useState(false);
-    const [selectedIds, setSelectedIds] = useState(new Set());
-    const [lastSelectedId, setLastSelectedId] = useState(null);
     const [selectedIds, setSelectedIds] = useState(new Set());
     const [lastSelectedId, setLastSelectedId] = useState(null);
     const [isCompletedCollapsed, setIsCompletedCollapsed] = useState(true);
