@@ -19,6 +19,9 @@ export default {
           700: '#be123c',
           800: '#9f1239',
           900: '#881337',
+        },
+        fontFamily: {
+          sans: ['Outfit', 'Inter', 'sans-serif'],
         }
       }
     },
