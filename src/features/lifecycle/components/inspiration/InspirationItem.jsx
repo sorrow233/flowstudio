@@ -57,7 +57,7 @@ export const parseRichText = (text) => {
         // Inline Code: `...`
         if (part.startsWith('`') && part.endsWith('`')) {
             return (
-                <code key={index} className="bg-blue-50/50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded text-[13px] font-mono text-blue-600 dark:text-blue-400 mx-0.5 border border-blue-100/50 dark:border-blue-800/30">
+                <code key={index} className="bg-pink-50/50 dark:bg-pink-900/20 px-1.5 py-0.5 rounded text-[13px] font-mono text-pink-600 dark:text-pink-400 mx-0.5 border border-pink-100/50 dark:border-pink-800/30">
                     {part.slice(1, -1)}
                 </code>
             );
@@ -76,7 +76,7 @@ export const parseRichText = (text) => {
             return (
                 <span
                     key={index}
-                    className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-md text-[11px] font-medium align-middle border border-blue-100/50 dark:border-blue-800/30 shadow-sm transform -translate-y-0.5"
+                    className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-pink-50/50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 rounded-md text-[11px] font-medium align-middle border border-pink-100/50 dark:border-pink-800/30 shadow-sm transform -translate-y-0.5"
                 >
                     {tagName}
                 </span>

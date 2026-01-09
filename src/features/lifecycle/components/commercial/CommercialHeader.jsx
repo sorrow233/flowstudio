@@ -14,7 +14,7 @@ const CommercialHeader = ({
     return (
         <div className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-gray-100 dark:border-gray-800 pb-8 gap-6">
             <div>
-                <h2 className="text-3xl font-thin text-gray-900 dark:text-white mb-2 tracking-tight flex items-center gap-3">
+                <h2 className="text-3xl font-thin text-amber-500 dark:text-amber-400 mb-2 tracking-tight flex items-center gap-3">
                     <span className="text-amber-500"><Coins size={28} strokeWidth={1.5} /></span>
                     {t('commercial.strategy')}
                 </h2>

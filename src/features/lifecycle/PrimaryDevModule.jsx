@@ -13,6 +13,7 @@ import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import confetti from 'canvas-confetti';
 import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
+import { useTranslation } from '../i18n';
 
 import Spotlight from '../../components/shared/Spotlight';
 
@@ -317,13 +318,15 @@ const PrimaryDevModule = () => {
         return stats;
     }, [selectedProject?.tasks]);
 
+    const { t } = useTranslation();
+
     return (
         <div className="max-w-7xl mx-auto pt-10 px-6 pb-20">
             {/* Dashboard Header */}
             <div className="mb-12 flex justify-between items-end">
                 <div>
-                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">Production Pipeline</h2>
-                    <p className="text-gray-400 text-sm font-light tracking-wide">Execution & Engineering</p>
+                    <h2 className="text-2xl font-light text-purple-500 dark:text-purple-400 mb-2 tracking-tight">{t('primary.title')}</h2>
+                    <p className="text-gray-400 text-sm font-light tracking-wide">{t('primary.subtitle')}</p>
                 </div>
                 <div className="flex items-center gap-4 text-right">
 

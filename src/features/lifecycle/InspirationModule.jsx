@@ -189,10 +189,10 @@ const InspirationModule = () => {
             {/* Header Section */}
             <div className="mb-14 text-center md:text-left">
                 <div className="inline-flex items-center justify-center md:justify-start gap-2 mb-3">
-                    <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                        <Lightbulb className="w-5 h-5 text-amber-500" />
+                    <div className="p-2 bg-pink-50 dark:bg-pink-900/20 rounded-xl">
+                        <Lightbulb className="w-5 h-5 text-pink-400" />
                     </div>
-                    <h2 className="text-3xl font-light text-gray-900 dark:text-white tracking-tight">
+                    <h2 className="text-3xl font-light text-pink-400 dark:text-pink-300 tracking-tight">
                         {t('inspiration.title')}
                     </h2>
                 </div>
@@ -243,7 +243,7 @@ const InspirationModule = () => {
                                             <button
                                                 key={tag}
                                                 onClick={() => handleTagClick(tag)}
-                                                className="flex-shrink-0 px-3 py-1 bg-blue-50/50 dark:bg-blue-900/20 hover:bg-blue-100/50 dark:hover:bg-blue-800/40 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 rounded-full text-[11px] font-medium transition-colors border border-blue-100/50 dark:border-blue-800/30 hover:border-blue-200/50 dark:hover:border-blue-700/50 whitespace-nowrap shadow-sm"
+                                                className="flex-shrink-0 px-3 py-1 bg-pink-50/50 dark:bg-pink-900/20 hover:bg-pink-100/50 dark:hover:bg-pink-800/40 text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 rounded-full text-[11px] font-medium transition-colors border border-pink-100/50 dark:border-pink-800/30 hover:border-pink-200/50 dark:hover:border-pink-700/50 whitespace-nowrap shadow-sm"
                                             >
                                                 {tag}
                                             </button>

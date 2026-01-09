@@ -5,6 +5,7 @@ import { useSyncedProjects } from '../sync/useSyncStore';
 import { useSync } from '../sync/SyncContext';
 import AdvancedProjectWorkspace from './components/advanced/AdvancedProjectWorkspace';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '../i18n';
 
 const AdvancedDevModule = () => {
     const navigate = useNavigate();
@@ -20,6 +21,8 @@ const AdvancedDevModule = () => {
     // For compatibility with some local variables if they exist
     const projects = allProjects;
 
+    const { t } = useTranslation();
+
     // --- State ---
     const [selectedProject, setSelectedProject] = useState(null);
 
@@ -30,9 +33,9 @@ const AdvancedDevModule = () => {
                 <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Trophy size={40} className="text-gray-300" strokeWidth={1} />
                 </div>
-                <h3 className="text-xl font-light text-gray-900 mb-2">No Final Projects Yet</h3>
+                <h3 className="text-xl font-light text-gray-900 mb-2">{t('final.emptyState')}</h3>
                 <p className="max-w-md mx-auto leading-relaxed">
-                    Graduate projects from the Production Pipeline by completing all 5 stages and the Ascension Ritual.
+                    Graduate projects from the Production Pipeline by completing all 5 stages.
                 </p>
             </div>
         );
@@ -43,8 +46,8 @@ const AdvancedDevModule = () => {
             {/* Header */}
             <div className="mb-12 flex justify-between items-end">
                 <div>
-                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">终稿整合阶段</h2>
-                    <p className="text-gray-400 text-sm font-light tracking-wide">项目核心逻辑与系统整合的最终阶段</p>
+                    <h2 className="text-2xl font-light text-red-500 dark:text-red-400 mb-2 tracking-tight">{t('final.title')}</h2>
+                    <p className="text-gray-400 text-sm font-light tracking-wide">{t('final.subtitle')}</p>
                 </div>
                 <div className="text-right">
                     <span className="text-3xl font-thin text-gray-900">{finalProjects.length}</span>

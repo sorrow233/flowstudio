@@ -90,7 +90,7 @@ export default {
     final: {
         title: 'Modules',
         subtitle: 'Global view of project modules and architecture.',
-        emptyState: 'No modular projects',
+        emptyState: 'No module projects',
     },
 
     // Commercial Module

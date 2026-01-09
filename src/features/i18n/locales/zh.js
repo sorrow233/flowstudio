@@ -4,9 +4,9 @@ export default {
     navbar: {
         inspiration: '灵感',
         pending: '待定',
-        primary: '主开发',
+        primary: '开发',
         advanced: '进阶',
-        final: '终稿',
+        final: '模块',
         commercial: '商业化',
         command: '命令',
         cloudSync: '云同步',
@@ -58,8 +58,8 @@ export default {
 
     // 主开发模块
     primary: {
-        title: '主力开发',
-        subtitle: '当前正在积极开发的项目',
+        title: '开发',
+        subtitle: '正在积极开发中的项目',
         emptyState: '暂无开发中项目',
         tasks: '任务',
         progress: '进度',
@@ -86,11 +86,11 @@ export default {
         newProjectDefaultDesc: '优化、功能与修复',
     },
 
-    // 终稿开发 (原进阶)
+    // 模块 (原终稿/进阶)
     final: {
-        title: '终稿整合',
-        subtitle: '项目核心逻辑与系统整合的最终阶段',
-        emptyState: '暂无终稿项目',
+        title: '模块',
+        subtitle: '全局查看并管理项目功能模块',
+        emptyState: '暂无模块',
     },
 
     // 商业化模块
