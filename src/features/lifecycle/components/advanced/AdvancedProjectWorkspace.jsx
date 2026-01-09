@@ -137,7 +137,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
     const stableModules = modules.filter(m => m.stage >= 4).length;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 pointer-events-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 sm:p-6 pointer-events-auto">
             {/* Backdrop */}
             <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -148,12 +148,12 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
             {/* Main Window */}
             <motion.div
                 layoutId={`advanced-card-${project.id}`}
-                className="w-full max-w-[1600px] h-[95vh] bg-white dark:bg-gray-950 rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10 flex flex-col ring-1 ring-gray-100 dark:ring-gray-800"
+                className="w-full max-w-[1600px] h-[100dvh] md:h-[95vh] bg-white dark:bg-gray-950 rounded-none md:rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10 flex flex-col ring-1 ring-gray-100 dark:ring-gray-800"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex flex-col h-full bg-white dark:bg-gray-950 relative">
                     {/* Header */}
-                    <div className="flex justify-between items-start px-8 py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 z-10">
+                    <div className="flex flex-col md:flex-row justify-between items-start px-4 md:px-8 py-4 md:py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 z-10 gap-4 md:gap-0">
                         <div className="flex-1">
                             <div className="flex items-center gap-3 text-red-600 mb-2">
                                 <div className="p-2 bg-red-50 rounded-lg">
@@ -254,7 +254,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-8 bg-gray-50/30 dark:bg-gray-900/30">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 bg-gray-50/30 dark:bg-gray-900/30">
                         {viewMode === 'grid' ? (
                             <div className="pb-20">
                                 {CATEGORIES.map(category => {

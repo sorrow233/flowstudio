@@ -22,14 +22,22 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
             currentKv: 'border-purple-500 text-purple-600 dark:text-purple-400',
             progressLine: 'bg-purple-500',
             text: 'text-purple-500',
-            titleHover: 'group-hover:text-purple-600'
+            titleHover: 'group-hover:text-purple-600',
+            completedText: 'text-purple-600/70',
+            dotBg: 'bg-purple-500',
+            dotShadow: 'shadow-purple-200',
+            dotRing: 'ring-purple-100'
         },
         red: {
             completedKv: 'bg-red-100 text-red-600',
             currentKv: 'border-red-500 text-red-600 dark:text-red-400',
             progressLine: 'bg-red-500',
             text: 'text-red-500',
-            titleHover: 'group-hover:text-red-600'
+            titleHover: 'group-hover:text-red-600',
+            completedText: 'text-red-600/70',
+            dotBg: 'bg-red-500',
+            dotShadow: 'shadow-red-200',
+            dotRing: 'ring-red-100'
         }
     };
     const theme = THEME_STYLES[themeColor] || THEME_STYLES.purple;
@@ -130,7 +138,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                         </div>
                                     )}
                                     <div className={`flex items-center gap-2 mt-0.5 text-[10px] truncate transition-colors ${isViewActive ? 'text-white/50' : 'text-gray-400'}`}>
-                                        <span className={isCompleted ? 'text-purple-600/70' : ''}>{isCompleted ? 'Completed' : isCurrentProgress ? 'In Progress' : 'Pending'}</span>
+                                        <span className={isCompleted ? theme.completedText : ''}>{isCompleted ? 'Completed' : isCurrentProgress ? 'In Progress' : 'Pending'}</span>
 
                                         {/* Content Badges */}
                                         {!isCompleted && (stats.commandCount > 0 || stats.taskCount > 0) && (
@@ -166,7 +174,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                         className={`
                                             w-2.5 h-2.5 rounded-full transition-all duration-300 shadow-sm
                                             ${isCompleted
-                                                ? 'bg-purple-500 shadow-purple-200 ring-2 ring-purple-100'
+                                                ? `${theme.dotBg} ${theme.dotShadow} ring-2 ${theme.dotRing}`
                                                 : (() => {
                                                     const stageColors = {
                                                         1: 'bg-purple-400',

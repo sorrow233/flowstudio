@@ -14,36 +14,56 @@ const CATEGORY_ICONS = {
 };
 
 const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCategory, stages = DEV_STAGES, themeColor = 'emerald' }) => {
-    // Dynamic color classes based on theme
-    const themeClasses = themeColor === 'purple' ? {
-        border: 'border-purple-100/50 hover:border-purple-300',
-        activeBorder: 'border-purple-200 ring-1 ring-purple-50',
-        hoverShadow: 'hover:shadow-purple-500/5',
-        icon: 'bg-purple-50 text-purple-600',
-        iconHover: 'group-hover:bg-purple-50 group-hover:text-purple-600',
-        titleHover: 'group-hover:text-purple-700',
-        badge: 'text-purple-600 bg-purple-50 border-purple-100',
-        addBtn: 'text-purple-600 bg-purple-50',
-        recommendedBg: 'border-purple-100 bg-purple-50/50',
-        recommendedLine: 'from-purple-400 to-violet-400',
-        recommendedTitle: 'text-purple-800',
-        recommendedIcon: 'text-purple-500',
-        searchRing: 'focus:ring-purple-100'
-    } : {
-        border: 'border-emerald-100/50 hover:border-emerald-300',
-        activeBorder: 'border-emerald-200 ring-1 ring-emerald-50',
-        hoverShadow: 'hover:shadow-emerald-500/5',
-        icon: 'bg-emerald-50 text-emerald-600',
-        iconHover: 'group-hover:bg-emerald-50 group-hover:text-emerald-600',
-        titleHover: 'group-hover:text-emerald-700',
-        badge: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-        addBtn: 'text-emerald-600 bg-emerald-50',
-        recommendedBg: 'border-emerald-100 bg-emerald-50/50',
-        recommendedLine: 'from-emerald-400 to-teal-400',
-        recommendedTitle: 'text-emerald-800',
-        recommendedIcon: 'text-emerald-500',
-        searchRing: 'focus:ring-emerald-100'
+    const THEME_STYLES = {
+        purple: {
+            border: 'border-purple-100/50 hover:border-purple-300',
+            activeBorder: 'border-purple-200 ring-1 ring-purple-50',
+            hoverShadow: 'hover:shadow-purple-500/5',
+            icon: 'bg-purple-50 text-purple-600',
+            iconHover: 'group-hover:bg-purple-50 group-hover:text-purple-600',
+            titleHover: 'group-hover:text-purple-700',
+            badge: 'text-purple-600 bg-purple-50 border-purple-100',
+            addBtn: 'text-purple-600 bg-purple-50',
+            recommendedBg: 'border-purple-100 bg-purple-50/50',
+            recommendedLine: 'from-purple-400 to-violet-400',
+            recommendedTitle: 'text-purple-800',
+            recommendedIcon: 'text-purple-500',
+            searchRing: 'focus:ring-purple-100'
+        },
+        emerald: {
+            border: 'border-emerald-100/50 hover:border-emerald-300',
+            activeBorder: 'border-emerald-200 ring-1 ring-emerald-50',
+            hoverShadow: 'hover:shadow-emerald-500/5',
+            icon: 'bg-emerald-50 text-emerald-600',
+            iconHover: 'group-hover:bg-emerald-50 group-hover:text-emerald-600',
+            titleHover: 'group-hover:text-emerald-700',
+            badge: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+            addBtn: 'text-emerald-600 bg-emerald-50',
+            recommendedBg: 'border-emerald-100 bg-emerald-50/50',
+            recommendedLine: 'from-emerald-400 to-teal-400',
+            recommendedTitle: 'text-emerald-800',
+            recommendedIcon: 'text-emerald-500',
+            searchRing: 'focus:ring-emerald-100'
+        },
+        red: {
+            border: 'border-red-100/50 hover:border-red-300',
+            activeBorder: 'border-red-200 ring-1 ring-red-50',
+            hoverShadow: 'hover:shadow-red-500/5',
+            icon: 'bg-red-50 text-red-600',
+            iconHover: 'group-hover:bg-red-50 group-hover:text-red-600',
+            titleHover: 'group-hover:text-red-700',
+            badge: 'text-red-600 bg-red-50 border-red-100',
+            addBtn: 'text-red-600 bg-red-50',
+            recommendedBg: 'border-red-100 bg-red-50/50',
+            recommendedLine: 'from-red-400 to-rose-400',
+            recommendedTitle: 'text-red-800',
+            recommendedIcon: 'text-red-500',
+            searchRing: 'focus:ring-red-100'
+        }
     };
+
+    // Default to emerald if not found, but try to match provided themeColor
+    const themeClasses = THEME_STYLES[themeColor] || THEME_STYLES.emerald;
     const [categories, setCategories] = useState(COMMAND_CATEGORIES);
     const [commands, setCommands] = useState([]); // BUG FIX: Missing state
     const [importCategory, setImportCategory] = useState('all'); // BUG FIX: Missing state
