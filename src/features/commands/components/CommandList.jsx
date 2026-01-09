@@ -155,27 +155,34 @@ const CommandList = ({
                         className="space-y-3"
                     >
                         {visibleCommands.map(cmd => (
-                            <CommandItem
+                            <Reorder.Item
                                 key={cmd.id}
-                                cmd={cmd}
-                                isSelectionMode={isSelectionMode}
-                                selectedIds={selectedIds}
-                                categories={categories}
-                                handleEdit={handleEdit}
-                                handleCopy={handleCopy}
-                                handleRemove={handleRemove}
-                                handleShare={handleShare}
-                                handleShiftSelect={handleShiftSelect}
-                                copiedId={copiedId}
-                                isSearching={isSearching}
-                                onClick={(e) => {
-                                    if (isSelectionMode) {
-                                        handleShiftSelect(cmd.id, e);
-                                        return;
-                                    }
-                                }}
-                                onDoubleClick={() => !isSelectionMode && handleEdit(cmd)}
-                            />
+                                value={cmd}
+                                dragListener={!isSearching && !isSelectionMode}
+                                className="relative"
+                            >
+                                <CommandItem
+                                    cmd={cmd}
+                                    isSelectionMode={isSelectionMode}
+                                    selectedIds={selectedIds}
+                                    categories={categories}
+                                    handleEdit={handleEdit}
+                                    handleCopy={handleCopy}
+                                    handleRemove={handleRemove}
+                                    handleShare={handleShare}
+                                    handleShiftSelect={handleShiftSelect}
+                                    copiedId={copiedId}
+                                    isSearching={isSearching}
+                                    dragListener={!isSearching && !isSelectionMode}
+                                    onClick={(e) => {
+                                        if (isSelectionMode) {
+                                            handleShiftSelect(cmd.id, e);
+                                            return;
+                                        }
+                                    }}
+                                    onDoubleClick={() => !isSelectionMode && handleEdit(cmd)}
+                                />
+                            </Reorder.Item>
                         ))}
                     </Reorder.Group>
                 ) : (

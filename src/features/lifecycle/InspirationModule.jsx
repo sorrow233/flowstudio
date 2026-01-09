@@ -7,38 +7,55 @@ import { useTranslation } from '../i18n';
 
 const STORAGE_KEY = 'flowstudio_inspiration_ideas';
 
-// Color palette for status dots
-const DOT_COLORS = [
-    'bg-gradient-to-br from-emerald-400 to-teal-500',
-    'bg-gradient-to-br from-amber-400 to-orange-500',
-    'bg-gradient-to-br from-violet-400 to-purple-500',
-    'bg-gradient-to-br from-sky-400 to-blue-500',
-    'bg-gradient-to-br from-rose-400 to-pink-500',
-    'bg-gradient-to-br from-lime-400 to-green-500',
+// Refined Color Configuration for "Elegant and Faint" look
+const COLOR_CONFIG = [
+    {
+        id: 'emerald',
+        dot: 'bg-emerald-400',
+        glow: 'group-hover:ring-emerald-500/10 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.05)]',
+        border: 'hover:border-emerald-200 dark:hover:border-emerald-800/50'
+    },
+    {
+        id: 'amber',
+        dot: 'bg-amber-400',
+        glow: 'group-hover:ring-amber-500/10 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.05)]',
+        border: 'hover:border-amber-200 dark:hover:border-amber-800/50'
+    },
+    {
+        id: 'violet',
+        dot: 'bg-violet-400',
+        glow: 'group-hover:ring-violet-500/10 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.05)]',
+        border: 'hover:border-violet-200 dark:hover:border-violet-800/50'
+    },
+    {
+        id: 'blue',
+        dot: 'bg-blue-400',
+        glow: 'group-hover:ring-blue-500/10 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.05)]',
+        border: 'hover:border-blue-200 dark:hover:border-blue-800/50'
+    },
+    {
+        id: 'rose',
+        dot: 'bg-rose-400',
+        glow: 'group-hover:ring-rose-500/10 group-hover:shadow-[0_0_20px_rgba(244,63,94,0.05)]',
+        border: 'hover:border-rose-200 dark:hover:border-rose-800/50'
+    },
+    {
+        id: 'lime',
+        dot: 'bg-lime-400',
+        glow: 'group-hover:ring-lime-500/10 group-hover:shadow-[0_0_20px_rgba(132,204,22,0.05)]',
+        border: 'hover:border-lime-200 dark:hover:border-lime-800/50'
+    },
 ];
 
-// Get consistent color based on idea id or explicit colorIndex
-const getDotColor = (id, colorIndex) => {
-    // If colorIndex is provided and valid, use it
-    if (typeof colorIndex === 'number' && DOT_COLORS[colorIndex]) {
-        return DOT_COLORS[colorIndex];
-    }
-    // Fallback to deterministic hash
-    const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return DOT_COLORS[hash % DOT_COLORS.length];
-};
-
-// Auto color logic: Every 3 items, switch to next color
-const getNextAutoColorIndex = (totalCount) => {
-    const groupIndex = Math.floor(totalCount / 3);
-    return groupIndex % DOT_COLORS.length;
-};
+const getColorConfig = (index) => COLOR_CONFIG[index % COLOR_CONFIG.length];
 
 // Extracted Item Component to manage local drag state
 const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
     const { t } = useTranslation();
+
+    const config = getColorConfig(idea.colorIndex || 0);
 
     // Handle double click to toggle completion (strikethrough)
     const handleDoubleClick = (e) => {
@@ -85,7 +102,13 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                 transition={{ x: { type: "spring", stiffness: 500, damping: 30 } }}
                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                 layout
-                className={`group relative bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.4)] hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-300 cursor-pointer active:scale-[0.99] ${isCompleted ? 'opacity-50' : ''}`}
+                className={`
+                    group relative bg-white dark:bg-gray-900 rounded-xl p-5 
+                    border border-gray-100 dark:border-gray-800 shadow-sm 
+                    transition-all duration-500 cursor-pointer active:scale-[0.99]
+                    ${isDragging ? '' : `hover:shadow-md ${config.border} hover:ring-1 ring-inset ${config.glow}`}
+                    ${isCompleted ? 'opacity-50' : ''}
+                `}
             >
                 <div className="flex items-start gap-3">
                     {/* Color Status Dot - Click to cycle colors */}
@@ -95,11 +118,11 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                             e.stopPropagation();
                             // Cycle to next color
                             const currentIndex = typeof idea.colorIndex === 'number' ? idea.colorIndex : 0;
-                            const nextIndex = (currentIndex + 1) % DOT_COLORS.length;
+                            const nextIndex = (currentIndex + 1) % COLOR_CONFIG.length;
                             onUpdateColor(idea.id, nextIndex);
                         }}
                     >
-                        <div className={`w-2.5 h-2.5 rounded-full ${getDotColor(idea.id, idea.colorIndex)} shadow-sm transition-transform duration-200 hover:scale-125 ${isCompleted ? 'scale-75 opacity-50' : ''}`} />
+                        <div className={`w-2.5 h-2.5 rounded-full ${config.dot} shadow-sm transition-transform duration-200 hover:scale-125 ${isCompleted ? 'scale-75 opacity-50' : ''}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
@@ -200,6 +223,7 @@ const InspirationModule = () => {
     const { projects: pendingProjects } = useSyncedProjects(doc, 'pending_projects');
 
     const [input, setInput] = useState('');
+    const [selectedColorIndex, setSelectedColorIndex] = useState(0);
     const [copiedId, setCopiedId] = useState(null);
     const [deletedIdea, setDeletedIdea] = useState(null);
 
@@ -261,7 +285,7 @@ const InspirationModule = () => {
             id: uuidv4(),
             content: input.trim(),
             timestamp: Date.now(),
-            colorIndex: getNextAutoColorIndex(ideas.length), // Auto color based on count
+            colorIndex: selectedColorIndex,
         };
         addIdea(newIdea);
         setInput('');
@@ -346,35 +370,48 @@ const InspirationModule = () => {
 
                     {/* Bottom Action Area */}
                     <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                        {/* Project Tags Bar */}
-                        <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2 mr-4 mask-linear-fade">
-                            {allProjectTags.length > 0 && (
-                                <>
-                                    <Hash size={14} className="text-gray-300 dark:text-gray-600 flex-shrink-0" />
-                                    {allProjectTags.map((tag) => (
-                                        <button
-                                            key={tag}
-                                            onClick={() => handleTagClick(tag)}
-                                            className="flex-shrink-0 px-3 py-1 bg-emerald-50/80 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-800/50 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 rounded-full text-[11px] font-medium transition-colors border border-emerald-100/50 dark:border-emerald-800/50 hover:border-emerald-200 dark:hover:border-emerald-700 whitespace-nowrap shadow-sm"
-                                        >
-                                            {tag}
-                                        </button>
-                                    ))}
-                                </>
-                            )}
-                        </div>
+                        <div className="flex items-center gap-4">
+                            {/* Minimal Color Picker */}
+                            <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50/50 dark:bg-gray-800/50 rounded-full border border-gray-100/50 dark:border-gray-700/50 backdrop-blur-sm">
+                                {COLOR_CONFIG.map((conf, index) => (
+                                    <button
+                                        key={conf.id}
+                                        onClick={() => setSelectedColorIndex(index)}
+                                        className={`w-3 h-3 rounded-full transition-all duration-300 ${conf.dot} ${index === selectedColorIndex ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 ring-gray-400 dark:ring-gray-500 scale-110' : 'opacity-40 hover:opacity-100 hover:scale-110'}`}
+                                    />
+                                ))}
+                            </div>
 
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                            <span className="text-[10px] text-gray-300 dark:text-gray-600 font-mono hidden md:inline-block">
-                                {t('inspiration.cmdEnter')}
-                            </span>
-                            <button
-                                onClick={handleAdd}
-                                disabled={!input.trim()}
-                                className="flex items-center justify-center p-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl hover:bg-black dark:hover:bg-gray-100 disabled:opacity-30 transition-all duration-300 active:scale-95 shadow-lg shadow-gray-200 dark:shadow-gray-900"
-                            >
-                                <ArrowRight size={18} strokeWidth={2} />
-                            </button>
+                            {/* Project Tags Bar */}
+                            <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2 mask-linear-fade">
+                                {allProjectTags.length > 0 && (
+                                    <>
+                                        <Hash size={14} className="text-gray-300 dark:text-gray-600 flex-shrink-0" />
+                                        {allProjectTags.map((tag) => (
+                                            <button
+                                                key={tag}
+                                                onClick={() => handleTagClick(tag)}
+                                                className="flex-shrink-0 px-3 py-1 bg-emerald-50/80 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-800/50 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 rounded-full text-[11px] font-medium transition-colors border border-emerald-100/50 dark:border-emerald-800/50 hover:border-emerald-200 dark:hover:border-emerald-700 whitespace-nowrap shadow-sm"
+                                            >
+                                                {tag}
+                                            </button>
+                                        ))}
+                                    </>
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-3 flex-shrink-0">
+                                <span className="text-[10px] text-gray-300 dark:text-gray-600 font-mono hidden md:inline-block">
+                                    {t('inspiration.cmdEnter')}
+                                </span>
+                                <button
+                                    onClick={handleAdd}
+                                    disabled={!input.trim()}
+                                    className="flex items-center justify-center p-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl hover:bg-black dark:hover:bg-gray-100 disabled:opacity-30 transition-all duration-300 active:scale-95 shadow-lg shadow-gray-200 dark:shadow-gray-900"
+                                >
+                                    <ArrowRight size={18} strokeWidth={2} />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
