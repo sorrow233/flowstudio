@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import { useTranslation } from '../i18n';
-import InspirationItem, { COLOR_CONFIG, getColorConfig } from './components/inspiration/InspirationItem';
+import InspirationItem, { COLOR_CONFIG } from './components/inspiration/InspirationItem';
 import InputRichPreview from './components/inspiration/InputRichPreview';
 
 // Auto color logic: Every 3 items, switch to next color
@@ -192,6 +192,11 @@ const InspirationModule = () => {
             .sort();
     }, [primaryProjects, pendingProjects]);
 
+    // Sort ideas by timestamp (memoized to prevent mutation)
+    const sortedIdeas = useMemo(() => {
+        return [...ideas].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    }, [ideas]);
+
     return (
         <div className="max-w-4xl mx-auto pt-14 px-6 md:px-10 pb-32">
             {/* Header Section */}
@@ -280,7 +285,7 @@ const InspirationModule = () => {
             {/* List Section */}
             <div className="space-y-6">
                 <AnimatePresence mode="popLayout">
-                    {ideas.sort((a, b) => b.timestamp - a.timestamp).map((idea) => (
+                    {sortedIdeas.map((idea) => (
                         <InspirationItem
                             key={idea.id}
                             idea={idea}

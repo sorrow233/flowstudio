@@ -89,6 +89,7 @@ export const parseRichText = (text) => {
 
 const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComplete, copiedId }) => {
     const [isDragging, setIsDragging] = React.useState(false);
+    const hasVibratedRef = React.useRef(false); // Prevent multiple vibrations
     const { t } = useTranslation();
 
     const config = getColorConfig(idea.colorIndex || 0);
@@ -113,17 +114,26 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComple
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={{ right: 0.05, left: 0.5 }}
-                onDragStart={() => setIsDragging(true)}
+                onDragStart={() => {
+                    setIsDragging(true);
+                    hasVibratedRef.current = false; // Reset on new drag
+                }}
                 onDrag={(e, info) => {
-                    // 触觉反馈：滑动到删除阈值时震动
-                    if (info.offset.x < -140 && info.offset.x > -160) {
+                    // 触觉反馈：滑动到删除阈值时震动（只触发一次）
+                    if (info.offset.x < -140 && !hasVibratedRef.current) {
+                        hasVibratedRef.current = true;
                         if (navigator.vibrate) {
                             navigator.vibrate(10); // 轻微震动 10ms
                         }
                     }
+                    // 如果用户拖回来，重置标志以便再次触发
+                    if (info.offset.x > -100) {
+                        hasVibratedRef.current = false;
+                    }
                 }}
                 onDragEnd={(e, info) => {
                     setIsDragging(false);
+                    hasVibratedRef.current = false;
                     if (info.offset.x < -150 || info.velocity.x < -800) {
                         // 删除确认时的强震动
                         if (navigator.vibrate) {
