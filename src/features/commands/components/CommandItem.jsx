@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, useDragControls } from 'framer-motion';
+import { motion, useDragControls, useMotionValue, useTransform } from 'framer-motion';
 import { GripVertical, Check, Copy, Trash2, Pencil, Link as LinkIcon, Command, Globe, Tag, FileText, Share2 } from 'lucide-react';
 
 const CommandItem = ({
@@ -32,6 +32,11 @@ const CommandItem = ({
 
     const [isGrabbing, setIsGrabbing] = useState(false);
 
+    // Motion value for drag position
+    const x = useMotionValue(0);
+    // Opacity fades in as we drag left: 0 at -10px, 1 at -80px
+    const bgOpacity = useTransform(x, [-80, -10], [1, 0]);
+
     // Only enable swipe actions if not selecting or searching
     const swipeEnabled = !isSelectionMode && !isSearching;
 
@@ -40,8 +45,8 @@ const CommandItem = ({
             {/* Slide Action Context (Behind content) - Only render when swipe is possible */}
             {swipeEnabled && (
                 <motion.div
-                    className={`absolute inset-y-0 right-0 bg-red-500 z-0 flex items-center justify-end pr-5 text-white rounded-2xl transition-opacity duration-200 ${isGrabbing ? 'opacity-100' : 'opacity-0'}`}
-                    style={{ width: '100%' }}
+                    className="absolute inset-y-0 right-0 bg-rose-400 z-0 flex items-center justify-end pr-5 text-white rounded-2xl"
+                    style={{ width: '100%', opacity: bgOpacity }}
                 >
                     <Trash2 size={24} />
                 </motion.div>
@@ -49,6 +54,7 @@ const CommandItem = ({
 
             <motion.div
                 layout
+                style={{ x }}
                 drag={swipeEnabled ? "x" : false}
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={{ right: 0.05, left: 0.5 }}
