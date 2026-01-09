@@ -7,7 +7,7 @@ import { exportAllData, importData, validateImportData, downloadAsJson, readJson
 const DataManagementModal = ({ isOpen, onClose }) => {
     const [mode, setMode] = useState('menu'); // 'menu' | 'importing' | 'preview'
     const [importFile, setImportFile] = useState(null);
-    const [importData, setImportDataState] = useState(null);
+    const [previewData, setPreviewData] = useState(null);
     const [importMode, setImportMode] = useState('merge'); // 'merge' | 'replace'
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -19,7 +19,7 @@ const DataManagementModal = ({ isOpen, onClose }) => {
     const resetState = () => {
         setMode('menu');
         setImportFile(null);
-        setImportDataState(null);
+        setPreviewData(null);
         setError('');
         setSuccess('');
         setLoading(false);
@@ -65,7 +65,7 @@ const DataManagementModal = ({ isOpen, onClose }) => {
             }
 
             setImportFile(file);
-            setImportDataState(data);
+            setPreviewData(data);
             setMode('preview');
         } catch (err) {
             setError(err.message);
@@ -100,11 +100,11 @@ const DataManagementModal = ({ isOpen, onClose }) => {
 
     // 执行导入
     const executeImport = () => {
-        if (!importData) return;
+        if (!previewData) return;
 
         setLoading(true);
         try {
-            importData(doc, importData, importMode);
+            importData(doc, previewData, importMode);
             setSuccess('数据导入成功！页面将刷新以应用更改。');
             setTimeout(() => {
                 window.location.reload();
@@ -117,15 +117,15 @@ const DataManagementModal = ({ isOpen, onClose }) => {
 
     // 统计摘要
     const getDataSummary = useCallback(() => {
-        if (!importData?.data) return null;
-        const { pendingProjects, primaryProjects, commands, customCategories } = importData.data;
+        if (!previewData?.data) return null;
+        const { pendingProjects, primaryProjects, commands, customCategories } = previewData.data;
         return {
             pending: pendingProjects?.length || 0,
             primary: primaryProjects?.length || 0,
             commands: commands?.length || 0,
             categories: customCategories?.length || 0,
         };
-    }, [importData]);
+    }, [previewData]);
 
     if (!isOpen) return null;
 
@@ -226,7 +226,7 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                     )}
 
                     {/* Import Preview */}
-                    {mode === 'preview' && importData && (
+                    {mode === 'preview' && previewData && (
                         <div className="space-y-4">
                             {/* File Info */}
                             <div className="p-4 bg-gray-50 rounded-xl flex items-center gap-3">
@@ -234,7 +234,7 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                                 <div className="flex-1 min-w-0">
                                     <div className="font-medium text-gray-900 truncate">{importFile?.name}</div>
                                     <div className="text-xs text-gray-400">
-                                        导出于 {new Date(importData.exportedAt).toLocaleString('zh-CN')}
+                                        导出于 {new Date(previewData.exportedAt).toLocaleString('zh-CN')}
                                     </div>
                                 </div>
                             </div>
@@ -272,8 +272,8 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                                     <button
                                         onClick={() => setImportMode('merge')}
                                         className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-all ${importMode === 'merge'
-                                                ? 'bg-blue-500 text-white'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                             }`}
                                     >
                                         合并（保留现有）
@@ -281,8 +281,8 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                                     <button
                                         onClick={() => setImportMode('replace')}
                                         className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-all ${importMode === 'replace'
-                                                ? 'bg-red-500 text-white'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            ? 'bg-red-500 text-white'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                             }`}
                                     >
                                         覆盖（替换全部）
