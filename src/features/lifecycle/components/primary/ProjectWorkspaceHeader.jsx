@@ -19,8 +19,28 @@ const ProjectWorkspaceHeader = ({
     ...props
 }) => {
 
-    // Get info for current stage to show in header title if needed, 
-    // though the design requests the PROJECT title to be dominant.
+    // Theme Configuration
+    const THEME_STYLES = {
+        purple: {
+            badge: 'bg-purple-500 text-white shadow-purple-500/20',
+            vow: 'bg-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.8)]',
+            inputBorder: 'focus:border-purple-500',
+            button: 'hover:shadow-purple-500/20 hover:text-purple-600',
+            icon: 'group-hover:text-purple-500',
+            bgImageBorder: 'border-purple-500'
+        },
+        red: {
+            badge: 'bg-red-500 text-white shadow-red-500/20',
+            vow: 'bg-red-400 shadow-[0_0_10px_rgba(239,68,68,0.8)]',
+            inputBorder: 'focus:border-red-500',
+            button: 'hover:shadow-red-500/20 hover:text-red-600',
+            icon: 'group-hover:text-red-500',
+            bgImageBorder: 'border-red-500'
+        }
+    };
+
+    const theme = THEME_STYLES[themeColor] || THEME_STYLES.purple;
+
     const stageInfo = stages.find(s => s.id === activeStage);
 
     return (
@@ -82,7 +102,7 @@ const ProjectWorkspaceHeader = ({
                             <input
                                 value={editForm.title}
                                 onChange={e => setEditForm({ ...editForm, title: e.target.value })}
-                                className="w-full bg-transparent text-2xl md:text-3xl font-light text-white placeholder:text-white/30 outline-none border-b border-white/10 focus:border-emerald-500 pb-2 transition-colors"
+                                className={`w-full bg-transparent text-2xl md:text-3xl font-light text-white placeholder:text-white/30 outline-none border-b border-white/10 ${theme.inputBorder} pb-2 transition-colors`}
                                 placeholder="Project Title"
                             />
                             <textarea
@@ -99,7 +119,7 @@ const ProjectWorkspaceHeader = ({
                                             <button
                                                 key={i}
                                                 onClick={() => setEditForm({ ...editForm, bgImage: vibe })}
-                                                className={`w-6 h-6 rounded-full border-2 overflow-hidden transition-all shrink-0 ${editForm.bgImage === vibe ? 'border-purple-500 scale-125' : 'border-transparent opacity-50 hover:opacity-100'}`}
+                                                className={`w-6 h-6 rounded-full border-2 overflow-hidden transition-all shrink-0 ${editForm.bgImage === vibe ? `${theme.bgImageBorder} scale-125` : 'border-transparent opacity-50 hover:opacity-100'}`}
                                             >
                                                 <img src={vibe} className="w-full h-full object-cover" />
                                             </button>
@@ -113,7 +133,7 @@ const ProjectWorkspaceHeader = ({
                         <div className="flex flex-col md:flex-row justify-end md:justify-between items-start md:items-end w-full gap-6">
                             <div className="w-full md:w-auto">
                                 <motion.div layout className="flex items-center gap-3 mb-2 opacity-80">
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-purple-500 text-white shadow-lg shadow-purple-500/20">
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest ${theme.badge} shadow-lg`}>
                                         {stageInfo?.label} Phase
                                     </span>
                                     {project.link && (
@@ -143,7 +163,7 @@ const ProjectWorkspaceHeader = ({
                                         className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-white/10 text-white rounded-2xl backdrop-blur-md hover:bg-white/20 transition-all border border-white/5"
                                         title="View Founding Vow"
                                     >
-                                        <div className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.8)] animate-pulse" />
+                                        <div className={`w-2 h-2 rounded-full ${theme.vow} animate-pulse`} />
                                         <span className="text-xs font-medium tracking-widest uppercase inline">The Vow</span>
                                     </motion.button>
                                 )}
@@ -152,9 +172,9 @@ const ProjectWorkspaceHeader = ({
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={onImportCommand}
-                                    className={`flex-1 md:flex-none flex items-center justify-center gap-3 px-4 md:px-6 py-3 md:py-4 bg-white text-gray-900 rounded-2xl shadow-2xl hover:shadow-${themeColor}-500/20 hover:text-${themeColor}-600 transition-all font-medium whitespace-nowrap group`}
+                                    className={`flex-1 md:flex-none flex items-center justify-center gap-3 px-4 md:px-6 py-3 md:py-4 bg-white text-gray-900 rounded-2xl shadow-2xl ${theme.button} transition-all font-medium whitespace-nowrap group`}
                                 >
-                                    <Terminal size={18} className={`md:w-5 md:h-5 group-hover:text-${themeColor}-500 transition-colors`} />
+                                    <Terminal size={18} className={`md:w-5 md:h-5 ${theme.icon} transition-colors`} />
                                     <span className="inline">Import Command</span>
                                 </motion.button>
                             </div>

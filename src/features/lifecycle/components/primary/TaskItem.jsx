@@ -138,6 +138,15 @@ const TaskItem = ({
             inputRing: 'focus:ring-rose-100',
             grab: 'border-rose-300 ring-rose-100 bg-rose-50/10',
             action: 'hover:text-rose-500 hover:bg-rose-50'
+        },
+        red: {
+            main: 'bg-red-500 border-red-500',
+            border: 'border-red-300 hover:border-red-400 hover:bg-red-50',
+            decoration: 'decoration-red-500/30',
+            inputBorder: 'border-red-200',
+            inputRing: 'focus:ring-red-100',
+            grab: 'border-red-300 ring-red-100 bg-red-50/10',
+            action: 'hover:text-red-500 hover:bg-red-50'
         }
     };
 
@@ -342,7 +351,7 @@ const TaskItem = ({
 
                 {/* Copied Feedback Badge */}
                 {task.isCommand && copiedTaskId === task.id && (
-                    <span className="absolute top-2 right-2 text-[9px] uppercase font-bold text-purple-500 bg-purple-50 px-2 py-0.5 rounded-full animate-pulse">
+                    <span className={`absolute top-2 right-2 text-[9px] uppercase font-bold px-2 py-0.5 rounded-full animate-pulse ${themeColor === 'red' ? 'text-red-500 bg-red-50' : 'text-purple-500 bg-purple-50'}`}>
                         Copied
                     </span>
                 )}

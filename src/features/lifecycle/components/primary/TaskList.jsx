@@ -14,7 +14,7 @@ const CATEGORY_ICONS = {
 };
 
 
-const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask, onUpdateTask, newTaskInput, setNewTaskInput, newTaskCategory, setNewTaskCategory, onScroll, onReorder, onImportCommand, availableCommands }, ref) => {
+const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask, onUpdateTask, newTaskInput, setNewTaskInput, newTaskCategory, setNewTaskCategory, onScroll, onReorder, onImportCommand, availableCommands, themeColor = 'purple' }, ref) => {
     const [copiedTaskId, setCopiedTaskId] = useState(null);
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const [editingTaskId, setEditingTaskId] = useState(null);
@@ -173,15 +173,44 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
     const stageInfo = DEV_STAGES.find(s => s.id === activeStage);
     const emptyState = STAGE_EMPTY_STATES[activeStage];
 
-    // Stage Themes Mapping
-    const STAGE_THEMES = {
-        1: 'purple',
-        2: 'blue',
-        3: 'violet',
-        4: 'amber',
-        5: 'rose'
+    // Theme Configuration
+    const THEME_STYLES = {
+        purple: {
+            bulkBg: 'bg-purple-50/90 border-purple-100 shadow-purple-500/10',
+            bulkText: 'text-purple-600 hover:text-purple-700',
+            bulkTextEmph: 'text-purple-900',
+            bulkDivider: 'bg-purple-200',
+            completedIconBg: 'bg-purple-100/80 text-purple-600',
+            completedIcon: 'text-purple-500',
+            completedText: 'font-bold text-purple-600/80 bg-purple-50',
+            completedHover: 'hover:bg-purple-50/50',
+            inputRing: 'focus-within:ring-purple-200 dark:focus-within:ring-purple-800 focus-within:border-purple-300',
+            inputShadow: 'shadow-purple-500/5 hover:shadow-purple-500/10',
+            emptyIconBg: 'bg-gradient-to-br from-purple-50 to-fuchsia-50 border-purple-100/50',
+            emptyIcon: 'text-purple-500',
+        },
+        red: {
+            bulkBg: 'bg-red-50/90 border-red-100 shadow-red-500/10',
+            bulkText: 'text-red-600 hover:text-red-700',
+            bulkTextEmph: 'text-red-900',
+            bulkDivider: 'bg-red-200',
+            completedIconBg: 'bg-red-100/80 text-red-600',
+            completedIcon: 'text-red-500',
+            completedText: 'font-bold text-red-600/80 bg-red-50',
+            completedHover: 'hover:bg-red-50/50',
+            inputRing: 'focus-within:ring-red-200 dark:focus-within:ring-red-800 focus-within:border-red-300',
+            inputShadow: 'shadow-red-500/5 hover:shadow-red-500/10',
+            emptyIconBg: 'bg-gradient-to-br from-red-50 to-orange-50 border-red-100/50',
+            emptyIcon: 'text-red-500',
+        }
     };
-    const activeTheme = STAGE_THEMES[activeStage] || 'purple';
+    const theme = THEME_STYLES[themeColor] || THEME_STYLES.purple;
+
+    // Use passed themeColor for activeTheme unless strictly needed for stage-specifics.
+    // Ideally we want the UI frame to follow the module theme (Red for Advanced), 
+    // even if the stage concept inside has its own color.
+    // For consistency with User request "Advanced Module = Red", we force the themeColor passed down.
+    const activeTheme = themeColor; // Override STAGE_THEMES logic for the generic UI items
 
 
     const handleCopy = (id, content) => {
@@ -266,21 +295,21 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                         {/* Completed Section Header */}
                                         <button
                                             onClick={() => setIsCompletedCollapsed(!isCompletedCollapsed)}
-                                            className="w-full flex items-center gap-3 py-2.5 px-3 hover:bg-purple-50/50 rounded-xl transition-all group"
+                                            className={`w-full flex items-center gap-3 py-2.5 px-3 ${theme.completedHover} rounded-xl transition-all group`}
                                         >
                                             <motion.div
                                                 animate={{ rotate: isCompletedCollapsed ? 0 : 90 }}
                                                 transition={{ duration: 0.2 }}
-                                                className="flex items-center justify-center w-5 h-5 rounded-md bg-purple-100/80 text-purple-600"
+                                                className={`flex items-center justify-center w-5 h-5 rounded-md ${theme.completedIconBg}`}
                                             >
                                                 <ChevronRight size={12} strokeWidth={2.5} />
                                             </motion.div>
                                             <div className="flex items-center gap-2">
-                                                <CheckCircle2 size={14} className="text-purple-500" />
+                                                <CheckCircle2 size={14} className={theme.completedIcon} />
                                                 <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">已完成</span>
                                             </div>
                                             <div className="flex-1" />
-                                            <span className="text-[11px] font-bold text-purple-600/80 bg-purple-50 px-2 py-0.5 rounded-md tabular-nums">
+                                            <span className={`text-[11px] tabular-nums px-2 py-0.5 rounded-md ${theme.completedText}`}>
                                                 {completedTasks.length}
                                             </span>
                                         </button>
@@ -361,7 +390,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                         className="flex flex-col items-center py-10 text-center"
                                     >
                                         <motion.div
-                                            className="w-14 h-14 bg-gradient-to-br from-purple-50 to-fuchsia-50 rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-purple-100/50"
+                                            className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shadow-sm border ${theme.emptyIconBg}`}
                                             animate={{
                                                 scale: [1, 1.05, 1],
                                                 rotate: [0, 3, -3, 0]
@@ -372,7 +401,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                                 repeatDelay: 3
                                             }}
                                         >
-                                            <CheckCircle2 size={24} className="text-purple-500" />
+                                            <CheckCircle2 size={24} className={theme.emptyIcon} />
                                         </motion.div>
                                         <h4 className="text-base font-semibold text-gray-800 mb-1">阶段任务已完成</h4>
                                         <p className="text-xs text-gray-400 max-w-[200px]">所有任务都已完成，可以进入下一阶段</p>
@@ -412,16 +441,16 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 20 }}
-                            className={`flex items-center justify-between bg-purple-50/90 backdrop-blur border border-purple-100 rounded-2xl p-2 px-4 shadow-lg shadow-purple-500/10`}
+                            className={`flex items-center justify-between backdrop-blur border rounded-2xl p-2 px-4 shadow-lg ${theme.bulkBg}`}
                         >
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={() => handleSelectAll()}
-                                    className={`text-xs font-bold uppercase tracking-wider text-purple-600 hover:text-purple-700 px-2 py-1 rounded transition-colors`}
+                                    className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded transition-colors ${theme.bulkText}`}
                                 >
                                     {selectedIds.size === localTasks.length ? 'Deselect All' : 'Select All'}
                                 </button>
-                                <span className={`text-sm font-medium text-purple-900`}>
+                                <span className={`text-sm font-medium ${theme.bulkTextEmph}`}>
                                     {selectedIds.size} Selected
                                 </span>
                             </div>
@@ -435,11 +464,11 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                 >
                                     <Trash2 size={18} />
                                 </button>
-                                <div className={`w-px h-4 bg-purple-200 mx-1`} />
+                                <div className={`w-px h-4 mx-1 ${theme.bulkDivider}`} />
                                 <button
                                     onClick={handleBulkToggle}
                                     disabled={selectedIds.size === 0}
-                                    className={`p-2 rounded-lg hover:bg-white text-purple-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
+                                    className={`p-2 rounded-lg hover:bg-white transition-all disabled:opacity-30 disabled:cursor-not-allowed ${theme.bulkText}`}
                                     title="Mark Done/Undone"
                                 >
                                     <CheckSquare size={18} />
@@ -447,12 +476,12 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                 <button
                                     onClick={handleBulkCopy}
                                     disabled={selectedIds.size === 0}
-                                    className={`p-2 rounded-lg hover:bg-white text-purple-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
+                                    className={`p-2 rounded-lg hover:bg-white transition-all disabled:opacity-30 disabled:cursor-not-allowed ${theme.bulkText}`}
                                     title="Copy Content"
                                 >
                                     <Copy size={18} />
                                 </button>
-                                <div className={`w-px h-4 bg-purple-200 mx-1`} />
+                                <div className={`w-px h-4 mx-1 ${theme.bulkDivider}`} />
                                 {/* Move to Stage Buttons */}
                                 <div className="flex items-center gap-1">
                                     <span className="text-xs text-gray-400 mr-1 flex items-center gap-1">
@@ -479,7 +508,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                         );
                                     })}
                                 </div>
-                                <div className={`w-px h-4 bg-purple-200 mx-1`} />
+                                <div className={`w-px h-4 mx-1 ${theme.bulkDivider}`} />
                                 <button
                                     onClick={() => setIsSelectionMode(false)}
                                     className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all"
@@ -495,7 +524,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 20 }}
-                            className="relative group shadow-xl shadow-purple-500/5 dark:shadow-none rounded-2xl bg-white dark:bg-gray-800 ring-1 ring-gray-100 dark:ring-gray-700 focus-within:ring-2 focus-within:ring-purple-200 dark:focus-within:ring-purple-800 focus-within:border-purple-300 transition-all hover:shadow-2xl hover:shadow-purple-500/10 flex items-center"
+                            className={`relative group rounded-2xl bg-white dark:bg-gray-800 ring-1 ring-gray-100 dark:ring-gray-700 transition-all hover:shadow-2xl flex items-center ${theme.inputRing} ${theme.inputShadow}`}
                         >
                             <input
                                 type="text"
