@@ -42,6 +42,9 @@ const PendingModule = () => {
         projects: syncedCategories,
     } = useSyncedProjects(doc, 'command_categories');
 
+    // Initialize Undo Shortcuts
+    useUndoShortcuts(undo, redo);
+
     const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
 
     // Merge default categories with synced custom labels
