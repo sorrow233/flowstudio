@@ -90,43 +90,35 @@ export const DEFAULT_TEMPLATE = {
             hasHolyGlow: true,
             bgImage: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2672&auto=format&fit=crop", // 更极客、科技感的图片
 
-            modules: [
+            // 根级别任务 - PrimaryDevModule 读取这个数组
+            tasks: [
                 {
-                    id: "mod-g-001",
-                    name: "1. 核心工作流",
-                    description: "Flow Studio 的理念：灵感 (Inspiration) -> 孵化 (Pending) -> 执行 (Primary) -> 完成 (Final)。",
-                    category: "Guide",
-                    priority: "High",
+                    id: 1001,
+                    text: "✅ 尝试将此任务标记为完成（点击复选框）",
+                    done: false,
                     stage: 1,
-                    progress: 100,
-                    tasks: [
-                        {
-                            id: 1001,
-                            text: "尝试将此任务标记为完成",
-                            done: false,
-                            stage: 1
-                        }
-                    ]
+                    category: "general"
                 },
                 {
-                    id: "mod-g-002",
-                    name: "2. 指令中心",
-                    description: "你的 AI 知识库。在这里存储 Prompt，并在任何地方通过 Cmd+K 调用。",
-                    category: "Core",
-                    priority: "High",
+                    id: 1002,
+                    text: "📖 了解核心工作流：灵感 → 孵化 → 执行 → 完成",
+                    done: false,
+                    stage: 1,
+                    category: "general"
+                },
+                {
+                    id: 1003,
+                    text: "⌨️ 按 Cmd+K 打开指令中心，试试预置的 Prompt",
+                    done: false,
                     stage: 2,
-                    progress: 50,
-                    tasks: []
+                    category: "general"
                 },
                 {
-                    id: "mod-g-003",
-                    name: "3. 商业化追踪",
-                    description: "关注核心指标。在此模块记录你的 MRR、用户增长和市场策略。",
-                    category: "Feature",
-                    priority: "Medium",
-                    stage: 1,
-                    progress: 0,
-                    tasks: []
+                    id: 1004,
+                    text: "💰 探索商业化模块，记录你的产品指标",
+                    done: false,
+                    stage: 3,
+                    category: "general"
                 }
             ],
 
@@ -143,8 +135,7 @@ export const DEFAULT_TEMPLATE = {
                     payments: false
                 },
                 paymentProvider: "stripe"
-            },
-            tasks: []
+            }
         },
         {
             id: "project-demo",
@@ -163,26 +154,28 @@ export const DEFAULT_TEMPLATE = {
             subStage: 1,
             progress: 15,
             bgImage: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2670&auto=format&fit=crop", // 代码风格图片
-            modules: [
+            // 根级别任务
+            tasks: [
                 {
-                    id: "mod-d-001",
-                    name: "核心算法引擎",
-                    description: "数据处理与分析的核心逻辑。",
-                    category: "Backend",
-                    priority: "High",
-                    stage: 2,
-                    progress: 60,
-                    tasks: []
+                    id: 2001,
+                    text: "定义核心算法的数据处理流程",
+                    done: true,
+                    stage: 1,
+                    category: "backend"
                 },
                 {
-                    id: "mod-d-002",
-                    name: "用户仪表盘",
-                    description: "可视化的前端数据展示界面。",
-                    category: "Frontend",
-                    priority: "Medium",
+                    id: 2002,
+                    text: "设计用户仪表盘的 UI 原型",
+                    done: false,
                     stage: 1,
-                    progress: 20,
-                    tasks: []
+                    category: "frontend"
+                },
+                {
+                    id: 2003,
+                    text: "实现数据可视化图表组件",
+                    done: false,
+                    stage: 2,
+                    category: "frontend"
                 }
             ],
             commercial: {
@@ -195,8 +188,7 @@ export const DEFAULT_TEMPLATE = {
                     analytics: true,
                     payments: false
                 }
-            },
-            tasks: []
+            }
         }
     ],
 

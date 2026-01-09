@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import { Plus, Search, Library, Globe2, Layout, Boxes } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Search, Library, Globe2, Pencil, Trash2, X, Check } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES, COMMAND_CATEGORIES } from '../../utils/constants';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -16,6 +16,109 @@ import { useTranslation } from '../i18n';
 // Storage key for profiles
 const PROFILES_STORAGE_KEY = 'flowstudio_command_profiles';
 
+// Profile Modal Component
+const ProfileModal = ({ isOpen, onClose, profile, onSave, onDelete, mode, t }) => {
+    const [name, setName] = useState('');
+
+    useEffect(() => {
+        if (profile) {
+            setName(profile.name || '');
+        } else {
+            setName('');
+        }
+    }, [profile, isOpen]);
+
+    const handleSave = () => {
+        if (name.trim()) {
+            onSave(name.trim());
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSave();
+        } else if (e.key === 'Escape') {
+            onClose();
+        }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <AnimatePresence>
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <motion.div
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                    onClick={onClose}
+                />
+                <motion.div
+                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                    className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm relative z-50"
+                >
+                    {mode === 'delete' ? (
+                        <>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                {t('commands.deleteProfile')}
+                            </h3>
+                            <p className="text-sm text-gray-500 mb-6">
+                                {t('commands.deleteProfileConfirm')}
+                            </p>
+                            <div className="flex gap-2 justify-end">
+                                <button
+                                    onClick={onClose}
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                >
+                                    {t('common.cancel')}
+                                </button>
+                                <button
+                                    onClick={onDelete}
+                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                >
+                                    {t('common.delete')}
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                {mode === 'add' ? t('commands.addProfile') : t('commands.editProfile')}
+                            </h3>
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder={t('commands.profileName')}
+                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100 outline-none transition-all text-gray-900"
+                                autoFocus
+                            />
+                            <div className="flex gap-2 justify-end mt-4">
+                                <button
+                                    onClick={onClose}
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                >
+                                    {t('common.cancel')}
+                                </button>
+                                <button
+                                    onClick={handleSave}
+                                    disabled={!name.trim()}
+                                    className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                    <Check size={16} />
+                                    {t('common.save')}
+                                </button>
+                            </div>
+                        </>
+                    )}
+                </motion.div>
+            </div>
+        </AnimatePresence>
+    );
+};
+
 const CommandCenterModule = () => {
     const [commands, setCommands] = useState([]);
     const [activeStage, setActiveStage] = useState(1);
@@ -30,7 +133,11 @@ const CommandCenterModule = () => {
     // Profile State
     const [profiles, setProfiles] = useState([{ id: 'default', name: 'Default' }]);
     const [activeProfileId, setActiveProfileId] = useState('default');
-    const [isEditingProfiles, setIsEditingProfiles] = useState(false);
+
+    // Profile Modal State
+    const [profileModalOpen, setProfileModalOpen] = useState(false);
+    const [profileModalMode, setProfileModalMode] = useState('add'); // 'add' | 'edit' | 'delete'
+    const [editingProfile, setEditingProfile] = useState(null);
 
     const { t } = useTranslation();
 
@@ -49,7 +156,12 @@ const CommandCenterModule = () => {
     useEffect(() => {
         const savedProfiles = localStorage.getItem(PROFILES_STORAGE_KEY);
         if (savedProfiles) {
-            setProfiles(JSON.parse(savedProfiles));
+            const parsed = JSON.parse(savedProfiles);
+            setProfiles(parsed);
+            // Ensure activeProfileId is valid
+            if (!parsed.find(p => p.id === activeProfileId)) {
+                setActiveProfileId(parsed[0]?.id || 'default');
+            }
         }
     }, []);
 
@@ -59,32 +171,46 @@ const CommandCenterModule = () => {
         localStorage.setItem(PROFILES_STORAGE_KEY, JSON.stringify(newProfiles));
     };
 
-    const handleAddProfile = () => {
-        const name = prompt(t('common.add') + ' ' + t('common.profile') || "Add Profile");
-        if (name && name.trim()) {
-            const newProfile = { id: uuidv4(), name: name.trim() };
+    const openAddProfileModal = () => {
+        setEditingProfile(null);
+        setProfileModalMode('add');
+        setProfileModalOpen(true);
+    };
+
+    const openEditProfileModal = (profile) => {
+        setEditingProfile(profile);
+        setProfileModalMode('edit');
+        setProfileModalOpen(true);
+    };
+
+    const openDeleteProfileModal = (profile) => {
+        if (profiles.length <= 1) return; // Cannot delete last profile
+        setEditingProfile(profile);
+        setProfileModalMode('delete');
+        setProfileModalOpen(true);
+    };
+
+    const handleProfileSave = (name) => {
+        if (profileModalMode === 'add') {
+            const newProfile = { id: uuidv4(), name };
             updateProfiles([...profiles, newProfile]);
             setActiveProfileId(newProfile.id);
+        } else if (profileModalMode === 'edit' && editingProfile) {
+            updateProfiles(profiles.map(p => p.id === editingProfile.id ? { ...p, name } : p));
         }
+        setProfileModalOpen(false);
+        setEditingProfile(null);
     };
 
-    const handleRenameProfile = (id) => {
-        const profile = profiles.find(p => p.id === id);
-        const newName = prompt(t('common.edit') + ' ' + t('common.profile') || "Rename Profile", profile.name);
-        if (newName && newName.trim()) {
-            updateProfiles(profiles.map(p => p.id === id ? { ...p, name: newName.trim() } : p));
+    const handleProfileDelete = () => {
+        if (!editingProfile || profiles.length <= 1) return;
+        const newProfiles = profiles.filter(p => p.id !== editingProfile.id);
+        updateProfiles(newProfiles);
+        if (activeProfileId === editingProfile.id) {
+            setActiveProfileId(newProfiles[0].id);
         }
-    };
-
-    const handleDeleteProfile = (id) => {
-        if (profiles.length <= 1) return;
-        if (confirm(t('common.delete') + '?')) {
-            const newProfiles = profiles.filter(p => p.id !== id);
-            updateProfiles(newProfiles);
-            if (activeProfileId === id) {
-                setActiveProfileId(newProfiles[0].id);
-            }
-        }
+        setProfileModalOpen(false);
+        setEditingProfile(null);
     };
 
     // Initial Load of Categories from localStorage
@@ -210,15 +336,6 @@ const CommandCenterModule = () => {
     };
 
     const handleImport = (cmd) => {
-        // Add activeStage to the command's stageIds AND ensure it's in the current profile (copy it effectively if sharing)
-        // Actually, if we are importing from library (other stages), it might stay same ID.
-        // But what if we import from another profile? 
-        // For now, assume library import just adds the stageId to existing command.
-        // If the command is from a DIFFERENT profile, we should probably CLONE it into this profile?
-        // User said: "Import can always be combined".
-        // Let's allow commands to exist across profiles? No, "Partitioning".
-        // Let's Clone it if we are "Importing" from a global sense.
-
         // Check if command is in current profile
         if (cmd.profileId !== activeProfileId) {
             // Clone command into this profile
@@ -315,8 +432,6 @@ const CommandCenterModule = () => {
     );
 
     // For Import Modal: Commands from ANY profile that are (Link or Utility)
-    // We want to allow importing from other profiles too?
-    // "Imports can be combined".
     const importableCommands = commands.filter(c =>
         // Exclude commands already in this stage AND this profile
         !(c.stageIds?.includes(activeStage) && c.profileId === activeProfileId) &&
@@ -368,26 +483,42 @@ const CommandCenterModule = () => {
                             <div key={profile.id} className="relative group/profile">
                                 <button
                                     onClick={() => setActiveProfileId(profile.id)}
-                                    onDoubleClick={() => handleRenameProfile(profile.id)}
-                                    onContextMenu={(e) => {
-                                        e.preventDefault();
-                                        handleDeleteProfile(profile.id);
-                                    }}
                                     className={`
-                                        px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap select-none
+                                        px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap select-none flex items-center gap-2
                                         ${activeProfileId === profile.id
                                             ? 'bg-white text-gray-900 shadow-sm ring-1 ring-black/5'
                                             : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'}
                                     `}
                                 >
                                     {profile.name}
+                                    {/* Edit/Delete icons on hover for active profile */}
+                                    {activeProfileId === profile.id && (
+                                        <span className="flex items-center gap-0.5 opacity-0 group-hover/profile:opacity-100 transition-opacity ml-1">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); openEditProfileModal(profile); }}
+                                                className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600"
+                                                title={t('common.edit')}
+                                            >
+                                                <Pencil size={12} />
+                                            </button>
+                                            {profiles.length > 1 && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); openDeleteProfileModal(profile); }}
+                                                    className="p-1 hover:bg-red-50 rounded text-gray-400 hover:text-red-500"
+                                                    title={t('common.delete')}
+                                                >
+                                                    <Trash2 size={12} />
+                                                </button>
+                                            )}
+                                        </span>
+                                    )}
                                 </button>
                             </div>
                         ))}
                         <button
-                            onClick={handleAddProfile}
-                            className="px-3 py-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-white/50 transition-all"
-                            title={t('common.add')}
+                            onClick={openAddProfileModal}
+                            className="px-3 py-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+                            title={t('commands.addProfile')}
                         >
                             <Plus size={14} />
                         </button>
@@ -542,6 +673,17 @@ const CommandCenterModule = () => {
                 />
             </div>
 
+            {/* Profile Modal */}
+            <ProfileModal
+                isOpen={profileModalOpen}
+                onClose={() => { setProfileModalOpen(false); setEditingProfile(null); }}
+                profile={editingProfile}
+                onSave={handleProfileSave}
+                onDelete={handleProfileDelete}
+                mode={profileModalMode}
+                t={t}
+            />
+
             {/* Modals */}
             <CategoryRenameModal
                 renamingCategory={renamingCategory}
@@ -556,6 +698,8 @@ const CommandCenterModule = () => {
                 setIsImporting={setIsImporting}
                 importableCommands={importableCommands}
                 handleImport={handleImport}
+                profiles={profiles}
+                activeProfileId={activeProfileId}
             />
 
             <ShareBrowserModal

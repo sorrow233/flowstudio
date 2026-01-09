@@ -202,6 +202,17 @@ export default {
         browseCommunity: 'Browse community shares',
         importFromLibrary: 'Import from Global Library',
         stage: 'Stage',
+        // Profile related
+        profileName: 'Profile Name',
+        addProfile: 'Add Profile',
+        editProfile: 'Edit Profile',
+        deleteProfile: 'Delete Profile',
+        deleteProfileConfirm: 'Delete this profile? Commands will remain in storage.',
+        // Library related
+        globalLibrary: 'Global Command Library',
+        importFromOther: 'Import from other stages/profiles',
+        noImportable: 'No commands available to import',
+        noImportableHint: 'Only Utility and Link types can be shared globally',
     },
 
     // Dev Stages (5 stages)

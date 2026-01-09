@@ -203,6 +203,17 @@ export default {
         browseCommunity: '浏览社区分享',
         importFromLibrary: '从全局库导入',
         stage: '阶段',
+        // Profile related
+        profileName: '配置名称',
+        addProfile: '新建配置',
+        editProfile: '编辑配置',
+        deleteProfile: '删除配置',
+        deleteProfileConfirm: '确认删除此配置？配置下的指令将保留在数据中。',
+        // Library related
+        globalLibrary: '全局指令库',
+        importFromOther: '从其他阶段/配置导入',
+        noImportable: '暂无可导入的指令',
+        noImportableHint: '仅 Utility 和 Link 类型可跨阶段共享',
     },
 
     // 开发阶段（5阶段）
