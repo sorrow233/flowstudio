@@ -144,7 +144,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                                         // Inline Code: `...`
                                         if (part.startsWith('`') && part.endsWith('`')) {
                                             return (
-                                                <code key={index} className="bg-emerald-50 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded text-[13px] font-mono text-emerald-600 dark:text-emerald-400 mx-0.5 border border-emerald-100 dark:border-emerald-800/50">
+                                                <code key={index} className="bg-blue-50/50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded text-[13px] font-mono text-blue-600 dark:text-blue-400 mx-0.5 border border-blue-100/50 dark:border-blue-800/30">
                                                     {part.slice(1, -1)}
                                                 </code>
                                             );
@@ -163,7 +163,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                                             return (
                                                 <span
                                                     key={index}
-                                                    className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-md text-[11px] font-medium align-middle border border-emerald-100/50 dark:border-emerald-800/50 shadow-sm transform -translate-y-0.5"
+                                                    className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-md text-[11px] font-medium align-middle border border-blue-100/50 dark:border-blue-800/30 shadow-sm transform -translate-y-0.5"
                                                 >
                                                     {tagName}
                                                 </span>
@@ -209,6 +209,48 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                 </AnimatePresence>
             </motion.div >
         </div >
+    );
+};
+
+// Rich input preview to render tags in textarea
+const InputRichPreview = ({ text }) => {
+    const parseRichText = (text) => {
+        const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\])/g);
+        return parts.map((part, index) => {
+            if (part.startsWith('`') && part.endsWith('`')) {
+                return (
+                    <code key={index} className="bg-blue-50/50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded text-[13px] font-mono text-blue-600 dark:text-blue-400 mx-0.5 border border-blue-100/50 dark:border-blue-800/30">
+                        {part.slice(1, -1)}
+                    </code>
+                );
+            }
+            if (part.startsWith('**') && part.endsWith('**')) {
+                return (
+                    <span key={index} className="font-bold text-gray-900 dark:text-gray-100 mx-0.5">
+                        {part.slice(2, -2)}
+                    </span>
+                );
+            }
+            if (part.startsWith('[') && part.endsWith(']')) {
+                const tagName = part.slice(1, -1);
+                return (
+                    <span
+                        key={index}
+                        className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-md text-[11px] font-medium align-middle border border-blue-100/50 dark:border-blue-800/30 shadow-sm transform -translate-y-0.5"
+                    >
+                        {tagName}
+                    </span>
+                );
+            }
+            return <span key={index}>{part}</span>;
+        });
+    };
+
+    return (
+        <div className="absolute inset-0 p-6 pb-20 pointer-events-none text-lg leading-relaxed whitespace-pre-wrap font-light break-words overflow-hidden text-gray-800 dark:text-gray-100 opacity-100">
+            {parseRichText(text)}
+            {/* Hidden cursor mimic to keep spacing if needed, but not required with overlay */}
+        </div>
     );
 };
 
@@ -362,11 +404,14 @@ const InspirationModule = () => {
                 <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 dark:from-gray-800 via-gray-50 dark:via-gray-900 to-gray-100 dark:to-gray-800 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
                 <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] group-hover:border-gray-200 dark:group-hover:border-gray-700">
 
+                    {/* Rich Preview Layer */}
+                    <InputRichPreview text={input} />
+
                     <textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder={t('inspiration.placeholder')}
-                        className="w-full bg-transparent text-lg text-gray-800 dark:text-gray-100 placeholder:text-gray-300 dark:placeholder:text-gray-600 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed"
+                        placeholder={input ? '' : t('inspiration.placeholder')}
+                        className="w-full bg-transparent text-lg text-transparent caret-gray-800 dark:caret-gray-200 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed relative z-10"
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                                 handleAdd();
@@ -398,7 +443,7 @@ const InspirationModule = () => {
                                             <button
                                                 key={tag}
                                                 onClick={() => handleTagClick(tag)}
-                                                className="flex-shrink-0 px-3 py-1 bg-emerald-50/80 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-800/50 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 rounded-full text-[11px] font-medium transition-colors border border-emerald-100/50 dark:border-emerald-800/50 hover:border-emerald-200 dark:hover:border-emerald-700 whitespace-nowrap shadow-sm"
+                                                className="flex-shrink-0 px-3 py-1 bg-blue-50/50 dark:bg-blue-900/20 hover:bg-blue-100/50 dark:hover:bg-blue-800/40 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 rounded-full text-[11px] font-medium transition-colors border border-blue-100/50 dark:border-blue-800/30 hover:border-blue-200/50 dark:hover:border-blue-700/50 whitespace-nowrap shadow-sm"
                                             >
                                                 {tag}
                                             </button>
