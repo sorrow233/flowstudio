@@ -118,6 +118,57 @@ const ColorPicker = ({ selectedIndex, onSelect, align = 'center' }) => {
     );
 };
 
+// Re-adjust ColorPicker component to be styled exactly as the dot but clickable
+const StatusDotPicker = ({ ideaId, colorIndex, onSelect }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const close = () => setIsOpen(false);
+        window.addEventListener('click', close);
+        return () => window.removeEventListener('click', close);
+    }, [isOpen]);
+
+    const activeColorClass = getDotColor(ideaId, colorIndex);
+
+    return (
+        <div className="relative">
+            <button
+                onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
+                className={`w-2.5 h-2.5 rounded-full ${activeColorClass} shadow-sm transition-transform hover:scale-125 focus:outline-none ring-2 ring-transparent focus:ring-emerald-200`}
+            />
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, x: -10 }}
+                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="absolute left-4 top-[-6px] z-50 p-1.5 bg-white dark:bg-gray-800 rounded-full shadow-xl border border-gray-100 dark:border-gray-700 flex gap-1.5"
+                    >
+                        {/* Auto Option */}
+                        <button
+                            onClick={() => { onSelect(null); setIsOpen(false); }}
+                            className={`w-4 h-4 rounded-full flex items-center justify-center transition-transform hover:scale-110 ${colorIndex === undefined || colorIndex === null ? 'ring-1 ring-offset-1 ring-gray-400' : ''}`}
+                            title="Auto"
+                        >
+                            <div className="w-full h-full rounded-full bg-gray-300 dark:bg-gray-600" />
+                        </button>
+
+                        {COLOR_NAMES.map((color) => (
+                            <button
+                                key={color.value}
+                                onClick={() => { onSelect(color.value); setIsOpen(false); }}
+                                className={`w-4 h-4 rounded-full ${color.class} transition-transform hover:scale-110 ${colorIndex === color.value ? 'ring-1 ring-offset-1 ring-gray-400' : ''}`}
+                            />
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    )
+}
+
 const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
@@ -235,57 +286,6 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
         </div >
     );
 };
-
-// Re-adjust ColorPicker component to be styled exactly as the dot but clickable
-const StatusDotPicker = ({ ideaId, colorIndex, onSelect }) => {
-    const [isOpen, setIsOpen] = useState(false);
-
-    useEffect(() => {
-        if (!isOpen) return;
-        const close = () => setIsOpen(false);
-        window.addEventListener('click', close);
-        return () => window.removeEventListener('click', close);
-    }, [isOpen]);
-
-    const activeColorClass = getDotColor(ideaId, colorIndex);
-
-    return (
-        <div className="relative">
-            <button
-                onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
-                className={`w-2.5 h-2.5 rounded-full ${activeColorClass} shadow-sm transition-transform hover:scale-125 focus:outline-none ring-2 ring-transparent focus:ring-emerald-200`}
-            />
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, x: -10 }}
-                        animate={{ opacity: 1, scale: 1, x: 0 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="absolute left-4 top-[-6px] z-50 p-1.5 bg-white dark:bg-gray-800 rounded-full shadow-xl border border-gray-100 dark:border-gray-700 flex gap-1.5"
-                    >
-                        {/* Auto Option */}
-                        <button
-                            onClick={() => { onSelect(null); setIsOpen(false); }}
-                            className={`w-4 h-4 rounded-full flex items-center justify-center transition-transform hover:scale-110 ${colorIndex === undefined || colorIndex === null ? 'ring-1 ring-offset-1 ring-gray-400' : ''}`}
-                            title="Auto"
-                        >
-                            <div className="w-full h-full rounded-full bg-gray-300 dark:bg-gray-600" />
-                        </button>
-
-                        {COLOR_NAMES.map((color) => (
-                            <button
-                                key={color.value}
-                                onClick={() => { onSelect(color.value); setIsOpen(false); }}
-                                className={`w-4 h-4 rounded-full ${color.class} transition-transform hover:scale-110 ${colorIndex === color.value ? 'ring-1 ring-offset-1 ring-gray-400' : ''}`}
-                            />
-                        ))}
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-    )
-}
 
 const InspirationModule = () => {
     const { doc } = useSyncStore('flowstudio_v1');
