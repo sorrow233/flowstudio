@@ -6,6 +6,7 @@ import { Activity, X, Settings, ChevronRight, Menu, Plus } from 'lucide-react';
 import AdvancedStageNavigation from './AdvancedStageNavigation';
 import ProjectSettingsModal from './ProjectSettingsModal';
 import TaskList from '../primary/TaskList'; // Reusing Primary TaskList
+import ImportCommandModal from '../primary/ImportCommandModal';
 import { useSyncedProjects } from '../../../sync/useSyncStore';
 import { useSync } from '../../../sync/SyncContext';
 import { useTranslation } from '../../../i18n';
@@ -37,6 +38,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [newTaskInput, setNewTaskInput] = useState('');
     const [newTaskCategory, setNewTaskCategory] = useState('general');
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     // Force sync state for real-time updates
     const { projects: allCommands } = useSyncedProjects(doc, 'all_commands');
@@ -125,6 +127,22 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
             t.id === taskId ? { ...t, stage: targetStageId } : t
         );
         handleUpdateProject(project.id, { tasks: updatedTasks });
+    };
+
+    // --- Import Handler ---
+    const handleImportTask = (command) => {
+        const newTasks = [...(project.tasks || []), {
+            id: Date.now(),
+            text: command.content || command.title,
+            done: false,
+            category: command.category || 'general',
+            stage: activeStageId,
+            createdAt: new Date().toISOString(),
+            isCommand: true,
+            commandType: command.type || 'utility'
+        }];
+        handleUpdateProject(project.id, { tasks: newTasks });
+        setIsImportModalOpen(false);
     };
 
 
@@ -231,6 +249,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
                             setNewTaskInput={setNewTaskInput}
                             newTaskCategory={newTaskCategory}
                             setNewTaskCategory={setNewTaskCategory}
+                            onImportCommand={() => setIsImportModalOpen(true)}
                             availableCommands={allCommands}
                             themeColor={activeStage?.color ? 'custom' : 'red'}
                         />
@@ -243,6 +262,15 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
                     project={project}
                     onUpdate={handleUpdateProject}
                     onDelete={(id) => { onDeleteProject(id); onClose(); }}
+                />
+
+                <ImportCommandModal
+                    isOpen={isImportModalOpen}
+                    onClose={() => setIsImportModalOpen(false)}
+                    onImport={handleImportTask}
+                    currentStage={activeStageId}
+                    projectCategory={project.category}
+                    themeColor={activeStage?.color ? 'custom' : 'purple'}
                 />
             </motion.div>
         </div>
