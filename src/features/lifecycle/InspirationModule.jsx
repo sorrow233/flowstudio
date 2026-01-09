@@ -365,7 +365,7 @@ const InspirationModule = () => {
                                                 <button
                                                     key={tag}
                                                     onClick={() => handleTagClick(tag)}
-                                                    className="flex-shrink-0 px-2 py-1 bg-gray-50 dark:bg-gray-800 hover:bg-pink-50 dark:hover:bg-pink-900/20 text-gray-500 hover:text-pink-600 dark:text-gray-400 dark:hover:text-pink-400 rounded-md text-[11px] font-medium transition-all duration-300 border border-transparent hover:border-pink-100 dark:hover:border-pink-800/30 whitespace-nowrap"
+                                                    className="flex-shrink-0 px-2 py-1 bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-900/40 rounded-md text-[11px] font-medium transition-all duration-300 border border-pink-100 dark:border-pink-800/30 whitespace-nowrap"
                                                 >
                                                     {tag}
                                                 </button>

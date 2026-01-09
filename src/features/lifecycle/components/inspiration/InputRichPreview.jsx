@@ -5,7 +5,7 @@ import { parseRichText } from './InspirationItem'; // Reuse the parser
 const InputRichPreview = ({ text, scrollTop }) => {
     return (
         <div
-            className="absolute inset-0 p-6 pb-20 pointer-events-none text-lg leading-relaxed whitespace-pre-wrap font-light break-words overflow-hidden text-transparent"
+            className="absolute inset-0 p-6 pb-20 pointer-events-none text-lg leading-relaxed whitespace-pre-wrap font-light break-words overflow-hidden text-gray-700 dark:text-gray-200"
             style={{
                 marginTop: `-${scrollTop}px`,
                 fontFamily: 'inherit',
