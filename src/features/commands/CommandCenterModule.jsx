@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Search, Library, Globe2, Pencil, Trash2, X, Check } from 'lucide-react';
 import { STORAGE_KEYS, DEV_STAGES, COMMAND_CATEGORIES } from '../../utils/constants';
@@ -11,83 +11,74 @@ import CategoryRenameModal from './components/CategoryRenameModal';
 import { SharePublishModal, ShareBrowserModal } from '../share';
 import LibraryImportModal from './components/LibraryImportModal';
 
+import { useSync } from '../sync/SyncContext';
+import { useSyncedProjects } from '../sync/useSyncStore';
 import { useTranslation } from '../i18n';
 
 
 
 const CommandCenterModule = () => {
-    const [commands, setCommands] = useState([]);
+    // --- Sync Integration ---
+    const { doc } = useSync();
+    const { t } = useTranslation();
+
+    // Sync: Commands
+    const {
+        projects: commands,
+        addProject: addCommand,
+        updateProject: updateCommand,
+        removeProject: deleteCommand
+    } = useSyncedProjects(doc, 'all_commands');
+
+    // Sync: Categories
+    const {
+        projects: syncedCategories,
+        addProject: addCategory,
+        updateProject: updateCat,
+        removeProject: removeCat
+    } = useSyncedProjects(doc, 'command_categories');
+
+    // Merge default categories with synced custom labels
+    const categories = useMemo(() => {
+        if (syncedCategories && syncedCategories.length > 0) {
+            return COMMAND_CATEGORIES.map(defaultCat => {
+                const userCat = syncedCategories.find(c => c.id === defaultCat.id);
+                return userCat ? { ...defaultCat, label: userCat.label } : defaultCat;
+            });
+        }
+        return COMMAND_CATEGORIES;
+    }, [syncedCategories]);
+
+    // --- UI State ---
     const [activeStage, setActiveStage] = useState(1);
-    const [selectedCategory, setSelectedCategory] = useState('general'); // Category Filter
-    const [isAdding, setIsAdding] = useState(false);
-    const [isImporting, setIsImporting] = useState(false);
-    const [isCommunityBrowsing, setIsCommunityBrowsing] = useState(false);
-    const [sharingCommand, setSharingCommand] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState('general');
     const [search, setSearch] = useState('');
     const [copiedId, setCopiedId] = useState(null);
 
-    const { t } = useTranslation();
-
-    // Form State
+    // --- Form State ---
+    const [isAdding, setIsAdding] = useState(false);
     const [newCmd, setNewCmd] = useState({ title: '', content: '', type: 'utility', url: '', tags: [], category: 'general' });
     const [newTag, setNewTag] = useState({ label: '', value: '' });
-    const [editingTagId, setEditingTagId] = useState(null); // Track which tag is being edited
+    const [editingTagId, setEditingTagId] = useState(null);
 
-    // Category State (with custom names)
-    const [categories, setCategories] = useState(COMMAND_CATEGORIES);
-    // Custom Rename Modal State
-    const [renamingCategory, setRenamingCategory] = useState(null); // { id, currentName, color }
+    // --- Modal State ---
+    const [isImporting, setIsImporting] = useState(false);
+    const [isCommunityBrowsing, setIsCommunityBrowsing] = useState(false);
+    const [sharingCommand, setSharingCommand] = useState(null);
+    const [renamingCategory, setRenamingCategory] = useState(null);
     const [renameValue, setRenameValue] = useState('');
 
 
-
-    // Initial Load of Categories from localStorage
-    useEffect(() => {
-        const savedCats = localStorage.getItem('flowstudio_categories_custom');
-        if (savedCats) {
-            const parsedCats = JSON.parse(savedCats);
-            // MERGE LOGIC: Keep custom labels, but enforce new system colors/icons
-            const mergedCats = COMMAND_CATEGORIES.map(defaultCat => {
-                const userCat = parsedCats.find(pc => pc.id === defaultCat.id);
-                return userCat ? { ...defaultCat, label: userCat.label } : defaultCat;
-            });
-            setCategories(mergedCats);
-        }
-    }, []);
-
-    // Save Categories when changed
+    // Category rename handler
     const updateCategoryName = (id, newName) => {
-        const updated = categories.map(c => c.id === id ? { ...c, label: newName } : c);
-        setCategories(updated);
-        localStorage.setItem('flowstudio_categories_custom', JSON.stringify(updated));
-    };
-
-    useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEYS.COMMANDS);
-        if (saved) {
-            let parsed = JSON.parse(saved);
-
-            // DATA MIGRATION: Ensure all commands have stageIds array
-            const migrated = parsed.map(c => {
-                let updated = { ...c };
-                if (!updated.stageIds) {
-                    updated.stageIds = updated.stageId ? [updated.stageId] : [];
-                }
-                if (!updated.tags) {
-                    updated.tags = [];
-                }
-                if (!updated.category) {
-                    updated.category = 'general';
-                }
-                return updated;
-            });
-            setCommands(migrated);
+        const existingCat = syncedCategories.find(c => c.id === id);
+        if (existingCat) {
+            updateCat(id, { label: newName });
+        } else {
+            // First rename: add to synced categories
+            addCategory({ id, label: newName });
         }
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem(STORAGE_KEYS.COMMANDS, JSON.stringify(commands));
-    }, [commands]);
+    };
 
     const handleAdd = () => {
         if (!newCmd.title.trim()) return;
@@ -98,29 +89,26 @@ const CommandCenterModule = () => {
 
         if (newCmd.id) {
             // Update existing
-            setCommands(commands.map(c => c.id === newCmd.id ? {
-                ...c,
+            updateCommand(newCmd.id, {
                 title: newCmd.title.trim(),
                 content: newCmd.content.trim(),
                 url: newCmd.url.trim(),
                 type: newCmd.type,
                 tags: newCmd.tags || [],
                 category: newCmd.category || 'general'
-            } : c));
+            });
         } else {
             // Create New
-            const command = {
-                id: uuidv4(),
+            addCommand({
                 title: newCmd.title.trim(),
                 content: newCmd.content.trim(),
                 url: newCmd.url.trim(),
                 type: newCmd.type,
                 tags: newCmd.tags || [],
                 category: newCmd.category || 'general',
-                stageIds: [activeStage], // Assign to current stage
+                stageIds: [activeStage],
                 createdAt: Date.now()
-            };
-            setCommands([command, ...commands]);
+            });
         }
 
         setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [], category: 'general' });
@@ -159,31 +147,19 @@ const CommandCenterModule = () => {
     };
 
     const handleImport = (cmd) => {
-        // Check if command is in current profile
-        // Check if command is not in current stage
         const isInStage = cmd.stageIds?.includes(activeStage);
         if (!isInStage) {
-            // Add stage
-            const updated = commands.map(c =>
-                c.id === cmd.id
-                    ? { ...c, stageIds: [...(c.stageIds || []), activeStage] }
-                    : c
-            );
-            setCommands(updated);
+            updateCommand(cmd.id, { stageIds: [...(cmd.stageIds || []), activeStage] });
         }
-
         setIsImporting(false);
     };
 
     const handleCommunityImport = (cmd) => {
-        // Import from community share
-        const command = {
-            id: uuidv4(),
+        addCommand({
             ...cmd,
             stageIds: [activeStage],
             createdAt: Date.now()
-        };
-        setCommands([command, ...commands]);
+        });
         setIsCommunityBrowsing(false);
     };
 
@@ -214,14 +190,9 @@ const CommandCenterModule = () => {
 
         if (confirm(isLastInstance ? t('commands.deleteConfirmLast') : t('commands.deleteConfirmStage'))) {
             if (isLastInstance) {
-                setCommands(commands.filter(c => c.id !== id));
+                deleteCommand(id);
             } else {
-                // Just remove the stageId
-                setCommands(commands.map(c =>
-                    c.id === id
-                        ? { ...c, stageIds: c.stageIds.filter(sid => sid !== activeStage) }
-                        : c
-                ));
+                updateCommand(id, { stageIds: command.stageIds.filter(sid => sid !== activeStage) });
             }
         }
     };
@@ -233,10 +204,9 @@ const CommandCenterModule = () => {
     };
 
     const handleReorder = (reorderedStageCommands) => {
-        // We need to merge reordered subset back into the main list without losing others
-        const stageIdsSet = new Set(reorderedStageCommands.map(c => c.id));
-        const others = commands.filter(c => !stageIdsSet.has(c.id));
-        setCommands([...reorderedStageCommands, ...others]);
+        reorderedStageCommands.forEach((cmd, index) => {
+            updateCommand(cmd.id, { order: index });
+        });
     };
 
     // Filter commands for current stage
@@ -416,7 +386,7 @@ const CommandCenterModule = () => {
                     setIsImporting={setIsImporting}
                     copiedId={copiedId}
                     commands={commands}
-                    setCommands={setCommands}
+                    updateCommand={updateCommand}
                 />
             </div>
 

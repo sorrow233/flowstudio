@@ -21,7 +21,7 @@ const CommandList = ({
     setIsImporting,
     copiedId,
     commands,
-    setCommands,
+    updateCommand,
 }) => {
     // Multi-select state
     const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -124,20 +124,20 @@ const CommandList = ({
 
     // Bulk move to another stage
     const handleBulkMove = (targetStage) => {
-        if (selectedIds.size === 0 || !commands || !setCommands) return;
+        if (selectedIds.size === 0 || !commands || !updateCommand) return;
 
-        const updated = commands.map(cmd => {
-            if (!selectedIds.has(cmd.id)) return cmd;
+        selectedIds.forEach(id => {
+            const cmd = commands.find(c => c.id === id);
+            if (!cmd) return;
+
             const newStageIds = [...(cmd.stageIds || [])];
-            // Remove from current stage
             const currentIdx = newStageIds.indexOf(activeStage);
             if (currentIdx !== -1) newStageIds.splice(currentIdx, 1);
-            // Add to target stage if not already there
             if (!newStageIds.includes(targetStage)) newStageIds.push(targetStage);
-            return { ...cmd, stageIds: newStageIds };
+
+            updateCommand(id, { stageIds: newStageIds });
         });
 
-        setCommands(updated);
         setIsSelectionMode(false);
         setSelectedIds(new Set());
         setLastSelectedId(null);
