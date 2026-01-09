@@ -555,8 +555,7 @@ const FinalDevModule = () => {
                                                 setIsHeaderCollapsed(true);
                                             }
                                         }}
-                                        }}
-                                    themeColor="red"
+                                        themeColor="red"
                                     />
                                 </div>
                             </div>
