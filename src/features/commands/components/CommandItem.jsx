@@ -32,19 +32,24 @@ const CommandItem = ({
 
     const [isGrabbing, setIsGrabbing] = useState(false);
 
+    // Only enable swipe actions if not selecting or searching
+    const swipeEnabled = !isSelectionMode && !isSearching;
+
     return (
         <div className="relative">
-            {/* Slide Action Context (Behind content) */}
-            <motion.div
-                className="absolute inset-y-0 right-0 bg-red-500 -z-10 flex items-center justify-end pr-5 text-white rounded-2xl"
-                style={{ width: '100%' }}
-            >
-                <Trash2 size={24} />
-            </motion.div>
+            {/* Slide Action Context (Behind content) - Only render when swipe is possible */}
+            {swipeEnabled && (
+                <motion.div
+                    className="absolute inset-y-0 right-0 bg-red-500 z-0 flex items-center justify-end pr-5 text-white rounded-2xl"
+                    style={{ width: '100%' }}
+                >
+                    <Trash2 size={24} />
+                </motion.div>
+            )}
 
             <motion.div
                 layout
-                drag={(isSelectionMode || isSearching) ? false : "x"}
+                drag={swipeEnabled ? "x" : false}
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={{ right: 0.05, left: 0.5 }}
                 onDragStart={() => setIsGrabbing(true)}
@@ -69,7 +74,7 @@ const CommandItem = ({
                 }}
                 onDoubleClick={onDoubleClick}
                 className={`
-                    group bg-white border rounded-2xl p-4 transition-all duration-300 flex flex-col relative overflow-hidden select-none touch-pan-y
+                    group bg-white border rounded-2xl p-4 transition-all duration-300 flex flex-col relative z-10 overflow-hidden select-none touch-pan-y
                     ${getBorderClass()}
                     ${isSelectionMode ? 'cursor-pointer' : 'cursor-default'}
                     ${isGrabbing ? 'cursor-grabbing' : ''}
