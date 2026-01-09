@@ -9,39 +9,33 @@ export const STORAGE_KEYS = {
 export const DEV_STAGES = [
     {
         id: 1,
-        label: 'Inspiration',
-        title: 'Idea Generation',
-        desc: 'Capture sparks of creativity and define the initial concept.',
+        label: 'Skeleton',
+        title: 'Architectural Blueprint',
+        desc: 'Define the structural integrity, routing logic, and component hierarchy.',
     },
     {
         id: 2,
-        label: 'Command',
-        title: 'Directive & Control',
-        desc: 'Issue core directives and establish the operational framework.',
+        label: 'Functionality',
+        title: 'Core Mechanics & Logic',
+        desc: 'Implement primary business logic, data flows, and state management.',
     },
     {
         id: 3,
-        label: 'Pending',
-        title: 'Queue & Planning',
-        desc: 'Queue modules and features for upcoming development cycles.',
+        label: 'Modules',
+        title: 'System Integration',
+        desc: 'Connect authentication, database bindings, and external API services.',
     },
     {
         id: 4,
-        label: 'Primary',
-        title: 'Core Development',
-        desc: 'Execute the main development phase and build core features.',
+        label: 'Optimization',
+        title: 'Performance & Polish',
+        desc: 'Refine UI/UX transitions, optimize re-renders, and handle edge cases.',
     },
     {
         id: 5,
-        label: 'Advanced',
-        title: 'Enhanced Features',
-        desc: 'Implement complex logic, optimization, and advanced capabilities.',
-    },
-    {
-        id: 6,
-        label: 'Commercial',
-        title: 'Market Readiness',
-        desc: 'Final polish, monetization setup, and launch preparation.',
+        label: 'Completion',
+        title: 'Production Readiness',
+        desc: 'Final QA, build verification, and deployment to production.',
     }
 ];
 

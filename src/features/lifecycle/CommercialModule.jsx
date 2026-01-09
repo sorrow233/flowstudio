@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import {
     Coins, TrendingUp, CreditCard, Globe, Zap, BarChart3,
     Terminal, Wallet, Megaphone, Rocket, Hash, LineChart, Globe2,
-    Share2, MousePointerClick, RefreshCw
+    Share2, MousePointerClick
 } from 'lucide-react';
 import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
 import { toast } from 'sonner';
@@ -20,7 +20,7 @@ import GrowthPhase from './components/commercial/GrowthPhase';
 
 // Configuration Data
 const REVENUE_MODELS = [
-    { id: 'subscription', icon: RefreshCw },
+    { id: 'subscription', icon: RefreshCwIcon },
     { id: 'one_time', icon: CreditCard },
     { id: 'freemium', icon: Zap },
     { id: 'ads', icon: Globe },
@@ -42,6 +42,29 @@ const MARKETING_CHANNELS = [
     { id: 'short_video', icon: MousePointerClick },
     { id: 'ads', icon: LineChart },
 ];
+
+// Helper icons because local imports are messy
+function RefreshCwIcon(props) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+            <path d="M21 3v5h-5" />
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+            <path d="M3 21v-5h5" />
+        </svg>
+    );
+}
 
 const CommercialModule = () => {
     const { t } = useTranslation();

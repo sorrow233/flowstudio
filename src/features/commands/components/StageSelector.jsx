@@ -1,24 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Layers, MonitorPlay, Bug, Lightbulb, Flag, Terminal, Gem } from 'lucide-react';
+import { Layers, MonitorPlay, Bug, Sparkles, Flag, Terminal } from 'lucide-react';
 import { DEV_STAGES } from '../../../utils/constants';
 
 const STAGE_ICONS = {
     1: Layers,
     2: MonitorPlay,
     3: Bug,
-    4: Lightbulb,
-    5: Flag,
-    6: Gem
-};
-
-const STAGE_THEMES = {
-    1: 'bg-emerald-500 text-white shadow-emerald-200',
-    2: 'bg-gray-900 text-white shadow-gray-200',
-    3: 'bg-violet-500 text-white shadow-violet-200',
-    4: 'bg-blue-500 text-white shadow-blue-200',
-    5: 'bg-rose-500 text-white shadow-rose-200',
-    6: 'bg-amber-500 text-white shadow-amber-200'
+    4: Sparkles,
+    5: Flag
 };
 
 const StageSelector = ({ activeStage, setActiveStage, commands }) => {
@@ -69,7 +59,6 @@ const StageSelector = ({ activeStage, setActiveStage, commands }) => {
                     // Count items in this stage
                     const count = commands.filter(c => c.stageIds?.includes(stage.id)).length;
                     const isActive = activeStage === stage.id;
-                    const themeClass = STAGE_THEMES[stage.id] || 'bg-gray-900 text-white';
 
                     return (
                         <button
@@ -84,8 +73,8 @@ const StageSelector = ({ activeStage, setActiveStage, commands }) => {
                         >
                             <div className="flex items-center gap-3 md:gap-4 relative z-10 show-full">
                                 <div className={`
-                                    w-8 h-8 rounded-lg flex items-center justify-center transition-colors shadow-sm
-                                    ${isActive ? themeClass : 'bg-gray-100 text-gray-400 group-hover:bg-white'}
+                                    w-8 h-8 rounded-lg flex items-center justify-center transition-colors
+                                    ${isActive ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-white'}
                                 `}>
                                     <Icon size={16} />
                                 </div>
