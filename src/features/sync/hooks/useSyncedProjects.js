@@ -6,7 +6,7 @@ export const useSyncedProjects = (doc, arrayName) => {
     const [projects, setProjects] = useState([]);
     const [canUndo, setCanUndo] = useState(false);
     const [canRedo, setCanRedo] = useState(false);
-    const undoManagerDisplayRef = useRef(null); // Keep a ref to the UndoManager
+    const undoManagerRef = useRef(null);
 
     useEffect(() => {
         if (!doc) return;
@@ -15,13 +15,12 @@ export const useSyncedProjects = (doc, arrayName) => {
 
         // Initialize UndoManager scoped to this specific array (and its children)
         const undoManager = new Y.UndoManager(yArray, {
-            trackedOrigins: new Set([null, 'local']), // Track local changes (null origin or explicit 'local')
-            ignoreRemoteOrigins: true // Don't undo other people's changes by default (optional, but usually good for UX)
+            trackedOrigins: new Set([null, 'local']),
+            ignoreRemoteOrigins: true
         });
-        undoManagerDisplayRef.current = undoManager;
+        undoManagerRef.current = undoManager;
 
         const handleChange = () => {
-            // Use toJSON() to ensure we get POJOs (Plain Old JavaScript Objects)
             setProjects(yArray.toJSON());
         };
 
@@ -43,77 +42,67 @@ export const useSyncedProjects = (doc, arrayName) => {
         };
     }, [doc, arrayName]);
 
-    const addProject = (project) => {
+    const addProject = useCallback((project) => {
         if (!doc) return;
         const yArray = doc.getArray(arrayName);
 
-        // Convert plain object to Y.Map for granular tracking
         const yMap = new Y.Map();
         Object.entries(project).forEach(([key, value]) => {
             yMap.set(key, value);
         });
 
         yArray.insert(0, [yMap]);
-    };
+    }, [doc, arrayName]);
 
-    const removeProject = (id) => {
+    const removeProject = useCallback((id) => {
         if (!doc) return;
         doc.transact(() => {
             const yArray = doc.getArray(arrayName);
-            let index = -1;
             const arr = yArray.toArray();
             for (let i = 0; i < arr.length; i++) {
                 const item = arr[i];
                 const itemId = item instanceof Y.Map ? item.get('id') : item.id;
                 if (itemId === id) {
-                    index = i;
+                    yArray.delete(i, 1);
                     break;
                 }
             }
-            if (index !== -1) {
-                yArray.delete(index, 1);
-            }
         });
-    };
+    }, [doc, arrayName]);
 
-    const updateProject = (id, updates) => {
+    const updateProject = useCallback((id, updates) => {
         if (!doc) return;
         doc.transact(() => {
             const yArray = doc.getArray(arrayName);
             const arr = yArray.toArray();
-            let targetMap = null;
 
-            // Find the Y.Map
             for (let i = 0; i < arr.length; i++) {
                 const item = arr[i];
                 const itemId = item instanceof Y.Map ? item.get('id') : item.id;
                 if (itemId === id) {
-                    targetMap = item;
+                    if (item instanceof Y.Map) {
+                        // Granular update on Y.Map
+                        Object.entries(updates).forEach(([key, value]) => {
+                            item.set(key, value);
+                        });
+                    } else {
+                        // Fallback for non-Y.Map items
+                        const updated = { ...item, ...updates };
+                        yArray.delete(i, 1);
+                        yArray.insert(i, [updated]);
+                    }
                     break;
                 }
             }
-
-            if (targetMap && targetMap instanceof Y.Map) {
-                // Granular update on the Y.Map
-                Object.entries(updates).forEach(([key, value]) => {
-                    targetMap.set(key, value);
-                });
-            } else if (targetMap) {
-                // Fallback for non-Y.Map items
-                const index = arr.indexOf(targetMap);
-                const updated = { ...targetMap, ...updates };
-                yArray.delete(index, 1);
-                yArray.insert(index, [updated]);
-            }
         });
-    };
+    }, [doc, arrayName]);
 
     const undo = useCallback(() => {
-        undoManagerDisplayRef.current?.undo();
+        undoManagerRef.current?.undo();
     }, []);
 
     const redo = useCallback(() => {
-        undoManagerDisplayRef.current?.redo();
+        undoManagerRef.current?.redo();
     }, []);
 
     return { projects, addProject, removeProject, updateProject, undo, redo, canUndo, canRedo };

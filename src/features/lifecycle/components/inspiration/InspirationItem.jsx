@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Trash2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
@@ -47,8 +47,10 @@ export const getColorConfig = (index) => COLOR_CONFIG[index % COLOR_CONFIG.lengt
 
 // Helper for parsing rich text (moved out to be reused/static)
 export const parseRichText = (text) => {
+    // Guard: Handle null/undefined/empty
+    if (!text) return null;
+
     // Split by delimiters: **...**, `...`, [ ... ]
-    // Using capturing groups to keep delimiters in the array
     const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\])/g);
 
     return parts.map((part, index) => {
@@ -85,24 +87,22 @@ export const parseRichText = (text) => {
     });
 };
 
-const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) => {
-    const [isDragging, setIsDragging] = useState(false);
-    const [isCompleted, setIsCompleted] = useState(false);
+const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComplete, copiedId }) => {
+    const [isDragging, setIsDragging] = React.useState(false);
     const { t } = useTranslation();
 
     const config = getColorConfig(idea.colorIndex || 0);
+    const isCompleted = idea.completed || false;
 
-    // Handle double click to toggle completion (strikethrough)
+    // Handle double click to toggle completion (persisted)
     const handleDoubleClick = (e) => {
         e.stopPropagation();
-        setIsCompleted(prev => !prev);
+        onToggleComplete(idea.id, !isCompleted);
     };
 
     return (
         <div className="relative">
-            {/* Swipe Background (Delete Action) 
-                Only visible when dragging to prevent flash during entry animation 
-            */}
+            {/* Swipe Background (Delete Action) */}
             <div
                 className={`absolute inset-0 bg-red-500 rounded-xl flex items-center justify-end pr-6 -z-10 transition-opacity duration-200 ${isDragging ? 'opacity-100' : 'opacity-0'}`}
             >
@@ -116,7 +116,6 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                 onDragStart={() => setIsDragging(true)}
                 onDragEnd={(e, info) => {
                     setIsDragging(false);
-                    // Higher threshold: need to drag further or swipe faster
                     if (info.offset.x < -150 || info.velocity.x < -800) {
                         onRemove(idea.id);
                     }
@@ -151,7 +150,6 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                         className="flex-shrink-0 mt-1.5 cursor-pointer"
                         onClick={(e) => {
                             e.stopPropagation();
-                            // Cycle to next color
                             const currentIndex = typeof idea.colorIndex === 'number' ? idea.colorIndex : 0;
                             const nextIndex = (currentIndex + 1) % COLOR_CONFIG.length;
                             onUpdateColor(idea.id, nextIndex);
@@ -163,7 +161,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                         <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
                             {parseRichText(idea.content)}
                         </div>
-                        {/* Date/Time - compact, directly under content */}
+                        {/* Date/Time */}
                         <div className="mt-2 text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                             {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
                                 year: 'numeric',
@@ -193,8 +191,8 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </motion.div >
-        </div >
+            </motion.div>
+        </div>
     );
 };
 

@@ -100,10 +100,11 @@ const InspirationModule = () => {
     };
 
     const handleUpdateColor = (id, newColorIndex) => {
-        const idea = ideas.find(i => i.id === id);
-        if (idea) {
-            updateIdea(id, { colorIndex: newColorIndex });
-        }
+        updateIdea(id, { colorIndex: newColorIndex });
+    };
+
+    const handleToggleComplete = (id, completed) => {
+        updateIdea(id, { completed });
     };
 
     const handleCopy = async (content, id) => {
@@ -286,6 +287,7 @@ const InspirationModule = () => {
                             onRemove={handleRemove}
                             onCopy={handleCopy}
                             onUpdateColor={handleUpdateColor}
+                            onToggleComplete={handleToggleComplete}
                             copiedId={copiedId}
                         />
                     ))}
