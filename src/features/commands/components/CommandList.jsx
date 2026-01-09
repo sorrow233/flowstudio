@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Reorder, AnimatePresence, useDragControls } from 'framer-motion';
 import { Terminal, Library, ChevronRight, Copy, Trash2, ListChecks, X } from 'lucide-react';
 import CommandItem from './CommandItem';
-import { useConfirmDialog } from '../../../../components/shared/ConfirmDialog';
+import { useConfirmDialog } from '../../../components/shared/ConfirmDialog';
 
 // Internal Item Component - Clean and simple
 const DraggableCommandItem = ({
