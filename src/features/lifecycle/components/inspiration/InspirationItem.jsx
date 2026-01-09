@@ -114,9 +114,21 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComple
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={{ right: 0.05, left: 0.5 }}
                 onDragStart={() => setIsDragging(true)}
+                onDrag={(e, info) => {
+                    // 触觉反馈：滑动到删除阈值时震动
+                    if (info.offset.x < -140 && info.offset.x > -160) {
+                        if (navigator.vibrate) {
+                            navigator.vibrate(10); // 轻微震动 10ms
+                        }
+                    }
+                }}
                 onDragEnd={(e, info) => {
                     setIsDragging(false);
                     if (info.offset.x < -150 || info.velocity.x < -800) {
+                        // 删除确认时的强震动
+                        if (navigator.vibrate) {
+                            navigator.vibrate([20, 30, 20]); // 短-停-短 震动模式
+                        }
                         onRemove(idea.id);
                     }
                 }}
