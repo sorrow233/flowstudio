@@ -185,6 +185,21 @@ export default {
             tbd: '待定',
             pending: '待选择',
             none: '未选择',
+        },
+        aiConfig: {
+            title: 'AI 智能配置',
+            desc: '配置商业参数，生成 AI 指令，快速构建您的商业化逻辑。',
+            steps: {
+                1: '配置左侧商业参数',
+                2: '生成并复制 AI 指令',
+                3: '发送给 AI 助手进行构建',
+                4: '确认无误后解锁增长引擎',
+            },
+            copyAction: '生成 AI 指令',
+            unlockAction: '解锁增长引擎',
+            unlockDesc: '确任配置已完成？这将激活增长面板。',
+            unlocked: '增长引擎已激活',
+            unlockedDesc: '您可以随时重新生成指令以更新配置。',
         }
 
     },

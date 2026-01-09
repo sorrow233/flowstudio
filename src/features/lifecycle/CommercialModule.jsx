@@ -16,7 +16,7 @@ import CommercialHeader from './components/commercial/CommercialHeader';
 import PaymentProviderSelector from './components/commercial/PaymentProviderSelector';
 import RevenueModelSelector from './components/commercial/RevenueModelSelector';
 import PricingStructure from './components/commercial/PricingStructure';
-import LaunchChecklist from './components/commercial/LaunchChecklist';
+import AiConfigurationPanel from './components/commercial/AiConfigurationPanel';
 import GrowthPhase from './components/commercial/GrowthPhase';
 
 // Configuration Data
@@ -138,7 +138,9 @@ const CommercialModule = () => {
 - **${t('commercial.directive.channels')}**: ${(data.marketingChannels || []).map(id => t(`commercial.marketing.${id}`)).join(', ') || t('commercial.directive.none')}
 
 ## ${t('commercial.directive.readiness')}
-${Object.keys(data.checklist || {}).map(key => `- [${data.checklist[key] ? 'x' : ' '}] ${t(`commercial.checklist.${key}`)}`).join('\n')}
+// Checklist logic removed for AI Config
+${t('commercial.directive.readiness')}
+- [${data.isLaunched ? 'x' : ' '}] ${t('commercial.aiConfig.unlocked')}
 
 > ${t('commercial.directive.generated')}
 `.trim();
@@ -164,8 +166,11 @@ ${Object.keys(data.checklist || {}).map(key => `- [${data.checklist[key] ? 'x' :
     if (!selectedProject) return null;
 
     const data = selectedProject.commercial || {};
-    const checklistProgress = Object.keys(data.checklist || {}).filter(key => data.checklist[key]).length;
-    const isLaunchReady = checklistProgress >= 6;
+    const isLaunchReady = data.isLaunched === true;
+
+    const handleUnlock = () => {
+        handleUpdate({ isLaunched: true });
+    };
 
     return (
         <div className="max-w-7xl mx-auto pt-10 px-6 pb-24">
@@ -216,14 +221,10 @@ ${Object.keys(data.checklist || {}).map(key => `- [${data.checklist[key] ? 'x' :
                 </div>
 
                 <div className="space-y-10">
-                    <LaunchChecklist
-                        checklist={data.checklist}
-                        isLaunchReady={isLaunchReady}
-                        progress={checklistProgress}
-                        onToggle={(id) => {
-                            const current = data.checklist || {};
-                            handleUpdate({ checklist: { ...current, [id]: !current[id] } });
-                        }}
+                    <AiConfigurationPanel
+                        onCopy={handleCopyCommand}
+                        onUnlock={handleUnlock}
+                        isLaunched={isLaunchReady}
                     />
                 </div>
             </div>
