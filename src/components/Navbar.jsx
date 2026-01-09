@@ -51,8 +51,7 @@ const Navbar = () => {
         { id: 'primary', label: t('navbar.primary'), icon: tabIcons.primary, path: '/primary' },
         { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' },
         { id: 'final', label: t('navbar.final'), icon: tabIcons.final, path: '/final' },
-        { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' },
-        { id: 'final', label: t('navbar.final'), icon: tabIcons.final, path: '/final' },
+
     ];
 
     const { status, pendingCount } = useSyncStore('flowstudio_v1');
