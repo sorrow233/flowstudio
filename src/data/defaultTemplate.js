@@ -31,8 +31,10 @@ export const DEFAULT_TEMPLATE = {
             content: "请帮我审查这段代码：\n1. 潜在的 Bug 和边缘情况\n2. 安全性漏洞\n3. 性能优化建议\n4. 代码风格一致性\n\n请提供具体的重构代码示例。",
             url: "",
             type: "utility",
-            category: "development",
+            category: "general",
             tags: [{ id: "tag-dev", label: "开发", value: "Development" }],
+            stageIds: [1, 2, 3, 4, 5], // 适用于所有阶段
+            profileId: "default",
             createdAt: Date.now()
         },
         {
@@ -41,8 +43,10 @@ export const DEFAULT_TEMPLATE = {
             content: "# 任务：生成技术文档\n\n分析代码逻辑并生成详细文档，包含：\n- 函数签名与参数说明\n- 使用示例\n- 核心架构决策\n\n输出格式：Markdown",
             url: "",
             type: "utility",
-            category: "documentation",
+            category: "general",
             tags: [{ id: "tag-docs", label: "文档", value: "Documentation" }],
+            stageIds: [4, 5], // 文档主要在后期阶段
+            profileId: "default",
             createdAt: Date.now()
         },
         {
@@ -51,8 +55,10 @@ export const DEFAULT_TEMPLATE = {
             content: "我遇到了一个 Bug，上下文如下：\n- 观察到的行为：\n- 预期的行为：\n- 错误日志：\n\n请分析根本原因并提供修复方案。",
             url: "",
             type: "utility",
-            category: "debugging",
+            category: "general",
             tags: [{ id: "tag-debug", label: "调试", value: "Debugging" }],
+            stageIds: [2, 3, 4], // Bug 修复主要在中后期
+            profileId: "default",
             createdAt: Date.now()
         },
         {
@@ -61,8 +67,10 @@ export const DEFAULT_TEMPLATE = {
             content: "帮我规划 [功能名称] 的实现方案。\n\n请包含：\n1. 核心需求分析\n2. 技术架构设计\n3. 详细的分步实现计划\n4. 验证与测试步骤",
             url: "",
             type: "utility",
-            category: "planning",
+            category: "general",
             tags: [{ id: "tag-plan", label: "产品", value: "Planning" }],
+            stageIds: [1, 2], // 规划主要在早期阶段
+            profileId: "default",
             createdAt: Date.now()
         }
     ],

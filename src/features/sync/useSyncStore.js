@@ -277,7 +277,27 @@ export const useDataMigration = (doc) => {
         // --- 默认模板加载逻辑 ---
         // 如果用户是新用户且没有任何数据，则加载默认模板
         const seedDefaultTemplateIfEmpty = () => {
-            // 已经加载过默认模板，跳过
+            const COMMANDS_KEY = 'flowstudio_commands';
+            const CATEGORIES_KEY = 'flowstudio_categories_custom';
+
+            // 1. 单独处理命令加载（不管项目数据是否存在）
+            // 只在命令为空时加载默认命令
+            const existingCommands = localStorage.getItem(COMMANDS_KEY);
+            if (!existingCommands || existingCommands === '[]') {
+                if (DEFAULT_TEMPLATE.commands && DEFAULT_TEMPLATE.commands.length > 0) {
+                    localStorage.setItem(COMMANDS_KEY, JSON.stringify(DEFAULT_TEMPLATE.commands));
+                    console.info(`[DefaultTemplate] 加载了 ${DEFAULT_TEMPLATE.commands.length} 个默认指令`);
+                }
+            }
+
+            // 2. 加载自定义分类（如果不存在）
+            if (!localStorage.getItem(CATEGORIES_KEY)) {
+                if (DEFAULT_TEMPLATE.customCategories && DEFAULT_TEMPLATE.customCategories.length > 0) {
+                    localStorage.setItem(CATEGORIES_KEY, JSON.stringify(DEFAULT_TEMPLATE.customCategories));
+                }
+            }
+
+            // 3. 检查是否已加载过项目数据
             if (localStorage.getItem(DEFAULT_TEMPLATE_KEY)) return;
 
             const yPending = doc.getArray('pending_projects');
@@ -287,7 +307,7 @@ export const useDataMigration = (doc) => {
             const hasData = yPending.length > 0 || yPrimary.length > 0;
 
             if (!hasData) {
-                console.info("[DefaultTemplate] 首次访问，加载默认模板数据...");
+                console.info("[DefaultTemplate] 首次访问，加载默认项目和灵感数据...");
 
                 try {
                     doc.transact(() => {
@@ -323,17 +343,6 @@ export const useDataMigration = (doc) => {
                             console.info(`[DefaultTemplate] 加载了 ${DEFAULT_TEMPLATE.inspirations.length} 条灵感数据`);
                         }
                     });
-
-                    // 加载 Commands 到 localStorage
-                    if (DEFAULT_TEMPLATE.commands && DEFAULT_TEMPLATE.commands.length > 0) {
-                        localStorage.setItem('flowstudio_commands', JSON.stringify(DEFAULT_TEMPLATE.commands));
-                        console.info(`[DefaultTemplate] 加载了 ${DEFAULT_TEMPLATE.commands.length} 个指令模板`);
-                    }
-
-                    // 加载 Custom Categories
-                    if (DEFAULT_TEMPLATE.customCategories && DEFAULT_TEMPLATE.customCategories.length > 0) {
-                        localStorage.setItem('flowstudio_categories_custom', JSON.stringify(DEFAULT_TEMPLATE.customCategories));
-                    }
 
                     console.info("[DefaultTemplate] 默认模板加载完成！");
                 } catch (e) {
