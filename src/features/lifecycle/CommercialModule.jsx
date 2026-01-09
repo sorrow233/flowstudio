@@ -6,7 +6,8 @@ import {
     Terminal, Wallet, Megaphone, Rocket, Hash, LineChart, Globe2,
     Share2, MousePointerClick
 } from 'lucide-react';
-import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
+import { useSync } from '../sync/SyncContext';
+import { useSyncedProjects } from '../sync/useSyncStore';
 import { toast } from 'sonner';
 import { useTranslation } from '../i18n';
 
@@ -68,7 +69,7 @@ function RefreshCwIcon(props) {
 
 const CommercialModule = () => {
     const { t } = useTranslation();
-    const { doc } = useSyncStore('flowstudio_v1');
+    const { doc } = useSync();
     const {
         projects,
         updateProject

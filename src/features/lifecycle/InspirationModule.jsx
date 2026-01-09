@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Send, Trash2, ArrowRight, Copy, Check, Lightbulb, Hash, Tag } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
+import { useSync } from '../sync/SyncContext';
+import { useSyncedProjects } from '../sync/useSyncStore';
 import { useTranslation } from '../i18n';
 
 const STORAGE_KEY = 'flowstudio_inspiration_ideas';
@@ -261,7 +262,7 @@ const InputRichPreview = ({ text, scrollTop }) => {
 const InspirationModule = () => {
     // ... (rest of component logic remains same until return)
     // Sync
-    const { doc } = useSyncStore('flowstudio_v1');
+    const { doc } = useSync();
     const { t } = useTranslation();
     const {
         projects: ideas,

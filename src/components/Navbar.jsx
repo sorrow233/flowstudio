@@ -18,7 +18,7 @@ import {
 import { useState } from 'react';
 import { useAuth } from '../features/auth/AuthContext';
 import AuthModal from '../features/auth/AuthModal';
-import { useSyncStore } from '../features/sync/useSyncStore';
+import { useSync } from '../features/sync/SyncContext';
 import SyncStatus from '../features/sync/SyncStatus';
 import { DataManagementModal } from '../features/settings';
 import { useTheme } from '../hooks/ThemeContext';
@@ -53,7 +53,7 @@ const Navbar = () => {
         { id: 'commercial', label: t('navbar.commercial'), icon: tabIcons.commercial, path: '/commercial' },
     ];
 
-    const { status, pendingCount } = useSyncStore('flowstudio_v1');
+    const { status } = useSync();
 
     return (
         <div className="flex justify-center w-full px-4 pt-10 pb-4 relative z-50">
@@ -105,7 +105,7 @@ const Navbar = () => {
                         <div className="relative z-40 shrink-0">
                             <button onClick={() => setIsAuthModalOpen(true)} className="focus:outline-none">
                                 {user ? (
-                                    <SyncStatus status={status} pendingCount={pendingCount} />
+                                    <SyncStatus status={status} />
                                 ) : (
                                     <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-black dark:hover:bg-gray-100 transition-all whitespace-nowrap">
                                         <Cloud size={14} />

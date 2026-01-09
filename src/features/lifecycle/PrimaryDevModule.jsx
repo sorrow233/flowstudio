@@ -9,7 +9,8 @@ import StageNavigation from './components/primary/StageNavigation';
 import TaskList from './components/primary/TaskList';
 import ProjectWorkspaceHeader from './components/primary/ProjectWorkspaceHeader';
 import ImportCommandModal from './components/primary/ImportCommandModal';
-import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
+import { useSync } from '../sync/SyncContext';
+import { useSyncedProjects } from '../sync/useSyncStore';
 import confetti from 'canvas-confetti';
 import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
 
@@ -37,7 +38,7 @@ const getDefaultBackground = (projectId) => {
 
 const PrimaryDevModule = () => {
     // --- Sync Integration ---
-    const { doc } = useSyncStore('flowstudio_v1');
+    const { doc } = useSync();
     const {
         projects,
         updateProject,

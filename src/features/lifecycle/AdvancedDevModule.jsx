@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Network, Sparkles, FolderDot, Box, Activity, Trophy } from 'lucide-react';
-import { useSyncStore, useSyncedProjects } from '../sync/useSyncStore';
+import { useSyncedProjects } from '../sync/useSyncStore';
 import { useSync } from '../sync/SyncContext';
 import AdvancedProjectWorkspace from './components/advanced/AdvancedProjectWorkspace';
 

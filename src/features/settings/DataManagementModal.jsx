@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, Upload, FileJson, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
-import { useSyncStore } from '../sync/useSyncStore';
+import { useSync } from '../sync/SyncContext';
 import { exportAllData, importData, validateImportData, downloadAsJson, readJsonFile } from './dataUtils';
 
 const DataManagementModal = ({ isOpen, onClose }) => {
@@ -14,7 +14,7 @@ const DataManagementModal = ({ isOpen, onClose }) => {
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef(null);
 
-    const { doc } = useSyncStore('flowstudio_v1');
+    const { doc } = useSync();
 
     const resetState = () => {
         setMode('menu');
