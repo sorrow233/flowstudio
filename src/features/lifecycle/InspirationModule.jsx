@@ -49,6 +49,12 @@ const COLOR_CONFIG = [
 
 const getColorConfig = (index) => COLOR_CONFIG[index % COLOR_CONFIG.length];
 
+// Auto color logic: Every 3 items, switch to next color
+const getNextAutoColorIndex = (totalCount) => {
+    const groupIndex = Math.floor(totalCount / 3);
+    return groupIndex % COLOR_CONFIG.length;
+};
+
 // Extracted Item Component to manage local drag state
 const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) => {
     const [isDragging, setIsDragging] = useState(false);
@@ -223,7 +229,7 @@ const InspirationModule = () => {
     const { projects: pendingProjects } = useSyncedProjects(doc, 'pending_projects');
 
     const [input, setInput] = useState('');
-    const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+    const [selectedColorIndex, setSelectedColorIndex] = useState(null);
     const [copiedId, setCopiedId] = useState(null);
     const [deletedIdea, setDeletedIdea] = useState(null);
 
@@ -285,7 +291,7 @@ const InspirationModule = () => {
             id: uuidv4(),
             content: input.trim(),
             timestamp: Date.now(),
-            colorIndex: selectedColorIndex,
+            colorIndex: selectedColorIndex !== null ? selectedColorIndex : getNextAutoColorIndex(ideas.length),
         };
         addIdea(newIdea);
         setInput('');
@@ -376,7 +382,7 @@ const InspirationModule = () => {
                                 {COLOR_CONFIG.map((conf, index) => (
                                     <button
                                         key={conf.id}
-                                        onClick={() => setSelectedColorIndex(index)}
+                                        onClick={() => setSelectedColorIndex(prev => prev === index ? null : index)}
                                         className={`w-3 h-3 rounded-full transition-all duration-300 ${conf.dot} ${index === selectedColorIndex ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 ring-gray-400 dark:ring-gray-500 scale-110' : 'opacity-40 hover:opacity-100 hover:scale-110'}`}
                                         title={conf.id}
                                     />
