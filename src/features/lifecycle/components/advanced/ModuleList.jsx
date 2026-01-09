@@ -65,7 +65,7 @@ const ModuleList = ({ modules, onModuleClick, onDeleteModule }) => {
                         >
                             {/* Icon */}
                             <div className="col-span-1">
-                                <div className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                                <div className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
                                     <Icon size={18} />
                                 </div>
                             </div>
@@ -88,7 +88,7 @@ const ModuleList = ({ modules, onModuleClick, onDeleteModule }) => {
                                 <div className="flex items-center gap-3">
                                     <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                                         <div
-                                            className={`h-full rounded-full ${module.progress === 100 ? 'bg-emerald-500' : 'bg-blue-500'}`}
+                                            className={`h-full rounded-full ${module.progress === 100 ? 'bg-red-500' : 'bg-red-400'}`}
                                             style={{ width: `${module.progress}%` }}
                                         />
                                     </div>
@@ -98,7 +98,7 @@ const ModuleList = ({ modules, onModuleClick, onDeleteModule }) => {
 
                             {/* Actions */}
                             <div className="col-span-2 flex justify-end items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <div className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                                <div className="p-2 text-gray-400 hover:text-red-600 transition-colors">
                                     <Edit2 size={16} />
                                 </div>
                                 <button

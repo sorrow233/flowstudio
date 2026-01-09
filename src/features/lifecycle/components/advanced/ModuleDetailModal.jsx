@@ -60,7 +60,7 @@ const ModuleDetailModal = ({ isOpen, onClose, module, onUpdate, onDelete }) => {
                             <select
                                 value={localModule.priority || 'Medium'}
                                 onChange={(e) => handleChange('priority', e.target.value)}
-                                className="bg-transparent text-[10px] font-bold uppercase tracking-widest text-blue-600 border-none p-0 focus:ring-0 cursor-pointer"
+                                className="bg-transparent text-[10px] font-bold uppercase tracking-widest text-red-600 border-none p-0 focus:ring-0 cursor-pointer"
                             >
                                 <option value="High">High Priority</option>
                                 <option value="Medium">Medium Priority</option>
@@ -86,7 +86,7 @@ const ModuleDetailModal = ({ isOpen, onClose, module, onUpdate, onDelete }) => {
                         <textarea
                             value={localModule.description}
                             onChange={(e) => handleChange('description', e.target.value)}
-                            className="w-full text-sm text-gray-600 bg-gray-50 rounded-xl p-4 border-none focus:ring-2 focus:ring-blue-100 resize-none h-24"
+                            className="w-full text-sm text-gray-600 bg-gray-50 rounded-xl p-4 border-none focus:ring-2 focus:ring-red-100 resize-none h-24"
                             placeholder="Describe the module's purpose..."
                         />
                     </div>
@@ -97,8 +97,7 @@ const ModuleDetailModal = ({ isOpen, onClose, module, onUpdate, onDelete }) => {
                         <div>
                             <div className="flex justify-between items-end mb-2">
                                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Maturity Stage</label>
-                                <span className={`text-sm font-medium ${localModule.stage === 4 ? 'text-emerald-600' : 'text-blue-500'
-                                    }`}>
+                                <span className={`text-sm font-medium text-red-500`}>
                                     {STAGE_LABELS[localModule.stage]}
                                 </span>
                             </div>
@@ -127,7 +126,7 @@ const ModuleDetailModal = ({ isOpen, onClose, module, onUpdate, onDelete }) => {
                                 min="0" max="100"
                                 value={localModule.progress}
                                 onChange={(e) => handleChange('progress', parseInt(e.target.value))}
-                                className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                                className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-red-500"
                             />
                         </div>
                     </div>

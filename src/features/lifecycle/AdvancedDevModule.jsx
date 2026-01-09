@@ -69,7 +69,7 @@ const AdvancedDevModule = () => {
                             layoutId={`advanced-card-${project.id}`}
                             key={project.id}
                             onClick={() => setSelectedProject(project)}
-                            className="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-blue-900/5 dark:hover:shadow-blue-900/20 transition-all cursor-pointer relative h-[320px] flex flex-col ring-1 ring-transparent hover:ring-blue-50 dark:hover:ring-blue-900/30"
+                            className="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-red-900/5 dark:hover:shadow-red-900/20 transition-all cursor-pointer relative h-[320px] flex flex-col ring-1 ring-transparent hover:ring-red-50 dark:hover:ring-red-900/30"
                         >
                             {/* Card Background */}
                             <div className="absolute inset-0 z-0 h-40">
@@ -79,7 +79,7 @@ const AdvancedDevModule = () => {
                                         <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent" />
                                     </div>
                                 ) : (
-                                    <div className="w-full h-full bg-gradient-to-br from-blue-50 to-white dark:from-blue-950 dark:to-gray-900" />
+                                    <div className="w-full h-full bg-gradient-to-br from-red-50 to-white dark:from-red-950 dark:to-gray-900" />
                                 )}
                             </div>
 
@@ -88,7 +88,7 @@ const AdvancedDevModule = () => {
                                     <div className="w-12 h-12 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl flex items-center justify-center shadow-sm border border-gray-100 dark:border-gray-700 mb-6 group-hover:scale-110 transition-transform duration-300">
                                         <Network size={24} strokeWidth={1.5} />
                                     </div>
-                                    <h3 className="text-2xl font-light text-gray-900 dark:text-white mb-2 line-clamp-1 group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors">
+                                    <h3 className="text-2xl font-light text-gray-900 dark:text-white mb-2 line-clamp-1 group-hover:text-red-900 dark:group-hover:text-red-400 transition-colors">
                                         {project.title}
                                     </h3>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{project.desc || 'No description provided.'}</p>

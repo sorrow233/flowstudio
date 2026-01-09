@@ -155,8 +155,8 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                     {/* Header */}
                     <div className="flex justify-between items-start px-8 py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 z-10">
                         <div className="flex-1">
-                            <div className="flex items-center gap-3 text-emerald-600 mb-2">
-                                <div className="p-2 bg-emerald-50 rounded-lg">
+                            <div className="flex items-center gap-3 text-red-600 mb-2">
+                                <div className="p-2 bg-red-50 rounded-lg">
                                     <Network size={20} />
                                 </div>
                                 <span className="text-xs font-bold uppercase tracking-widest">Rapid Iteration</span>
@@ -168,7 +168,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                             {/* System Health Dashboard */}
                             <div className="flex flex-wrap gap-6">
                                 <div className="flex items-center gap-3 pr-6 border-r border-gray-100">
-                                    <div className="p-3 bg-blue-50 text-blue-500 rounded-xl">
+                                    <div className="p-3 bg-red-50 text-red-500 rounded-xl">
                                         <Activity size={20} />
                                     </div>
                                     <div>
@@ -211,13 +211,13 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                             <div className="flex bg-gray-50 dark:bg-gray-900 rounded-xl p-1 mr-2">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-red-600' : 'text-gray-400 hover:text-gray-600'}`}
                                 >
                                     <LayoutGrid size={16} />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-gray-800 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-gray-800 shadow-sm text-red-600 dark:text-red-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
                                 >
                                     <List size={16} />
                                 </button>
@@ -225,7 +225,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
 
                             <button
                                 onClick={() => setIsLibraryOpen(true)}
-                                className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-blue-100 transition-colors flex items-center gap-2"
+                                className="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-red-100 transition-colors flex items-center gap-2"
                             >
                                 <Box size={14} />
                                 Library
@@ -235,14 +235,14 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
 
                             <button
                                 onClick={() => setIsImportOpen(true)}
-                                className="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-xl transition-all"
+                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                                 title="AI Architect Import"
                             >
                                 <Sparkles size={20} />
                             </button>
                             <button
                                 onClick={handleCreateModule}
-                                className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
+                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                                 title="Add Custom Module"
                             >
                                 <Plus size={20} />
@@ -310,7 +310,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                                             </div>
                                                             <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                                                                 <div
-                                                                    className={`h-full rounded-full transition-all duration-500 ${module.progress === 100 ? 'bg-emerald-400' : 'bg-blue-500'
+                                                                    className={`h-full rounded-full transition-all duration-500 ${module.progress === 100 ? 'bg-red-500' : 'bg-red-400'
                                                                         }`}
                                                                     style={{ width: `${module.progress}%` }}
                                                                 />
@@ -367,7 +367,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                                                 <span className="font-mono text-gray-400">{module.progress}%</span>
                                                             </div>
                                                             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                                <div className="h-full rounded-full bg-blue-500" style={{ width: `${module.progress}%` }} />
+                                                                <div className="h-full rounded-full bg-red-500" style={{ width: `${module.progress}%` }} />
                                                             </div>
                                                         </div>
                                                     </motion.div>
@@ -379,7 +379,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                 {/* Empty State */}
                                 {modules.length === 0 && (
                                     <div className="col-span-full py-20 flex flex-col items-center justify-center text-gray-300 dark:text-gray-600 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[3rem]">
-                                        <Sparkles size={48} className="mb-4 text-emerald-100 dark:text-emerald-900/40" />
+                                        <Sparkles size={48} className="mb-4 text-red-100 dark:text-red-900/40" />
                                         <p className="text-lg font-light text-gray-400 dark:text-gray-500">Your architecture is empty</p>
                                         <p className="text-xs text-gray-300 mt-2 font-mono">
                                             Use AI Import or Library to get started
