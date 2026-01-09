@@ -8,7 +8,7 @@ export const DEFAULT_TEMPLATE = {
     inspirations: [
         {
             id: "welcome-001",
-            content: "你好啊，我们是 FlowStudio 的开发团队（右滑删除此条）",
+            content: "你好啊，我们是 FlowStudio 的开发团队（`右滑删除此条`）",
             timestamp: Date.now()
         },
         {
@@ -18,7 +18,7 @@ export const DEFAULT_TEMPLATE = {
         },
         {
             id: "guide-command",
-            content: "你可以在命令中保存不同类别的指令：开发、学习、目标，或者只是一些碎碎念（双击圆点标记已读）",
+            content: "你可以在命令中保存不同类别的指令：开发、学习、目标，或者只是一些碎碎念（`双击圆点标记已读`）",
             timestamp: Date.now() - 120000
         },
         {

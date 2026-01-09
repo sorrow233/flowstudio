@@ -58,7 +58,11 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                         onRemove(idea.id);
                     }
                 }}
-                onClick={() => onCopy(idea.content, idea.id)}
+                onClick={() => {
+                    if (!window.getSelection().toString()) {
+                        onCopy(idea.content, idea.id);
+                    }
+                }}
                 onDoubleClick={handleDoubleClick}
                 initial={{ opacity: 0, y: 20, scale: 0.98 }}
                 animate={{
@@ -78,7 +82,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                         <div className={`w-2.5 h-2.5 rounded-full ${getDotColor(idea.id)} shadow-sm transition-transform duration-200 ${isCompleted ? 'scale-75 opacity-50' : ''}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans select-none transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
+                        <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
                             {(() => {
                                 // Light-weight Markdown Parser for **bold**, `code`, and [Tag]
                                 const parseRichText = (text) => {
