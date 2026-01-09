@@ -60,22 +60,64 @@ const Navbar = () => {
 
     const { status } = useSync();
 
-    // Dynamic Spotlight Color based on active tab
-    const getSpotlightColor = () => {
+    // Dynamic Theme Config based on active tab
+    const getActiveTheme = () => {
         const path = location.pathname;
-        if (path.startsWith('/inspiration')) return isDark ? "rgba(244, 114, 182, 0.15)" : "rgba(244, 114, 182, 0.12)"; // Pink
-        if (path.startsWith('/pending')) return isDark ? "rgba(16, 185, 129, 0.15)" : "rgba(16, 185, 129, 0.1)"; // Green
-        if (path.startsWith('/primary')) return isDark ? "rgba(168, 85, 247, 0.15)" : "rgba(168, 85, 247, 0.1)"; // Purple
-        if (path.startsWith('/advanced')) return isDark ? "rgba(239, 68, 68, 0.15)" : "rgba(239, 68, 68, 0.1)"; // Red
-        if (path.startsWith('/commercial')) return isDark ? "rgba(245, 158, 11, 0.15)" : "rgba(245, 158, 11, 0.1)"; // Amber
-        if (path.startsWith('/commands')) return isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)"; // Neutral
-        return isDark ? "rgba(16, 185, 129, 0.15)" : "rgba(16, 185, 129, 0.1)"; // Default to Green
+        if (path.startsWith('/inspiration')) return 'pink';
+        if (path.startsWith('/pending')) return 'green';
+        if (path.startsWith('/primary')) return 'purple';
+        if (path.startsWith('/advanced')) return 'red';
+        if (path.startsWith('/commercial')) return 'amber';
+        return 'default';
     };
+
+    const activeTheme = getActiveTheme();
+
+    const themeConfigs = {
+        pink: {
+            spotlight: isDark ? "rgba(244, 114, 182, 0.15)" : "rgba(244, 114, 182, 0.12)",
+            iconText: 'text-pink-400 dark:text-pink-300',
+            iconHover: 'hover:bg-pink-50 dark:hover:bg-pink-900/20',
+            sync: { dot: 'bg-pink-400', shadow: 'shadow-[0_0_8px_rgba(244,114,182,0.4)]', text: 'text-pink-500', bg: 'bg-pink-50/50 dark:bg-pink-900/20' }
+        },
+        green: {
+            spotlight: isDark ? "rgba(16, 185, 129, 0.15)" : "rgba(16, 185, 129, 0.1)",
+            iconText: 'text-green-500 dark:text-green-400',
+            iconHover: 'hover:bg-green-50 dark:hover:bg-green-900/20',
+            sync: { dot: 'bg-emerald-500', shadow: 'shadow-[0_0_8px_rgba(16,185,129,0.4)]', text: 'text-emerald-600', bg: 'bg-emerald-50/50 dark:bg-emerald-900/20' }
+        },
+        purple: {
+            spotlight: isDark ? "rgba(168, 85, 247, 0.15)" : "rgba(168, 85, 247, 0.1)",
+            iconText: 'text-purple-500 dark:text-purple-400',
+            iconHover: 'hover:bg-purple-50 dark:hover:bg-purple-900/20',
+            sync: { dot: 'bg-purple-500', shadow: 'shadow-[0_0_8px_rgba(168,85,247,0.4)]', text: 'text-purple-600', bg: 'bg-purple-50/50 dark:bg-purple-900/20' }
+        },
+        red: {
+            spotlight: isDark ? "rgba(239, 68, 68, 0.15)" : "rgba(239, 68, 68, 0.1)",
+            iconText: 'text-red-500 dark:text-red-400',
+            iconHover: 'hover:bg-red-50 dark:hover:bg-red-900/20',
+            sync: { dot: 'bg-red-500', shadow: 'shadow-[0_0_8px_rgba(239,68,68,0.4)]', text: 'text-red-600', bg: 'bg-red-50/50 dark:bg-red-900/20' }
+        },
+        amber: {
+            spotlight: isDark ? "rgba(245, 158, 11, 0.15)" : "rgba(245, 158, 11, 0.1)",
+            iconText: 'text-amber-500 dark:text-amber-400',
+            iconHover: 'hover:bg-amber-50 dark:hover:bg-amber-900/20',
+            sync: { dot: 'bg-amber-500', shadow: 'shadow-[0_0_8px_rgba(245,158,11,0.4)]', text: 'text-amber-600', bg: 'bg-amber-50/50 dark:bg-amber-900/20' }
+        },
+        default: {
+            spotlight: isDark ? "rgba(16, 185, 129, 0.15)" : "rgba(16, 185, 129, 0.1)",
+            iconText: 'text-gray-400 dark:text-gray-500',
+            iconHover: 'hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800',
+            sync: null
+        }
+    };
+
+    const currentConfig = themeConfigs[activeTheme] || themeConfigs.default;
 
     return (
         <div className="flex justify-center w-full px-4 pt-10 pb-4 relative z-50">
             <nav className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-full shadow-sm max-w-[95vw] md:max-w-full relative mx-auto">
-                <Spotlight spotColor={getSpotlightColor()} size={300} className="rounded-full">
+                <Spotlight spotColor={currentConfig.spotlight} size={300} className="rounded-full">
                     <div className="flex items-center gap-1 md:gap-2 px-1.5 py-1.5 md:px-2 md:py-2 overflow-x-auto no-scrollbar mask-linear-fade">
                         {/* 主流程 */}
                         {mainTabs.map((tab) => {
@@ -149,7 +191,7 @@ const Navbar = () => {
                         {/* Theme Toggle */}
                         <button
                             onClick={toggleTheme}
-                            className={`relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all z-40 shrink-0 ${getSpotlightColor().includes('244, 114, 182') ? 'hover:text-pink-500' : getSpotlightColor().includes('168, 85, 247') ? 'hover:text-purple-500' : getSpotlightColor().includes('239, 68, 68') ? 'hover:text-red-500' : getSpotlightColor().includes('245, 158, 11') ? 'hover:text-amber-500' : 'hover:text-emerald-500'}`}
+                            className={`relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full transition-all z-40 shrink-0 ${currentConfig.iconText} ${currentConfig.iconHover}`}
                             title={isDark ? '亮色模式' : '暗色模式'}
                         >
                             {isDark ? <Sun size={16} strokeWidth={1.5} /> : <Moon size={16} strokeWidth={1.5} />}
@@ -158,7 +200,7 @@ const Navbar = () => {
                         {/* Settings */}
                         <button
                             onClick={() => setIsDataModalOpen(true)}
-                            className={`relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all z-40 shrink-0 ${getSpotlightColor().includes('244, 114, 182') ? 'hover:text-pink-500' : getSpotlightColor().includes('168, 85, 247') ? 'hover:text-purple-500' : getSpotlightColor().includes('239, 68, 68') ? 'hover:text-red-500' : getSpotlightColor().includes('245, 158, 11') ? 'hover:text-amber-500' : 'hover:text-emerald-500'}`}
+                            className={`relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full transition-all z-40 shrink-0 ${currentConfig.iconText} ${currentConfig.iconHover}`}
                             title={t('navbar.dataManagement')}
                         >
                             <Settings size={16} strokeWidth={1.5} />
@@ -170,35 +212,7 @@ const Navbar = () => {
                                 {user ? (
                                     <SyncStatus
                                         status={status}
-                                        themeColor={(() => {
-                                            const color = getSpotlightColor();
-                                            if (color.includes('244, 114, 182')) return { // Pink
-                                                dot: 'bg-pink-400',
-                                                shadow: 'shadow-[0_0_8px_rgba(244,114,182,0.4)]',
-                                                text: 'text-pink-500',
-                                                bg: 'bg-pink-50/50 dark:bg-pink-900/20'
-                                            };
-                                            if (color.includes('168, 85, 247')) return { // Purple
-                                                dot: 'bg-purple-500',
-                                                shadow: 'shadow-[0_0_8px_rgba(168,85,247,0.4)]',
-                                                text: 'text-purple-600',
-                                                bg: 'bg-purple-50/50 dark:bg-purple-900/20'
-                                            };
-                                            if (color.includes('239, 68, 68')) return { // Red
-                                                dot: 'bg-red-500',
-                                                shadow: 'shadow-[0_0_8px_rgba(239,68,68,0.4)]',
-                                                text: 'text-red-600',
-                                                bg: 'bg-red-50/50 dark:bg-red-900/20'
-                                            };
-                                            if (color.includes('245, 158, 11')) return { // Amber
-                                                dot: 'bg-amber-500',
-                                                shadow: 'shadow-[0_0_8px_rgba(245,158,11,0.4)]',
-                                                text: 'text-amber-600',
-                                                bg: 'bg-amber-50/50 dark:bg-amber-900/20'
-                                            };
-                                            // Default Green
-                                            return null;
-                                        })()}
+                                        themeColor={currentConfig.sync}
                                     />
                                 ) : (
                                     <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-black dark:hover:bg-gray-100 transition-all whitespace-nowrap">
