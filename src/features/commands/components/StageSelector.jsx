@@ -21,7 +21,7 @@ const STAGE_THEMES = {
     6: 'bg-yellow-400 text-white shadow-yellow-100',
 };
 
-const StageSelector = ({ activeStage, setActiveStage, commands }) => {
+const StageSelector = ({ activeStage, setActiveStage, commands, selectedCategory }) => {
     const scrollContainerRef = React.useRef(null);
     const activeBtnRef = React.useRef(null);
 
@@ -67,7 +67,11 @@ const StageSelector = ({ activeStage, setActiveStage, commands }) => {
                 {DEV_STAGES.map(stage => {
                     const Icon = STAGE_ICONS[stage.id];
                     // Count items in this stage
-                    const count = commands.filter(c => c.stageIds?.includes(stage.id)).length;
+                    // Count items in this stage AND category
+                    const count = commands.filter(c =>
+                        c.stageIds?.includes(stage.id) &&
+                        (c.category || 'general') === selectedCategory
+                    ).length;
                     const isActive = activeStage === stage.id;
 
                     return (

@@ -282,6 +282,7 @@ const CommandCenterModule = () => {
                 activeStage={activeStage}
                 setActiveStage={setActiveStage}
                 commands={commands}
+                selectedCategory={selectedCategory}
             />
 
             {/* Main Content */}
