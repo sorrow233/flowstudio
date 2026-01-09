@@ -25,7 +25,7 @@ const PendingModule = () => {
     const { doc } = useSync();
 
     const {
-        projects,
+        projects: allProjects,
         addProject,
         removeProject: deleteProject,
         updateProject,
@@ -33,25 +33,27 @@ const PendingModule = () => {
         redo,
         canUndo,
         canRedo
-    } = useSyncedProjects(doc, 'pending_projects');
+    } = useSyncedProjects(doc, 'all_projects');
 
-    useUndoShortcuts(undo, redo);
+    // Filter for pending projects
+    const projects = React.useMemo(() =>
+        allProjects.filter(p => p.stage === 'pending'),
+        [allProjects]);
 
-    const {
-        projects: primaryProjects
-    } = useSyncedProjects(doc, 'primary_projects');
+    // Filter for primary projects (Nursery)
+    const primaryProjects = React.useMemo(() =>
+        allProjects.filter(p => p.stage === 'primary'),
+        [allProjects]);
 
     const [selectedProject, setSelectedProject] = useState(null);
 
-    // No effect needed for syncing selection with "filtered" arrays since we use direct arrays now.
-    // However, if the project is deleted, we should deselect it.
     useEffect(() => {
         if (selectedProject) {
             const current = projects.find(p => p.id === selectedProject.id);
-            if (!current) {
-                setSelectedProject(null);
-            } else {
+            if (current) {
                 setSelectedProject(current);
+            } else {
+                setSelectedProject(null);
             }
         }
     }, [projects]);
@@ -69,26 +71,21 @@ const PendingModule = () => {
     };
 
     const handleGraduate = (project, category = 'general') => {
-        deleteProject(project.id);
+        const hasReason = project.foundingReason && project.foundingReason.trim().length > 0;
+
+        // Graduate: simply change stage and set initial primary data
+        updateProject(project.id, {
+            stage: 'primary',
+            category,
+            graduatedAt: Date.now(),
+            subStage: 1,
+            progress: 0,
+            tasks: project.tasks || [],
+            hasHolyGlow: hasReason,
+            bgImage: project.bgImage || getRandomProjectImage()
+        });
+
         setSelectedProject(null);
-
-        if (doc) {
-            const primaryList = doc.getArray('primary_projects');
-            const hasReason = project.foundingReason && project.foundingReason.trim().length > 0;
-
-            const newPrimary = {
-                id: uuidv4(), // Generate new ID for primary stage
-                ...project,
-                category,
-                graduatedAt: Date.now(),
-                subStage: 1,
-                progress: 0,
-                tasks: [],
-                hasHolyGlow: hasReason,
-                bgImage: project.bgImage || getRandomProjectImage()
-            };
-            primaryList.unshift([newPrimary]);
-        }
     };
 
     const handleDelete = (e, id) => {
@@ -104,6 +101,9 @@ const PendingModule = () => {
         if (score < 4) return { scale: 1.0, opacity: 0.9, color: 'text-lime-500' };
         return { scale: 1.1, opacity: 1, color: 'text-emerald-600' };
     };
+
+
+
 
     const getTreeVisual = (stage = 1, projectId = '') => {
         const stages = [
@@ -137,11 +137,8 @@ const PendingModule = () => {
             <div className={`transition-all duration-500 flex-col ${selectedProject ? 'hidden md:flex md:w-[350px] opacity-100' : 'flex w-full'}`}>
                 <div className="mb-8 flex justify-between items-end">
                     <div>
-                        <h2 className="text-2xl font-light tracking-wide text-green-500 dark:text-green-400 flex items-center gap-2">
-                            <Sprout size={24} strokeWidth={1.5} />
-                            Idea Staging
-                        </h2>
-                        <p className="text-xs font-mono text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-widest pl-8">Validate before you build</p>
+                        <h2 className="text-2xl font-light tracking-wide text-gray-900 dark:text-white">Idea Staging</h2>
+                        <p className="text-xs font-mono text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-widest">Validate before you build</p>
                     </div>
 
                 </div>
@@ -220,15 +217,17 @@ const PendingModule = () => {
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && e.target.value?.trim()) {
                                             const newP = {
-                                                id: uuidv4(),
                                                 title: e.target.value.trim(),
                                                 desc: '一句话描述这个创想...',
                                                 score: 0,
-                                                answers: {}
+                                                answers: {},
+                                                stage: 'pending' // Explicitly set stage
                                             };
                                             addProject(newP);
-                                            // Since we have a UUID, we can set it
-                                            setSelectedProject(newP);
+                                            // Note: addProject now returns nothing, but we'll find it in projects
+                                            // For now, we rely on the list update. 
+                                            // If we need immediate selection, we might need a way to get the generated ID.
+                                            // However, the standard behavior is projects will update and user can click.
                                             e.target.value = '';
                                         }
                                     }}
@@ -377,5 +376,7 @@ const PendingModule = () => {
         </div>
     );
 };
+
+
 
 export default PendingModule;
