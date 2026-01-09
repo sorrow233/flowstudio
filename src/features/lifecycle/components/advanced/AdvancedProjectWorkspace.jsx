@@ -153,9 +153,13 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
     const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 pointer-events-auto">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-0 pointer-events-auto"
+        >
             <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="absolute inset-0 bg-white/20 dark:bg-black/20 backdrop-blur-xl"
                 onClick={onClose}
             />
@@ -273,7 +277,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
                     themeColor={activeStage?.color ? 'custom' : 'purple'}
                 />
             </motion.div>
-        </div>
+        </motion.div>
     );
 };
 
