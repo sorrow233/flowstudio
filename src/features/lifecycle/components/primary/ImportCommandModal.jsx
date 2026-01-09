@@ -65,11 +65,30 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
     };
 
     // Default to emerald if not found, but try to match provided themeColor
+    // Sync: Fetch commands and categories directly
+    const { doc } = useSync();
+    const { projects: syncedCommands } = useSyncedProjects(doc, 'all_commands');
+    const { projects: syncedCategories } = useSyncedProjects(doc, 'command_categories');
+
+    // Default to emerald if not found, but try to match provided themeColor
     const themeClasses = THEME_STYLES[themeColor] || THEME_STYLES.emerald;
-    const [categories, setCategories] = useState(COMMAND_CATEGORIES);
-    const [commands, setCommands] = useState([]); // BUG FIX: Missing state
-    const [importCategory, setImportCategory] = useState('all'); // BUG FIX: Missing state
-    const [importSearch, setImportSearch] = useState(''); // BUG FIX: Missing state
+
+    // Use synced commands
+    const commands = syncedCommands;
+
+    // Merge default categories with synced custom labels
+    const categories = React.useMemo(() => {
+        if (syncedCategories && syncedCategories.length > 0) {
+            return COMMAND_CATEGORIES.map(defaultCat => {
+                const userCat = syncedCategories.find(c => c.id === defaultCat.id);
+                return userCat ? { ...defaultCat, label: userCat.label } : defaultCat;
+            });
+        }
+        return COMMAND_CATEGORIES;
+    }, [syncedCategories]);
+
+    const [importCategory, setImportCategory] = useState('all');
+    const [importSearch, setImportSearch] = useState('');
     const [importedIds, setImportedIds] = useState(new Set());
 
     const handleImport = (cmd) => {
@@ -77,22 +96,10 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
         setImportedIds(prev => new Set(prev).add(cmd.id));
     };
 
+    // Reset imported IDs when modal opens
     useEffect(() => {
         if (isOpen) {
             setImportedIds(new Set());
-            const savedCmds = localStorage.getItem(STORAGE_KEYS.COMMANDS);
-            if (savedCmds) setCommands(JSON.parse(savedCmds));
-
-            const savedCats = localStorage.getItem('flowstudio_categories_custom');
-            if (savedCats) {
-                const parsedCats = JSON.parse(savedCats);
-                // MERGE LOGIC: Keep custom labels, but enforce new system colors/icons
-                const mergedCats = COMMAND_CATEGORIES.map(defaultCat => {
-                    const userCat = parsedCats.find(pc => pc.id === defaultCat.id);
-                    return userCat ? { ...defaultCat, label: userCat.label } : defaultCat;
-                });
-                setCategories(mergedCats);
-            }
         }
     }, [isOpen]);
 
