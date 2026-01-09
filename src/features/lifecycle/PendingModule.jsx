@@ -6,7 +6,7 @@ import { STORAGE_KEYS, getRandomProjectImage, COMMAND_CATEGORIES, QUESTIONS } fr
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
-import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
+
 
 import Spotlight from '../../components/shared/Spotlight';
 import { SakuraTree, MapleTree, GinkgoTree, CedarTree } from '../../components/illustrations/TreeIllustrations';
@@ -42,8 +42,6 @@ const PendingModule = () => {
         projects: syncedCategories,
     } = useSyncedProjects(doc, 'command_categories');
 
-    // Initialize Undo Shortcuts
-    useUndoShortcuts(undo, redo);
 
     const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
 

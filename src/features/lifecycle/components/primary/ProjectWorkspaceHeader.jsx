@@ -93,7 +93,7 @@ const ProjectWorkspaceHeader = ({
                         className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-white/50 dark:hover:text-white transition-colors bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 px-4 py-2 rounded-full backdrop-blur-md border border-gray-200/50 dark:border-white/5"
                     >
                         <ArrowLeft size={16} />
-                        <span className="text-xs font-medium uppercase tracking-widest">Back</span>
+                        <span className="text-xs font-medium uppercase tracking-widest">{t('common.back')}</span>
                     </button>
 
 

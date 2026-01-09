@@ -35,6 +35,19 @@ export default {
         noData: 'No data',
         lightMode: 'Light Mode',
         darkMode: 'Dark Mode',
+        back: 'Back',
+        close: 'Close',
+        settings: 'Settings',
+        projectTitle: 'Project Title',
+        projectDesc: 'Brief mission statement...',
+        descPlaceholder: 'Describe the project...',
+        linkPlaceholder: 'https://...',
+        backgroundTheme: 'Background Theme',
+        deleteProject: 'Delete Project',
+        deleteProjectConfirm: 'Delete this project?',
+        deleteTasks: 'Delete Tasks',
+        deleteTasksConfirm: 'Delete {count} items?',
+        plantSeed: 'Plant a new seed...',
     },
 
     // Inspiration Module
@@ -108,6 +121,17 @@ export default {
             deleteConfirm: 'Are you sure you want to delete this stage?',
             delete: 'Delete',
         },
+    },
+
+    // Project Settings Modal
+    projectSettings: {
+        manageDetails: 'Manage project details and configuration',
+        description: 'Description',
+        appearance: 'Appearance',
+        imageUrlHint: 'Enter a valid image URL for the project background card.',
+        preview: 'Background Preview',
+        deleteConfirm: 'Are you sure you want to delete this project? This action cannot be undone.',
+        saveChanges: 'Save Changes',
     },
 
     // Project Management

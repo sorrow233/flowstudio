@@ -129,9 +129,9 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
     const handleBulkDelete = () => {
         if (selectedIds.size === 0) return;
         openConfirm({
-            title: 'Delete Tasks',
-            message: `Delete ${selectedIds.size} items?`,
-            confirmText: 'Delete',
+            title: t('common.deleteTasks'),
+            message: t('common.deleteTasksConfirm', { count: selectedIds.size }),
+            confirmText: t('common.delete'),
             onConfirm: () => {
                 selectedIds.forEach(id => onDelete(projectId, id));
                 setIsSelectionMode(false);
@@ -468,10 +468,10 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                     onClick={() => handleSelectAll()}
                                     className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded transition-colors ${theme.bulkText}`}
                                 >
-                                    {selectedIds.size === localTasks.length ? 'Deselect All' : 'Select All'}
+                                    {selectedIds.size === localTasks.length ? t('taskList.deselectAll') : t('taskList.selectAll')}
                                 </button>
                                 <span className={`text-sm font-medium ${theme.bulkTextEmph}`}>
-                                    {selectedIds.size} Selected
+                                    {selectedIds.size} {t('taskList.selected')}
                                 </span>
                             </div>
 
@@ -551,7 +551,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                 value={newTaskInput}
                                 onChange={(e) => setNewTaskInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && onAddTask(projectId)}
-                                placeholder={`Add a task to ${stageInfo?.label || 'stage'}...`}
+                                placeholder={t('taskList.addTaskPlaceholder', { stage: stageInfo?.label || 'stage' })}
                                 className="flex-1 bg-transparent border-0 rounded-l-2xl py-4 pl-14 pr-4 transition-all outline-none placeholder:text-gray-300 dark:placeholder:text-gray-600 text-lg font-light text-gray-800 dark:text-white"
                             />
 

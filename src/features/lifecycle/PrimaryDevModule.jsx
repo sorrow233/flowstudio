@@ -12,7 +12,7 @@ import ImportCommandModal from './components/primary/ImportCommandModal';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import confetti from 'canvas-confetti';
-import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
+
 import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { useTranslation } from '../i18n';
 
@@ -58,7 +58,6 @@ const PrimaryDevModule = () => {
 
     // Legacy Migration removed as it's now handled by global migration hook
 
-    useUndoShortcuts(undo, redo);
     const navigate = useNavigate();
 
     // --- Global State ---

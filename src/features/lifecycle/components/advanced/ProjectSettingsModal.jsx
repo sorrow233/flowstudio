@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Trash2, Save, Image as ImageIcon } from 'lucide-react';
 import { useConfirmDialog } from '../../../../components/shared/ConfirmDialog';
+import { useTranslation } from '../../../i18n';
 
 const ProjectSettingsModal = ({ isOpen, onClose, project, onUpdate, onDelete }) => {
+    const { t } = useTranslation();
     const [localProject, setLocalProject] = useState(project);
     const [hasChanges, setHasChanges] = useState(false);
     const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
@@ -45,8 +47,8 @@ const ProjectSettingsModal = ({ isOpen, onClose, project, onUpdate, onDelete }) 
                 {/* Header */}
                 <div className="p-8 pb-6 flex justify-between items-start border-b border-gray-100 dark:border-gray-800">
                     <div>
-                        <h2 className="text-2xl font-light text-gray-900 dark:text-white mb-1">Project Settings</h2>
-                        <p className="text-sm text-gray-400">Manage project details and configuration</p>
+                        <h2 className="text-2xl font-light text-gray-900 dark:text-white mb-1">{t('common.settings')}</h2>
+                        <p className="text-sm text-gray-400">{t('projectSettings.manageDetails')}</p>
                     </div>
                     <button onClick={onClose} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400">
                         <X size={20} />
@@ -57,29 +59,29 @@ const ProjectSettingsModal = ({ isOpen, onClose, project, onUpdate, onDelete }) 
                     {/* General Info */}
                     <div className="space-y-4">
                         <div>
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">Project Name</label>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">{t('common.projectTitle')}</label>
                             <input
                                 value={localProject.title || ''}
                                 onChange={(e) => handleChange('title', e.target.value)}
                                 className="w-full text-lg text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3 border-none focus:ring-2 focus:ring-red-100"
-                                placeholder="Project Title"
+                                placeholder={t('common.projectTitle')}
                             />
                         </div>
 
                         <div>
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">Description</label>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">{t('projectSettings.description')}</label>
                             <textarea
                                 value={localProject.desc || ''}
                                 onChange={(e) => handleChange('desc', e.target.value)}
                                 className="w-full text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border-none focus:ring-2 focus:ring-red-100 resize-none h-24"
-                                placeholder="Describe the project..."
+                                placeholder={t('common.descPlaceholder')}
                             />
                         </div>
                     </div>
 
                     {/* Appearance */}
                     <div>
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">Appearance</label>
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">{t('projectSettings.appearance')}</label>
                         <div className="space-y-3">
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -93,7 +95,7 @@ const ProjectSettingsModal = ({ isOpen, onClose, project, onUpdate, onDelete }) 
                                 />
                             </div>
                             <p className="text-[10px] text-gray-400 pl-1">
-                                Enter a valid image URL for the project background card.
+                                {t('projectSettings.imageUrlHint')}
                             </p>
 
                             {/* Preview */}
@@ -106,7 +108,7 @@ const ProjectSettingsModal = ({ isOpen, onClose, project, onUpdate, onDelete }) 
                                         onError={(e) => e.target.style.display = 'none'}
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-4">
-                                        <span className="text-white text-xs font-medium">Background Preview</span>
+                                        <span className="text-white text-xs font-medium">{t('projectSettings.preview')}</span>
                                     </div>
                                 </div>
                             )}
@@ -119,16 +121,16 @@ const ProjectSettingsModal = ({ isOpen, onClose, project, onUpdate, onDelete }) 
                     <button
                         onClick={() => {
                             openConfirm({
-                                title: 'Delete Project',
-                                message: "Are you sure you want to delete this project? This action cannot be undone.",
-                                confirmText: 'Delete',
+                                title: t('common.deleteProject'),
+                                message: t('projectSettings.deleteConfirm'),
+                                confirmText: t('common.delete'),
                                 onConfirm: () => onDelete(project.id)
                             });
                         }}
                         className="p-3 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors flex items-center gap-2"
                     >
                         <Trash2 size={18} />
-                        <span className="text-sm">Delete Project</span>
+                        <span className="text-sm">{t('common.deleteProject')}</span>
                     </button>
 
                     <button
@@ -140,7 +142,7 @@ const ProjectSettingsModal = ({ isOpen, onClose, project, onUpdate, onDelete }) 
                             }`}
                     >
                         <Save size={18} />
-                        Save Changes
+                        {t('projectSettings.saveChanges')}
                     </button>
                 </div>
                 <ConfirmDialogComponent />

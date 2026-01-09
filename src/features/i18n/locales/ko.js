@@ -34,6 +34,19 @@ export default {
         noData: '데이터 없음',
         lightMode: '라이트 모드',
         darkMode: '다크 모드',
+        back: '뒤로',
+        close: '닫기',
+        settings: '설정',
+        projectTitle: '프로젝트 제목',
+        projectDesc: '간단한 설명...',
+        descPlaceholder: '프로젝트 설명...',
+        linkPlaceholder: 'https://...',
+        backgroundTheme: '배경 테마',
+        deleteProject: '프로젝트 삭제',
+        deleteProjectConfirm: '이 프로젝트를 삭제하시겠습니까?',
+        deleteTasks: '작업 삭제',
+        deleteTasksConfirm: '{count}개 항목을 삭제하시겠습니까?',
+        plantSeed: '새 씨앗을 심으세요...',
     },
 
     // Inspiration Module
@@ -107,6 +120,17 @@ export default {
             deleteConfirm: '이 단계를 삭제하시겠습니까?',
             delete: '삭제',
         },
+    },
+
+    // Project Settings Modal
+    projectSettings: {
+        manageDetails: '프로젝트 세부 정보 및 구성 관리',
+        description: '설명',
+        appearance: '외관',
+        imageUrlHint: '프로젝트 배경 카드의 유효한 이미지 URL을 입력하세요.',
+        preview: '배경 미리보기',
+        deleteConfirm: '이 프로젝트를 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.',
+        saveChanges: '변경 사항 저장',
     },
 
     // Project Management

@@ -35,6 +35,19 @@ export default {
         noData: '暂无数据',
         lightMode: '亮色模式',
         darkMode: '暗色模式',
+        back: '返回',
+        close: '关闭',
+        settings: '设置',
+        projectTitle: '项目标题',
+        projectDesc: '简要描述...',
+        descPlaceholder: '描述项目...',
+        linkPlaceholder: 'https://...',
+        backgroundTheme: '背景主题',
+        deleteProject: '删除项目',
+        deleteProjectConfirm: '确定删除此项目？',
+        deleteTasks: '删除任务',
+        deleteTasksConfirm: '删除 {count} 个项目？',
+        plantSeed: '播下新的种子...',
     },
 
     // 灵感模块
@@ -108,6 +121,17 @@ export default {
             deleteConfirm: '确定要删除此阶段吗？',
             delete: '删除',
         },
+    },
+
+    // 项目设置模态框
+    projectSettings: {
+        manageDetails: '管理项目详情和配置',
+        description: '描述',
+        appearance: '外观',
+        imageUrlHint: '输入有效的图片 URL 作为项目背景卡片。',
+        preview: '背景预览',
+        deleteConfirm: '确定要删除此项目吗？此操作无法撤销。',
+        saveChanges: '保存更改',
     },
 
     // 项目管理

@@ -34,6 +34,19 @@ export default {
         noData: 'データなし',
         lightMode: 'ライトモード',
         darkMode: 'ダークモード',
+        back: '戻る',
+        close: '閉じる',
+        settings: '設定',
+        projectTitle: 'プロジェクト名',
+        projectDesc: '簡単な説明...',
+        descPlaceholder: 'プロジェクトを説明...',
+        linkPlaceholder: 'https://...',
+        backgroundTheme: '背景テーマ',
+        deleteProject: 'プロジェクトを削除',
+        deleteProjectConfirm: 'このプロジェクトを削除しますか？',
+        deleteTasks: 'タスクを削除',
+        deleteTasksConfirm: '{count}件のアイテムを削除しますか？',
+        plantSeed: '新しい種を植える...',
     },
 
     // Inspiration Module
@@ -107,6 +120,17 @@ export default {
             deleteConfirm: 'このステージを削除してもよろしいですか？',
             delete: '削除',
         },
+    },
+
+    // Project Settings Modal
+    projectSettings: {
+        manageDetails: 'プロジェクトの詳細と設定を管理',
+        description: '説明',
+        appearance: '外観',
+        imageUrlHint: 'プロジェクト背景カードの有効な画像URLを入力してください。',
+        preview: '背景プレビュー',
+        deleteConfirm: 'このプロジェクトを削除しますか？この操作は取り消すことができません。',
+        saveChanges: '変更を保存',
     },
 
     // Project Management
