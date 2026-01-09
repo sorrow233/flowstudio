@@ -227,6 +227,7 @@ const PendingModule = () => {
                                                 answers: {}
                                             };
                                             addProject(newP);
+                                            // Since we have a UUID, we can set it
                                             setSelectedProject(newP);
                                             e.target.value = '';
                                         }
@@ -356,7 +357,7 @@ const PendingModule = () => {
             </div>
 
             {/* Right Column: Detail View */}
-            < AnimatePresence mode="wait" >
+            <AnimatePresence mode="wait">
                 {selectedProject && (
                     <ProjectDetailModal
                         project={selectedProject}
@@ -366,17 +367,15 @@ const PendingModule = () => {
                         onClose={() => setSelectedProject(null)}
                     />
                 )}
-            </AnimatePresence >
+            </AnimatePresence>
 
             {!selectedProject && (
                 <div className="hidden md:flex flex-1 flex-col items-center justify-center text-gray-300">
                     <p>选择一颗种子</p>
                 </div>
             )}
-        </div >
+        </div>
     );
 };
-
-
 
 export default PendingModule;
