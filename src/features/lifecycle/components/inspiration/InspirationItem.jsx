@@ -2,6 +2,7 @@ import React from 'react';
 import { Trash2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
+import { triggerHaptic } from '../../../../utils/haptic';
 
 // Refined Color Configuration for "Elegant and Faint" look
 export const COLOR_CONFIG = [
@@ -122,9 +123,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComple
                     // 触觉反馈：滑动到删除阈值时震动（只触发一次）
                     if (info.offset.x < -140 && !hasVibratedRef.current) {
                         hasVibratedRef.current = true;
-                        if (navigator.vibrate) {
-                            navigator.vibrate(10); // 轻微震动 10ms
-                        }
+                        triggerHaptic('light');
                     }
                     // 如果用户拖回来，重置标志以便再次触发
                     if (info.offset.x > -100) {
@@ -136,9 +135,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComple
                     hasVibratedRef.current = false;
                     if (info.offset.x < -150 || info.velocity.x < -800) {
                         // 删除确认时的强震动
-                        if (navigator.vibrate) {
-                            navigator.vibrate([20, 30, 20]); // 短-停-短 震动模式
-                        }
+                        triggerHaptic('heavy');
                         onRemove(idea.id);
                     }
                 }}

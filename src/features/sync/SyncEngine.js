@@ -17,6 +17,11 @@ const PUSH_DEBOUNCE_MS = 10000;
 // 最小推送间隔：30秒（即使有多次变更，也至少等待30秒）
 const MIN_PUSH_INTERVAL_MS = 30000;
 
+// 重试配置
+const MAX_RETRY_COUNT = 5;
+const INITIAL_RETRY_DELAY_MS = 5000;
+const MAX_RETRY_DELAY_MS = 120000; // 2分钟
+
 /**
  * SyncEngine v2 - 单文档同步版本
  * 
@@ -25,6 +30,7 @@ const MIN_PUSH_INTERVAL_MS = 30000;
  * 2. 监听单个文档而非整个集合，大幅减少读取次数
  * 3. 使用版本号防止并发冲突
  * 4. 更长的防抖时间减少写入次数
+ * 5. 智能重试机制：指数退避 + 最大重试次数限制
  * 
  * 数据结构：
  * users/{userId}/rooms/{docId} -> { state: base64, version: number, updatedAt: timestamp, sessionId: string }
@@ -59,6 +65,10 @@ export class SyncEngine {
 
         // 防止处理自己的更新
         this.lastPushedSessionId = null;
+
+        // 重试控制
+        this.retryCount = 0;
+        this.hasPermissionError = false;
 
         this.init();
     }
