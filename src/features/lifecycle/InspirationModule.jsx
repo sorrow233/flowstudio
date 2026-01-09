@@ -213,7 +213,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, copiedId }) =>
 };
 
 // Rich input preview to render tags in textarea
-const InputRichPreview = ({ text }) => {
+const InputRichPreview = ({ text, scrollTop }) => {
     const parseRichText = (text) => {
         const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\])/g);
         return parts.map((part, index) => {
