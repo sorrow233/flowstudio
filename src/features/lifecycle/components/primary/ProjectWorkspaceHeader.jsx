@@ -25,7 +25,7 @@ const ProjectWorkspaceHeader = ({
     return (
         <motion.div
             {...props}
-            className="relative shrink-0 flex flex-col justify-end overflow-hidden transition-all duration-500 bg-gray-900 group"
+            className="relative shrink-0 flex flex-col justify-end overflow-hidden transition-all duration-500 bg-white dark:bg-gray-900 group"
             animate={{
                 height: isCollapsed ? 120 : 320,
             }}
@@ -37,9 +37,9 @@ const ProjectWorkspaceHeader = ({
                         {editForm.bgImage ? (
                             <img src={editForm.bgImage} alt="" className="w-full h-full object-cover opacity-40 blur-sm" />
                         ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-gray-800 to-black" />
+                            <div className="w-full h-full bg-gradient-to-br from-gray-100 to-white dark:from-gray-800 dark:to-black" />
                         )}
-                        <div className="absolute inset-0 bg-black/60" />
+                        <div className="absolute inset-0 bg-white/60 dark:bg-black/60" />
                     </>
                 ) : (
                     <>
@@ -50,9 +50,9 @@ const ProjectWorkspaceHeader = ({
                                 className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-[2s]"
                             />
                         ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-gray-900 via-gray-800 to-black" />
+                            <div className="w-full h-full bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-black" />
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent dark:from-gray-900 dark:via-gray-900/40 dark:to-transparent" />
                     </>
                 )}
             </div>
@@ -63,7 +63,8 @@ const ProjectWorkspaceHeader = ({
             >
                 <button
                     onClick={onClose}
-                    className="flex items-center gap-2 text-white/50 hover:text-white transition-colors bg-black/20 hover:bg-black/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/5"
+                    onClick={onClose}
+                    className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-white/50 dark:hover:text-white transition-colors bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 px-4 py-2 rounded-full backdrop-blur-md border border-gray-200/50 dark:border-white/5"
                 >
                     <ArrowLeft size={16} />
                     <span className="text-xs font-medium uppercase tracking-widest">Back</span>
@@ -136,16 +137,16 @@ const ProjectWorkspaceHeader = ({
                                         {stageInfo?.label} Phase
                                     </span>
                                     {project.link && (
-                                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-white/70 hover:text-white transition-colors truncate max-w-[200px]">
+                                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 dark:text-white/70 dark:hover:text-white transition-colors truncate max-w-[200px]">
                                             <ExternalLink size={12} /> {new URL(project.link).hostname}
                                         </a>
                                     )}
                                 </motion.div>
-                                <motion.h1 layout className={`font-thin text-white leading-none tracking-tighter break-words ${isCollapsed ? 'text-3xl md:text-4xl' : 'text-4xl md:text-6xl mb-4'}`}>
+                                <motion.h1 layout className={`font-thin text-gray-900 dark:text-white leading-none tracking-tighter break-words ${isCollapsed ? 'text-3xl md:text-4xl' : 'text-4xl md:text-6xl mb-4'}`}>
                                     {project.title}
                                 </motion.h1>
                                 {!isCollapsed && (
-                                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm md:text-lg font-light text-white/70 max-w-xl leading-relaxed mt-2 md:mt-0 line-clamp-3 md:line-clamp-none">
+                                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm md:text-lg font-light text-gray-500 dark:text-white/70 max-w-xl leading-relaxed mt-2 md:mt-0 line-clamp-3 md:line-clamp-none">
                                         {project.desc}
                                     </motion.p>
                                 )}
@@ -185,7 +186,7 @@ const ProjectWorkspaceHeader = ({
             <div className="absolute bottom-0 left-0 right-0 flex justify-center z-40 pb-2 pointer-events-none">
                 <button
                     onClick={(e) => { e.stopPropagation(); onToggleCollapse(); }}
-                    className="p-1 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full text-white/50 hover:text-white transition-all cursor-pointer pointer-events-auto border border-white/5 group/toggle"
+                    className="p-1 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 backdrop-blur-md rounded-full text-gray-400 hover:text-gray-900 dark:text-white/50 dark:hover:text-white transition-all cursor-pointer pointer-events-auto border border-gray-200/50 dark:border-white/5 group/toggle"
                 >
                     <ChevronDown size={14} className={`transition-transform duration-500 ${isCollapsed ? 'rotate-0' : 'rotate-180'}`} />
                 </button>
