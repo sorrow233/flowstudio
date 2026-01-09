@@ -1,22 +1,33 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, Upload, FileJson, AlertCircle, CheckCircle2, Loader2, Zap, Settings as SettingsIcon, Database } from 'lucide-react';
+import { X, Download, Upload, FileJson, AlertCircle, CheckCircle2, Loader2, Zap, Settings as SettingsIcon, Database, History, RotateCcw, Clock } from 'lucide-react';
 import { useSync } from '../sync/SyncContext';
 import { useSettings } from '../../hooks/SettingsContext';
 import { exportAllData, importData, validateImportData, downloadAsJson, readJsonFile } from './dataUtils';
+import { getLocalBackups } from '../sync/LocalBackupService';
 
 const DataManagementModal = ({ isOpen, onClose }) => {
-    const [mode, setMode] = useState('menu'); // 'menu' | 'importing' | 'preview' | 'settings'
+    const [mode, setMode] = useState('menu'); // 'menu' | 'importing' | 'preview' | 'settings' | 'backups'
     const [importFile, setImportFile] = useState(null);
     const [previewData, setPreviewData] = useState(null);
     const [importMode, setImportMode] = useState('merge'); // 'merge' | 'replace'
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
+    const [backups, setBackups] = useState([]);
+
     const fileInputRef = useRef(null);
 
     const { doc } = useSync();
     const { showAdvancedFeatures, toggleAdvancedFeatures } = useSettings();
+
+    // 加载备份列表
+    useEffect(() => {
+        if (mode === 'backups') {
+            const list = getLocalBackups().sort((a, b) => b.timestamp - a.timestamp);
+            setBackups(list);
+        }
+    }, [mode]);
 
     const resetState = () => {
         setMode('menu');
@@ -46,6 +57,30 @@ const DataManagementModal = ({ isOpen, onClose }) => {
         } finally {
             setLoading(false);
         }
+    };
+
+    // 加载备份进行预览（恢复流程）
+    const handleRestoreBackup = (backup) => {
+        try {
+            const validation = validateImportData(backup.data);
+            if (!validation.valid) {
+                setError('备份数据验证失败: ' + validation.errors.join('\n'));
+                return;
+            }
+
+            setImportFile({ name: `自动备份 (${new Date(backup.timestamp).toLocaleString()})` });
+            setPreviewData(backup.data);
+            setImportMode('replace'); // 恢复备份默认使用覆盖模式
+            setMode('preview');
+        } catch (e) {
+            setError('加载备份失败: ' + e.message);
+        }
+    };
+
+    // 下载单个备份
+    const handleDownloadBackup = (backup) => {
+        const dateStr = new Date(backup.timestamp).toISOString().replace(/[:.]/g, '-');
+        downloadAsJson(backup.data, `flowstudio-auto-backup-${dateStr}.json`);
     };
 
     // 文件选择处理
@@ -142,6 +177,13 @@ const DataManagementModal = ({ isOpen, onClose }) => {
         };
     }, [previewData]);
 
+    // 渲染备份项摘要
+    const getBackupSummary = (backupData) => {
+        const { allProjects, allCommands } = backupData?.data || {};
+        const count = (allProjects?.length || 0) + (allCommands?.length || 0);
+        return `${count} items`;
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -158,19 +200,29 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="relative bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-md"
+                className="relative bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col"
             >
-                <div className="p-6">
+                <div className="p-6 flex-1 overflow-y-auto">
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h2 className="text-xl font-medium text-gray-900">
+                            <h2 className="text-xl font-medium text-gray-900 flex items-center gap-2">
+                                {mode !== 'menu' && (
+                                    <button
+                                        onClick={() => setMode('menu')}
+                                        className="hover:bg-gray-100 p-1 rounded-lg -ml-2 mr-1 transition-colors"
+                                    >
+                                        <X size={16} className="rotate-45" /> {/* Use X as back sort of, or better Back icon */}
+                                    </button>
+                                )}
                                 {mode === 'menu' && '设置'}
                                 {mode === 'preview' && '导入预览'}
+                                {mode === 'backups' && '本地备份历史'}
                             </h2>
                             <p className="text-sm text-gray-400 mt-0.5">
                                 {mode === 'menu' && '管理应用偏好与数据'}
                                 {mode === 'preview' && '确认导入以下数据'}
+                                {mode === 'backups' && '每小时自动备份，最多保留3天'}
                             </p>
                         </div>
                         <button
@@ -200,6 +252,20 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                     {/* Main Menu */}
                     {mode === 'menu' && (
                         <div className="space-y-3">
+                            {/* Local Backups Button */}
+                            <button
+                                onClick={() => setMode('backups')}
+                                className="w-full p-4 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all flex items-center gap-4 group"
+                            >
+                                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
+                                    <History size={22} className="text-purple-600" />
+                                </div>
+                                <div className="text-left flex-1">
+                                    <div className="font-medium text-gray-900">本地备份</div>
+                                    <div className="text-sm text-gray-400">查看和恢复自动备份</div>
+                                </div>
+                            </button>
+
                             {/* Export Button */}
                             <button
                                 onClick={handleExport}
@@ -236,6 +302,62 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                                     onChange={handleFileSelect}
                                     className="hidden"
                                 />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Backups List */}
+                    {mode === 'backups' && (
+                        <div className="space-y-3">
+                            {backups.length === 0 ? (
+                                <div className="text-center py-8 text-gray-400">
+                                    <History size={48} className="mx-auto mb-3 opacity-20" />
+                                    <p>暂无本地备份</p>
+                                    <p className="text-xs mt-1">系统会在您在线时每小时自动备份</p>
+                                </div>
+                            ) : (
+                                backups.map((backup, index) => (
+                                    <div key={backup.timestamp} className="p-4 bg-gray-50 rounded-xl flex items-center justify-between group hover:bg-gray-100 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm text-gray-500">
+                                                <Clock size={20} />
+                                            </div>
+                                            <div>
+                                                <div className="font-medium text-gray-900">
+                                                    {new Date(backup.timestamp).toLocaleString()}
+                                                </div>
+                                                <div className="text-xs text-gray-400">
+                                                    {getBackupSummary(backup)} · {Math.round(JSON.stringify(backup.data).length / 1024)} KB
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                onClick={() => handleRestoreBackup(backup)}
+                                                className="p-2 bg-white text-blue-600 rounded-lg shadow-sm hover:bg-blue-50 transition-colors"
+                                                title="恢复此备份"
+                                            >
+                                                <RotateCcw size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDownloadBackup(backup)}
+                                                className="p-2 bg-white text-emerald-600 rounded-lg shadow-sm hover:bg-emerald-50 transition-colors"
+                                                title="下载 JSON"
+                                            >
+                                                <Download size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+
+                            <div className="mt-6 pt-4 border-t border-gray-100 text-center">
+                                <button
+                                    onClick={() => setMode('menu')}
+                                    className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                                >
+                                    返回主菜单
+                                </button>
                             </div>
                         </div>
                     )}
