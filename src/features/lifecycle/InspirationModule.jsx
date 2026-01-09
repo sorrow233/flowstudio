@@ -80,22 +80,48 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                     <div className="flex-1 min-w-0">
                         <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans select-none transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
                             {(() => {
-                                // Parser for [Tag] pattern in saved ideas
-                                const parts = idea.content.split(/(\[.*?\])/g);
-                                return parts.map((part, index) => {
-                                    if (part.match(/^\[(.*?)\]$/)) {
-                                        const tagName = part.slice(1, -1); // Remove [ and ]
-                                        return (
-                                            <span
-                                                key={index}
-                                                className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-md text-[11px] font-medium align-middle border border-emerald-100/50 dark:border-emerald-800/50 shadow-sm transform -translate-y-0.5"
-                                            >
-                                                {tagName}
-                                            </span>
-                                        );
-                                    }
-                                    return <span key={index}>{part}</span>;
-                                })
+                                // Light-weight Markdown Parser for **bold**, `code`, and [Tag]
+                                const parseRichText = (text) => {
+                                    // Split by delimiters: **...**, `...`, [ ... ]
+                                    // Using capturing groups to keep delimiters in the array
+                                    // Note: Order matters. Check code first, then bold, then tag.
+                                    const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\])/g);
+
+                                    return parts.map((part, index) => {
+                                        // Inline Code: `...`
+                                        if (part.startsWith('`') && part.endsWith('`')) {
+                                            return (
+                                                <code key={index} className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-[13px] font-mono text-pink-500 dark:text-pink-400 mx-0.5 border border-gray-200 dark:border-gray-700">
+                                                    {part.slice(1, -1)}
+                                                </code>
+                                            );
+                                        }
+                                        // Bold: **...**
+                                        if (part.startsWith('**') && part.endsWith('**')) {
+                                            return (
+                                                <span key={index} className="font-bold text-gray-900 dark:text-gray-100 mx-0.5">
+                                                    {part.slice(2, -2)}
+                                                </span>
+                                            );
+                                        }
+                                        // Tag: [...]
+                                        if (part.startsWith('[') && part.endsWith(']')) {
+                                            const tagName = part.slice(1, -1);
+                                            return (
+                                                <span
+                                                    key={index}
+                                                    className="inline-block px-2 py-0.5 mx-1 first:ml-0 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-md text-[11px] font-medium align-middle border border-emerald-100/50 dark:border-emerald-800/50 shadow-sm transform -translate-y-0.5"
+                                                >
+                                                    {tagName}
+                                                </span>
+                                            );
+                                        }
+                                        // Plain text
+                                        return <span key={index}>{part}</span>;
+                                    });
+                                };
+
+                                return parseRichText(idea.content);
                             })()}
                         </div>
                         {/* Date/Time - compact, directly under content */}
