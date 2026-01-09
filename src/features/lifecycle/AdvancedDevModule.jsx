@@ -22,7 +22,7 @@ const AdvancedDevModule = () => {
     const [selectedProject, setSelectedProject] = useState(null);
 
     // --- Empty State ---
-    if (advancedProjects.length === 0) {
+    if (finalProjects.length === 0) {
         return (
             <div className="max-w-7xl mx-auto pt-20 px-6 text-center text-gray-400 font-light">
                 <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
