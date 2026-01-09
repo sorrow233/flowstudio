@@ -311,15 +311,15 @@ const InspirationModule = () => {
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 50 }}
-                        className="fixed bottom-10 right-10 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-6 py-3 rounded-xl shadow-2xl flex items-center gap-4 z-50"
+                        className="fixed bottom-10 right-10 bg-pink-50 dark:bg-pink-900 text-pink-900 dark:text-pink-50 px-6 py-3 rounded-xl shadow-2xl shadow-pink-100 dark:shadow-pink-900/20 border border-pink-100 dark:border-pink-800 flex items-center gap-4 z-50"
                     >
                         <span className="text-sm font-medium">{t('inspiration.ideaDeleted')}</span>
                         <button
                             onClick={handleUndo}
-                            className="text-sm font-bold text-pink-400 dark:text-pink-600 hover:text-pink-300 dark:hover:text-pink-500 transition-colors flex items-center gap-2"
+                            className="text-sm font-bold text-pink-500 dark:text-pink-300 hover:text-pink-400 dark:hover:text-pink-200 transition-colors flex items-center gap-2"
                         >
                             <span>{t('common.undo')}</span>
-                            <kbd className="text-[10px] bg-gray-700 dark:bg-gray-300 px-1.5 py-0.5 rounded text-gray-300 dark:text-gray-700 font-mono">⌘Z</kbd>
+                            <kbd className="text-[10px] bg-pink-100 dark:bg-pink-800 px-1.5 py-0.5 rounded text-pink-600 dark:text-pink-200 font-mono border border-pink-200 dark:border-pink-700">⌘Z</kbd>
                         </button>
                     </motion.div>
                 )}
