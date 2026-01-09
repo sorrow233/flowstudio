@@ -42,7 +42,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 50 }}
-            className="flex-1 bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] p-4 md:p-10 shadow-2xl shadow-gray-200/50 dark:shadow-none overflow-y-auto no-scrollbar relative flex flex-col z-10"
+            className="flex-1 h-full bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] p-4 md:p-10 shadow-2xl shadow-gray-200/50 dark:shadow-none overflow-y-auto no-scrollbar relative flex flex-col z-10"
         >
             <div className="absolute top-8 right-8 flex gap-2 z-30">
                 {/* Mobile Back Button - Optimized for Drill-Down */}

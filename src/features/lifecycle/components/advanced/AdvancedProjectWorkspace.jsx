@@ -148,12 +148,12 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
             {/* Main Window */}
             <motion.div
                 layoutId={`advanced-card-${project.id}`}
-                className="w-full max-w-[1600px] h-[95vh] bg-white rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10 flex flex-col ring-1 ring-gray-100"
+                className="w-full max-w-[1600px] h-[95vh] bg-white dark:bg-gray-950 rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10 flex flex-col ring-1 ring-gray-100 dark:ring-gray-800"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex flex-col h-full bg-white relative">
+                <div className="flex flex-col h-full bg-white dark:bg-gray-950 relative">
                     {/* Header */}
-                    <div className="flex justify-between items-start px-8 py-6 border-b border-gray-100 bg-white z-10">
+                    <div className="flex justify-between items-start px-8 py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 z-10">
                         <div className="flex-1">
                             <div className="flex items-center gap-3 text-emerald-600 mb-2">
                                 <div className="p-2 bg-emerald-50 rounded-lg">
@@ -161,7 +161,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                 </div>
                                 <span className="text-xs font-bold uppercase tracking-widest">Rapid Iteration</span>
                             </div>
-                            <h2 className="text-3xl font-light text-gray-900 tracking-tight mb-4">
+                            <h2 className="text-3xl font-light text-gray-900 dark:text-white tracking-tight mb-4">
                                 {project.title}
                             </h2>
 
@@ -172,16 +172,16 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                         <Activity size={20} />
                                     </div>
                                     <div>
-                                        <p className="text-2xl font-light text-gray-900">{avgProgress}%</p>
+                                        <p className="text-2xl font-light text-gray-900 dark:text-white">{avgProgress}%</p>
                                         <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">System Maturity</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3 pr-6 border-r border-gray-100">
+                                <div className="flex items-center gap-3 pr-6 border-r border-gray-100 dark:border-gray-800">
                                     <div className="p-3 bg-emerald-50 text-emerald-500 rounded-xl">
                                         <CheckCircle2 size={20} />
                                     </div>
                                     <div>
-                                        <p className="text-2xl font-light text-gray-900">{stableModules}/{totalModules}</p>
+                                        <p className="text-2xl font-light text-gray-900 dark:text-white">{stableModules}/{totalModules}</p>
                                         <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Production Ready</p>
                                     </div>
                                 </div>
@@ -190,7 +190,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                         <Zap size={20} />
                                     </div>
                                     <div>
-                                        <p className="text-2xl font-light text-gray-900">{totalModules}</p>
+                                        <p className="text-2xl font-light text-gray-900 dark:text-white">{totalModules}</p>
                                         <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Total Modules</p>
                                     </div>
                                 </div>
@@ -208,7 +208,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                             </button>
 
                             {/* View Toggles */}
-                            <div className="flex bg-gray-50 rounded-xl p-1 mr-2">
+                            <div className="flex bg-gray-50 dark:bg-gray-900 rounded-xl p-1 mr-2">
                                 <button
                                     onClick={() => setViewMode('grid')}
                                     className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
@@ -217,7 +217,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-gray-800 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
                                 >
                                     <List size={16} />
                                 </button>
@@ -231,7 +231,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                 Library
                             </button>
 
-                            <div className="h-8 w-px bg-gray-100 mx-1" />
+                            <div className="h-8 w-px bg-gray-100 dark:bg-gray-800 mx-1" />
 
                             <button
                                 onClick={() => setIsImportOpen(true)}
@@ -254,7 +254,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-8 bg-gray-50/30">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-8 bg-gray-50/30 dark:bg-gray-900/30">
                         {viewMode === 'grid' ? (
                             <div className="pb-20">
                                 {CATEGORIES.map(category => {
@@ -267,9 +267,9 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                     return (
                                         <div key={category.id} className="mb-12">
                                             <div className="flex items-center gap-3 mb-6">
-                                                <h3 className="text-xl font-light text-gray-900">{category.label}</h3>
-                                                <div className="h-px flex-1 bg-gray-200/50" />
-                                                <span className="text-xs font-bold text-gray-400 px-2 py-1 bg-white rounded-md shadow-sm border border-gray-100">
+                                                <h3 className="text-xl font-light text-gray-900 dark:text-white">{category.label}</h3>
+                                                <div className="h-px flex-1 bg-gray-200/50 dark:bg-gray-800/50" />
+                                                <span className="text-xs font-bold text-gray-400 px-2 py-1 bg-white dark:bg-gray-900 rounded-md shadow-sm border border-gray-100 dark:border-gray-800">
                                                     {categoryModules.length}
                                                 </span>
                                             </div>
@@ -280,7 +280,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                                         layoutId={`module-${module.id}`}
                                                         key={module.id}
                                                         onClick={() => setEditingModule(module)}
-                                                        className="group bg-white border border-gray-100 rounded-[2rem] p-6 hover:shadow-xl hover:border-blue-100 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
+                                                        className="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] p-6 hover:shadow-xl hover:border-blue-100 dark:hover:border-blue-900 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
                                                     >
                                                         <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                                             <div className="bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase">
@@ -297,8 +297,8 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                                             </span>
                                                         </div>
 
-                                                        <h3 className="text-xl font-light text-gray-900 mb-2 truncate">{module.name}</h3>
-                                                        <p className="text-xs text-gray-400 line-clamp-2 min-h-[2.5em] mb-6 font-light leading-relaxed">
+                                                        <h3 className="text-xl font-light text-gray-900 dark:text-white mb-2 truncate">{module.name}</h3>
+                                                        <p className="text-xs text-gray-400 dark:text-gray-500 line-clamp-2 min-h-[2.5em] mb-6 font-light leading-relaxed">
                                                             {module.description || 'No description provided.'}
                                                         </p>
 
@@ -308,7 +308,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                                                 <span className="font-bold text-gray-300 uppercase tracking-wider">Progress</span>
                                                                 <span className="font-mono text-gray-400">{module.progress}%</span>
                                                             </div>
-                                                            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                                            <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                                                                 <div
                                                                     className={`h-full rounded-full transition-all duration-500 ${module.progress === 100 ? 'bg-emerald-400' : 'bg-blue-500'
                                                                         }`}
@@ -342,7 +342,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                                         layoutId={`module-${module.id}`}
                                                         key={module.id}
                                                         onClick={() => setEditingModule(module)}
-                                                        className="group bg-white border border-gray-100 rounded-[2rem] p-6 hover:shadow-xl hover:border-blue-100 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
+                                                        className="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] p-6 hover:shadow-xl hover:border-blue-100 dark:hover:border-blue-900 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
                                                     >
                                                         <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                                             <div className="bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase">
@@ -356,8 +356,8 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
                                                             </span>
                                                         </div>
 
-                                                        <h3 className="text-xl font-light text-gray-900 mb-2 truncate">{module.name}</h3>
-                                                        <p className="text-xs text-gray-400 line-clamp-2 min-h-[2.5em] mb-6 font-light leading-relaxed">
+                                                        <h3 className="text-xl font-light text-gray-900 dark:text-white mb-2 truncate">{module.name}</h3>
+                                                        <p className="text-xs text-gray-400 dark:text-gray-500 line-clamp-2 min-h-[2.5em] mb-6 font-light leading-relaxed">
                                                             {module.description || 'No description provided.'}
                                                         </p>
 
@@ -378,9 +378,9 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate 
 
                                 {/* Empty State */}
                                 {modules.length === 0 && (
-                                    <div className="col-span-full py-20 flex flex-col items-center justify-center text-gray-300 border-2 border-dashed border-gray-100 rounded-[3rem]">
-                                        <Sparkles size={48} className="mb-4 text-emerald-100" />
-                                        <p className="text-lg font-light text-gray-400">Your architecture is empty</p>
+                                    <div className="col-span-full py-20 flex flex-col items-center justify-center text-gray-300 dark:text-gray-600 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[3rem]">
+                                        <Sparkles size={48} className="mb-4 text-emerald-100 dark:text-emerald-900/40" />
+                                        <p className="text-lg font-light text-gray-400 dark:text-gray-500">Your architecture is empty</p>
                                         <p className="text-xs text-gray-300 mt-2 font-mono">
                                             Use AI Import or Library to get started
                                         </p>

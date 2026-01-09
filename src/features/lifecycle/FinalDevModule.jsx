@@ -299,7 +299,7 @@ const FinalDevModule = () => {
             {/* Dashboard Header */}
             <div className="mb-12 flex justify-between items-end">
                 <div>
-                    <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">进阶优化阶段</h2>
+                    <h2 className="text-2xl font-light text-gray-900 dark:text-white mb-2 tracking-tight">进阶优化阶段</h2>
                     <p className="text-gray-400 text-sm font-light tracking-wide">核心功能之外的深度性能优化与体验打磨</p>
                 </div>
                 <div className="flex items-center gap-4 text-right">
@@ -315,7 +315,7 @@ const FinalDevModule = () => {
                                     if (e.key === 'Escape') { setIsCreatingProject(false); setNewProjectTitle(''); }
                                 }}
                                 placeholder="项目名称..."
-                                className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 outline-none w-48"
+                                className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 focus:border-indigo-300 dark:focus:border-indigo-700 outline-none w-48 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                             />
                             <button
                                 onClick={handleCreateProject}
@@ -340,7 +340,7 @@ const FinalDevModule = () => {
                         </button>
                     )}
                     <div>
-                        <span className="text-3xl font-thin text-gray-900">{activeProjects.length}</span>
+                        <span className="text-3xl font-thin text-gray-900 dark:text-white">{activeProjects.length}</span>
                         <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">TOTAL</span>
                     </div>
                 </div>
@@ -356,10 +356,10 @@ const FinalDevModule = () => {
                             layoutId={`final-card-${project.id}`}
                             key={project.id}
                             onClick={() => handleSelectProject(project)}
-                            className={`group bg-white border rounded-[2rem] overflow-hidden hover:shadow-2xl transition-all cursor-pointer relative h-[360px] flex flex-col
+                            className={`group bg-white dark:bg-gray-900 border rounded-[2rem] overflow-hidden hover:shadow-2xl transition-all cursor-pointer relative h-[360px] flex flex-col
                                 ${isHoly
                                     ? 'border-transparent shadow-[0_0_0_2px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]'
-                                    : 'border-gray-100 hover:shadow-gray-200/50 ring-1 ring-transparent hover:ring-gray-100'}
+                                    : 'border-gray-100 dark:border-gray-800 hover:shadow-gray-200/50 dark:hover:shadow-gray-900 ring-1 ring-transparent hover:ring-gray-100 dark:hover:ring-gray-700'}
                             `}
                         >
                             {/* Holy Flowing Border Animation */}
@@ -395,19 +395,19 @@ const FinalDevModule = () => {
                                             alt=""
                                             className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent dark:from-gray-900 dark:via-gray-900/60 dark:to-transparent" />
                                     </div>
                                 </div>
 
                                 <div className="p-8 relative z-10 flex flex-col h-full">
                                     <div className="flex justify-between items-start mb-6">
                                         <div className={`w-12 h-12 backdrop-blur rounded-2xl flex items-center justify-center shadow-sm border transition-transform group-hover:scale-105
-                                            ${isHoly ? 'bg-emerald-50/80 border-emerald-200/50 text-emerald-700' : 'bg-white/80 border-white/50 text-gray-900'}
+                                            ${isHoly ? 'bg-emerald-50/80 dark:bg-emerald-900/30 border-emerald-200/50 dark:border-emerald-700/30 text-emerald-700 dark:text-emerald-400' : 'bg-white/80 dark:bg-gray-800/80 border-white/50 dark:border-white/10 text-gray-900 dark:text-white'}
                                         `}>
                                             <Code2 size={24} strokeWidth={1.5} />
                                         </div>
                                         {project.link && (
-                                            <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 text-gray-500 hover:text-gray-900 transition-colors bg-white/50 backdrop-blur rounded-full hover:bg-white">
+                                            <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors bg-white/50 dark:bg-black/30 backdrop-blur rounded-full hover:bg-white dark:hover:bg-black/50">
                                                 <ExternalLink size={16} />
                                             </a>
                                         )}
@@ -415,18 +415,18 @@ const FinalDevModule = () => {
 
                                     <div className="mt-8">
                                         <h3 className={`text-2xl font-light mb-2 line-clamp-1 transition-colors
-                                            ${isHoly ? 'text-emerald-900 group-hover:text-emerald-700' : 'text-gray-900 group-hover:text-emerald-900'}
+                                            ${isHoly ? 'text-emerald-900 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300' : 'text-gray-900 dark:text-white group-hover:text-emerald-900 dark:group-hover:text-emerald-400'}
                                         `}>{project.title}</h3>
-                                        <p className="text-sm text-gray-500 line-clamp-2 min-h-[2.5em] leading-relaxed">{project.desc || 'No description provided.'}</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 min-h-[2.5em] leading-relaxed">{project.desc || 'No description provided.'}</p>
                                     </div>
 
-                                    <div className="mt-auto pt-6 border-t border-gray-100/50">
+                                    <div className="mt-auto pt-6 border-t border-gray-100/50 dark:border-gray-800/50">
                                         {/* Mini Stage Visualization */}
                                         <div className="flex items-center gap-1.5 mb-3">
                                             {[1, 2, 3].map(step => (
                                                 <div
                                                     key={step}
-                                                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-indigo-500 shadow-sm shadow-indigo-200' : 'bg-gray-100'}`}
+                                                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-indigo-500 shadow-sm shadow-indigo-200 dark:shadow-indigo-900/30' : 'bg-gray-100 dark:bg-gray-800'}`}
                                                 />
                                             ))}
                                         </div>
@@ -435,7 +435,7 @@ const FinalDevModule = () => {
                                                 <span className={`w-2 h-2 rounded-full animate-pulse ${isHoly ? 'bg-blue-500' : 'bg-indigo-500'}`} />
                                                 <span>Step {project.subStage || 1}</span>
                                             </div>
-                                            <span className="text-gray-900 font-medium">
+                                            <span className="text-gray-900 dark:text-white font-medium">
                                                 {project.stageNames?.[project.subStage || 1] || FINAL_STAGES[(project.subStage || 1) - 1]?.label}
                                             </span>
                                         </div>
@@ -448,12 +448,12 @@ const FinalDevModule = () => {
 
                 {/* Empty State */}
                 {activeProjects.length === 0 && (
-                    <div className="col-span-full border-2 border-dashed border-gray-100 rounded-[2rem] p-12 flex flex-col items-center justify-center text-gray-300 min-h-[400px]">
-                        <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 opacity-50 animate-pulse">
-                            <Sparkles size={40} className="text-gray-400" strokeWidth={1} />
+                    <div className="col-span-full border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] p-12 flex flex-col items-center justify-center text-gray-300 dark:text-gray-600 min-h-[400px]">
+                        <div className="w-24 h-24 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6 opacity-50 animate-pulse">
+                            <Sparkles size={40} className="text-gray-400 dark:text-gray-500" strokeWidth={1} />
                         </div>
-                        <span className="text-xl font-light text-gray-900 mb-2">暂无进阶项目</span>
-                        <span className="text-sm text-gray-400 max-w-sm text-center leading-relaxed">创建项目以开始深度优化与体验打磨</span>
+                        <span className="text-xl font-light text-gray-900 dark:text-white mb-2">暂无进阶项目</span>
+                        <span className="text-sm text-gray-400 dark:text-gray-500 max-w-sm text-center leading-relaxed">创建项目以开始深度优化与体验打磨</span>
                         <button
                             onClick={() => setIsCreatingProject(true)}
                             className="mt-6 text-indigo-500 hover:text-indigo-600 font-medium text-sm transition-colors"
@@ -475,7 +475,7 @@ const FinalDevModule = () => {
                         />
                         <motion.div
                             layoutId={`final-card-${selectedProject.id}`}
-                            className="w-full max-w-6xl bg-white rounded-[3rem] shadow-2xl overflow-hidden relative z-10 h-[90vh] flex flex-col ring-1 ring-gray-100"
+                            className="w-full max-w-6xl bg-white dark:bg-gray-950 rounded-[3rem] shadow-2xl overflow-hidden relative z-10 h-[90vh] flex flex-col ring-1 ring-gray-100 dark:ring-gray-800"
                             onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
                         >
                             <ProjectWorkspaceHeader
@@ -497,7 +497,7 @@ const FinalDevModule = () => {
                             />
 
                             <div
-                                className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30"
+                                className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30 dark:bg-gray-900/30"
                                 onClick={() => !isHeaderCollapsed && setIsHeaderCollapsed(true)}
                             >
                                 {/* Left Sidebar: Stage Navigation */}

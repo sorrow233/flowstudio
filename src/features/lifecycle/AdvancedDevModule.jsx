@@ -69,7 +69,7 @@ const AdvancedDevModule = () => {
                             layoutId={`advanced-card-${project.id}`}
                             key={project.id}
                             onClick={() => setSelectedProject(project)}
-                            className="group bg-white border border-gray-100 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-blue-900/5 transition-all cursor-pointer relative h-[320px] flex flex-col ring-1 ring-transparent hover:ring-blue-50"
+                            className="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-blue-900/5 dark:hover:shadow-blue-900/20 transition-all cursor-pointer relative h-[320px] flex flex-col ring-1 ring-transparent hover:ring-blue-50 dark:hover:ring-blue-900/30"
                         >
                             {/* Card Background */}
                             <div className="absolute inset-0 z-0 h-40">
@@ -79,27 +79,27 @@ const AdvancedDevModule = () => {
                                         <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent" />
                                     </div>
                                 ) : (
-                                    <div className="w-full h-full bg-gradient-to-br from-blue-50 to-white" />
+                                    <div className="w-full h-full bg-gradient-to-br from-blue-50 to-white dark:from-blue-950 dark:to-gray-900" />
                                 )}
                             </div>
 
                             <div className="p-8 relative z-10 flex flex-col h-full mt-auto">
                                 <div className="mb-auto pt-12">
-                                    <div className="w-12 h-12 bg-white text-gray-900 rounded-2xl flex items-center justify-center shadow-sm border border-gray-100 mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <div className="w-12 h-12 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl flex items-center justify-center shadow-sm border border-gray-100 dark:border-gray-700 mb-6 group-hover:scale-110 transition-transform duration-300">
                                         <Network size={24} strokeWidth={1.5} />
                                     </div>
-                                    <h3 className="text-2xl font-light text-gray-900 mb-2 line-clamp-1 group-hover:text-blue-900 transition-colors">
+                                    <h3 className="text-2xl font-light text-gray-900 dark:text-white mb-2 line-clamp-1 group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors">
                                         {project.title}
                                     </h3>
-                                    <p className="text-sm text-gray-500 line-clamp-2">{project.desc || 'No description provided.'}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{project.desc || 'No description provided.'}</p>
                                 </div>
 
-                                <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center">
+                                <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
                                     <div className="flex items-center gap-2 text-gray-500">
                                         <Box size={14} />
                                         <span className="text-xs font-medium">{moduleCount} Modules</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full">
                                         <Activity size={12} />
                                         <span className="text-xs font-bold">{progress}% Health</span>
                                     </div>
