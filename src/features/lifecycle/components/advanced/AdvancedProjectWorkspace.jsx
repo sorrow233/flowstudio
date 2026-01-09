@@ -1,98 +1,137 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { v4 as uuidv4 } from 'uuid';
-import { Sparkles, X, Plus, Box, LayoutGrid, List, Settings, ChevronLeft, ChevronUp, Terminal, Edit2 } from 'lucide-react';
 
-import AdvancedStageNavigation from './AdvancedStageNavigation';
+import { v4 as uuidv4 } from 'uuid';
 import ModuleGrid from './ModuleGrid';
 import ModuleList from './ModuleList';
 import ArchitectureImportModal from './ArchitectureImportModal';
 import ModuleDetailModal from './ModuleDetailModal';
 import ModuleLibraryModal from './ModuleLibraryModal';
 import ProjectSettingsModal from './ProjectSettingsModal';
+import { Network, Sparkles, Activity, Zap, CheckCircle2, X, Plus, Box, AlignJustify, Grid, LayoutGrid, List, Trophy, Settings } from 'lucide-react';
 
-const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeleteProject }) => {
-    // Stage Management
-    const stages = project.customStages || [];
-    const [activeStageId, setActiveStageId] = useState(stages.length > 0 ? stages[0].id : null);
 
-    // UI State
+const CATEGORIES = [
+    { id: 'frontend', label: 'Frontend', aliases: ['frontend', '前端'] },
+    { id: 'backend', label: 'Backend', aliases: ['backend', '后端'] },
+    { id: 'database', label: 'Database', aliases: ['database', '数据库'] },
+    { id: 'core', label: 'Core', aliases: ['core', '核心'] },
+    { id: 'feature', label: 'Features', aliases: ['feature', 'features', '功能'] },
+    { id: 'integration', label: 'Integration', aliases: ['integration', '集成'] },
+    { id: 'security', label: 'Security', aliases: ['security', '安全'] },
+    { id: 'devops', label: 'DevOps', aliases: ['devops', '运维'] },
+];
+
+const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onGraduate, onDeleteProject }) => {
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [isLibraryOpen, setIsLibraryOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const [editingModule, setEditingModule] = useState(null);
-    const [viewMode, setViewMode] = useState('grid');
 
-    // New Goal Input
-    const [newGoalInput, setNewGoalInput] = useState('');
+    const [editingModule, setEditingModule] = useState(null);
+    const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+
+    // Last Edited Logic
+    const [lastEdited, setLastEdited] = useState(null);
+
+    useEffect(() => {
+        if (project.updatedAt) {
+            setLastEdited(new Date(project.updatedAt));
+        }
+    }, [project.updatedAt]);
+
+    const formatLastEdited = (date) => {
+        if (!date) return '';
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000); // seconds
+        if (diff < 60) return 'Just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+        return 'Today';
+    };
+
+
 
     const modules = project.modules || [];
-    const activeStage = stages.find(s => s.id === activeStageId);
-
-    // Initial Active Stage
-    useEffect(() => {
-        if (!activeStageId && stages.length > 0) {
-            setActiveStageId(stages[0].id);
-        }
-    }, [stages]);
 
     // --- Actions ---
 
-    const handleUpdateStages = (newStages) => {
-        updateProject(project.id, { customStages: newStages });
-        if (newStages.length > 0 && (!activeStageId || !newStages.find(s => s.id === activeStageId))) {
-            setActiveStageId(newStages[0].id);
-        }
+    const pushSnapshot = () => {
+        setLastEdited(new Date());
     };
 
-    const handleAddGoal = () => {
-        if (!newGoalInput.trim()) return;
-
-        const newModule = {
+    const handleImportModules = (newModules) => {
+        // Enhance modules with IDs and initial state
+        const enhancedModules = newModules.map(m => ({
             id: uuidv4(),
-            name: newGoalInput,
-            description: '',
-            category: 'goal',
-            stageId: activeStageId,
-            progress: 0,
-            tasks: [],
-            createdAt: new Date().toISOString()
-        };
+            ...m,
+            stage: 1,      // 1-5 Scale
+            progress: 0,   // 0-100%
+            tasks: []
+        }));
 
-        const updatedModules = [...modules, newModule];
-        updateProject(project.id, { modules: updatedModules });
-        setNewGoalInput('');
-    };
+        pushSnapshot();
 
-    const handleUpdateModule = (moduleId, updates) => {
-        const updatedModules = modules.map(m =>
-            m.id === moduleId ? { ...m, ...updates } : m
-        );
+        const currentModules = project.modules || [];
+        // Append
+        const updatedModules = [...currentModules, ...enhancedModules];
         updateProject(project.id, { modules: updatedModules });
     };
 
     const handleAddFromLibrary = (newModules) => {
-        const enhanced = newModules.map(m => ({ ...m, stageId: activeStageId }));
-        const updatedModules = [...modules, ...enhanced];
+        pushSnapshot();
+        const currentModules = project.modules || [];
+        const updatedModules = [...currentModules, ...newModules];
         updateProject(project.id, { modules: updatedModules });
     };
 
+
+
+    const handleUpdateModule = (moduleId, updates) => {
+        // Only snapshot for significant changes if desired, but for now snapshot everything
+        // Note: For frequent text updates, this might be too aggressive. 
+        // We generally snapshot on 'Save' or 'Delete' rather than every keystroke if it was real-time.
+        // But since this is passed to a modal 'onUpdate', it happens on Save.
+        pushSnapshot();
+
+        const currentModules = project.modules || [];
+        const exists = currentModules.find(m => m.id === moduleId);
+
+        let updatedModules;
+        if (exists) {
+            updatedModules = currentModules.map(m =>
+                m.id === moduleId ? { ...m, ...updates } : m
+            );
+        } else {
+            // Create new
+            updatedModules = [...currentModules, { id: moduleId, ...updates }];
+        }
+        updateProject(project.id, { modules: updatedModules });
+    };
+
+    const handleCreateModule = () => {
+        pushSnapshot();
+        const newModule = {
+            id: uuidv4(),
+            name: 'New Module',
+            description: '',
+            category: 'feature',
+            priority: 'Medium',
+            stage: 1,
+            progress: 0,
+            tasks: []
+        };
+        setEditingModule(newModule);
+    };
+
     const handleDeleteModule = (moduleId) => {
-        const updatedModules = modules.filter(m => m.id !== moduleId);
+        pushSnapshot();
+        const currentModules = project.modules || [];
+        const updatedModules = currentModules.filter(m => m.id !== moduleId);
         updateProject(project.id, { modules: updatedModules });
         setEditingModule(null);
     };
 
-    const handleImportModules = (newModulesDesc) => {
-        const enhancedModules = newModulesDesc.map(m => ({
-            id: uuidv4(),
-            ...m,
-            stageId: activeStageId,
-            progress: 0,
-            tasks: []
-        }));
-        const updatedModules = [...modules, ...enhancedModules];
-        updateProject(project.id, { modules: updatedModules });
+    const handleModuleClick = (module) => {
+        setEditingModule(module);
     };
 
     const handleDeleteProject = (projectId) => {
@@ -102,152 +141,317 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
         }
     };
 
-    // Filtered Modules for current view
-    const filteredModules = modules.filter(m => activeStageId ? m.stageId === activeStageId : true);
+    // --- System Health Calculation ---
+    const totalModules = modules.length;
+    const avgProgress = totalModules > 0
+        ? Math.round(modules.reduce((acc, m) => acc + (m.progress || 0), 0) / totalModules)
+        : 0;
+    const stableModules = modules.filter(m => m.stage >= 4).length;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 pointer-events-auto overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 sm:p-6 pointer-events-auto">
+            {/* Backdrop */}
             <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-[#F2F2F2] dark:bg-black/95"
+                className="absolute inset-0 bg-white/90 backdrop-blur-xl"
                 onClick={onClose}
             />
 
+            {/* Main Window */}
             <motion.div
                 layoutId={`advanced-card-${project.id}`}
-                className="w-full h-full bg-white dark:bg-[#0A0A0A] md:rounded-[3rem] shadow-2xl overflow-hidden relative z-10 flex flex-col md:flex-row transition-all duration-700"
+                className="w-full max-w-[1600px] h-[100dvh] md:h-[95vh] bg-white dark:bg-gray-950 rounded-none md:rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10 flex flex-col ring-1 ring-gray-100 dark:ring-gray-800"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Left Sidebar: Custom Stages */}
-                <AdvancedStageNavigation
-                    stages={stages}
-                    activeStageId={activeStageId}
-                    onChangeStage={setActiveStageId}
-                    onUpdateStages={handleUpdateStages}
-                />
+                <div className="flex flex-col h-full bg-white dark:bg-gray-950 relative">
+                    {/* Header */}
+                    <div className="flex flex-col md:flex-row justify-between items-start px-4 md:px-8 py-4 md:py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 z-10 gap-4 md:gap-0">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-3 text-red-600 mb-2">
+                                <div className="p-2 bg-red-50 rounded-lg">
+                                    <Network size={20} />
+                                </div>
+                                <span className="text-xs font-bold uppercase tracking-widest">Rapid Iteration</span>
+                            </div>
+                            <h2 className="text-3xl font-light text-gray-900 dark:text-white tracking-tight mb-4">
+                                {project.title}
+                            </h2>
 
-                {/* Main Content Area */}
-                <div className="flex-1 flex flex-col h-full bg-white dark:bg-[#121212] relative overflow-hidden">
-
-                    {/* Top UI Elements */}
-                    <div className="p-12 pb-0 flex justify-between items-start">
-                        <div className="space-y-6">
-                            <button
-                                onClick={onClose}
-                                className="px-6 py-2 bg-gray-50 dark:bg-white/5 text-[10px] font-bold text-gray-400 uppercase tracking-widest rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-all flex items-center gap-2"
-                            >
-                                <ChevronLeft size={14} /> Back
-                            </button>
-
-                            <div>
-                                {activeStage && (
-                                    <span className="px-3 py-1 bg-red-500 text-[10px] font-bold text-white uppercase tracking-widest rounded-md shadow-lg shadow-red-500/30 mb-4 inline-block">
-                                        {activeStage.name} Phase
-                                    </span>
-                                )}
-                                <h2 className="text-6xl font-light text-gray-900 dark:text-white tracking-tighter mb-2">
-                                    {project.title}
-                                </h2>
-                                <p className="text-gray-400 text-lg font-light">{project.desc || 'Architecting the final vision.'}</p>
+                            {/* System Health Dashboard */}
+                            <div className="flex flex-wrap gap-6">
+                                <div className="flex items-center gap-3 pr-6 border-r border-gray-100">
+                                    <div className="p-3 bg-red-50 text-red-500 rounded-xl">
+                                        <Activity size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-light text-gray-900 dark:text-white">{avgProgress}%</p>
+                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">System Maturity</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 pr-6 border-r border-gray-100 dark:border-gray-800">
+                                    <div className="p-3 bg-emerald-50 text-emerald-500 rounded-xl">
+                                        <CheckCircle2 size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-light text-gray-900 dark:text-white">{stableModules}/{totalModules}</p>
+                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Production Ready</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="p-3 bg-amber-50 text-amber-500 rounded-xl">
+                                        <Zap size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-light text-gray-900 dark:text-white">{totalModules}</p>
+                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Total Modules</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex flex-col items-end gap-12">
+                        {/* Controls */}
+                        <div className="flex items-center gap-3">
                             <button
-                                onClick={() => setIsImportOpen(true)}
-                                className="group flex items-center gap-3 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-white/5 pl-6 pr-8 py-4 rounded-3xl shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1"
+                                onClick={onGraduate}
+                                className="px-4 py-2 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-900 rounded-xl text-xs font-bold uppercase tracking-wider hover:shadow-md transition-all flex items-center gap-2 mr-4"
                             >
-                                <div className="p-2 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-xl">
-                                    <Terminal size={20} />
-                                </div>
-                                <span className="text-sm font-bold text-gray-900 dark:text-white">Import Command</span>
+                                <Trophy size={14} />
+                                Launch Commercial
                             </button>
 
-                            <ChevronUp size={24} className="text-gray-100 dark:text-gray-800 animate-bounce" />
+                            {/* View Toggles */}
+                            <div className="flex bg-gray-50 dark:bg-gray-900 rounded-xl p-1 mr-2">
+                                <button
+                                    onClick={() => setViewMode('grid')}
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-red-600' : 'text-gray-400 hover:text-gray-600'}`}
+                                >
+                                    <LayoutGrid size={16} />
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('list')}
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-gray-800 shadow-sm text-red-600 dark:text-red-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
+                                >
+                                    <List size={16} />
+                                </button>
+                            </div>
+
+                            <button
+                                onClick={() => setIsLibraryOpen(true)}
+                                className="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-red-100 transition-colors flex items-center gap-2"
+                            >
+                                <Box size={14} />
+                                Library
+                            </button>
+
+                            <div className="h-8 w-px bg-gray-100 dark:bg-gray-800 mx-1" />
+
+                            <button
+                                onClick={() => setIsImportOpen(true)}
+                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                title="AI Architect Import"
+                            >
+                                <Sparkles size={20} />
+                            </button>
+                            <div className="h-8 w-px bg-gray-100 dark:bg-gray-800 mx-1" />
+                            <button
+                                onClick={() => setIsSettingsOpen(true)}
+                                className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-50 dark:hover:text-white dark:hover:bg-gray-800 rounded-xl transition-all"
+                                title="Project Settings"
+                            >
+                                <Settings size={20} />
+                            </button>
+                            <button
+                                onClick={handleCreateModule}
+                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                title="Add Custom Module"
+                            >
+                                <Plus size={20} />
+                            </button>
+                            <button onClick={onClose} className="p-2 text-gray-300 hover:text-gray-500 hover:bg-gray-50 rounded-xl transition-all">
+                                <X size={20} />
+                            </button>
                         </div>
                     </div>
 
-                    {/* Canvas Area */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar px-12 pt-8">
-                        {stages.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center text-center opacity-30">
-                                <Plus size={64} strokeWidth={1} className="mb-4" />
-                                <p className="text-xl font-light">Create your first stage to begin.</p>
-                            </div>
-                        ) : filteredModules.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center text-center py-20">
-                                <div className="w-24 h-24 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center mb-10 border border-gray-100 dark:border-white/5 shadow-inner animate-pulse">
-                                    <Edit2 size={32} className="text-gray-200" strokeWidth={1} />
-                                </div>
-                                <h3 className="text-2xl font-light text-gray-900 dark:text-white mb-4 tracking-tight">Architect's Blank Canvas</h3>
-                                <p className="max-w-md text-gray-400 text-sm leading-relaxed font-light">
-                                    Begin by defining the core routes and layout components. A strong foundation prevents future debt.
-                                </p>
+                    {/* Content */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 bg-gray-50/30 dark:bg-gray-900/30">
+                        {viewMode === 'grid' ? (
+                            <div className="pb-20">
+                                {CATEGORIES.map(category => {
+                                    const categoryModules = modules.filter(m => {
+                                        const cat = m.category?.toLowerCase();
+                                        return category.aliases.some(alias => cat === alias || cat?.includes(alias));
+                                    });
+                                    if (categoryModules.length === 0) return null;
 
-                                <button
-                                    onClick={() => setIsImportOpen(true)}
-                                    className="mt-12 group flex items-center gap-3 bg-white dark:bg-[#1A1A1A] border border-gray-50 dark:border-white/5 px-6 py-3 rounded-2xl shadow-sm hover:shadow-lg transition-all"
-                                >
-                                    <Terminal size={16} className="text-red-500" />
-                                    <span className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest">Import Command</span>
-                                </button>
+                                    return (
+                                        <div key={category.id} className="mb-12">
+                                            <div className="flex items-center gap-3 mb-6">
+                                                <h3 className="text-xl font-light text-gray-900 dark:text-white">{category.label}</h3>
+                                                <div className="h-px flex-1 bg-gray-200/50 dark:bg-gray-800/50" />
+                                                <span className="text-xs font-bold text-gray-400 px-2 py-1 bg-white dark:bg-gray-900 rounded-md shadow-sm border border-gray-100 dark:border-gray-800">
+                                                    {categoryModules.length}
+                                                </span>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                {categoryModules.map(module => (
+                                                    <motion.div
+                                                        layoutId={`module-${module.id}`}
+                                                        key={module.id}
+                                                        onClick={() => setEditingModule(module)}
+                                                        className="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] p-6 hover:shadow-xl hover:border-blue-100 dark:hover:border-blue-900 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
+                                                    >
+                                                        <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                                            <div className="bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase">
+                                                                Edit
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex justify-between items-start mb-4">
+                                                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${module.priority === 'High' ? 'bg-red-50 text-red-500' :
+                                                                module.priority === 'Low' ? 'bg-gray-100 text-gray-500' :
+                                                                    'bg-blue-50 text-blue-500'
+                                                                }`}>
+                                                                {module.category}
+                                                            </span>
+                                                        </div>
+
+                                                        <h3 className="text-xl font-light text-gray-900 dark:text-white mb-2 truncate">{module.name}</h3>
+                                                        <p className="text-xs text-gray-400 dark:text-gray-500 line-clamp-2 min-h-[2.5em] mb-6 font-light leading-relaxed">
+                                                            {module.description || 'No description provided.'}
+                                                        </p>
+
+                                                        {/* Progress Bar */}
+                                                        <div className="space-y-2">
+                                                            <div className="flex justify-between text-xs">
+                                                                <span className="font-bold text-gray-300 uppercase tracking-wider">Progress</span>
+                                                                <span className="font-mono text-gray-400">{module.progress}%</span>
+                                                            </div>
+                                                            <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                                                <div
+                                                                    className={`h-full rounded-full transition-all duration-500 ${module.progress === 100 ? 'bg-red-500' : 'bg-red-400'
+                                                                        }`}
+                                                                    style={{ width: `${module.progress}%` }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+
+                                {/* Fallback for Uncategorized */}
+                                {modules.length > 0 && modules.filter(m => {
+                                    const cat = m.category?.toLowerCase();
+                                    return !CATEGORIES.some(c => c.aliases.some(alias => cat === alias || cat?.includes(alias)));
+                                }).length > 0 && (
+                                        <div className="mb-12">
+                                            <div className="flex items-center gap-3 mb-6">
+                                                <h3 className="text-xl font-light text-gray-900">Uncategorized</h3>
+                                                <div className="h-px flex-1 bg-gray-200/50" />
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                {modules.filter(m => {
+                                                    const cat = m.category?.toLowerCase();
+                                                    return !CATEGORIES.some(c => c.aliases.some(alias => cat === alias || cat?.includes(alias)));
+                                                }).map(module => (
+                                                    <motion.div
+                                                        layoutId={`module-${module.id}`}
+                                                        key={module.id}
+                                                        onClick={() => setEditingModule(module)}
+                                                        className="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] p-6 hover:shadow-xl hover:border-blue-100 dark:hover:border-blue-900 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
+                                                    >
+                                                        <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                                            <div className="bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase">
+                                                                Edit
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex justify-between items-start mb-4">
+                                                            <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+                                                                {module.category || 'Other'}
+                                                            </span>
+                                                        </div>
+
+                                                        <h3 className="text-xl font-light text-gray-900 dark:text-white mb-2 truncate">{module.name}</h3>
+                                                        <p className="text-xs text-gray-400 dark:text-gray-500 line-clamp-2 min-h-[2.5em] mb-6 font-light leading-relaxed">
+                                                            {module.description || 'No description provided.'}
+                                                        </p>
+
+                                                        <div className="space-y-2">
+                                                            <div className="flex justify-between text-xs">
+                                                                <span className="font-bold text-gray-300 uppercase tracking-wider">Progress</span>
+                                                                <span className="font-mono text-gray-400">{module.progress}%</span>
+                                                            </div>
+                                                            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                                                <div className="h-full rounded-full bg-red-500" style={{ width: `${module.progress}%` }} />
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                {/* Empty State */}
+                                {modules.length === 0 && (
+                                    <div className="col-span-full py-20 flex flex-col items-center justify-center text-gray-300 dark:text-gray-600 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[3rem]">
+                                        <Sparkles size={48} className="mb-4 text-red-100 dark:text-red-900/40" />
+                                        <p className="text-lg font-light text-gray-400 dark:text-gray-500">Your architecture is empty</p>
+                                        <p className="text-xs text-gray-300 mt-2 font-mono">
+                                            Use AI Import or Library to get started
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         ) : (
-                            <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                                <div className="flex justify-between items-center mb-8">
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex bg-gray-50 dark:bg-white/5 rounded-2xl p-1.5">
-                                            <button onClick={() => setViewMode('grid')} className={`p-2.5 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-[#202020] text-red-500 shadow-md scale-105' : 'text-gray-400 hover:text-gray-600'}`}><LayoutGrid size={18} /></button>
-                                            <button onClick={() => setViewMode('list')} className={`p-2.5 rounded-xl transition-all ${viewMode === 'list' ? 'bg-white dark:bg-[#202020] text-red-500 shadow-md scale-105' : 'text-gray-400 hover:text-gray-600'}`}><List size={18} /></button>
-                                        </div>
-                                        <button onClick={() => setIsLibraryOpen(true)} className="p-3 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors bg-white/50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5"><Box size={18} /></button>
-                                        <button onClick={() => setIsSettingsOpen(true)} className="p-3 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors bg-white/50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5"><Settings size={18} /></button>
-                                    </div>
-                                </div>
-                                <div className="pb-32">
-                                    {viewMode === 'grid' ? (
-                                        <ModuleGrid modules={filteredModules} onModuleClick={setEditingModule} />
-                                    ) : (
-                                        <ModuleList modules={filteredModules} onModuleClick={setEditingModule} onDeleteModule={handleDeleteModule} />
-                                    )}
-                                </div>
-                            </div>
+                            <ModuleList
+                                modules={modules}
+                                onModuleClick={setEditingModule}
+                                onDeleteModule={handleDeleteModule}
+                            />
                         )}
                     </div>
 
-                    {/* Quick Input Bar */}
-                    <div className="px-12 py-10 bg-gradient-to-t from-white via-white to-transparent dark:from-[#121212] dark:via-[#121212] absolute bottom-0 left-0 right-0">
-                        <div className="max-w-4xl mx-auto relative group">
-                            <input
-                                type="text"
-                                value={newGoalInput}
-                                onChange={(e) => setNewGoalInput(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleAddGoal()}
-                                placeholder={`Add a task to ${activeStage?.name || 'Skeleton'}...`}
-                                className="w-full bg-[#f9f9f9] dark:bg-[#1A1A1A] border-none rounded-[2rem] pl-8 pr-16 py-6 text-xl font-light placeholder:text-gray-300 focus:ring-4 focus:ring-red-500/5 transition-all outline-none"
+                    {/* Modals */}
+                    <AnimatePresence>
+                        {editingModule && (
+                            <ModuleDetailModal
+                                isOpen={!!editingModule}
+                                module={editingModule}
+                                onClose={() => setEditingModule(null)}
+                                onUpdate={handleUpdateModule}
+                                onDelete={handleDeleteModule}
                             />
-                            <div className="absolute right-4 top-4">
-                                <button
-                                    onClick={handleAddGoal}
-                                    className="w-12 h-12 bg-white dark:bg-[#222] rounded-2xl flex items-center justify-center text-gray-200 group-hover:text-red-500 hover:shadow-xl transition-all active:scale-95"
-                                >
-                                    <List size={20} />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                        )}
+                    </AnimatePresence>
+
+                    <ArchitectureImportModal
+                        isOpen={isImportOpen}
+                        onClose={() => setIsImportOpen(false)}
+                        onImport={handleImportModules}
+                        currentModules={modules}
+                    />
+
+
+
+                    <ModuleLibraryModal
+                        isOpen={isLibraryOpen}
+                        onClose={() => setIsLibraryOpen(false)}
+                        onAddModule={handleAddFromLibrary}
+                    />
+
+                    <ProjectSettingsModal
+                        isOpen={isSettingsOpen}
+                        onClose={() => setIsSettingsOpen(false)}
+                        project={project}
+                        onUpdate={updateProject}
+                        onDelete={handleDeleteProject}
+                    />
                 </div>
-
-                {/* Modals */}
-                <AnimatePresence>
-                    {editingModule && (
-                        <ModuleDetailModal isOpen={!!editingModule} module={editingModule} onClose={() => setEditingModule(null)} onUpdate={handleUpdateModule} onDelete={handleDeleteModule} />
-                    )}
-                </AnimatePresence>
-
-                <ArchitectureImportModal isOpen={isImportOpen} onClose={() => setIsImportOpen(false)} onImport={handleImportModules} currentModules={modules} />
-                <ModuleLibraryModal isOpen={isLibraryOpen} onClose={() => setIsLibraryOpen(false)} onAddModule={handleAddFromLibrary} />
-                <ProjectSettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} project={project} onUpdate={updateProject} onDelete={handleDeleteProject} />
             </motion.div>
         </div>
     );

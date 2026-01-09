@@ -6,6 +6,7 @@ export default {
         pending: '保留',
         primary: 'メイン開発',
         advanced: '高度',
+        final: '最終',
         commercial: '商用化',
         command: '青写真',
         cloudSync: 'クラウド同期',
@@ -27,9 +28,8 @@ export default {
         search: '検索...',
         notePlaceholder: 'メモを追加...',
         new: '新規',
-        profile: 'プロファイル',
         all: 'すべて',
-        allCategories: 'すべてのカテゴリ',
+        allCategories: '全カテゴリ',
         loading: '読み込み中...',
         noData: 'データなし',
         lightMode: 'ライトモード',
@@ -39,8 +39,8 @@ export default {
     // Inspiration Module
     inspiration: {
         title: 'インスピレーション',
-        subtitle: ' fleeting アイデアを捉え、未来のエネルギーを蓄える。',
-        placeholder: 'ふと思いついた考えを記録する...',
+        subtitle: '瞬間のひらめきを捉え、未来のために蓄える。',
+        placeholder: 'アイデアを記録...',
         emptyState: 'インスピレーションはまだありません。最初のアイデアを記録しましょう。',
         ideaDeleted: 'インスピレーションを削除しました',
         cmdEnter: 'CMD + ENTER',
@@ -56,10 +56,10 @@ export default {
         projectDescription: 'プロジェクトの説明',
     },
 
-    // Primary Dev Module
+    // Primary Development Module
     primary: {
-        title: '開発',
-        subtitle: '現在アクティブに開発中のプロジェクト',
+        title: '主力開発',
+        subtitle: '現在積極的に開発中のプロジェクト',
         emptyState: '開発中のプロジェクトはありません',
         tasks: 'タスク',
         progress: '進捗',
@@ -67,20 +67,30 @@ export default {
         addTask: 'タスクを追加',
     },
 
-    // Advanced Refinement
+    // 高度な最適化 (旧 最終)
     advanced: {
-        title: '高度なワークスペース',
-        subtitle: 'カスタムフローと高度なアーキテクチャの設計。',
+        title: '高度な最適化',
+        subtitle: 'コア機能を超えたディープなパフォーマンス最適化と体験のブラッシュアップ',
         emptyState: '高度なプロジェクトはありません',
+        stageOptimization: '低レベル最適化',
+        stageNewModule: 'モジュールの進化',
+        stageBugFix: '深度修正',
         createProject: '新規プロジェクト',
         projectName: 'プロジェクト名...',
         create: '作成',
         total: '合計',
-        noProjectsTitle: '高度なプロジェクトはありません',
-        noProjectsDesc: 'プロジェクトを作成して、カスタムアーキテクチャフローを開始します',
+        noProjectsTitle: '高度なプロジェクトなし',
+        noProjectsDesc: '最適化と仕上げを開始するためにプロジェクトを作成',
         createFirst: '+ 最初のプロジェクトを作成',
-        newProjectDefaultTitle: '新しい高度なプロジェクト',
-        newProjectDefaultDesc: 'カスタムワークフロー',
+        newProjectDefaultTitle: '新しい高度な開発プロジェクト',
+        newProjectDefaultDesc: '最適化、機能、修正',
+    },
+
+    // 最終開発 (旧 高度)
+    final: {
+        title: '最終統合',
+        subtitle: 'プロジェクトのコアロジックとシステム統合の最終段階',
+        emptyState: '最終プロジェクトはありません',
     },
 
     // Commercial Module
@@ -90,19 +100,19 @@ export default {
         emptyState: '商用化プロジェクトはありません',
         launchChecklist: 'ローンチチェックリスト',
         strategy: '商用戦略',
-        strategyDesc: '経済エンジンを設計します。価値の価格を設定し、チャネルを選択し、リリースの準備をします。',
-        strategyReadyDesc: 'リリースシステムが検証されました。焦点は成長エンジンとユーザー獲得に移ります。',
+        strategyDesc: '経済エンジンを設計します。価値の価格設定、チャネル選択、発売準備。',
+        strategyReadyDesc: '発売システム検証済み。成長エンジンとユーザー獲得に焦点を移します。',
         copyDirective: '運用指令をコピー',
         project: 'プロジェクト',
-        noProjectsTitle: '商用化プロジェクトはありません',
-        noProjectsDesc: 'メイン開発フェーズからプロジェクトを卒業させて、戦略をアンロックします。',
+        noProjectsTitle: '商用プロジェクトなし',
+        noProjectsDesc: '戦略をアンロックするには、メイン開発からプロジェクトを卒業させてください。',
         financialInfrastructure: '1. 金融インフラ',
         revenueModel: '2. 収益モデル',
         pricingStructure: '3. 価格体系',
-        growthPhase: '成長フェーズが有効',
-        growthTitle: 'エンジンは準備完了です。',
-        growthSubtitle: 'ユーザーを獲得する時です。',
-        growthDesc: 'インフラストラクチャが確立されました。金融レールが接続されました。あなたの戦略は現在、配信とチャネルの最適化に純粋に集中しています。',
+        growthPhase: '成長フェーズ進行中',
+        growthTitle: 'エンジン準備完了。',
+        growthSubtitle: 'ユーザー獲得の時間です。',
+        growthDesc: 'インフラは設定されました。金融レールも接続されています。戦略は今、配信とチャネル最適化に純粋に焦点を当てています。',
         activeChannels: 'アクティブなチャネル',
         launchReadiness: 'ローンチ準備度',
         readiness: '準備度',
@@ -110,21 +120,21 @@ export default {
             subscription: 'サブスクリプション (SaaS)',
             subscriptionDesc: '月次/年次プランによる継続的な収益。',
             one_time: '買い切り',
-            one_timeDesc: '生涯買い切りの支払い。',
+            one_timeDesc: '生涯アクセスのための1回払い。',
             freemium: 'フリーミアム',
             freemiumDesc: 'コア機能は無料、アップグレードは有料。',
-            ads: '広告収益',
-            adsDesc: '広告によって収益化。',
+            ads: '広告モデル',
+            adsDesc: '広告による収益化。',
         },
         payment: {
             stripe: 'Stripe',
-            stripeDesc: 'カスタム SaaS の標準。',
+            stripeDesc: 'カスタムSaaSの標準。',
             lemonsqueezy: 'Lemon Squeezy',
             lemonsqueezyDesc: 'MoR、グローバルな税務処理。',
             paddle: 'Paddle',
-            paddleDesc: '統合された B2B ビリング。',
+            paddleDesc: '統一B2B請求。',
             revenuecat: 'RevenueCat',
-            revenuecatDesc: 'アプリ内課金 (IAP) に最適。',
+            revenuecatDesc: 'アプリ内課金(IAP)に最適。',
         },
         marketing: {
             twitter: 'X / Twitter',
@@ -140,18 +150,18 @@ export default {
             waitlist: 'ウェイティングリストLP公開',
             pricing: '価格モデル確定',
             legal: '利用規約とプライバシーポリシー',
-            analytics: '分析とトラッキングの設定',
-            payments: '決済ゲートウェイの接続',
+            analytics: '分析と追跡の設定',
+            payments: '決済ゲートウェイ接続',
         },
         pricingTiers: {
-            personal: 'パーソナル',
+            personal: '個人',
             pro: 'プロ',
             enterprise: 'エンタープライズ',
             custom: 'カスタム',
             features: {
                 core: 'コア機能',
                 community: 'コミュニティサポート',
-                everything: '無料版のすべての機能を含む',
+                everything: '無料版の全機能',
                 priority: '優先サポート',
                 analytics: '高度な分析',
                 sso: 'SSO & セキュリティ',
@@ -166,9 +176,9 @@ export default {
             pricing: '価格',
             infrastructure: '2. 金融インフラ',
             provider: 'プロバイダー',
-            rationale: '理由',
+            rationale: '選定理由',
             growth: '3. 成長エンジン',
-            channels: 'アクティブなチャネル',
+            channels: 'アクティブチャネル',
             readiness: '4. ローンチ準備度',
             generated: 'Flow Studio 商用モジュールで生成',
             notSelected: '未選択',
@@ -183,55 +193,64 @@ export default {
         title: '青写真センター',
         subtitle: '開発フローの一般的な青写真とリンクを管理',
         emptyState: 'この段階にはコマンドがありません',
-        emptyStateHint: '新しいコマンドを追加するか、ライブラリからインポートします',
+        emptyStateHint: '新しいコマンドを追加するか、ライブラリからインポートしてください',
         community: 'コミュニティ',
         library: 'ライブラリ',
         newCommand: '新規',
-        deleteConfirmLast: 'このコマンドを永久に削除しますか？',
-        deleteConfirmStage: 'この段階からコマンドを削除しますか？（他の段階には残ります）',
+        deleteConfirmLast: 'このコマンドを完全に削除しますか？',
+        deleteConfirmStage: 'このステージからコマンドを削除しますか？（他のステージには残ります）',
         browseCommunity: 'コミュニティの共有を閲覧',
         importFromLibrary: 'グローバルライブラリからインポート',
         stage: 'ステージ',
-        // Profile related
-        profileName: 'プロファイル名',
-        addProfile: '新規プロファイル',
-        editProfile: 'プロファイルを編集',
-        deleteProfile: 'プロファイルを削除',
-        deleteProfileConfirm: 'このプロファイルを削除しますか？配下のコマンドはデータに残ります。',
-        // Library related
-        globalLibrary: 'グローバルコマンドライブラリ',
-        importFromOther: '他のステージ/プロファイルからインポート',
-        noImportable: 'インポート可能なコマンドはありません',
         noImportableHint: 'ユーティリティとリンクタイプのみグローバルに共有できます',
         renameHint: 'ダブルクリックで名前を変更',
     },
 
-    // Development Stages (5 stages)
+    // Development Stages (5 Stages)
     devStages: {
         1: {
             label: 'スケルトン',
             title: 'アーキテクチャ設計図',
-            desc: '構造の整合性、ルーティングロジック、コンポーネント階層を定義。',
+            desc: '構造の整合性、ルールのロジック、コンポーネント階層を定義',
         },
         2: {
             label: '機能',
             title: 'コアロジック',
-            desc: '主要なビジネスロジック、データフロー、状態管理を実装。',
+            desc: '主要なビジネスロジック、データフロー、状態管理を実装',
         },
         3: {
             label: 'モジュール',
             title: 'システム統合',
-            desc: '認証、データベースバインディング、外部APIサービスを接続。',
+            desc: '認証、データベースバインディング、外部APIサービスを接続',
         },
         4: {
             label: '最適化',
-            title: 'パフォーマンスの磨き上げ',
-            desc: 'UI/UXの遷移を微調整し、再レンダリングを最適化し、エッジケースを処理。',
+            title: 'パフォーマンス向上',
+            desc: 'UI/UXのトランジションを洗練させ、レンダリングを最適化し、エッジケースを処理',
         },
         5: {
             label: '完了',
             title: '本番準備完了',
-            desc: '最終QA、ビルド検証、本番環境へのデプロイ。',
+            desc: '最終QA、ビルド検証、本番環境へのデプロイ',
+        },
+    },
+
+    // Final Stages (3 Stages)
+    finalStages: {
+        1: {
+            label: '最適化',
+            title: 'モジュール最適化',
+            desc: '既存の実装を分析し、ボトルネックを特定し、パフォーマンスと可読性を向上させるためにコードを最適化',
+        },
+        2: {
+            label: '新モジュール',
+            title: '機能追加',
+            desc: '新しいモジュールまたは機能を計画および実装し、既存のシステムとのシームレスな統合を確保',
+        },
+        3: {
+            label: '修正',
+            title: 'バグ解決',
+            desc: '報告されたバグを特定、再現、解決し、システムの安定性と信頼性を確保',
         },
     },
 
@@ -239,59 +258,60 @@ export default {
     stageEmptyStates: {
         1: {
             title: 'アーキテクトの空白のキャンバス',
-            desc: 'コアのルートとレイアウトコンポーネントを定義することから始めます。強固な基盤は将来の技術負債を防ぎます。',
+            desc: 'コアルートとレイアウトコンポーネントの定義から始めましょう。強固な基礎は将来の技術的負債を防ぎます。',
         },
         2: {
-            title: 'エンジン尚未始動',
-            desc: '構造は準備できました。今度は、ロジックとインタラクションで命を吹き込みます。',
+            title: 'エンジンはまだ始動していません',
+            desc: '構造の準備が整いました。次はロジックとインタラクションで命を吹き込みましょう。',
         },
         3: {
             title: 'システムオフライン',
-            desc: '孤立したモジュールを一つの統合されたエコシステムに接続する時です。',
+            desc: '独立したモジュールを統一されたエコシステムに接続する時が来ました。',
         },
         4: {
-            title: '粗削りな部分',
-            desc: 'アプリは動作しますが、「高級感」が必要です。細部に焦点を当てます。',
+            title: '荒削りなエッジ',
+            desc: 'アプリは機能しますが、「高級感」が必要です。細部に集中しましょう。',
         },
         5: {
-            title: 'フライト前チェックリスト',
-            desc: '成功はもうすぐです。すべてのシステムが準備完了していることを確認します。',
+            title: '離陸前のチェックリスト',
+            desc: 'もうすぐ成功です。すべてのシステムの準備が整っていることを確認してください。',
         },
     },
 
     // Command Categories
     categories: {
-        general: '全般',
+        general: '一般',
         frontend: 'フロントエンド',
         backend: 'バックエンド',
         database: 'データベース',
         devops: 'DevOps',
         testing: 'テスト',
+        final: '最終',
     },
 
-    // Soul Questions
+    // Soul Queries
     questions: {
         clarity: {
             text: '自分が本当に何を求めているのか、明確に表現できますか？',
             sub: '明確さ',
         },
         dogfood: {
-            text: '開発した後、自分自身で頻繁に使いますか？',
-            sub: 'ドッグフーディング',
+            text: '開発した後、自分自身でも頻繁に使いますか？',
+            sub: '自己需要',
         },
         impact: {
-            text: 'それはあなたの生活を長期的に変えることができますか？',
-            sub: '長期的な影響',
+            text: 'それは将来、あなたの生活を長期的に変えることができますか？',
+            sub: '長期的価値',
         },
         value: {
-            text: 'このプロジェクトが本当に他の人の役に立つと信じていますか？',
-            sub: '利他主義',
+            text: 'このプロジェクトが本当にみんなの役に立つと信じていますか？',
+            sub: '利他の心',
         },
     },
 
     // Sync Status
     sync: {
-        synced: '同期済み',
+        synced: '同期完了',
         syncing: '同期中...',
         offline: 'オフライン',
         error: '同期エラー',
@@ -300,8 +320,8 @@ export default {
 
     // Auth
     auth: {
-        signIn: 'サインイン',
-        signOut: 'サインアウト',
-        signInWithGoogle: 'Googleでサインイン',
+        signIn: 'ログイン',
+        signOut: 'ログアウト',
+        signInWithGoogle: 'Googleでログイン',
     },
 };

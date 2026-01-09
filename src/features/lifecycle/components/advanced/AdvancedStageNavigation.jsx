@@ -1,21 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Check, X, Trash2, Edit2, Layers, Box, Terminal } from 'lucide-react';
+import { Plus, Edit2, Check, X, MoreVertical, Trash2 } from 'lucide-react';
 
 const AdvancedStageNavigation = ({ stages = [], activeStageId, onChangeStage, onUpdateStages }) => {
     const [isAdding, setIsAdding] = useState(false);
     const [newStageName, setNewStageName] = useState('');
-    const [editingStageId, setEditingStageId] = useState(null);
-    const [editingName, setEditingName] = useState('');
-    const editInputRef = useRef(null);
 
     const handleAdd = () => {
         if (!newStageName.trim()) return;
         const newStage = {
             id: Date.now().toString(),
             name: newStageName,
-            status: 'pending',
-            dotColor: '#A855F7' // Default purple dot like screenshot
+            status: 'pending', // pending | in-progress | completed
+            color: '#A855F7' // Default purple
         };
         onUpdateStages([...stages, newStage]);
         setNewStageName('');
@@ -23,138 +20,109 @@ const AdvancedStageNavigation = ({ stages = [], activeStageId, onChangeStage, on
     };
 
     const handleUpdateStage = (id, updates) => {
-        onUpdateStages(stages.map(s => s.id === id ? { ...s, ...updates } : s));
+        const updated = stages.map(s => s.id === id ? { ...s, ...updates } : s);
+        onUpdateStages(updated);
     };
 
     const handleDeleteStage = (e, id) => {
         e.stopPropagation();
-        if (confirm('Permanently remove this stage?')) {
+        if (confirm('Delete this stage?')) {
             onUpdateStages(stages.filter(s => s.id !== id));
         }
     };
 
-    const startEditing = (e, stage) => {
+    const toggleStatus = (e, stage) => {
         e.stopPropagation();
-        setEditingStageId(stage.id);
-        setEditingName(stage.name);
+        const nextStatus = {
+            'pending': 'in-progress',
+            'in-progress': 'completed',
+            'completed': 'pending'
+        };
+        handleUpdateStage(stage.id, { status: nextStatus[stage.status] });
     };
-
-    const saveEdit = () => {
-        if (editingName.trim()) {
-            handleUpdateStage(editingStageId, { name: editingName });
-        }
-        setEditingStageId(null);
-    };
-
-    useEffect(() => {
-        if (editingStageId && editInputRef.current) {
-            editInputRef.current.focus();
-        }
-    }, [editingStageId]);
 
     return (
-        <div className="w-[380px] border-r border-gray-100 dark:border-white/5 bg-gray-50/20 dark:bg-[#0D0D0D] flex flex-col h-full relative z-20">
-            <div className="p-10 flex-1 overflow-y-auto custom-scrollbar">
-                <div className="mb-10">
-                    <h3 className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em]">Pipeline Stages</h3>
-                </div>
+        <div className="w-80 border-r border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-950/50 flex flex-col h-full overflow-hidden">
+            <div className="p-6">
+                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-8">Pipeline Stages</h3>
 
-                <div className="space-y-4 relative">
-                    <AnimatePresence mode="popLayout">
-                        {stages.map((stage, index) => {
-                            const isActive = activeStageId === stage.id;
-
-                            return (
+                <div className="space-y-3">
+                    {stages.map((stage) => {
+                        const isActive = activeStageId === stage.id;
+                        return (
+                            <div key={stage.id} className="relative group">
                                 <motion.div
-                                    layout
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
                                     onClick={() => onChangeStage(stage.id)}
-                                    key={stage.id}
                                     className={`
-                                        group relative z-10 p-5 rounded-[1.5rem] cursor-pointer transition-all flex items-center gap-5
+                                        relative z-10 p-4 rounded-2xl cursor-pointer transition-all flex items-center gap-4
                                         ${isActive
-                                            ? 'bg-[#12121A] dark:bg-[#1A1A24] shadow-2xl shadow-black/20'
-                                            : 'hover:bg-gray-100 dark:hover:bg-white/5'}
+                                            ? 'bg-white dark:bg-gray-900 shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-800 scale-[1.02]'
+                                            : 'hover:bg-white/50 dark:hover:bg-gray-900/50'}
                                     `}
                                 >
-                                    {/* Connection Line */}
-                                    {index < stages.length - 1 && (
-                                        <div className="absolute left-[34px] top-[4.5rem] w-px h-6 bg-gray-200 dark:bg-gray-800 -z-10" />
-                                    )}
+                                    {/* Connection Line (Visual only) */}
+                                    <div className="absolute left-7 top-[2.5rem] w-px h-8 bg-gray-200 dark:bg-gray-800 -z-10 last:hidden" />
 
-                                    {/* Icon Circle */}
-                                    <div className={`
-                                        w-12 h-12 rounded-full flex items-center justify-center transition-all shrink-0 border
-                                        ${isActive
-                                            ? 'bg-[#21212B] border-white/10 text-white'
-                                            : 'bg-white dark:bg-[#151515] border-gray-100 dark:border-white/5 text-gray-400'}
-                                    `}>
-                                        {index === 0 ? <Layers size={20} /> : index === 1 ? <Terminal size={20} /> : <Box size={20} />}
+                                    {/* Status Icon/Dot */}
+                                    <div
+                                        onClick={(e) => toggleStatus(e, stage)}
+                                        className={`
+                                            w-10 h-10 rounded-2xl border-2 flex items-center justify-center transition-all bg-gray-50 dark:bg-gray-800
+                                            ${stage.status === 'completed' ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-500' :
+                                                stage.status === 'in-progress' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-500' :
+                                                    'border-gray-200 dark:border-gray-700 text-gray-300'}
+                                        `}
+                                    >
+                                        {stage.status === 'completed' ? <Check size={18} strokeWidth={3} /> :
+                                            stage.status === 'in-progress' ? <div className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse" /> :
+                                                null}
                                     </div>
 
-                                    <div className="flex-1 min-w-0">
-                                        {editingStageId === stage.id ? (
-                                            <input
-                                                ref={editInputRef}
-                                                value={editingName}
-                                                onChange={(e) => setEditingName(e.target.value)}
-                                                onBlur={saveEdit}
-                                                onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                                                className="bg-transparent text-sm font-bold text-white border-b border-red-500 outline-none w-full"
-                                            />
-                                        ) : (
-                                            <>
-                                                <h4 className={`text-sm font-bold truncate ${isActive ? 'text-white' : 'text-gray-900 dark:text-gray-400'}`}>
-                                                    {stage.name}
-                                                </h4>
-                                                <span className={`text-[10px] font-medium mt-0.5 block ${isActive ? 'text-gray-400' : 'text-gray-400 opacity-60'}`}>
-                                                    {stage.status === 'in-progress' ? 'In Progress' : stage.status === 'completed' ? 'Completed' : 'Pending'}
-                                                </span>
-                                            </>
-                                        )}
+                                    <div className="flex-1">
+                                        <h4 className={`text-sm font-bold ${isActive ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500'}`}>
+                                            {stage.name}
+                                        </h4>
+                                        <p className="text-[10px] text-gray-400 capitalize mt-0.5">
+                                            {stage.status === 'in-progress' ? 'In Progress' : stage.status}
+                                        </p>
                                     </div>
 
-                                    {/* Action Dot / Status */}
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-2.5 h-2.5 rounded-full`} style={{ backgroundColor: stage.dotColor || '#A855F7' }} />
-
-                                        <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={(e) => startEditing(e, stage)} className="text-gray-400 hover:text-white transition-colors"><Edit2 size={12} /></button>
-                                            <button onClick={(e) => handleDeleteStage(e, stage.id)} className="text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={12} /></button>
-                                        </div>
-                                    </div>
+                                    <button
+                                        onClick={(e) => handleDeleteStage(e, stage.id)}
+                                        className="opacity-0 group-hover:opacity-100 p-2 text-gray-300 hover:text-red-500 transition-all"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
                                 </motion.div>
-                            );
-                        })}
-                    </AnimatePresence>
+                            </div>
+                        );
+                    })}
                 </div>
 
                 <div className="mt-8">
                     {isAdding ? (
-                        <div className="space-y-3 bg-white dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5">
+                        <div className="space-y-3">
                             <input
                                 autoFocus
                                 type="text"
                                 value={newStageName}
                                 onChange={(e) => setNewStageName(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-                                placeholder="Stage Name..."
-                                className="w-full bg-transparent text-sm font-medium outline-none p-1 border-b border-gray-200 dark:border-white/10"
+                                placeholder="Stage name..."
+                                className="w-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-500/20"
                             />
-                            <div className="flex gap-2 pt-2">
-                                <button onClick={handleAdd} className="flex-1 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-[10px] font-bold uppercase tracking-widest">Add</button>
-                                <button onClick={() => setIsAdding(false)} className="p-2 text-gray-400"><X size={16} /></button>
+                            <div className="flex gap-2">
+                                <button onClick={handleAdd} className="flex-1 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg text-xs font-bold uppercase tracking-widest">Add</button>
+                                <button onClick={() => setIsAdding(false)} className="p-2 text-gray-400"><X size={18} /></button>
                             </div>
                         </div>
                     ) : (
                         <button
                             onClick={() => setIsAdding(true)}
-                            className="w-full py-4 border-2 border-dashed border-gray-200 dark:border-white/5 rounded-2xl flex items-center justify-center gap-2 text-gray-300 hover:text-gray-500 hover:border-gray-300 dark:hover:border-white/10 transition-all font-medium text-sm"
+                            className="w-full py-4 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl flex items-center justify-center gap-2 text-gray-300 hover:text-gray-500 hover:border-gray-200 transition-all"
                         >
                             <Plus size={18} />
-                            Add Milestone
+                            <span className="text-sm font-medium">New Stage</span>
                         </button>
                     )}
                 </div>

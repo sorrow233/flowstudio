@@ -6,6 +6,7 @@ export default {
         pending: 'Pending',
         primary: 'Development',
         advanced: 'Advanced',
+        final: 'Modules',
         commercial: 'Commercial',
         command: 'Blueprint',
         cloudSync: 'Cloud Sync',
@@ -67,20 +68,30 @@ export default {
         addTask: 'Add Task',
     },
 
-    // Advanced Refinement
+    // Advanced Refinement (formerly Final)
     advanced: {
-        title: 'Advanced Workspace',
-        subtitle: 'Design custom flows and high-level architecture.',
+        title: 'Advanced Refinement',
+        subtitle: 'Deep performance optimization and experience polishing beyond the core.',
         emptyState: 'No advanced projects',
+        stageOptimization: 'Low-level Optimization',
+        stageNewModule: 'Module Evolution',
+        stageBugFix: 'Deep Debugging',
         createProject: 'New Project',
         projectName: 'Project Name...',
         create: 'Create',
         total: 'TOTAL',
         noProjectsTitle: 'No Advanced Projects',
-        noProjectsDesc: 'Create a project to start custom architectural flows',
+        noProjectsDesc: 'Create a project to start optimization and polishing',
         createFirst: '+ Create First Project',
         newProjectDefaultTitle: 'New Advanced Project',
-        newProjectDefaultDesc: 'Custom workflow',
+        newProjectDefaultDesc: 'Optimization, features & fixes',
+    },
+
+    // Final Dev (Renamed to Modules)
+    final: {
+        title: 'Modules',
+        subtitle: 'Global view of project modules and architecture.',
+        emptyState: 'No module projects',
     },
 
     // Commercial Module
@@ -235,6 +246,25 @@ export default {
         },
     },
 
+    // Final Stages (3 stages)
+    finalStages: {
+        1: {
+            label: 'Optimization',
+            title: 'Module Optimization',
+            desc: 'Analyze existing implementation, identify bottlenecks, and refine code for better performance and readability.',
+        },
+        2: {
+            label: 'New Module',
+            title: 'Feature Append',
+            desc: 'Plan and implement new modules or features, ensuring seamless integration with the existing system.',
+        },
+        3: {
+            label: 'Bug Fix',
+            title: 'Defect Resolution',
+            desc: 'Identify, reproduce, and resolve reported bugs to ensure system stability and reliability.',
+        },
+    },
+
     // Stage Empty States
     stageEmptyStates: {
         1: {
@@ -267,6 +297,7 @@ export default {
         database: 'Database',
         devops: 'DevOps',
         testing: 'Testing',
+        final: 'Final',
     },
 
     // Soul Questions

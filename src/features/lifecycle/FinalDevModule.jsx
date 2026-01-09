@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Code2, ExternalLink, Trash2, Check, Rocket, Sparkles, Trophy, Star, X } from 'lucide-react';
-import { STORAGE_KEYS, DEV_STAGES, EXTRA_STAGES } from '../../utils/constants';
-import { useNavigate } from 'react-router-dom';
+import { Code2, ExternalLink, Trash2, Check, Rocket, Sparkles, Trophy, Star, X, Plus } from 'lucide-react';
+import { STORAGE_KEYS, FINAL_STAGES } from '../../utils/constants';
 
-// Import New Modular Components
+// Reusing Primary Components (Assuming they are generic enough or we might need to duplicate/adapt if they have hardcoded 'Primary' logic)
+// Based on PrimaryDevModule imports:
 import StageNavigation from './components/primary/StageNavigation';
 import TaskList from './components/primary/TaskList';
 import ProjectWorkspaceHeader from './components/primary/ProjectWorkspaceHeader';
@@ -13,7 +13,6 @@ import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import confetti from 'canvas-confetti';
 import { useUndoShortcuts } from '../../hooks/useUndoShortcuts';
-import { useTranslation } from '../i18n';
 
 import Spotlight from '../../components/shared/Spotlight';
 
@@ -37,11 +36,12 @@ const getDefaultBackground = (projectId) => {
 };
 
 
-const PrimaryDevModule = () => {
-    // --- Sync Integration ---
+const FinalDevModule = () => {
+    // --- Sync Integration (using 'final_projects' key) ---
     const { doc } = useSync();
     const {
         projects: allProjects,
+        addProject,
         updateProject,
         removeProject: deleteProject,
         undo,
@@ -50,21 +50,22 @@ const PrimaryDevModule = () => {
         canRedo
     } = useSyncedProjects(doc, 'all_projects');
 
-    // Filter projects for this module
+    // Filter projects for this module (Optimization Stage)
     const projects = React.useMemo(() =>
-        allProjects.filter(p => (p.stage || 'primary') === 'primary'),
+        allProjects.filter(p => ['advanced', 'final', 'commercial', 'modules'].includes(p.stage)),
         [allProjects]);
 
-    // Legacy Migration removed as it's now handled by global migration hook
-
     useUndoShortcuts(undo, redo);
-    const navigate = useNavigate();
 
     // --- Global State ---
     const [selectedProject, setSelectedProject] = useState(null);
 
+    // --- Project Creation State ---
+    const [isCreatingProject, setIsCreatingProject] = useState(false);
+    const [newProjectTitle, setNewProjectTitle] = useState('');
+
     // --- UI/Interaction State ---
-    const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+    const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
     const [viewStage, setViewStage] = useState(1);
 
     // --- Edit Mode State ---
@@ -79,10 +80,6 @@ const PrimaryDevModule = () => {
     // Sync: Load Commands
     const { projects: availableCommands } = useSyncedProjects(doc, 'all_commands');
 
-    // --- Graduation State ---
-    const [showGraduationChecklist, setShowGraduationChecklist] = useState(false);
-    const [graduationChecks, setGraduationChecks] = useState({});
-
     // --- Scroll Handling Ref ---
     const taskListRef = useRef(null);
 
@@ -91,13 +88,6 @@ const PrimaryDevModule = () => {
             taskListRef.current.scrollTop += e.deltaY;
         }
     };
-
-    const GRADUATION_PILLARS = [
-        { id: 'audience', label: 'Have I truly understood who I am building for?' },
-        { id: 'vow', label: 'Does this solution honor the original Founder\'s Vow?' },
-        { id: 'tech', label: 'Is the technical heart beating steadily?' },
-        { id: 'ready', label: 'Am I ready to leave the nursery and face the real world?' }
-    ];
 
     // Sync selectedProject with latest data
     useEffect(() => {
@@ -117,18 +107,35 @@ const PrimaryDevModule = () => {
         setViewStage(project.subStage || 1);
     };
 
-    const toggleGraduationCheck = (id) => {
-        setGraduationChecks(prev => ({
-            ...prev,
-            [id]: !prev[id]
-        }));
-    };
 
-    const allPillarsChecked = GRADUATION_PILLARS.every(p => graduationChecks[p.id]);
-
-
+    // --- Project Filtering ---
+    // For Final module, we might not have 'advanced' separation internally like Primary, 
+    // or maybe 'Completed' projects are separated. 
+    // For now, let's treat all as active unless marked complete? 
+    // Primary separated by stage < 6. Final has only 3 stages.
+    // Let's assume all are active for now, or maybe separate fully completed ones later.
     const activeProjects = projects;
-    const finalProjects = allProjects.filter(p => p.stage === 'final');
+    // If we want to separate 'Done' ones:
+    // const activeProjects = projects.filter(p => (p.subStage || 1) <= 3);
+    // const completedProjects = projects.filter(p => (p.subStage || 1) > 3);
+    // But specific requirement was just "Final becomes Primary's card format".
+
+
+    // --- Create Project Handler (Inline, no prompt) ---
+    const handleCreateProject = () => {
+        if (!newProjectTitle.trim()) return;
+
+        const newProject = {
+            title: newProjectTitle.trim(),
+            desc: '新的最终开发项目',
+            subStage: 1,
+            tasks: [],
+            stage: 'advanced' // Set stage to Advanced (Optimization)
+        };
+        addProject(newProject);
+        setNewProjectTitle('');
+        setIsCreatingProject(false);
+    };
 
 
     // --- Project Handlers ---
@@ -243,40 +250,10 @@ const PrimaryDevModule = () => {
         const newSubStage = isComplete ? stageId + 1 : stageId;
         handleUpdateProject(selectedProject.id, { subStage: newSubStage });
 
-        // Optional: Auto-switch view to next stage when completed?
-        if (isComplete) {
-            setViewStage(newSubStage <= 5 ? newSubStage : 5);
+        // Auto-switch view for Final module? Maybe not strictly needed but good UX
+        if (isComplete && newSubStage <= 3) { // Max stage 3
+            setViewStage(newSubStage);
         }
-    };
-
-    // --- Graduation Logic ---
-    const handleGraduateToFinal = () => {
-        if (!allPillarsChecked) return;
-
-        // Trigger Confetti
-        confetti({
-            particleCount: 200,
-            spread: 100,
-            origin: { y: 0.6 },
-            colors: ['#10B981', '#34D399', '#FBBF24', '#ffffff']
-        });
-
-        // Graduation: Transition stage from primary to advanced (Optimization)
-        updateProject(selectedProject.id, {
-            stage: 'advanced',
-            subStage: 1, // Reset subStage for the new phase
-        });
-
-        // Close modal after delay
-        setTimeout(() => {
-            setShowGraduationChecklist(false);
-            setGraduationChecks({}); // Reset
-
-            // Navigate to Final Module for setup
-            navigate('/advanced', { state: { projectId: selectedProject.id } });
-
-            setSelectedProject(null);
-        }, 1500);
     };
 
 
@@ -296,7 +273,7 @@ const PrimaryDevModule = () => {
         if (!selectedProject?.tasks) return {};
 
         const stats = {};
-        DEV_STAGES.forEach(stage => {
+        FINAL_STAGES.forEach(stage => {
             const stageTasks = selectedProject.tasks.filter(t => (t.stage || 1) === stage.id);
             stats[stage.id] = {
                 taskCount: stageTasks.filter(t => !t.isCommand && !t.done).length,
@@ -306,21 +283,54 @@ const PrimaryDevModule = () => {
         return stats;
     }, [selectedProject?.tasks]);
 
-    const { t } = useTranslation();
-
     return (
         <div className="max-w-7xl mx-auto pt-10 px-6 pb-20">
             {/* Dashboard Header */}
             <div className="mb-12 flex justify-between items-end">
                 <div>
-                    <h2 className="text-2xl font-light text-purple-500 dark:text-purple-400 mb-2 tracking-tight">{t('primary.title')}</h2>
-                    <p className="text-gray-400 text-sm font-light tracking-wide">{t('primary.subtitle')}</p>
+                    <h2 className="text-2xl font-light text-gray-900 dark:text-white mb-2 tracking-tight">进阶优化阶段</h2>
+                    <p className="text-gray-400 text-sm font-light tracking-wide">核心功能之外的深度性能优化与体验打磨</p>
                 </div>
                 <div className="flex items-center gap-4 text-right">
-
+                    {isCreatingProject ? (
+                        <div className="flex items-center gap-2">
+                            <input
+                                autoFocus
+                                type="text"
+                                value={newProjectTitle}
+                                onChange={(e) => setNewProjectTitle(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleCreateProject();
+                                    if (e.key === 'Escape') { setIsCreatingProject(false); setNewProjectTitle(''); }
+                                }}
+                                placeholder="项目名称..."
+                                className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 focus:border-indigo-300 dark:focus:border-indigo-700 outline-none w-48 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                            />
+                            <button
+                                onClick={handleCreateProject}
+                                disabled={!newProjectTitle.trim()}
+                                className="bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-600 transition-colors disabled:opacity-50"
+                            >
+                                创建
+                            </button>
+                            <button
+                                onClick={() => { setIsCreatingProject(false); setNewProjectTitle(''); }}
+                                className="text-gray-400 hover:text-gray-600 p-2"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => setIsCreatingProject(true)}
+                            className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+                        >
+                            <Plus size={16} /> 新建项目
+                        </button>
+                    )}
                     <div>
-                        <span className="text-3xl font-thin text-gray-900">{activeProjects.length}</span>
-                        <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">Active</span>
+                        <span className="text-3xl font-thin text-gray-900 dark:text-white">{activeProjects.length}</span>
+                        <span className="text-gray-400 text-xs uppercase tracking-widest ml-2">TOTAL</span>
                     </div>
                 </div>
             </div>
@@ -332,13 +342,13 @@ const PrimaryDevModule = () => {
 
                     return (
                         <motion.div
-                            layoutId={`primary-card-${project.id}`}
+                            layoutId={`final-card-${project.id}`}
                             key={project.id}
                             onClick={() => handleSelectProject(project)}
                             className={`group bg-white dark:bg-gray-900 border rounded-[2rem] overflow-hidden hover:shadow-2xl transition-all cursor-pointer relative h-[360px] flex flex-col
                                 ${isHoly
-                                    ? 'border-transparent shadow-[0_0_0_2px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.2)]'
-                                    : 'border-gray-100 dark:border-gray-800 hover:shadow-gray-200/50 dark:hover:shadow-gray-900/50 ring-1 ring-transparent hover:ring-gray-100 dark:hover:ring-gray-800'}
+                                    ? 'border-transparent shadow-[0_0_0_2px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]'
+                                    : 'border-gray-100 dark:border-gray-800 hover:shadow-red-900/10 dark:hover:shadow-red-900/20 ring-1 ring-transparent hover:ring-red-50 dark:hover:ring-red-900/30'}
                             `}
                         >
                             {/* Holy Flowing Border Animation */}
@@ -346,7 +356,7 @@ const PrimaryDevModule = () => {
                                 <motion.div
                                     className="absolute inset-0 rounded-[2rem] pointer-events-none z-50"
                                     style={{
-                                        background: 'linear-gradient(90deg, transparent, rgba(168,85,247,0.4), transparent)',
+                                        background: 'linear-gradient(90deg, transparent, rgba(16,185,129,0.4), transparent)',
                                         backgroundSize: '200% 100%',
                                     }}
                                     animate={{
@@ -364,8 +374,7 @@ const PrimaryDevModule = () => {
 
                             <Spotlight
                                 className="w-full h-full"
-                                spotColor={isHoly ? "rgba(59, 130, 246, 0.15)" : "rgba(168, 85, 247, 0.2)"}
-                                size={350}
+                                spotColor={isHoly ? "rgba(59, 130, 246, 0.15)" : "rgba(220, 38, 38, 0.1)"}
                             >
                                 {/* Card Background */}
                                 <div className="absolute inset-0 z-0 h-48">
@@ -375,19 +384,19 @@ const PrimaryDevModule = () => {
                                             alt=""
                                             className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent dark:from-gray-900 dark:via-gray-900/60" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent dark:from-gray-900 dark:via-gray-900/60 dark:to-transparent" />
                                     </div>
                                 </div>
 
                                 <div className="p-8 relative z-10 flex flex-col h-full">
                                     <div className="flex justify-between items-start mb-6">
-                                        <div className={`w-12 h-12 backdrop-blur rounded-2xl flex items-center justify-center shadow-sm border transition-transform group-hover:scale-105
-                                            ${isHoly ? 'bg-purple-50/80 border-purple-200/50 text-purple-700' : 'bg-white/80 dark:bg-gray-800/80 border-white/50 dark:border-gray-700/50 text-gray-900 dark:text-white'}
+                                        <div className={`w-12 h-12 backdrop-blur rounded-2xl flex items-center justify-center shadow-sm border transition-transform group-hover:scale-110 duration-300
+                                            ${isHoly ? 'bg-emerald-50/80 dark:bg-emerald-900/30 border-emerald-200/50 dark:border-emerald-700/30 text-emerald-700 dark:text-emerald-400' : 'bg-white/80 dark:bg-gray-800/80 border-white/50 dark:border-white/10 text-gray-900 dark:text-white group-hover:text-red-900 dark:group-hover:text-red-400'}
                                         `}>
                                             <Code2 size={24} strokeWidth={1.5} />
                                         </div>
                                         {project.link && (
-                                            <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors bg-white/50 dark:bg-gray-800/50 backdrop-blur rounded-full hover:bg-white dark:hover:bg-gray-800">
+                                            <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors bg-white/50 dark:bg-black/30 backdrop-blur rounded-full hover:bg-white dark:hover:bg-black/50">
                                                 <ExternalLink size={16} />
                                             </a>
                                         )}
@@ -395,7 +404,7 @@ const PrimaryDevModule = () => {
 
                                     <div className="mt-8">
                                         <h3 className={`text-2xl font-light mb-2 line-clamp-1 transition-colors
-                                            ${isHoly ? 'text-purple-900 group-hover:text-purple-700' : 'text-gray-900 dark:text-white group-hover:text-purple-900 dark:group-hover:text-purple-400'}
+                                            ${isHoly ? 'text-emerald-900 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300' : 'text-gray-900 dark:text-white group-hover:text-red-900 dark:group-hover:text-red-400'}
                                         `}>{project.title}</h3>
                                         <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 min-h-[2.5em] leading-relaxed">{project.desc || 'No description provided.'}</p>
                                     </div>
@@ -403,20 +412,20 @@ const PrimaryDevModule = () => {
                                     <div className="mt-auto pt-6 border-t border-gray-100/50 dark:border-gray-800/50">
                                         {/* Mini Stage Visualization */}
                                         <div className="flex items-center gap-1.5 mb-3">
-                                            {[1, 2, 3, 4, 5].map(step => (
+                                            {[1, 2, 3].map(step => (
                                                 <div
                                                     key={step}
-                                                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-purple-500 shadow-sm shadow-purple-200' : 'bg-gray-100 dark:bg-gray-800'}`}
+                                                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-red-500 shadow-sm shadow-red-200 dark:shadow-red-900/30' : 'bg-gray-100 dark:bg-gray-800'}`}
                                                 />
                                             ))}
                                         </div>
                                         <div className="flex justify-between items-center text-xs font-mono text-gray-400 uppercase tracking-wider">
                                             <div className="flex items-center gap-2">
-                                                <span className={`w-2 h-2 rounded-full animate-pulse ${isHoly ? 'bg-blue-500' : 'bg-purple-500'}`} />
-                                                <span>Stage {project.subStage || 1}</span>
+                                                <span className={`w-2 h-2 rounded-full animate-pulse ${isHoly ? 'bg-blue-500' : 'bg-indigo-500'}`} />
+                                                <span>Step {project.subStage || 1}</span>
                                             </div>
                                             <span className="text-gray-900 dark:text-white font-medium">
-                                                {project.stageNames?.[project.subStage || 1] || DEV_STAGES[(project.subStage || 1) - 1]?.label}
+                                                {project.stageNames?.[project.subStage || 1] || FINAL_STAGES[(project.subStage || 1) - 1]?.label}
                                             </span>
                                         </div>
                                     </div>
@@ -430,68 +439,32 @@ const PrimaryDevModule = () => {
                 {activeProjects.length === 0 && (
                     <div className="col-span-full border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] p-12 flex flex-col items-center justify-center text-gray-300 dark:text-gray-600 min-h-[400px]">
                         <div className="w-24 h-24 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6 opacity-50 animate-pulse">
-                            <Rocket size={40} className="text-gray-400 dark:text-gray-500" strokeWidth={1} />
+                            <Sparkles size={40} className="text-gray-400 dark:text-gray-500" strokeWidth={1} />
                         </div>
-                        <span className="text-xl font-light text-gray-900 dark:text-gray-100 mb-2">The Workshop is Clear</span>
-                        <span className="text-sm text-gray-400 dark:text-gray-500 max-w-sm text-center leading-relaxed">Great products require validation first. Graduate a project from 'Idea Staging' to begin engineering.</span>
+                        <span className="text-xl font-light text-gray-900 dark:text-white mb-2">暂无进阶项目</span>
+                        <span className="text-sm text-gray-400 dark:text-gray-500 max-w-sm text-center leading-relaxed">创建项目以开始深度优化与体验打磨</span>
+                        <button
+                            onClick={() => setIsCreatingProject(true)}
+                            className="mt-6 text-indigo-500 hover:text-indigo-600 font-medium text-sm transition-colors"
+                        >
+                            + 创建首个项目
+                        </button>
                     </div>
                 )}
             </div>
 
-
-            {/* Final / Graduated Section */}
-            {
-                finalProjects.length > 0 && (
-                    <div className="mt-20 border-t border-gray-100 pt-10">
-                        <div className="mb-8 flex items-center gap-3">
-                            <div className="p-2 bg-emerald-50 rounded-lg text-emerald-500">
-                                <Trophy size={20} />
-                            </div>
-                            <h3 className="text-xl font-light text-gray-900 tracking-tight">Final Development</h3>
-                            <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">{finalProjects.length}</span>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {finalProjects.map((project) => (
-                                <motion.div
-                                    key={project.id}
-                                    layoutId={`primary-card-${project.id}`} // Keep animation
-                                    onClick={() => handleSelectProject(project)}
-                                    className="group bg-white dark:bg-gray-900 border border-amber-100/50 dark:border-amber-900/30 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-amber-100/50 dark:hover:shadow-amber-900/20 transition-all cursor-pointer relative h-[300px] flex flex-col opacity-80 hover:opacity-100"
-                                >
-                                    <Spotlight className="w-full h-full" spotColor="rgba(251, 191, 36, 0.15)">
-                                        <div className="absolute inset-0 z-0 h-32 bg-amber-50/30">
-                                            {project.bgImage && <img src={project.bgImage} className="w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 transition-all" />}
-                                        </div>
-                                        <div className="p-8 relative z-10 flex flex-col h-full mt-16">
-                                            <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-1">{project.title}</h3>
-                                            <div className="flex items-center gap-2 text-amber-600 text-xs font-bold uppercase tracking-widest mb-4">
-                                                <Star size={12} fill="currentColor" />
-                                                <span>Advanced Phase</span>
-                                            </div>
-                                            <p className="text-sm text-gray-400 line-clamp-2">{project.desc}</p>
-                                        </div>
-                                    </Spotlight>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
-                )
-            }
-
-
             {/* Project Workspace Modal */}
             <AnimatePresence>
                 {selectedProject && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 sm:p-10 pointer-events-auto">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-10 pointer-events-auto">
                         <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-md"
+                            className="absolute inset-0 bg-white/80 backdrop-blur-md"
                             onClick={() => { setSelectedProject(null); setIsEditingProject(false); }}
                         />
                         <motion.div
-                            layoutId={`primary-card-${selectedProject.id}`}
-                            className="w-full max-w-6xl bg-white dark:bg-gray-950 rounded-none md:rounded-[3rem] shadow-2xl overflow-hidden relative z-10 h-[100dvh] md:h-[90vh] flex flex-col ring-1 ring-gray-100 dark:ring-gray-800"
+                            layoutId={`final-card-${selectedProject.id}`}
+                            className="w-full max-w-6xl bg-white dark:bg-gray-950 rounded-[3rem] shadow-2xl overflow-hidden relative z-10 h-[90vh] flex flex-col ring-1 ring-gray-100 dark:ring-gray-800"
                             onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
                         >
                             <ProjectWorkspaceHeader
@@ -509,10 +482,12 @@ const PrimaryDevModule = () => {
                                 onImportCommand={() => setCommandModalOpen(true)}
                                 onToggleCollapse={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
                                 onWheel={handleHeaderWheel}
+                                stages={FINAL_STAGES} // Pass custom stages as 'stages' prop
+                                themeColor="red"
                             />
 
                             <div
-                                className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30 dark:bg-gray-950/50"
+                                className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30 dark:bg-gray-900/30"
                                 onClick={() => !isHeaderCollapsed && setIsHeaderCollapsed(true)}
                             >
                                 {/* Left Sidebar: Stage Navigation */}
@@ -524,18 +499,25 @@ const PrimaryDevModule = () => {
                                     customStageNames={selectedProject.stageNames || {}}
                                     onRenameStage={handleRenameStage}
                                     stageStats={stageStats}
+                                    stages={FINAL_STAGES} // Use FINAL_STAGES here
+                                    themeColor="red"
                                 />
 
                                 {/* Right Content: Task List */}
                                 <div className="flex-1 flex flex-col relative w-full overflow-hidden">
-                                    {/* Graduation Call To Action - Only if Stage 5 is active view AND progress is at 5 (waiting for graduation) OR 6 (advanced) */}
-                                    {viewStage === 5 && (selectedProject.subStage || 1) >= 6 && (
+                                    {/* Graduation Button (Optimization -> Final) */}
+                                    {viewStage === 3 && (selectedProject.subStage || 1) >= 4 && (
                                         <div className="px-6 pt-6 -mb-4">
                                             <button
-                                                onClick={() => setShowGraduationChecklist(true)}
-                                                className="w-full py-3 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-xl text-emerald-800 font-bold uppercase tracking-widest text-xs shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
+                                                onClick={() => {
+                                                    if (confirm('Ready to graduate to Final Integration?')) {
+                                                        updateProject(selectedProject.id, { stage: 'final', subStage: 1 });
+                                                        setSelectedProject(null);
+                                                    }
+                                                }}
+                                                className="w-full py-3 bg-gradient-to-r from-indigo-100 to-blue-100 rounded-xl text-indigo-800 font-bold uppercase tracking-widest text-xs shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
                                             >
-                                                <Trophy size={16} /> Enter Ascension Ritual
+                                                <Trophy size={16} /> Graduate to Final Integration
                                             </button>
                                         </div>
                                     )}
@@ -557,100 +539,15 @@ const PrimaryDevModule = () => {
                                         onImportCommand={() => setCommandModalOpen(true)}
                                         availableCommands={availableCommands}
                                         onScroll={(e) => {
-                                            // Manual control only, removed auto-collapse/expand on scroll
+                                            const scrollTop = e.currentTarget.scrollTop;
+                                            if (scrollTop > 10 && !isHeaderCollapsed) {
+                                                setIsHeaderCollapsed(true);
+                                            }
                                         }}
+                                        themeColor="red"
                                     />
                                 </div>
                             </div>
-
-
-                            {/* Graduation Checklist Overlay (The Ascension Ritual) */}
-                            <AnimatePresence mode="wait">
-                                {showGraduationChecklist && (
-                                    <motion.div
-                                        key="graduation-ritual"
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        transition={{ duration: 0.2 }}
-                                        className="absolute inset-0 z-50 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center p-8"
-                                    >
-                                        <div className="max-w-xl w-full text-center relative">
-                                            {/* Close Button */}
-                                            <button
-                                                onClick={() => setShowGraduationChecklist(false)}
-                                                className="absolute -top-12 right-0 p-2 text-gray-300 hover:text-gray-500 transition-colors"
-                                            >
-                                                <X size={24} />
-                                            </button>
-
-                                            <motion.div
-                                                initial={{ scale: 0.9, opacity: 0 }}
-                                                animate={{ scale: 1, opacity: 1 }}
-                                                className="mb-10"
-                                            >
-                                                <div className="w-24 h-24 bg-gradient-to-tr from-emerald-50 to-teal-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-emerald-100/50">
-                                                    <Sparkles size={40} className="text-emerald-500/80" />
-                                                </div>
-                                                <h2 className="text-4xl font-thin text-gray-900 mb-3 tracking-tight">The Ascension Ritual</h2>
-                                                <p className="text-emerald-600/60 font-medium tracking-widest text-xs uppercase">Stabilize the Four Pillars to Proceed</p>
-                                            </motion.div>
-
-                                            <div className="space-y-4 text-left mb-12">
-                                                {GRADUATION_PILLARS.map((pillar, i) => {
-                                                    const isChecked = graduationChecks[pillar.id];
-                                                    return (
-                                                        <motion.button
-                                                            key={pillar.id}
-                                                            initial={{ x: -20, opacity: 0 }}
-                                                            animate={{ x: 0, opacity: 1 }}
-                                                            transition={{ delay: i * 0.1 }}
-                                                            onClick={() => toggleGraduationCheck(pillar.id)}
-                                                            className={`
-                                                                w-full group flex items-center gap-5 p-5 rounded-2xl border text-left transition-all duration-300
-                                                                ${isChecked
-                                                                    ? 'bg-emerald-50/50 border-emerald-200 shadow-lg shadow-emerald-100/50 scale-[1.02]'
-                                                                    : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50'
-                                                                }
-                                                            `}
-                                                        >
-                                                            <div className={`
-                                                                w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500
-                                                                ${isChecked ? 'border-emerald-500 bg-emerald-500 text-white rotate-0' : 'border-gray-200 text-transparent -rotate-180'}
-                                                            `}>
-                                                                <Check size={16} strokeWidth={3} />
-                                                            </div>
-                                                            <span className={`
-                                                                text-lg font-light transition-colors duration-300
-                                                                ${isChecked ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-600'}
-                                                            `}>
-                                                                {pillar.label}
-                                                            </span>
-                                                        </motion.button>
-                                                    );
-                                                })}
-                                            </div>
-
-                                            <div className="flex justify-center">
-                                                <button
-                                                    onClick={handleGraduateToFinal}
-                                                    disabled={!allPillarsChecked}
-                                                    className={`
-                                                        px-12 py-5 rounded-2xl font-bold text-sm uppercase tracking-[0.2em] transition-all duration-500 flex items-center gap-3
-                                                        ${allPillarsChecked
-                                                            ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-2xl shadow-emerald-500/40 hover:shadow-emerald-500/60 hover:-translate-y-1 cursor-pointer'
-                                                            : 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                                                        }
-                                                    `}
-                                                >
-                                                    <Trophy size={18} className={allPillarsChecked ? 'animate-bounce' : ''} />
-                                                    <span>Ascend Project</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
 
                         </motion.div>
                     </div>
@@ -663,10 +560,11 @@ const PrimaryDevModule = () => {
                 onImport={handleLinkCommand}
                 currentStage={viewStage}
                 projectCategory={selectedProject?.category}
-                themeColor="purple"
+                stages={FINAL_STAGES}
+                themeColor="red"
             />
-        </div >
+        </div>
     );
 };
 
-export default PrimaryDevModule;
+export default FinalDevModule;
