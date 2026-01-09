@@ -15,12 +15,20 @@ const highlightText = (text) => {
         // Tag: [TagName]
         if (part.startsWith('[') && part.endsWith(']')) {
             return (
-                <span key={index} className="text-pink-500 dark:text-pink-400" style={{ fontStyle: 'normal' }}>
+                <span
+                    key={index}
+                    className="text-pink-600 dark:text-pink-400 bg-pink-50/50 dark:bg-pink-900/20 rounded-md ring-1 ring-inset ring-pink-100 dark:ring-pink-800/30"
+                    style={{
+                        fontStyle: 'normal',
+                        padding: '0px 0px', // No horizontal padding to affect width
+                        margin: '0px 0px',
+                    }}
+                >
                     {part}
                 </span>
             );
         }
-        // Bold: **Text** - NO font-weight change to avoid width drift
+        // Bold: **Text** - Just color, NO font-weight change to avoid width drift
         if (part.startsWith('**') && part.endsWith('**')) {
             return (
                 <span key={index} className="text-gray-900 dark:text-gray-100" style={{ fontStyle: 'normal' }}>
@@ -31,7 +39,7 @@ const highlightText = (text) => {
         // Code: `Code` - Just color
         if (part.startsWith('`') && part.endsWith('`')) {
             return (
-                <span key={index} className="text-pink-600 dark:text-pink-400" style={{ fontStyle: 'normal' }}>
+                <span key={index} className="text-pink-600 dark:text-pink-400 bg-gray-50 dark:bg-gray-800/50 rounded" style={{ fontStyle: 'normal' }}>
                     {part}
                 </span>
             );

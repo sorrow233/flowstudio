@@ -1,3 +1,8 @@
+import React, { useState, useEffect } from 'react';
+import { motion, Reorder, AnimatePresence, useDragControls } from 'framer-motion';
+import { Terminal, Library, ChevronRight, Copy, Trash2, ListChecks, X } from 'lucide-react';
+import CommandItem from './CommandItem';
+
 // Wrapper to manage drag controls for each item
 const DraggableItem = ({ cmd, children, dragListener }) => {
     const controls = useDragControls();
