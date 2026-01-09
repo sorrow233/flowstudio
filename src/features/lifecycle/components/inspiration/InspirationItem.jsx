@@ -162,13 +162,13 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComple
                             {parseRichText(idea.content)}
                         </div>
                         {/* Date/Time */}
-                        <div className="mt-2 text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                        <div className="mt-2 text-[11px] text-pink-300 dark:text-pink-500/70 font-medium">
                             {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
                                 year: 'numeric',
                                 month: 'short',
                                 day: 'numeric',
                             })}
-                            <span className="mx-1.5 text-gray-300 dark:text-gray-600">·</span>
+                            <span className="mx-1.5 text-pink-200 dark:text-pink-800">·</span>
                             {new Date(idea.timestamp || Date.now()).toLocaleTimeString(undefined, {
                                 hour: '2-digit',
                                 minute: '2-digit'
@@ -184,7 +184,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onToggleComple
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
-                            className="absolute top-3 right-3 bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 shadow-sm border border-emerald-100 dark:border-emerald-800"
+                            className="absolute top-3 right-3 bg-pink-50 dark:bg-pink-900/50 text-pink-600 dark:text-pink-400 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 shadow-sm border border-pink-100 dark:border-pink-800"
                         >
                             <Check size={12} strokeWidth={3} />
                             <span>{t('common.copied')}</span>
