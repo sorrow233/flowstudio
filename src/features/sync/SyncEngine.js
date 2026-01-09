@@ -157,6 +157,17 @@ export class SyncEngine {
                 }
             }
 
+            // 成功接收数据，清除权限错误状态
+            if (this.hasPermissionError) {
+                console.info("[SyncEngine] Permission restored, resuming sync.");
+                this.hasPermissionError = false;
+                this.retryCount = 0;
+                // 如果有待推送的数据，立即调度推送
+                if (this.isDirty) {
+                    this.schedulePush();
+                }
+            }
+
             if (!this.isServerLoaded) {
                 this.isServerLoaded = true;
                 console.info("[SyncEngine] Server loaded.");
@@ -164,7 +175,17 @@ export class SyncEngine {
             }
 
         }, (error) => {
-            console.error("[SyncEngine] Firestore error:", error.code);
+            const isPermissionError = error.code === 'permission-denied';
+
+            if (isPermissionError) {
+                console.warn("[SyncEngine] Firestore permission denied - waiting for auth.");
+                this.hasPermissionError = true;
+                // 权限错误时不立即进入 ready，等待权限恢复
+                // 但仍然设置 isServerLoaded 以便本地数据可用
+            } else {
+                console.error("[SyncEngine] Firestore error:", error.code);
+            }
+
             this.isServerLoaded = true;
             this.setStatus('offline');
             this.tryReady();
@@ -188,9 +209,22 @@ export class SyncEngine {
      * 智能防抖推送
      * - 基础防抖：10秒
      * - 最小间隔：30秒（防止频繁推送）
+     * - 权限错误时跳过推送直到权限恢复
      */
     schedulePush() {
         clearTimeout(this.pushTimeout);
+
+        // 如果处于权限错误状态，暂不调度推送
+        if (this.hasPermissionError) {
+            console.info("[SyncEngine] Skipping push - waiting for permission.");
+            return;
+        }
+
+        // 如果已超过最大重试次数，暂停推送
+        if (this.retryCount >= MAX_RETRY_COUNT) {
+            console.warn(`[SyncEngine] Max retries (${MAX_RETRY_COUNT}) reached, pausing push.`);
+            return;
+        }
 
         const now = Date.now();
         const timeSinceLastPush = now - this.lastPushTime;
@@ -200,6 +234,16 @@ export class SyncEngine {
         if (timeSinceLastPush < MIN_PUSH_INTERVAL_MS) {
             // 如果距离上次推送不足30秒，延长等待时间
             delay = Math.max(delay, MIN_PUSH_INTERVAL_MS - timeSinceLastPush);
+        }
+
+        // 如果是重试，使用指数退避
+        if (this.retryCount > 0) {
+            const backoffDelay = Math.min(
+                INITIAL_RETRY_DELAY_MS * Math.pow(2, this.retryCount - 1),
+                MAX_RETRY_DELAY_MS
+            );
+            delay = Math.max(delay, backoffDelay);
+            console.info(`[SyncEngine] Retry ${this.retryCount}/${MAX_RETRY_COUNT}, delay: ${delay}ms`);
         }
 
         this.pushTimeout = setTimeout(() => this.tryPush(), delay);
@@ -246,11 +290,25 @@ export class SyncEngine {
             this.isDirty = false;
             this.setStatus('synced');
 
+            // 推送成功，重置重试计数
+            this.retryCount = 0;
+
         } catch (error) {
-            console.error("[SyncEngine] Push failed:", error);
-            this.setStatus('offline');
-            // 失败后重试
-            this.schedulePush();
+            const isPermissionError = error.code === 'permission-denied' ||
+                error.message?.includes('permission');
+
+            if (isPermissionError) {
+                console.warn("[SyncEngine] Push permission denied - waiting for auth.");
+                this.hasPermissionError = true;
+                this.setStatus('offline');
+                // 权限错误不计入重试，等待 onSnapshot 检测到权限恢复
+            } else {
+                console.error("[SyncEngine] Push failed:", error);
+                this.retryCount++;
+                this.setStatus('offline');
+                // 只有非权限错误才重试
+                this.schedulePush();
+            }
         } finally {
             this.isPushing = false;
         }
