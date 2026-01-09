@@ -7,6 +7,7 @@ import { useSyncedProjects } from '../sync/useSyncStore';
 import { useTranslation } from '../i18n';
 import InspirationItem, { COLOR_CONFIG } from './components/inspiration/InspirationItem';
 import InputRichPreview from './components/inspiration/InputRichPreview';
+import Spotlight from '../../components/shared/Spotlight';
 
 // Auto color logic: Every 3 items, switch to next color
 const getNextAutoColorIndex = (totalCount) => {
@@ -203,70 +204,72 @@ const InspirationModule = () => {
 
             {/* Input Section */}
             <div className="relative mb-20 group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 dark:from-gray-800 via-gray-50 dark:via-gray-900 to-gray-100 dark:to-gray-800 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] group-hover:border-gray-200 dark:group-hover:border-gray-700">
+                <Spotlight className="rounded-2xl" spotColor="rgba(244, 114, 182, 0.25)">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 dark:from-gray-800 via-gray-50 dark:via-gray-900 to-gray-100 dark:to-gray-800 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                    <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] group-hover:border-gray-200 dark:group-hover:border-gray-700">
 
-                    {/* Rich Preview Layer */}
-                    <InputRichPreview text={input} scrollTop={scrollTop} />
+                        {/* Rich Preview Layer */}
+                        <InputRichPreview text={input} scrollTop={scrollTop} />
 
-                    <textarea
-                        ref={textareaRef}
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onScroll={handleTextareaScroll}
-                        onKeyDown={handleKeyDown}
-                        placeholder={input ? '' : t('inspiration.placeholder')}
-                        className="w-full bg-transparent text-lg text-transparent caret-gray-800 dark:caret-gray-200 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed relative z-10"
-                    />
+                        <textarea
+                            ref={textareaRef}
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onScroll={handleTextareaScroll}
+                            onKeyDown={handleKeyDown}
+                            placeholder={input ? '' : t('inspiration.placeholder')}
+                            className="w-full bg-transparent text-lg text-transparent caret-gray-800 dark:caret-gray-200 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed relative z-10"
+                        />
 
-                    {/* Bottom Action Area */}
-                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-4 z-20">
-                        <div className="flex items-center gap-4 flex-1 min-w-0">
-                            {/* Minimal Color Picker */}
-                            <div className="flex items-center gap-1.5 px-2 py-1.5 bg-gray-50/50 dark:bg-gray-800/50 rounded-full border border-gray-100/50 dark:border-gray-700/50 backdrop-blur-sm flex-shrink-0">
-                                {COLOR_CONFIG.map((conf, index) => (
-                                    <button
-                                        key={conf.id}
-                                        onClick={() => setSelectedColorIndex(prev => prev === index ? null : index)}
-                                        className={`w-3 h-3 rounded-full transition-all duration-300 ${conf.dot} ${index === selectedColorIndex ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 ring-gray-400 dark:ring-gray-500 scale-110' : 'opacity-40 hover:opacity-100 hover:scale-110'}`}
-                                        title={conf.id}
-                                    />
-                                ))}
+                        {/* Bottom Action Area */}
+                        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-4 z-20">
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                                {/* Minimal Color Picker */}
+                                <div className="flex items-center gap-1.5 px-2 py-1.5 bg-gray-50/50 dark:bg-gray-800/50 rounded-full border border-gray-100/50 dark:border-gray-700/50 backdrop-blur-sm flex-shrink-0">
+                                    {COLOR_CONFIG.map((conf, index) => (
+                                        <button
+                                            key={conf.id}
+                                            onClick={() => setSelectedColorIndex(prev => prev === index ? null : index)}
+                                            className={`w-3 h-3 rounded-full transition-all duration-300 ${conf.dot} ${index === selectedColorIndex ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 ring-gray-400 dark:ring-gray-500 scale-110' : 'opacity-40 hover:opacity-100 hover:scale-110'}`}
+                                            title={conf.id}
+                                        />
+                                    ))}
+                                </div>
+
+                                {/* Project Tags Bar */}
+                                <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2 mask-linear-fade">
+                                    {allProjectTags.length > 0 && (
+                                        <>
+                                            <Hash size={14} className="text-gray-300 dark:text-gray-600 flex-shrink-0" />
+                                            {allProjectTags.map((tag) => (
+                                                <button
+                                                    key={tag}
+                                                    onClick={() => handleTagClick(tag)}
+                                                    className="flex-shrink-0 px-3 py-1 bg-pink-50/50 dark:bg-pink-900/20 hover:bg-pink-100/50 dark:hover:bg-pink-800/40 text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 rounded-full text-[11px] font-medium transition-all duration-300 border border-pink-100/50 dark:border-pink-800/30 hover:border-pink-200 dark:hover:border-pink-700/50 whitespace-nowrap shadow-sm hover:shadow-[0_0_15px_rgba(244,114,182,0.4)] hover:scale-105"
+                                                >
+                                                    {tag}
+                                                </button>
+                                            ))}
+                                        </>
+                                    )}
+                                </div>
                             </div>
 
-                            {/* Project Tags Bar */}
-                            <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2 mask-linear-fade">
-                                {allProjectTags.length > 0 && (
-                                    <>
-                                        <Hash size={14} className="text-gray-300 dark:text-gray-600 flex-shrink-0" />
-                                        {allProjectTags.map((tag) => (
-                                            <button
-                                                key={tag}
-                                                onClick={() => handleTagClick(tag)}
-                                                className="flex-shrink-0 px-3 py-1 bg-pink-50/50 dark:bg-pink-900/20 hover:bg-pink-100/50 dark:hover:bg-pink-800/40 text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 rounded-full text-[11px] font-medium transition-all duration-300 border border-pink-100/50 dark:border-pink-800/30 hover:border-pink-200 dark:hover:border-pink-700/50 whitespace-nowrap shadow-sm hover:shadow-[0_0_15px_rgba(244,114,182,0.4)] hover:scale-105"
-                                            >
-                                                {tag}
-                                            </button>
-                                        ))}
-                                    </>
-                                )}
+                            <div className="flex items-center gap-3 flex-shrink-0">
+                                <span className="text-[10px] text-gray-300 dark:text-gray-600 font-mono hidden md:inline-block">
+                                    {t('inspiration.cmdEnter')}
+                                </span>
+                                <button
+                                    onClick={handleAdd}
+                                    disabled={!input.trim()}
+                                    className="flex items-center justify-center p-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl hover:bg-black dark:hover:bg-gray-100 disabled:opacity-30 transition-all duration-300 active:scale-95 shadow-lg shadow-gray-200 dark:shadow-gray-900"
+                                >
+                                    <ArrowRight size={18} strokeWidth={2} />
+                                </button>
                             </div>
-                        </div>
-
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                            <span className="text-[10px] text-gray-300 dark:text-gray-600 font-mono hidden md:inline-block">
-                                {t('inspiration.cmdEnter')}
-                            </span>
-                            <button
-                                onClick={handleAdd}
-                                disabled={!input.trim()}
-                                className="flex items-center justify-center p-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl hover:bg-black dark:hover:bg-gray-100 disabled:opacity-30 transition-all duration-300 active:scale-95 shadow-lg shadow-gray-200 dark:shadow-gray-900"
-                            >
-                                <ArrowRight size={18} strokeWidth={2} />
-                            </button>
                         </div>
                     </div>
-                </div>
+                </Spotlight>
             </div>
 
             {/* List Section */}
