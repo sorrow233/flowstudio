@@ -272,10 +272,10 @@ const CommandCenterModule = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto pt-8 px-4 md:px-6 min-h-[100dvh] pb-safe md:h-[calc(100vh-4rem)] md:min-h-0 flex flex-col md:flex-row gap-4 md:gap-8">
+        <div className="max-w-7xl mx-auto pt-8 px-4 md:px-6 min-h-[100dvh] pb-safe md:h-[calc(100vh-4rem)] md:min-h-0 flex flex-col md:flex-row gap-4 md:gap-8 transition-colors duration-300">
             {/* Ambient Background */}
-            <div className="fixed inset-0 -z-10 bg-gray-50/50 pointer-events-none" />
-            <div className="fixed top-0 left-0 w-full h-96 bg-gradient-to-b from-gray-100 to-transparent -z-10 opacity-50" />
+            <div className="fixed inset-0 -z-10 bg-gray-50/50 dark:bg-black/90 pointer-events-none transition-colors duration-300" />
+            <div className="fixed top-0 left-0 w-full h-96 bg-gradient-to-b from-gray-100 to-transparent dark:from-gray-900/50 -z-10 opacity-50 pointer-events-none transition-colors duration-300" />
 
             {/* Sidebar / Stage Select */}
             <StageSelector
@@ -286,20 +286,20 @@ const CommandCenterModule = () => {
             />
 
             {/* Main Content */}
-            <div className="flex-1 bg-white/80 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-4 md:p-10 shadow-2xl shadow-gray-200/50 flex flex-col relative overflow-hidden ring-1 ring-gray-100/50">
+            <div className="flex-1 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 rounded-[2.5rem] p-4 md:p-10 shadow-2xl shadow-gray-200/50 dark:shadow-black/50 flex flex-col relative overflow-hidden ring-1 ring-gray-100/50 dark:ring-gray-800/50 transition-all duration-300">
                 {/* Decorative Elements */}
-                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-50/50 to-transparent blur-3xl -z-10 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-900/10 blur-3xl -z-10 pointer-events-none" />
 
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 md:mb-10 gap-6 md:gap-0">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
-                            <span className="px-2 py-1 rounded-md bg-sky-50 text-[10px] font-bold tracking-widest uppercase text-sky-600">
+                            <span className="px-2 py-1 rounded-md bg-sky-50 dark:bg-sky-900/30 text-[10px] font-bold tracking-widest uppercase text-sky-600 dark:text-sky-400 border border-sky-100 dark:border-sky-800/30">
                                 {t('commands.stage')} 0{activeStage}
                             </span>
                         </div>
                         <h3 className="text-3xl md:text-4xl font-thin text-sky-600 dark:text-sky-400 mb-2">{t(`devStages.${activeStage}.title`, DEV_STAGES[activeStage - 1].title)}</h3>
-                        <p className="text-gray-400 font-light max-w-lg leading-relaxed text-sm md:text-base">
+                        <p className="text-gray-400 dark:text-gray-500 font-light max-w-lg leading-relaxed text-sm md:text-base">
                             {t(`devStages.${activeStage}.desc`, DEV_STAGES[activeStage - 1].desc)}
                         </p>
                     </div>
@@ -308,7 +308,7 @@ const CommandCenterModule = () => {
                             {/* Community Button */}
                             <button
                                 onClick={() => setIsCommunityBrowsing(true)}
-                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-100 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
                                 title={t('commands.browseCommunity')}
                             >
                                 <Globe2 size={18} />
@@ -318,7 +318,7 @@ const CommandCenterModule = () => {
                             {/* Import Button */}
                             <button
                                 onClick={() => setIsImporting(true)}
-                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-white text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 p-3 md:px-5 md:py-3 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
                                 title={t('commands.importFromLibrary')}
                             >
                                 <Library size={18} />
@@ -333,7 +333,7 @@ const CommandCenterModule = () => {
                                     setEditingTagId(null);
                                     setIsAdding(true);
                                 }}
-                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 md:gap-3 p-3 md:px-6 md:py-3 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap min-w-[3.5rem]"
+                                className="flex-1 md:flex-initial group flex items-center justify-center gap-2 md:gap-3 p-3 md:px-6 md:py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl hover:bg-black dark:hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap min-w-[3.5rem]"
                             >
                                 <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
                                 <span className="font-medium tracking-wide">{t('commands.newCommand')}</span>

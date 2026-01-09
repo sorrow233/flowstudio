@@ -290,16 +290,16 @@ const CommandList = ({
                     {isSelectionMode ? (
                         <div
                             key="bulk-actions"
-                            className="flex items-center justify-between bg-emerald-50/50 border border-emerald-100 rounded-2xl p-2 px-4 shadow-lg animate-in slide-in-from-bottom-4 fade-in duration-200"
+                            className="flex items-center justify-between bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-500/20 rounded-2xl p-2 px-4 shadow-lg animate-in slide-in-from-bottom-4 fade-in duration-200"
                         >
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={handleSelectAll}
-                                    className="text-xs font-bold uppercase tracking-wider text-emerald-600 hover:text-emerald-700 px-2 py-1 rounded transition-colors"
+                                    className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 px-2 py-1 rounded transition-colors"
                                 >
                                     {selectedIds.size === visibleCommands.length ? 'Deselect All' : 'Select All'}
                                 </button>
-                                <span className="text-sm font-medium text-emerald-900">
+                                <span className="text-sm font-medium text-emerald-900 dark:text-emerald-300">
                                     {selectedIds.size} Selected
                                 </span>
                             </div>
@@ -308,7 +308,7 @@ const CommandList = ({
                                 <button
                                     onClick={handleBulkDelete}
                                     disabled={selectedIds.size === 0}
-                                    className="p-2 rounded-lg hover:bg-white text-red-500 hover:text-red-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                    className="p-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                     title="Delete Selected"
                                 >
                                     <Trash2 size={18} />
@@ -316,26 +316,26 @@ const CommandList = ({
                                 <button
                                     onClick={handleBulkCopy}
                                     disabled={selectedIds.size === 0}
-                                    className="p-2 rounded-lg hover:bg-white text-emerald-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                    className="p-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 text-emerald-600 dark:text-emerald-400 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                     title="Copy Content"
                                 >
                                     <Copy size={18} />
                                 </button>
-                                <div className="w-px h-4 bg-emerald-200 mx-1" />
+                                <div className="w-px h-4 bg-emerald-200 dark:bg-emerald-800 mx-1" />
                                 {/* Move to Stage Buttons */}
-                                <div className="flex items-center gap-0.5 bg-white/50 rounded-lg p-0.5">
+                                <div className="flex items-center gap-0.5 bg-white/50 dark:bg-gray-800/50 rounded-lg p-0.5">
                                     {[1, 2, 3, 4, 5].filter(s => s !== activeStage).map(stage => (
                                         <button
                                             key={stage}
                                             onClick={() => handleBulkMove(stage)}
                                             disabled={selectedIds.size === 0}
                                             className={`w-7 h-7 rounded-md text-xs font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed
-                                                ${stage === 1 ? 'hover:bg-emerald-100 hover:text-emerald-700' : ''}
-                                                ${stage === 2 ? 'hover:bg-blue-100 hover:text-blue-700' : ''}
-                                                ${stage === 3 ? 'hover:bg-violet-100 hover:text-violet-700' : ''}
-                                                ${stage === 4 ? 'hover:bg-amber-100 hover:text-amber-700' : ''}
-                                                ${stage === 5 ? 'hover:bg-rose-100 hover:text-rose-700' : ''}
-                                                text-gray-500
+                                                ${stage === 1 ? 'hover:bg-emerald-100 dark:hover:bg-emerald-900/30 hover:text-emerald-700' : ''}
+                                                ${stage === 2 ? 'hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700' : ''}
+                                                ${stage === 3 ? 'hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-700' : ''}
+                                                ${stage === 4 ? 'hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700' : ''}
+                                                ${stage === 5 ? 'hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-700' : ''}
+                                                text-gray-500 dark:text-gray-400
                                             `}
                                             title={`Move to Stage ${stage}`}
                                         >
@@ -343,14 +343,14 @@ const CommandList = ({
                                         </button>
                                     ))}
                                 </div>
-                                <div className="w-px h-4 bg-emerald-200 mx-1" />
+                                <div className="w-px h-4 bg-emerald-200 dark:bg-emerald-800 mx-1" />
                                 <button
                                     onClick={() => {
                                         setIsSelectionMode(false);
                                         setSelectedIds(new Set());
                                         setLastSelectedId(null);
                                     }}
-                                    className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all"
+                                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all"
                                     title="Cancel (Esc)"
                                 >
                                     <X size={18} />
@@ -364,7 +364,7 @@ const CommandList = ({
                         >
                             <button
                                 onClick={() => setIsSelectionMode(true)}
-                                className="flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-xl transition-all text-sm"
+                                className="flex items-center gap-2 px-3 py-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-all text-sm"
                                 title="Multi-select mode"
                             >
                                 <ListChecks size={16} />
