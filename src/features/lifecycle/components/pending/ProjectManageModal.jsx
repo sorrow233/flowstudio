@@ -59,16 +59,6 @@ const ProjectManageModal = ({ project, isOpen, onClose, onDelete }) => {
                             {/* Gradient Overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent" />
 
-                            {/* Floating Icon */}
-                            <motion.div
-                                initial={{ scale: 0.5, opacity: 0, y: 20 }}
-                                animate={{ scale: 1, opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1, type: "spring" }}
-                                className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-16 h-16 rounded-2xl bg-white dark:bg-gray-800 flex items-center justify-center shadow-lg ring-4 ring-white dark:ring-gray-900 z-10"
-                            >
-                                {getStageIcon(project.stage, project.subStage)}
-                            </motion.div>
-
                             {/* Close Button */}
                             <button
                                 onClick={onClose}
@@ -76,6 +66,18 @@ const ProjectManageModal = ({ project, isOpen, onClose, onDelete }) => {
                             >
                                 <X size={18} />
                             </button>
+                        </div>
+
+                        {/* Floating Icon (Moved out of header to avoid overflow clipping) */}
+                        <div className="relative z-10 -mt-8 flex justify-center pointer-events-none">
+                            <motion.div
+                                initial={{ scale: 0.5, opacity: 0, y: 20 }}
+                                animate={{ scale: 1, opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1, type: "spring" }}
+                                className="w-16 h-16 rounded-2xl bg-white dark:bg-gray-800 flex items-center justify-center shadow-lg ring-4 ring-white dark:ring-gray-900 pointer-events-auto"
+                            >
+                                {getStageIcon(project.stage, project.subStage)}
+                            </motion.div>
                         </div>
 
                         {/* 2. Content Area */}
