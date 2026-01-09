@@ -40,7 +40,7 @@ const CommandItem = ({
             {/* Slide Action Context (Behind content) - Only render when swipe is possible */}
             {swipeEnabled && (
                 <motion.div
-                    className="absolute inset-y-0 right-0 bg-red-500 z-0 flex items-center justify-end pr-5 text-white rounded-2xl"
+                    className={`absolute inset-y-0 right-0 bg-red-500 z-0 flex items-center justify-end pr-5 text-white rounded-2xl transition-opacity duration-200 ${isGrabbing ? 'opacity-100' : 'opacity-0'}`}
                     style={{ width: '100%' }}
                 >
                     <Trash2 size={24} />
