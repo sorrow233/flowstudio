@@ -328,8 +328,8 @@ const PrimaryDevModule = () => {
             setShowGraduationChecklist(false);
             setGraduationChecks({}); // Reset
 
-            // Navigate to Commercial Module for pricing setup
-            navigate('/commercial', { state: { projectId: selectedProject.id } });
+            // Navigate to Final Module
+            navigate('/final', { state: { projectId: selectedProject.id } });
 
             setSelectedProject(null);
         }, 1500);

@@ -142,87 +142,64 @@ export const DEFAULT_TEMPLATE = {
                     category: "general"
                 },
                 {
-                    id: 1004,
-                    text: "💰 探索商业化模块，记录你的产品指标",
+                    id: 1003,
+                    text: "⌨️ 按 Cmd+K 打开指令中心，试试预置的 Prompt",
                     done: false,
-                    stage: 3,
+                    stage: 2,
                     category: "general"
                 }
             ],
 
-            commercial: {
-                model: "subscription",
-                proPrice: "29",
-                marketingChannels: ["Twitter", "Product Hunt"],
-                checklist: {
-                    market_fit: true,
-                    waitlist: false,
-                    pricing: true,
-                    legal: false,
-                    analytics: false,
-                    payments: false
-                },
-                paymentProvider: "stripe"
-            }
+        }
         },
-        {
-            id: "project-demo",
-            title: "🚀 示例：我的第一个产品",
-            desc: "一个标准的 Saas 项目结构参考。",
-            score: 4,
-            answers: {
-                clarity: true,
-                dogfood: false,
-                impact: true,
-                value: true
+    {
+        id: "project-demo",
+        title: "🚀 示例：我的第一个产品",
+        desc: "一个标准的 Saas 项目结构参考。",
+        score: 4,
+        answers: {
+            clarity: true,
+            dogfood: false,
+            impact: true,
+            value: true
             },
-            foundingReason: "解决特定领域的问题。",
-            category: "SaaS",
-            graduatedAt: Date.now() - 1000000,
+        foundingReason: "解决特定领域的问题。",
+        category: "SaaS",
+        graduatedAt: Date.now() - 1000000,
             subStage: 1,
-            progress: 15,
-            bgImage: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2670&auto=format&fit=crop", // 代码风格图片
-            // 根级别任务
-            tasks: [
-                {
-                    id: 2001,
-                    text: "定义核心算法的数据处理流程",
-                    done: true,
-                    stage: 1,
-                    category: "backend"
-                },
-                {
-                    id: 2002,
-                    text: "设计用户仪表盘的 UI 原型",
-                    done: false,
-                    stage: 1,
-                    category: "frontend"
-                },
-                {
-                    id: 2003,
-                    text: "实现数据可视化图表组件",
-                    done: false,
-                    stage: 2,
-                    category: "frontend"
-                }
-            ],
-            commercial: {
-                model: "usage_based",
-                checklist: {
-                    market_fit: false,
-                    waitlist: true,
-                    pricing: false,
-                    legal: false,
-                    analytics: true,
-                    payments: false
-                }
+                progress: 15,
+                    bgImage: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2670&auto=format&fit=crop", // 代码风格图片
+                        // 根级别任务
+                        tasks: [
+                            {
+                                id: 2001,
+                                text: "定义核心算法的数据处理流程",
+                                done: true,
+                                stage: 1,
+                                category: "backend"
+                            },
+                            {
+                                id: 2002,
+                                text: "设计用户仪表盘的 UI 原型",
+                                done: false,
+                                stage: 1,
+                                category: "frontend"
+                            },
+                            {
+                                id: 2003,
+                                text: "实现数据可视化图表组件",
+                                done: false,
+                                stage: 2,
+                                category: "frontend"
+                            }
+                        ],
             }
         }
     ],
 
-    customCategories: [
-        { id: "cat-dev", name: "开发", color: "blue" },
-        { id: "cat-design", name: "设计", color: "pink" },
-        { id: "cat-marketing", name: "市场", color: "orange" }
-    ]
+customCategories: [
+    { id: "cat-dev", name: "开发", color: "blue" },
+    { id: "cat-design", name: "设计", color: "pink" },
+    { id: "cat-marketing", name: "市场", color: "orange" }
+]
 };

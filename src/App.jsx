@@ -8,7 +8,7 @@ import PendingModule from './features/lifecycle/PendingModule';
 import PrimaryDevModule from './features/lifecycle/PrimaryDevModule';
 import FinalDevModule from './features/lifecycle/FinalDevModule';
 import AdvancedDevModule from './features/lifecycle/AdvancedDevModule';
-import CommercialModule from './features/lifecycle/CommercialModule';
+import AdvancedDevModule from './features/lifecycle/AdvancedDevModule';
 import CommandCenterModule from './features/commands/CommandCenterModule';
 import ShareViewPage from './features/share/components/ShareViewPage';
 
@@ -41,7 +41,9 @@ function App() {
                                         <Route path="/primary" element={<PrimaryDevModule />} />
                                         <Route path="/final" element={<FinalDevModule />} />
                                         <Route path="/advanced" element={<AdvancedDevModule />} />
-                                        <Route path="/commercial" element={<CommercialModule />} />
+                                        <Route path="/primary" element={<PrimaryDevModule />} />
+                                        <Route path="/final" element={<FinalDevModule />} />
+                                        <Route path="/advanced" element={<AdvancedDevModule />} />
                                         <Route path="/commands" element={<CommandCenterModule />} />
                                         <Route path="/share/:id" element={<ShareViewPage />} />
                                         <Route path="*" element={<Navigate to="/" replace />} />

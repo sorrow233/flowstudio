@@ -8,6 +8,7 @@ import {
     Code2,
     CheckCircle2,
     Zap,
+    Zap,
     Briefcase,
     Terminal,
     Cloud,
@@ -30,7 +31,7 @@ const tabIcons = {
     primary: Code2,
     advanced: Zap,
     final: CheckCircle2,
-    commercial: Briefcase,
+    final: CheckCircle2,
     command: Terminal,
 };
 
@@ -50,7 +51,8 @@ const Navbar = () => {
         { id: 'primary', label: t('navbar.primary'), icon: tabIcons.primary, path: '/primary' },
         { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' },
         { id: 'final', label: t('navbar.final'), icon: tabIcons.final, path: '/final' },
-        { id: 'commercial', label: t('navbar.commercial'), icon: tabIcons.commercial, path: '/commercial' },
+        { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' },
+        { id: 'final', label: t('navbar.final'), icon: tabIcons.final, path: '/final' },
     ];
 
     const { status, pendingCount } = useSyncStore('flowstudio_v1');
