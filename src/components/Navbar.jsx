@@ -45,12 +45,12 @@ const Navbar = () => {
 
     const tabs = [
         { id: 'inspiration', label: t('navbar.inspiration'), icon: tabIcons.inspiration, path: '/inspiration' },
+        { id: 'command', label: t('navbar.command'), icon: tabIcons.command, path: '/commands' },
         { id: 'pending', label: t('navbar.pending'), icon: tabIcons.pending, path: '/pending' },
         { id: 'primary', label: t('navbar.primary'), icon: tabIcons.primary, path: '/primary' },
         { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' },
         { id: 'final', label: t('navbar.final'), icon: tabIcons.final, path: '/final' },
         { id: 'commercial', label: t('navbar.commercial'), icon: tabIcons.commercial, path: '/commercial' },
-        { id: 'command', label: t('navbar.command'), icon: tabIcons.command, path: '/commands' },
     ];
 
     const { status, pendingCount } = useSyncStore('flowstudio_v1');
