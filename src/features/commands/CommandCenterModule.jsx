@@ -294,11 +294,11 @@ const CommandCenterModule = () => {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 md:mb-10 gap-6 md:gap-0">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
-                            <span className="px-2 py-1 rounded-md bg-gray-100 text-[10px] font-bold tracking-widest uppercase text-gray-500">
+                            <span className="px-2 py-1 rounded-md bg-sky-50 text-[10px] font-bold tracking-widest uppercase text-sky-600">
                                 {t('commands.stage')} 0{activeStage}
                             </span>
                         </div>
-                        <h3 className="text-3xl md:text-4xl font-thin text-gray-900 mb-2">{t(`devStages.${activeStage}.title`, DEV_STAGES[activeStage - 1].title)}</h3>
+                        <h3 className="text-3xl md:text-4xl font-thin text-sky-600 dark:text-sky-400 mb-2">{t(`devStages.${activeStage}.title`, DEV_STAGES[activeStage - 1].title)}</h3>
                         <p className="text-gray-400 font-light max-w-lg leading-relaxed text-sm md:text-base">
                             {t(`devStages.${activeStage}.desc`, DEV_STAGES[activeStage - 1].desc)}
                         </p>

@@ -68,6 +68,7 @@ const Navbar = () => {
         if (path.startsWith('/primary')) return 'purple';
         if (path.startsWith('/advanced')) return 'red';
         if (path.startsWith('/commercial')) return 'amber';
+        if (path.startsWith('/commands')) return 'sky';
         return 'default';
     };
 
@@ -104,6 +105,12 @@ const Navbar = () => {
             iconHover: 'hover:bg-amber-50 dark:hover:bg-amber-900/20',
             sync: { dot: 'bg-amber-500', shadow: 'shadow-[0_0_8px_rgba(245,158,11,0.4)]', text: 'text-amber-600', bg: 'bg-amber-50/50 dark:bg-amber-900/20' }
         },
+        sky: {
+            spotlight: isDark ? "rgba(14, 165, 233, 0.15)" : "rgba(14, 165, 233, 0.1)", // Sky-500
+            iconText: 'text-sky-500 dark:text-sky-400',
+            iconHover: 'hover:bg-sky-50 dark:hover:bg-sky-900/20',
+            sync: { dot: 'bg-sky-500', shadow: 'shadow-[0_0_8px_rgba(14,165,233,0.4)]', text: 'text-sky-600', bg: 'bg-sky-50/50 dark:bg-sky-900/20' }
+        },
         default: {
             spotlight: isDark ? "rgba(16, 185, 129, 0.15)" : "rgba(16, 185, 129, 0.1)",
             iconText: 'text-gray-400 dark:text-gray-500',
@@ -131,7 +138,7 @@ const Navbar = () => {
                                 primary: 'text-purple-500 dark:text-purple-400',
                                 advanced: 'text-red-500 dark:text-red-400',
                                 commercial: 'text-amber-500 dark:text-amber-400',
-                                command: 'text-gray-900 dark:text-white', // Invariant black/white
+                                command: 'text-sky-500 dark:text-sky-400',
                             };
 
                             const activeColorClass = activeColors[tab.id] || 'text-gray-900 dark:text-white';
