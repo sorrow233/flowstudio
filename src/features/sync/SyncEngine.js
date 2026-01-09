@@ -98,8 +98,13 @@ export class SyncEngine {
 
     /**
      * 连接 Firestore - 监听单个文档而非集合
+     * 注意：重复调用时会先取消旧监听，防止监听器累积
      */
     connectFirestore() {
+        // 防止重复监听：先取消所有旧监听器
+        this.unsubscribes.forEach(fn => fn());
+        this.unsubscribes = [];
+
         this.setStatus('syncing');
 
         // 单个文档路径，不再使用 updates 子集合
