@@ -8,7 +8,7 @@ export default {
         advanced: '进阶',
         final: '模块',
         commercial: '商业化',
-        command: '命令',
+        command: '蓝图',
         cloudSync: '云同步',
         sync: '同步',
         dataManagement: '数据管理',
@@ -206,8 +206,8 @@ export default {
 
     // 命令中心
     commands: {
-        title: '命令中心',
-        subtitle: '管理开发流程中的常用命令和链接',
+        title: '蓝图中心',
+        subtitle: '管理开发流程中的常用蓝图和链接',
         emptyState: '此阶段暂无命令',
         emptyStateHint: '添加新命令或从库中导入',
         community: '社区',

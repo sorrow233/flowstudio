@@ -8,7 +8,7 @@ export default {
         advanced: 'Advanced',
         final: 'Modules',
         commercial: 'Commercial',
-        command: 'Command',
+        command: 'Blueprint',
         cloudSync: 'Cloud Sync',
         sync: 'Sync',
         dataManagement: 'Data Management',
@@ -190,8 +190,8 @@ export default {
 
     // Command Center
     commands: {
-        title: 'Command Center',
-        subtitle: 'Manage common commands and links in your dev workflow',
+        title: 'Blueprint Center',
+        subtitle: 'Manage common blueprints and links in your dev workflow',
         emptyState: 'No commands in this stage',
         emptyStateHint: 'Add a new command or import from library',
         community: 'Community',

@@ -8,7 +8,7 @@ export default {
         advanced: '고급',
         final: '최종',
         commercial: '상용화',
-        command: '명령',
+        command: '청사진',
         cloudSync: '클라우드 동기화',
         sync: '동기화',
         dataManagement: '데이터 관리',
@@ -189,8 +189,8 @@ export default {
 
     // Command Center
     commands: {
-        title: '명령 센터',
-        subtitle: '개발 워크플로우의 일반적인 명령과 링크 관리',
+        title: '청사진 센터',
+        subtitle: '개발 워크플로우의 일반적인 청사진과 링크 관리',
         emptyState: '이 단계에는 명령이 없습니다',
         emptyStateHint: '새 명령을 추가하거나 라이브러리에서 가져오세요',
         community: '커뮤니티',

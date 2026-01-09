@@ -8,7 +8,7 @@ export default {
         advanced: '高度',
         final: '最終',
         commercial: '商用化',
-        command: 'コマンド',
+        command: '青写真',
         cloudSync: 'クラウド同期',
         sync: '同期',
         dataManagement: 'データ管理',
@@ -189,8 +189,8 @@ export default {
 
     // Command Center
     commands: {
-        title: 'コマンドセンター',
-        subtitle: '開発フローの一般的なコマンドとリンクを管理',
+        title: '青写真センター',
+        subtitle: '開発フローの一般的な青写真とリンクを管理',
         emptyState: 'この段階にはコマンドがありません',
         emptyStateHint: '新しいコマンドを追加するか、ライブラリからインポートしてください',
         community: 'コミュニティ',
