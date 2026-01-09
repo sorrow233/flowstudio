@@ -12,7 +12,7 @@ const STAGE_ICONS = {
     6: Gem
 };
 
-const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleComplete, customStageNames = {}, onRenameStage, stageStats = {}, stages = DEV_STAGES }) => {
+const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleComplete, customStageNames = {}, onRenameStage, stageStats = {}, stages = DEV_STAGES, extraStages = [] }) => {
     const [editingStageId, setEditingStageId] = React.useState(null);
     const [editValue, setEditValue] = React.useState('');
 
@@ -179,6 +179,59 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                         </div>
                     );
                 })}
+
+                {/* Additional Flows Section */}
+                {extraStages.length > 0 && (
+                    <>
+                        <div className="my-6 border-t border-gray-100 relative">
+                            <span className="absolute left-1/2 -translate-x-1/2 -top-2 px-2 bg-white text-[10px] uppercase tracking-widest text-gray-400 font-bold whitespace-nowrap">
+                                Other Flows
+                            </span>
+                        </div>
+                        {extraStages.map((stage) => {
+                            const isViewActive = viewStage === stage.id;
+                            const stats = stageStats[stage.id] || { taskCount: 0, commandCount: 0 };
+                            const Icon = STAGE_ICONS[stage.id] || Gem;
+
+                            return (
+                                <div
+                                    key={stage.id}
+                                    className={`
+                                        relative z-10 flex items-center p-2 rounded-xl transition-all duration-300 group min-w-[260px] md:min-w-0
+                                        ${isViewActive ? 'bg-gray-900 shadow-xl shadow-gray-200 ring-1 ring-black/5' : 'hover:bg-gray-50'}
+                                    `}
+                                >
+                                    <div
+                                        onClick={() => onViewChange(stage.id)}
+                                        className="flex items-center gap-3 cursor-pointer min-w-0 w-full"
+                                    >
+                                        <div className={`
+                                            w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all duration-500 relative
+                                            ${isViewActive
+                                                ? 'bg-white/20 text-white shadow-inner'
+                                                : 'bg-white border-2 border-gray-100 text-gray-300'
+                                            }
+                                        `}>
+                                            <Icon size={18} />
+                                        </div>
+
+                                        <div className="min-w-0 flex-1">
+                                            <div className={`text-sm font-bold tracking-tight transition-colors ${isViewActive ? 'text-white' : 'text-gray-600'}`}>
+                                                {customStageNames[stage.id] || stage.label}
+                                            </div>
+                                            <div className={`flex items-center gap-2 mt-0.5 text-[10px] truncate transition-colors ${isViewActive ? 'text-white/50' : 'text-gray-400'}`}>
+                                                <span>Active Phase</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Status Dot */}
+                                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-400 shadow-sm ml-2" />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </>
+                )}
             </div>
         </div>
     );
