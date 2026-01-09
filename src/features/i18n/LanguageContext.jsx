@@ -1,6 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useSync } from '../sync/SyncContext';
-import { useSyncedMap } from '../sync/useSyncStore';
 import zh from './locales/zh';
 import en from './locales/en';
 import ja from './locales/ja';

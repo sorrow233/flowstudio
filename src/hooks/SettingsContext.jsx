@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useSync } from '../features/sync/SyncContext';
-import { useSyncedMap } from '../features/sync/useSyncStore';
+
+const STORAGE_KEY = 'flow_settings_advanced';
 
 const SettingsContext = createContext();
 
@@ -13,23 +13,17 @@ export const useSettings = () => {
 };
 
 export const SettingsProvider = ({ children }) => {
-    // Default to false (hidden)
-    const { doc } = useSync();
-    const { data, set } = useSyncedMap(doc, 'user_preferences');
+    const [showAdvancedFeatures, setShowAdvancedFeatures] = useState(() => {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : false;
+    });
 
-    // Default to false (hidden), but use synced value if present
-    const showAdvancedFeatures = data.showAdvancedFeatures ?? false;
-
-    // Backward compatibility / Init from local if sync is empty?
-    // For simplicity, we just trust sync. If sync is empty, it's false.
-    // Ideally we could migrate one-time, but let's keep it clean.
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(showAdvancedFeatures));
+    }, [showAdvancedFeatures]);
 
     const toggleAdvancedFeatures = () => {
-        set('showAdvancedFeatures', !showAdvancedFeatures);
-    };
-
-    const setShowAdvancedFeatures = (value) => {
-        set('showAdvancedFeatures', value);
+        setShowAdvancedFeatures(prev => !prev);
     };
 
     const value = {
