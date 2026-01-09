@@ -6,40 +6,40 @@ import { useTranslation } from '../../../i18n';
 // Refined Color Configuration for "Elegant and Faint" look
 export const COLOR_CONFIG = [
     {
-        id: 'emerald',
-        dot: 'bg-emerald-400',
-        glow: 'group-hover:ring-emerald-500/10 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.05)]',
-        border: 'hover:border-emerald-200 dark:hover:border-emerald-800/50'
+        id: 'pale-pink',
+        dot: 'bg-[#F9DFDF]',
+        glow: 'group-hover:ring-[#F9DFDF]/30 group-hover:shadow-[0_0_20px_rgba(249,223,223,0.3)]',
+        border: 'hover:border-[#F9DFDF] dark:hover:border-[#F9DFDF]/50'
     },
     {
-        id: 'amber',
-        dot: 'bg-amber-400',
-        glow: 'group-hover:ring-amber-500/10 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.05)]',
-        border: 'hover:border-amber-200 dark:hover:border-amber-800/50'
+        id: 'light-red',
+        dot: 'bg-[#FFA4A4]',
+        glow: 'group-hover:ring-[#FFA4A4]/30 group-hover:shadow-[0_0_20px_rgba(255,164,164,0.3)]',
+        border: 'hover:border-[#FFA4A4] dark:hover:border-[#FFA4A4]/50'
+    },
+    {
+        id: 'salmon',
+        dot: 'bg-[#FF8F8F]',
+        glow: 'group-hover:ring-[#FF8F8F]/30 group-hover:shadow-[0_0_20px_rgba(255,143,143,0.3)]',
+        border: 'hover:border-[#FF8F8F] dark:hover:border-[#FF8F8F]/50'
+    },
+    {
+        id: 'pale-white',
+        dot: 'bg-[#FBEFEF]',
+        glow: 'group-hover:ring-[#FBEFEF]/30 group-hover:shadow-[0_0_20px_rgba(251,239,239,0.3)]',
+        border: 'hover:border-[#FBEFEF] dark:hover:border-[#FBEFEF]/50'
     },
     {
         id: 'violet',
         dot: 'bg-violet-400',
-        glow: 'group-hover:ring-violet-500/10 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.05)]',
-        border: 'hover:border-violet-200 dark:hover:border-violet-800/50'
+        glow: 'group-hover:ring-violet-400/30 group-hover:shadow-[0_0_20px_rgba(167,139,250,0.3)]',
+        border: 'hover:border-violet-300 dark:hover:border-violet-700/50'
     },
     {
-        id: 'blue',
-        dot: 'bg-blue-400',
-        glow: 'group-hover:ring-blue-500/10 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.05)]',
-        border: 'hover:border-blue-200 dark:hover:border-blue-800/50'
-    },
-    {
-        id: 'pink',
-        dot: 'bg-pink-400',
-        glow: 'group-hover:ring-pink-500/10 group-hover:shadow-[0_0_20px_rgba(244,114,182,0.05)]',
-        border: 'hover:border-pink-200 dark:hover:border-pink-800/50'
-    },
-    {
-        id: 'lime',
-        dot: 'bg-lime-400',
-        glow: 'group-hover:ring-lime-500/10 group-hover:shadow-[0_0_20px_rgba(132,204,22,0.05)]',
-        border: 'hover:border-lime-200 dark:hover:border-lime-800/50'
+        id: 'pale-green',
+        dot: 'bg-[#D9E9CF]',
+        glow: 'group-hover:ring-[#D9E9CF]/30 group-hover:shadow-[0_0_20px_rgba(217,233,207,0.3)]',
+        border: 'hover:border-[#D9E9CF] dark:hover:border-[#D9E9CF]/50'
     },
 ];
 

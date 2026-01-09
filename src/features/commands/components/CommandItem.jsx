@@ -85,11 +85,7 @@ const CommandItem = ({
                         {cmd.type === 'link' && (
                             <span className="text-[10px] font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full uppercase tracking-wider">LINK</span>
                         )}
-                        {(cmd.stageIds && cmd.stageIds.length > 1) && (
-                            <span className="text-[10px] font-bold bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                                <Globe size={8} /> SHARED
-                            </span>
-                        )}
+
                         {/* Inline Tags */}
                         {(cmd.tags && cmd.tags.length > 0) && (
                             <div className="flex flex-wrap gap-1.5 ml-1">
