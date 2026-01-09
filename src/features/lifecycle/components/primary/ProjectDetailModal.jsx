@@ -244,15 +244,15 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
             </div>
 
             {/* Choose Your Path - Category Selection */}
-            <div className="max-w-2xl mx-auto w-full relative z-20 mt-8">
-                <div className="flex items-center justify-center gap-2 mb-6">
-                    <Sparkles size={14} className="text-emerald-400" />
-                    <h4 className="text-xs font-medium text-gray-400 tracking-[0.2em] uppercase">Choose Your Path</h4>
-                    <Sparkles size={14} className="text-emerald-400" />
+            <div className="max-w-2xl mx-auto w-full relative z-20 mt-12 mb-20">
+                <div className="flex items-center justify-center gap-4 mb-8">
+                    <Sparkles size={16} className="text-emerald-400 animate-pulse" />
+                    <h4 className="text-[11px] font-bold text-gray-400 tracking-[0.4em] uppercase opacity-80">Choose Your Path</h4>
+                    <Sparkles size={16} className="text-emerald-400 animate-pulse" />
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {COMMAND_CATEGORIES.filter(c => c.id !== 'general').map(cat => {
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {COMMAND_CATEGORIES.map(cat => {
                         // Map icon string to component
                         const IconComponent = {
                             'LayoutGrid': LayoutGrid,
@@ -276,25 +276,34 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                                 key={cat.id}
                                 onClick={() => setSelectedCategory(cat.id)}
                                 className={`
-                                    relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-300 group
+                                    relative flex flex-col items-center justify-center p-6 h-32 rounded-[2rem] border transition-all duration-500 group overflow-hidden
                                     ${isSelected
-                                        ? 'bg-white dark:bg-gray-900 border-emerald-500 shadow-xl shadow-emerald-500/10 scale-105 z-10 ring-1 ring-emerald-500'
-                                        : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-1'
+                                        ? 'bg-gray-900/90 dark:bg-gray-900 border-emerald-500/50 shadow-[0_20px_40px_-10px_rgba(16,185,129,0.2)] scale-[1.05] z-10 ring-1 ring-emerald-500/30'
+                                        : 'bg-gray-50/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800 hover:border-emerald-200/50 hover:bg-white dark:hover:bg-gray-800 hover:shadow-xl hover:shadow-emerald-500/5 hover:-translate-y-1.5'
                                     }
                                 `}
                             >
+                                {/* Background Ambient Glow */}
+                                {isSelected && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(52,211,153,0.1),transparent_70%)] pointer-events-none"
+                                    />
+                                )}
+
                                 <div className={`
-                                    w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-colors
+                                    w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-all duration-500
                                     ${isSelected
-                                        ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
-                                        : 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-600 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-900/30 group-hover:text-emerald-500 dark:group-hover:text-emerald-400'
+                                        ? 'bg-emerald-500/10 text-emerald-500 scale-110'
+                                        : 'bg-white dark:bg-gray-800 text-gray-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-900/20 group-hover:text-emerald-500 group-hover:scale-110'
                                     }
                                 `}>
-                                    <IconComponent size={20} strokeWidth={1.5} />
+                                    <IconComponent size={24} strokeWidth={1.2} />
                                 </div>
                                 <span className={`
-                                    text-xs font-medium tracking-wide transition-colors
-                                    ${isSelected ? 'text-emerald-900 dark:text-emerald-400 font-bold' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200'}
+                                    text-xs font-bold tracking-widest transition-colors uppercase
+                                    ${isSelected ? 'text-emerald-400' : 'text-gray-500 group-hover:text-gray-900 dark:group-hover:text-gray-200'}
                                 `}>
                                     {cat.label}
                                 </span>
@@ -302,9 +311,9 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                                 {isSelected && (
                                     <motion.div
                                         layoutId="category-check"
-                                        className="absolute top-2 right-2 text-emerald-500"
+                                        className="absolute top-4 right-4"
                                     >
-                                        <CheckCircle2 size={14} fill="currentColor" className="text-white" />
+                                        <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
                                     </motion.div>
                                 )}
                             </button>
