@@ -346,6 +346,13 @@ const CommandCenterModule = () => {
                                 {/* Category Filter Pills - Dot Ribbon */}
 
                                 <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-full overflow-x-auto no-scrollbar scrollbar-hide flex-1 md:flex-none md:max-w-[300px] xl:max-w-none shadow-inner border border-gray-200/50">
+                                    {/* Category Label */}
+                                    <div className="px-3 py-1.5 rounded-full bg-white text-xs font-bold text-gray-700 shadow-sm shrink-0 border border-gray-100 flex items-center gap-2">
+                                        <div className={`w-2 h-2 rounded-full ${categories.find(c => c.id === selectedCategory)?.color.split(' ')[0].replace('bg-', 'bg-')}`} />
+                                        {categories.find(c => c.id === selectedCategory)?.label || 'Category'}
+                                    </div>
+                                    <div className="w-px h-4 bg-gray-300/50 mx-1" />
+
                                     {categories.map(cat => (
                                         <div key={cat.id} className="relative group/cat">
                                             <button
