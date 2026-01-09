@@ -139,7 +139,7 @@ const TaskItem = ({
         if (task.done) {
             return `w-5 h-5 ${shapeClass} flex items-center justify-center transition-all ${theme.main} text-white shadow-sm scale-100`;
         }
-        return `w-5 h-5 ${shapeClass} border-2 ${theme.border} bg-white transition-all shadow-sm hover:scale-105 active:scale-95 group-hover:border-opacity-100`;
+        return `w-5 h-5 ${shapeClass} border-2 ${theme.border} bg-white dark:bg-gray-900 transition-all shadow-sm hover:scale-105 active:scale-95 group-hover:border-opacity-100`;
     };
 
     // Wrapper component based on disableReorder
@@ -216,9 +216,9 @@ const TaskItem = ({
                             : !isSelectionMode && isLink
                                 ? 'bg-white border-blue-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5'
                                 : !isSelectionMode && task.done
-                                    ? 'bg-gray-50 border-gray-100 opacity-60'
+                                    ? 'bg-gray-50 border-gray-100 opacity-60 dark:bg-gray-900/40 dark:border-gray-800'
                                     : !isSelectionMode && !isSelected
-                                        ? 'bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5'
+                                        ? 'bg-white dark:bg-gray-800/40 border-gray-100 dark:border-gray-700/50 hover:border-emerald-200 dark:hover:border-emerald-800 hover:shadow-lg hover:shadow-emerald-500/5'
                                         : ''
                     }
                 `}
@@ -254,7 +254,7 @@ const TaskItem = ({
                             onChange={(e) => setEditValue(e.target.value)}
                             onBlur={() => saveEdit(task.id)}
                             onKeyDown={(e) => e.key === 'Enter' && saveEdit(task.id)}
-                            className={`w-full bg-white border rounded px-2 py-1 text-base focus:ring-2 outline-none ${theme.inputBorder} ${theme.inputRing}`}
+                            className={`w-full bg-white dark:bg-gray-800 border rounded px-2 py-1 text-base focus:ring-2 outline-none dark:text-white ${theme.inputBorder} ${theme.inputRing}`}
                         />
                     ) : (
 
@@ -271,7 +271,7 @@ const TaskItem = ({
                             }}
                         >
                             <div className="flex items-center gap-2">
-                                <span className={`text-base font-medium transition-all truncate ${task.done ? `opacity-60 line-through decoration-2 text-gray-400 ${theme.decoration}` : 'text-gray-700'}`}>
+                                <span className={`text-base font-medium transition-all truncate ${task.done ? `opacity-60 line-through decoration-2 text-gray-400 ${theme.decoration}` : 'text-gray-700 dark:text-gray-200'}`}>
                                     {task.text}
                                 </span>
                             </div>

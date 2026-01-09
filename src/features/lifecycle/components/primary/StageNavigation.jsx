@@ -37,7 +37,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
         setEditValue('');
     };
     return (
-        <div className="w-full md:w-80 bg-white border-b md:border-b-0 md:border-r border-gray-100 p-4 md:p-8 overflow-x-auto md:overflow-y-auto shrink-0 custom-scrollbar relative flex md:block gap-4 md:gap-0 items-center md:items-stretch no-scrollbar">
+        <div className="w-full md:w-80 bg-white dark:bg-gray-900 border-b md:border-b-0 md:border-r border-gray-100 dark:border-gray-800 p-4 md:p-8 overflow-x-auto md:overflow-y-auto shrink-0 custom-scrollbar relative flex md:block gap-4 md:gap-0 items-center md:items-stretch no-scrollbar">
             <h3 className="text-xs font-mono text-gray-400 uppercase tracking-widest md:mb-8 px-2 hidden md:block">Pipeline Stages</h3>
 
             <div className="flex md:block gap-4 md:gap-0 md:space-y-4 relative w-full md:w-auto">
@@ -64,7 +64,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                             key={stage.id}
                             className={`
                                 relative z-10 flex items-center p-2 rounded-xl transition-all duration-300 group min-w-[260px] md:min-w-0
-                                ${isViewActive ? 'bg-gray-900 shadow-xl shadow-gray-200 ring-1 ring-black/5' : 'hover:bg-gray-50'}
+                                ${isViewActive ? 'bg-gray-900 dark:bg-gray-800 shadow-xl shadow-gray-200 dark:shadow-none ring-1 ring-black/5 dark:ring-white/10' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}
                             `}
                         >
                             {/* Clickable Area for VIEWING */}
@@ -79,8 +79,8 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                         : isCompleted
                                             ? 'bg-emerald-100 text-emerald-600'
                                             : isCurrentProgress
-                                                ? 'bg-white border-2 border-emerald-500 text-emerald-600'
-                                                : 'bg-white border-2 border-gray-100 text-gray-300'
+                                                ? 'bg-white dark:bg-gray-800 border-2 border-emerald-500 text-emerald-600 dark:text-emerald-400'
+                                                : 'bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600'
                                     }
                                 `}>
                                     {isCompleted ? (
@@ -108,9 +108,8 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                         />
                                     ) : (
                                         <div
-                                            onDoubleClick={(e) => startEditing(e, stage)}
                                             title="Double click to rename"
-                                            className={`text-sm font-bold tracking-tight transition-colors cursor-text ${isViewActive ? 'text-white' : isCompleted ? 'text-emerald-900' : 'text-gray-600'}`}
+                                            className={`text-sm font-bold tracking-tight transition-colors cursor-text ${isViewActive ? 'text-white' : isCompleted ? 'text-emerald-900 dark:text-emerald-400' : 'text-gray-600 dark:text-gray-400'}`}
                                         >
                                             {customStageNames[stage.id] || stage.label}
                                         </div>
@@ -198,7 +197,7 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                     key={stage.id}
                                     className={`
                                         relative z-10 flex items-center p-2 rounded-xl transition-all duration-300 group min-w-[260px] md:min-w-0
-                                        ${isViewActive ? 'bg-gray-900 shadow-xl shadow-gray-200 ring-1 ring-black/5' : 'hover:bg-gray-50'}
+                                        ${isViewActive ? 'bg-gray-900 dark:bg-gray-800 shadow-xl shadow-gray-200 dark:shadow-none ring-1 ring-black/5 dark:ring-white/10' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}
                                     `}
                                 >
                                     <div
@@ -209,14 +208,14 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                             w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all duration-500 relative
                                             ${isViewActive
                                                 ? 'bg-white/20 text-white shadow-inner'
-                                                : 'bg-white border-2 border-gray-100 text-gray-300'
+                                                : 'bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600'
                                             }
                                         `}>
                                             <Icon size={18} />
                                         </div>
 
                                         <div className="min-w-0 flex-1">
-                                            <div className={`text-sm font-bold tracking-tight transition-colors ${isViewActive ? 'text-white' : 'text-gray-600'}`}>
+                                            <div className={`text-sm font-bold tracking-tight transition-colors ${isViewActive ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}>
                                                 {customStageNames[stage.id] || stage.label}
                                             </div>
                                             <div className={`flex items-center gap-2 mt-0.5 text-[10px] truncate transition-colors ${isViewActive ? 'text-white/50' : 'text-gray-400'}`}>

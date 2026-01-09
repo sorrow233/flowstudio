@@ -439,12 +439,12 @@ const PrimaryDevModule = () => {
 
                 {/* Empty State */}
                 {activeProjects.length === 0 && (
-                    <div className="col-span-full border-2 border-dashed border-gray-100 rounded-[2rem] p-12 flex flex-col items-center justify-center text-gray-300 min-h-[400px]">
-                        <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 opacity-50 animate-pulse">
-                            <Rocket size={40} className="text-gray-400" strokeWidth={1} />
+                    <div className="col-span-full border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] p-12 flex flex-col items-center justify-center text-gray-300 dark:text-gray-600 min-h-[400px]">
+                        <div className="w-24 h-24 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6 opacity-50 animate-pulse">
+                            <Rocket size={40} className="text-gray-400 dark:text-gray-500" strokeWidth={1} />
                         </div>
-                        <span className="text-xl font-light text-gray-900 mb-2">The Workshop is Clear</span>
-                        <span className="text-sm text-gray-400 max-w-sm text-center leading-relaxed">Great products require validation first. Graduate a project from 'Idea Staging' to begin engineering.</span>
+                        <span className="text-xl font-light text-gray-900 dark:text-gray-100 mb-2">The Workshop is Clear</span>
+                        <span className="text-sm text-gray-400 dark:text-gray-500 max-w-sm text-center leading-relaxed">Great products require validation first. Graduate a project from 'Idea Staging' to begin engineering.</span>
                     </div>
                 )}
             </div>
@@ -496,12 +496,12 @@ const PrimaryDevModule = () => {
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-10 pointer-events-auto">
                         <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-white/80 backdrop-blur-md"
+                            className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-md"
                             onClick={() => { setSelectedProject(null); setIsEditingProject(false); }}
                         />
                         <motion.div
                             layoutId={`primary-card-${selectedProject.id}`}
-                            className="w-full max-w-6xl bg-white rounded-[3rem] shadow-2xl overflow-hidden relative z-10 h-[90vh] flex flex-col ring-1 ring-gray-100"
+                            className="w-full max-w-6xl bg-white dark:bg-gray-950 rounded-[3rem] shadow-2xl overflow-hidden relative z-10 h-[90vh] flex flex-col ring-1 ring-gray-100 dark:ring-gray-800"
                             onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
                         >
                             <ProjectWorkspaceHeader
@@ -522,7 +522,7 @@ const PrimaryDevModule = () => {
                             />
 
                             <div
-                                className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30"
+                                className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30 dark:bg-gray-950/50"
                                 onClick={() => !isHeaderCollapsed && setIsHeaderCollapsed(true)}
                             >
                                 {/* Left Sidebar: Stage Navigation */}

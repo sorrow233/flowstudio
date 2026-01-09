@@ -385,13 +385,13 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                 className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 opacity-60"
                             >
                                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
-                                    <CheckSquare size={32} className="text-gray-300" strokeWidth={1} />
+                                    <CheckSquare size={32} className="text-gray-300 dark:text-gray-600" strokeWidth={1} />
                                 </div>
-                                <h4 className="text-xl font-light text-gray-900 mb-2">{emptyState?.title}</h4>
-                                <p className="text-sm text-gray-400 max-w-xs leading-relaxed">{emptyState?.desc}</p>
+                                <h4 className="text-xl font-light text-gray-900 dark:text-gray-100 mb-2">{emptyState?.title}</h4>
+                                <p className="text-sm text-gray-400 dark:text-gray-500 max-w-xs leading-relaxed">{emptyState?.desc}</p>
                                 <button
                                     onClick={onImportCommand}
-                                    className="mt-6 flex items-center gap-2 px-5 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all font-medium text-sm shadow-sm hover:shadow-md"
+                                    className="mt-6 flex items-center gap-2 px-5 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 transition-all font-medium text-sm shadow-sm hover:shadow-md"
                                 >
                                     <Terminal size={14} />
                                     <span>Import Command</span>
@@ -403,7 +403,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
             </div>
 
             {/* Input Footer / Bulk Actions */}
-            <div className="p-8 pt-4 bg-white/90 backdrop-blur-md shrink-0 border-t border-gray-100/50 relative z-20">
+            <div className="p-8 pt-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shrink-0 border-t border-gray-100/50 dark:border-gray-800/50 relative z-20">
                 <AnimatePresence mode="wait">
                     {isSelectionMode ? (
                         <motion.div
@@ -494,7 +494,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 20 }}
-                            className="relative group shadow-xl shadow-gray-200/50 rounded-2xl bg-white ring-1 ring-gray-100 focus-within:ring-2 focus-within:ring-gray-900 transition-all hover:shadow-2xl hover:shadow-gray-200/50 flex items-center"
+                            className="relative group shadow-xl shadow-gray-200/50 dark:shadow-none rounded-2xl bg-white dark:bg-gray-800 ring-1 ring-gray-100 dark:ring-gray-700 focus-within:ring-2 focus-within:ring-gray-900 dark:focus-within:ring-white transition-all hover:shadow-2xl hover:shadow-gray-200/50 flex items-center"
                         >
                             <input
                                 type="text"
@@ -502,7 +502,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                 onChange={(e) => setNewTaskInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && onAddTask(projectId)}
                                 placeholder={`Add a task to ${stageInfo?.label || 'stage'}...`}
-                                className="flex-1 bg-transparent border-0 rounded-l-2xl py-4 pl-14 pr-4 transition-all outline-none placeholder:text-gray-300 text-lg font-light text-gray-800"
+                                className="flex-1 bg-transparent border-0 rounded-l-2xl py-4 pl-14 pr-4 transition-all outline-none placeholder:text-gray-300 dark:placeholder:text-gray-600 text-lg font-light text-gray-800 dark:text-white"
                             />
 
                             {/* Category Selector */}
@@ -526,7 +526,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                className="absolute bottom-full left-0 mb-3 p-1.5 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 flex flex-col gap-1 min-w-[140px]"
+                                                className="absolute bottom-full left-0 mb-3 p-1.5 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 z-50 flex flex-col gap-1 min-w-[140px]"
                                             >
                                                 {COMMAND_CATEGORIES.map(cat => {
                                                     const Icon = CATEGORY_ICONS[cat.icon] || LayoutGrid;
@@ -537,7 +537,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                                                 setNewTaskCategory(cat.id);
                                                                 setIsCategoryOpen(false);
                                                             }}
-                                                            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${newTaskCategory === cat.id ? 'bg-gray-50 text-gray-900 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'}`}
+                                                            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${newTaskCategory === cat.id ? 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white font-medium' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200'}`}
                                                         >
                                                             <Icon size={16} className={cat.color.split(' ')[1]} />
                                                             {cat.label}
