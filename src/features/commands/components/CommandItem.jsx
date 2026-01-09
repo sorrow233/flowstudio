@@ -19,11 +19,18 @@ const CommandItem = ({
 }) => {
     const longPressTimer = useRef(null);
     const startPos = useRef({ x: 0, y: 0 });
+    const isLongPressTriggered = useRef(false);
 
     const handlePointerDown = (e) => {
         if (isSelectionMode) return;
+        // Only trigger for primary button (left click)
+        if (e.button !== 0) return;
+
+        isLongPressTriggered.current = false;
         startPos.current = { x: e.clientX, y: e.clientY };
+
         longPressTimer.current = setTimeout(() => {
+            isLongPressTriggered.current = true;
             onLongPress?.(cmd.id);
             longPressTimer.current = null;
         }, 500);
@@ -42,11 +49,20 @@ const CommandItem = ({
         }
     };
 
-    const handlePointerUp = () => {
+    const handlePointerUp = (e) => {
         if (longPressTimer.current) {
             clearTimeout(longPressTimer.current);
             longPressTimer.current = null;
         }
+    };
+
+    const handleInternalClick = (e) => {
+        // If we just finished a long press, don't execute the click logic
+        if (isLongPressTriggered.current) {
+            isLongPressTriggered.current = false;
+            return;
+        }
+        onClick?.(e);
     };
 
     // Elegant, minimal styling logic
@@ -69,7 +85,7 @@ const CommandItem = ({
                 ${isSelectionMode && selectedIds.has(cmd.id) ? 'border-emerald-400 ring-1 ring-emerald-400 bg-emerald-50/50' : borders[cmd.type] || borders.utility}
                 ${isSelectionMode ? 'cursor-pointer' : ''}
             `}
-            onClick={onClick}
+            onClick={handleInternalClick}
             onDoubleClick={onDoubleClick}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
