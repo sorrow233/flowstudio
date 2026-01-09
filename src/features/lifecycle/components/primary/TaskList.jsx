@@ -174,14 +174,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
     const emptyState = STAGE_EMPTY_STATES[activeStage];
 
     // Stage Themes Mapping
-    const STAGE_THEMES = {
-        1: 'emerald',
-        2: 'blue',
-        3: 'violet',
-        4: 'amber',
-        5: 'rose'
-    };
-    const activeTheme = STAGE_THEMES[activeStage] || 'emerald';
+
 
     const handleCopy = (id, content) => {
         navigator.clipboard.writeText(content);
