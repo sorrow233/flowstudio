@@ -16,16 +16,22 @@ import { motion, AnimatePresence } from 'framer-motion';
  * - status: 'synced' | 'syncing' | 'offline' | 'disconnected'
  * - pendingCount: number (optional, for "Saving (3)...")
  */
-const SyncStatus = ({ status, pendingCount = 0 }) => {
+const SyncStatus = ({ status, pendingCount = 0, themeColor }) => {
 
     // Helper for status config
     const getConfig = () => {
         switch (status) {
             case 'synced':
+                // Use themeColor if available, otherwise default to emerald
+                const dotColor = themeColor ? themeColor.dot : 'bg-emerald-500';
+                const shadowColor = themeColor ? themeColor.shadow : 'shadow-[0_0_8px_rgba(16,185,129,0.4)]';
+                const textColor = themeColor ? themeColor.text : 'text-emerald-600';
+                const bgColor = themeColor ? themeColor.bg : 'bg-emerald-50/50';
+
                 return {
-                    icon: <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />,
+                    icon: <div className={`w-2 h-2 rounded-full ${dotColor} ${shadowColor}`} />,
                     text: 'Synced',
-                    color: 'text-emerald-600 bg-emerald-50/50',
+                    color: `${textColor} ${bgColor}`,
                     tooltip: 'All changes saved to cloud'
                 };
             case 'syncing':

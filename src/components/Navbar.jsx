@@ -149,7 +149,7 @@ const Navbar = () => {
                         {/* Theme Toggle */}
                         <button
                             onClick={toggleTheme}
-                            className="relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all z-40 shrink-0"
+                            className={`relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all z-40 shrink-0 ${getSpotlightColor().includes('244, 114, 182') ? 'hover:text-pink-500' : getSpotlightColor().includes('168, 85, 247') ? 'hover:text-purple-500' : getSpotlightColor().includes('239, 68, 68') ? 'hover:text-red-500' : getSpotlightColor().includes('245, 158, 11') ? 'hover:text-amber-500' : 'hover:text-emerald-500'}`}
                             title={isDark ? '亮色模式' : '暗色模式'}
                         >
                             {isDark ? <Sun size={16} strokeWidth={1.5} /> : <Moon size={16} strokeWidth={1.5} />}
@@ -158,7 +158,7 @@ const Navbar = () => {
                         {/* Settings */}
                         <button
                             onClick={() => setIsDataModalOpen(true)}
-                            className="relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all z-40 shrink-0"
+                            className={`relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all z-40 shrink-0 ${getSpotlightColor().includes('244, 114, 182') ? 'hover:text-pink-500' : getSpotlightColor().includes('168, 85, 247') ? 'hover:text-purple-500' : getSpotlightColor().includes('239, 68, 68') ? 'hover:text-red-500' : getSpotlightColor().includes('245, 158, 11') ? 'hover:text-amber-500' : 'hover:text-emerald-500'}`}
                             title={t('navbar.dataManagement')}
                         >
                             <Settings size={16} strokeWidth={1.5} />
@@ -168,7 +168,38 @@ const Navbar = () => {
                         <div className="relative z-40 shrink-0">
                             <button onClick={() => setIsAuthModalOpen(true)} className="focus:outline-none">
                                 {user ? (
-                                    <SyncStatus status={status} />
+                                    <SyncStatus
+                                        status={status}
+                                        themeColor={(() => {
+                                            const color = getSpotlightColor();
+                                            if (color.includes('244, 114, 182')) return { // Pink
+                                                dot: 'bg-pink-400',
+                                                shadow: 'shadow-[0_0_8px_rgba(244,114,182,0.4)]',
+                                                text: 'text-pink-500',
+                                                bg: 'bg-pink-50/50 dark:bg-pink-900/20'
+                                            };
+                                            if (color.includes('168, 85, 247')) return { // Purple
+                                                dot: 'bg-purple-500',
+                                                shadow: 'shadow-[0_0_8px_rgba(168,85,247,0.4)]',
+                                                text: 'text-purple-600',
+                                                bg: 'bg-purple-50/50 dark:bg-purple-900/20'
+                                            };
+                                            if (color.includes('239, 68, 68')) return { // Red
+                                                dot: 'bg-red-500',
+                                                shadow: 'shadow-[0_0_8px_rgba(239,68,68,0.4)]',
+                                                text: 'text-red-600',
+                                                bg: 'bg-red-50/50 dark:bg-red-900/20'
+                                            };
+                                            if (color.includes('245, 158, 11')) return { // Amber
+                                                dot: 'bg-amber-500',
+                                                shadow: 'shadow-[0_0_8px_rgba(245,158,11,0.4)]',
+                                                text: 'text-amber-600',
+                                                bg: 'bg-amber-50/50 dark:bg-amber-900/20'
+                                            };
+                                            // Default Green
+                                            return null;
+                                        })()}
+                                    />
                                 ) : (
                                     <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-black dark:hover:bg-gray-100 transition-all whitespace-nowrap">
                                         <Cloud size={14} />
