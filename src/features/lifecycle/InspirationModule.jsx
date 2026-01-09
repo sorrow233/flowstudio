@@ -91,7 +91,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, copiedId }) => {
                                         // Inline Code: `...`
                                         if (part.startsWith('`') && part.endsWith('`')) {
                                             return (
-                                                <code key={index} className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-[13px] font-mono text-pink-500 dark:text-pink-400 mx-0.5 border border-gray-200 dark:border-gray-700">
+                                                <code key={index} className="bg-emerald-50 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded text-[13px] font-mono text-emerald-600 dark:text-emerald-400 mx-0.5 border border-emerald-100 dark:border-emerald-800/50">
                                                     {part.slice(1, -1)}
                                                 </code>
                                             );

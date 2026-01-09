@@ -13,7 +13,7 @@ export const DEFAULT_TEMPLATE = {
         },
         {
             id: "guide-inspiration",
-            content: "你可以在灵感记录随时随地的想法，下载插件一键保存推特的推文，捕捉触动你的瞬间（点击卡片复制内容）",
+            content: "你可以在灵感记录随时随地的想法，下载插件一键保存推特的推文，捕捉触动你的瞬间（`点击卡片复制内容`）",
             timestamp: Date.now() - 60000
         },
         {
