@@ -412,16 +412,16 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 20 }}
-                            className={`flex items-center justify-between bg-${activeTheme}-50/50 border border-${activeTheme}-100 rounded-2xl p-2 px-4 shadow-lg shadow-${activeTheme}-100/20`}
+                            className={`flex items-center justify-between bg-purple-50/90 backdrop-blur border border-purple-100 rounded-2xl p-2 px-4 shadow-lg shadow-purple-500/10`}
                         >
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={() => handleSelectAll()}
-                                    className={`text-xs font-bold uppercase tracking-wider text-${activeTheme}-600 hover:text-${activeTheme}-700 px-2 py-1 rounded transition-colors`}
+                                    className={`text-xs font-bold uppercase tracking-wider text-purple-600 hover:text-purple-700 px-2 py-1 rounded transition-colors`}
                                 >
                                     {selectedIds.size === localTasks.length ? 'Deselect All' : 'Select All'}
                                 </button>
-                                <span className={`text-sm font-medium text-${activeTheme}-900`}>
+                                <span className={`text-sm font-medium text-purple-900`}>
                                     {selectedIds.size} Selected
                                 </span>
                             </div>
@@ -435,11 +435,11 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                 >
                                     <Trash2 size={18} />
                                 </button>
-                                <div className={`w-px h-4 bg-${activeTheme}-200 mx-1`} />
+                                <div className={`w-px h-4 bg-purple-200 mx-1`} />
                                 <button
                                     onClick={handleBulkToggle}
                                     disabled={selectedIds.size === 0}
-                                    className={`p-2 rounded-lg hover:bg-white text-${activeTheme}-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
+                                    className={`p-2 rounded-lg hover:bg-white text-purple-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
                                     title="Mark Done/Undone"
                                 >
                                     <CheckSquare size={18} />
@@ -447,12 +447,12 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                 <button
                                     onClick={handleBulkCopy}
                                     disabled={selectedIds.size === 0}
-                                    className={`p-2 rounded-lg hover:bg-white text-${activeTheme}-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
+                                    className={`p-2 rounded-lg hover:bg-white text-purple-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed`}
                                     title="Copy Content"
                                 >
                                     <Copy size={18} />
                                 </button>
-                                <div className={`w-px h-4 bg-${activeTheme}-200 mx-1`} />
+                                <div className={`w-px h-4 bg-purple-200 mx-1`} />
                                 {/* Move to Stage Buttons */}
                                 <div className="flex items-center gap-1">
                                     <span className="text-xs text-gray-400 mr-1 flex items-center gap-1">
@@ -479,93 +479,94 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                         );
                                     })}
                                 </div>
-                                <div className={`w-px h-4 bg-${activeTheme}-200 mx-1`} />
-                                <button
-                                    onClick={() => setIsSelectionMode(false)}
-                                    className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all"
-                                    title="Cancel (Esc)"
-                                >
-                                    <X size={18} />
-                                </button>
                             </div>
+                            <div className={`w-px h-4 bg-purple-200 mx-1`} />
+                            <button
+                                onClick={() => setIsSelectionMode(false)}
+                                className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all"
+                                title="Cancel (Esc)"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
                         </motion.div>
-                    ) : (
-                        <motion.div
-                            key="input"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 20 }}
-                            className="relative group shadow-xl shadow-gray-200/50 dark:shadow-none rounded-2xl bg-white dark:bg-gray-800 ring-1 ring-gray-100 dark:ring-gray-700 focus-within:ring-2 focus-within:ring-gray-900 dark:focus-within:ring-white transition-all hover:shadow-2xl hover:shadow-gray-200/50 flex items-center"
+                ) : (
+                <motion.div
+                    key="input"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    className="relative group shadow-xl shadow-purple-500/5 dark:shadow-none rounded-2xl bg-white dark:bg-gray-800 ring-1 ring-gray-100 dark:ring-gray-700 focus-within:ring-2 focus-within:ring-purple-200 dark:focus-within:ring-purple-800 focus-within:border-purple-300 transition-all hover:shadow-2xl hover:shadow-purple-500/10 flex items-center"
+                >
+                    <input
+                        type="text"
+                        value={newTaskInput}
+                        onChange={(e) => setNewTaskInput(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && onAddTask(projectId)}
+                        placeholder={`Add a task to ${stageInfo?.label || 'stage'}...`}
+                        className="flex-1 bg-transparent border-0 rounded-l-2xl py-4 pl-14 pr-4 transition-all outline-none placeholder:text-gray-300 dark:placeholder:text-gray-600 text-lg font-light text-gray-800 dark:text-white"
+                    />
+
+                    {/* Category Selector */}
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                        <button
+                            onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-400 hover:text-gray-900 transition-all"
                         >
-                            <input
-                                type="text"
-                                value={newTaskInput}
-                                onChange={(e) => setNewTaskInput(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && onAddTask(projectId)}
-                                placeholder={`Add a task to ${stageInfo?.label || 'stage'}...`}
-                                className="flex-1 bg-transparent border-0 rounded-l-2xl py-4 pl-14 pr-4 transition-all outline-none placeholder:text-gray-300 dark:placeholder:text-gray-600 text-lg font-light text-gray-800 dark:text-white"
-                            />
+                            {(() => {
+                                const activeCat = COMMAND_CATEGORIES.find(c => c.id === newTaskCategory);
+                                const ActiveIcon = CATEGORY_ICONS[activeCat?.icon] || LayoutGrid;
+                                return <ActiveIcon size={18} className={activeCat?.color.split(' ')[1]} />
+                            })()}
+                        </button>
 
-                            {/* Category Selector */}
-                            <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                                <button
-                                    onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-400 hover:text-gray-900 transition-all"
-                                >
-                                    {(() => {
-                                        const activeCat = COMMAND_CATEGORIES.find(c => c.id === newTaskCategory);
-                                        const ActiveIcon = CATEGORY_ICONS[activeCat?.icon] || LayoutGrid;
-                                        return <ActiveIcon size={18} className={activeCat?.color.split(' ')[1]} />
-                                    })()}
-                                </button>
+                        <AnimatePresence>
+                            {isCategoryOpen && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setIsCategoryOpen(false)} />
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        className="absolute bottom-full left-0 mb-3 p-1.5 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 z-50 flex flex-col gap-1 min-w-[140px]"
+                                    >
+                                        {COMMAND_CATEGORIES.map(cat => {
+                                            const Icon = CATEGORY_ICONS[cat.icon] || LayoutGrid;
+                                            return (
+                                                <button
+                                                    key={cat.id}
+                                                    onClick={() => {
+                                                        setNewTaskCategory(cat.id);
+                                                        setIsCategoryOpen(false);
+                                                    }}
+                                                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${newTaskCategory === cat.id ? 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white font-medium' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200'}`}
+                                                >
+                                                    <Icon size={16} className={cat.color.split(' ')[1]} />
+                                                    {cat.label}
+                                                </button>
+                                            );
+                                        })}
+                                    </motion.div>
+                                </>
+                            )}
+                        </AnimatePresence>
+                    </div>
 
-                                <AnimatePresence>
-                                    {isCategoryOpen && (
-                                        <>
-                                            <div className="fixed inset-0 z-40" onClick={() => setIsCategoryOpen(false)} />
-                                            <motion.div
-                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                className="absolute bottom-full left-0 mb-3 p-1.5 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 z-50 flex flex-col gap-1 min-w-[140px]"
-                                            >
-                                                {COMMAND_CATEGORIES.map(cat => {
-                                                    const Icon = CATEGORY_ICONS[cat.icon] || LayoutGrid;
-                                                    return (
-                                                        <button
-                                                            key={cat.id}
-                                                            onClick={() => {
-                                                                setNewTaskCategory(cat.id);
-                                                                setIsCategoryOpen(false);
-                                                            }}
-                                                            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${newTaskCategory === cat.id ? 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white font-medium' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200'}`}
-                                                        >
-                                                            <Icon size={16} className={cat.color.split(' ')[1]} />
-                                                            {cat.label}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </motion.div>
-                                        </>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-
-                            {/* Multi-select Toggle */}
-                            <div className="pr-2 border-l border-gray-100 pl-2">
-                                <button
-                                    onClick={() => setIsSelectionMode(true)}
-                                    className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-all"
-                                    title="Multi-select"
-                                >
-                                    <ListChecks size={20} strokeWidth={1.5} />
-                                </button>
-                            </div>
-                        </motion.div>
+                    {/* Multi-select Toggle */}
+                    <div className="pr-2 border-l border-gray-100 pl-2">
+                        <button
+                            onClick={() => setIsSelectionMode(true)}
+                            className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-all"
+                            title="Multi-select"
+                        >
+                            <ListChecks size={20} strokeWidth={1.5} />
+                        </button>
+                    </div>
+                </motion.div>
                     )}
-                </AnimatePresence>
-            </div>
+            </AnimatePresence>
         </div>
+        </div >
     );
 });
 

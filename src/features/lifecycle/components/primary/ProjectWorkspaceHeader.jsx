@@ -151,9 +151,9 @@ const ProjectWorkspaceHeader = ({
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={onImportCommand}
-                                    className="flex-1 md:flex-none flex items-center justify-center gap-3 px-4 md:px-6 py-3 md:py-4 bg-white text-gray-900 rounded-2xl shadow-2xl hover:shadow-white/20 transition-all font-medium whitespace-nowrap"
+                                    className="flex-1 md:flex-none flex items-center justify-center gap-3 px-4 md:px-6 py-3 md:py-4 bg-white text-gray-900 rounded-2xl shadow-2xl hover:shadow-purple-500/20 hover:text-purple-600 transition-all font-medium whitespace-nowrap group"
                                 >
-                                    <Terminal size={18} className="md:w-5 md:h-5" />
+                                    <Terminal size={18} className="md:w-5 md:h-5 group-hover:text-purple-500 transition-colors" />
                                     <span className="inline">Import Command</span>
                                 </motion.button>
                             </div>
