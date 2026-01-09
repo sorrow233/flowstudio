@@ -36,6 +36,12 @@ export const DEV_STAGES = [
         label: 'Completion',
         title: 'Production Readiness',
         desc: 'Final QA, build verification, and deployment to production.',
+    },
+    {
+        id: 6,
+        label: 'Commercial',
+        title: 'Market Readiness',
+        desc: 'Final polish, monetization setup, and launch preparation.',
     }
 ];
 
@@ -80,6 +86,10 @@ export const STAGE_EMPTY_STATES = {
     5: {
         title: 'Pre-Flight Checklist',
         desc: 'You are almost there. Ensure systems are go for launch.'
+    },
+    6: {
+        title: 'Open for Business',
+        desc: 'Capitalize on your creation. Setup monetization and growth channels.'
     }
 };
 

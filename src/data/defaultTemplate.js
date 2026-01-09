@@ -142,15 +142,28 @@ export const DEFAULT_TEMPLATE = {
                     category: "general"
                 },
                 {
-                    id: 1003,
-                    text: "⌨️ 按 Cmd+K 打开指令中心，试试预置的 Prompt",
+                    id: 1004,
+                    text: "💰 探索商业化模块，记录你的产品指标",
                     done: false,
-                    stage: 2,
+                    stage: 3,
                     category: "general"
                 }
             ],
 
-
+            commercial: {
+                model: "subscription",
+                proPrice: "29",
+                marketingChannels: ["Twitter", "Product Hunt"],
+                checklist: {
+                    market_fit: true,
+                    waitlist: false,
+                    pricing: true,
+                    legal: false,
+                    analytics: false,
+                    payments: false
+                },
+                paymentProvider: "stripe"
+            }
         },
         {
             id: "project-demo",
@@ -193,8 +206,18 @@ export const DEFAULT_TEMPLATE = {
                     category: "frontend"
                 }
             ],
+            commercial: {
+                model: "usage_based",
+                checklist: {
+                    market_fit: false,
+                    waitlist: true,
+                    pricing: false,
+                    legal: false,
+                    analytics: true,
+                    payments: false
+                }
+            }
         }
-
     ],
 
     customCategories: [
