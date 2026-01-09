@@ -12,9 +12,27 @@ const STAGE_ICONS = {
     6: CheckCircle2
 };
 
-const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleComplete, customStageNames = {}, onRenameStage, stageStats = {}, stages = DEV_STAGES, extraStages = [] }) => {
+const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleComplete, customStageNames = {}, onRenameStage, stageStats = {}, stages = DEV_STAGES, extraStages = [], themeColor = 'purple' }) => {
     const [editingStageId, setEditingStageId] = React.useState(null);
     const [editValue, setEditValue] = React.useState('');
+
+    const THEME_STYLES = {
+        purple: {
+            completedKv: 'bg-purple-100 text-purple-600',
+            currentKv: 'border-purple-500 text-purple-600 dark:text-purple-400',
+            progressLine: 'bg-purple-500',
+            text: 'text-purple-500',
+            titleHover: 'group-hover:text-purple-600'
+        },
+        red: {
+            completedKv: 'bg-red-100 text-red-600',
+            currentKv: 'border-red-500 text-red-600 dark:text-red-400',
+            progressLine: 'bg-red-500',
+            text: 'text-red-500',
+            titleHover: 'group-hover:text-red-600'
+        }
+    };
+    const theme = THEME_STYLES[themeColor] || THEME_STYLES.purple;
 
     const startEditing = (e, stage) => {
         e.stopPropagation();
@@ -74,9 +92,9 @@ const StageNavigation = ({ viewStage, onViewChange, currentProgress, onToggleCom
                                     ${isViewActive
                                         ? 'bg-white/20 text-white shadow-inner'
                                         : isCompleted
-                                            ? 'bg-purple-100 text-purple-600'
+                                            ? `${theme.completedKv}`
                                             : isCurrentProgress
-                                                ? 'bg-white dark:bg-gray-800 border-2 border-purple-500 text-purple-600 dark:text-purple-400'
+                                                ? `bg-white dark:bg-gray-800 border-2 ${theme.currentKv}`
                                                 : 'bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600'
                                     }
                                 `}>

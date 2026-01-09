@@ -511,6 +511,7 @@ const FinalDevModule = () => {
                                     onRenameStage={handleRenameStage}
                                     stageStats={stageStats}
                                     stages={FINAL_STAGES} // Use FINAL_STAGES here
+                                    themeColor="red"
                                 />
 
                                 {/* Right Content: Task List */}
@@ -570,6 +571,7 @@ const FinalDevModule = () => {
                 currentStage={viewStage}
                 projectCategory={selectedProject?.category}
                 stages={FINAL_STAGES}
+                themeColor="red"
             />
         </div>
     );
