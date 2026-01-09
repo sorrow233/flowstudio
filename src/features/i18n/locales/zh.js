@@ -5,8 +5,8 @@ export default {
         inspiration: '灵感',
         pending: '待定',
         primary: '主开发',
-        advanced: '进阶',
-        final: '终稿',
+        advanced: '终稿',
+        final: '进阶',
         commercial: '商业化',
         command: '命令',
         cloudSync: '云同步',
@@ -67,21 +67,21 @@ export default {
         addTask: '添加任务',
     },
 
-    // 进阶开发模块
+    // 终稿开发 (原进阶)
     advanced: {
-        title: '进阶开发',
-        subtitle: '需要更深入工作的复杂项目',
-        emptyState: '暂无进阶项目',
+        title: '终稿整合',
+        subtitle: '项目核心逻辑与系统整合的最终阶段',
+        emptyState: '暂无终稿项目',
     },
 
-    // 终稿模块
+    // 进阶优化 (原终稿)
     final: {
-        title: '终稿开发',
-        subtitle: '进入最终打磨阶段的项目',
-        emptyState: '暂无终稿项目',
-        stageOptimization: '模块优化',
-        stageNewModule: '新增功能',
-        stageBugFix: '缺陷修复',
+        title: '进阶优化',
+        subtitle: '核心功能之外的深度性能优化与体验打磨',
+        emptyState: '暂无进阶项目',
+        stageOptimization: '底层优化',
+        stageNewModule: '模块演进',
+        stageBugFix: '深度修复',
         createProject: '新建项目',
         projectName: '项目名称...',
         create: '创建',
