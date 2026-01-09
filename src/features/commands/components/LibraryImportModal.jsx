@@ -8,16 +8,12 @@ const LibraryImportModal = ({
     setIsImporting,
     importableCommands,
     handleImport,
-    profiles = [],
-    activeProfileId = 'default'
+    isImporting,
+    setIsImporting,
+    importableCommands,
+    handleImport,
 }) => {
     const { t } = useTranslation();
-
-    // Helper to get profile name
-    const getProfileName = (profileId) => {
-        const profile = profiles.find(p => p.id === profileId);
-        return profile?.name || 'Default';
-    };
 
     return (
         <AnimatePresence>
@@ -49,26 +45,8 @@ const LibraryImportModal = ({
                         <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
                             {importableCommands.length > 0 ? (
                                 importableCommands.map(cmd => {
-                                    const isFromDifferentProfile = cmd.profileId !== activeProfileId;
-                                    return (
-                                        <div key={cmd.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:border-emerald-200 hover:shadow-md transition-all group">
-                                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                <div className={`
-                                                    w-10 h-10 rounded-lg flex items-center justify-center shrink-0
-                                                    ${cmd.type === 'link' ? 'bg-blue-50 text-blue-500' : 'bg-gray-50 text-gray-400'}
-                                                `}>
-                                                    {cmd.type === 'link' ? <LinkIcon size={18} /> : <Command size={18} />}
-                                                </div>
-                                                <div className="min-w-0 flex-1">
                                                     <div className="flex items-center gap-2 flex-wrap">
                                                         <h4 className="font-medium text-gray-900 truncate">{cmd.title}</h4>
-                                                        {/* Profile Badge */}
-                                                        {isFromDifferentProfile && (
-                                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-violet-50 text-violet-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-violet-100">
-                                                                <Layers size={10} />
-                                                                {getProfileName(cmd.profileId)}
-                                                            </span>
-                                                        )}
                                                         {/* Stage badges */}
                                                         <div className="flex gap-1">
                                                             {cmd.stageIds?.map(sid => (
@@ -88,20 +66,20 @@ const LibraryImportModal = ({
                                                 <Download size={14} /> {t('common.add')}
                                             </button>
                                         </div>
-                                    );
-                                })
+    );
+})
                             ) : (
-                                <div className="text-center py-12 text-gray-400">
-                                    <Library size={48} className="mx-auto mb-4 opacity-20" />
-                                    <p>{t('commands.noImportable')}</p>
-                                    <p className="text-xs mt-2">{t('commands.noImportableHint')}</p>
-                                </div>
-                            )}
-                        </div>
-                    </motion.div>
-                </div>
+    <div className="text-center py-12 text-gray-400">
+        <Library size={48} className="mx-auto mb-4 opacity-20" />
+        <p>{t('commands.noImportable')}</p>
+        <p className="text-xs mt-2">{t('commands.noImportableHint')}</p>
+    </div>
+)}
+                        </div >
+                    </motion.div >
+                </div >
             )}
-        </AnimatePresence>
+        </AnimatePresence >
     );
 };
 

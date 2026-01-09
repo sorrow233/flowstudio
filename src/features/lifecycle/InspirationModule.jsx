@@ -316,7 +316,7 @@ const InspirationModule = () => {
                         <span className="text-sm font-medium">{t('inspiration.ideaDeleted')}</span>
                         <button
                             onClick={handleUndo}
-                            className="text-sm font-bold text-emerald-400 dark:text-emerald-600 hover:text-emerald-300 dark:hover:text-emerald-500 transition-colors flex items-center gap-2"
+                            className="text-sm font-bold text-pink-400 dark:text-pink-600 hover:text-pink-300 dark:hover:text-pink-500 transition-colors flex items-center gap-2"
                         >
                             <span>{t('common.undo')}</span>
                             <kbd className="text-[10px] bg-gray-700 dark:bg-gray-300 px-1.5 py-0.5 rounded text-gray-300 dark:text-gray-700 font-mono">⌘Z</kbd>
