@@ -374,123 +374,121 @@ const PrimaryDevModule = () => {
                                 />
                             )}
 
-                            <Spotlight
-                                className="w-full h-full"
-                                spotColor={isHoly ? "rgba(59, 130, 246, 0.15)" : "rgba(168, 85, 247, 0.2)"}
-                            >
-                                {/* Card Background */}
-                                <div className="absolute inset-0 z-0 h-48">
-                                    <div className="w-full h-full relative">
-                                        <img
-                                            src={project.bgImage || getDefaultBackground(project.id)}
-                                            alt=""
-                                            className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent dark:from-gray-900 dark:via-gray-900/60" />
-                                    </div>
-                                </div>
 
-                                <div className="p-8 relative z-10 flex flex-col h-full">
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div className={`w-12 h-12 backdrop-blur rounded-2xl flex items-center justify-center shadow-sm border transition-transform group-hover:scale-105
+                            {/* Card Background */}
+                            <div className="absolute inset-0 z-0 h-48">
+                                <div className="w-full h-full relative">
+                                    <img
+                                        src={project.bgImage || getDefaultBackground(project.id)}
+                                        alt=""
+                                        className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent dark:from-gray-900 dark:via-gray-900/60" />
+                                </div>
+                            </div>
+
+                            <div className="p-8 relative z-10 flex flex-col h-full">
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className={`w-12 h-12 backdrop-blur rounded-2xl flex items-center justify-center shadow-sm border transition-transform group-hover:scale-105
                                             ${isHoly ? 'bg-purple-50/80 border-purple-200/50 text-purple-700' : 'bg-white/80 dark:bg-gray-800/80 border-white/50 dark:border-gray-700/50 text-gray-900 dark:text-white'}
                                         `}>
-                                            <Code2 size={24} strokeWidth={1.5} />
-                                        </div>
-                                        {project.link && (
-                                            <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors bg-white/50 dark:bg-gray-800/50 backdrop-blur rounded-full hover:bg-white dark:hover:bg-gray-800">
-                                                <ExternalLink size={16} />
-                                            </a>
-                                        )}
+                                        <Code2 size={24} strokeWidth={1.5} />
                                     </div>
+                                    {project.link && (
+                                        <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors bg-white/50 dark:bg-gray-800/50 backdrop-blur rounded-full hover:bg-white dark:hover:bg-gray-800">
+                                            <ExternalLink size={16} />
+                                        </a>
+                                    )}
+                                </div>
 
-                                    <div className="mt-8">
-                                        <h3 className={`text-2xl font-light mb-2 line-clamp-1 transition-colors
+                                <div className="mt-8">
+                                    <h3 className={`text-2xl font-light mb-2 line-clamp-1 transition-colors
                                             ${isHoly ? 'text-purple-900 group-hover:text-purple-700' : 'text-gray-900 dark:text-white group-hover:text-purple-900 dark:group-hover:text-purple-400'}
                                         `}>{project.title}</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 min-h-[2.5em] leading-relaxed">{project.desc || 'No description provided.'}</p>
-                                    </div>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 min-h-[2.5em] leading-relaxed">{project.desc || 'No description provided.'}</p>
+                                </div>
 
-                                    <div className="mt-auto pt-6 border-t border-gray-100/50 dark:border-gray-800/50">
-                                        {/* Mini Stage Visualization */}
-                                        <div className="flex items-center gap-1.5 mb-3">
-                                            {[1, 2, 3, 4, 5].map(step => (
-                                                <div
-                                                    key={step}
-                                                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-purple-500 shadow-sm shadow-purple-200' : 'bg-gray-100 dark:bg-gray-800'}`}
-                                                />
-                                            ))}
-                                        </div>
-                                        <div className="flex justify-between items-center text-xs font-mono text-gray-400 uppercase tracking-wider">
-                                            <div className="flex items-center gap-2">
-                                                <span className={`w-2 h-2 rounded-full animate-pulse ${isHoly ? 'bg-blue-500' : 'bg-purple-500'}`} />
-                                                <span>Stage {project.subStage || 1}</span>
-                                            </div>
-                                            <span className="text-gray-900 dark:text-white font-medium">
-                                                {project.stageNames?.[project.subStage || 1] || DEV_STAGES[(project.subStage || 1) - 1]?.label}
-                                            </span>
-                                        </div>
+                                <div className="mt-auto pt-6 border-t border-gray-100/50 dark:border-gray-800/50">
+                                    {/* Mini Stage Visualization */}
+                                    <div className="flex items-center gap-1.5 mb-3">
+                                        {[1, 2, 3, 4, 5].map(step => (
+                                            <div
+                                                key={step}
+                                                className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step <= (project.subStage || 1) ? 'bg-purple-500 shadow-sm shadow-purple-200' : 'bg-gray-100 dark:bg-gray-800'}`}
+                                            />
+                                        ))}
                                     </div>
+                                    <div className="flex justify-between items-center text-xs font-mono text-gray-400 uppercase tracking-wider">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`w-2 h-2 rounded-full animate-pulse ${isHoly ? 'bg-blue-500' : 'bg-purple-500'}`} />
+                                            <span>Stage {project.subStage || 1}</span>
+                                        </div>
+                                        <span className="text-gray-900 dark:text-white font-medium">
+                                            {project.stageNames?.[project.subStage || 1] || DEV_STAGES[(project.subStage || 1) - 1]?.label}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </Spotlight>
+                        </motion.div>
+            );
+                })}
+
+            {/* Empty State */}
+            {activeProjects.length === 0 && (
+                <div className="col-span-full border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] p-12 flex flex-col items-center justify-center text-gray-300 dark:text-gray-600 min-h-[400px]">
+                    <div className="w-24 h-24 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6 opacity-50 animate-pulse">
+                        <Rocket size={40} className="text-gray-400 dark:text-gray-500" strokeWidth={1} />
+                    </div>
+                    <span className="text-xl font-light text-gray-900 dark:text-gray-100 mb-2">The Workshop is Clear</span>
+                    <span className="text-sm text-gray-400 dark:text-gray-500 max-w-sm text-center leading-relaxed">Great products require validation first. Graduate a project from 'Idea Staging' to begin engineering.</span>
+                </div>
+            )}
+        </div>
+
+
+            {/* Final / Graduated Section */ }
+    {
+        finalProjects.length > 0 && (
+            <div className="mt-20 border-t border-gray-100 pt-10">
+                <div className="mb-8 flex items-center gap-3">
+                    <div className="p-2 bg-emerald-50 rounded-lg text-emerald-500">
+                        <Trophy size={20} />
+                    </div>
+                    <h3 className="text-xl font-light text-gray-900 tracking-tight">Final Development</h3>
+                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">{finalProjects.length}</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {finalProjects.map((project) => (
+                        <motion.div
+                            key={project.id}
+                            layoutId={`primary-card-${project.id}`} // Keep animation
+                            onClick={() => handleSelectProject(project)}
+                            className="group bg-white dark:bg-gray-900 border border-amber-100/50 dark:border-amber-900/30 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-amber-100/50 dark:hover:shadow-amber-900/20 transition-all cursor-pointer relative h-[300px] flex flex-col opacity-80 hover:opacity-100"
+                        >
+                            <Spotlight className="w-full h-full" spotColor="rgba(251, 191, 36, 0.15)">
+                                <div className="absolute inset-0 z-0 h-32 bg-amber-50/30">
+                                    {project.bgImage && <img src={project.bgImage} className="w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 transition-all" />}
+                                </div>
+                                <div className="p-8 relative z-10 flex flex-col h-full mt-16">
+                                    <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-1">{project.title}</h3>
+                                    <div className="flex items-center gap-2 text-amber-600 text-xs font-bold uppercase tracking-widest mb-4">
+                                        <Star size={12} fill="currentColor" />
+                                        <span>Advanced Phase</span>
+                                    </div>
+                                    <p className="text-sm text-gray-400 line-clamp-2">{project.desc}</p>
                                 </div>
                             </Spotlight>
                         </motion.div>
-                    );
-                })}
-
-                {/* Empty State */}
-                {activeProjects.length === 0 && (
-                    <div className="col-span-full border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] p-12 flex flex-col items-center justify-center text-gray-300 dark:text-gray-600 min-h-[400px]">
-                        <div className="w-24 h-24 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6 opacity-50 animate-pulse">
-                            <Rocket size={40} className="text-gray-400 dark:text-gray-500" strokeWidth={1} />
-                        </div>
-                        <span className="text-xl font-light text-gray-900 dark:text-gray-100 mb-2">The Workshop is Clear</span>
-                        <span className="text-sm text-gray-400 dark:text-gray-500 max-w-sm text-center leading-relaxed">Great products require validation first. Graduate a project from 'Idea Staging' to begin engineering.</span>
-                    </div>
-                )}
-            </div>
-
-
-            {/* Final / Graduated Section */}
-            {finalProjects.length > 0 && (
-                <div className="mt-20 border-t border-gray-100 pt-10">
-                    <div className="mb-8 flex items-center gap-3">
-                        <div className="p-2 bg-emerald-50 rounded-lg text-emerald-500">
-                            <Trophy size={20} />
-                        </div>
-                        <h3 className="text-xl font-light text-gray-900 tracking-tight">Final Development</h3>
-                        <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">{finalProjects.length}</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {finalProjects.map((project) => (
-                            <motion.div
-                                key={project.id}
-                                layoutId={`primary-card-${project.id}`} // Keep animation
-                                onClick={() => handleSelectProject(project)}
-                                className="group bg-white dark:bg-gray-900 border border-amber-100/50 dark:border-amber-900/30 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-amber-100/50 dark:hover:shadow-amber-900/20 transition-all cursor-pointer relative h-[300px] flex flex-col opacity-80 hover:opacity-100"
-                            >
-                                <Spotlight className="w-full h-full" spotColor="rgba(251, 191, 36, 0.15)">
-                                    <div className="absolute inset-0 z-0 h-32 bg-amber-50/30">
-                                        {project.bgImage && <img src={project.bgImage} className="w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 transition-all" />}
-                                    </div>
-                                    <div className="p-8 relative z-10 flex flex-col h-full mt-16">
-                                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-1">{project.title}</h3>
-                                        <div className="flex items-center gap-2 text-amber-600 text-xs font-bold uppercase tracking-widest mb-4">
-                                            <Star size={12} fill="currentColor" />
-                                            <span>Advanced Phase</span>
-                                        </div>
-                                        <p className="text-sm text-gray-400 line-clamp-2">{project.desc}</p>
-                                    </div>
-                                </Spotlight>
-                            </motion.div>
-                        ))}
-                    </div>
+                    ))}
                 </div>
-            )
-            }
+            </div>
+        )
+    }
 
 
-            {/* Project Workspace Modal */}
+    {/* Project Workspace Modal */ }
             <AnimatePresence>
                 {selectedProject && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-10 pointer-events-auto">
