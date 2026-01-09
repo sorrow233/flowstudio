@@ -36,6 +36,22 @@ const PendingModule = () => {
         canRedo
     } = useSyncedProjects(doc, 'all_projects');
 
+    // Sync: Categories (for Project Category Selection)
+    const {
+        projects: syncedCategories,
+    } = useSyncedProjects(doc, 'command_categories');
+
+    // Merge default categories with synced custom labels
+    const categories = React.useMemo(() => {
+        if (syncedCategories && syncedCategories.length > 0) {
+            return COMMAND_CATEGORIES.map(defaultCat => {
+                const userCat = syncedCategories.find(c => c.id === defaultCat.id);
+                return userCat ? { ...defaultCat, label: userCat.label } : defaultCat;
+            });
+        }
+        return COMMAND_CATEGORIES;
+    }, [syncedCategories]);
+
     // Filter for pending projects
     const projects = React.useMemo(() =>
         allProjects.filter(p => p.stage === 'pending'),
@@ -383,6 +399,7 @@ const PendingModule = () => {
                         onAnswer={handleAnswer}
                         onGraduate={handleGraduate}
                         onClose={() => setSelectedProject(null)}
+                        categories={categories}
                     />
                 )}
             </AnimatePresence>

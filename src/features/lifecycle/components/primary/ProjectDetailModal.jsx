@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sprout, X, ArrowRight, Sun, Sparkles, CheckCircle2, Scroll, Feather, LayoutGrid, Monitor, Server, Database, Container, Beaker, Terminal, Globe, Smartphone, Cloud, Box, Cpu } from 'lucide-react';
 import { COMMAND_CATEGORIES, QUESTIONS } from '../../../../utils/constants';
 
-const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }) => {
+const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose, categories = COMMAND_CATEGORIES }) => {
     // Local state for Vow to support IME (Chinese Input) properly
     const [localVow, setLocalVow] = useState(project.foundingReason || '');
     const [localTitle, setLocalTitle] = useState(project.title || '');
@@ -252,7 +252,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    {COMMAND_CATEGORIES.map(cat => {
+                    {categories.map(cat => {
                         // Map icon string to component
                         const IconComponent = {
                             'LayoutGrid': LayoutGrid,
@@ -337,7 +337,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose }
                     `}
                     >
                         <span className="text-base font-light tracking-widest relative z-10 uppercase">
-                            {project.foundingReason ? `Begin ${COMMAND_CATEGORIES.find(c => c.id === selectedCategory)?.label || ''} Journey` : 'Begin Journey'}
+                            {project.foundingReason ? `Begin ${categories.find(c => c.id === selectedCategory)?.label || ''} Journey` : 'Begin Journey'}
                         </span>
                         <ArrowRight size={18} className={`transition-transform duration-300 ${project.foundingReason ? 'group-hover:translate-x-1' : ''}`} />
                     </button>
