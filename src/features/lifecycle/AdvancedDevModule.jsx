@@ -42,7 +42,7 @@ const AdvancedDevModule = () => {
                 title: newItemTitle,
                 stage: 'advanced',
                 customStages: [
-                    { id: '1', name: 'Planning', status: 'in-progress', color: '#A855F7' }
+                    { id: '1', name: 'Planning', status: 'in-progress', dotColor: '#A855F7' }
                 ],
                 modules: [],
                 createdAt: timestamp,
@@ -257,13 +257,6 @@ const AdvancedDevModule = () => {
                             onClose={() => setSelectedProject(null)}
                             updateProject={updateProject}
                             onDeleteProject={removeProject}
-                            onGraduate={() => {
-                                if (confirm('Ready to launch this project commercially?')) {
-                                    updateProject(selectedProject.id, { stage: 'commercial', subStage: 1 });
-                                    setSelectedProject(null);
-                                    navigate('/commercial');
-                                }
-                            }}
                         />
                     );
                 })()}
