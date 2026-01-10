@@ -23,8 +23,8 @@ const highlightText = (text) => {
                 const suffix = '#';
                 return (
                     <span key={index} style={{ fontStyle: 'normal' }}>
-                        {/* 前缀标记：透明占位 */}
-                        <span style={{ color: 'transparent' }}>{prefix}</span>
+                        {/* 前缀标记：完全隐藏但保留占位 */}
+                        <span style={{ opacity: 0 }}>{prefix}</span>
                         {/* 内容：蜡笔荧光笔效果 */}
                         <span
                             style={{
@@ -37,10 +37,11 @@ const highlightText = (text) => {
                         >
                             {content}
                         </span>
-                        {/* 后缀标记：透明占位 */}
-                        <span style={{ color: 'transparent' }}>{suffix}</span>
+                        {/* 后缀标记：完全隐藏但保留占位 */}
+                        <span style={{ opacity: 0 }}>{suffix}</span>
                     </span>
                 );
+
 
             }
         }
