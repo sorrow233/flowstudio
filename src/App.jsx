@@ -42,7 +42,7 @@ function App() {
                                         <Route path="/flow" element={<PrimaryDevModule />} />
                                         <Route path="/advanced" element={<AdvancedDevModule />} />
                                         <Route path="/commercial" element={<CommercialModule />} />
-                                        <Route path="/commands" element={<CommandCenterModule />} />
+                                        <Route path="/blueprint" element={<CommandCenterModule />} />
                                         <Route path="/share/:id" element={<ShareViewPage />} />
                                         <Route path="*" element={<Navigate to="/" replace />} />
                                     </Routes>

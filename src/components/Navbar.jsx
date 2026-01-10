@@ -48,7 +48,7 @@ const Navbar = () => {
     // 主流程：灵感 → 蓝图 → 萌芽 → 心流(Flow) → 进阶
     const mainTabs = [
         { id: 'inspiration', label: t('navbar.inspiration'), icon: tabIcons.inspiration, path: '/inspiration' },
-        { id: 'command', label: t('navbar.command'), icon: tabIcons.command, path: '/commands' },
+        { id: 'command', label: t('navbar.command'), icon: tabIcons.command, path: '/blueprint' },
         { id: 'pending', label: t('navbar.pending'), icon: tabIcons.pending, path: '/pending' },
         { id: 'primary', label: t('navbar.primary'), icon: tabIcons.primary, path: '/flow' },
         { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' },
@@ -70,7 +70,7 @@ const Navbar = () => {
         if (path.startsWith('/flow')) return 'purple';
         if (path.startsWith('/advanced')) return 'red';
         if (path.startsWith('/commercial')) return 'amber';
-        if (path.startsWith('/commands')) return 'sky';
+        if (path.startsWith('/blueprint')) return 'sky';
         return 'default';
     };
 

@@ -156,12 +156,14 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-0 pointer-events-auto"
+            exit={{ opacity: 0, pointerEvents: 'none' }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-0"
+            style={{ pointerEvents: 'auto' }}
         >
             <motion.div
                 className="absolute inset-0 bg-white/20 dark:bg-black/20 backdrop-blur-xl"
                 onClick={onClose}
+                exit={{ opacity: 0 }}
             />
 
             <motion.div
