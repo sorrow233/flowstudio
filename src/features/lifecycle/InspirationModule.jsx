@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ArrowRight, Lightbulb, Hash } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSync } from '../sync/SyncContext';
@@ -18,6 +19,7 @@ const getNextAutoColorIndex = (totalCount) => {
 
 
 const InspirationModule = () => {
+    const navigate = useNavigate();
     // Sync - 使用 immediateSync 实现即时同步
     const { doc, immediateSync } = useSync();
     const { t } = useTranslation();
@@ -161,15 +163,29 @@ const InspirationModule = () => {
     const handleRemove = (id) => {
         const idea = ideas.find(i => i.id === id);
         if (idea) {
-            setDeletedIdeas(prev => [...prev, idea]);
+            setDeletedIdeas(prev => [...prev, { ...idea, wasArchived: false }]);
             removeIdea(id);
+        }
+    };
+
+    const handleArchive = (id) => {
+        const idea = ideas.find(i => i.id === id);
+        if (idea) {
+            setDeletedIdeas(prev => [...prev, { ...idea, wasArchived: true }]);
+            updateIdea(id, { stage: 'archive', archiveTimestamp: Date.now() });
         }
     };
 
     const handleUndo = () => {
         if (deletedIdeas.length > 0) {
             const lastDeleted = deletedIdeas[deletedIdeas.length - 1];
-            addIdea(lastDeleted);
+            if (lastDeleted.wasArchived) {
+                // Restore from archive
+                updateIdea(lastDeleted.id, { stage: 'inspiration' });
+            } else {
+                // Restore deleted
+                addIdea(lastDeleted);
+            }
             setDeletedIdeas(prev => prev.slice(0, -1));
         }
     };
@@ -297,7 +313,10 @@ const InspirationModule = () => {
                     <div className="p-2 bg-pink-50 dark:bg-pink-900/20 rounded-xl">
                         <Lightbulb className="w-5 h-5 text-pink-400" />
                     </div>
-                    <h2 className="text-3xl font-light text-pink-400 dark:text-pink-300 tracking-tight relative inline-block">
+                    <h2
+                        onDoubleClick={() => navigate('/inspiration/archive')}
+                        className="text-3xl font-light text-pink-400 dark:text-pink-300 tracking-tight relative inline-block cursor-pointer hover:opacity-80 transition-opacity"
+                    >
                         {t('inspiration.title')}
                         {/* Pink Brush Stroke */}
                         <span className="absolute -bottom-1 left-0 w-full h-2 bg-gradient-to-r from-pink-200/80 via-pink-300/60 to-transparent dark:from-pink-700/50 dark:via-pink-600/30 dark:to-transparent rounded-full blur-[2px]" />
@@ -426,6 +445,7 @@ const InspirationModule = () => {
                             key={idea.id}
                             idea={idea}
                             onRemove={handleRemove}
+                            onArchive={handleArchive}
                             onCopy={handleCopy}
                             onUpdateColor={handleUpdateColor}
                             onUpdateNote={handleUpdateNote}
@@ -462,7 +482,9 @@ const InspirationModule = () => {
                         className="fixed bottom-24 left-6 right-6 md:bottom-10 md:left-auto md:right-10 md:w-auto bg-pink-50 dark:bg-pink-900 text-pink-900 dark:text-pink-50 px-6 py-3 rounded-xl shadow-2xl shadow-pink-100 dark:shadow-pink-900/20 border border-pink-100 dark:border-pink-800 flex items-center justify-between md:justify-start gap-4 z-50"
                     >
                         <span className="text-sm font-medium">
-                            {t('inspiration.ideaDeleted')}
+                            {deletedIdeas[deletedIdeas.length - 1]?.wasArchived
+                                ? t('inspiration.ideaArchived', '已归档')
+                                : t('inspiration.ideaDeleted')}
                             {deletedIdeas.length > 1 && <span className="ml-1 opacity-70">({deletedIdeas.length})</span>}
                         </span>
                         <button

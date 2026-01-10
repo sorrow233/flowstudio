@@ -138,6 +138,15 @@ export const performBackup = (doc, force = false) => {
         const now = Date.now();
         const data = exportAllData(doc);
 
+        // 检查备份数据是否有效（防止保存空备份）
+        const { allProjects = [], allCommands = [], commandCategories = [] } = data.data || {};
+        const totalItems = allProjects.length + allCommands.length + commandCategories.length;
+
+        if (totalItems === 0) {
+            console.warn('[LocalBackup] Skipping backup: no data found (Y.Doc may not be synced yet).');
+            return false;
+        }
+
         // 获取现有备份
         let backups = getLocalBackups();
 
@@ -153,7 +162,7 @@ export const performBackup = (doc, force = false) => {
         // 保存
         saveBackups(backups, now);
 
-        console.info(`[LocalBackup] Backup completed at ${new Date(now).toLocaleString()}, total ${backups.length} backups.`);
+        console.info(`[LocalBackup] Backup completed at ${new Date(now).toLocaleString()}, ${totalItems} items, total ${backups.length} backups.`);
         return true;
     } catch (e) {
         console.error('[LocalBackup] Backup failed:', e);

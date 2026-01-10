@@ -58,6 +58,10 @@ export default {
         placeholder: '记录一闪而过的念头...',
         emptyState: '暂无灵感，记录下第一个想法吧',
         ideaDeleted: '灵感已删除',
+        ideaArchived: '已归档',
+        archiveTitle: '灵感存档',
+        archiveSubtitle: '暂存的灵感碎片，点击标题返回',
+        emptyArchive: '存档箱是空的',
         cmdEnter: 'CMD + ENTER',
     },
 

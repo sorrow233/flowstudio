@@ -7,7 +7,7 @@ import { COLOR_CONFIG, getColorConfig, parseRichText } from './InspirationUtils'
 
 // COLOR_CONFIG, getColorConfig, and parseRichText are now imported from InspirationUtils.js
 
-const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, onUpdateContent, onToggleComplete, copiedId }) => {
+const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onUpdateNote, onUpdateContent, onToggleComplete, copiedId, isArchiveView = false }) => {
     const [isDragging, setIsDragging] = React.useState(false);
     const [isEditingNote, setIsEditingNote] = React.useState(false);
     const [isEditingContent, setIsEditingContent] = React.useState(false);
@@ -101,23 +101,31 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
     const editIconOpacity = useTransform(x, [0, 80, 120], [0, 0, 1]);
     const editIconScale = useTransform(x, [0, 80, 150], [0.5, 0.5, 1.2]);
 
+    // Vertical drag for archive
+    const y = useMotionValue(0);
+
     return (
         <motion.div
-            style={{ x }} // Bind x motion value
-            drag="x"
+            style={{ x, y }}
+            drag={isArchiveView ? "x" : true}
             dragDirectionLock
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={{ right: 0.6, left: 0.6 }}
+            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+            dragElastic={{ right: 0.6, left: 0.6, top: 0.5, bottom: 0.1 }}
             onDragStart={() => setIsDragging(true)}
             onDragEnd={(e, info) => {
                 setIsDragging(false);
+                // Up swipe: Archive (only in main view)
+                if (!isArchiveView && (info.offset.y < -100 || (info.velocity.y < -400 && info.offset.y < -40))) {
+                    onArchive?.(idea.id);
+                    return;
+                }
                 // Left swipe: Delete
                 if (info.offset.x < -200 || (info.velocity.x < -400 && info.offset.x < -50)) {
                     onRemove(idea.id);
                 }
                 // Right swipe: Edit
                 else if (info.offset.x > 150 || (info.velocity.x > 400 && info.offset.x > 50)) {
-                    setIsEditingContent(true);
+                    if (!isArchiveView) setIsEditingContent(true);
                 }
             }}
             initial={{ opacity: 0, y: 20, scale: 0.98 }}
@@ -125,13 +133,12 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
                 opacity: 1,
                 y: 0,
                 scale: 1,
-                x: 0 // Reset x on animate to 0 if not dragging, but drag controls it
+                x: 0
             }}
-            // Framer motion drag needs layout prop or specific style handling, usually style={{x}} is enough with drag
-            transition={{ x: { type: "spring", stiffness: 500, damping: 30 } }}
-            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+            transition={{ x: { type: "spring", stiffness: 500, damping: 30 }, y: { type: "spring", stiffness: 500, damping: 30 } }}
+            exit={{ opacity: 0, y: -400, scale: 0.8, transition: { duration: 0.3, ease: "easeIn" } }}
             layout
-            className="relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 touch-pan-y"
+            className="relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 touch-none"
         >
             {/* Main Card Component */}
             <div
