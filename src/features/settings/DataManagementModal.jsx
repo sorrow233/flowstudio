@@ -1,10 +1,11 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, Upload, FileJson, AlertCircle, CheckCircle2, Loader2, Zap, Settings as SettingsIcon, Database, History, RotateCcw, Clock } from 'lucide-react';
+import { X, Download, Upload, FileJson, AlertCircle, CheckCircle2, Loader2, Zap, Settings as SettingsIcon, Database, History, RotateCcw, Clock, ChevronLeft } from 'lucide-react';
 import { useSync } from '../sync/SyncContext';
 import { useSettings } from '../../hooks/SettingsContext';
 import { exportAllData, importData, validateImportData, downloadAsJson, readJsonFile } from './dataUtils';
 import { getLocalBackups } from '../sync/LocalBackupService';
+import Spotlight from '../../components/shared/Spotlight';
 
 const DataManagementModal = ({ isOpen, onClose }) => {
     const [mode, setMode] = useState('menu'); // 'menu' | 'importing' | 'preview' | 'settings' | 'backups'
@@ -192,34 +193,35 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                className="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-md"
                 onClick={handleClose}
             />
 
             <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="relative bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col"
+                initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="relative bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden shadow-2xl w-full max-w-md max-h-[85vh] flex flex-col ring-1 ring-gray-100 dark:ring-gray-800"
             >
                 <div className="p-6 flex-1 overflow-y-auto">
                     {/* Header */}
-                    <div className="flex justify-between items-center mb-6">
+                    <div className="flex justify-between items-start mb-8">
                         <div>
-                            <h2 className="text-xl font-medium text-gray-900 flex items-center gap-2">
+                            <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
                                 {mode !== 'menu' && (
                                     <button
                                         onClick={() => setMode('menu')}
-                                        className="hover:bg-gray-100 p-1 rounded-lg -ml-2 mr-1 transition-colors"
+                                        className="hover:bg-gray-100 dark:hover:bg-gray-800 p-1.5 rounded-full -ml-1 transition-colors text-gray-400"
                                     >
-                                        <X size={16} className="rotate-45" /> {/* Use X as back sort of, or better Back icon */}
+                                        <ChevronLeft size={20} />
                                     </button>
                                 )}
                                 {mode === 'menu' && '设置'}
                                 {mode === 'preview' && '导入预览'}
                                 {mode === 'backups' && '本地备份历史'}
                             </h2>
-                            <p className="text-sm text-gray-400 mt-0.5">
+                            <p className="text-sm text-gray-400 mt-1.5 tracking-wide">
                                 {mode === 'menu' && '管理应用偏好与数据'}
                                 {mode === 'preview' && '确认导入以下数据'}
                                 {mode === 'backups' && '每小时自动备份，最多保留3天'}
@@ -227,9 +229,9 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                         </div>
                         <button
                             onClick={handleClose}
-                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            className="p-2 bg-gray-50 dark:bg-gray-800 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 transition-all"
                         >
-                            <X size={20} className="text-gray-400" />
+                            <X size={20} />
                         </button>
                     </div>
 
@@ -251,110 +253,118 @@ const DataManagementModal = ({ isOpen, onClose }) => {
 
                     {/* Main Menu */}
                     {mode === 'menu' && (
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {/* Local Backups Button */}
-                            <button
-                                onClick={() => setMode('backups')}
-                                className="w-full p-4 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all flex items-center gap-4 group"
-                            >
-                                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
-                                    <History size={22} className="text-purple-600" />
-                                </div>
-                                <div className="text-left flex-1">
-                                    <div className="font-medium text-gray-900">本地备份</div>
-                                    <div className="text-sm text-gray-400">查看和恢复自动备份</div>
-                                </div>
-                            </button>
+                            <Spotlight className="rounded-2xl" spotColor="rgba(147, 51, 234, 0.1)">
+                                <button
+                                    onClick={() => setMode('backups')}
+                                    className="w-full p-5 bg-gray-50/50 dark:bg-gray-800/30 hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-2xl transition-all flex items-center gap-5 group border border-gray-100 dark:border-gray-800"
+                                >
+                                    <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                                        <History size={22} className="text-purple-600 dark:text-purple-400" />
+                                    </div>
+                                    <div className="text-left flex-1 min-w-0">
+                                        <div className="font-medium text-gray-900 dark:text-white">本地备份</div>
+                                        <div className="text-xs text-gray-400 mt-0.5">查看和恢复自动备份</div>
+                                    </div>
+                                </button>
+                            </Spotlight>
 
                             {/* Export Button */}
-                            <button
-                                onClick={handleExport}
-                                disabled={loading}
-                                className="w-full p-4 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all flex items-center gap-4 group"
-                            >
-                                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
-                                    <Download size={22} className="text-emerald-600" />
-                                </div>
-                                <div className="text-left">
-                                    <div className="font-medium text-gray-900">导出数据</div>
-                                    <div className="text-sm text-gray-400">下载所有项目和配置</div>
-                                </div>
-                            </button>
+                            <Spotlight className="rounded-2xl" spotColor="rgba(16, 185, 129, 0.1)">
+                                <button
+                                    onClick={handleExport}
+                                    disabled={loading}
+                                    className="w-full p-5 bg-gray-50/50 dark:bg-gray-800/30 hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-2xl transition-all flex items-center gap-5 group border border-gray-100 dark:border-gray-800"
+                                >
+                                    <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                                        <Download size={22} className="text-emerald-600 dark:text-emerald-400" />
+                                    </div>
+                                    <div className="text-left flex-1 min-w-0">
+                                        <div className="font-medium text-gray-900 dark:text-white">导出数据</div>
+                                        <div className="text-xs text-gray-400 mt-0.5">下载所有项目和配置</div>
+                                    </div>
+                                </button>
+                            </Spotlight>
 
                             {/* Import Area */}
-                            <div
-                                onDragOver={handleDragOver}
-                                onDrop={handleDrop}
-                                onClick={() => fileInputRef.current?.click()}
-                                className="w-full p-6 border-2 border-dashed border-gray-200 hover:border-blue-300 rounded-2xl transition-all cursor-pointer flex flex-col items-center gap-3 group"
-                            >
-                                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
-                                    <Upload size={22} className="text-blue-600" />
+                            <Spotlight className="rounded-2xl" spotColor="rgba(59, 130, 246, 0.1)">
+                                <div
+                                    onDragOver={handleDragOver}
+                                    onDrop={handleDrop}
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="w-full p-8 border-2 border-dashed border-gray-100 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-500 rounded-2xl transition-all cursor-pointer flex flex-col items-center gap-4 group bg-gray-50/30 dark:bg-gray-800/10"
+                                >
+                                    <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                        <Upload size={26} className="text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="font-medium text-gray-900 dark:text-white">导入数据</div>
+                                        <div className="text-xs text-gray-400 mt-1">拖拽或点击选择 JSON 文件</div>
+                                    </div>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept=".json,application/json"
+                                        onChange={handleFileSelect}
+                                        className="hidden"
+                                    />
                                 </div>
-                                <div className="text-center">
-                                    <div className="font-medium text-gray-900">导入数据</div>
-                                    <div className="text-sm text-gray-400">拖拽或点击选择 JSON 文件</div>
-                                </div>
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept=".json,application/json"
-                                    onChange={handleFileSelect}
-                                    className="hidden"
-                                />
-                            </div>
+                            </Spotlight>
                         </div>
                     )}
 
                     {/* Backups List */}
                     {mode === 'backups' && (
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {backups.length === 0 ? (
-                                <div className="text-center py-8 text-gray-400">
-                                    <History size={48} className="mx-auto mb-3 opacity-20" />
-                                    <p>暂无本地备份</p>
-                                    <p className="text-xs mt-1">系统会在您在线时每小时自动备份</p>
+                                <div className="text-center py-12 text-gray-400 bg-gray-50/50 dark:bg-gray-800/30 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                    <History size={48} className="mx-auto mb-4 opacity-10" />
+                                    <p className="text-sm font-light">暂无本地备份</p>
+                                    <p className="text-[10px] mt-2 tracking-wide">系统会在您在线时每小时自动备份</p>
                                 </div>
                             ) : (
-                                backups.map((backup, index) => (
-                                    <div key={backup.timestamp} className="p-4 bg-gray-50 rounded-xl flex items-center justify-between group hover:bg-gray-100 transition-colors">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm text-gray-500">
-                                                <Clock size={20} />
+                                <div className="space-y-3">
+                                    {backups.map((backup, index) => (
+                                        <div key={backup.timestamp} className="p-4 bg-gray-50/50 dark:bg-gray-800/30 rounded-2xl flex items-center justify-between group hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-all border border-gray-100 dark:border-gray-800">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 bg-white dark:bg-gray-900 rounded-xl flex items-center justify-center shadow-sm text-gray-400 dark:text-gray-500 ring-1 ring-gray-100 dark:ring-gray-800">
+                                                    <Clock size={18} />
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                                        {new Date(backup.timestamp).toLocaleString()}
+                                                    </div>
+                                                    <div className="text-[10px] text-gray-400 mt-0.5 tracking-wider uppercase font-bold">
+                                                        {getBackupSummary(backup)} · {Math.round(JSON.stringify(backup.data).length / 1024)} KB
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <div className="font-medium text-gray-900">
-                                                    {new Date(backup.timestamp).toLocaleString()}
-                                                </div>
-                                                <div className="text-xs text-gray-400">
-                                                    {getBackupSummary(backup)} · {Math.round(JSON.stringify(backup.data).length / 1024)} KB
-                                                </div>
+                                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={() => handleRestoreBackup(backup)}
+                                                    className="p-2 bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 rounded-xl shadow-sm hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors ring-1 ring-gray-100 dark:ring-gray-800"
+                                                    title="恢复此备份"
+                                                >
+                                                    <RotateCcw size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDownloadBackup(backup)}
+                                                    className="p-2 bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400 rounded-xl shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors ring-1 ring-gray-100 dark:ring-gray-800"
+                                                    title="下载 JSON"
+                                                >
+                                                    <Download size={16} />
+                                                </button>
                                             </div>
                                         </div>
-                                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button
-                                                onClick={() => handleRestoreBackup(backup)}
-                                                className="p-2 bg-white text-blue-600 rounded-lg shadow-sm hover:bg-blue-50 transition-colors"
-                                                title="恢复此备份"
-                                            >
-                                                <RotateCcw size={16} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDownloadBackup(backup)}
-                                                className="p-2 bg-white text-emerald-600 rounded-lg shadow-sm hover:bg-emerald-50 transition-colors"
-                                                title="下载 JSON"
-                                            >
-                                                <Download size={16} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))
+                                    ))}
+                                </div>
                             )}
 
-                            <div className="mt-6 pt-4 border-t border-gray-100 text-center">
+                            <div className="mt-8 pt-4 border-t border-gray-100 dark:border-gray-800 text-center">
                                 <button
                                     onClick={() => setMode('menu')}
-                                    className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                                    className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
                                 >
                                     返回主菜单
                                 </button>
@@ -364,13 +374,15 @@ const DataManagementModal = ({ isOpen, onClose }) => {
 
                     {/* Import Preview */}
                     {mode === 'preview' && previewData && (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             {/* File Info */}
-                            <div className="p-4 bg-gray-50 rounded-xl flex items-center gap-3">
-                                <FileJson size={24} className="text-blue-500" />
+                            <div className="p-5 bg-gray-50/50 dark:bg-gray-800/30 rounded-[1.5rem] flex items-center gap-4 border border-gray-100 dark:border-gray-800">
+                                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                                    <FileJson size={24} className="text-blue-600 dark:text-blue-400" />
+                                </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="font-medium text-gray-900 truncate">{importFile?.name}</div>
-                                    <div className="text-xs text-gray-400">
+                                    <div className="font-medium text-gray-900 dark:text-white truncate">{importFile?.name}</div>
+                                    <div className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider font-bold">
                                         导出于 {new Date(previewData.exportedAt).toLocaleString('zh-CN')}
                                     </div>
                                 </div>
@@ -382,63 +394,66 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                                 if (!summary) return null;
                                 return (
                                     <div className="grid grid-cols-2 gap-3">
-                                        <div className="p-3 bg-amber-50 rounded-xl text-center">
-                                            <div className="text-2xl font-bold text-amber-600">{summary.pending}</div>
-                                            <div className="text-xs text-amber-500">待定项目</div>
+                                        <div className="p-4 bg-amber-50/50 dark:bg-amber-900/10 rounded-2xl text-center border border-amber-100/50 dark:border-amber-900/20">
+                                            <div className="text-2xl font-light text-amber-600 dark:text-amber-400">{summary.pending}</div>
+                                            <div className="text-[10px] text-amber-500/80 uppercase tracking-widest font-bold mt-1">待定项目</div>
                                         </div>
-                                        <div className="p-3 bg-emerald-50 rounded-xl text-center">
-                                            <div className="text-2xl font-bold text-emerald-600">{summary.primary}</div>
-                                            <div className="text-xs text-emerald-500">主开发项目</div>
+                                        <div className="p-4 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-2xl text-center border border-emerald-100/50 dark:border-emerald-900/20">
+                                            <div className="text-2xl font-light text-emerald-600 dark:text-emerald-400">{summary.primary}</div>
+                                            <div className="text-[10px] text-emerald-500/80 uppercase tracking-widest font-bold mt-1">主开发项目</div>
                                         </div>
-                                        <div className="p-3 bg-blue-50 rounded-xl text-center">
-                                            <div className="text-2xl font-bold text-blue-600">{summary.commands}</div>
-                                            <div className="text-xs text-blue-500">命令</div>
+                                        <div className="p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl text-center border border-blue-100/50 dark:border-blue-900/20">
+                                            <div className="text-2xl font-light text-blue-600 dark:text-blue-400">{summary.commands}</div>
+                                            <div className="text-[10px] text-blue-500/80 uppercase tracking-widest font-bold mt-1">命令</div>
                                         </div>
-                                        <div className="p-3 bg-purple-50 rounded-xl text-center">
-                                            <div className="text-2xl font-bold text-purple-600">{summary.categories}</div>
-                                            <div className="text-xs text-purple-500">自定义分类</div>
+                                        <div className="p-4 bg-purple-50/50 dark:bg-purple-900/10 rounded-2xl text-center border border-purple-100/50 dark:border-purple-900/20">
+                                            <div className="text-2xl font-light text-purple-600 dark:text-purple-400">{summary.categories}</div>
+                                            <div className="text-[10px] text-purple-500/80 uppercase tracking-widest font-bold mt-1">自定义分类</div>
                                         </div>
                                     </div>
                                 );
                             })()}
 
                             {/* Import Mode Selection */}
-                            <div className="space-y-2">
-                                <div className="text-sm font-medium text-gray-700">导入模式</div>
-                                <div className="flex gap-2">
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block px-1">导入模式</label>
+                                <div className="flex gap-2 p-1 bg-gray-50/50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800">
                                     <button
                                         onClick={() => setImportMode('merge')}
-                                        className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-all ${importMode === 'merge'
-                                            ? 'bg-blue-500 text-white'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        className={`flex-1 py-3 px-3 rounded-xl text-sm font-medium transition-all ${importMode === 'merge'
+                                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-100 dark:ring-gray-600'
+                                            : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
                                             }`}
                                     >
-                                        合并（保留现有）
+                                        合并
                                     </button>
                                     <button
                                         onClick={() => setImportMode('replace')}
-                                        className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-all ${importMode === 'replace'
-                                            ? 'bg-red-500 text-white'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        className={`flex-1 py-3 px-3 rounded-xl text-sm font-medium transition-all ${importMode === 'replace'
+                                            ? 'bg-red-500 text-white shadow-lg shadow-red-200 dark:shadow-red-900/20'
+                                            : 'text-gray-400 hover:text-red-400 dark:hover:text-red-400'
                                             }`}
                                     >
-                                        覆盖（替换全部）
+                                        覆盖
                                     </button>
                                 </div>
+                                <p className="text-[10px] text-gray-400 px-1 italic">
+                                    {importMode === 'merge' ? '在现有数据基础上追加导入项' : '清空当前所有数据并替换为备份内容'}
+                                </p>
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="flex gap-3 pt-2">
+                            <div className="flex gap-3 pt-4">
                                 <button
                                     onClick={resetState}
-                                    className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                                    className="flex-1 py-4 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-2xl font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-gray-100 dark:border-gray-700"
                                 >
                                     取消
                                 </button>
                                 <button
                                     onClick={executeImport}
                                     disabled={loading}
-                                    className="flex-1 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+                                    className="flex-1 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-medium hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 shadow-xl"
                                 >
                                     {loading ? (
                                         <>
