@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2, Check } from 'lucide-react';
+import { Trash2, Check, Pencil } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
 
@@ -66,23 +66,25 @@ export const parseRichText = (text) => {
             if (match) {
                 const [, colorId, content] = match;
                 const colorConfig = COLOR_CONFIG.find(c => c.id === colorId) || COLOR_CONFIG[0];
+                const highlightColor = colorConfig.highlight || 'rgba(167, 139, 250, 0.5)';
+                // 一笔带过效果：只覆盖下半部分，边缘自然淡出
                 return (
                     <span
                         key={index}
                         className="relative inline text-gray-800 dark:text-gray-100"
                         style={{
-                            background: `linear-gradient(-2deg, transparent 0%, ${colorConfig.highlight || 'rgba(167, 139, 250, 0.5)'} 8%, ${colorConfig.highlight || 'rgba(167, 139, 250, 0.5)'} 92%, transparent 100%)`,
-                            backgroundSize: '100% 85%',
-                            backgroundPosition: 'center 60%',
+                            background: `linear-gradient(to right, transparent 0%, ${highlightColor} 5%, ${highlightColor} 95%, transparent 100%)`,
+                            backgroundSize: '100% 50%',
+                            backgroundPosition: 'center bottom',
                             backgroundRepeat: 'no-repeat',
-                            padding: '0.1em 0.15em',
-                            margin: '0 0.1em',
-                            borderRadius: '2px',
+                            padding: '0 0.1em',
                         }}
                     >
                         {content}
                     </span>
                 );
+
+
 
 
             }
@@ -121,15 +123,36 @@ export const parseRichText = (text) => {
     });
 };
 
-const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, onToggleComplete, copiedId }) => {
+const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, onUpdateContent, onToggleComplete, copiedId }) => {
     const [isDragging, setIsDragging] = React.useState(false);
     const [isEditingNote, setIsEditingNote] = React.useState(false);
+    const [isEditingContent, setIsEditingContent] = React.useState(false);
     const [noteDraft, setNoteDraft] = React.useState(idea.note || '');
+    const [contentDraft, setContentDraft] = React.useState(idea.content || '');
     const inputRef = React.useRef(null);
+    const contentTextareaRef = React.useRef(null);
     const { t } = useTranslation();
 
     const config = getColorConfig(idea.colorIndex || 0);
     const isCompleted = idea.completed || false;
+
+    // Focus textarea when entering edit mode
+    React.useEffect(() => {
+        if (isEditingContent && contentTextareaRef.current) {
+            contentTextareaRef.current.focus();
+            contentTextareaRef.current.setSelectionRange(
+                contentTextareaRef.current.value.length,
+                contentTextareaRef.current.value.length
+            );
+        }
+    }, [isEditingContent]);
+
+    // Sync contentDraft when idea.content changes externally
+    React.useEffect(() => {
+        if (!isEditingContent) {
+            setContentDraft(idea.content || '');
+        }
+    }, [idea.content, isEditingContent]);
 
     // Handle double click to toggle completion (persisted)
     const handleDoubleClick = (e) => {
@@ -160,14 +183,43 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
         }
     };
 
+    // Content editing handlers
+    const handleContentSave = () => {
+        if (contentDraft.trim() !== (idea.content || '')) {
+            onUpdateContent?.(idea.id, contentDraft.trim());
+        }
+        setIsEditingContent(false);
+    };
+
+    const handleContentKeyDown = (e) => {
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            handleContentSave();
+        }
+        if (e.key === 'Escape') {
+            setIsEditingContent(false);
+            setContentDraft(idea.content || '');
+        }
+    };
+
     const x = useMotionValue(0);
-    const backgroundColor = useTransform(
+    // Left swipe (delete) visual feedback
+    const deleteBackgroundColor = useTransform(
         x,
         [0, -80, -200],
         ['rgba(252, 231, 243, 0)', 'rgba(252, 231, 243, 0.8)', 'rgba(239, 68, 68, 1)']
     );
-    const iconOpacity = useTransform(x, [0, -80, -150], [0, 0, 1]);
-    const iconScale = useTransform(x, [0, -80, -200], [0.5, 0.5, 1.2]);
+    const deleteIconOpacity = useTransform(x, [0, -80, -150], [0, 0, 1]);
+    const deleteIconScale = useTransform(x, [0, -80, -200], [0.5, 0.5, 1.2]);
+
+    // Right swipe (edit) visual feedback
+    const editBackgroundColor = useTransform(
+        x,
+        [0, 80, 150],
+        ['rgba(236, 253, 245, 0)', 'rgba(236, 253, 245, 0.8)', 'rgba(52, 211, 153, 1)']
+    );
+    const editIconOpacity = useTransform(x, [0, 80, 120], [0, 0, 1]);
+    const editIconScale = useTransform(x, [0, 80, 150], [0.5, 0.5, 1.2]);
 
     return (
         <motion.div
@@ -175,15 +227,17 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
             drag="x"
             dragDirectionLock
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={{ right: 0.05, left: 0.6 }}
+            dragElastic={{ right: 0.6, left: 0.6 }}
             onDragStart={() => setIsDragging(true)}
             onDragEnd={(e, info) => {
                 setIsDragging(false);
-                // iOS-optimized: Lower thresholds for touch gestures
-                // Trigger delete if dragged far enough OR flicked fast enough (velocity < -400)
-                // Minimum distance check (offset.x < -50) to prevent accidental small flicks
+                // Left swipe: Delete
                 if (info.offset.x < -200 || (info.velocity.x < -400 && info.offset.x < -50)) {
                     onRemove(idea.id);
+                }
+                // Right swipe: Edit
+                else if (info.offset.x > 150 || (info.velocity.x > 400 && info.offset.x > 50)) {
+                    setIsEditingContent(true);
                 }
             }}
             initial={{ opacity: 0, y: 20, scale: 0.98 }}
@@ -216,13 +270,23 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
                 }}
                 onDoubleClick={handleDoubleClick}
             >
-                {/* Swipe Background (Delete Action) - Now dynamic */}
+                {/* Swipe Background (Delete Action - Left) */}
                 <motion.div
-                    style={{ backgroundColor }}
+                    style={{ backgroundColor: deleteBackgroundColor }}
                     className={`absolute inset-0 rounded-xl flex items-center justify-end pr-6 -z-10`}
                 >
-                    <motion.div style={{ opacity: iconOpacity, scale: iconScale }}>
+                    <motion.div style={{ opacity: deleteIconOpacity, scale: deleteIconScale }}>
                         <Trash2 className="text-white" size={20} />
+                    </motion.div>
+                </motion.div>
+
+                {/* Swipe Background (Edit Action - Right) */}
+                <motion.div
+                    style={{ backgroundColor: editBackgroundColor }}
+                    className={`absolute inset-0 rounded-xl flex items-center justify-start pl-6 -z-10`}
+                >
+                    <motion.div style={{ opacity: editIconOpacity, scale: editIconScale }}>
+                        <Pencil className="text-white" size={20} />
                     </motion.div>
                 </motion.div>
 
@@ -250,9 +314,31 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
                     </div>
 
                     <div className="flex-1 min-w-0">
-                        <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
-                            {parseRichText(idea.content)}
-                        </div>
+                        {isEditingContent ? (
+                            /* Edit Mode: Textarea */
+                            <div className="relative">
+                                <textarea
+                                    ref={contentTextareaRef}
+                                    value={contentDraft}
+                                    onChange={(e) => setContentDraft(e.target.value)}
+                                    onBlur={handleContentSave}
+                                    onKeyDown={handleContentKeyDown}
+                                    className="w-full text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans bg-pink-50/50 dark:bg-pink-900/20 rounded-lg p-3 outline-none border border-pink-200 dark:border-pink-800 focus:border-pink-400 dark:focus:border-pink-600 resize-none min-h-[60px]"
+                                    placeholder={t('inspiration.editPlaceholder', 'Edit your idea...')}
+                                    rows={3}
+                                />
+                                <div className="mt-2 flex items-center gap-2 text-[10px] text-gray-400">
+                                    <span>⌘+Enter {t('common.save', 'to save')}</span>
+                                    <span>·</span>
+                                    <span>Esc {t('common.cancel', 'to cancel')}</span>
+                                </div>
+                            </div>
+                        ) : (
+                            /* View Mode: Parsed Rich Text */
+                            <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
+                                {parseRichText(idea.content)}
+                            </div>
+                        )}
                         {/* Date/Time */}
                         <div className="mt-2 text-[11px] text-pink-300/30 dark:text-pink-500/30 font-medium group-hover:text-pink-300/80 dark:group-hover:text-pink-500/80 transition-colors">
                             {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {

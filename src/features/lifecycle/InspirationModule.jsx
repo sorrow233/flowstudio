@@ -171,6 +171,10 @@ const InspirationModule = () => {
         updateIdea(id, { completed });
     };
 
+    const handleUpdateContent = (id, content) => {
+        updateIdea(id, { content });
+    };
+
     const handleCopy = async (content, id) => {
         try {
             await navigator.clipboard.writeText(content);
@@ -456,6 +460,7 @@ const InspirationModule = () => {
                             onCopy={handleCopy}
                             onUpdateColor={handleUpdateColor}
                             onUpdateNote={handleUpdateNote}
+                            onUpdateContent={handleUpdateContent}
                             onToggleComplete={handleToggleComplete}
                             copiedId={copiedId}
                         />
