@@ -7,7 +7,7 @@ const SyncContext = createContext(null);
 
 export const SyncProvider = ({ children, docId = 'flowstudio_v1' }) => {
     // Single source of truth for the connection
-    const { doc, status, update } = useSyncStore(docId);
+    const { doc, status, update, immediateSync } = useSyncStore(docId);
     const { user } = useAuth();
 
     // Determine if user is logged in
@@ -29,7 +29,7 @@ export const SyncProvider = ({ children, docId = 'flowstudio_v1' }) => {
     ]);
 
     return (
-        <SyncContext.Provider value={{ doc, status, update }}>
+        <SyncContext.Provider value={{ doc, status, update, immediateSync }}>
             {children}
         </SyncContext.Provider>
     );

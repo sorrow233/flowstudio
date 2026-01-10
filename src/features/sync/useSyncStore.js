@@ -56,5 +56,11 @@ export const useSyncStore = (docId, initialData = {}) => {
         });
     }, [syncedDoc]);
 
-    return { doc: syncedDoc, status, update, pendingCount };
+    // 获取当前引擎实例以调用 immediateSync
+    const immediateSync = useCallback(() => {
+        const engine = engineMap.get(docId);
+        engine?.immediateSync();
+    }, [docId]);
+
+    return { doc: syncedDoc, status, update, pendingCount, immediateSync };
 };

@@ -374,6 +374,17 @@ export class SyncEngine {
     }
 
     getDoc() { return this.doc; }
+
+    /**
+     * 立即推送数据到云端（跳过防抖）
+     * 用于需要即时同步的页面，如 Inspiration
+     */
+    immediateSync() {
+        if (!this.isDirty || !this.userId || !navigator.onLine) return;
+        clearTimeout(this.pushTimeout);
+        this.tryPush();
+    }
+
     getStatus() { return { status: this.status, pendingCount: this.pendingCount }; }
 
     subscribe(cb) {

@@ -26,15 +26,29 @@ const useAutoResizeTextArea = (ref, value) => {
 };
 
 const InspirationModule = () => {
-    // Sync
-    const { doc } = useSync();
+    // Sync - 使用 immediateSync 实现即时同步
+    const { doc, immediateSync } = useSync();
     const { t } = useTranslation();
     const {
         projects: allProjects,
-        addProject: addIdea,
-        removeProject: removeIdea,
-        updateProject: updateIdea
+        addProject: addProjectBase,
+        removeProject: removeProjectBase,
+        updateProject: updateProjectBase
     } = useSyncedProjects(doc, 'all_projects');
+
+    // 包装 CRUD 操作，添加即时同步
+    const addIdea = (idea) => {
+        addProjectBase(idea);
+        immediateSync?.();
+    };
+    const removeIdea = (id) => {
+        removeProjectBase(id);
+        immediateSync?.();
+    };
+    const updateIdea = (id, updates) => {
+        updateProjectBase(id, updates);
+        immediateSync?.();
+    };
 
     // Filter for ideas (stage: 'inspiration')
     const ideas = useMemo(() =>
