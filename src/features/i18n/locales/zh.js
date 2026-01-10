@@ -4,7 +4,7 @@ export default {
     navbar: {
         inspiration: '灵感',
         pending: '萌芽',
-        primary: '开发',
+        primary: '心流',
         advanced: '进阶',
         final: '模块',
         commercial: '商业化',

@@ -4,7 +4,7 @@ export default {
     navbar: {
         inspiration: 'Inspiration',
         pending: 'Sprout',
-        primary: 'Development',
+        primary: 'Flow',
         advanced: 'Advanced',
         final: 'Modules',
         commercial: 'Commercial',

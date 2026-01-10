@@ -39,7 +39,7 @@ function App() {
                                         <Route path="/" element={<Navigate to="/inspiration" replace />} />
                                         <Route path="/inspiration" element={<InspirationModule />} />
                                         <Route path="/pending" element={<PendingModule />} />
-                                        <Route path="/primary" element={<PrimaryDevModule />} />
+                                        <Route path="/flow" element={<PrimaryDevModule />} />
                                         <Route path="/advanced" element={<AdvancedDevModule />} />
                                         <Route path="/commercial" element={<CommercialModule />} />
                                         <Route path="/commands" element={<CommandCenterModule />} />

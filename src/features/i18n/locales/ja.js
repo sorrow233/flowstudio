@@ -4,7 +4,7 @@ export default {
     navbar: {
         inspiration: 'インスピレーション',
         pending: '萌芽',
-        primary: 'メイン開発',
+        primary: 'フロー',
         advanced: '高度',
         final: 'モジュール',
         commercial: '商用化',
