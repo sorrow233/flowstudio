@@ -61,6 +61,7 @@ const InspirationModule = () => {
     const [selectedColorIndex, setSelectedColorIndex] = useState(null);
     const [copiedId, setCopiedId] = useState(null);
     const [deletedIdeas, setDeletedIdeas] = useState([]);
+    const [archiveShake, setArchiveShake] = useState(false);
     const editorRef = useRef(null);
 
     // Autocomplete State
@@ -173,6 +174,9 @@ const InspirationModule = () => {
         if (idea) {
             setDeletedIdeas(prev => [...prev, { ...idea, wasArchived: true }]);
             updateIdea(id, { stage: 'archive', archiveTimestamp: Date.now() });
+            // Trigger header shake
+            setArchiveShake(true);
+            setTimeout(() => setArchiveShake(false), 500);
         }
     };
 
@@ -309,10 +313,24 @@ const InspirationModule = () => {
         <div className="max-w-4xl mx-auto pt-14 px-6 md:px-10 pb-32">
             {/* Header Section */}
             <div className="mb-14 text-center md:text-left">
-                <div className="inline-flex items-center justify-center md:justify-start gap-2 mb-3">
-                    <div className="p-2 bg-pink-50 dark:bg-pink-900/20 rounded-xl">
+                <motion.div
+                    className="inline-flex items-center justify-center md:justify-start gap-2 mb-3"
+                    animate={archiveShake ? {
+                        x: [0, -4, 4, -4, 4, 0],
+                        scale: [1, 1.05, 1],
+                    } : {}}
+                    transition={{ duration: 0.4 }}
+                >
+                    <motion.div
+                        className="p-2 bg-pink-50 dark:bg-pink-900/20 rounded-xl"
+                        animate={archiveShake ? {
+                            backgroundColor: ['rgba(251, 207, 232, 0.2)', 'rgba(244, 114, 182, 0.6)', 'rgba(251, 207, 232, 0.2)'],
+                            scale: [1, 1.2, 1],
+                        } : {}}
+                        transition={{ duration: 0.4 }}
+                    >
                         <Lightbulb className="w-5 h-5 text-pink-400" />
-                    </div>
+                    </motion.div>
                     <h2
                         onDoubleClick={() => navigate('/inspiration/archive')}
                         className="text-3xl font-light text-pink-400 dark:text-pink-300 tracking-tight relative inline-block cursor-pointer hover:opacity-80 transition-opacity"
@@ -321,7 +339,7 @@ const InspirationModule = () => {
                         {/* Pink Brush Stroke */}
                         <span className="absolute -bottom-1 left-0 w-full h-2 bg-gradient-to-r from-pink-200/80 via-pink-300/60 to-transparent dark:from-pink-700/50 dark:via-pink-600/30 dark:to-transparent rounded-full blur-[2px]" />
                     </h2>
-                </div>
+                </motion.div>
                 <p className="text-gray-500 dark:text-gray-400 text-base font-light tracking-wide max-w-md mx-auto md:mx-0 leading-relaxed">
                     {t('inspiration.subtitle')}
                 </p>
