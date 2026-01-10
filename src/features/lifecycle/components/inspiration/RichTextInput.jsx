@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
-import { COLOR_CONFIG } from './InspirationItem';
+import { COLOR_CONFIG } from './InspirationUtils';
 
 /**
  * 富文本输入框组件 - 使用 contenteditable 实现真正的富文本编辑

@@ -2,132 +2,10 @@ import React from 'react';
 import { Trash2, Check, Pencil } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
+import RichTextInput from './RichTextInput';
+import { COLOR_CONFIG, getColorConfig, parseRichText } from './InspirationUtils';
 
-// Refined Color Configuration for "Crayon Highlighter" look
-export const COLOR_CONFIG = [
-    {
-        id: 'pale-pink',
-        dot: 'bg-[#F9DFDF]',
-        highlight: 'rgba(249, 223, 223, 0.4)',
-        glow: 'group-hover:ring-[#F9DFDF]/30 group-hover:shadow-[0_0_20px_rgba(249,223,223,0.3)]',
-        border: 'hover:border-[#F9DFDF] dark:hover:border-[#F9DFDF]/50'
-    },
-    {
-        id: 'light-red',
-        dot: 'bg-[#FFA4A4]',
-        highlight: 'rgba(255, 164, 164, 0.4)',
-        glow: 'group-hover:ring-[#FFA4A4]/30 group-hover:shadow-[0_0_20px_rgba(255,164,164,0.3)]',
-        border: 'hover:border-[#FFA4A4] dark:hover:border-[#FFA4A4]/50'
-    },
-    {
-        id: 'salmon',
-        dot: 'bg-[#FF8F8F]',
-        highlight: 'rgba(255, 143, 143, 0.4)',
-        glow: 'group-hover:ring-[#FF8F8F]/30 group-hover:shadow-[0_0_20px_rgba(255,143,143,0.3)]',
-        border: 'hover:border-[#FF8F8F] dark:hover:border-[#FF8F8F]/50'
-    },
-    {
-        id: 'pale-white',
-        dot: 'bg-[#FBEFEF]',
-        highlight: 'rgba(251, 239, 239, 0.45)',
-        glow: 'group-hover:ring-[#FBEFEF]/30 group-hover:shadow-[0_0_20px_rgba(251,239,239,0.3)]',
-        border: 'hover:border-[#FBEFEF] dark:hover:border-[#FBEFEF]/50'
-    },
-    {
-        id: 'violet',
-        dot: 'bg-violet-400',
-        highlight: 'rgba(167, 139, 250, 0.35)',
-        glow: 'group-hover:ring-violet-400/30 group-hover:shadow-[0_0_20px_rgba(167,139,250,0.3)]',
-        border: 'hover:border-violet-300 dark:hover:border-violet-700/50'
-    },
-    {
-        id: 'pale-green',
-        dot: 'bg-[#D9E9CF]',
-        highlight: 'rgba(217, 233, 207, 0.4)',
-        glow: 'group-hover:ring-[#D9E9CF]/30 group-hover:shadow-[0_0_20px_rgba(217,233,207,0.3)]',
-        border: 'hover:border-[#D9E9CF] dark:hover:border-[#D9E9CF]/50'
-    },
-    {
-        id: 'sky-blue',
-        dot: 'bg-[#A5D8FF]',
-        highlight: 'rgba(165, 216, 255, 0.4)',
-        glow: 'group-hover:ring-[#A5D8FF]/30 group-hover:shadow-[0_0_20px_rgba(165,216,255,0.3)]',
-        border: 'hover:border-[#A5D8FF] dark:hover:border-[#A5D8FF]/50'
-    },
-];
-
-export const getColorConfig = (index) => COLOR_CONFIG[index % COLOR_CONFIG.length];
-
-// Helper for parsing rich text (moved out to be reused/static)
-export const parseRichText = (text) => {
-    // Guard: Handle null/undefined/empty
-    if (!text) return null;
-
-    // Split by delimiters: **...**, `...`, [ ... ], #!color:text#
-    const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]|#![^:]+:[^#]+#)/g);
-
-    return parts.map((part, index) => {
-        // Colored Text: #!color_id:text#
-        if (part.startsWith('#!') && part.endsWith('#')) {
-            const match = part.match(/#!([^:]+):([^#]+)#/);
-            if (match) {
-                const [, colorId, content] = match;
-                const colorConfig = COLOR_CONFIG.find(c => c.id === colorId) || COLOR_CONFIG[0];
-                const highlightColor = colorConfig.highlight || 'rgba(167, 139, 250, 0.5)';
-                // 笔触效果：椭圆形渐变模拟两端尖细
-                return (
-                    <span
-                        key={index}
-                        className="relative inline text-gray-800 dark:text-gray-100"
-                        style={{
-                            background: `radial-gradient(ellipse 100% 40% at center 80%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%)`,
-                            padding: '0 0.15em',
-                        }}
-                    >
-                        {content}
-                    </span>
-                );
-
-
-
-
-
-
-            }
-        }
-        // Inline Code: `...`
-        if (part.startsWith('`') && part.endsWith('`')) {
-            return (
-                <code key={index} className="bg-pink-50/50 dark:bg-pink-900/20 px-1.5 py-0.5 rounded text-[13px] font-mono text-pink-600 dark:text-pink-400 mx-0.5 border border-pink-100/50 dark:border-pink-800/30">
-                    {part.slice(1, -1)}
-                </code>
-            );
-        }
-        // Bold: **...**
-        if (part.startsWith('**') && part.endsWith('**')) {
-            return (
-                <span key={index} className="font-bold text-gray-900 dark:text-gray-100 mx-0.5">
-                    {part.slice(2, -2)}
-                </span>
-            );
-        }
-        // Tag: [...]
-        if (part.startsWith('[') && part.endsWith(']')) {
-            const tagName = part.slice(1, -1);
-            return (
-                <span
-                    key={index}
-                    className="inline-flex items-center px-1.5 py-0.5 mx-1 first:ml-0 bg-pink-100/50 dark:bg-pink-500/20 text-pink-600 dark:text-pink-300 rounded-[6px] text-[0.9em] font-normal align-baseline border border-pink-200/50 dark:border-pink-500/30 shadow-[0_1px_2px_rgba(244,114,182,0.1)] select-none transform translate-y-[-1px]"
-                >
-                    <span className="opacity-50 mr-0.5">#</span>
-                    {tagName}
-                </span>
-            );
-        }
-        // Plain text
-        return <span key={index}>{part}</span>;
-    });
-};
+// COLOR_CONFIG, getColorConfig, and parseRichText are now imported from InspirationUtils.js
 
 const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, onUpdateContent, onToggleComplete, copiedId }) => {
     const [isDragging, setIsDragging] = React.useState(false);
@@ -146,10 +24,6 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
     React.useEffect(() => {
         if (isEditingContent && contentTextareaRef.current) {
             contentTextareaRef.current.focus();
-            contentTextareaRef.current.setSelectionRange(
-                contentTextareaRef.current.value.length,
-                contentTextareaRef.current.value.length
-            );
         }
     }, [isEditingContent]);
 
@@ -322,17 +196,15 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
 
                     <div className="flex-1 min-w-0">
                         {isEditingContent ? (
-                            /* Edit Mode: Textarea */
                             <div className="relative">
-                                <textarea
+                                <RichTextInput
                                     ref={contentTextareaRef}
                                     value={contentDraft}
-                                    onChange={(e) => setContentDraft(e.target.value)}
+                                    onChange={setContentDraft}
                                     onBlur={handleContentSave}
                                     onKeyDown={handleContentKeyDown}
-                                    className="w-full text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans bg-pink-50/50 dark:bg-pink-900/20 rounded-lg p-3 outline-none border border-pink-200 dark:border-pink-800 focus:border-pink-400 dark:focus:border-pink-600 resize-none min-h-[60px]"
+                                    className="w-full text-gray-800 dark:text-gray-100 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans bg-pink-50/50 dark:bg-pink-900/20 rounded-lg p-3 outline-none border border-pink-200 dark:border-pink-800 focus:border-pink-400 dark:focus:border-pink-600 resize-none min-h-[80px]"
                                     placeholder={t('inspiration.editPlaceholder', 'Edit your idea...')}
-                                    rows={3}
                                 />
                                 <div className="mt-2 flex items-center gap-2 text-[10px] text-gray-400">
                                     <span>⌘+Enter {t('common.save', 'to save')}</span>

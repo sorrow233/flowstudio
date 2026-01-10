@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import { useTranslation } from '../i18n';
-import InspirationItem, { COLOR_CONFIG } from './components/inspiration/InspirationItem';
+import InspirationItem from './components/inspiration/InspirationItem';
+import { COLOR_CONFIG } from './components/inspiration/InspirationUtils';
 import RichTextInput from './components/inspiration/RichTextInput';
 import Spotlight from '../../components/shared/Spotlight';
 
