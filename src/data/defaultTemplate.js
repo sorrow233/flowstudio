@@ -4,7 +4,7 @@
  */
 
 export const DEFAULT_TEMPLATE = {
-    // 灵感作为"新手引导"展示 - 6 条介绍性内容
+    // 灵感作为"新手引导"展示
     inspirations: [
         {
             id: "welcome-001",
