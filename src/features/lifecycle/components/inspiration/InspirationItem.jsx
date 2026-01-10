@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trash2, Check } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
 
 // Refined Color Configuration for "Elegant and Faint" look
@@ -128,7 +128,18 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
     };
 
     return (
+    const x = useMotionValue(0);
+    const backgroundColor = useTransform(
+        x,
+        [0, -50, -150],
+        ['rgba(252, 231, 243, 0)', 'rgba(252, 231, 243, 0.8)', 'rgba(239, 68, 68, 1)']
+    );
+    const iconOpacity = useTransform(x, [0, -40, -80], [0, 0, 1]);
+    const iconScale = useTransform(x, [0, -40, -80], [0.5, 0.5, 1.2]);
+
+    return (
         <motion.div
+            style={{ x }} // Bind x motion value
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={{ right: 0.05, left: 0.5 }}
@@ -144,8 +155,9 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
                 opacity: 1,
                 y: 0,
                 scale: 1,
-                x: 0
+                x: 0 // Reset x on animate to 0 if not dragging, but drag controls it
             }}
+            // Framer motion drag needs layout prop or specific style handling, usually style={{x}} is enough with drag
             transition={{ x: { type: "spring", stiffness: 500, damping: 30 } }}
             exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
             layout
@@ -159,6 +171,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
                     transition-all duration-500 cursor-pointer active:scale-[0.99]
                     ${isDragging ? '' : `hover:shadow-[0_0_20px_rgba(244,114,182,0.2)] hover:border-pink-200 dark:hover:border-pink-800/50`}
                     ${isCompleted ? 'opacity-50' : ''}
+                    z-10
                 `}
                 onClick={() => {
                     if (!window.getSelection().toString()) {
@@ -167,12 +180,15 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
                 }}
                 onDoubleClick={handleDoubleClick}
             >
-                {/* Swipe Background (Delete Action) */}
-                <div
-                    className={`absolute inset-0 bg-red-500 rounded-xl flex items-center justify-end pr-6 -z-10 transition-opacity duration-200 ${isDragging ? 'opacity-100' : 'opacity-0'}`}
+                {/* Swipe Background (Delete Action) - Now dynamic */}
+                <motion.div
+                    style={{ backgroundColor }}
+                    className={`absolute inset-0 rounded-xl flex items-center justify-end pr-6 -z-10`}
                 >
-                    <Trash2 className="text-white" size={20} />
-                </div>
+                    <motion.div style={{ opacity: iconOpacity, scale: iconScale }}>
+                        <Trash2 className="text-white" size={20} />
+                    </motion.div>
+                </motion.div>
 
                 <div className="flex items-start gap-3">
                     {/* Color Status Dot - Click to Edit Note */}
