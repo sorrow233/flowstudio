@@ -82,7 +82,7 @@
 
             html,
             body {
-                background-color: #0f0f0f;
+                background-color: #0f0f0f !important;
             }
         }
     </style>
@@ -164,24 +164,37 @@
                 if (splash) {
                     splash.style.display = 'flex';
 
-                    // 保证最小展示时间，防止闪烁，且让退场更丝滑
-                    var minDisplayTime = 800; // 最小展示 800ms
+                    // 等待 React 真正渲染完成，而不仅仅是 load 事件
+                    var minDisplayTime = 600; // 最小展示 600ms
                     var startTime = Date.now();
+                    var maxWaitTime = 5000; // 最多等待 5 秒
 
-                    window.addEventListener('load', function () {
+                    function checkReactReady() {
+                        var root = document.getElementById('root');
+                        var isReactReady = root && root.children.length > 0;
                         var elapsedTime = Date.now() - startTime;
-                        var remainingTime = Math.max(0, minDisplayTime - elapsedTime);
 
-                        setTimeout(function () {
+                        if (isReactReady && elapsedTime >= minDisplayTime) {
+                            // React 已渲染且达到最小展示时间，开始退场动画
                             splash.style.opacity = '0';
-                            splash.style.transform = 'scale(1.1)'; // 轻微放大退场效果
-                            splash.style.pointerEvents = 'none';   // 防止退场过程中阻挡点击
+                            splash.style.transform = 'scale(1.1)';
+                            splash.style.pointerEvents = 'none';
 
                             setTimeout(function () {
                                 splash.style.display = 'none';
-                            }, 600); // 与 transition 时间一致
-                        }, remainingTime);
-                    });
+                            }, 600);
+                        } else if (elapsedTime < maxWaitTime) {
+                            // 继续等待
+                            setTimeout(checkReactReady, 50);
+                        } else {
+                            // 超时，强制隐藏
+                            splash.style.opacity = '0';
+                            splash.style.display = 'none';
+                        }
+                    }
+
+                    // 开始检测
+                    checkReactReady();
                 }
             }
         })();
@@ -190,20 +203,6 @@
     <div id="root"></div>
 
     <script>
-        // 隐藏 Splash Screen（React 加载完成后）
-        window.addEventListener('load', function () {
-            setTimeout(function () {
-                var splash = document.getElementById('splash-screen');
-                if (splash) {
-                    splash.style.opacity = '0';
-                    setTimeout(function () {
-                        splash.style.display = 'none';
-                    }, 300);
-                }
-            }, 100);
-        });
-
-        // iOS/iPadOS PWA 页面恢复逻辑 - 解决第三方输入法跳转后白屏问题
         (function () {
             var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
