@@ -11,9 +11,11 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
     const [isDragging, setIsDragging] = React.useState(false);
     const [isEditingNote, setIsEditingNote] = React.useState(false);
     const [isEditingContent, setIsEditingContent] = React.useState(false);
-    const [exitDirection, setExitDirection] = React.useState(null); // 'up' for archive, 'left' for delete
+    const [exitDirection, setExitDirection] = React.useState(null); // 'right' for archive, 'left' for delete
     const [noteDraft, setNoteDraft] = React.useState(idea.note || '');
     const [contentDraft, setContentDraft] = React.useState(idea.content || '');
+    const [isCharging, setIsCharging] = React.useState(false); // Visual feedback for long press
+    const longPressTimer = React.useRef(null);
     const inputRef = React.useRef(null);
     const contentTextareaRef = React.useRef(null);
     const { t } = useTranslation();
@@ -44,6 +46,25 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
     const handleDotClick = (e) => {
         e.stopPropagation();
         setIsEditingNote(true);
+    };
+
+    // Long press (3 seconds) to enter edit mode
+    const handlePointerDown = () => {
+        if (isArchiveView) return;
+        setIsCharging(true);
+        longPressTimer.current = setTimeout(() => {
+            setIsCharging(false);
+            setIsEditingContent(true);
+            longPressTimer.current = null;
+        }, 3000);
+    };
+
+    const cancelLongPress = () => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = null;
+        }
+        setIsCharging(false);
     };
 
     const handleNoteSave = () => {
@@ -93,31 +114,33 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
     const deleteIconOpacity = useTransform(x, [0, -80, -150], [0, 0, 1]);
     const deleteIconScale = useTransform(x, [0, -80, -200], [0.5, 0.5, 1.2]);
 
-    // Right swipe (edit) visual feedback
-    const editBackgroundColor = useTransform(
+    // Right swipe (archive/restore) visual feedback
+    const archiveBackgroundColor = useTransform(
         x,
         [0, 80, 150],
-        ['rgba(236, 253, 245, 0)', 'rgba(236, 253, 245, 0.6)', 'rgba(167, 243, 208, 0.5)']
+        ['rgba(252, 231, 243, 0)', 'rgba(252, 231, 243, 0.6)', 'rgba(252, 231, 243, 1)']
     );
-    const editIconOpacity = useTransform(x, [0, 80, 120], [0, 0, 1]);
-    const editIconScale = useTransform(x, [0, 80, 150], [0.5, 0.5, 1.2]);
+    const archiveIconOpacity = useTransform(x, [0, 80, 120], [0, 0, 1]);
+    const archiveIconScale = useTransform(x, [0, 80, 150], [0.5, 0.5, 1.2]);
 
-    // Vertical drag for archive
     const y = useMotionValue(0);
 
     return (
         <motion.div
-            style={{ x, y }}
-            drag={isArchiveView ? "x" : true}
+            style={{ x }}
+            drag="x"
             dragDirectionLock
-            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-            dragElastic={{ right: 0.6, left: 0.6, top: 0.5, bottom: 0.1 }}
-            onDragStart={() => setIsDragging(true)}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={{ right: 0.6, left: 0.6 }}
+            onDragStart={() => {
+                setIsDragging(true);
+                cancelLongPress(); // Cancel long press when drag starts
+            }}
             onDragEnd={(e, info) => {
                 setIsDragging(false);
-                // Up swipe: Archive (only in main view)
-                if (!isArchiveView && (info.offset.y < -100 || (info.velocity.y < -400 && info.offset.y < -40))) {
-                    setExitDirection('up');
+                // Right swipe: Archive (or Restore in archive view)
+                if (info.offset.x > 150 || (info.velocity.x > 400 && info.offset.x > 50)) {
+                    setExitDirection('right');
                     setTimeout(() => onArchive?.(idea.id), 50);
                     return;
                 }
@@ -126,25 +149,29 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                     setExitDirection('left');
                     setTimeout(() => onRemove(idea.id), 50);
                 }
-                // Right swipe: Edit
-                else if (info.offset.x > 150 || (info.velocity.x > 400 && info.offset.x > 50)) {
-                    if (!isArchiveView) setIsEditingContent(true);
-                }
             }}
+            onPointerDown={handlePointerDown}
+            onPointerUp={cancelLongPress}
+            onPointerCancel={cancelLongPress}
+            onPointerLeave={cancelLongPress}
+            onContextMenu={(e) => e.preventDefault()}
             initial={{ opacity: 0, y: 20, scale: 0.98 }}
             animate={{
                 opacity: 1,
                 y: 0,
-                scale: 1,
+                scale: isCharging ? 1.03 : 1,
                 x: 0
             }}
-            transition={{ x: { type: "spring", stiffness: 500, damping: 30 }, y: { type: "spring", stiffness: 500, damping: 30 } }}
-            exit={exitDirection === 'up'
-                ? { opacity: 0, y: -400, scale: 0.8, transition: { duration: 0.3, ease: "easeIn" } }
-                : { opacity: 0, x: -400, scale: 0.9, transition: { duration: 0.25, ease: "easeIn" } }
+            transition={{
+                x: { type: "spring", stiffness: 400, damping: 30 },
+                scale: { type: "spring", stiffness: 300, damping: 20 }
+            }}
+            exit={exitDirection === 'right'
+                ? { opacity: 0, x: 400, rotate: 8, scale: 0.9, transition: { duration: 0.35, ease: "easeOut" } }
+                : { opacity: 0, x: -400, rotate: -8, scale: 0.9, transition: { duration: 0.35, ease: "easeOut" } }
             }
             layout
-            className="relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 touch-none"
+            className={`relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 touch-none select-none ${isCharging ? 'ring-2 ring-pink-400/60 shadow-lg shadow-pink-200/50 dark:shadow-pink-900/30' : ''}`}
         >
             {/* Main Card Component */}
             <div
@@ -174,13 +201,13 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                     </motion.div>
                 </motion.div>
 
-                {/* Swipe Background (Edit Action - Right) */}
+                {/* Right Swipe (Archive/Restore) Background */}
                 <motion.div
-                    style={{ backgroundColor: editBackgroundColor }}
-                    className={`absolute inset-0 rounded-xl flex items-center justify-start pl-6 -z-10`}
+                    style={{ backgroundColor: archiveBackgroundColor }}
+                    className="absolute inset-0 rounded-xl flex items-center justify-start pl-6 -z-10"
                 >
-                    <motion.div style={{ opacity: editIconOpacity, scale: editIconScale }}>
-                        <Pencil className="text-white" size={20} />
+                    <motion.div style={{ opacity: archiveIconOpacity, scale: archiveIconScale }}>
+                        <Check className="text-pink-600" size={20} />
                     </motion.div>
                 </motion.div>
 
