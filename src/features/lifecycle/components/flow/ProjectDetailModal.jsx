@@ -6,52 +6,79 @@ import { COMMAND_CATEGORIES, QUESTIONS } from '../../../../utils/constants';
 
 // Swipeable Question Card with Visual Feedback
 const SwipeableQuestionCard = ({ question, index, total, isFirstCard, onAnswer, t }) => {
+    const [exitDirection, setExitDirection] = React.useState(null);
     const x = useMotionValue(0);
 
-    // Left swipe (confirm) - green feedback
+    // Dynamic rotation based on drag
+    const rotate = useTransform(x, [-150, 0, 150], [-8, 0, 8]);
+
+    // Dynamic scale - slightly smaller when dragging
+    const scale = useTransform(x, [-150, 0, 150], [0.95, 1, 0.95]);
+
+    // Left swipe (confirm) - green feedback with gradient
     const confirmBg = useTransform(
         x,
-        [0, -50, -120],
-        ['rgba(16, 185, 129, 0)', 'rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.3)']
+        [0, -30, -80, -150],
+        ['rgba(16, 185, 129, 0)', 'rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.25)', 'rgba(16, 185, 129, 0.4)']
     );
 
-    // Right swipe (reject) - red feedback  
+    // Right swipe (reject) - red feedback with gradient
     const rejectBg = useTransform(
         x,
-        [0, 50, 120],
-        ['rgba(239, 68, 68, 0)', 'rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.3)']
+        [0, 30, 80, 150],
+        ['rgba(239, 68, 68, 0)', 'rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.25)', 'rgba(239, 68, 68, 0.4)']
+    );
+
+    // Border color feedback
+    const borderColor = useTransform(
+        x,
+        [-120, -50, 0, 50, 120],
+        ['rgba(16, 185, 129, 0.6)', 'rgba(16, 185, 129, 0.3)', 'rgba(229, 231, 235, 1)', 'rgba(239, 68, 68, 0.3)', 'rgba(239, 68, 68, 0.6)']
     );
 
     return (
-        <div className="relative">
-            {/* Background color feedback */}
+        <motion.div
+            className="relative"
+            initial={{ opacity: 1, x: 0 }}
+            animate={exitDirection ? {
+                opacity: 0,
+                x: exitDirection === 'left' ? -300 : 300,
+                scale: 0.8,
+                rotate: exitDirection === 'left' ? -15 : 15,
+            } : { opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+        >
+            {/* Background color feedback layers */}
             <motion.div
                 style={{ backgroundColor: confirmBg }}
-                className="absolute inset-0 rounded-xl -z-10"
+                className="absolute inset-0 rounded-2xl pointer-events-none"
             />
             <motion.div
                 style={{ backgroundColor: rejectBg }}
-                className="absolute inset-0 rounded-xl -z-10"
+                className="absolute inset-0 rounded-2xl pointer-events-none"
             />
 
             <motion.div
-                style={{ x }}
+                style={{ x, rotate, scale, borderColor }}
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.5}
+                dragElastic={0.6}
+                whileDrag={{ cursor: "grabbing" }}
                 onDragEnd={(e, info) => {
                     // Left swipe = YES (confirm)
-                    if (info.offset.x < -100 || (info.velocity.x < -300 && info.offset.x < -30)) {
-                        onAnswer(true);
+                    if (info.offset.x < -80 || (info.velocity.x < -300 && info.offset.x < -30)) {
+                        setExitDirection('left');
+                        setTimeout(() => onAnswer(true), 200);
                     }
                     // Right swipe = NO (reject)
-                    else if (info.offset.x > 100 || (info.velocity.x > 300 && info.offset.x > 30)) {
-                        onAnswer(false);
+                    else if (info.offset.x > 80 || (info.velocity.x > 300 && info.offset.x > 30)) {
+                        setExitDirection('right');
+                        setTimeout(() => onAnswer(false), 200);
                     }
                 }}
-                className="touch-none cursor-grab active:cursor-grabbing relative z-10"
+                className="touch-none cursor-grab relative z-10 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-2"
             >
-                <div className="relative z-30 mb-4">
+                <div className="relative z-30 mb-2">
                     <h4 className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-widest mb-2 flex items-center gap-1">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                         {t('common.question')} {index + 1} / {total}
@@ -65,7 +92,7 @@ const SwipeableQuestionCard = ({ question, index, total, isFirstCard, onAnswer, 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.5 }}
-                        className="flex items-center justify-center gap-6 text-xs text-gray-400 py-3 border-t border-dashed border-gray-100 dark:border-gray-800 mt-4"
+                        className="flex items-center justify-center gap-6 text-xs text-gray-400 py-3 border-t border-dashed border-gray-100 dark:border-gray-800 mt-2"
                     >
                         <span className="flex items-center gap-1">
                             <ArrowRight className="rotate-180 text-emerald-400" size={14} />
@@ -79,7 +106,7 @@ const SwipeableQuestionCard = ({ question, index, total, isFirstCard, onAnswer, 
                     </motion.div>
                 )}
             </motion.div>
-        </div>
+        </motion.div>
     );
 };
 
