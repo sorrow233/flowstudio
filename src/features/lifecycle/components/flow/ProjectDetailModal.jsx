@@ -113,11 +113,12 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose, 
                 </div>
             </div>
 
-            {/* Questions List - Auto-Jump (Collapsible) */}
+            {/* Questions List - Swipe to Answer */}
             <div className="space-y-3 max-w-2xl mx-auto w-full relative z-20">
                 {QUESTIONS.map((q, i) => {
                     const ans = project.answers[q.id];
                     const isAnswered = ans !== undefined;
+                    const isFirstUnanswered = !isAnswered && QUESTIONS.findIndex(qq => project.answers[qq.id] === undefined) === i;
 
                     return (
                         <motion.div
@@ -129,8 +130,8 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose, 
                             className={`
                                 relative rounded-2xl border transition-all duration-300 overflow-hidden
                                 ${isAnswered
-                                    ? 'p-4 bg-gray-50/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800' // Collapsed state
-                                    : 'p-6 bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 shadow-sm' // Active state
+                                    ? 'p-4 bg-gray-50/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800'
+                                    : 'p-6 bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 shadow-sm'
                                 }
                             `}
                         >
@@ -153,42 +154,50 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose, 
                                     </button>
                                 </div>
                             ) : (
-                                /* Active Question Card */
+                                /* Active Question Card - Swipeable */
                                 <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: 0.2 }}
+                                    drag="x"
+                                    dragConstraints={{ left: 0, right: 0 }}
+                                    dragElastic={0.5}
+                                    onDragEnd={(e, info) => {
+                                        // Left swipe = YES (confirm)
+                                        if (info.offset.x < -100 || (info.velocity.x < -300 && info.offset.x < -30)) {
+                                            onAnswer(project.id, q.id, true);
+                                        }
+                                        // Right swipe = NO (reject)
+                                        else if (info.offset.x > 100 || (info.velocity.x > 300 && info.offset.x > 30)) {
+                                            onAnswer(project.id, q.id, false);
+                                        }
+                                    }}
+                                    className="touch-none cursor-grab active:cursor-grabbing"
                                 >
-                                    <div className="relative z-30 flex justify-between items-start mb-6">
-                                        <div>
-                                            <h4 className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-widest mb-2 flex items-center gap-1">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                                                {t('common.question')} {i + 1} / 4
-                                            </h4>
-                                            <p className="text-xl text-gray-800 dark:text-gray-200 font-light leading-relaxed">{t(`questions.${q.id}.text`)}</p>
-                                        </div>
+                                    <div className="relative z-30 mb-4">
+                                        <h4 className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-widest mb-2 flex items-center gap-1">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                            {t('common.question')} {i + 1} / {QUESTIONS.length}
+                                        </h4>
+                                        <p className="text-xl text-gray-800 dark:text-gray-200 font-light leading-relaxed">{t(`questions.${q.id}.text`)}</p>
                                     </div>
 
-                                    <div className="relative z-30 flex gap-3">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onAnswer(project.id, q.id, true);
-                                            }}
-                                            className="relative z-50 cursor-pointer flex-1 py-4 border border-emerald-100 dark:border-emerald-900/30 rounded-xl text-sm font-medium tracking-wide transition-all bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/50 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100 active:scale-[0.98] group"
+                                    {/* Swipe Tutorial - Only on first unanswered */}
+                                    {isFirstUnanswered && (
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ delay: 0.5 }}
+                                            className="flex items-center justify-center gap-6 text-xs text-gray-400 py-3 border-t border-dashed border-gray-100 dark:border-gray-800 mt-4"
                                         >
-                                            <span className="group-hover:scale-110 inline-block transition-transform">YES</span>
-                                        </button>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onAnswer(project.id, q.id, false);
-                                            }}
-                                            className="relative z-50 cursor-pointer flex-1 py-4 border border-gray-100 dark:border-gray-800 rounded-xl text-sm font-medium tracking-wide transition-all bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 hover:border-gray-200 active:scale-[0.98]"
-                                        >
-                                            NO
-                                        </button>
-                                    </div>
+                                            <span className="flex items-center gap-1">
+                                                <ArrowRight className="rotate-180 text-emerald-400" size={14} />
+                                                <span className="text-emerald-500">左滑确定</span>
+                                            </span>
+                                            <span className="text-gray-300">|</span>
+                                            <span className="flex items-center gap-1">
+                                                <span className="text-gray-400">右滑否定</span>
+                                                <ArrowRight className="text-gray-400" size={14} />
+                                            </span>
+                                        </motion.div>
+                                    )}
                                 </motion.div>
                             )}
                         </motion.div>
