@@ -12,11 +12,11 @@ import { db } from '../../lib/firebase';
 
 const SESSION_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 
-// 防抖时间：10秒（减少写入频率）
-const PUSH_DEBOUNCE_MS = 10000;
+// 防抖时间：2秒（快速响应用户操作）
+const PUSH_DEBOUNCE_MS = 2000;
 
-// 最小推送间隔：30秒（即使有多次变更，也至少等待30秒）
-const MIN_PUSH_INTERVAL_MS = 30000;
+// 最小推送间隔：5秒（防止过于频繁推送）
+const MIN_PUSH_INTERVAL_MS = 5000;
 
 // 重试配置
 const MAX_RETRY_COUNT = 5;
