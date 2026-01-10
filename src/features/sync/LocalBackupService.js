@@ -177,11 +177,7 @@ export const useLocalBackup = (doc) => {
 
     // 检查是否应该执行备份（基于1小时间隔）
     const shouldBackup = useCallback(() => {
-        // 检查在线状态
-        if (!navigator.onLine) {
-            console.info('[LocalBackup] Offline, skipping scheduled backup.');
-            return false;
-        }
+        // Local backup should work even if offline
 
         // 检查距离上次备份的时间
         const lastTime = getLastBackupTime();
@@ -235,9 +231,11 @@ export const useLocalBackup = (doc) => {
             }
         }, BACKUP_INTERVAL_MS);
 
-        // 在线状态恢复时检查备份
+        // 在线状态恢复时检查备份（可选，因为现在离线也触发）
         const handleOnline = () => {
-            console.info('[LocalBackup] Online status restored, checking backup...');
+            console.info('[LocalBackup] Online status restored, checking sync status...');
+            // Keep the listener for potential cloud syncing needs if any, 
+            // but the interval already handles the periodic backup.
             if (shouldBackup() && docRef.current) {
                 performBackup(docRef.current);
             }

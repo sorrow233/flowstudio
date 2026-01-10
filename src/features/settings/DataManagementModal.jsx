@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, Upload, FileJson, AlertCircle, CheckCircle2, Loader2, Zap, Settings as SettingsIcon, Database, History, RotateCcw, Clock, ChevronLeft } from 'lucide-react';
 import { useSync } from '../sync/SyncContext';
@@ -8,6 +9,7 @@ import { getLocalBackups } from '../sync/LocalBackupService';
 import Spotlight from '../../components/shared/Spotlight';
 
 const DataManagementModal = ({ isOpen, onClose }) => {
+    const { t } = useTranslation();
     const [mode, setMode] = useState('menu'); // 'menu' | 'importing' | 'preview' | 'settings' | 'backups'
     const [importFile, setImportFile] = useState(null);
     const [previewData, setPreviewData] = useState(null);
@@ -180,9 +182,11 @@ const DataManagementModal = ({ isOpen, onClose }) => {
 
     // 渲染备份项摘要
     const getBackupSummary = (backupData) => {
-        const { allProjects, allCommands } = backupData?.data || {};
+        // Fix: backupData already contains { timestamp, data }, but data itself has a nested { version, exportedAt, data }
+        const innerData = backupData?.data?.data || {};
+        const { allProjects, allCommands } = innerData;
         const count = (allProjects?.length || 0) + (allCommands?.length || 0);
-        return `${count} items`;
+        return `${count} ${t('advanced.items')}`;
     };
 
     if (!isOpen) return null;
@@ -212,9 +216,9 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                                 {mode !== 'menu' && (
                                     <button
                                         onClick={() => setMode('menu')}
-                                        className="hover:bg-gray-100 dark:hover:bg-gray-800 p-1.5 rounded-full -ml-1 transition-colors text-gray-400"
+                                        className="hover:bg-gray-100 p-1 rounded-lg -ml-2 mr-1 transition-colors"
                                     >
-                                        <ChevronLeft size={20} />
+                                        <ChevronLeft size={16} />
                                     </button>
                                 )}
                                 {mode === 'menu' && '设置'}
