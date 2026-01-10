@@ -153,7 +153,15 @@ export default {
         pruneSeed: 'Prune this Seed',
         keepGrowing: 'Cancel and keep growing',
         waitingForSprout: 'Waiting for the first sprout of inspiration...',
+        untitledProject: 'Untitled Project',
+        descriptionPlaceholder: 'Add project description...',
+        addLink: 'Add a link...',
+        myVow: 'My Vow',
+        vowEstablished: 'Established',
+        vowPlaceholder: 'Write down your founding reason...',
+        promoteToAdvanced: 'Promote to Advanced',
     },
+
 
     // Final Dev (Renamed to Modules)
     final: {

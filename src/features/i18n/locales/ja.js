@@ -152,7 +152,15 @@ export default {
         pruneSeed: 'この芽を摘む',
         keepGrowing: 'キャンセルして育て続ける',
         waitingForSprout: '最初のインスピレーションの芽を待っています...',
+        untitledProject: '無題のプロジェクト',
+        descriptionPlaceholder: 'プロジェクトの説明を追加...',
+        addLink: 'リンクを追加...',
+        myVow: '私の誓い',
+        vowEstablished: '確立済み',
+        vowPlaceholder: '創設理由を書き留めてください...',
+        promoteToAdvanced: '高度に昇格',
     },
+
 
     // 最終開発 (旧 高度)
     final: {

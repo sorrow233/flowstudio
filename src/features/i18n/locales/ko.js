@@ -152,7 +152,15 @@ export default {
         pruneSeed: '이 새싹 다듬기',
         keepGrowing: '취소하고 계속 키우기',
         waitingForSprout: '첫 번째 영감의 싹이 트길 기다리는 중...',
+        untitledProject: '제목 없는 프로젝트',
+        descriptionPlaceholder: '프로젝트 설명 추가...',
+        addLink: '링크 추가...',
+        myVow: '나의 서약',
+        vowEstablished: '확립됨',
+        vowPlaceholder: '창립 이념을 적어주세요...',
+        promoteToAdvanced: '고급으로 승격',
     },
+
 
     // 최종 개발 (구 고급)
     final: {

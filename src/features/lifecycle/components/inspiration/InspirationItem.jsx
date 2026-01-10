@@ -127,7 +127,6 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
         }
     };
 
-    return (
     const x = useMotionValue(0);
     const backgroundColor = useTransform(
         x,

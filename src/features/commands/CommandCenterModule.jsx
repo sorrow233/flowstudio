@@ -347,7 +347,7 @@ const CommandCenterModule = () => {
                                 <div className="flex items-center p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner border border-gray-200/50 dark:border-gray-700">
                                     {/* Label Section */}
                                     <div className="hidden md:flex items-center px-4 border-r border-gray-200 dark:border-gray-700 mr-2 min-w-[100px] justify-center">
-                                        <span className={`text-sm font-medium ${categories.find(c => c.id === selectedCategory)?.color.replace('bg-', 'text-').replace('text-white', '') || 'text-gray-600 dark:text-gray-300'
+                                        <span className={`text-sm font-medium ${categories.find(c => c.id === selectedCategory)?.textColor || 'text-gray-600 dark:text-gray-300'
                                             }`}>
                                             {categories.find(c => c.id === selectedCategory)?.label || 'All'}
                                         </span>

@@ -438,11 +438,16 @@ const PendingModule = () => {
                 isOpen={!!managingProject}
                 onClose={() => setManagingProject(null)}
                 onDelete={(id) => handleDelete(null, id)}
+                onUpdate={(id, updates) => updateProject(id, updates)}
+                onPromoteToAdvanced={(id) => {
+                    updateProject(id, { stage: 'advanced', promotedAt: Date.now() });
+                }}
             />
             <ConfirmDialogComponent />
         </div>
     );
 };
+
 
 
 

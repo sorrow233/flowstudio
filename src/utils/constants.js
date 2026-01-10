@@ -107,12 +107,12 @@ export const formatDate = (timestamp) => {
 };
 
 export const COMMAND_CATEGORIES = [
-    { id: 'general', label: 'General', color: 'bg-slate-400 text-white', icon: 'LayoutGrid' },
-    { id: 'frontend', label: 'Frontend', color: 'bg-blue-400 text-white', icon: 'Monitor' },
-    { id: 'backend', label: 'Backend', color: 'bg-emerald-400 text-white', icon: 'Server' },
-    { id: 'database', label: 'Database', color: 'bg-amber-400 text-white', icon: 'Database' },
-    { id: 'devops', label: 'DevOps', color: 'bg-violet-400 text-white', icon: 'Container' },
-    { id: 'testing', label: 'Testing', color: 'bg-rose-400 text-white', icon: 'Beaker' },
+    { id: 'general', label: 'General', color: 'bg-slate-400 text-white', textColor: 'text-slate-400', icon: 'LayoutGrid' },
+    { id: 'frontend', label: 'Frontend', color: 'bg-blue-400 text-white', textColor: 'text-blue-400', icon: 'Monitor' },
+    { id: 'backend', label: 'Backend', color: 'bg-emerald-400 text-white', textColor: 'text-emerald-400', icon: 'Server' },
+    { id: 'database', label: 'Database', color: 'bg-amber-400 text-white', textColor: 'text-amber-400', icon: 'Database' },
+    { id: 'devops', label: 'DevOps', color: 'bg-violet-400 text-white', textColor: 'text-violet-400', icon: 'Container' },
+    { id: 'testing', label: 'Testing', color: 'bg-rose-400 text-white', textColor: 'text-rose-400', icon: 'Beaker' },
 
 ];
 

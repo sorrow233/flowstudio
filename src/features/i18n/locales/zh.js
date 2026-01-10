@@ -153,7 +153,15 @@ export default {
         pruneSeed: '修剪萌芽',
         keepGrowing: '取消并继续生长',
         waitingForSprout: '等待灵感的第一缕萌芽...',
+        untitledProject: '未命名项目',
+        descriptionPlaceholder: '添加项目描述...',
+        addLink: '添加链接...',
+        myVow: '我的誓言',
+        vowEstablished: '已立誓',
+        vowPlaceholder: '写下你的初心...',
+        promoteToAdvanced: '升级到进阶',
     },
+
 
     // 模块 (原终稿/进阶)
     final: {
