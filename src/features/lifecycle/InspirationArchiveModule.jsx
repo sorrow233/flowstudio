@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Archive, RotateCcw, Trash2 } from 'lucide-react';
+import { ArrowLeft, Archive } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '../i18n';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
-import { parseRichText, getColorConfig } from './components/inspiration/InspirationUtils';
+import InspirationItem from './components/inspiration/InspirationItem';
 
 const InspirationArchiveModule = () => {
     const { t } = useTranslation();
@@ -61,48 +61,20 @@ const InspirationArchiveModule = () => {
             <div className="space-y-4">
                 <AnimatePresence mode="popLayout">
                     {archivedIdeas.length > 0 ? (
-                        archivedIdeas.map((idea) => {
-                            const config = getColorConfig(idea.colorIndex || 0);
-                            return (
-                                <motion.div
-                                    key={idea.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    className="relative group bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm"
-                                >
-                                    <div className="flex items-start gap-3">
-                                        <div className={`mt-1.5 w-2.5 h-2.5 rounded-full ${config.dot} opacity-50`} />
-                                        <div className="flex-1 min-w-0">
-                                            <div className="text-gray-600 dark:text-gray-400 text-[15px] font-normal leading-relaxed">
-                                                {parseRichText(idea.content)}
-                                            </div>
-                                            <div className="mt-2 text-[11px] text-gray-300 dark:text-gray-600">
-                                                {new Date(idea.archiveTimestamp || idea.timestamp).toLocaleDateString()}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Action Buttons */}
-                                    <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button
-                                            onClick={() => handleRestore(idea.id)}
-                                            className="p-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
-                                            title={t('common.restore', '还原')}
-                                        >
-                                            <RotateCcw size={16} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(idea.id)}
-                                            className="p-2 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
-                                            title={t('common.delete', '删除')}
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            );
-                        })
+                        archivedIdeas.map((idea) => (
+                            <InspirationItem
+                                key={idea.id}
+                                idea={idea}
+                                onRemove={handleDelete}
+                                onArchive={handleRestore} // Right swipe restores in archive view
+                                onCopy={() => { }} // Disabled or handled via click internally
+                                onToggleComplete={() => { }}
+                                onUpdateNote={() => { }}
+                                onUpdateContent={() => { }}
+                                onUpdateColor={() => { }}
+                                isArchiveView={true}
+                            />
+                        ))
                     ) : (
                         <motion.div
                             initial={{ opacity: 0 }}

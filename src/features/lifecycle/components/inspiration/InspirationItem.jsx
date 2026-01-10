@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2, Check, Pencil } from 'lucide-react';
+import { Trash2, Check, Pencil, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
 import RichTextInput from './RichTextInput';
@@ -207,7 +207,11 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                     className="absolute inset-0 rounded-xl flex items-center justify-start pl-6 -z-10"
                 >
                     <motion.div style={{ opacity: archiveIconOpacity, scale: archiveIconScale }}>
-                        <Check className="text-pink-600" size={20} />
+                        {isArchiveView ? (
+                            <RotateCcw className="text-pink-600" size={20} />
+                        ) : (
+                            <Check className="text-pink-600" size={20} />
+                        )}
                     </motion.div>
                 </motion.div>
 
