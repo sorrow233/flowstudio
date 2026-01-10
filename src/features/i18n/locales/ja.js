@@ -81,11 +81,11 @@ export default {
         growing: '成長中',
     },
 
-    // Primary Development Module
+    // フローモジュール
     primary: {
-        title: '主力開発',
-        subtitle: '現在積極的に開発中のプロジェクト',
-        emptyState: '開発中のプロジェクトはありません',
+        title: 'フロー',
+        subtitle: 'すべての困難と複雑さをフローに変える',
+        emptyState: 'フロープロジェクトなし',
         tasks: 'タスク',
         progress: '進捗',
         noTasks: 'タスクなし',

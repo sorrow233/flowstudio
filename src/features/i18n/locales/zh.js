@@ -82,11 +82,11 @@ export default {
         growing: '成长中',
     },
 
-    // 主开发模块
+    // 心流模块
     primary: {
-        title: '开发',
-        subtitle: '正在积极开发中的项目',
-        emptyState: '暂无开发中项目',
+        title: '心流',
+        subtitle: '让一切困难和繁琐变为心流',
+        emptyState: '暂无心流项目',
         tasks: '任务',
         progress: '进度',
         noTasks: '暂无任务',

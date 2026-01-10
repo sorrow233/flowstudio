@@ -82,11 +82,11 @@ export default {
         growing: 'Growing',
     },
 
-    // Primary Dev Module
+    // Flow Module
     primary: {
-        title: 'Development',
-        subtitle: 'Projects currently under active development',
-        emptyState: 'No projects in development',
+        title: 'Flow',
+        subtitle: 'Turn all difficulties and complexities into flow',
+        emptyState: 'No flow projects',
         tasks: 'Tasks',
         progress: 'Progress',
         noTasks: 'No tasks',

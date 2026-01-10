@@ -81,11 +81,11 @@ export default {
         growing: '성장 중',
     },
 
-    // Primary Development Module
+    // 플로우 모듈
     primary: {
-        title: '주력 개발',
-        subtitle: '현재 적극적으로 개발 중인 프로젝트',
-        emptyState: '개발 중인 프로젝트가 없습니다',
+        title: '플로우',
+        subtitle: '모든 어려움과 복잡함을 플로우로 전환',
+        emptyState: '플로우 프로젝트 없음',
         tasks: '작업',
         progress: '진행 상황',
         noTasks: '작업 없음',
