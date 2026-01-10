@@ -14,12 +14,57 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#FBCFE8" />
+    <meta name="theme-color" content="#0f0f0f" />
 
     <!-- iOS PWA Configuration -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Flow Studio" />
+
+    <!-- iOS Startup Image - 使用 SVG data URI，覆盖所有设备尺寸 -->
+    <link rel="apple-touch-startup-image"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%230f0f0f' width='1' height='1'/%3E%3C/svg%3E"
+        media="(device-width: 320px)">
+    <link rel="apple-touch-startup-image"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%230f0f0f' width='1' height='1'/%3E%3C/svg%3E"
+        media="(device-width: 375px)">
+    <link rel="apple-touch-startup-image"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%230f0f0f' width='1' height='1'/%3E%3C/svg%3E"
+        media="(device-width: 390px)">
+    <link rel="apple-touch-startup-image"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%230f0f0f' width='1' height='1'/%3E%3C/svg%3E"
+        media="(device-width: 414px)">
+    <link rel="apple-touch-startup-image"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%230f0f0f' width='1' height='1'/%3E%3C/svg%3E"
+        media="(device-width: 428px)">
+    <link rel="apple-touch-startup-image"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%230f0f0f' width='1' height='1'/%3E%3C/svg%3E"
+        media="(device-width: 430px)">
+    <!-- iPad -->
+    <link rel="apple-touch-startup-image"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%230f0f0f' width='1' height='1'/%3E%3C/svg%3E"
+        media="(device-width: 768px)">
+    <link rel="apple-touch-startup-image"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%230f0f0f' width='1' height='1'/%3E%3C/svg%3E"
+        media="(device-width: 810px)">
+    <link rel="apple-touch-startup-image"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%230f0f0f' width='1' height='1'/%3E%3C/svg%3E"
+        media="(device-width: 820px)">
+    <link rel="apple-touch-startup-image"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%230f0f0f' width='1' height='1'/%3E%3C/svg%3E"
+        media="(device-width: 834px)">
+    <link rel="apple-touch-startup-image"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%230f0f0f' width='1' height='1'/%3E%3C/svg%3E"
+        media="(device-width: 1024px)">
+    <link rel="apple-touch-startup-image"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%230f0f0f' width='1' height='1'/%3E%3C/svg%3E"
+        media="(device-width: 1112px)">
+    <link rel="apple-touch-startup-image"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%230f0f0f' width='1' height='1'/%3E%3C/svg%3E"
+        media="(device-width: 1194px)">
+    <link rel="apple-touch-startup-image"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%230f0f0f' width='1' height='1'/%3E%3C/svg%3E"
+        media="(device-width: 1366px)">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,6 +72,14 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Outfit:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap"
         rel="stylesheet">
+
+    <!-- iOS PWA 背景色，防止白闪 -->
+    <style>
+        html,
+        body {
+            background-color: #0f0f0f;
+        }
+    </style>
 </head>
 
 <body>
@@ -92,9 +145,11 @@
     </div>
 
     <script>
-        // 仅在 iOS standalone 模式下显示 Splash Screen
+        // 仅在 iOS/iPadOS standalone 模式下显示 Splash Screen
         (function () {
-            var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+            // 检测 iOS/iPadOS（新版 iPadOS 伪装成 Mac，需要特殊检测）
+            var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
             var isStandalone = window.navigator.standalone === true ||
                 window.matchMedia('(display-mode: standalone)').matches;
 
@@ -142,9 +197,10 @@
             }, 100);
         });
 
-        // iOS PWA 页面恢复逻辑 - 解决第三方输入法跳转后白屏问题
+        // iOS/iPadOS PWA 页面恢复逻辑 - 解决第三方输入法跳转后白屏问题
         (function () {
-            var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+            var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
             var isStandalone = window.navigator.standalone === true ||
                 window.matchMedia('(display-mode: standalone)').matches;
 
