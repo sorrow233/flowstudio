@@ -106,7 +106,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
             drag="x"
             dragDirectionLock
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={{ right: 0.6, left: 0.6 }}
+            dragElastic={{ right: 0.2, left: 0.2 }}
             onDragStart={() => {
                 setIsDragging(true);
                 cancelLongPress(); // Cancel long press when drag starts
@@ -116,13 +116,13 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                 // Right swipe: Archive (or Restore in archive view)
                 if (info.offset.x > 150 || (info.velocity.x > 400 && info.offset.x > 50)) {
                     setExitDirection('right');
-                    setTimeout(() => onArchive?.(idea.id), 50);
+                    onArchive?.(idea.id);
                     return;
                 }
                 // Left swipe: Delete
                 if (info.offset.x < -200 || (info.velocity.x < -400 && info.offset.x < -50)) {
                     setExitDirection('left');
-                    setTimeout(() => onRemove(idea.id), 50);
+                    onRemove(idea.id);
                 }
             }}
             onPointerDown={handlePointerDown}
@@ -138,12 +138,12 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                 x: 0
             }}
             transition={{
-                x: { type: "spring", stiffness: 400, damping: 30 },
+                x: { type: "spring", stiffness: 600, damping: 25 },
                 scale: { type: "spring", stiffness: 300, damping: 20 }
             }}
             exit={exitDirection === 'right'
-                ? { opacity: 0, x: 400, rotate: 8, scale: 0.9, transition: { duration: 0.35, ease: "easeOut" } }
-                : { opacity: 0, x: -400, rotate: -8, scale: 0.9, transition: { duration: 0.35, ease: "easeOut" } }
+                ? { opacity: 0, x: 500, rotate: 12, scale: 0.9, transition: { duration: 0.2, ease: "easeOut" } }
+                : { opacity: 0, x: -500, rotate: -12, scale: 0.9, transition: { duration: 0.2, ease: "easeOut" } }
             }
             layout
             className={`relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 touch-none select-none ${isCharging ? 'ring-2 ring-pink-400/60 shadow-lg shadow-pink-200/50 dark:shadow-pink-900/30' : ''}`}
