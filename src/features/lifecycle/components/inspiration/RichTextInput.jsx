@@ -51,7 +51,9 @@ const RichTextInput = forwardRef(({
 
             // 如果选中的内容在颜色 span 内，更新颜色而不是嵌套
             if (parentColorSpan) {
-                parentColorSpan.style.color = colorConfig.text || colorConfig.highlight;
+                const highlightColor = colorConfig.highlight || 'rgba(167, 139, 250, 0.5)';
+                parentColorSpan.style.color = 'inherit'; // Let theme decide or keep it neutral
+                parentColorSpan.style.background = `radial-gradient(ellipse 100% 40% at center 80%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%)`;
                 parentColorSpan.dataset.colorId = colorId;
                 handleInput();
                 return true;
@@ -59,9 +61,11 @@ const RichTextInput = forwardRef(({
 
             // 创建带颜色的 span
             const coloredSpan = document.createElement('span');
-            coloredSpan.style.color = colorConfig.text || colorConfig.highlight;
+            const highlightColor = colorConfig.highlight || 'rgba(167, 139, 250, 0.5)';
+            coloredSpan.style.background = `radial-gradient(ellipse 100% 40% at center 80%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%)`;
+            coloredSpan.style.padding = '0 0.15em';
             coloredSpan.dataset.colorId = colorId;
-            coloredSpan.className = 'colored-text';
+            coloredSpan.className = 'colored-text relative inline';
 
             // 包裹选中内容
             try {
@@ -135,8 +139,9 @@ const RichTextInput = forwardRef(({
             .replace(/>/g, '&gt;')
             .replace(/#!([^:]+):([^#]+)#/g, (match, colorId, content) => {
                 const colorConfig = COLOR_CONFIG.find(c => c.id === colorId);
-                const color = colorConfig?.text || colorConfig?.highlight || '#888';
-                return `<span class="colored-text" data-color-id="${colorId}" style="color: ${color}">${content}</span>`;
+                const highlightColor = colorConfig?.highlight || 'rgba(167, 139, 250, 0.5)';
+                const style = `background: radial-gradient(ellipse 100% 40% at center 80%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%); padding: 0 0.15em;`;
+                return `<span class="colored-text relative inline" data-color-id="${colorId}" style="${style}">${content}</span>`;
             })
             .replace(/\n/g, '<br>');
 

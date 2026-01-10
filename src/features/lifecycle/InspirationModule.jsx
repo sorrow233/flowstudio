@@ -318,7 +318,7 @@ const InspirationModule = () => {
                             onChange={setInput}
                             onKeyDown={handleKeyDown}
                             placeholder={t('inspiration.placeholder')}
-                            className="w-full bg-transparent text-lg text-gray-700 dark:text-gray-200 caret-pink-500 outline-none p-6 pb-20 min-h-[200px] font-light leading-relaxed relative z-10 break-words empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400/50"
+                            className="w-full bg-transparent text-lg text-gray-800 dark:text-gray-100 caret-pink-500 outline-none p-6 pb-20 min-h-[200px] font-light leading-relaxed relative z-10 break-words empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400/50"
                             style={{
                                 fontFamily: 'inherit',
                                 lineHeight: '1.625',
