@@ -25,10 +25,8 @@ const InspirationArchiveModule = () => {
     };
 
     const handleDelete = (id) => {
-        if (window.confirm(t('common.deleteConfirm', '确定永久删除？'))) {
-            removeProject(id);
-            immediateSync?.();
-        }
+        removeProject(id);
+        immediateSync?.();
     };
 
     return (
