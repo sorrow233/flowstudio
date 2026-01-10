@@ -23,13 +23,8 @@ const highlightText = (text) => {
                 const suffix = '#';
                 return (
                     <span key={index} style={{ fontStyle: 'normal' }}>
-                        {/* 前缀标记：完全隐藏，不占用任何布局空间 */}
-                        <span style={{
-                            display: 'inline-block',
-                            width: 0,
-                            overflow: 'hidden',
-                            visibility: 'hidden',
-                        }}>{prefix}</span>
+                        {/* 前缀标记：保持原有宽度但透明，确保光标对齐 */}
+                        <span style={{ color: 'transparent' }}>{prefix}</span>
                         {/* 内容：维持与发送后一致的椭圆渐变笔触 */}
                         <span
                             style={{
@@ -39,13 +34,8 @@ const highlightText = (text) => {
                         >
                             {content}
                         </span>
-                        {/* 后缀标记：完全隐藏，不占用任何布局空间 */}
-                        <span style={{
-                            display: 'inline-block',
-                            width: 0,
-                            overflow: 'hidden',
-                            visibility: 'hidden',
-                        }}>{suffix}</span>
+                        {/* 后缀标记：保持原有宽度但透明，确保光标对齐 */}
+                        <span style={{ color: 'transparent' }}>{suffix}</span>
                     </span>
                 );
 
