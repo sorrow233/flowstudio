@@ -12,11 +12,11 @@ import { db } from '../../lib/firebase';
 
 const SESSION_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 
-// 防抖时间：2秒（快速响应用户操作）
-const PUSH_DEBOUNCE_MS = 2000;
+// 防抖时间：10秒（减少写入频率）
+const PUSH_DEBOUNCE_MS = 10000;
 
-// 最小推送间隔：5秒（防止过于频繁推送）
-const MIN_PUSH_INTERVAL_MS = 5000;
+// 最小推送间隔：30秒（即使有多次变更，也至少等待30秒）
+const MIN_PUSH_INTERVAL_MS = 30000;
 
 // 重试配置
 const MAX_RETRY_COUNT = 5;
@@ -378,15 +378,25 @@ export class SyncEngine {
     /**
      * 立即推送数据到云端（跳过防抖）
      * 用于需要即时同步的页面，如 Inspiration
-     * 使用 setTimeout(0) 确保在 Y.js update 事件触发后执行
+     * 使用 requestAnimationFrame 确保 Y.js 更新已完成
      */
     immediateSync() {
-        // 使用 setTimeout(0) 让 Y.js 的 update 事件先触发并设置 isDirty
-        setTimeout(() => {
-            if (!this.isDirty || !this.userId || !navigator.onLine) return;
+        // 使用 requestAnimationFrame 确保 DOM 和 Y.js 更新都已完成
+        requestAnimationFrame(() => {
+            // 强制设置为脏状态并推送
+            if (!this.userId || !navigator.onLine) return;
+
+            // 取消已调度的防抖推送
             clearTimeout(this.pushTimeout);
-            this.tryPush();
-        }, 0);
+
+            // 如果 Y.js 有任何待推送的变更，强制标记为脏
+            const state = Y.encodeStateAsUpdate(this.doc);
+            if (state.byteLength > 0) {
+                this.isDirty = true;
+                this.setStatus('syncing');
+                this.tryPush();
+            }
+        });
     }
 
     getStatus() { return { status: this.status, pendingCount: this.pendingCount }; }
