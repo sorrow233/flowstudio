@@ -112,7 +112,7 @@ const Navbar = () => {
         <div className="flex justify-center w-full px-4 pt-10 pb-4 relative z-50">
             <nav className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-full shadow-sm max-w-[95vw] md:max-w-full relative mx-auto">
                 <Spotlight spotColor={currentConfig.spotlight} size={300} className="rounded-full">
-                    <div className="flex items-center gap-4 md:gap-10 px-2 py-2 md:px-4 md:py-3 overflow-x-auto no-scrollbar mask-linear-fade">
+                    <div className="flex items-center gap-4 md:gap-12 px-2 py-2 md:px-10 md:py-3 overflow-x-auto no-scrollbar mask-linear-fade">
                         {/* 主流程 */}
                         {mainTabs.map((tab) => {
                             const Icon = tab.icon;
