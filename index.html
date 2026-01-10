@@ -43,34 +43,49 @@
         align-items: center;
         justify-content: center;
         z-index: 99999;
-        transition: opacity 0.3s ease-out;
+        transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
     ">
         <img src="/apple-touch-icon.png" alt="Flow Studio" style="
             width: 80px;
             height: 80px;
             border-radius: 18px;
-            margin-bottom: 16px;
-            animation: pulse 1.5s ease-in-out infinite;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: breathe 3s ease-in-out infinite;
         " />
         <div style="
             color: #FBCFE8;
             font-family: 'Outfit', 'Inter', sans-serif;
             font-size: 18px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.2s forwards;
         ">Flow Studio</div>
         <style>
-            @keyframes pulse {
+            @keyframes breathe {
 
                 0%,
                 100% {
-                    opacity: 1;
                     transform: scale(1);
+                    filter: brightness(1);
                 }
 
                 50% {
-                    opacity: 0.8;
-                    transform: scale(0.98);
+                    transform: scale(1.05);
+                    filter: brightness(1.1);
+                }
+            }
+
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
                 }
             }
         </style>
@@ -87,6 +102,25 @@
                 var splash = document.getElementById('splash-screen');
                 if (splash) {
                     splash.style.display = 'flex';
+
+                    // 保证最小展示时间，防止闪烁，且让退场更丝滑
+                    var minDisplayTime = 800; // 最小展示 800ms
+                    var startTime = Date.now();
+
+                    window.addEventListener('load', function () {
+                        var elapsedTime = Date.now() - startTime;
+                        var remainingTime = Math.max(0, minDisplayTime - elapsedTime);
+
+                        setTimeout(function () {
+                            splash.style.opacity = '0';
+                            splash.style.transform = 'scale(1.1)'; // 轻微放大退场效果
+                            splash.style.pointerEvents = 'none';   // 防止退场过程中阻挡点击
+
+                            setTimeout(function () {
+                                splash.style.display = 'none';
+                            }, 600); // 与 transition 时间一致
+                        }, remainingTime);
+                    });
                 }
             }
         })();
