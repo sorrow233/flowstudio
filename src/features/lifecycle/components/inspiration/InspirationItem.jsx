@@ -130,24 +130,26 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
     const x = useMotionValue(0);
     const backgroundColor = useTransform(
         x,
-        [0, -120, -300],
+        [0, -80, -200],
         ['rgba(252, 231, 243, 0)', 'rgba(252, 231, 243, 0.8)', 'rgba(239, 68, 68, 1)']
     );
-    const iconOpacity = useTransform(x, [0, -120, -250], [0, 0, 1]);
-    const iconScale = useTransform(x, [0, -120, -300], [0.5, 0.5, 1.2]);
+    const iconOpacity = useTransform(x, [0, -80, -150], [0, 0, 1]);
+    const iconScale = useTransform(x, [0, -80, -200], [0.5, 0.5, 1.2]);
 
     return (
         <motion.div
             style={{ x }} // Bind x motion value
             drag="x"
+            dragDirectionLock
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={{ right: 0.05, left: 0.5 }}
+            dragElastic={{ right: 0.05, left: 0.6 }}
             onDragStart={() => setIsDragging(true)}
             onDragEnd={(e, info) => {
                 setIsDragging(false);
-                // Trigger delete if dragged far enough OR flicked fast enough (velocity < -650)
-                // We add a minimum distance check (offset.x < -80) to prevent accidental small flicks
-                if (info.offset.x < -300 || (info.velocity.x < -650 && info.offset.x < -80)) {
+                // iOS-optimized: Lower thresholds for touch gestures
+                // Trigger delete if dragged far enough OR flicked fast enough (velocity < -400)
+                // Minimum distance check (offset.x < -50) to prevent accidental small flicks
+                if (info.offset.x < -200 || (info.velocity.x < -400 && info.offset.x < -50)) {
                     onRemove(idea.id);
                 }
             }}
@@ -162,7 +164,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
             transition={{ x: { type: "spring", stiffness: 500, damping: 30 } }}
             exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
             layout
-            className="relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4"
+            className="relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 touch-pan-y"
         >
             {/* Main Card Component */}
             <div
