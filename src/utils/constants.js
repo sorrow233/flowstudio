@@ -9,33 +9,33 @@ export const STORAGE_KEYS = {
 export const DEV_STAGES = [
     {
         id: 1,
-        label: 'Structure',
-        title: 'Project Architecture',
-        desc: 'Define the core structure, navigation logic, and basic building blocks.',
+        label: 'Skeleton',
+        title: 'Architectural Blueprint',
+        desc: 'Define the structural integrity, routing logic, and component hierarchy.',
     },
     {
         id: 2,
-        label: 'Integration',
-        title: 'Logic & Mechanics',
-        desc: 'Connect the pieces, implement primary workflows, and handle data.',
+        label: 'Functionality',
+        title: 'Core Mechanics & Logic',
+        desc: 'Implement primary business logic, data flows, and state management.',
     },
     {
         id: 3,
-        label: 'Enhancement',
-        title: 'System Refinement',
-        desc: 'Add advanced features, integrate external services, and polish UX.',
+        label: 'Modules',
+        title: 'System Integration',
+        desc: 'Connect authentication, database bindings, and external API services.',
     },
     {
         id: 4,
-        label: 'Experience',
-        title: 'Polishing & Detail',
-        desc: 'Refine transitions, optimize performance, and handle edge cases.',
+        label: 'Optimization',
+        title: 'Performance & Polish',
+        desc: 'Refine UI/UX transitions, optimize re-renders, and handle edge cases.',
     },
     {
         id: 5,
-        label: 'Launch',
-        title: 'Ready for Growth',
-        desc: 'Final verification, quality assurance, and deployment to users.',
+        label: 'Completion',
+        title: 'Production Readiness',
+        desc: 'Final QA, build verification, and deployment to production.',
     }
 ];
 
@@ -138,17 +138,17 @@ export const QUESTIONS = [
     },
     {
         id: 'dogfood',
-        text: '如果它能实现，你会成为它最忠实的用户吗？',
-        sub: '自用价值'
+        text: '开发出来之后，你自己也会经常用它吗？',
+        sub: '自用需求'
     },
     {
         id: 'impact',
-        text: '它能在未来长期改善你的生活或工作吗？',
-        sub: '长期改善'
+        text: '它能在未来长期改变你的生活吗？',
+        sub: '长期价值'
     },
     {
         id: 'value',
-        text: '你是否相信这个创意能够真正帮助到他人？',
-        sub: '利他主义'
+        text: '你是否相信这个项目能够真正帮助到大家？',
+        sub: '利他之心'
     },
 ];

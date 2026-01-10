@@ -296,29 +296,29 @@ export default {
     // Dev Stages (5 stages)
     devStages: {
         1: {
-            label: 'Structure',
-            title: 'Project Architecture',
-            desc: 'Define the core structure, navigation logic, and basic building blocks.',
+            label: 'Skeleton',
+            title: 'Architectural Blueprint',
+            desc: 'Define the structural integrity, routing logic, and component hierarchy.',
         },
         2: {
-            label: 'Integration',
-            title: 'Logic & Mechanics',
-            desc: 'Connect the pieces, implement primary workflows, and handle data.',
+            label: 'Functionality',
+            title: 'Core Mechanics & Logic',
+            desc: 'Implement primary business logic, data flows, and state management.',
         },
         3: {
-            label: 'Enhancement',
-            title: 'System Refinement',
-            desc: 'Add advanced features, integrate external services, and polish UX.',
+            label: 'Modules',
+            title: 'System Integration',
+            desc: 'Connect authentication, database bindings, and external API services.',
         },
         4: {
-            label: 'Experience',
-            title: 'Polishing & Detail',
-            desc: 'Refine transitions, optimize performance, and handle edge cases.',
+            label: 'Optimization',
+            title: 'Performance & Polish',
+            desc: 'Refine UI/UX transitions, optimize re-renders, and handle edge cases.',
         },
         5: {
-            label: 'Launch',
-            title: 'Ready for Growth',
-            desc: 'Final verification, quality assurance, and deployment to users.',
+            label: 'Completion',
+            title: 'Production Readiness',
+            desc: 'Final QA, build verification, and deployment to production.',
         },
     },
 
@@ -412,15 +412,15 @@ export default {
             sub: 'Clarity',
         },
         dogfood: {
-            text: 'If it materializes, would you be its most loyal user?',
-            sub: 'Personal Value',
+            text: 'Will you use it yourself frequently after building it?',
+            sub: 'Dogfooding',
         },
         impact: {
-            text: 'Can it improve your life or work in the long term?',
-            sub: 'Long-term Improvement',
+            text: 'Can it change your life in the long term?',
+            sub: 'Long-term Impact',
         },
         value: {
-            text: 'Do you believe this idea can truly help others?',
+            text: 'Do you believe this project can truly help others?',
             sub: 'Altruism',
         },
     },
