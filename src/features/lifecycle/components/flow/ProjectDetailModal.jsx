@@ -1,8 +1,87 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../../../i18n';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { Sprout, X, ArrowRight, Sun, Sparkles, CheckCircle2, Scroll, Feather, LayoutGrid, Monitor, Server, Database, Container, Beaker, Terminal, Globe, Smartphone, Cloud, Box, Cpu } from 'lucide-react';
 import { COMMAND_CATEGORIES, QUESTIONS } from '../../../../utils/constants';
+
+// Swipeable Question Card with Visual Feedback
+const SwipeableQuestionCard = ({ question, index, total, isFirstCard, onAnswer, t }) => {
+    const x = useMotionValue(0);
+
+    // Left swipe (confirm) - green feedback
+    const confirmBg = useTransform(
+        x,
+        [0, -50, -120],
+        ['rgba(16, 185, 129, 0)', 'rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.3)']
+    );
+
+    // Right swipe (reject) - red feedback  
+    const rejectBg = useTransform(
+        x,
+        [0, 50, 120],
+        ['rgba(239, 68, 68, 0)', 'rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.3)']
+    );
+
+    return (
+        <div className="relative">
+            {/* Background color feedback */}
+            <motion.div
+                style={{ backgroundColor: confirmBg }}
+                className="absolute inset-0 rounded-xl -z-10"
+            />
+            <motion.div
+                style={{ backgroundColor: rejectBg }}
+                className="absolute inset-0 rounded-xl -z-10"
+            />
+
+            <motion.div
+                style={{ x }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.5}
+                onDragEnd={(e, info) => {
+                    // Left swipe = YES (confirm)
+                    if (info.offset.x < -100 || (info.velocity.x < -300 && info.offset.x < -30)) {
+                        onAnswer(true);
+                    }
+                    // Right swipe = NO (reject)
+                    else if (info.offset.x > 100 || (info.velocity.x > 300 && info.offset.x > 30)) {
+                        onAnswer(false);
+                    }
+                }}
+                className="touch-none cursor-grab active:cursor-grabbing relative z-10"
+            >
+                <div className="relative z-30 mb-4">
+                    <h4 className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-widest mb-2 flex items-center gap-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                        {t('common.question')} {index + 1} / {total}
+                    </h4>
+                    <p className="text-xl text-gray-800 dark:text-gray-200 font-light leading-relaxed">{t(`questions.${question.id}.text`)}</p>
+                </div>
+
+                {/* Swipe Tutorial - Only on first card */}
+                {isFirstCard && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className="flex items-center justify-center gap-6 text-xs text-gray-400 py-3 border-t border-dashed border-gray-100 dark:border-gray-800 mt-4"
+                    >
+                        <span className="flex items-center gap-1">
+                            <ArrowRight className="rotate-180 text-emerald-400" size={14} />
+                            <span className="text-emerald-500">左滑确定</span>
+                        </span>
+                        <span className="text-gray-300">|</span>
+                        <span className="flex items-center gap-1">
+                            <span className="text-gray-400">右滑否定</span>
+                            <ArrowRight className="text-gray-400" size={14} />
+                        </span>
+                    </motion.div>
+                )}
+            </motion.div>
+        </div>
+    );
+};
 
 const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose, categories = COMMAND_CATEGORIES }) => {
     const { t } = useTranslation();
@@ -103,106 +182,68 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose, 
                         className="w-full text-base font-light text-center text-gray-500 dark:text-gray-400 bg-transparent resize-none border-none focus:ring-0 min-h-[3em]"
                         placeholder="这个想法的原动力是什么？"
                     />
-
-                    <div className="flex gap-2 justify-center mt-6">
-                        <div className="flex items-center gap-2 bg-white border rounded-full px-4 py-1.5 shadow-sm">
-                            <Sparkles size={12} className="text-gray-400" />
-                            <input value={project.link || ''} onChange={(e) => onUpdate(project.id, 'link', e.target.value)} placeholder="链接" className="w-40 text-xs border-none p-0 focus:ring-0" />
-                        </div>
-                    </div>
                 </div>
             </div>
 
             {/* Questions List - Swipe to Answer */}
             <div className="space-y-3 max-w-2xl mx-auto w-full relative z-20">
-                {QUESTIONS.map((q, i) => {
-                    const ans = project.answers[q.id];
-                    const isAnswered = ans !== undefined;
-                    const isFirstUnanswered = !isAnswered && QUESTIONS.findIndex(qq => project.answers[qq.id] === undefined) === i;
+                {(() => {
+                    // Find the first unanswered question index
+                    const firstUnansweredIndex = QUESTIONS.findIndex(qq => project.answers[qq.id] === undefined);
 
-                    return (
-                        <motion.div
-                            layout
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.4, type: "spring", bounce: 0 }}
-                            key={q.id}
-                            className={`
-                                relative rounded-2xl border transition-all duration-300 overflow-hidden
-                                ${isAnswered
-                                    ? 'p-4 bg-gray-50/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800'
-                                    : 'p-6 bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 shadow-sm'
-                                }
-                            `}
-                        >
-                            {isAnswered ? (
-                                /* Collapsed Summary Row */
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-1 rounded-full ${ans ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'}`}>
-                                            {ans ? <CheckCircle2 size={14} /> : <X size={14} />}
+                    return QUESTIONS.map((q, i) => {
+                        const ans = project.answers[q.id];
+                        const isAnswered = ans !== undefined;
+                        const isFirstCard = i === firstUnansweredIndex;
+
+                        return (
+                            <motion.div
+                                layout
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.4, type: "spring", bounce: 0 }}
+                                key={q.id}
+                                className={`
+                                    relative rounded-2xl border transition-all duration-300 overflow-hidden
+                                    ${isAnswered
+                                        ? 'p-4 bg-gray-50/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800'
+                                        : 'p-6 bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 shadow-sm'
+                                    }
+                                `}
+                            >
+                                {isAnswered ? (
+                                    /* Collapsed Summary Row */
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-1 rounded-full ${ans ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'}`}>
+                                                {ans ? <CheckCircle2 size={14} /> : <X size={14} />}
+                                            </div>
+                                            <span className={`text-sm font-medium ${ans ? 'text-emerald-900 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                                                {t(`questions.${q.id}.text`)}
+                                            </span>
                                         </div>
-                                        <span className={`text-sm font-medium ${ans ? 'text-emerald-900 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'}`}>
-                                            {t(`questions.${q.id}.text`)}
-                                        </span>
-                                    </div>
-                                    <button
-                                        onClick={() => onAnswer(project.id, q.id, undefined)}
-                                        className="text-xs text-gray-400 hover:text-emerald-500 transition-colors px-2 py-1 rounded hover:bg-white"
-                                    >
-                                        Redo
-                                    </button>
-                                </div>
-                            ) : (
-                                /* Active Question Card - Swipeable */
-                                <motion.div
-                                    drag="x"
-                                    dragConstraints={{ left: 0, right: 0 }}
-                                    dragElastic={0.5}
-                                    onDragEnd={(e, info) => {
-                                        // Left swipe = YES (confirm)
-                                        if (info.offset.x < -100 || (info.velocity.x < -300 && info.offset.x < -30)) {
-                                            onAnswer(project.id, q.id, true);
-                                        }
-                                        // Right swipe = NO (reject)
-                                        else if (info.offset.x > 100 || (info.velocity.x > 300 && info.offset.x > 30)) {
-                                            onAnswer(project.id, q.id, false);
-                                        }
-                                    }}
-                                    className="touch-none cursor-grab active:cursor-grabbing"
-                                >
-                                    <div className="relative z-30 mb-4">
-                                        <h4 className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-widest mb-2 flex items-center gap-1">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                                            {t('common.question')} {i + 1} / {QUESTIONS.length}
-                                        </h4>
-                                        <p className="text-xl text-gray-800 dark:text-gray-200 font-light leading-relaxed">{t(`questions.${q.id}.text`)}</p>
-                                    </div>
-
-                                    {/* Swipe Tutorial - Only on first unanswered */}
-                                    {isFirstUnanswered && (
-                                        <motion.div
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            transition={{ delay: 0.5 }}
-                                            className="flex items-center justify-center gap-6 text-xs text-gray-400 py-3 border-t border-dashed border-gray-100 dark:border-gray-800 mt-4"
+                                        <button
+                                            onClick={() => onAnswer(project.id, q.id, undefined)}
+                                            className="text-xs text-gray-400 hover:text-emerald-500 transition-colors px-2 py-1 rounded hover:bg-white"
                                         >
-                                            <span className="flex items-center gap-1">
-                                                <ArrowRight className="rotate-180 text-emerald-400" size={14} />
-                                                <span className="text-emerald-500">左滑确定</span>
-                                            </span>
-                                            <span className="text-gray-300">|</span>
-                                            <span className="flex items-center gap-1">
-                                                <span className="text-gray-400">右滑否定</span>
-                                                <ArrowRight className="text-gray-400" size={14} />
-                                            </span>
-                                        </motion.div>
-                                    )}
-                                </motion.div>
-                            )}
-                        </motion.div>
-                    );
-                })}
+                                            Redo
+                                        </button>
+                                    </div>
+                                ) : (
+                                    /* Active Question Card - Swipeable with Visual Feedback */
+                                    <SwipeableQuestionCard
+                                        question={q}
+                                        index={i}
+                                        total={QUESTIONS.length}
+                                        isFirstCard={isFirstCard}
+                                        onAnswer={(value) => onAnswer(project.id, q.id, value)}
+                                        t={t}
+                                    />
+                                )}
+                            </motion.div>
+                        );
+                    });
+                })()}
             </div>
 
             {/* Sacred Reason Input (Fresh & Sacred Design - Faint Green) */}
