@@ -23,19 +23,19 @@ const highlightText = (text) => {
                 const suffix = '#';
                 return (
                     <span key={index} style={{ fontStyle: 'normal' }}>
-                        {/* 前缀标记：完全不占空间 */}
-                        <span style={{ width: 0, overflow: 'hidden', display: 'inline-block', opacity: 0 }}>{prefix}</span>
-                        {/* 内容：一笔带过笔触效果 */}
+                        {/* 前缀标记：缩减到零大小以实现文字连贯 */}
+                        <span style={{ fontSize: 0, opacity: 0 }}>{prefix}</span>
+                        {/* 内容：维持与发送后一致的椭圆渐变笔触 */}
                         <span
                             style={{
                                 background: `radial-gradient(ellipse 100% 40% at center 80%, ${colorConfig.highlight || 'rgba(167, 139, 250, 0.5)'} 0%, ${colorConfig.highlight || 'rgba(167, 139, 250, 0.5)'} 70%, transparent 100%)`,
-                                padding: '0 0.15em',
+                                padding: '0 0.1em',
                             }}
                         >
                             {content}
                         </span>
-                        {/* 后缀标记：完全不占空间 */}
-                        <span style={{ width: 0, overflow: 'hidden', display: 'inline-block', opacity: 0 }}>{suffix}</span>
+                        {/* 后缀标记：缩减到零大小以实现文字连贯 */}
+                        <span style={{ fontSize: 0, opacity: 0 }}>{suffix}</span>
                     </span>
                 );
 
