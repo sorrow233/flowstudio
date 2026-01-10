@@ -20,6 +20,7 @@ import { useSync } from '../features/sync/SyncContext';
 import SyncStatus from '../features/sync/SyncStatus';
 import { DataManagementModal } from '../features/settings';
 import { useTheme } from '../hooks/ThemeContext';
+import { useSettings } from '../hooks/SettingsContext';
 import { useTranslation } from '../features/i18n';
 
 const tabIcons = {
@@ -37,16 +38,19 @@ const Navbar = () => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isDataModalOpen, setIsDataModalOpen] = useState(false);
     const { isDark, toggleTheme } = useTheme();
+    const { showAdvancedFeatures } = useSettings();
     const { t } = useTranslation();
 
-    // 主流程：灵感 → 蓝图 → 萌芽 → 心流(Flow) → 进阶
+    // 主流程：灵感 → 萌芽 → 心流 → 蓝图 → 进阶（可选）
     const mainTabs = [
         { id: 'inspiration', label: t('navbar.inspiration'), icon: tabIcons.inspiration, path: '/inspiration' },
-        { id: 'command', label: t('navbar.command'), icon: tabIcons.command, path: '/blueprint' },
         { id: 'pending', label: t('navbar.pending'), icon: tabIcons.pending, path: '/sprout' },
         { id: 'primary', label: t('navbar.primary'), icon: tabIcons.primary, path: '/flow' },
-        { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' },
+        { id: 'command', label: t('navbar.command'), icon: tabIcons.command, path: '/blueprint' },
     ];
+
+    // 进阶模块（需要用户开启）
+    const advancedTab = { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' };
 
     const { status } = useSync();
 
@@ -115,13 +119,11 @@ const Navbar = () => {
                             const isActive = location.pathname.startsWith(tab.path);
 
                             // Define active colors for each tab
-                            // Define active colors for each tab
                             const activeColors = {
                                 inspiration: '!text-pink-400 dark:!text-pink-300',
                                 pending: 'text-green-500 dark:text-green-400',
                                 primary: 'text-purple-500 dark:text-purple-400',
                                 advanced: 'text-red-500 dark:text-red-400',
-                                commercial: 'text-amber-500 dark:text-amber-400',
                                 command: 'text-sky-500 dark:text-sky-400',
                             };
 
@@ -143,6 +145,27 @@ const Navbar = () => {
                                 </button>
                             );
                         })}
+
+                        {/* 进阶模块 - 需要用户开启 */}
+                        {showAdvancedFeatures && (() => {
+                            const Icon = advancedTab.icon;
+                            const isActive = location.pathname.startsWith(advancedTab.path);
+                            return (
+                                <button
+                                    key={advancedTab.id}
+                                    onClick={() => navigate(advancedTab.path)}
+                                    className={`
+                                        relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40 shrink-0
+                                        ${isActive
+                                            ? 'text-red-500 dark:text-red-400 bg-gray-50/50 dark:bg-gray-800'
+                                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}
+                                    `}
+                                >
+                                    <Icon size={16} strokeWidth={isActive ? 2 : 1.5} className="w-4 h-4 md:w-4 md:h-4" />
+                                    <span className={`text-xs md:text-sm ${isActive ? 'font-medium' : 'font-light'}`}>{advancedTab.label}</span>
+                                </button>
+                            );
+                        })()}
 
                         <div className="w-px h-5 md:h-6 bg-gray-100 dark:bg-gray-700 mx-2 md:mx-4 relative z-40 shrink-0" />
 
