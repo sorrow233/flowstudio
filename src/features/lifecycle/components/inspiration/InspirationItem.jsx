@@ -47,6 +47,13 @@ export const COLOR_CONFIG = [
         glow: 'group-hover:ring-[#D9E9CF]/30 group-hover:shadow-[0_0_20px_rgba(217,233,207,0.3)]',
         border: 'hover:border-[#D9E9CF] dark:hover:border-[#D9E9CF]/50'
     },
+    {
+        id: 'sky-blue',
+        dot: 'bg-[#A5D8FF]',
+        highlight: 'rgba(165, 216, 255, 0.4)',
+        glow: 'group-hover:ring-[#A5D8FF]/30 group-hover:shadow-[0_0_20px_rgba(165,216,255,0.3)]',
+        border: 'hover:border-[#A5D8FF] dark:hover:border-[#A5D8FF]/50'
+    },
 ];
 
 export const getColorConfig = (index) => COLOR_CONFIG[index % COLOR_CONFIG.length];

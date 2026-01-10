@@ -13,22 +13,22 @@ export const DEFAULT_TEMPLATE = {
         },
         {
             id: "guide-inspiration",
-            content: "**Inspiration** 可以收集你的想法，感动。（左滑删除卡片）",
+            content: "#!pale-pink:Inspiration# 可以收集你的想法，感动。（左滑删除卡片）",
             timestamp: Date.now() - 60000
         },
         {
             id: "guide-sprout",
-            content: "**Sprout** 见证一个个想法是如何变成参天大树的（添加随记）",
+            content: "#!pale-green:Sprout# 见证一个个想法是如何变成参天大树的（添加随记）",
             timestamp: Date.now() - 120000
         },
         {
             id: "guide-blueprint",
-            content: "**Blueprint** 每次不可承受之重，都会变成下一次的轻盈（点击卡片复制）",
+            content: "#!sky-blue:Blueprint# 每次不可承受之重，都会变成下一次的轻盈（点击卡片复制）",
             timestamp: Date.now() - 180000
         },
         {
             id: "guide-flow",
-            content: "**Flow** 带你进入心流（双击卡片完成）",
+            content: "#!violet:Flow# 带你进入心流（双击卡片完成）",
             timestamp: Date.now() - 240000
         },
         {
