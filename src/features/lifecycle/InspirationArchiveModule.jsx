@@ -68,7 +68,10 @@ const InspirationArchiveModule = () => {
                                 onRemove={handleDelete}
                                 onArchive={handleRestore} // Right swipe restores in archive view
                                 onCopy={() => { }} // Disabled or handled via click internally
-                                onToggleComplete={() => { }}
+                                onToggleComplete={(id, completed) => {
+                                    updateProject(id, { completed });
+                                    immediateSync?.();
+                                }}
                                 onUpdateNote={() => { }}
                                 onUpdateContent={() => { }}
                                 onUpdateColor={() => { }}

@@ -7,12 +7,10 @@ import { COLOR_CONFIG, getColorConfig, parseRichText } from './InspirationUtils'
 
 // COLOR_CONFIG, getColorConfig, and parseRichText are now imported from InspirationUtils.js
 
-const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onUpdateNote, onUpdateContent, onToggleComplete, copiedId, isArchiveView = false }) => {
+const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onUpdateNote, onUpdateContent, onToggleComplete, isArchiveView = false }) => {
     const [isDragging, setIsDragging] = React.useState(false);
-    const [isEditingNote, setIsEditingNote] = React.useState(false);
     const [isEditingContent, setIsEditingContent] = React.useState(false);
     const [exitDirection, setExitDirection] = React.useState(null); // 'right' for archive, 'left' for delete
-    const [noteDraft, setNoteDraft] = React.useState(idea.note || '');
     const [contentDraft, setContentDraft] = React.useState(idea.content || '');
     const [isCharging, setIsCharging] = React.useState(false); // Visual feedback for long press
     const longPressTimer = React.useRef(null);
@@ -43,12 +41,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
         onToggleComplete(idea.id, !isCompleted);
     };
 
-    const handleDotClick = (e) => {
-        e.stopPropagation();
-        setIsEditingNote(true);
-    };
-
-    // Long press (3 seconds) to enter edit mode
+    // Long press (1 second) to enter edit mode
     const handlePointerDown = () => {
         if (isArchiveView) return;
         setIsCharging(true);
@@ -65,24 +58,6 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
             longPressTimer.current = null;
         }
         setIsCharging(false);
-    };
-
-    const handleNoteSave = () => {
-        if (noteDraft.trim() !== (idea.note || '')) {
-            onUpdateNote(idea.id, noteDraft.trim());
-        }
-        setIsEditingNote(false);
-    };
-
-    const handleNoteKeyDown = (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleNoteSave();
-        }
-        if (e.key === 'Escape') {
-            setIsEditingNote(false);
-            setNoteDraft(idea.note || '');
-        }
     };
 
     // Content editing handlers
@@ -219,23 +194,8 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                     {/* Color Status Dot - Click to Edit Note */}
                     <div className="flex-shrink-0 mt-1.5 relative z-10">
                         <div
-                            onClick={handleDotClick}
-                            className={`w-2.5 h-2.5 rounded-full ${config.dot} shadow-sm ${isCompleted ? 'opacity-50' : ''} cursor-pointer hover:scale-125 transition-transform duration-200`}
+                            className={`w-2.5 h-2.5 rounded-full ${config.dot} shadow-sm ${isCompleted ? 'opacity-50' : ''}`}
                         />
-                        {/* Note Input Popover */}
-                        {isEditingNote && (
-                            <div className="absolute top-6 left-0 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl shadow-pink-100/50 dark:shadow-pink-900/20 border border-pink-100 dark:border-pink-800 p-2 min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
-                                <input
-                                    ref={input => input && input.focus()}
-                                    value={noteDraft}
-                                    onChange={(e) => setNoteDraft(e.target.value)}
-                                    onBlur={handleNoteSave}
-                                    onKeyDown={handleNoteKeyDown}
-                                    placeholder={t('common.notePlaceholder', 'Add a note...')}
-                                    className="w-full text-base md:text-xs text-gray-700 dark:text-gray-200 bg-transparent outline-none placeholder:text-gray-400"
-                                />
-                            </div>
-                        )}
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -278,20 +238,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                     </div>
                 </div>
 
-                {/* Copied Indicator */}
-                <AnimatePresence>
-                    {copiedId === idea.id && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            className="absolute top-3 right-3 bg-pink-50 dark:bg-pink-900/50 text-pink-600 dark:text-pink-400 px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 shadow-sm border border-pink-100 dark:border-pink-800"
-                        >
-                            <Check size={12} strokeWidth={3} />
-                            <span>{t('common.copied')}</span>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                {/* Copied Indicator Removed */}
             </div>
 
             {/* Note Display - Outside the Card */}
