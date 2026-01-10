@@ -174,12 +174,18 @@ const RichTextInput = forwardRef(({
         }
     }, [value, htmlToMarkup, markupToHtml]);
 
-    // 处理粘贴 - 只粘贴纯文本
+    // 处理粘贴 - 将纯文本中的标记转换为 HTML 效果
     const handlePaste = useCallback((e) => {
         e.preventDefault();
         const text = e.clipboardData.getData('text/plain');
-        document.execCommand('insertText', false, text);
-    }, []);
+        // 如果包含标记，则通过 markupToHtml 转换并插入 HTML
+        if (text.includes('#!') || text.includes('\n')) {
+            const html = markupToHtml(text);
+            document.execCommand('insertHTML', false, html);
+        } else {
+            document.execCommand('insertText', false, text);
+        }
+    }, [markupToHtml]);
 
     // 处理按键
     const handleKeyDownInternal = useCallback((e) => {
