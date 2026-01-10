@@ -129,15 +129,6 @@ const Navbar = () => {
 
                             const activeColorClass = activeColors[tab.id] || 'text-gray-900 dark:text-white';
 
-                            // 激活状态光晕背景
-                            const activeBgColors = {
-                                inspiration: 'bg-gradient-to-r from-pink-100/80 via-pink-50/50 to-transparent dark:from-pink-900/30 dark:via-pink-900/10 dark:to-transparent',
-                                pending: 'bg-gradient-to-r from-green-100/80 via-green-50/50 to-transparent dark:from-green-900/30 dark:via-green-900/10 dark:to-transparent',
-                                primary: 'bg-gradient-to-r from-purple-100/80 via-purple-50/50 to-transparent dark:from-purple-900/30 dark:via-purple-900/10 dark:to-transparent',
-                                command: 'bg-gradient-to-r from-sky-100/80 via-sky-50/50 to-transparent dark:from-sky-900/30 dark:via-sky-900/10 dark:to-transparent',
-                            };
-                            const activeBgClass = activeBgColors[tab.id] || 'bg-gray-50/50 dark:bg-gray-800';
-
                             return (
                                 <button
                                     key={tab.id}
@@ -145,10 +136,19 @@ const Navbar = () => {
                                     className={`
                                         relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40 shrink-0
                                         ${isActive
-                                            ? `${activeColorClass} ${activeBgClass}`
+                                            ? `${activeColorClass}`
                                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}
                                     `}
                                 >
+                                    {/* Active Spotlight Glow */}
+                                    {isActive && (
+                                        <div
+                                            className="absolute inset-0 z-[-1] pointer-events-none blur-md opacity-100"
+                                            style={{
+                                                background: `radial-gradient(circle at center, ${currentConfig.spotlight} 0%, transparent 70%)`
+                                            }}
+                                        />
+                                    )}
                                     <Icon size={16} strokeWidth={isActive ? 2 : 1.5} className="w-4 h-4 md:w-4 md:h-4" />
                                     <span className={`text-xs md:text-sm ${isActive ? 'font-medium' : 'font-light'}`}>{tab.label}</span>
                                 </button>
@@ -166,10 +166,19 @@ const Navbar = () => {
                                     className={`
                                         relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40 shrink-0
                                         ${isActive
-                                            ? 'text-red-500 dark:text-red-400 bg-gradient-to-r from-red-100/80 via-red-50/50 to-transparent dark:from-red-900/30 dark:via-red-900/10 dark:to-transparent'
+                                            ? 'text-red-500 dark:text-red-400'
                                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}
                                     `}
                                 >
+                                    {/* Active Spotlight Glow (Advanced) */}
+                                    {isActive && (
+                                        <div
+                                            className="absolute inset-0 z-[-1] pointer-events-none blur-md opacity-100"
+                                            style={{
+                                                background: `radial-gradient(circle at center, rgba(239, 68, 68, 0.15) 0%, transparent 70%)`
+                                            }}
+                                        />
+                                    )}
                                     <Icon size={16} strokeWidth={isActive ? 2 : 1.5} className="w-4 h-4 md:w-4 md:h-4" />
                                     <span className={`text-xs md:text-sm ${isActive ? 'font-medium' : 'font-light'}`}>{advancedTab.label}</span>
                                 </button>
