@@ -3,41 +3,47 @@ import { Trash2, Check } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
 
-// Refined Color Configuration for "Elegant and Faint" look
+// Refined Color Configuration for "Crayon Highlighter" look
 export const COLOR_CONFIG = [
     {
         id: 'pale-pink',
         dot: 'bg-[#F9DFDF]',
+        highlight: 'rgba(249, 223, 223, 0.6)',
         glow: 'group-hover:ring-[#F9DFDF]/30 group-hover:shadow-[0_0_20px_rgba(249,223,223,0.3)]',
         border: 'hover:border-[#F9DFDF] dark:hover:border-[#F9DFDF]/50'
     },
     {
         id: 'light-red',
         dot: 'bg-[#FFA4A4]',
+        highlight: 'rgba(255, 164, 164, 0.6)',
         glow: 'group-hover:ring-[#FFA4A4]/30 group-hover:shadow-[0_0_20px_rgba(255,164,164,0.3)]',
         border: 'hover:border-[#FFA4A4] dark:hover:border-[#FFA4A4]/50'
     },
     {
         id: 'salmon',
         dot: 'bg-[#FF8F8F]',
+        highlight: 'rgba(255, 143, 143, 0.6)',
         glow: 'group-hover:ring-[#FF8F8F]/30 group-hover:shadow-[0_0_20px_rgba(255,143,143,0.3)]',
         border: 'hover:border-[#FF8F8F] dark:hover:border-[#FF8F8F]/50'
     },
     {
         id: 'pale-white',
         dot: 'bg-[#FBEFEF]',
+        highlight: 'rgba(251, 239, 239, 0.7)',
         glow: 'group-hover:ring-[#FBEFEF]/30 group-hover:shadow-[0_0_20px_rgba(251,239,239,0.3)]',
         border: 'hover:border-[#FBEFEF] dark:hover:border-[#FBEFEF]/50'
     },
     {
         id: 'violet',
         dot: 'bg-violet-400',
+        highlight: 'rgba(167, 139, 250, 0.5)',
         glow: 'group-hover:ring-violet-400/30 group-hover:shadow-[0_0_20px_rgba(167,139,250,0.3)]',
         border: 'hover:border-violet-300 dark:hover:border-violet-700/50'
     },
     {
         id: 'pale-green',
         dot: 'bg-[#D9E9CF]',
+        highlight: 'rgba(217, 233, 207, 0.6)',
         glow: 'group-hover:ring-[#D9E9CF]/30 group-hover:shadow-[0_0_20px_rgba(217,233,207,0.3)]',
         border: 'hover:border-[#D9E9CF] dark:hover:border-[#D9E9CF]/50'
     },
@@ -63,11 +69,21 @@ export const parseRichText = (text) => {
                 return (
                     <span
                         key={index}
-                        className={`${colorConfig.dot} bg-opacity-30 dark:bg-opacity-40 px-1 py-0.5 rounded text-gray-800 dark:text-gray-100`}
+                        className="relative inline text-gray-800 dark:text-gray-100"
+                        style={{
+                            background: `linear-gradient(-2deg, transparent 0%, ${colorConfig.highlight || 'rgba(167, 139, 250, 0.5)'} 8%, ${colorConfig.highlight || 'rgba(167, 139, 250, 0.5)'} 92%, transparent 100%)`,
+                            backgroundSize: '100% 85%',
+                            backgroundPosition: 'center 60%',
+                            backgroundRepeat: 'no-repeat',
+                            padding: '0.1em 0.15em',
+                            margin: '0 0.1em',
+                            borderRadius: '2px',
+                        }}
                     >
                         {content}
                     </span>
                 );
+
 
             }
         }

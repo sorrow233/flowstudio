@@ -25,14 +25,23 @@ const highlightText = (text) => {
                     <span key={index} style={{ fontStyle: 'normal' }}>
                         {/* 前缀标记：透明占位 */}
                         <span style={{ color: 'transparent' }}>{prefix}</span>
-                        {/* 内容：带背景色 */}
-                        <span className={`${colorConfig.dot} bg-opacity-30 dark:bg-opacity-40 rounded px-0.5`}>
+                        {/* 内容：蜡笔荧光笔效果 */}
+                        <span
+                            style={{
+                                background: `linear-gradient(-2deg, transparent 0%, ${colorConfig.highlight || 'rgba(167, 139, 250, 0.5)'} 8%, ${colorConfig.highlight || 'rgba(167, 139, 250, 0.5)'} 92%, transparent 100%)`,
+                                backgroundSize: '100% 85%',
+                                backgroundPosition: 'center 60%',
+                                backgroundRepeat: 'no-repeat',
+                                borderRadius: '2px',
+                            }}
+                        >
                             {content}
                         </span>
                         {/* 后缀标记：透明占位 */}
                         <span style={{ color: 'transparent' }}>{suffix}</span>
                     </span>
                 );
+
             }
         }
 
