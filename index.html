@@ -30,7 +30,7 @@
 </head>
 
 <body>
-    <!-- iOS PWA Splash Screen - 解决开屏白屏问题 -->
+    <!-- iOS PWA Splash Screen - 仅在 iOS standalone 模式下显示 -->
     <div id="splash-screen" style="
         position: fixed;
         top: 0;
@@ -38,7 +38,7 @@
         right: 0;
         bottom: 0;
         background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 100%);
-        display: flex;
+        display: none;
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -75,6 +75,22 @@
             }
         </style>
     </div>
+
+    <script>
+        // 仅在 iOS standalone 模式下显示 Splash Screen
+        (function () {
+            var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+            var isStandalone = window.navigator.standalone === true ||
+                window.matchMedia('(display-mode: standalone)').matches;
+
+            if (isIOS && isStandalone) {
+                var splash = document.getElementById('splash-screen');
+                if (splash) {
+                    splash.style.display = 'flex';
+                }
+            }
+        })();
+    </script>
 
     <div id="root"></div>
 
