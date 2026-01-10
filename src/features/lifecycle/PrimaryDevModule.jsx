@@ -5,10 +5,10 @@ import { STORAGE_KEYS, DEV_STAGES, EXTRA_STAGES } from '../../utils/constants';
 import { useNavigate } from 'react-router-dom';
 
 // Import New Modular Components
-import StageNavigation from './components/primary/StageNavigation';
-import TaskList from './components/primary/TaskList';
-import ProjectWorkspaceHeader from './components/primary/ProjectWorkspaceHeader';
-import ImportCommandModal from './components/primary/ImportCommandModal';
+import StageNavigation from './components/flow/StageNavigation';
+import TaskList from './components/flow/TaskList';
+import ProjectWorkspaceHeader from './components/flow/ProjectWorkspaceHeader';
+import ImportCommandModal from './components/flow/ImportCommandModal';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import confetti from 'canvas-confetti';

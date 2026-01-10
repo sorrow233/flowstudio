@@ -11,8 +11,8 @@ import { useTranslation } from '../i18n';
 
 import Spotlight from '../../components/shared/Spotlight';
 import { SakuraTree, MapleTree, GinkgoTree, CedarTree } from '../../components/illustrations/TreeIllustrations';
-import ProjectDetailModal from './components/primary/ProjectDetailModal';
-import ProjectManageModal from './components/pending/ProjectManageModal';
+import ProjectDetailModal from './components/flow/ProjectDetailModal';
+import ProjectManageModal from './components/sprout/ProjectManageModal';
 
 
 

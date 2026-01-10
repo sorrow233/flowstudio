@@ -8,7 +8,7 @@ import PendingModule from './features/lifecycle/PendingModule';
 import PrimaryDevModule from './features/lifecycle/PrimaryDevModule';
 import AdvancedDevModule from './features/lifecycle/AdvancedDevModule';
 import CommercialModule from './features/lifecycle/CommercialModule';
-import CommandCenterModule from './features/commands/CommandCenterModule';
+import CommandCenterModule from './features/blueprint/CommandCenterModule';
 import ShareViewPage from './features/share/components/ShareViewPage';
 
 import { Toaster } from 'sonner';
