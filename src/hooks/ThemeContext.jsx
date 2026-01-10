@@ -20,15 +20,7 @@ export function useTheme() {
 
 export function ThemeProvider({ children }) {
     const [theme, setTheme] = useState(() => {
-        // 检查是否有用户手动设置的主题
-        const savedTheme = localStorage.getItem('theme');
-        // 检查是否用户明确设置过（通过标记）
-        const hasUserSetTheme = localStorage.getItem('theme-user-set') === 'true';
-
-        if (hasUserSetTheme && savedTheme) {
-            return savedTheme;
-        }
-        // 首次访问或未手动设置，使用系统主题
+        // 始终使用系统主题作为初始值
         return getSystemTheme();
     });
 
@@ -37,19 +29,15 @@ export function ThemeProvider({ children }) {
         const root = window.document.documentElement;
         root.classList.remove('light', 'dark');
         root.classList.add(theme);
-        localStorage.setItem('theme', theme);
     }, [theme]);
 
-    // 监听系统主题变化
+    // 监听系统主题变化 - 始终跟随系统
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
         const handleSystemThemeChange = (e) => {
-            // 只有在用户没有手动设置主题时才跟随系统
-            const hasUserSetTheme = localStorage.getItem('theme-user-set') === 'true';
-            if (!hasUserSetTheme) {
-                setTheme(e.matches ? 'dark' : 'light');
-            }
+            // 实时跟随系统主题变化
+            setTheme(e.matches ? 'dark' : 'light');
         };
 
         // 添加监听器
@@ -61,14 +49,12 @@ export function ThemeProvider({ children }) {
     }, []);
 
     const toggleTheme = () => {
-        // 用户手动切换时，标记为用户设置
-        localStorage.setItem('theme-user-set', 'true');
+        // 用户手动切换只是临时覆盖，刷新后会重新跟随系统
         setTheme(prev => prev === 'light' ? 'dark' : 'light');
     };
 
     // 重置为跟随系统主题
     const useSystemTheme = () => {
-        localStorage.removeItem('theme-user-set');
         setTheme(getSystemTheme());
     };
 
@@ -77,10 +63,9 @@ export function ThemeProvider({ children }) {
         theme,
         toggleTheme,
         setTheme: (newTheme) => {
-            localStorage.setItem('theme-user-set', 'true');
             setTheme(newTheme);
         },
-        useSystemTheme, // 暴露重置方法，用户可以选择回归系统主题
+        useSystemTheme,
     };
 
     return (
