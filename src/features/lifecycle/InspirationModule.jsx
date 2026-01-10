@@ -1,31 +1,12 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowRight, Lightbulb, Hash } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useSync } from '../sync/SyncContext';
-import { useSyncedProjects } from '../sync/useSyncStore';
-import { useTranslation } from '../i18n';
-import InspirationItem, { COLOR_CONFIG } from './components/inspiration/InspirationItem';
-import InputRichPreview from './components/inspiration/InputRichPreview';
-import Spotlight from '../../components/shared/Spotlight';
-
-// Auto color logic: Every 3 items, switch to next color
-const getNextAutoColorIndex = (totalCount) => {
-    const groupIndex = Math.floor(totalCount / 3);
-    return groupIndex % COLOR_CONFIG.length;
-};
-
-// Hook for auto-resizing textarea
-const useAutoResizeTextArea = (ref, value) => {
-    useEffect(() => {
-        if (ref.current) {
-            ref.current.style.height = 'auto';
-            ref.current.style.height = ref.current.scrollHeight + 'px';
-        }
-    }, [ref, value]);
-};
+// 引入 Auth 相关
+import AuthModal from '../auth/AuthModal';
+import { useAuth } from '../auth/AuthContext';
 
 const InspirationModule = () => {
+    // Auth Hook
+    const { user } = useAuth();
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
     // Sync - 使用 immediateSync 实现即时同步
     const { doc, immediateSync } = useSync();
     const { t } = useTranslation();
@@ -35,6 +16,15 @@ const InspirationModule = () => {
         removeProject: removeProjectBase,
         updateProject: updateProjectBase
     } = useSyncedProjects(doc, 'all_projects');
+
+    // 鉴权检查 helper
+    const checkAuth = () => {
+        if (!user) {
+            setIsAuthModalOpen(true);
+            return false;
+        }
+        return true;
+    };
 
     // 包装 CRUD 操作，添加即时同步（仅 Inspiration 页面）
     const addIdea = (idea) => {
@@ -103,6 +93,7 @@ const InspirationModule = () => {
             // Cmd+Z or Ctrl+Z to undo
             if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
                 if (deletedIdeas.length > 0) {
+                    if (!checkAuth()) return; // Auth Check for Undo
                     e.preventDefault();
                     const lastDeleted = deletedIdeas[deletedIdeas.length - 1];
                     addIdea(lastDeleted);
@@ -113,9 +104,10 @@ const InspirationModule = () => {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [deletedIdeas, addIdea]);
+    }, [deletedIdeas, addIdea, user]); // Added user dependency
 
     const handleAdd = () => {
+        if (!checkAuth()) return; // Auth Check
         if (!input.trim()) return;
         const newIdea = {
             id: uuidv4(), // Generate ID here to ensure uniqueness if re-added
@@ -131,14 +123,17 @@ const InspirationModule = () => {
     };
 
     const handleUpdateColor = (id, newColorIndex) => {
+        if (!checkAuth()) return; // Auth Check
         updateIdea(id, { colorIndex: newColorIndex });
     };
 
     const handleUpdateNote = (id, note) => {
+        if (!checkAuth()) return; // Auth Check
         updateIdea(id, { note });
     };
 
     const handleToggleComplete = (id, completed) => {
+        if (!checkAuth()) return; // Auth Check
         updateIdea(id, { completed });
     };
 
@@ -153,6 +148,7 @@ const InspirationModule = () => {
     };
 
     const handleRemove = (id) => {
+        if (!checkAuth()) return; // Auth Check
         const idea = ideas.find(i => i.id === id);
         if (idea) {
             setDeletedIdeas(prev => [...prev, idea]);
@@ -161,6 +157,7 @@ const InspirationModule = () => {
     };
 
     const handleUndo = () => {
+        if (!checkAuth()) return; // Auth Check
         if (deletedIdeas.length > 0) {
             const lastDeleted = deletedIdeas[deletedIdeas.length - 1];
             addIdea(lastDeleted);
@@ -169,6 +166,7 @@ const InspirationModule = () => {
     };
 
     const handleTagClick = (projectTitle) => {
+        // Tag Insertion is UI only, no auth check needed until submit
         const tag = `[${projectTitle}] `;
         setInput(prev => prev + tag);
         textareaRef.current?.focus();
@@ -255,7 +253,7 @@ const InspirationModule = () => {
         // 1. Submit: Cmd+Enter or Ctrl+Enter
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
             e.preventDefault();
-            handleAdd();
+            handleAdd(); // This already has Auth Check
             return;
         }
 
@@ -373,7 +371,12 @@ const InspirationModule = () => {
                                     {COLOR_CONFIG.map((conf, index) => (
                                         <button
                                             key={conf.id}
-                                            onClick={() => setSelectedColorIndex(prev => prev === index ? null : index)}
+                                            onClick={() => {
+                                                // Color picker doesn't need auth check until it's applied to an item, 
+                                                // but here it sets the state for *next* item. 
+                                                // So it's fine to allow picking color freely.
+                                                setSelectedColorIndex(prev => prev === index ? null : index);
+                                            }}
                                             className={`relative w-3 h-3 rounded-full transition-all duration-300 ${conf.dot} ${index === selectedColorIndex ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 ring-gray-400 dark:ring-gray-500 scale-110' : 'opacity-40 hover:opacity-100 hover:scale-110'} after:absolute after:-inset-2`}
                                             title={conf.id}
                                         />
@@ -472,6 +475,12 @@ const InspirationModule = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Auth Modal */}
+            <AuthModal
+                isOpen={isAuthModalOpen}
+                onClose={() => setIsAuthModalOpen(false)}
+            />
         </div>
     );
 };

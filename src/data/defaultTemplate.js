@@ -4,42 +4,37 @@
  */
 
 export const DEFAULT_TEMPLATE = {
-    // 灵感作为"新手引导"展示
+    // 灵感作为"新手引导"展示 - 6 条介绍性内容
     inspirations: [
         {
             id: "welcome-001",
-            content: "你好啊，我们是 FlowStudio 的开发团队（`右滑删除此条`）",
+            content: "你好啊，我们是 FlowStudio 团队，感谢你的使用，请允许我们为你介绍这个软件",
             timestamp: Date.now()
         },
         {
             id: "guide-inspiration",
-            content: "你可以在灵感记录随时随地的想法，下载插件一键保存推特的推文，捕捉触动你的瞬间（`点击卡片复制内容`）",
+            content: "**Inspiration** 让你不再孤单，可以收集你的想法、感动（左滑删除卡片）",
             timestamp: Date.now() - 60000
         },
         {
-            id: "guide-command",
-            content: "你可以在命令中保存不同类别的指令：开发、学习、目标，或者只是一些碎碎念（`双击圆点标记已读`）",
+            id: "guide-sprout",
+            content: "**Sprout** 见证一个个想法是如何变成参天大树的，一回头，你会发现自己已走过路漫漫（点击左边圆点添加文本）",
             timestamp: Date.now() - 120000
         },
         {
-            id: "guide-flow",
-            content: "**Flow** 让你清晰地知道自己处于流程的哪个阶段，以及如何优化前进的方向",
+            id: "guide-blueprint",
+            content: "**Blueprint** 让你不再害怕困难——每次不可承受之重，都会变成下一次的轻盈（任意点击卡片区域复制）",
             timestamp: Date.now() - 180000
         },
         {
-            id: "guide-studio",
-            content: "**Studio** 让你不再害怕失败——每次遇到的问题，都会变成下一次的惊艳",
+            id: "guide-flow",
+            content: "**Flow** 带你进入心流，一切都是那么自然流畅（双击卡片完成）",
             timestamp: Date.now() - 240000
         },
         {
-            id: "hello-world",
-            content: "你好 | Hello | こんにちは | 안녕하세요",
+            id: "start-journey",
+            content: "现在，祝你开启心流之旅 ✨",
             timestamp: Date.now() - 300000
-        },
-        {
-            id: "start",
-            content: "**开始吧**",
-            timestamp: Date.now() - 360000
         }
     ],
 

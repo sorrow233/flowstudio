@@ -130,11 +130,11 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
     const x = useMotionValue(0);
     const backgroundColor = useTransform(
         x,
-        [0, -120, -350],
+        [0, -120, -300],
         ['rgba(252, 231, 243, 0)', 'rgba(252, 231, 243, 0.8)', 'rgba(239, 68, 68, 1)']
     );
     const iconOpacity = useTransform(x, [0, -120, -250], [0, 0, 1]);
-    const iconScale = useTransform(x, [0, -120, -350], [0.5, 0.5, 1.2]);
+    const iconScale = useTransform(x, [0, -120, -300], [0.5, 0.5, 1.2]);
 
     return (
         <motion.div
@@ -145,9 +145,9 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
             onDragStart={() => setIsDragging(true)}
             onDragEnd={(e, info) => {
                 setIsDragging(false);
-                // Trigger delete if dragged far enough OR flicked fast enough (velocity < -800)
-                // We add a minimum distance check (offset.x < -100) to prevent accidental small flicks
-                if (info.offset.x < -350 || (info.velocity.x < -800 && info.offset.x < -100)) {
+                // Trigger delete if dragged far enough OR flicked fast enough (velocity < -650)
+                // We add a minimum distance check (offset.x < -80) to prevent accidental small flicks
+                if (info.offset.x < -300 || (info.velocity.x < -650 && info.offset.x < -80)) {
                     onRemove(idea.id);
                 }
             }}
