@@ -129,7 +129,7 @@ export const getRandomProjectImage = () => {
     return DEFAULT_PROJECT_IMAGES[Math.floor(Math.random() * DEFAULT_PROJECT_IMAGES.length)];
 };
 
-// 灵魂四问 (Soul Questions)
+// 灵魂五问 (Soul Questions)
 export const QUESTIONS = [
     {
         id: 'clarity',
@@ -150,5 +150,10 @@ export const QUESTIONS = [
         id: 'value',
         text: '你是否相信这件事能够真正改变你的生活？',
         sub: '生活改变'
+    },
+    {
+        id: 'resilience',
+        text: '即便你会失败、会花费许多时间、会发现自己被人生骗了、被命运玩弄了，再给你一次机会，你依旧想要做这件事吗？',
+        sub: '决心'
     },
 ];
