@@ -50,10 +50,27 @@ export const parseRichText = (text) => {
     // Guard: Handle null/undefined/empty
     if (!text) return null;
 
-    // Split by delimiters: **...**, `...`, [ ... ]
-    const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\])/g);
+    // Split by delimiters: **...**, `...`, [ ... ], #!color:text#
+    const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]|#![^:]+:[^#]+#)/g);
 
     return parts.map((part, index) => {
+        // Colored Text: #!color_id:text#
+        if (part.startsWith('#!') && part.endsWith('#')) {
+            const match = part.match(/#!([^:]+):([^#]+)#/);
+            if (match) {
+                const [, colorId, content] = match;
+                const colorConfig = COLOR_CONFIG.find(c => c.id === colorId) || COLOR_CONFIG[0];
+                return (
+                    <span
+                        key={index}
+                        className={`${colorConfig.dot} bg-opacity-20 dark:bg-opacity-30 px-1.5 py-0.5 rounded-md mx-0.5 text-gray-900 dark:text-gray-100 border border-current border-opacity-10`}
+                        style={{ display: 'inline-block', lineHeight: '1.2' }}
+                    >
+                        {content}
+                    </span>
+                );
+            }
+        }
         // Inline Code: `...`
         if (part.startsWith('`') && part.endsWith('`')) {
             return (

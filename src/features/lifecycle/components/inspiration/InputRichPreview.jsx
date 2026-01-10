@@ -1,16 +1,35 @@
 import React from 'react';
+import { COLOR_CONFIG } from './InspirationItem';
 
 // Specialized highlighter for Input that STRICTLY preserves layout/character-count
 // to ensure perfect alignment with the overlaying textarea's cursor.
 const highlightText = (text) => {
     if (!text) return null;
 
-    // Split by delimiters: [...] or **...** or `...`
+    // Split by delimiters: [...] or **...** or `...` or #!color:text#
     // Using a more robust regex that handles nested spaces
-    const parts = text.split(/(\[.*?\]|\*\*.*?\*\*|`.*?`)/g);
+    const parts = text.split(/(\[.*?\]|\*\*.*?\*\*|`.*?`|#!.*?:.*?#)/g);
 
     return parts.map((part, index) => {
         if (!part) return null;
+
+        // Colored Text: #!color_id:text#
+        if (part.startsWith('#!') && part.endsWith('#')) {
+            const match = part.match(/#!([^:]+):([^#]+)#/);
+            if (match) {
+                const [, colorId, content] = match;
+                const colorConfig = COLOR_CONFIG.find(c => c.id === colorId) || COLOR_CONFIG[0];
+                return (
+                    <span
+                        key={index}
+                        className={`${colorConfig.dot} bg-opacity-20 dark:bg-opacity-30 rounded-md ring-1 ring-inset ring-black/5 dark:ring-white/5`}
+                        style={{ fontStyle: 'normal' }}
+                    >
+                        {part}
+                    </span>
+                );
+            }
+        }
 
         // Tag: [TagName]
         if (part.startsWith('[') && part.endsWith(']')) {

@@ -115,6 +115,35 @@ const InspirationModule = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [deletedIdeas, addIdea]);
 
+    const handleColorClick = (index) => {
+        const colorConfig = COLOR_CONFIG[index];
+        const textarea = textareaRef.current;
+
+        if (textarea && textarea.selectionStart !== textarea.selectionEnd) {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = input.substring(start, end);
+
+            const newText =
+                input.substring(0, start) +
+                `#!${colorConfig.id}:${selectedText}#` +
+                input.substring(end);
+
+            setInput(newText);
+
+            // Restore focus and selection after a tick
+            setTimeout(() => {
+                textarea.focus();
+                const prefixLength = `#!${colorConfig.id}:`.length;
+                const newPos = start + prefixLength + selectedText.length + 1;
+                textarea.setSelectionRange(newPos, newPos);
+            }, 0);
+        }
+
+        // Always update activation color
+        setSelectedColorIndex(prev => prev === index ? null : index);
+    };
+
     const handleAdd = () => {
         if (!input.trim()) return;
         const newIdea = {
@@ -373,7 +402,7 @@ const InspirationModule = () => {
                                     {COLOR_CONFIG.map((conf, index) => (
                                         <button
                                             key={conf.id}
-                                            onClick={() => setSelectedColorIndex(prev => prev === index ? null : index)}
+                                            onClick={() => handleColorClick(index)}
                                             className={`relative w-3 h-3 rounded-full transition-all duration-300 ${conf.dot} ${index === selectedColorIndex ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 ring-gray-400 dark:ring-gray-500 scale-110' : 'opacity-40 hover:opacity-100 hover:scale-110'} after:absolute after:-inset-2`}
                                             title={conf.id}
                                         />
