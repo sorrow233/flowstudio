@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, Upload, FileJson, AlertCircle, CheckCircle2, Loader2, Zap, Settings as SettingsIcon, Database, History, RotateCcw, Clock, ChevronLeft } from 'lucide-react';
 import { useSync } from '../sync/SyncContext';
