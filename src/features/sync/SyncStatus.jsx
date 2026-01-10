@@ -67,7 +67,7 @@ const SyncStatus = ({ status, pendingCount = 0, themeColor }) => {
                     flex items-center gap-2 px-3 py-1.5 rounded-full 
                     transition-colors duration-300 backdrop-blur-sm
                     border border-transparent hover:border-black/5
-                    min-w-[100px]
+                    min-w-[75px]
                     ${config.color}
                 `}
             >
