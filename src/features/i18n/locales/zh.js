@@ -64,17 +64,11 @@ export default {
     // 待定模块 (Renamed to Sprouting/萌芽)
     pending: {
         title: '萌芽',
-        subtitle: '静待生长的项目构思',
+        subtitle: '先验证，后构建',
         emptyState: '暂无萌芽项目',
         addProject: '添加项目',
         projectName: '项目名称',
         projectDescription: '项目描述',
-    },
-
-    // 待定模块
-    pending: {
-        title: '创意孵化',
-        subtitle: '先验证，后构建',
         removeConfirmTitle: '移除这颗种子？',
         removeConfirmMessage: '此操作无法撤销。这颗种子将回归虚无，等待下一次灵感的迸发。',
         remove: '移除',
