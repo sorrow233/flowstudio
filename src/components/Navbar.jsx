@@ -111,7 +111,7 @@ const Navbar = () => {
     return (
         <div className="flex justify-center w-full px-4 pt-10 pb-4 relative z-50">
             <nav className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-full shadow-sm max-w-[95vw] md:max-w-full relative mx-auto">
-                <Spotlight spotColor={currentConfig.spotlight} size={300} className="rounded-full">
+                <Spotlight spotColor={currentConfig.spotlight} size={450} className="rounded-full">
                     <div className="flex items-center gap-4 md:gap-12 px-2 py-2 md:px-10 md:py-3 overflow-x-auto no-scrollbar mask-linear-fade">
                         {/* 主流程 */}
                         {mainTabs.map((tab) => {
@@ -143,9 +143,9 @@ const Navbar = () => {
                                     {/* Active Spotlight Glow */}
                                     {isActive && (
                                         <div
-                                            className="absolute inset-0 z-[-1] pointer-events-none blur-xl opacity-100"
+                                            className="absolute inset-[-25%] z-[-1] pointer-events-none blur-2xl opacity-100"
                                             style={{
-                                                background: `radial-gradient(circle at center, ${themeConfigs[tab.id === 'pending' ? 'green' : tab.id === 'primary' ? 'purple' : tab.id === 'inspiration' ? 'pink' : tab.id === 'command' ? 'sky' : 'default'].spotlight.replace('0.15', '0.4').replace('0.1', '0.3').replace('0.12', '0.3')} 0%, transparent 80%)`
+                                                background: `radial-gradient(circle at center, ${themeConfigs[tab.id === 'pending' ? 'green' : tab.id === 'primary' ? 'purple' : tab.id === 'inspiration' ? 'pink' : tab.id === 'command' ? 'sky' : 'default'].spotlight.replace('0.15', '0.4').replace('0.1', '0.3').replace('0.12', '0.3')} 0%, transparent 75%)`
                                             }}
                                         />
                                     )}
@@ -173,9 +173,9 @@ const Navbar = () => {
                                     {/* Active Spotlight Glow (Advanced) */}
                                     {isActive && (
                                         <div
-                                            className="absolute inset-0 z-[-1] pointer-events-none blur-xl opacity-100"
+                                            className="absolute inset-[-25%] z-[-1] pointer-events-none blur-2xl opacity-100"
                                             style={{
-                                                background: `radial-gradient(circle at center, rgba(239, 68, 68, 0.35) 0%, transparent 80%)`
+                                                background: `radial-gradient(circle at center, rgba(239, 68, 68, 0.35) 0%, transparent 75%)`
                                             }}
                                         />
                                     )}
