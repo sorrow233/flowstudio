@@ -124,10 +124,9 @@ const InspirationModule = () => {
             const end = textarea.selectionEnd;
             const selectedText = input.substring(start, end);
 
-            // 使用简短的数字 ID 替代长字符串 ID，减少物理空隙
             const newText =
                 input.substring(0, start) +
-                `#!${index}:${selectedText}#` +
+                `#!${colorConfig.id}:${selectedText}#` +
                 input.substring(end);
 
             setInput(newText);
@@ -135,12 +134,11 @@ const InspirationModule = () => {
             // Restore focus and selection after a tick
             setTimeout(() => {
                 textarea.focus();
-                const prefixLength = `#!${index}:`.length;
+                const prefixLength = `#!${colorConfig.id}:`.length;
                 const newPos = start + prefixLength + selectedText.length + 1;
                 textarea.setSelectionRange(newPos, newPos);
             }, 0);
         }
-
 
         // Always update activation color
         setSelectedColorIndex(prev => prev === index ? null : index);
