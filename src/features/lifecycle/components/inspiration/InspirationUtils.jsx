@@ -24,13 +24,6 @@ export const COLOR_CONFIG = [
         border: 'hover:border-[#FF8F8F] dark:hover:border-[#FF8F8F]/50'
     },
     {
-        id: 'pale-white',
-        dot: 'bg-[#FBEFEF]',
-        highlight: 'rgba(251, 239, 239, 0.45)',
-        glow: 'group-hover:ring-[#FBEFEF]/30 group-hover:shadow-[0_0_20px_rgba(251,239,239,0.3)]',
-        border: 'hover:border-[#FBEFEF] dark:hover:border-[#FBEFEF]/50'
-    },
-    {
         id: 'violet',
         dot: 'bg-violet-400',
         highlight: 'rgba(167, 139, 250, 0.35)',
