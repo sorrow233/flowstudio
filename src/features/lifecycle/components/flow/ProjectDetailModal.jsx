@@ -251,23 +251,17 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose, 
                     <Sparkles size={16} className="text-emerald-400 animate-pulse" />
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div className="flex flex-wrap items-center justify-center gap-3 bg-gray-50/80 dark:bg-gray-900/50 rounded-full px-4 py-3 border border-gray-100 dark:border-gray-800">
                     {categories.map(cat => {
-                        // Map icon string to component
-                        const IconComponent = {
-                            'LayoutGrid': LayoutGrid,
-                            'Monitor': Monitor,
-                            'Server': Server,
-                            'Database': Database,
-                            'Container': Container,
-                            'Beaker': Beaker,
-                            'Terminal': Terminal,
-                            'Globe': Globe,
-                            'Smartphone': Smartphone,
-                            'Cloud': Cloud,
-                            'Box': Box,
-                            'Cpu': Cpu
-                        }[cat.icon] || LayoutGrid;
+                        // Map color class to dot color
+                        const dotColors = {
+                            'general': 'bg-slate-400',
+                            'frontend': 'bg-blue-400',
+                            'backend': 'bg-emerald-400',
+                            'database': 'bg-amber-400',
+                            'devops': 'bg-violet-400',
+                            'testing': 'bg-rose-400'
+                        };
 
                         const isSelected = selectedCategory === cat.id;
 
@@ -276,50 +270,29 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose, 
                                 key={cat.id}
                                 onClick={() => setSelectedCategory(cat.id)}
                                 className={`
-                                    relative flex flex-col items-center justify-center p-6 h-32 rounded-[2rem] border transition-all duration-500 group overflow-hidden
+                                    flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-300
                                     ${isSelected
-                                        ? 'bg-gray-900/90 dark:bg-gray-900 border-emerald-500/50 shadow-[0_20px_40px_-10px_rgba(16,185,129,0.2)] scale-[1.05] z-10 ring-1 ring-emerald-500/30'
-                                        : 'bg-gray-50/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800 hover:border-emerald-200/50 hover:bg-white dark:hover:bg-gray-800 hover:shadow-xl hover:shadow-emerald-500/5 hover:-translate-y-1.5'
+                                        ? 'bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 scale-105'
+                                        : 'hover:bg-white/50 dark:hover:bg-gray-800/50'
                                     }
                                 `}
                             >
-                                {/* Background Ambient Glow */}
-                                {isSelected && (
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(52,211,153,0.1),transparent_70%)] pointer-events-none"
-                                    />
-                                )}
-
                                 <div className={`
-                                    w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-all duration-500
-                                    ${isSelected
-                                        ? 'bg-emerald-500/10 text-emerald-500 scale-110'
-                                        : 'bg-white dark:bg-gray-800 text-gray-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-900/20 group-hover:text-emerald-500 group-hover:scale-110'
-                                    }
-                                `}>
-                                    <IconComponent size={24} strokeWidth={1.2} />
-                                </div>
+                                    w-3 h-3 rounded-full transition-all duration-300
+                                    ${dotColors[cat.id] || 'bg-gray-400'}
+                                    ${isSelected ? 'scale-125 ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-800 ring-current opacity-100' : 'opacity-70'}
+                                `} />
                                 <span className={`
-                                    text-xs font-bold tracking-widest transition-colors uppercase
-                                    ${isSelected ? 'text-emerald-400' : 'text-gray-500 group-hover:text-gray-900 dark:group-hover:text-gray-200'}
+                                    text-xs font-medium transition-colors
+                                    ${isSelected ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}
                                 `}>
                                     {cat.label}
                                 </span>
-
-                                {isSelected && (
-                                    <motion.div
-                                        layoutId="category-check"
-                                        className="absolute top-4 right-4"
-                                    >
-                                        <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-                                    </motion.div>
-                                )}
                             </button>
                         );
                     })}
                 </div>
+
             </div>
 
             {/* Graduate Button */}
