@@ -6,7 +6,7 @@ import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import { useTranslation } from '../i18n';
 import InspirationItem, { COLOR_CONFIG } from './components/inspiration/InspirationItem';
-import InputRichPreview from './components/inspiration/InputRichPreview';
+import RichTextInput from './components/inspiration/RichTextInput';
 import Spotlight from '../../components/shared/Spotlight';
 
 // Auto color logic: Every 3 items, switch to next color
@@ -15,15 +15,6 @@ const getNextAutoColorIndex = (totalCount) => {
     return groupIndex % COLOR_CONFIG.length;
 };
 
-// Hook for auto-resizing textarea
-const useAutoResizeTextArea = (ref, value) => {
-    useEffect(() => {
-        if (ref.current) {
-            ref.current.style.height = 'auto';
-            ref.current.style.height = ref.current.scrollHeight + 'px';
-        }
-    }, [ref, value]);
-};
 
 const InspirationModule = () => {
     // Sync - 使用 immediateSync 实现即时同步
@@ -67,7 +58,7 @@ const InspirationModule = () => {
     const [selectedColorIndex, setSelectedColorIndex] = useState(null);
     const [copiedId, setCopiedId] = useState(null);
     const [deletedIdeas, setDeletedIdeas] = useState([]);
-    const textareaRef = useRef(null);
+    const editorRef = useRef(null);
 
     // Autocomplete State
     const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -75,9 +66,6 @@ const InspirationModule = () => {
     const [autocompleteQuery, setAutocompleteQuery] = useState('');
     const [autocompleteIndex, setAutocompleteIndex] = useState(0);
 
-
-    // Use auto-resize hook
-    useAutoResizeTextArea(textareaRef, input);
 
     // Combine and sort projects for tags (Memoized)
     const allProjectTags = useMemo(() => {
@@ -117,46 +105,30 @@ const InspirationModule = () => {
 
     const handleColorClick = (index) => {
         const colorConfig = COLOR_CONFIG[index];
-        const textarea = textareaRef.current;
 
-        if (textarea && textarea.selectionStart !== textarea.selectionEnd) {
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const selectedText = input.substring(start, end);
-
-            const newText =
-                input.substring(0, start) +
-                `#!${colorConfig.id}:${selectedText}#` +
-                input.substring(end);
-
-            setInput(newText);
-
-            // Restore focus and selection after a tick
-            setTimeout(() => {
-                textarea.focus();
-                const prefixLength = `#!${colorConfig.id}:`.length;
-                const newPos = start + prefixLength + selectedText.length + 1;
-                textarea.setSelectionRange(newPos, newPos);
-            }, 0);
+        // 使用 contenteditable 的 applyColor 方法
+        if (editorRef.current) {
+            const applied = editorRef.current.applyColor(colorConfig.id);
+            if (!applied) {
+                // 如果没有选中文本，只更新激活颜色状态
+                setSelectedColorIndex(prev => prev === index ? null : index);
+            }
         }
-
-        // Always update activation color
-        setSelectedColorIndex(prev => prev === index ? null : index);
     };
 
     const handleAdd = () => {
         if (!input.trim()) return;
         const newIdea = {
-            id: uuidv4(), // Generate ID here to ensure uniqueness if re-added
+            id: uuidv4(),
             content: input.trim(),
             timestamp: Date.now(),
             colorIndex: selectedColorIndex !== null ? selectedColorIndex : getNextAutoColorIndex(ideas.length),
-            stage: 'inspiration', // Explicitly set stage
+            stage: 'inspiration',
         };
         addIdea(newIdea);
         setInput('');
-        // Reset height
-        if (textareaRef.current) textareaRef.current.style.height = 'auto';
+        // 清空 contenteditable 编辑器
+        if (editorRef.current) editorRef.current.clear();
     };
 
     const handleUpdateColor = (id, newColorIndex) => {
@@ -204,7 +176,7 @@ const InspirationModule = () => {
     const handleTagClick = (projectTitle) => {
         const tag = `[${projectTitle}] `;
         setInput(prev => prev + tag);
-        textareaRef.current?.focus();
+        editorRef.current?.focus();
     };
 
 
@@ -339,28 +311,22 @@ const InspirationModule = () => {
                     <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 dark:from-gray-800 via-gray-50 dark:via-gray-900 to-gray-100 dark:to-gray-800 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
                     <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 overflow-visible transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] group-hover:border-gray-200 dark:group-hover:border-gray-700">
 
-                        {/* Rich Preview Layer */}
-                        <InputRichPreview text={input} scrollTop={0} />
-
-                        <textarea
-                            ref={textareaRef}
+                        {/* 富文本输入框 - 使用 contenteditable 实现 */}
+                        <RichTextInput
+                            ref={editorRef}
                             value={input}
-                            onChange={handleInputChange}
+                            onChange={setInput}
                             onKeyDown={handleKeyDown}
-                            placeholder={input ? '' : t('inspiration.placeholder')}
-                            className="w-full bg-transparent text-lg text-gray-900 dark:text-gray-100 caret-pink-500 outline-none p-6 pb-20 min-h-[140px] resize-none font-light leading-relaxed relative z-10 overflow-hidden break-words placeholder:text-gray-400/50"
+                            placeholder={t('inspiration.placeholder')}
+                            className="w-full bg-transparent text-lg text-gray-700 dark:text-gray-200 caret-pink-500 outline-none p-6 pb-20 min-h-[140px] font-light leading-relaxed relative z-10 break-words empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400/50"
                             style={{
                                 fontFamily: 'inherit',
-                                WebkitTextFillColor: 'transparent',
                                 lineHeight: '1.625',
                                 letterSpacing: 'normal',
                                 fontVariantLigatures: 'none',
                                 WebkitFontSmoothing: 'antialiased',
                                 MozOsxFontSmoothing: 'grayscale',
                             }}
-                            autoComplete="off"
-                            autoCorrect="off"
-                            spellCheck="false"
                         />
 
                         {/* Autocomplete Popover */}
