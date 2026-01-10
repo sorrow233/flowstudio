@@ -49,7 +49,7 @@ const Navbar = () => {
     const mainTabs = [
         { id: 'inspiration', label: t('navbar.inspiration'), icon: tabIcons.inspiration, path: '/inspiration' },
         { id: 'command', label: t('navbar.command'), icon: tabIcons.command, path: '/blueprint' },
-        { id: 'pending', label: t('navbar.pending'), icon: tabIcons.pending, path: '/pending' },
+        { id: 'pending', label: t('navbar.pending'), icon: tabIcons.pending, path: '/sprout' },
         { id: 'primary', label: t('navbar.primary'), icon: tabIcons.primary, path: '/flow' },
         { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' },
     ];
@@ -66,7 +66,7 @@ const Navbar = () => {
     const getActiveTheme = () => {
         const path = location.pathname;
         if (path.startsWith('/inspiration')) return 'pink';
-        if (path.startsWith('/pending')) return 'green';
+        if (path.startsWith('/sprout')) return 'green';
         if (path.startsWith('/flow')) return 'purple';
         if (path.startsWith('/advanced')) return 'red';
         if (path.startsWith('/commercial')) return 'amber';

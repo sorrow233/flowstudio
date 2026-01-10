@@ -38,7 +38,7 @@ function App() {
                                     <Routes location={location} key={location.pathname}>
                                         <Route path="/" element={<Navigate to="/inspiration" replace />} />
                                         <Route path="/inspiration" element={<InspirationModule />} />
-                                        <Route path="/pending" element={<PendingModule />} />
+                                        <Route path="/sprout" element={<PendingModule />} />
                                         <Route path="/flow" element={<PrimaryDevModule />} />
                                         <Route path="/advanced" element={<AdvancedDevModule />} />
                                         <Route path="/commercial" element={<CommercialModule />} />
