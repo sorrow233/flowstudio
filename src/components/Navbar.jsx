@@ -185,7 +185,7 @@ const Navbar = () => {
                             );
                         })()}
 
-                        <div className="w-px h-5 md:h-6 bg-gray-100 dark:bg-gray-700 mx-2 md:mx-6 relative z-40 shrink-0" />
+                        <div className="w-px h-5 md:h-6 bg-gray-100 dark:bg-gray-700 mx-2 md:mx-8 relative z-40 shrink-0" />
 
                         {/* 右侧工具栏 - 紧凑布局 */}
                         <div className="flex items-center gap-1 md:gap-1.5">
