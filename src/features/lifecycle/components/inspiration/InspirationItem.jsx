@@ -130,11 +130,11 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
     const x = useMotionValue(0);
     const backgroundColor = useTransform(
         x,
-        [0, -50, -150],
+        [0, -120, -350],
         ['rgba(252, 231, 243, 0)', 'rgba(252, 231, 243, 0.8)', 'rgba(239, 68, 68, 1)']
     );
-    const iconOpacity = useTransform(x, [0, -40, -80], [0, 0, 1]);
-    const iconScale = useTransform(x, [0, -40, -80], [0.5, 0.5, 1.2]);
+    const iconOpacity = useTransform(x, [0, -120, -250], [0, 0, 1]);
+    const iconScale = useTransform(x, [0, -120, -350], [0.5, 0.5, 1.2]);
 
     return (
         <motion.div
@@ -145,7 +145,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
             onDragStart={() => setIsDragging(true)}
             onDragEnd={(e, info) => {
                 setIsDragging(false);
-                if (info.offset.x < -150 || info.velocity.x < -800) {
+                if (info.offset.x < -350) {
                     onRemove(idea.id);
                 }
             }}

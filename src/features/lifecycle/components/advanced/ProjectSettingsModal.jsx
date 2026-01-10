@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Save, Image as ImageIcon } from 'lucide-react';
 import { useConfirmDialog } from '../../../../components/shared/ConfirmDialog';
 import { useTranslation } from '../../../i18n';
@@ -26,7 +26,7 @@ const ProjectSettingsModal = ({ isOpen, onClose, project, onUpdate, onDelete }) 
         onClose();
     };
 
-    if (!isOpen || !localProject) return null;
+    if (!localProject) return null;
 
     return (
         <AnimatePresence>
@@ -148,9 +148,11 @@ const ProjectSettingsModal = ({ isOpen, onClose, project, onUpdate, onDelete }) 
                             </button>
                         </div>
                         <ConfirmDialogComponent />
-                    </motion.div >
-                </div >
-            );
+                    </motion.div>
+                </div>
+            )}
+        </AnimatePresence>
+    );
 };
 
-            export default ProjectSettingsModal;
+export default ProjectSettingsModal;
