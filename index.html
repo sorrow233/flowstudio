@@ -30,7 +30,97 @@
 </head>
 
 <body>
+    <!-- iOS PWA Splash Screen - 解决开屏白屏问题 -->
+    <div id="splash-screen" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        transition: opacity 0.3s ease-out;
+    ">
+        <img src="/apple-touch-icon.png" alt="Flow Studio" style="
+            width: 80px;
+            height: 80px;
+            border-radius: 18px;
+            margin-bottom: 16px;
+            animation: pulse 1.5s ease-in-out infinite;
+        " />
+        <div style="
+            color: #FBCFE8;
+            font-family: 'Outfit', 'Inter', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        ">Flow Studio</div>
+        <style>
+            @keyframes pulse {
+
+                0%,
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+
+                50% {
+                    opacity: 0.8;
+                    transform: scale(0.98);
+                }
+            }
+        </style>
+    </div>
+
     <div id="root"></div>
+
+    <script>
+        // 隐藏 Splash Screen（React 加载完成后）
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                var splash = document.getElementById('splash-screen');
+                if (splash) {
+                    splash.style.opacity = '0';
+                    setTimeout(function () {
+                        splash.style.display = 'none';
+                    }, 300);
+                }
+            }, 100);
+        });
+
+        // iOS PWA 页面恢复逻辑 - 解决第三方输入法跳转后白屏问题
+        (function () {
+            var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+            var isStandalone = window.navigator.standalone === true ||
+                window.matchMedia('(display-mode: standalone)').matches;
+
+            if (isIOS && isStandalone) {
+                document.addEventListener('visibilitychange', function () {
+                    if (document.visibilityState === 'visible') {
+                        // 页面重新可见时，检查是否需要恢复
+                        var root = document.getElementById('root');
+                        if (root && (!root.innerHTML || root.innerHTML.trim() === '')) {
+                            // 如果 root 为空，说明可能出现了白屏，尝试重新加载
+                            window.location.reload();
+                        }
+                    }
+                });
+
+                // 监听 pageshow 事件（从 bfcache 恢复时触发）
+                window.addEventListener('pageshow', function (event) {
+                    if (event.persisted) {
+                        // 从缓存恢复，强制刷新以确保状态正确
+                        window.location.reload();
+                    }
+                });
+            }
+        })();
+    </script>
+
     <script type="module" src="/src/main.jsx"></script>
 </body>
 
