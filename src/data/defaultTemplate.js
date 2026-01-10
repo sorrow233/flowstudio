@@ -20,7 +20,7 @@ export const DEFAULT_TEMPLATE = {
         },
         {
             id: "guide-sprout",
-            content: "#!pale-green:Sprout 见证一个个想法是如何变成参天大树的（添加随记）#",
+            content: "#!pale-green:Sprout 见证一个个想法是如何变成参天大树的（点击小点添加随记）#",
             colorIndex: 4,
             timestamp: Date.now() - 120000
         },
