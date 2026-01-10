@@ -134,7 +134,7 @@ const Navbar = () => {
                                     key={tab.id}
                                     onClick={() => navigate(tab.path)}
                                     className={`
-                                        relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40 shrink-0
+                                        relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-50 shrink-0
                                         ${isActive
                                             ? `${activeColorClass}`
                                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}
@@ -143,9 +143,9 @@ const Navbar = () => {
                                     {/* Active Spotlight Glow */}
                                     {isActive && (
                                         <div
-                                            className="absolute inset-0 z-[-1] pointer-events-none blur-md opacity-100"
+                                            className="absolute inset-0 z-[-1] pointer-events-none blur-xl opacity-100"
                                             style={{
-                                                background: `radial-gradient(circle at center, ${currentConfig.spotlight} 0%, transparent 70%)`
+                                                background: `radial-gradient(circle at center, ${themeConfigs[tab.id === 'pending' ? 'green' : tab.id === 'primary' ? 'purple' : tab.id === 'inspiration' ? 'pink' : tab.id === 'command' ? 'sky' : 'default'].spotlight.replace('0.15', '0.4').replace('0.1', '0.3').replace('0.12', '0.3')} 0%, transparent 80%)`
                                             }}
                                         />
                                     )}
@@ -164,7 +164,7 @@ const Navbar = () => {
                                     key={advancedTab.id}
                                     onClick={() => navigate(advancedTab.path)}
                                     className={`
-                                        relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40 shrink-0
+                                        relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-50 shrink-0
                                         ${isActive
                                             ? 'text-red-500 dark:text-red-400'
                                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}
@@ -173,9 +173,9 @@ const Navbar = () => {
                                     {/* Active Spotlight Glow (Advanced) */}
                                     {isActive && (
                                         <div
-                                            className="absolute inset-0 z-[-1] pointer-events-none blur-md opacity-100"
+                                            className="absolute inset-0 z-[-1] pointer-events-none blur-xl opacity-100"
                                             style={{
-                                                background: `radial-gradient(circle at center, rgba(239, 68, 68, 0.15) 0%, transparent 70%)`
+                                                background: `radial-gradient(circle at center, rgba(239, 68, 68, 0.35) 0%, transparent 80%)`
                                             }}
                                         />
                                     )}
