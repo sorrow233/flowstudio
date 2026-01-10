@@ -14,7 +14,10 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#0f0f0f" />
+    <!-- 浅色模式主题色 -->
+    <meta name="theme-color" content="#FBCFE8" media="(prefers-color-scheme: light)" />
+    <!-- 深色模式主题色 (防止 PWA 启动白闪) -->
+    <meta name="theme-color" content="#0f0f0f" media="(prefers-color-scheme: dark)" />
 
     <!-- iOS PWA Configuration -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -73,11 +76,14 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Outfit:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap"
         rel="stylesheet">
 
-    <!-- iOS PWA 背景色，防止白闪 -->
+    <!-- iOS PWA 背景色，防止白闪 (仅在 standalone 模式下) -->
     <style>
-        html,
-        body {
-            background-color: #0f0f0f;
+        @media (display-mode: standalone) {
+
+            html,
+            body {
+                background-color: #0f0f0f;
+            }
         }
     </style>
 </head>
