@@ -38,6 +38,7 @@ export default {
         back: '返回',
         close: '关闭',
         settings: '设置',
+        question: '问题',
         projectTitle: '项目标题',
         projectDesc: '简要描述...',
         descPlaceholder: '描述项目...',

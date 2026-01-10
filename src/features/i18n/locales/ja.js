@@ -37,6 +37,7 @@ export default {
         back: '戻る',
         close: '閉じる',
         settings: '設定',
+        question: '問題',
         projectTitle: 'プロジェクト名',
         projectDesc: '簡単な説明...',
         descPlaceholder: 'プロジェクトを説明...',
@@ -401,16 +402,16 @@ export default {
             sub: '明確さ',
         },
         dogfood: {
-            text: '開発した後、自分自身でも頻繁に使いますか？',
-            sub: '自己需要',
+            text: 'それが実現したら、あなたは持続的な幸せを感じますか？',
+            sub: '持続的な幸せ',
         },
         impact: {
             text: 'それは将来、あなたの生活を長期的に変えることができますか？',
             sub: '長期的価値',
         },
         value: {
-            text: 'このプロジェクトが本当にみんなの役に立つと信じていますか？',
-            sub: '利他の心',
+            text: 'このアイデアが本当にあなたの人生を変えることができると信じていますか？',
+            sub: '人生の変化',
         },
     },
 

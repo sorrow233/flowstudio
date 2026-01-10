@@ -38,6 +38,7 @@ export default {
         back: 'Back',
         close: 'Close',
         settings: 'Settings',
+        question: 'Question',
         projectTitle: 'Project Title',
         projectDesc: 'Brief mission statement...',
         descPlaceholder: 'Describe the project...',
@@ -412,16 +413,16 @@ export default {
             sub: 'Clarity',
         },
         dogfood: {
-            text: 'Will you use it yourself frequently after building it?',
-            sub: 'Dogfooding',
+            text: 'Will you feel lasting happiness if it is realized?',
+            sub: 'Lasting Happiness',
         },
         impact: {
             text: 'Can it change your life in the long term?',
             sub: 'Long-term Impact',
         },
         value: {
-            text: 'Do you believe this project can truly help others?',
-            sub: 'Altruism',
+            text: 'Do you believe this idea can truly change your life?',
+            sub: 'Life Change',
         },
     },
 
