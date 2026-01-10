@@ -8,7 +8,7 @@ export const DEFAULT_TEMPLATE = {
     inspirations: [
         {
             id: "welcome-001",
-            content: "你好啊，我们是FlowStudio 团队",
+            content: "你好啊，这里是FlowStudio 团队",
             timestamp: Date.now()
         },
         {
@@ -18,12 +18,12 @@ export const DEFAULT_TEMPLATE = {
         },
         {
             id: "guide-sprout",
-            content: "**Sprout** 见证一个个想法是如何变成参天大树的（点击左边圆点添加文本）",
+            content: "**Sprout** 见证一个个想法是如何变成参天大树的（添加随记）",
             timestamp: Date.now() - 120000
         },
         {
             id: "guide-blueprint",
-            content: "**Blueprint** 每次不可承受之重，都会变成下一次的轻盈（任意点击卡片区域复制）",
+            content: "**Blueprint** 每次不可承受之重，都会变成下一次的轻盈（点击卡片复制）",
             timestamp: Date.now() - 180000
         },
         {
