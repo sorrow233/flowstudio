@@ -67,11 +67,12 @@ const SyncStatus = ({ status, pendingCount = 0, themeColor }) => {
                     flex items-center gap-2 px-3 py-1.5 rounded-full 
                     transition-colors duration-300 backdrop-blur-sm
                     border border-transparent hover:border-black/5
+                    min-w-[100px]
                     ${config.color}
                 `}
             >
                 {config.icon}
-                <span className="text-xs font-medium tracking-wide min-w-[52px] text-center">
+                <span className="text-xs font-medium tracking-wide">
                     {config.text}
                 </span>
             </motion.div>
