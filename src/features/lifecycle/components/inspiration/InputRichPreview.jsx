@@ -14,34 +14,25 @@ const highlightText = (text) => {
         if (!part) return null;
 
         // Colored Text: #!color_id:text#
+        // 输入模式：简单显示，整个标记都用颜色，不隐藏任何字符
+        // 这样光标完美对齐，发送后在卡片中才显示高级效果
         if (part.startsWith('#!') && part.endsWith('#')) {
             const match = part.match(/#!([^:]+):([^#]+)#/);
             if (match) {
                 const [fullMatch, colorId, content] = match;
                 const colorConfig = COLOR_CONFIG.find(c => c.id === colorId) || COLOR_CONFIG[0];
-                const prefix = `#!${colorId}:`;
-                const suffix = '#';
+                // 简单模式：所有内容都用同一颜色，包括标记符号
                 return (
-                    <span key={index} style={{ fontStyle: 'normal' }}>
-                        {/* 前缀标记：透明但保持原有宽度，确保光标对齐 */}
-                        <span style={{ color: 'transparent' }}>{prefix}</span>
-                        {/* 内容：维持与发送后一致的椭圆渐变笔触 */}
-                        <span
-                            style={{
-                                background: `radial-gradient(ellipse 100% 40% at center 80%, ${colorConfig.highlight || 'rgba(167, 139, 250, 0.5)'} 0%, ${colorConfig.highlight || 'rgba(167, 139, 250, 0.5)'} 70%, transparent 100%)`,
-                                padding: '0 0.1em',
-                            }}
-                        >
-                            {content}
-                        </span>
-                        {/* 后缀标记：透明但保持原有宽度，确保光标对齐 */}
-                        <span style={{ color: 'transparent' }}>{suffix}</span>
+                    <span
+                        key={index}
+                        style={{
+                            color: colorConfig.text || colorConfig.highlight,
+                            fontStyle: 'normal',
+                        }}
+                    >
+                        {part}
                     </span>
                 );
-
-
-
-
             }
         }
 
