@@ -148,7 +148,7 @@ export const QUESTIONS = [
     },
     {
         id: 'value',
-        text: '你是否相信这个创意能够真正改变你的生活？',
+        text: '你是否相信这件事能够真正改变你的生活？',
         sub: '生活改变'
     },
 ];
