@@ -15,9 +15,11 @@ import { Toaster } from 'sonner';
 import { KeymapProvider, ShortcutHelpModal, useBrowserIntercept } from './features/shortcuts';
 import { LanguageProvider } from './features/i18n';
 import { ThemeProvider } from './hooks/ThemeContext';
+import { useIOSStandalone } from './hooks/useIOSStandalone';
 
 function App() {
     const location = useLocation();
+    const { isIOSStandalone } = useIOSStandalone();
 
     // 拦截浏览器默认快捷键 (Cmd+S, Cmd+P 等)
     useBrowserIntercept();
@@ -26,7 +28,7 @@ function App() {
         <ThemeProvider>
             <LanguageProvider>
                 <KeymapProvider>
-                    <div className="flex flex-col h-screen overflow-hidden bg-gray-50/50 dark:bg-gray-950">
+                    <div className={`flex flex-col h-screen overflow-hidden bg-gray-50/50 dark:bg-gray-950 ${isIOSStandalone ? 'ios-standalone' : ''}`}>
                         <Toaster position="top-right" richColors />
                         <Navbar />
 

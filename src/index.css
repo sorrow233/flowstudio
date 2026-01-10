@@ -65,9 +65,18 @@ body {
     scrollbar-width: none;
 }
 
-/* iOS Safe Area Bottom Padding */
+/* iOS Safe Area Padding */
 .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* iOS Standalone Mode - 从主屏幕打开时的样式 */
+.ios-standalone {
+    padding-top: env(safe-area-inset-top, 0px);
 }
 
 /* Mobile viewport fix for iOS Safari */
