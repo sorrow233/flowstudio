@@ -20,8 +20,20 @@ export function useTheme() {
 
 export function ThemeProvider({ children }) {
     const [theme, setTheme] = useState(() => {
-        // 始终使用系统主题作为初始值
-        return getSystemTheme();
+        // 检查用户是否手动设置过，以及当时的系统主题
+        const savedTheme = localStorage.getItem('theme');
+        const systemThemeAtOverride = localStorage.getItem('theme-system-at-override');
+        const currentSystemTheme = getSystemTheme();
+
+        // 如果用户之前手动设置过，且当时的系统主题与现在相同，保持用户选择
+        if (savedTheme && systemThemeAtOverride === currentSystemTheme) {
+            return savedTheme;
+        }
+
+        // 系统主题已变化，或从未手动设置过，清除覆盖并跟随系统
+        localStorage.removeItem('theme');
+        localStorage.removeItem('theme-system-at-override');
+        return currentSystemTheme;
     });
 
     // 应用主题到 DOM
@@ -31,13 +43,16 @@ export function ThemeProvider({ children }) {
         root.classList.add(theme);
     }, [theme]);
 
-    // 监听系统主题变化 - 始终跟随系统
+    // 监听系统主题变化
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
         const handleSystemThemeChange = (e) => {
-            // 实时跟随系统主题变化
-            setTheme(e.matches ? 'dark' : 'light');
+            const newSystemTheme = e.matches ? 'dark' : 'light';
+            // 系统主题变化时，清除用户的覆盖，开始跟随系统
+            localStorage.removeItem('theme');
+            localStorage.removeItem('theme-system-at-override');
+            setTheme(newSystemTheme);
         };
 
         // 添加监听器
@@ -49,12 +64,18 @@ export function ThemeProvider({ children }) {
     }, []);
 
     const toggleTheme = () => {
-        // 用户手动切换只是临时覆盖，刷新后会重新跟随系统
-        setTheme(prev => prev === 'light' ? 'dark' : 'light');
+        // 用户手动切换时，记录当前系统主题，表示这是"豁免"期
+        const currentSystemTheme = getSystemTheme();
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        localStorage.setItem('theme', newTheme);
+        localStorage.setItem('theme-system-at-override', currentSystemTheme);
+        setTheme(newTheme);
     };
 
     // 重置为跟随系统主题
     const useSystemTheme = () => {
+        localStorage.removeItem('theme');
+        localStorage.removeItem('theme-system-at-override');
         setTheme(getSystemTheme());
     };
 
@@ -63,6 +84,9 @@ export function ThemeProvider({ children }) {
         theme,
         toggleTheme,
         setTheme: (newTheme) => {
+            const currentSystemTheme = getSystemTheme();
+            localStorage.setItem('theme', newTheme);
+            localStorage.setItem('theme-system-at-override', currentSystemTheme);
             setTheme(newTheme);
         },
         useSystemTheme,
