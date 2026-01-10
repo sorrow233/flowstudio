@@ -5,8 +5,8 @@ import { Activity, X, Settings, ChevronRight, Menu, Plus } from 'lucide-react';
 
 import AdvancedStageNavigation from './AdvancedStageNavigation';
 import ProjectSettingsModal from './ProjectSettingsModal';
-import TaskList from '../primary/TaskList'; // Reusing Primary TaskList
-import ImportCommandModal from '../primary/ImportCommandModal';
+import TaskList from '../flow/TaskList'; // Reusing Flow TaskList
+import ImportCommandModal from '../flow/ImportCommandModal';
 import { useSyncedProjects } from '../../../sync/useSyncStore';
 import { useSync } from '../../../sync/SyncContext';
 import { useTranslation } from '../../../i18n';
