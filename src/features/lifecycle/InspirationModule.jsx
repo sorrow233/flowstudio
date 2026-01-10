@@ -297,8 +297,10 @@ const InspirationModule = () => {
                     <div className="p-2 bg-pink-50 dark:bg-pink-900/20 rounded-xl">
                         <Lightbulb className="w-5 h-5 text-pink-400" />
                     </div>
-                    <h2 className="text-3xl font-light text-pink-400 dark:text-pink-300 tracking-tight">
+                    <h2 className="text-3xl font-light text-pink-400 dark:text-pink-300 tracking-tight relative inline-block">
                         {t('inspiration.title')}
+                        {/* Pink Brush Stroke */}
+                        <span className="absolute -bottom-1 left-0 w-full h-2 bg-gradient-to-r from-pink-200/80 via-pink-300/60 to-transparent dark:from-pink-700/50 dark:via-pink-600/30 dark:to-transparent rounded-full blur-[2px]" />
                     </h2>
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 text-base font-light tracking-wide max-w-md mx-auto md:mx-0 leading-relaxed">

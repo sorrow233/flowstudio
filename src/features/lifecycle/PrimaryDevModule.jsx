@@ -319,7 +319,11 @@ const PrimaryDevModule = () => {
             {/* Dashboard Header */}
             <div className="mb-12 flex justify-between items-end">
                 <div>
-                    <h2 className="text-2xl font-light text-purple-500 dark:text-purple-400 mb-2 tracking-tight">{t('primary.title')}</h2>
+                    <h2 className="text-2xl font-light text-purple-500 dark:text-purple-400 mb-2 tracking-tight relative inline-block">
+                        {t('primary.title')}
+                        {/* Purple Brush Stroke */}
+                        <span className="absolute -bottom-1 left-0 w-full h-2 bg-gradient-to-r from-purple-200/80 via-purple-300/60 to-transparent dark:from-purple-700/50 dark:via-purple-600/30 dark:to-transparent rounded-full blur-[2px]" />
+                    </h2>
                     <p className="text-gray-400 text-sm font-light tracking-wide">{t('primary.subtitle')}</p>
                 </div>
                 <div className="flex items-center gap-4 text-right">

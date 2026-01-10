@@ -193,7 +193,7 @@ const PendingModule = () => {
     };
 
     return (
-        <div className="w-full pt-4 md:pt-8 h-auto md:h-full flex flex-col md:flex-row gap-4 md:gap-10 overflow-visible md:overflow-hidden">
+        <div className="w-full pt-4 md:pt-8 h-auto md:h-full flex flex-col md:flex-row gap-4 md:gap-8 overflow-visible md:overflow-hidden max-w-6xl mx-auto">
             {/* Left Column: Stream & Nursery */}
             <div className={`transition-all duration-500 flex-col ${selectedProject ? 'hidden md:flex md:w-[350px] opacity-100' : 'flex w-full'} h-auto md:h-full`}>
                 <div className="flex-none mb-6 px-4 md:px-0 flex justify-between items-end">
@@ -201,7 +201,7 @@ const PendingModule = () => {
                         <h2 className="text-2xl font-light tracking-wide flex items-center gap-2">
                             <Sprout className="w-6 h-6 text-emerald-500" />
                             <span className="relative text-emerald-500 dark:text-emerald-400">
-                                {t('navbar.sprout')}
+                                {t('pending.title')}
                                 {/* Green Brush Stroke */}
                                 <span className="absolute -bottom-1 left-0 w-full h-2 bg-gradient-to-r from-emerald-200/80 via-emerald-300/60 to-transparent dark:from-emerald-700/50 dark:via-emerald-600/30 dark:to-transparent rounded-full blur-[2px]" />
                             </span>
