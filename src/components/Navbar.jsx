@@ -109,106 +109,100 @@ const Navbar = () => {
     const currentConfig = themeConfigs[activeTheme] || themeConfigs.default;
 
     return (
-        <div className="flex justify-center w-full px-4 md:px-6 pt-10 pb-4 relative z-50">
-            <nav className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-full shadow-sm w-full max-w-7xl relative">
+        <div className="flex justify-center w-full px-4 pt-10 pb-4 relative z-50">
+            <nav className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-full shadow-sm max-w-[95vw] md:max-w-full relative mx-auto">
                 <Spotlight spotColor={currentConfig.spotlight} size={300} className="rounded-full">
-                    <div className="flex items-center justify-between px-2 py-2 md:px-4 md:py-3 overflow-x-auto no-scrollbar mask-linear-fade">
-                        {/* 左侧核心模块 */}
-                        <div className="flex items-center gap-1 md:gap-4">
-                            {/* 主流程 */}
-                            {mainTabs.map((tab) => {
-                                const Icon = tab.icon;
-                                const isActive = location.pathname.startsWith(tab.path);
+                    <div className="flex items-center gap-2 md:gap-6 px-2 py-2 md:px-4 md:py-3 overflow-x-auto no-scrollbar mask-linear-fade">
+                        {/* 主流程 */}
+                        {mainTabs.map((tab) => {
+                            const Icon = tab.icon;
+                            const isActive = location.pathname.startsWith(tab.path);
 
-                                // Define active colors for each tab
-                                const activeColors = {
-                                    inspiration: '!text-pink-400 dark:!text-pink-300',
-                                    pending: 'text-green-500 dark:text-green-400',
-                                    primary: 'text-purple-500 dark:text-purple-400',
-                                    advanced: 'text-red-500 dark:text-red-400',
-                                    command: 'text-sky-500 dark:text-sky-400',
-                                };
+                            // Define active colors for each tab
+                            const activeColors = {
+                                inspiration: '!text-pink-400 dark:!text-pink-300',
+                                pending: 'text-green-500 dark:text-green-400',
+                                primary: 'text-purple-500 dark:text-purple-400',
+                                advanced: 'text-red-500 dark:text-red-400',
+                                command: 'text-sky-500 dark:text-sky-400',
+                            };
 
-                                const activeColorClass = activeColors[tab.id] || 'text-gray-900 dark:text-white';
+                            const activeColorClass = activeColors[tab.id] || 'text-gray-900 dark:text-white';
 
-                                return (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => navigate(tab.path)}
-                                        className={`
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => navigate(tab.path)}
+                                    className={`
                                         relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40 shrink-0
                                         ${isActive
-                                                ? `${activeColorClass} bg-gray-50/50 dark:bg-gray-800`
-                                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}
+                                            ? `${activeColorClass} bg-gray-50/50 dark:bg-gray-800`
+                                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}
                                     `}
-                                    >
-                                        <Icon size={16} strokeWidth={isActive ? 2 : 1.5} className="w-4 h-4 md:w-4 md:h-4" />
-                                        <span className={`text-xs md:text-sm ${isActive ? 'font-medium' : 'font-light'}`}>{tab.label}</span>
-                                    </button>
-                                );
-                            })}
-
-                            {/* 进阶模块 - 需要用户开启 */}
-                            {showAdvancedFeatures && (() => {
-                                const Icon = advancedTab.icon;
-                                const isActive = location.pathname.startsWith(advancedTab.path);
-                                return (
-                                    <button
-                                        key={advancedTab.id}
-                                        onClick={() => navigate(advancedTab.path)}
-                                        className={`
-                                        relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40 shrink-0
-                                        ${isActive
-                                                ? 'text-red-500 dark:text-red-400 bg-gray-50/50 dark:bg-gray-800'
-                                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}
-                                    `}
-                                    >
-                                        <Icon size={16} strokeWidth={isActive ? 2 : 1.5} className="w-4 h-4 md:w-4 md:h-4" />
-                                        <span className={`text-xs md:text-sm ${isActive ? 'font-medium' : 'font-light'}`}>{advancedTab.label}</span>
-                                    </button>
-                                );
-                            })()}
-                        </div>
-                        {/* 左侧核心模块结束 */}
-
-                        {/* 右侧工具栏 */}
-                        <div className="flex items-center gap-1 md:gap-1.5 ml-2 md:ml-4">
-                            <div className="w-px h-5 md:h-6 bg-gray-100 dark:bg-gray-700 mr-1 md:mr-2 relative z-40 shrink-0" />
-                            {/* Theme Toggle */}
-                            <button
-                                onClick={toggleTheme}
-                                className={`relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full transition-all z-40 shrink-0 ${currentConfig.iconText} ${currentConfig.iconHover}`}
-                                title={isDark ? '亮色模式' : '暗色模式'}
-                            >
-                                {isDark ? <Sun size={16} strokeWidth={1.5} /> : <Moon size={16} strokeWidth={1.5} />}
-                            </button>
-
-                            {/* Settings */}
-                            <button
-                                onClick={() => setIsDataModalOpen(true)}
-                                className={`relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full transition-all z-40 shrink-0 ${currentConfig.iconText} ${currentConfig.iconHover}`}
-                                title={t('navbar.dataManagement')}
-                            >
-                                <Settings size={16} strokeWidth={1.5} />
-                            </button>
-
-                            {/* Auth/Sync */}
-                            <div className="relative z-40 shrink-0">
-                                <button onClick={() => setIsAuthModalOpen(true)} className="focus:outline-none">
-                                    {user ? (
-                                        <SyncStatus
-                                            status={status}
-                                            themeColor={currentConfig.sync}
-                                        />
-                                    ) : (
-                                        <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-black dark:hover:bg-gray-100 transition-all whitespace-nowrap">
-                                            <Cloud size={14} />
-                                            <span className="text-xs md:text-sm hidden sm:inline">{t('navbar.cloudSync')}</span>
-                                            <span className="text-xs md:text-sm sm:hidden">{t('navbar.sync')}</span>
-                                        </div>
-                                    )}
+                                >
+                                    <Icon size={16} strokeWidth={isActive ? 2 : 1.5} className="w-4 h-4 md:w-4 md:h-4" />
+                                    <span className={`text-xs md:text-sm ${isActive ? 'font-medium' : 'font-light'}`}>{tab.label}</span>
                                 </button>
-                            </div>
+                            );
+                        })}
+
+                        {/* 进阶模块 - 需要用户开启 */}
+                        {showAdvancedFeatures && (() => {
+                            const Icon = advancedTab.icon;
+                            const isActive = location.pathname.startsWith(advancedTab.path);
+                            return (
+                                <button
+                                    key={advancedTab.id}
+                                    onClick={() => navigate(advancedTab.path)}
+                                    className={`
+                                        relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40 shrink-0
+                                        ${isActive
+                                            ? 'text-red-500 dark:text-red-400 bg-gray-50/50 dark:bg-gray-800'
+                                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}
+                                    `}
+                                >
+                                    <Icon size={16} strokeWidth={isActive ? 2 : 1.5} className="w-4 h-4 md:w-4 md:h-4" />
+                                    <span className={`text-xs md:text-sm ${isActive ? 'font-medium' : 'font-light'}`}>{advancedTab.label}</span>
+                                </button>
+                            );
+                        })()}
+
+                        <div className="w-px h-5 md:h-6 bg-gray-100 dark:bg-gray-700 mx-2 md:mx-4 relative z-40 shrink-0" />
+
+                        {/* Theme Toggle */}
+                        <button
+                            onClick={toggleTheme}
+                            className={`relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full transition-all z-40 shrink-0 ${currentConfig.iconText} ${currentConfig.iconHover}`}
+                            title={isDark ? '亮色模式' : '暗色模式'}
+                        >
+                            {isDark ? <Sun size={16} strokeWidth={1.5} /> : <Moon size={16} strokeWidth={1.5} />}
+                        </button>
+
+                        {/* Settings */}
+                        <button
+                            onClick={() => setIsDataModalOpen(true)}
+                            className={`relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full transition-all z-40 shrink-0 ${currentConfig.iconText} ${currentConfig.iconHover}`}
+                            title={t('navbar.dataManagement')}
+                        >
+                            <Settings size={16} strokeWidth={1.5} />
+                        </button>
+
+                        {/* Auth/Sync */}
+                        <div className="relative z-40 shrink-0">
+                            <button onClick={() => setIsAuthModalOpen(true)} className="focus:outline-none">
+                                {user ? (
+                                    <SyncStatus
+                                        status={status}
+                                        themeColor={currentConfig.sync}
+                                    />
+                                ) : (
+                                    <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-black dark:hover:bg-gray-100 transition-all whitespace-nowrap">
+                                        <Cloud size={14} />
+                                        <span className="text-xs md:text-sm hidden sm:inline">{t('navbar.cloudSync')}</span>
+                                        <span className="text-xs md:text-sm sm:hidden">{t('navbar.sync')}</span>
+                                    </div>
+                                )}
+                            </button>
                         </div>
                     </div>
                 </Spotlight>
