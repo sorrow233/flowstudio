@@ -119,7 +119,7 @@ const CommandCenterModule = () => {
             });
         }
 
-        setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [], category: 'general' });
+        setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [], category: selectedCategory });
         setIsAdding(false);
     };
 
@@ -328,7 +328,7 @@ const CommandCenterModule = () => {
                             {/* New Command Button */}
                             <button
                                 onClick={() => {
-                                    setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [], category: 'general' }); // Clear for new
+                                    setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [], category: selectedCategory }); // Use current selected category
                                     setNewTag({ label: '', value: '' });
                                     setEditingTagId(null);
                                     setIsAdding(true);
