@@ -65,21 +65,25 @@ export const parseRichText = (text) => {
             const match = part.match(/#!([^:]+):([^#]+)#/);
             if (match) {
                 const [, colorId, content] = match;
-                const colorConfig = COLOR_CONFIG.find(c => c.id === colorId) || COLOR_CONFIG[0];
-                const highlightColor = colorConfig.highlight || 'rgba(167, 139, 250, 0.5)';
-                // 笔触效果：椭圆形渐变模拟两端尖细
+                // Try finding by id or by index (if numeric)
+                const colorConfig = COLOR_CONFIG.find(c => c.id === colorId) ||
+                    (COLOR_CONFIG[parseInt(colorId)] ? COLOR_CONFIG[parseInt(colorId)] : COLOR_CONFIG[0]);
+                const highlightColor = colorConfig.highlight ? colorConfig.highlight.replace(/[\d.]+\)$/, '0.35)') : 'rgba(167, 139, 250, 0.3)';
+
+                // 纯 inline 渲染：确保不破坏文字流排版，解决换行和对齐问题
                 return (
                     <span
                         key={index}
-                        className="relative inline text-gray-800 dark:text-gray-100"
+                        className="relative text-gray-800 dark:text-gray-100"
                         style={{
-                            background: `radial-gradient(ellipse 100% 40% at center 80%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%)`,
-                            padding: '0 0.15em',
+                            background: `radial-gradient(ellipse 100% 40% at center 85%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%)`,
+                            padding: '0 0.1em',
                         }}
                     >
                         {content}
                     </span>
                 );
+
 
 
 
