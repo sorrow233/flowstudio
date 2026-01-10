@@ -63,7 +63,6 @@ const SyncStatus = ({ status, pendingCount = 0, themeColor }) => {
     return (
         <div className="group relative flex items-center justify-center">
             <motion.div
-                layout
                 className={`
                     flex items-center gap-2 px-3 py-1.5 rounded-full 
                     transition-colors duration-300 backdrop-blur-sm
@@ -72,7 +71,7 @@ const SyncStatus = ({ status, pendingCount = 0, themeColor }) => {
                 `}
             >
                 {config.icon}
-                <span className="text-xs font-medium tracking-wide">
+                <span className="text-xs font-medium tracking-wide min-w-[52px] text-center">
                     {config.text}
                 </span>
             </motion.div>
