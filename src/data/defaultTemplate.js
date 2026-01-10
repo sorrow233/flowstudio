@@ -8,7 +8,7 @@ export const DEFAULT_TEMPLATE = {
     inspirations: [
         {
             id: "welcome-001",
-            content: "你好啊，这里是FlowStudio 团队",
+            content: "#!pale-pink:你好啊#，这里是FlowStudio 团队",
             timestamp: Date.now()
         },
         {
@@ -33,7 +33,7 @@ export const DEFAULT_TEMPLATE = {
         },
         {
             id: "start-journey",
-            content: "现在，祝你开启心流之旅",
+            content: "#!pale-pink:现在#，祝你开启心流之旅",
             timestamp: Date.now() - 300000
         }
     ],
