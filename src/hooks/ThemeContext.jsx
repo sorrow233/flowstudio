@@ -20,20 +20,15 @@ export function useTheme() {
 
 export function ThemeProvider({ children }) {
     const [theme, setTheme] = useState(() => {
-        // 检查用户是否手动设置过，以及当时的系统主题
         const savedTheme = localStorage.getItem('theme');
-        const systemThemeAtOverride = localStorage.getItem('theme-system-at-override');
-        const currentSystemTheme = getSystemTheme();
+        const hasOverride = localStorage.getItem('theme-override') === 'true';
 
-        // 如果用户之前手动设置过，且当时的系统主题与现在相同，保持用户选择
-        if (savedTheme && systemThemeAtOverride === currentSystemTheme) {
+        if (hasOverride && savedTheme) {
+            // 用户有覆盖，保持用户选择
             return savedTheme;
         }
-
-        // 系统主题已变化，或从未手动设置过，清除覆盖并跟随系统
-        localStorage.removeItem('theme');
-        localStorage.removeItem('theme-system-at-override');
-        return currentSystemTheme;
+        // 没有覆盖，跟随系统
+        return getSystemTheme();
     });
 
     // 应用主题到 DOM
@@ -41,6 +36,7 @@ export function ThemeProvider({ children }) {
         const root = window.document.documentElement;
         root.classList.remove('light', 'dark');
         root.classList.add(theme);
+        localStorage.setItem('theme', theme);
     }, [theme]);
 
     // 监听系统主题变化
@@ -49,34 +45,48 @@ export function ThemeProvider({ children }) {
 
         const handleSystemThemeChange = (e) => {
             const newSystemTheme = e.matches ? 'dark' : 'light';
-            // 系统主题变化时，清除用户的覆盖，开始跟随系统
-            localStorage.removeItem('theme');
-            localStorage.removeItem('theme-system-at-override');
-            setTheme(newSystemTheme);
+            const hasOverride = localStorage.getItem('theme-override') === 'true';
+            const currentTheme = localStorage.getItem('theme');
+
+            if (hasOverride) {
+                // 用户有覆盖状态
+                if (newSystemTheme === currentTheme) {
+                    // 系统主题变得和用户选择一致了，清除覆盖，开始同步
+                    localStorage.removeItem('theme-override');
+                    // 主题不变，但现在是"跟随系统"状态
+                }
+                // 系统主题和用户选择不一致，保持用户选择，不做任何事
+            } else {
+                // 没有覆盖，正常跟随系统
+                setTheme(newSystemTheme);
+            }
         };
 
-        // 添加监听器
         mediaQuery.addEventListener('change', handleSystemThemeChange);
-
-        return () => {
-            mediaQuery.removeEventListener('change', handleSystemThemeChange);
-        };
+        return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
     }, []);
 
     const toggleTheme = () => {
-        // 用户手动切换时，记录当前系统主题，表示这是"豁免"期
         const currentSystemTheme = getSystemTheme();
         const newTheme = theme === 'light' ? 'dark' : 'light';
+
+        if (newTheme !== currentSystemTheme) {
+            // 用户选择了和系统不一样的主题，设置覆盖标记
+            localStorage.setItem('theme-override', 'true');
+        } else {
+            // 用户选择了和系统一样的主题，清除覆盖
+            localStorage.removeItem('theme-override');
+        }
         localStorage.setItem('theme', newTheme);
-        localStorage.setItem('theme-system-at-override', currentSystemTheme);
         setTheme(newTheme);
     };
 
     // 重置为跟随系统主题
     const useSystemTheme = () => {
-        localStorage.removeItem('theme');
-        localStorage.removeItem('theme-system-at-override');
-        setTheme(getSystemTheme());
+        localStorage.removeItem('theme-override');
+        const systemTheme = getSystemTheme();
+        localStorage.setItem('theme', systemTheme);
+        setTheme(systemTheme);
     };
 
     const value = {
@@ -85,8 +95,12 @@ export function ThemeProvider({ children }) {
         toggleTheme,
         setTheme: (newTheme) => {
             const currentSystemTheme = getSystemTheme();
+            if (newTheme !== currentSystemTheme) {
+                localStorage.setItem('theme-override', 'true');
+            } else {
+                localStorage.removeItem('theme-override');
+            }
             localStorage.setItem('theme', newTheme);
-            localStorage.setItem('theme-system-at-override', currentSystemTheme);
             setTheme(newTheme);
         },
         useSystemTheme,
