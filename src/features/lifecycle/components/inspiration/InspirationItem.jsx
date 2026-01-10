@@ -56,7 +56,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
             setIsCharging(false);
             setIsEditingContent(true);
             longPressTimer.current = null;
-        }, 1500);
+        }, 1000);
     };
 
     const cancelLongPress = () => {
