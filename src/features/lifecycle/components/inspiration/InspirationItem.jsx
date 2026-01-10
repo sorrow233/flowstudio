@@ -145,7 +145,9 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
             onDragStart={() => setIsDragging(true)}
             onDragEnd={(e, info) => {
                 setIsDragging(false);
-                if (info.offset.x < -350) {
+                // Trigger delete if dragged far enough OR flicked fast enough (velocity < -800)
+                // We add a minimum distance check (offset.x < -100) to prevent accidental small flicks
+                if (info.offset.x < -350 || (info.velocity.x < -800 && info.offset.x < -100)) {
                     onRemove(idea.id);
                 }
             }}
