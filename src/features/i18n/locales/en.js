@@ -296,29 +296,29 @@ export default {
     // Dev Stages (5 stages)
     devStages: {
         1: {
-            label: 'Skeleton',
-            title: 'Architectural Blueprint',
-            desc: 'Define the structural integrity, routing logic, and component hierarchy.',
+            label: 'Structure',
+            title: 'Project Architecture',
+            desc: 'Define the core structure, navigation logic, and basic building blocks.',
         },
         2: {
-            label: 'Functionality',
-            title: 'Core Mechanics & Logic',
-            desc: 'Implement primary business logic, data flows, and state management.',
+            label: 'Integration',
+            title: 'Logic & Mechanics',
+            desc: 'Connect the pieces, implement primary workflows, and handle data.',
         },
         3: {
-            label: 'Modules',
-            title: 'System Integration',
-            desc: 'Connect authentication, database bindings, and external API services.',
+            label: 'Enhancement',
+            title: 'System Refinement',
+            desc: 'Add advanced features, integrate external services, and polish UX.',
         },
         4: {
-            label: 'Optimization',
-            title: 'Performance & Polish',
-            desc: 'Refine UI/UX transitions, optimize re-renders, and handle edge cases.',
+            label: 'Experience',
+            title: 'Polishing & Detail',
+            desc: 'Refine transitions, optimize performance, and handle edge cases.',
         },
         5: {
-            label: 'Completion',
-            title: 'Production Readiness',
-            desc: 'Final QA, build verification, and deployment to production.',
+            label: 'Launch',
+            title: 'Ready for Growth',
+            desc: 'Final verification, quality assurance, and deployment to users.',
         },
     },
 
@@ -397,11 +397,11 @@ export default {
     // Command Categories
     categories: {
         general: 'General',
-        frontend: 'Frontend',
-        backend: 'Backend',
-        database: 'Database',
-        devops: 'DevOps',
-        testing: 'Testing',
+        frontend: 'Life',
+        backend: 'Work',
+        database: 'Finance',
+        devops: 'Health',
+        testing: 'Travel',
         final: 'Final',
     },
 
@@ -412,15 +412,15 @@ export default {
             sub: 'Clarity',
         },
         dogfood: {
-            text: 'Will you use it yourself frequently after building it?',
-            sub: 'Dogfooding',
+            text: 'If it materializes, would you be its most loyal user?',
+            sub: 'Personal Value',
         },
         impact: {
-            text: 'Can it change your life in the long term?',
-            sub: 'Long-term Impact',
+            text: 'Can it improve your life or work in the long term?',
+            sub: 'Long-term Improvement',
         },
         value: {
-            text: 'Do you believe this project can truly help others?',
+            text: 'Do you believe this idea can truly help others?',
             sub: 'Altruism',
         },
     },

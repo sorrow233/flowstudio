@@ -309,32 +309,32 @@ export default {
         renameHint: '双击重命名',
     },
 
-    // 开发阶段（5阶段）
+    // 原始阶段（5阶段）
     devStages: {
         1: {
-            label: '骨架',
-            title: '架构蓝图',
-            desc: '定义结构完整性、路由逻辑和组件层次',
+            label: '结构',
+            title: '项目架构',
+            desc: '定义核心结构、导航逻辑及基础模块',
         },
         2: {
-            label: '功能',
-            title: '核心逻辑',
-            desc: '实现主要业务逻辑、数据流和状态管理',
+            label: '集成',
+            title: '逻辑交互',
+            desc: '梳理业务流程，实现核心功能与数据联动',
         },
         3: {
-            label: '模块',
-            title: '系统集成',
-            desc: '连接认证、数据库绑定和外部API服务',
+            label: '增强',
+            title: '系统精修',
+            desc: '添加进阶功能，优化交互体验与外部集成',
         },
         4: {
-            label: '优化',
-            title: '性能打磨',
-            desc: '精细化UI/UX过渡效果、优化渲染、处理边缘情况',
+            label: '感官',
+            title: '细节打磨',
+            desc: '精细化 UI/UX 过渡，优化性能并处理边缘情况',
         },
         5: {
-            label: '完成',
-            title: '生产就绪',
-            desc: '最终QA、构建验证和生产环境部署',
+            label: '发布',
+            title: '蓄势待发',
+            desc: '最终 QA 验证、构建测试并准备面向用户',
         },
     },
 
@@ -413,11 +413,11 @@ export default {
     // 命令分类
     categories: {
         general: '通用',
-        frontend: '前端',
-        backend: '后端',
-        database: '数据库',
-        devops: 'DevOps',
-        testing: '测试',
+        frontend: '生活',
+        backend: '工作',
+        database: '财务',
+        devops: '健康',
+        testing: '旅行',
         final: '终稿',
     },
 
@@ -428,16 +428,16 @@ export default {
             sub: '清晰度',
         },
         dogfood: {
-            text: '开发出来之后，你自己也会经常用它吗？',
-            sub: '自用需求',
+            text: '如果它能实现，你会成为它最忠实的用户吗？',
+            sub: '自用价值',
         },
         impact: {
-            text: '它能在未来长期改变你的生活吗？',
-            sub: '长期价值',
+            text: '它能在未来长期改善你的生活或工作吗？',
+            sub: '长期改善',
         },
         value: {
-            text: '你是否相信这个项目能够真正帮助到大家？',
-            sub: '利他之心',
+            text: '你是否相信这个创意能够真正帮助到他人？',
+            sub: '利他主义',
         },
     },
 

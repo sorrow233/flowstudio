@@ -9,33 +9,33 @@ export const STORAGE_KEYS = {
 export const DEV_STAGES = [
     {
         id: 1,
-        label: 'Skeleton',
-        title: 'Architectural Blueprint',
-        desc: 'Define the structural integrity, routing logic, and component hierarchy.',
+        label: 'Structure',
+        title: 'Project Architecture',
+        desc: 'Define the core structure, navigation logic, and basic building blocks.',
     },
     {
         id: 2,
-        label: 'Functionality',
-        title: 'Core Mechanics & Logic',
-        desc: 'Implement primary business logic, data flows, and state management.',
+        label: 'Integration',
+        title: 'Logic & Mechanics',
+        desc: 'Connect the pieces, implement primary workflows, and handle data.',
     },
     {
         id: 3,
-        label: 'Modules',
-        title: 'System Integration',
-        desc: 'Connect authentication, database bindings, and external API services.',
+        label: 'Enhancement',
+        title: 'System Refinement',
+        desc: 'Add advanced features, integrate external services, and polish UX.',
     },
     {
         id: 4,
-        label: 'Optimization',
-        title: 'Performance & Polish',
-        desc: 'Refine UI/UX transitions, optimize re-renders, and handle edge cases.',
+        label: 'Experience',
+        title: 'Polishing & Detail',
+        desc: 'Refine transitions, optimize performance, and handle edge cases.',
     },
     {
         id: 5,
-        label: 'Completion',
-        title: 'Production Readiness',
-        desc: 'Final QA, build verification, and deployment to production.',
+        label: 'Launch',
+        title: 'Ready for Growth',
+        desc: 'Final verification, quality assurance, and deployment to users.',
     }
 ];
 
@@ -108,12 +108,11 @@ export const formatDate = (timestamp) => {
 
 export const COMMAND_CATEGORIES = [
     { id: 'general', label: 'General', color: 'bg-slate-400 text-white', textColor: 'text-slate-400', icon: 'LayoutGrid' },
-    { id: 'frontend', label: 'Frontend', color: 'bg-blue-400 text-white', textColor: 'text-blue-400', icon: 'Monitor' },
-    { id: 'backend', label: 'Backend', color: 'bg-emerald-400 text-white', textColor: 'text-emerald-400', icon: 'Server' },
-    { id: 'database', label: 'Database', color: 'bg-amber-400 text-white', textColor: 'text-amber-400', icon: 'Database' },
-    { id: 'devops', label: 'DevOps', color: 'bg-violet-400 text-white', textColor: 'text-violet-400', icon: 'Container' },
-    { id: 'testing', label: 'Testing', color: 'bg-rose-400 text-white', textColor: 'text-rose-400', icon: 'Beaker' },
-
+    { id: 'frontend', label: 'Life', color: 'bg-blue-400 text-white', textColor: 'text-blue-400', icon: 'Heart' },
+    { id: 'backend', label: 'Work', color: 'bg-emerald-400 text-white', textColor: 'text-emerald-400', icon: 'Briefcase' },
+    { id: 'database', label: 'Finance', color: 'bg-amber-400 text-white', textColor: 'text-amber-400', icon: 'Wallet' },
+    { id: 'devops', label: 'Health', color: 'bg-violet-400 text-white', textColor: 'text-violet-400', icon: 'Activity' },
+    { id: 'testing', label: 'Travel', color: 'bg-rose-400 text-white', textColor: 'text-rose-400', icon: 'Plane' },
 ];
 
 export const DEFAULT_PROJECT_IMAGES = [
@@ -139,17 +138,17 @@ export const QUESTIONS = [
     },
     {
         id: 'dogfood',
-        text: '开发出来之后，你自己也会经常用它吗？',
-        sub: '自用需求'
+        text: '如果它能实现，你会成为它最忠实的用户吗？',
+        sub: '自用价值'
     },
     {
         id: 'impact',
-        text: '它能在未来长期改变你的生活吗？',
-        sub: '长期价值'
+        text: '它能在未来长期改善你的生活或工作吗？',
+        sub: '长期改善'
     },
     {
         id: 'value',
-        text: '你是否相信这个项目能够真正帮助到大家？',
-        sub: '利他之心'
+        text: '你是否相信这个创意能够真正帮助到他人？',
+        sub: '利他主义'
     },
 ];

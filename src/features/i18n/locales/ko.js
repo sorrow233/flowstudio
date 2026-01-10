@@ -284,29 +284,29 @@ export default {
     // Development Stages (5 Stages)
     devStages: {
         1: {
-            label: '뼈대',
-            title: '아키텍처 청사진',
-            desc: '구조적 무결성, 라우팅 로직 및 컴포넌트 계층 구조 정의',
+            label: '구조',
+            title: '프로젝트 아키텍처',
+            desc: '핵심 구조, 내비게이션 로직 및 기본 빌딩 블록 정의',
         },
         2: {
-            label: '기능',
-            title: '핵심 로직',
-            desc: '주요 비즈니스 로직, 데이터 흐름 및 상태 관리 구현',
+            label: '통합',
+            title: '로직 및 메커니즘',
+            desc: '조각들을 연결하고, 주요 워크플로우를 구현하며, 데이터를 처리',
         },
         3: {
-            label: '모듈',
-            title: '시스템 통합',
-            desc: '인증, 데이터베이스 바인딩 및 외부 API 서비스 연결',
+            label: '강화',
+            title: '시스템 고도화',
+            desc: '고급 기능을 추가하고, 외부 서비스를 통합하며, 사용자 경험을 개선',
         },
         4: {
-            label: '최적화',
-            title: '성능 다듬기',
-            desc: 'UI/UX 전환 효과 개선, 렌더링 최적화, 엣지 케이스 처리',
+            label: '감각',
+            title: '디테일 및 다듬기',
+            desc: '전환 효과를 정교화하고, 성능을 최적화하며, 예외 상황을 처리',
         },
         5: {
-            label: '완료',
-            title: '프로덕션 준비 완료',
-            desc: '최종 QA, 빌드 검증 및 프로덕션 환경 배포',
+            label: '출시',
+            title: '성장을 위한 준비',
+            desc: '최종 검증 및 품질 보증을 완료하고, 사용자에게 배포할 준비 완료',
         },
     },
 
@@ -385,30 +385,30 @@ export default {
     // Command Categories
     categories: {
         general: '일반',
-        frontend: '프론트엔드',
-        backend: '백엔드',
-        database: '데이터베이스',
-        devops: 'DevOps',
-        testing: '테스트',
+        frontend: '생활',
+        backend: '업무',
+        database: '재무',
+        devops: '건강',
+        testing: '여행',
         final: '최종',
     },
 
-    // Soul Queries
+    // Soul Questions
     questions: {
         clarity: {
-            text: '자신이 진정으로 원하는 것이 무엇인지 명확하게 표현할 수 있습니까?',
+            text: '자신이 원하는 것이 무엇인지 명확하게 표현할 수 있습니까?',
             sub: '명확성',
         },
         dogfood: {
-            text: '개발한 후에, 본인 스스로도 자주 사용할 것 같습니까?',
-            sub: '자기 수요',
+            text: '그것이 실현된다면, 당신은 가장 충실한 사용자가 되겠습니까?',
+            sub: '자기 가치',
         },
         impact: {
-            text: '그것이 미래에 당신의 삶을 장기적으로 변화시킬 수 있습니까?',
-            sub: '장기적 가치',
+            text: '그것이 미래에 당신의 삶이나 업무를 장기적으로 개선할 수 있습니까?',
+            sub: '장기적 개선',
         },
         value: {
-            text: '이 프로젝트가 진정으로 사람들에게 도움이 될 것이라고 믿습니까?',
+            text: '이 아이디어가 진정으로 다른 사람들에게 도움이 될 것이라고 믿습니까?',
             sub: '이타심',
         },
     },
