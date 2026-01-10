@@ -11,7 +11,6 @@ import { version } from '../package.json';
 // Flow Studio - Force Hash Refresh
 console.log(`Flow Studio v${version} loaded`);
 
-import { SettingsProvider } from './hooks/SettingsContext';
 import { ThemeProvider } from './hooks/ThemeContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -20,9 +19,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <AuthProvider>
                 <SyncProvider>
                     <ThemeProvider>
-                        <SettingsProvider>
-                            <App />
-                        </SettingsProvider>
+                        <App />
                     </ThemeProvider>
                 </SyncProvider>
             </AuthProvider>

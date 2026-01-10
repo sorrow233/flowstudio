@@ -3,7 +3,6 @@ import { useTranslation } from '../i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, Upload, FileJson, AlertCircle, CheckCircle2, Loader2, Zap, Settings as SettingsIcon, Database, History, RotateCcw, Clock, ChevronLeft } from 'lucide-react';
 import { useSync } from '../sync/SyncContext';
-import { useSettings } from '../../hooks/SettingsContext';
 import { exportAllData, importData, validateImportData, downloadAsJson, readJsonFile } from './dataUtils';
 import { getLocalBackups } from '../sync/LocalBackupService';
 import Spotlight from '../../components/shared/Spotlight';
@@ -22,7 +21,6 @@ const DataManagementModal = ({ isOpen, onClose }) => {
     const fileInputRef = useRef(null);
 
     const { doc } = useSync();
-    const { showAdvancedFeatures, toggleAdvancedFeatures } = useSettings();
 
     // 加载备份列表
     useEffect(() => {

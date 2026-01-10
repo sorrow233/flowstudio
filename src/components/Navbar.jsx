@@ -7,8 +7,6 @@ import {
     Clock,
     Code2,
     CheckCircle2,
-    Zap,
-    Briefcase,
     Terminal,
     Cloud,
     Settings,
@@ -22,7 +20,6 @@ import { useSync } from '../features/sync/SyncContext';
 import SyncStatus from '../features/sync/SyncStatus';
 import { DataManagementModal } from '../features/settings';
 import { useTheme } from '../hooks/ThemeContext';
-import { useSettings } from '../hooks/SettingsContext';
 import { useTranslation } from '../features/i18n';
 
 const tabIcons = {
@@ -30,8 +27,6 @@ const tabIcons = {
     pending: Clock,
     primary: Code2,
     advanced: CheckCircle2,
-    final: Zap,
-    commercial: Briefcase,
     command: Terminal,
 };
 
@@ -42,7 +37,6 @@ const Navbar = () => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isDataModalOpen, setIsDataModalOpen] = useState(false);
     const { isDark, toggleTheme } = useTheme();
-    const { showAdvancedFeatures } = useSettings();
     const { t } = useTranslation();
 
     // 主流程：灵感 → 蓝图 → 萌芽 → 心流(Flow) → 进阶
@@ -54,12 +48,6 @@ const Navbar = () => {
         { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' },
     ];
 
-    // 额外流程：终稿 -> 商业化
-    const extraTabs = [
-        { id: 'final', label: t('navbar.final'), icon: tabIcons.final, path: '/final' }, // Icon: Check
-        { id: 'commercial', label: t('navbar.commercial'), icon: tabIcons.commercial, path: '/commercial' },
-    ];
-
     const { status } = useSync();
 
     // Dynamic Theme Config based on active tab
@@ -69,7 +57,6 @@ const Navbar = () => {
         if (path.startsWith('/sprout')) return 'green';
         if (path.startsWith('/flow')) return 'purple';
         if (path.startsWith('/advanced')) return 'red';
-        if (path.startsWith('/commercial')) return 'amber';
         if (path.startsWith('/blueprint')) return 'sky';
         return 'default';
     };
@@ -100,12 +87,6 @@ const Navbar = () => {
             iconText: 'text-red-500 dark:text-red-400',
             iconHover: 'hover:bg-red-50 dark:hover:bg-red-900/20',
             sync: { dot: 'bg-red-500', shadow: 'shadow-[0_0_8px_rgba(239,68,68,0.4)]', text: 'text-red-600', bg: 'bg-red-50/50 dark:bg-red-900/20' }
-        },
-        amber: {
-            spotlight: isDark ? "rgba(245, 158, 11, 0.15)" : "rgba(245, 158, 11, 0.1)",
-            iconText: 'text-amber-500 dark:text-amber-400',
-            iconHover: 'hover:bg-amber-50 dark:hover:bg-amber-900/20',
-            sync: { dot: 'bg-amber-500', shadow: 'shadow-[0_0_8px_rgba(245,158,11,0.4)]', text: 'text-amber-600', bg: 'bg-amber-50/50 dark:bg-amber-900/20' }
         },
         sky: {
             spotlight: isDark ? "rgba(14, 165, 233, 0.15)" : "rgba(14, 165, 233, 0.1)", // Sky-500
@@ -162,43 +143,6 @@ const Navbar = () => {
                                 </button>
                             );
                         })}
-
-                        {/* 分割线 - 主流程与其他流程分界 */}
-                        {showAdvancedFeatures && (
-                            <>
-                                <div className="w-px h-5 md:h-6 bg-gray-200 dark:bg-gray-600 mx-2 md:mx-4 relative z-40 shrink-0" />
-
-                                {/* 其他流程（终稿、商业化） */}
-                                {extraTabs.map((tab) => {
-                                    const Icon = tab.icon;
-                                    const isActive = location.pathname.startsWith(tab.path);
-
-                                    // Define active colors for each tab
-                                    const activeColors = {
-                                        final: 'text-gray-900 dark:text-white',
-                                        commercial: 'text-amber-500 dark:text-amber-400',
-                                    };
-
-                                    const activeColorClass = activeColors[tab.id] || 'text-gray-900 dark:text-white';
-
-                                    return (
-                                        <button
-                                            key={tab.id}
-                                            onClick={() => navigate(tab.path)}
-                                            className={`
-                                                relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-40 shrink-0
-                                                ${isActive
-                                                    ? `${activeColorClass} bg-gray-50/50 dark:bg-gray-800`
-                                                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}
-                                            `}
-                                        >
-                                            <Icon size={16} strokeWidth={isActive ? 2 : 1.5} className="w-4 h-4 md:w-4 md:h-4" />
-                                            <span className={`text-xs md:text-sm ${isActive ? 'font-medium' : 'font-light'}`}>{tab.label}</span>
-                                        </button>
-                                    );
-                                })}
-                            </>
-                        )}
 
                         <div className="w-px h-5 md:h-6 bg-gray-100 dark:bg-gray-700 mx-2 md:mx-4 relative z-40 shrink-0" />
 
