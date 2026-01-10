@@ -63,12 +63,12 @@ export const parseRichText = (text) => {
                 return (
                     <span
                         key={index}
-                        className={`${colorConfig.dot} bg-opacity-20 dark:bg-opacity-30 px-1.5 py-0.5 rounded-md mx-0.5 text-gray-900 dark:text-gray-100 border border-current border-opacity-10`}
-                        style={{ display: 'inline-block', lineHeight: '1.2' }}
+                        className={`${colorConfig.dot} bg-opacity-30 dark:bg-opacity-40 px-1 py-0.5 rounded text-gray-800 dark:text-gray-100`}
                     >
                         {content}
                     </span>
                 );
+
             }
         }
         // Inline Code: `...`

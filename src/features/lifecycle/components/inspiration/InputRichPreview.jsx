@@ -17,15 +17,20 @@ const highlightText = (text) => {
         if (part.startsWith('#!') && part.endsWith('#')) {
             const match = part.match(/#!([^:]+):([^#]+)#/);
             if (match) {
-                const [, colorId, content] = match;
+                const [fullMatch, colorId, content] = match;
                 const colorConfig = COLOR_CONFIG.find(c => c.id === colorId) || COLOR_CONFIG[0];
+                const prefix = `#!${colorId}:`;
+                const suffix = '#';
                 return (
-                    <span
-                        key={index}
-                        className={`${colorConfig.dot} bg-opacity-20 dark:bg-opacity-30 rounded-md ring-1 ring-inset ring-black/5 dark:ring-white/5`}
-                        style={{ fontStyle: 'normal' }}
-                    >
-                        {part}
+                    <span key={index} style={{ fontStyle: 'normal' }}>
+                        {/* 前缀标记：透明占位 */}
+                        <span style={{ color: 'transparent' }}>{prefix}</span>
+                        {/* 内容：带背景色 */}
+                        <span className={`${colorConfig.dot} bg-opacity-30 dark:bg-opacity-40 rounded px-0.5`}>
+                            {content}
+                        </span>
+                        {/* 后缀标记：透明占位 */}
+                        <span style={{ color: 'transparent' }}>{suffix}</span>
                     </span>
                 );
             }
