@@ -25,14 +25,11 @@ const highlightText = (text) => {
                     <span key={index} style={{ fontStyle: 'normal' }}>
                         {/* 前缀标记：完全隐藏但保留占位 */}
                         <span style={{ opacity: 0 }}>{prefix}</span>
-                        {/* 内容：蜡笔荧光笔效果 */}
+                        {/* 内容：一笔带过笔触效果 */}
                         <span
                             style={{
-                                background: `linear-gradient(-2deg, transparent 0%, ${colorConfig.highlight || 'rgba(167, 139, 250, 0.5)'} 8%, ${colorConfig.highlight || 'rgba(167, 139, 250, 0.5)'} 92%, transparent 100%)`,
-                                backgroundSize: '100% 85%',
-                                backgroundPosition: 'center 60%',
-                                backgroundRepeat: 'no-repeat',
-                                borderRadius: '2px',
+                                background: `radial-gradient(ellipse 100% 40% at center 80%, ${colorConfig.highlight || 'rgba(167, 139, 250, 0.5)'} 0%, ${colorConfig.highlight || 'rgba(167, 139, 250, 0.5)'} 70%, transparent 100%)`,
+                                padding: '0 0.15em',
                             }}
                         >
                             {content}
@@ -41,6 +38,7 @@ const highlightText = (text) => {
                         <span style={{ opacity: 0 }}>{suffix}</span>
                     </span>
                 );
+
 
 
             }
