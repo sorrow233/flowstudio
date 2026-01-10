@@ -11,6 +11,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
     const [isDragging, setIsDragging] = React.useState(false);
     const [isEditingNote, setIsEditingNote] = React.useState(false);
     const [isEditingContent, setIsEditingContent] = React.useState(false);
+    const [exitDirection, setExitDirection] = React.useState(null); // 'up' for archive, 'left' for delete
     const [noteDraft, setNoteDraft] = React.useState(idea.note || '');
     const [contentDraft, setContentDraft] = React.useState(idea.content || '');
     const inputRef = React.useRef(null);
@@ -116,12 +117,14 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                 setIsDragging(false);
                 // Up swipe: Archive (only in main view)
                 if (!isArchiveView && (info.offset.y < -100 || (info.velocity.y < -400 && info.offset.y < -40))) {
-                    onArchive?.(idea.id);
+                    setExitDirection('up');
+                    setTimeout(() => onArchive?.(idea.id), 50);
                     return;
                 }
                 // Left swipe: Delete
                 if (info.offset.x < -200 || (info.velocity.x < -400 && info.offset.x < -50)) {
-                    onRemove(idea.id);
+                    setExitDirection('left');
+                    setTimeout(() => onRemove(idea.id), 50);
                 }
                 // Right swipe: Edit
                 else if (info.offset.x > 150 || (info.velocity.x > 400 && info.offset.x > 50)) {
@@ -136,7 +139,10 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                 x: 0
             }}
             transition={{ x: { type: "spring", stiffness: 500, damping: 30 }, y: { type: "spring", stiffness: 500, damping: 30 } }}
-            exit={{ opacity: 0, y: -400, scale: 0.8, transition: { duration: 0.3, ease: "easeIn" } }}
+            exit={exitDirection === 'up'
+                ? { opacity: 0, y: -400, scale: 0.8, transition: { duration: 0.3, ease: "easeIn" } }
+                : { opacity: 0, x: -400, scale: 0.9, transition: { duration: 0.25, ease: "easeIn" } }
+            }
             layout
             className="relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 touch-none"
         >
