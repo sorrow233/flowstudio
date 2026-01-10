@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from '../../../i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sprout, X, ArrowRight, Sun, Sparkles, CheckCircle2, Scroll, Feather, LayoutGrid, Monitor, Server, Database, Container, Beaker, Terminal, Globe, Smartphone, Cloud, Box, Cpu } from 'lucide-react';
 import { COMMAND_CATEGORIES, QUESTIONS } from '../../../../utils/constants';
 
 const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose, categories = COMMAND_CATEGORIES }) => {
+    const { t } = useTranslation();
     // Local state for Vow to support IME (Chinese Input) properly
     const [localVow, setLocalVow] = useState(project.foundingReason || '');
     const [localTitle, setLocalTitle] = useState(project.title || '');
@@ -140,7 +142,7 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose, 
                                             {ans ? <CheckCircle2 size={14} /> : <X size={14} />}
                                         </div>
                                         <span className={`text-sm font-medium ${ans ? 'text-emerald-900 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'}`}>
-                                            {q.text}
+                                            {t(`questions.${q.id}.text`)}
                                         </span>
                                     </div>
                                     <button
@@ -161,9 +163,9 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose, 
                                         <div>
                                             <h4 className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-widest mb-2 flex items-center gap-1">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                                                Question {i + 1} / 4
+                                                {t('common.question')} {i + 1} / 4
                                             </h4>
-                                            <p className="text-xl text-gray-800 dark:text-gray-200 font-light leading-relaxed">{q.text}</p>
+                                            <p className="text-xl text-gray-800 dark:text-gray-200 font-light leading-relaxed">{t(`questions.${q.id}.text`)}</p>
                                         </div>
                                     </div>
 
