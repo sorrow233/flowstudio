@@ -378,11 +378,15 @@ export class SyncEngine {
     /**
      * 立即推送数据到云端（跳过防抖）
      * 用于需要即时同步的页面，如 Inspiration
+     * 使用 setTimeout(0) 确保在 Y.js update 事件触发后执行
      */
     immediateSync() {
-        if (!this.isDirty || !this.userId || !navigator.onLine) return;
-        clearTimeout(this.pushTimeout);
-        this.tryPush();
+        // 使用 setTimeout(0) 让 Y.js 的 update 事件先触发并设置 isDirty
+        setTimeout(() => {
+            if (!this.isDirty || !this.userId || !navigator.onLine) return;
+            clearTimeout(this.pushTimeout);
+            this.tryPush();
+        }, 0);
     }
 
     getStatus() { return { status: this.status, pendingCount: this.pendingCount }; }
