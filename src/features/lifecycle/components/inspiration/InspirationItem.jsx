@@ -144,7 +144,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
                     z-10
                 `}
                 onClick={() => {
-                    if (isDragging) return;
+                    if (isDragging || isEditingContent) return;
                     if (!window.getSelection().toString()) {
                         onCopy(idea.content, idea.id);
                     }
@@ -196,7 +196,7 @@ const InspirationItem = ({ idea, onRemove, onCopy, onUpdateColor, onUpdateNote, 
 
                     <div className="flex-1 min-w-0">
                         {isEditingContent ? (
-                            <div className="relative">
+                            <div className="relative" onClick={(e) => e.stopPropagation()}>
                                 <RichTextInput
                                     ref={contentTextareaRef}
                                     value={contentDraft}

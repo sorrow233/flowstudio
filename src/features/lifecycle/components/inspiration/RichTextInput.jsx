@@ -9,6 +9,7 @@ const RichTextInput = forwardRef(({
     value,
     onChange,
     onKeyDown,
+    onBlur,
     placeholder,
     className,
     style,
@@ -204,6 +205,7 @@ const RichTextInput = forwardRef(({
             onPaste={handlePaste}
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
+            onBlur={onBlur}
             data-placeholder={placeholder}
             spellCheck="false"
             autoCorrect="off"
