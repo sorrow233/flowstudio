@@ -59,8 +59,8 @@ const SwipeableQuestionCard = ({ question, index, total, isFirstCard, onAnswer, 
                     <p className="text-xl text-gray-800 dark:text-gray-200 font-light leading-relaxed">{t(`questions.${question.id}.text`)}</p>
                 </div>
 
-                {/* Swipe Tutorial - Only on first card */}
-                {isFirstCard && (
+                {/* Swipe Tutorial - Only on question 1/5, never again */}
+                {index === 0 && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
