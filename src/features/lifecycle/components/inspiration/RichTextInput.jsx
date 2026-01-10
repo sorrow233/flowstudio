@@ -38,6 +38,25 @@ const RichTextInput = forwardRef(({
             const colorConfig = COLOR_CONFIG.find(c => c.id === colorId);
             if (!colorConfig) return false;
 
+            // 检查选中内容是否在已有颜色 span 内
+            let parentColorSpan = null;
+            let node = range.commonAncestorContainer;
+            while (node && node !== editorRef.current) {
+                if (node.nodeType === Node.ELEMENT_NODE && node.classList?.contains('colored-text')) {
+                    parentColorSpan = node;
+                    break;
+                }
+                node = node.parentNode;
+            }
+
+            // 如果选中的内容在颜色 span 内，更新颜色而不是嵌套
+            if (parentColorSpan) {
+                parentColorSpan.style.color = colorConfig.text || colorConfig.highlight;
+                parentColorSpan.dataset.colorId = colorId;
+                handleInput();
+                return true;
+            }
+
             // 创建带颜色的 span
             const coloredSpan = document.createElement('span');
             coloredSpan.style.color = colorConfig.text || colorConfig.highlight;
@@ -88,7 +107,8 @@ const RichTextInput = forwardRef(({
                     result += '\n';
                 } else if (node.classList?.contains('colored-text')) {
                     const colorId = node.dataset.colorId;
-                    const innerText = htmlToMarkup(node);
+                    // 重要：提取纯文本内容，避免嵌套标记
+                    const innerText = node.textContent;
                     result += `#!${colorId}:${innerText}#`;
                 } else if (node.tagName === 'DIV') {
                     // DIV 通常表示新行
