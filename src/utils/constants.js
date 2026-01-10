@@ -138,8 +138,8 @@ export const QUESTIONS = [
     },
     {
         id: 'dogfood',
-        text: '开发出来之后，你自己也会经常用它吗？',
-        sub: '自用需求'
+        text: '如果它能实现，你会得到持续的开心吗？',
+        sub: '持续快乐'
     },
     {
         id: 'impact',
@@ -148,7 +148,7 @@ export const QUESTIONS = [
     },
     {
         id: 'value',
-        text: '你是否相信这个项目能够真正帮助到大家？',
-        sub: '利他之心'
+        text: '你是否相信这个创意能够真正改变你的生活？',
+        sub: '生活改变'
     },
 ];
