@@ -38,9 +38,14 @@ function ThemeProviderInner({ children }) {
 
     // 从云端同步主题设置
     useEffect(() => {
-        if (preferences?.theme && preferences?.themeOverride !== undefined) {
+        console.log('[ThemeSync] preferences changed:', preferences);
+
+        // 只要云端有主题设置就应用
+        if (preferences?.theme) {
             const syncedTheme = preferences.theme;
-            const syncedOverride = preferences.themeOverride;
+            const syncedOverride = preferences.themeOverride ?? true; // 默认为 true（用户手动设置）
+
+            console.log('[ThemeSync] Applying synced theme:', syncedTheme, 'override:', syncedOverride);
 
             // 更新本地存储
             localStorage.setItem('theme', syncedTheme);
@@ -50,12 +55,8 @@ function ThemeProviderInner({ children }) {
                 localStorage.removeItem('theme-override');
             }
 
-            // 如果有覆盖，使用同步的主题；否则跟随系统
-            if (syncedOverride) {
-                setThemeState(syncedTheme);
-            } else {
-                setThemeState(getSystemTheme());
-            }
+            // 应用主题
+            setThemeState(syncedTheme);
         }
     }, [preferences?.theme, preferences?.themeOverride]);
 
@@ -98,6 +99,8 @@ function ThemeProviderInner({ children }) {
         const newTheme = theme === 'light' ? 'dark' : 'light';
         const hasOverride = newTheme !== currentSystemTheme;
 
+        console.log('[ThemeSync] Toggle theme:', newTheme, 'override:', hasOverride, 'doc:', !!doc);
+
         if (hasOverride) {
             localStorage.setItem('theme-override', 'true');
         } else {
@@ -108,8 +111,11 @@ function ThemeProviderInner({ children }) {
 
         // 同步到云端
         if (doc) {
+            console.log('[ThemeSync] Writing to cloud...');
             set('theme', newTheme);
             set('themeOverride', hasOverride);
+        } else {
+            console.warn('[ThemeSync] No doc available, cannot sync!');
         }
     };
 
