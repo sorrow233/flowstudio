@@ -16,8 +16,13 @@ export const useImportQueue = (userId, addIdea, ideasCount, getNextColorIndex) =
     const processedRef = useRef(false);
 
     useEffect(() => {
+        console.debug('[ImportQueue] Checking queue for user:', userId);
+
         // 只处理一次，避免重复导入
-        if (!userId || !addIdea || processedRef.current) return;
+        if (!userId || !addIdea || processedRef.current) {
+            if (!userId) console.debug('[ImportQueue] Skipping: No userId provided');
+            return;
+        }
 
         const processQueue = async () => {
             try {
