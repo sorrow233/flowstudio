@@ -49,7 +49,7 @@ export const COLOR_CONFIG = [
 export const getColorConfig = (index) => COLOR_CONFIG[index % COLOR_CONFIG.length];
 
 // Helper for parsing rich text
-export const parseRichText = (text) => {
+export const parseRichText = (text, hideTags = false) => {
     if (!text) return null;
 
     const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]|#![^:]+:[^#]+#)/g);
@@ -90,6 +90,7 @@ export const parseRichText = (text) => {
             );
         }
         if (part.startsWith('[') && part.endsWith(']')) {
+            if (hideTags) return <span key={index}>{part}</span>; // Render as plain text when hidden
             const tagName = part.slice(1, -1);
             return (
                 <span

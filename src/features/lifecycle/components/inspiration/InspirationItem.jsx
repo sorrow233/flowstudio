@@ -7,7 +7,7 @@ import { COLOR_CONFIG, getColorConfig, parseRichText } from './InspirationUtils'
 
 // COLOR_CONFIG, getColorConfig, and parseRichText are now imported from InspirationUtils.js
 
-const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onUpdateNote, onUpdateContent, onToggleComplete, isArchiveView = false }) => {
+const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onUpdateNote, onUpdateContent, onToggleComplete, isArchiveView = false, copiedId }) => {
     const [isDragging, setIsDragging] = React.useState(false);
     const [isEditingContent, setIsEditingContent] = React.useState(false);
     const [exitDirection, setExitDirection] = React.useState(null); // 'right' for archive, 'left' for delete
@@ -238,7 +238,20 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                     </div>
                 </div>
 
-                {/* Copied Indicator Removed */}
+                {/* Copied Indicator */}
+                <AnimatePresence>
+                    {copiedId === idea.id && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.8, y: -10 }}
+                            className="absolute top-4 right-4 flex items-center gap-1.5 px-2.5 py-1 bg-pink-500 text-white rounded-full shadow-lg shadow-pink-200/50 dark:shadow-pink-900/40 z-20 pointer-events-none"
+                        >
+                            <Check size={12} strokeWidth={3} />
+                            <span className="text-[10px] font-bold uppercase tracking-wider">{t('common.copied', 'Copied')}</span>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* Note Display - Outside the Card */}

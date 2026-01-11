@@ -12,6 +12,7 @@ const InspirationArchiveModule = () => {
     const navigate = useNavigate();
     const { doc, immediateSync } = useSync();
     const { projects: allProjects, updateProject, removeProject } = useSyncedProjects(doc, 'all_projects');
+    const [copiedId, setCopiedId] = React.useState(null);
 
     const archivedIdeas = useMemo(() =>
         allProjects
@@ -27,6 +28,16 @@ const InspirationArchiveModule = () => {
     const handleDelete = (id) => {
         removeProject(id);
         immediateSync?.();
+    };
+
+    const handleCopy = async (content, id) => {
+        try {
+            await navigator.clipboard.writeText(content);
+            setCopiedId(id);
+            setTimeout(() => setCopiedId(null), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
     };
 
     return (
@@ -67,7 +78,7 @@ const InspirationArchiveModule = () => {
                                 idea={idea}
                                 onRemove={handleDelete}
                                 onArchive={handleRestore} // Right swipe restores in archive view
-                                onCopy={() => { }} // Disabled or handled via click internally
+                                onCopy={handleCopy}
                                 onToggleComplete={(id, completed) => {
                                     updateProject(id, { completed });
                                     immediateSync?.();
@@ -76,6 +87,7 @@ const InspirationArchiveModule = () => {
                                 onUpdateContent={() => { }}
                                 onUpdateColor={() => { }}
                                 isArchiveView={true}
+                                copiedId={copiedId}
                             />
                         ))
                     ) : (
