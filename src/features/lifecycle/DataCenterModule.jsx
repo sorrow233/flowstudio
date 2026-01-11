@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
+    BarChart3,
+    Lightbulb,
     Terminal,
     Hash,
     Sparkles,
