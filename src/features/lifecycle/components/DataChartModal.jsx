@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, TrendingUp } from 'lucide-react';
+import { X, Calendar, TrendingUp, Sparkles } from 'lucide-react';
 
 const DataChartModal = ({ isOpen, onClose, data }) => {
     const [view, setView] = useState('daily'); // daily, weekly, monthly
