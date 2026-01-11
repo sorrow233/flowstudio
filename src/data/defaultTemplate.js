@@ -41,6 +41,27 @@ export const DEFAULT_TEMPLATE = {
             content: "#!pale-pink:现在，祝你开启心流之旅#",
             colorIndex: 0,
             timestamp: Date.now() - 300000
+        },
+        {
+            id: "test-week-1",
+            content: "这是 1 周之前产生的灵感 [测试标签]",
+            note: "这是 1 周之前的备注",
+            colorIndex: 1,
+            timestamp: Date.now() - 8 * 24 * 60 * 60 * 1000
+        },
+        {
+            id: "test-week-2",
+            content: "这是 2 周之前产生的灵感 #!pale-green:通过 ID 快速跳转#",
+            note: "这是 2 周之前的备注",
+            colorIndex: 2,
+            timestamp: Date.now() - 15 * 24 * 60 * 60 * 1000
+        },
+        {
+            id: "test-week-3",
+            content: "这是 3 周之前产生的灵感 **加粗文本**",
+            note: "这是 3 周之前的备注",
+            colorIndex: 4,
+            timestamp: Date.now() - 22 * 24 * 60 * 60 * 1000
         }
     ],
 
