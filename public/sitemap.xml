@@ -1,356 +1,325 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
   <url>
-    <loc>https://flowstudio.catzz.work/</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work"/>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/" />
   </url>
   <url>
     <loc>https://flowstudio.catzz.work/en</loc>
-    <lastmod>2026-01-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work"/>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/" />
   </url>
   <url>
     <loc>https://flowstudio.catzz.work/ja</loc>
-    <lastmod>2026-01-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work"/>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/" />
   </url>
   <url>
     <loc>https://flowstudio.catzz.work/ko</loc>
-    <lastmod>2026-01-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work"/>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/" />
   </url>
   <url>
     <loc>https://flowstudio.catzz.work/inspiration</loc>
-    <lastmod>2026-01-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/inspiration"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/inspiration" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/inspiration" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/inspiration" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/inspiration" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/inspiration" />
   </url>
   <url>
     <loc>https://flowstudio.catzz.work/en/inspiration</loc>
-    <lastmod>2026-01-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/inspiration"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/inspiration" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/inspiration" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/inspiration" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/inspiration" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/inspiration" />
   </url>
   <url>
     <loc>https://flowstudio.catzz.work/ja/inspiration</loc>
-    <lastmod>2026-01-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/inspiration"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/inspiration" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/inspiration" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/inspiration" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/inspiration" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/inspiration" />
   </url>
   <url>
     <loc>https://flowstudio.catzz.work/ko/inspiration</loc>
-    <lastmod>2026-01-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/inspiration"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/inspiration"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/inspiration" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/inspiration" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/inspiration" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/inspiration" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/inspiration" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/pending</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/inspiration/archive</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/inspiration/archive"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/pending" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/pending" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/pending" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/pending" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/pending" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/en/pending</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/en/inspiration/archive</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/inspiration/archive"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/pending" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/pending" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/pending" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/pending" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/pending" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/ja/pending</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/ja/inspiration/archive</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/inspiration/archive"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/pending" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/pending" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/pending" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/pending" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/pending" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/ko/pending</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/ko/inspiration/archive</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/inspiration/archive"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/inspiration/archive"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/pending" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/pending" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/pending" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/pending" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/pending" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/primary</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/sprout</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/sprout"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/sprout"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/sprout"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/sprout"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/sprout"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/primary" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/primary" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/primary" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/primary" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/primary" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/en/primary</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/en/sprout</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/sprout"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/sprout"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/sprout"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/sprout"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/sprout"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/primary" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/primary" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/primary" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/primary" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/primary" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/ja/primary</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/ja/sprout</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/sprout"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/sprout"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/sprout"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/sprout"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/sprout"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/primary" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/primary" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/primary" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/primary" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/primary" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/ko/primary</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/ko/sprout</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/sprout"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/sprout"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/sprout"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/sprout"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/sprout"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/primary" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/primary" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/primary" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/primary" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/primary" />
+  </url>
+  <url>
+    <loc>https://flowstudio.catzz.work/flow</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/flow"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/flow"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/flow"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/flow"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/flow"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://flowstudio.catzz.work/en/flow</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/flow"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/flow"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/flow"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/flow"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/flow"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://flowstudio.catzz.work/ja/flow</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/flow"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/flow"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/flow"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/flow"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/flow"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://flowstudio.catzz.work/ko/flow</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/flow"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/flow"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/flow"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/flow"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/flow"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://flowstudio.catzz.work/advanced</loc>
-    <lastmod>2026-01-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/advanced"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/advanced"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/advanced"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/advanced"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/advanced"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/advanced" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/advanced" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/advanced" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/advanced" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/advanced" />
   </url>
   <url>
     <loc>https://flowstudio.catzz.work/en/advanced</loc>
-    <lastmod>2026-01-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/advanced"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/advanced"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/advanced"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/advanced"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/advanced"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/advanced" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/advanced" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/advanced" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/advanced" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/advanced" />
   </url>
   <url>
     <loc>https://flowstudio.catzz.work/ja/advanced</loc>
-    <lastmod>2026-01-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/advanced"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/advanced"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/advanced"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/advanced"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/advanced"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/advanced" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/advanced" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/advanced" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/advanced" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/advanced" />
   </url>
   <url>
     <loc>https://flowstudio.catzz.work/ko/advanced</loc>
-    <lastmod>2026-01-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/advanced"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/advanced"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/advanced"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/advanced"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/advanced"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/advanced" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/advanced" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/advanced" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/advanced" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/advanced" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/final</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/blueprint</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/blueprint"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/final" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/final" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/final" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/final" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/final" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/en/final</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/en/blueprint</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/blueprint"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/final" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/final" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/final" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/final" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/final" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/ja/final</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/ja/blueprint</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/blueprint"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/final" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/final" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/final" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/final" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/final" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/ko/final</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/ko/blueprint</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/blueprint"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/blueprint"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/final" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/final" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/final" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/final" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/final" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/commercial</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/data</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/data"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/data"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/data"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/data"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/data"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/commercial" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/commercial" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/commercial" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/commercial" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/commercial" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/en/commercial</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/en/data</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/data"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/data"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/data"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/data"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/data"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/commercial" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/commercial" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/commercial" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/commercial" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/commercial" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/ja/commercial</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/ja/data</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/data"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/data"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/data"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/data"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/data"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/commercial" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/commercial" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/commercial" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/commercial" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/commercial" />
   </url>
   <url>
-    <loc>https://flowstudio.catzz.work/ko/commercial</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://flowstudio.catzz.work/ko/data</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/data"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/data"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/data"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/data"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/data"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/commercial" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/commercial" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/commercial" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/commercial" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/commercial" />
-  </url>
-  <url>
-    <loc>https://flowstudio.catzz.work/commands</loc>
-    <lastmod>2026-01-11</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/commands" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/commands" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/commands" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/commands" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/commands" />
-  </url>
-  <url>
-    <loc>https://flowstudio.catzz.work/en/commands</loc>
-    <lastmod>2026-01-11</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/commands" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/commands" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/commands" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/commands" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/commands" />
-  </url>
-  <url>
-    <loc>https://flowstudio.catzz.work/ja/commands</loc>
-    <lastmod>2026-01-11</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/commands" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/commands" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/commands" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/commands" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/commands" />
-  </url>
-  <url>
-    <loc>https://flowstudio.catzz.work/ko/commands</loc>
-    <lastmod>2026-01-11</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/commands" />
-      <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/commands" />
-      <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/commands" />
-      <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/commands" />
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/commands" />
   </url>
 </urlset>

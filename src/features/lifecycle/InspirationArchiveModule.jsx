@@ -83,9 +83,18 @@ const InspirationArchiveModule = () => {
                                     updateProject(id, { completed });
                                     immediateSync?.();
                                 }}
-                                onUpdateNote={() => { }}
-                                onUpdateContent={() => { }}
-                                onUpdateColor={() => { }}
+                                onUpdateNote={(id, note) => {
+                                    updateProject(id, { note });
+                                    immediateSync?.();
+                                }}
+                                onUpdateContent={(id, content) => {
+                                    updateProject(id, { content });
+                                    immediateSync?.();
+                                }}
+                                onUpdateColor={(id, colorIndex) => {
+                                    updateProject(id, { colorIndex });
+                                    immediateSync?.();
+                                }}
                                 isArchiveView={true}
                                 copiedId={copiedId}
                             />

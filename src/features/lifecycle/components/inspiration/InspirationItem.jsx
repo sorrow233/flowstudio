@@ -41,13 +41,14 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
         onToggleComplete(idea.id, !isCompleted);
     };
 
-    // Long press (1 second) to enter edit mode
+    // Long press (1 second) to enter edit mode (or just visual feedback in archive)
     const handlePointerDown = () => {
-        if (isArchiveView) return;
         setIsCharging(true);
         longPressTimer.current = setTimeout(() => {
             setIsCharging(false);
-            setIsEditingContent(true);
+            if (!isArchiveView) {
+                setIsEditingContent(true);
+            }
             longPressTimer.current = null;
         }, 1000);
     };
@@ -115,8 +116,14 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                 setIsDragging(false);
                 // Right swipe: Archive (or Restore in archive view)
                 if (info.offset.x > 150 || (info.velocity.x > 400 && info.offset.x > 50)) {
-                    setExitDirection('right');
-                    onArchive?.(idea.id);
+                    if (isArchiveView) {
+                        // In Archive View, Right Swipe triggers Editing
+                        setIsEditingContent(true);
+                    } else {
+                        // In Normal View, Right Swipe triggers Archive
+                        setExitDirection('right');
+                        onArchive?.(idea.id);
+                    }
                     return;
                 }
                 // Left swipe: Delete
@@ -157,6 +164,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                     ${isDragging ? '' : `hover:shadow-[0_0_20px_rgba(244,114,182,0.2)] hover:border-pink-200 dark:hover:border-pink-800/50`}
                     ${isCompleted ? 'opacity-50' : ''}
                     z-10
+                    group/card
                 `}
                 onClick={() => {
                     if (isDragging || isEditingContent) return;
@@ -176,14 +184,14 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                     </motion.div>
                 </motion.div>
 
-                {/* Right Swipe (Archive/Restore) Background */}
+                {/* Right Swipe (Archive/Restore/Edit) Background */}
                 <motion.div
                     style={{ backgroundColor: archiveBackgroundColor }}
                     className="absolute inset-0 rounded-xl flex items-center justify-start pl-6 -z-10"
                 >
                     <motion.div style={{ opacity: archiveIconOpacity, scale: archiveIconScale }}>
                         {isArchiveView ? (
-                            <RotateCcw className="text-pink-600" size={20} />
+                            <Pencil className="text-blue-500" size={20} />
                         ) : (
                             <Check className="text-pink-600" size={20} />
                         )}
@@ -222,18 +230,33 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                                 {parseRichText(idea.content)}
                             </div>
                         )}
-                        {/* Date/Time */}
-                        <div className="mt-2 text-[11px] text-pink-300/30 dark:text-pink-500/30 font-medium group-hover:text-pink-300/80 dark:group-hover:text-pink-500/80 transition-colors">
-                            {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                            })}
-                            <span className="mx-1.5 text-pink-200/20 dark:text-pink-800/20">·</span>
-                            {new Date(idea.timestamp || Date.now()).toLocaleTimeString(undefined, {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            })}
+                        {/* Date/Time + Restore Button (Archive View) */}
+                        <div className="mt-2 flex items-center justify-between">
+                            <div className="text-[11px] text-pink-300/30 dark:text-pink-500/30 font-medium group-hover/card:text-pink-300/80 dark:group-hover/card:text-pink-500/80 transition-colors">
+                                {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                })}
+                                <span className="mx-1.5 text-pink-200/20 dark:text-pink-800/20">·</span>
+                                {new Date(idea.timestamp || Date.now()).toLocaleTimeString(undefined, {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                            </div>
+
+                            {isArchiveView && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onArchive?.(idea.id);
+                                    }}
+                                    className="p-1.5 -mr-2 text-gray-300 hover:text-pink-500 hover:bg-pink-50 dark:text-gray-600 dark:hover:text-pink-400 dark:hover:bg-pink-900/20 rounded-lg transition-all opacity-0 group-hover/card:opacity-100"
+                                    title={t('common.restore', 'Restore')}
+                                >
+                                    <RotateCcw size={14} />
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -242,10 +265,11 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                 <AnimatePresence>
                     {copiedId === idea.id && (
                         <motion.div
+                            key="copied-indicator"
                             initial={{ opacity: 0, scale: 0.8, y: 10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.8, y: -10 }}
-                            className="absolute top-4 right-4 flex items-center gap-1.5 px-2.5 py-1 bg-pink-500 text-white rounded-full shadow-lg shadow-pink-200/50 dark:shadow-pink-900/40 z-20 pointer-events-none"
+                            className="absolute top-4 right-4 flex items-center gap-1.5 px-2.5 py-1 bg-pink-500 text-white rounded-full shadow-lg shadow-pink-200/50 dark:shadow-pink-900/40 z-50 pointer-events-none"
                         >
                             <Check size={12} strokeWidth={3} />
                             <span className="text-[10px] font-bold uppercase tracking-wider">{t('common.copied', 'Copied')}</span>
