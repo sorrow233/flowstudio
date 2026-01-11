@@ -78,9 +78,6 @@ const DataCenterModule = () => {
         visible: { opacity: 1, y: 0 }
     };
 
-    const conversionRate = stats.inspirationCount > 0
-        ? Math.round((stats.flowCount / stats.inspirationCount) * 100)
-        : 0;
 
     return (
         <div className="max-w-7xl mx-auto pt-8 px-4 md:px-6 min-h-[100dvh] pb-safe">
@@ -188,24 +185,6 @@ const DataCenterModule = () => {
                             <div className="text-xs text-gray-500 dark:text-gray-400 font-light uppercase tracking-wider">
                                 {t('data.totalItems')}
                             </div>
-                        </div>
-                    </motion.div>
-
-                    {/* Conversion Rate Card */}
-                    <motion.div variants={cardVariants}>
-                        <div className="bg-gray-900 dark:bg-white rounded-[2rem] p-6 flex items-center justify-between group overflow-hidden relative">
-                            <div className="relative z-10">
-                                <div className="text-2xl font-light text-white dark:text-gray-900 mb-1">
-                                    {conversionRate}%
-                                </div>
-                                <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                                    {t('data.conversion')}
-                                </div>
-                            </div>
-                            <div className="relative z-10 w-12 h-12 rounded-full border-4 border-indigo-500/30 flex items-center justify-center">
-                                <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
-                            </div>
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-2xl -z-0" />
                         </div>
                     </motion.div>
                 </div>
