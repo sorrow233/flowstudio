@@ -334,12 +334,12 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose, 
                     {categories.map(cat => {
                         // Map color class to dot color
                         const dotColors = {
-                            'general': 'bg-slate-400',
-                            'frontend': 'bg-blue-400',
-                            'backend': 'bg-emerald-400',
-                            'database': 'bg-amber-400',
-                            'devops': 'bg-violet-400',
-                            'testing': 'bg-rose-400'
+                            'general': 'bg-gray-400 dark:bg-gray-500 shadow-[0_0_8px_rgba(156,163,175,0.4)]',
+                            'frontend': 'bg-blue-400 dark:bg-blue-500 shadow-[0_0_8px_rgba(96,165,250,0.4)]',
+                            'backend': 'bg-emerald-400 dark:bg-emerald-500 shadow-[0_0_8px_rgba(52,211,153,0.4)]',
+                            'database': 'bg-amber-400 dark:bg-amber-500 shadow-[0_0_8px_rgba(251,191,36,0.4)]',
+                            'devops': 'bg-violet-400 dark:bg-violet-500 shadow-[0_0_8px_rgba(167,139,250,0.4)]',
+                            'testing': 'bg-rose-400 dark:bg-rose-500 shadow-[0_0_8px_rgba(251,113,133,0.4)]'
                         };
 
                         const isSelected = selectedCategory === cat.id;
@@ -357,9 +357,9 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose, 
                                 `}
                             >
                                 <div className={`
-                                    w-3 h-3 rounded-full transition-all duration-300
+                                    w-2.5 h-2.5 rounded-full transition-all duration-300
                                     ${dotColors[cat.id] || 'bg-gray-400'}
-                                    ${isSelected ? 'scale-125 ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-800 ring-current opacity-100' : 'opacity-70'}
+                                    ${isSelected ? 'scale-110 ring-2 ring-emerald-100 dark:ring-emerald-900/50 ring-offset-2 ring-offset-white dark:ring-offset-gray-900 opacity-100' : 'opacity-60'}
                                 `} />
                                 <span className={`
                                     text-xs font-medium transition-colors
@@ -374,26 +374,39 @@ const ProjectDetailModal = ({ project, onUpdate, onAnswer, onGraduate, onClose, 
 
             </div>
 
-            {/* Graduate Button */}
+            {/* Graduate Button Section */}
             <div className="max-w-2xl mx-auto mt-6 pb-10 w-full relative z-30">
-                {project.score === 4 && (
-                    <button
-                        onClick={() => onGraduate(project, selectedCategory)} // Pass category
-                        className={`
-                        w-full py-5 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500
-                        ${project.foundingReason
-                                ? 'bg-white border border-emerald-100 text-emerald-600 shadow-[0_10px_40px_-10px_rgba(52,211,153,0.3)] hover:shadow-[0_15px_50px_-10px_rgba(16,185,129,0.4)] hover:-translate-y-0.5'
-                                : 'bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed'
-                            }
-                        ${!project.foundingReason && 'hover:bg-gray-100 hover:text-gray-500'}
-                    `}
-                    >
-                        <span className="text-base font-light tracking-widest relative z-10 uppercase">
-                            {project.foundingReason ? `Begin ${categories.find(c => c.id === selectedCategory)?.label || ''} Journey` : 'Begin Journey'}
-                        </span>
-                        <ArrowRight size={18} className={`transition-transform duration-300 ${project.foundingReason ? 'group-hover:translate-x-1' : ''}`} />
-                    </button>
-                )}
+                {(() => {
+                    const totalQuestions = QUESTIONS.length;
+                    const answeredCount = Object.keys(project.answers || {}).length;
+                    const isAllAnswered = answeredCount >= totalQuestions;
+                    const hasVow = project.foundingReason && project.foundingReason.trim().length > 0;
+                    const canBegin = isAllAnswered && hasVow;
+
+                    if (!isAllAnswered) return null;
+
+                    return (
+                        <button
+                            onClick={() => canBegin && onGraduate(project, selectedCategory)}
+                            disabled={!canBegin}
+                            className={`
+                                w-full py-5 rounded-3xl flex items-center justify-center gap-3 transition-all duration-500 group
+                                ${canBegin
+                                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-[0_20px_40px_-10px_rgba(16,185,129,0.3)] hover:shadow-[0_25px_50px_-10px_rgba(16,185,129,0.4)] hover:-translate-y-1'
+                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 cursor-not-allowed opacity-60'
+                                }
+                            `}
+                        >
+                            <span className="text-base font-medium tracking-[0.2em] relative z-10 uppercase">
+                                {canBegin
+                                    ? (t(`categories.${selectedCategory}`) ? `Begin ${t(`categories.${selectedCategory}`)} Journey` : 'Begin Journey')
+                                    : t('project.vowPlaceholder')
+                                }
+                            </span>
+                            <ArrowRight size={18} className={`transition-transform duration-300 ${canBegin ? 'group-hover:translate-x-1.5' : ''}`} />
+                        </button>
+                    );
+                })()}
             </div>
 
         </motion.div>
