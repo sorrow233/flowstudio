@@ -11,15 +11,16 @@ import { v4 as uuidv4 } from 'uuid';
  * @param {Function} addIdea - 添加 Inspiration 的函数
  * @param {number} ideasCount - 当前 ideas 数量（用于计算颜色）
  * @param {Function} getNextColorIndex - 获取下一个颜色索引的函数
+ * @param {boolean} isReady - 同步引擎是否就绪
  */
-export const useImportQueue = (userId, addIdea, ideasCount, getNextColorIndex) => {
+export const useImportQueue = (userId, addIdea, ideasCount, getNextColorIndex, isReady) => {
     const processedRef = useRef(false);
 
     useEffect(() => {
-        console.debug('[ImportQueue] Checking queue for user:', userId);
+        console.debug('[ImportQueue] Checking queue for user:', userId, 'Ready:', isReady);
 
-        // 只处理一次，避免重复导入
-        if (!userId || !addIdea || processedRef.current) {
+        // userId 或 同步未准备好，等
+        if (!userId || !addIdea || !isReady || processedRef.current) {
             if (!userId) console.debug('[ImportQueue] Skipping: No userId provided');
             return;
         }
@@ -30,9 +31,12 @@ export const useImportQueue = (userId, addIdea, ideasCount, getNextColorIndex) =
                 const q = query(pendingRef);
                 const snapshot = await getDocs(q);
 
-                if (snapshot.empty) return;
+                if (snapshot.empty) {
+                    console.debug('[ImportQueue] No pending imports found.');
+                    return;
+                }
 
-                console.log(`[ImportQueue] Found ${snapshot.size} pending imports`);
+                console.info(`[ImportQueue] Found ${snapshot.size} pending imports! Processing...`);
 
                 let colorOffset = 0;
                 const deletePromises = [];
@@ -79,5 +83,5 @@ export const useImportQueue = (userId, addIdea, ideasCount, getNextColorIndex) =
         processedRef.current = true;
         processQueue();
 
-    }, [userId, addIdea, ideasCount, getNextColorIndex]);
+    }, [userId, addIdea, ideasCount, getNextColorIndex, isReady]);
 };

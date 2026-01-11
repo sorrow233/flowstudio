@@ -24,7 +24,9 @@ const InspirationModule = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     // Sync - 使用 immediateSync 实现即时同步
-    const { doc, immediateSync } = useSync();
+    const { doc, immediateSync, status } = useSync();
+    const isReady = status?.status === 'synced';
+
     const { t } = useTranslation();
     const {
         projects: allProjects,
@@ -53,7 +55,7 @@ const InspirationModule = () => {
         [allProjects]);
 
     // 处理待导入队列（从外部项目发送的内容）
-    useImportQueue(user?.uid, addIdea, ideas.length, getNextAutoColorIndex);
+    useImportQueue(user?.uid, addIdea, ideas.length, getNextAutoColorIndex, isReady);
 
     // Fetch existing projects for tags
     const primaryProjects = useMemo(() =>

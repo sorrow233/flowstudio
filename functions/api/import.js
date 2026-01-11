@@ -42,22 +42,21 @@ export async function onRequestPost({ request }) {
         }
 
         // 生成唯一 ID
-        const importId = `import_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        const importId = `import_${Date.now()}`;
 
-        // 使用 Firebase REST API POST 方式创建文档（更稳健）
-        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/users/${userId}/pending_imports?documentId=${importId}`;
+        // 使用 Firebase REST API PATCH 方式直接写入目标路径
+        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/users/${userId}/pending_imports/${importId}`;
 
         const firestoreDoc = {
             fields: {
                 text: { stringValue: text },
                 source: { stringValue: source || 'external' },
-                createdAt: { integerValue: Date.now().toString() },
-                processed: { booleanValue: false }
+                createdAt: { integerValue: Date.now().toString() }
             }
         };
 
         const firestoreResponse = await fetch(firestoreUrl, {
-            method: 'POST',
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(firestoreDoc)
         });
