@@ -139,6 +139,16 @@ const Navbar = () => {
                             };
 
                             const activeColorClass = activeColors[tab.id] || 'text-gray-900 dark:text-white';
+                            const tabTheme = themeConfigs[tab.id === 'pending' ? 'green' : tab.id === 'primary' ? 'purple' : tab.id === 'inspiration' ? 'pink' : tab.id === 'command' ? 'sky' : tab.id === 'data' ? 'indigo' : 'default'];
+
+                            // Brush gradient definitions matching module headers
+                            const brushGradients = {
+                                inspiration: 'from-pink-200/80 via-pink-300/60 to-transparent dark:from-pink-700/50 dark:via-pink-600/30',
+                                pending: 'from-green-200/80 via-green-300/60 to-transparent dark:from-green-700/50 dark:via-green-600/30',
+                                primary: 'from-purple-200/80 via-purple-300/60 to-transparent dark:from-purple-700/50 dark:via-purple-600/30',
+                                command: 'from-sky-200/80 via-sky-300/60 to-transparent dark:from-sky-700/50 dark:via-sky-600/30',
+                                data: 'from-indigo-200/80 via-indigo-300/60 to-transparent dark:from-indigo-700/50 dark:via-indigo-600/30'
+                            };
 
                             return (
                                 <button
@@ -146,6 +156,7 @@ const Navbar = () => {
                                     onClick={() => navigate(tab.path)}
                                     className={`
                                         relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-50 shrink-0
+                                        hover:scale-105 active:scale-95
                                         ${isActive
                                             ? `${activeColorClass}`
                                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}
@@ -156,10 +167,24 @@ const Navbar = () => {
                                         <div
                                             className="absolute inset-[-25%] z-[-1] pointer-events-none blur-2xl opacity-100"
                                             style={{
-                                                background: `radial-gradient(circle at center, ${themeConfigs[tab.id === 'pending' ? 'green' : tab.id === 'primary' ? 'purple' : tab.id === 'inspiration' ? 'pink' : tab.id === 'command' ? 'sky' : tab.id === 'data' ? 'indigo' : 'default'].spotlight.replace('0.15', '0.4').replace('0.1', '0.3').replace('0.12', '0.3')} 0%, transparent 75%)`
+                                                background: `radial-gradient(circle at center, ${tabTheme.spotlight.replace('0.15', '0.4').replace('0.1', '0.3').replace('0.12', '0.3')} 0%, transparent 75%)`
                                             }}
                                         />
                                     )}
+
+                                    {/* Active Brush Stroke */}
+                                    <AnimatePresence>
+                                        {isActive && (
+                                            <motion.span
+                                                layoutId="nav-brush"
+                                                initial={{ opacity: 0, scaleX: 0 }}
+                                                animate={{ opacity: 1, scaleX: 1 }}
+                                                exit={{ opacity: 0, scaleX: 0 }}
+                                                className={`absolute -bottom-0.5 left-2 right-2 h-1.5 bg-gradient-to-r ${brushGradients[tab.id]} to-transparent rounded-full blur-[1px] z-[-1]`}
+                                            />
+                                        )}
+                                    </AnimatePresence>
+
                                     <Icon size={16} strokeWidth={isActive ? 2 : 1.5} className="w-4 h-4 md:w-4 md:h-4" />
                                     <span className={`text-xs md:text-sm ${isActive ? 'font-medium' : 'font-light'}`}>{tab.label}</span>
                                 </button>
