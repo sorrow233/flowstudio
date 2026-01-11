@@ -4,11 +4,8 @@ import {
     BarChart3,
     Lightbulb,
     Terminal,
-    TextQuote,
-    Zap,
-    ArrowUpRight,
-    TrendingUp,
-    Hash
+    Hash,
+    Sparkles
 } from 'lucide-react';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
@@ -27,23 +24,15 @@ const DataCenterModule = () => {
     const stats = useMemo(() => {
         let totalChars = 0;
         let inspirationCount = 0;
-        let sproutCount = 0;
-        let flowCount = 0;
         let instructionCount = allCommands?.length || 0;
 
         // Process Projects
         allProjects?.forEach(project => {
-            // Count characters in content and note
             totalChars += (project.content?.length || 0);
             totalChars += (project.note?.length || 0);
 
-            // Categorize by stage (Inspiration is stage 0 or specific flag)
             if (project.stage === 'inspiration') {
                 inspirationCount++;
-            } else if (project.stageIds?.includes(1) || project.stageIds?.includes(2)) {
-                sproutCount++;
-            } else {
-                flowCount++;
             }
         });
 
@@ -56,8 +45,6 @@ const DataCenterModule = () => {
         return {
             totalChars,
             inspirationCount,
-            sproutCount,
-            flowCount,
             instructionCount,
             totalItems: (allProjects?.length || 0) + (allCommands?.length || 0)
         };
@@ -68,121 +55,111 @@ const DataCenterModule = () => {
         visible: {
             opacity: 1,
             transition: {
-                staggerChildren: 0.1
+                staggerChildren: 0.08
             }
         }
     };
 
     const cardVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 }
+        hidden: { opacity: 0, y: 15 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
     };
 
-
     return (
-        <div className="max-w-7xl mx-auto pt-8 px-4 md:px-6 min-h-[100dvh] pb-safe">
-            {/* Header Area */}
-            <div className="mb-12">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-indigo-500/10 rounded-xl">
-                        <BarChart3 className="text-indigo-500" size={24} />
+        <div className="max-w-4xl mx-auto pt-14 px-6 md:px-10 pb-32">
+            {/* Header Section - 与灵感页保持一致 */}
+            <div className="mb-14 text-center md:text-left">
+                <div className="inline-flex items-center justify-center md:justify-start gap-2 mb-3">
+                    <div className="p-2 bg-pink-50 dark:bg-pink-900/20 rounded-xl">
+                        <BarChart3 className="w-5 h-5 text-pink-400" />
                     </div>
-                    <div>
-                        <h1 className="text-3xl font-light text-gray-900 dark:text-white tracking-tight">
-                            {t('navbar.data')}
-                        </h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 font-light">
-                            {t('data.subtitle')}
-                        </p>
-                    </div>
+                    <h2 className="text-3xl font-light text-pink-400 dark:text-pink-300 tracking-tight relative inline-block">
+                        {t('navbar.data')}
+                        {/* Pink Brush Stroke */}
+                        <span className="absolute -bottom-1 left-0 w-full h-2 bg-gradient-to-r from-pink-200/80 via-pink-300/60 to-transparent dark:from-pink-700/50 dark:via-pink-600/30 dark:to-transparent rounded-full blur-[2px]" />
+                    </h2>
                 </div>
+                <p className="text-gray-500 dark:text-gray-400 text-base font-light tracking-wide max-w-md mx-auto md:mx-0 leading-relaxed">
+                    {t('data.subtitle')}
+                </p>
             </div>
 
+            {/* Stats Grid */}
             <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                className="space-y-4"
             >
-                {/* Total Word Count - Main Focus */}
-                <motion.div variants={cardVariants} className="md:col-span-2 lg:col-span-1">
-                    <Spotlight className="h-full rounded-[2.5rem] bg-indigo-600 p-8 text-white shadow-2xl shadow-indigo-200 dark:shadow-none relative overflow-hidden group" spotColor="rgba(255,255,255,0.2)">
-                        <div className="relative z-10 h-full flex flex-col justify-between">
-                            <div>
-                                <div className="flex items-center justify-between mb-8">
-                                    <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md">
-                                        <TextQuote size={24} />
+                {/* 主要数据卡片 - 文字总量 */}
+                <motion.div variants={cardVariants}>
+                    <Spotlight
+                        className="rounded-2xl transition-all duration-300 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg hover:shadow-pink-100/50 dark:hover:shadow-pink-900/10"
+                        spotColor="rgba(244, 114, 182, 0.08)"
+                    >
+                        <div className="p-6 md:p-8">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2.5 bg-gradient-to-br from-pink-50 to-pink-100/50 dark:from-pink-900/30 dark:to-pink-800/20 rounded-xl">
+                                        <Sparkles className="w-5 h-5 text-pink-400" />
                                     </div>
-                                    <TrendingUp size={20} className="text-indigo-200 opacity-50" />
-                                </div>
-                                <div className="text-sm font-light text-indigo-100 mb-2 uppercase tracking-widest">
-                                    {t('data.totalWords')}
-                                </div>
-                                <div className="text-6xl font-extralight tracking-tighter mb-4">
-                                    {stats.totalChars.toLocaleString()}
+                                    <span className="text-sm text-gray-400 dark:text-gray-500 font-light uppercase tracking-widest">
+                                        {t('data.totalWords')}
+                                    </span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-indigo-100/70 font-light">
-                                <Zap size={14} className="text-yellow-300" />
-                                <span>{t('data.flowEfficiency')}</span>
+                            <div className="text-5xl md:text-6xl font-extralight text-gray-900 dark:text-white tracking-tight">
+                                {stats.totalChars.toLocaleString()}
+                            </div>
+                            <div className="mt-4 text-xs text-pink-300 dark:text-pink-400/60 font-light">
+                                {t('data.flowEfficiency')}
                             </div>
                         </div>
-                        {/* Background Decoration */}
-                        <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-700" />
                     </Spotlight>
                 </motion.div>
 
-                {/* Sub Stats Grid */}
-                <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {/* Inspiration Stats */}
+                {/* 次要数据 - 三列网格 */}
+                <div className="grid grid-cols-3 gap-3 md:gap-4">
+                    {/* 灵感数 */}
                     <motion.div variants={cardVariants}>
-                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] p-6 shadow-sm hover:shadow-xl transition-all duration-500 group">
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="p-3 bg-pink-50 dark:bg-pink-900/20 rounded-2xl text-pink-500">
-                                    <Lightbulb size={20} />
-                                </div>
-                                <ArrowUpRight size={16} className="text-gray-300 group-hover:text-pink-400 transition-colors" />
+                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 md:p-5 text-center hover:border-pink-200 dark:hover:border-pink-800/50 transition-all duration-300 hover:shadow-sm">
+                            <div className="mx-auto mb-3 w-10 h-10 flex items-center justify-center bg-pink-50 dark:bg-pink-900/20 rounded-xl">
+                                <Lightbulb className="w-4 h-4 text-pink-400" />
                             </div>
-                            <div className="text-2xl font-light text-gray-900 dark:text-white mb-1">
+                            <div className="text-2xl md:text-3xl font-light text-gray-900 dark:text-white mb-1">
                                 {stats.inspirationCount}
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 font-light uppercase tracking-wider">
+                            <div className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 font-light uppercase tracking-wider">
                                 {t('navbar.inspiration')}
                             </div>
                         </div>
                     </motion.div>
 
-                    {/* Instruction Stats */}
+                    {/* 指令数 */}
                     <motion.div variants={cardVariants}>
-                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] p-6 shadow-sm hover:shadow-xl transition-all duration-500 group">
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="p-3 bg-sky-50 dark:bg-sky-900/20 rounded-2xl text-sky-500">
-                                    <Terminal size={20} />
-                                </div>
-                                <ArrowUpRight size={16} className="text-gray-300 group-hover:text-sky-400 transition-colors" />
+                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 md:p-5 text-center hover:border-pink-200 dark:hover:border-pink-800/50 transition-all duration-300 hover:shadow-sm">
+                            <div className="mx-auto mb-3 w-10 h-10 flex items-center justify-center bg-pink-50 dark:bg-pink-900/20 rounded-xl">
+                                <Terminal className="w-4 h-4 text-pink-400" />
                             </div>
-                            <div className="text-2xl font-light text-gray-900 dark:text-white mb-1">
+                            <div className="text-2xl md:text-3xl font-light text-gray-900 dark:text-white mb-1">
                                 {stats.instructionCount}
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 font-light uppercase tracking-wider">
+                            <div className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 font-light uppercase tracking-wider">
                                 {t('navbar.command')}
                             </div>
                         </div>
                     </motion.div>
 
-                    {/* Total Items */}
+                    {/* 总记录 */}
                     <motion.div variants={cardVariants}>
-                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] p-6 shadow-sm hover:shadow-xl transition-all duration-500 group">
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl text-indigo-500">
-                                    <Hash size={20} />
-                                </div>
-                                <ArrowUpRight size={16} className="text-gray-300 group-hover:text-indigo-400 transition-colors" />
+                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 md:p-5 text-center hover:border-pink-200 dark:hover:border-pink-800/50 transition-all duration-300 hover:shadow-sm">
+                            <div className="mx-auto mb-3 w-10 h-10 flex items-center justify-center bg-pink-50 dark:bg-pink-900/20 rounded-xl">
+                                <Hash className="w-4 h-4 text-pink-400" />
                             </div>
-                            <div className="text-2xl font-light text-gray-900 dark:text-white mb-1">
+                            <div className="text-2xl md:text-3xl font-light text-gray-900 dark:text-white mb-1">
                                 {stats.totalItems}
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 font-light uppercase tracking-wider">
+                            <div className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 font-light uppercase tracking-wider">
                                 {t('data.totalItems')}
                             </div>
                         </div>
@@ -190,15 +167,15 @@ const DataCenterModule = () => {
                 </div>
             </motion.div>
 
-            {/* Footer Insight */}
+            {/* Footer */}
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-                className="mt-12 text-center"
+                transition={{ delay: 0.6 }}
+                className="mt-16 text-center"
             >
-                <p className="text-xs text-gray-400 dark:text-gray-600 font-light italic">
-                    "Data is the shadow of thought. Keep creating."
+                <p className="text-xs text-gray-300 dark:text-gray-700 font-light italic">
+                    "Data is the shadow of thought."
                 </p>
             </motion.div>
         </div>
