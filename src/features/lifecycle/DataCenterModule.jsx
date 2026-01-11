@@ -1,11 +1,10 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
-    BarChart3,
-    Lightbulb,
     Terminal,
     Hash,
-    Sparkles
+    Sparkles,
+    Box
 } from 'lucide-react';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
