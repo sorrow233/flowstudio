@@ -190,35 +190,36 @@ const DataCenterModule = () => {
                     {/* Sprout/Flow ratio placeholder */}
                     <motion.div variants={cardVariants}>
                         <div className="bg-gray-900 dark:bg-white rounded-[2rem] p-6 flex items-center justify-between group overflow-hidden relative">
-                            <div className="relative z-10">
-                                <div className="text-2xl font-light text-white dark:text-gray-900 mb-1">
-                                    {Math.round((stats.flowCount / (stats.totalItems || 1)) * 100)}%
-                                </div>
-                                <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                                    {t('data.conversion', '灵感转化率')}
-                                </div>
+                            <div className="text-2xl font-light text-white dark:text-gray-900 mb-1">
+                                {stats.inspirationCount > 0
+                                    ? Math.round((stats.flowCount / stats.inspirationCount) * 100)
+                                    : 0}%
                             </div>
-                            <div className="relative z-10 w-12 h-12 rounded-full border-4 border-indigo-500/30 flex items-center justify-center">
-                                <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
+                            <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                                {t('data.conversion', '灵感转化率')}
                             </div>
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-2xl -z-0" />
                         </div>
-                    </motion.div>
+                        <div className="relative z-10 w-12 h-12 rounded-full border-4 border-indigo-500/30 flex items-center justify-center">
+                            <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
+                        </div>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-2xl -z-0" />
                 </div>
             </motion.div>
-
-            {/* Footer Insight */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-                className="mt-12 text-center"
-            >
-                <p className="text-xs text-gray-400 dark:text-gray-600 font-light italic">
-                    "Data is the shadow of thought. Keep creating."
-                </p>
-            </motion.div>
         </div>
+            </motion.div >
+
+    {/* Footer Insight */ }
+    < motion.div
+initial = {{ opacity: 0 }}
+animate = {{ opacity: 1 }}
+transition = {{ delay: 0.8 }}
+className = "mt-12 text-center"
+    >
+    <p className="text-xs text-gray-400 dark:text-gray-600 font-light italic">
+        "Data is the shadow of thought. Keep creating."
+    </p>
+            </motion.div >
+        </div >
     );
 };
 

@@ -442,4 +442,14 @@ export default {
         signOut: 'Sign Out',
         signInWithGoogle: 'Sign in with Google',
     },
+
+    // Data Center
+    data: {
+        subtitle: 'Visualize your digital mind footprint',
+        totalWords: 'Total Characters',
+        totalItems: 'Total Records',
+        conversion: 'Inspiration Conversion',
+        flowEfficiency: 'Flow output is actively growing',
+        emptyState: 'No data yet. Start recording your thoughts.',
+    },
 };

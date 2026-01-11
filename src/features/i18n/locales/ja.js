@@ -431,4 +431,14 @@ export default {
         signOut: 'ログアウト',
         signInWithGoogle: 'Googleでログイン',
     },
+
+    // データセンター
+    data: {
+        subtitle: '思考のデジタル足跡を可視化',
+        totalWords: '総文字数',
+        totalItems: '総記録数',
+        conversion: 'インスピレーション転換率',
+        flowEfficiency: 'フロー出力が活発に成長中',
+        emptyState: 'まだデータがありません。考えを記録し始めましょう。',
+    },
 };

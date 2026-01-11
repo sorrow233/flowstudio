@@ -430,4 +430,14 @@ export default {
         signOut: '로그아웃',
         signInWithGoogle: 'Google로 로그인',
     },
+
+    // 데이터 센터
+    data: {
+        subtitle: '사고의 디지털 발자취를 시각화',
+        totalWords: '총 문자 수',
+        totalItems: '총 기록 수',
+        conversion: '영감 전환율',
+        flowEfficiency: '플로우 출력이 활발하게 성장 중',
+        emptyState: '아직 데이터가 없습니다. 생각을 기록하기 시작하세요.',
+    },
 };

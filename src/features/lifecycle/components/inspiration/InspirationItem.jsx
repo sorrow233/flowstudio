@@ -20,7 +20,6 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
 
     const config = getColorConfig(idea.colorIndex || 0);
     const isCompleted = idea.completed || false;
-    const isRecent = Date.now() - (idea.timestamp || Date.now()) < 7 * 24 * 60 * 60 * 1000;
 
     // Focus textarea when entering edit mode
     React.useEffect(() => {
@@ -220,7 +219,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                         ) : (
                             /* View Mode: Parsed Rich Text */
                             <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
-                                {parseRichText(idea.content, isRecent)}
+                                {parseRichText(idea.content)}
                             </div>
                         )}
                         {/* Date/Time */}
@@ -256,7 +255,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
             </div>
 
             {/* Note Display - Outside the Card */}
-            {idea.note && !isRecent && (
+            {idea.note && (
                 <div className="w-full md:w-[140px] pt-1 md:pt-4 pl-4 md:pl-0 flex-shrink-0 animate-in fade-in slide-in-from-left-4 duration-500">
                     <p className="text-[12px] font-medium text-pink-300 dark:text-pink-300/80 leading-relaxed italic break-words select-text">
                         {idea.note}
