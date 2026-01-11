@@ -465,7 +465,7 @@ export default {
     data: {
         subtitle: '可视化你的思维数字足迹',
         totalWords: '文字总处理量',
-        totalItems: '总记录条数',
+        projectCount: '进行中项目',
         conversion: '灵感转化率',
         flowEfficiency: '心流产出持续活跃中',
         emptyState: '还没有任何数据，开始记录你的所思所想吧',

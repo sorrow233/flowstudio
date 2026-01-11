@@ -46,7 +46,7 @@ const DataCenterModule = () => {
             totalChars,
             inspirationCount,
             instructionCount,
-            totalItems: (allProjects?.length || 0) + (allCommands?.length || 0)
+            projectCount: (allProjects?.length || 0) - inspirationCount
         };
     }, [allProjects, allCommands]);
 
@@ -150,17 +150,17 @@ const DataCenterModule = () => {
                         </div>
                     </motion.div>
 
-                    {/* 总记录 */}
+                    {/* 项目数 */}
                     <motion.div variants={cardVariants}>
                         <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 md:p-5 text-center hover:border-indigo-200 dark:hover:border-indigo-800/50 transition-all duration-300 hover:shadow-sm">
                             <div className="mx-auto mb-3 w-10 h-10 flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
-                                <Hash className="w-4 h-4 text-indigo-400" />
+                                <Terminal className="w-4 h-4 text-indigo-400" />
                             </div>
                             <div className="text-2xl md:text-3xl font-light text-gray-900 dark:text-white mb-1">
-                                {stats.totalItems}
+                                {stats.projectCount}
                             </div>
                             <div className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 font-light uppercase tracking-wider">
-                                {t('data.totalItems')}
+                                {t('data.projectCount', '进行中项目')}
                             </div>
                         </div>
                     </motion.div>
