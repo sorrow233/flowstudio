@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Trash2, Link as LinkIcon, Command, Globe, Tag, FileText, Share2, GripVertical } from 'lucide-react';
 
 const CommandItem = ({
@@ -153,7 +153,13 @@ const CommandItem = ({
                                     >
                                         <span className="relative z-10">{tag.label}</span>
                                         {copiedId === `${cmd.id}-${tag.id}` && (
-                                            <motion.div initial={{ y: 20 }} animate={{ y: 0 }} className="absolute inset-0 bg-emerald-500 text-white flex items-center justify-center z-20">
+                                            <motion.div
+                                                key="tag-copied"
+                                                initial={{ y: 20 }}
+                                                animate={{ y: 0 }}
+                                                exit={{ y: -20, opacity: 0 }}
+                                                className="absolute inset-0 bg-emerald-500 text-white flex items-center justify-center z-20"
+                                            >
                                                 <Check size={10} strokeWidth={3} />
                                             </motion.div>
                                         )}
@@ -184,6 +190,22 @@ const CommandItem = ({
                         </button>
                     </div>
                 )}
+
+                {/* Main Copied Indicator */}
+                <AnimatePresence>
+                    {copiedId === cmd.id && (
+                        <motion.div
+                            key="main-copied"
+                            initial={{ opacity: 0, scale: 0.8, x: 20 }}
+                            animate={{ opacity: 1, scale: 1, x: 0 }}
+                            exit={{ opacity: 0, scale: 0.8, x: -20 }}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white rounded-full shadow-lg shadow-emerald-200/50 dark:shadow-emerald-900/40 z-30 pointer-events-none"
+                        >
+                            <Check size={14} strokeWidth={3} />
+                            <span className="text-xs font-bold uppercase tracking-wider">Copied</span>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </motion.div>
     );
