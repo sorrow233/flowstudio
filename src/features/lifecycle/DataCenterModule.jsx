@@ -116,7 +116,7 @@ const DataCenterModule = () => {
                                     </span>
                                 </div>
                             </div>
-                            <div className="text-5xl md:text-6xl font-extralight text-gray-900 dark:text-white tracking-tight">
+                            <div className="text-5xl md:text-6xl font-extralight text-indigo-500 dark:text-indigo-400 tracking-tight">
                                 {stats.totalChars.toLocaleString()}
                             </div>
                             <div className="mt-4 text-xs text-indigo-300 dark:text-indigo-400/60 font-light">
@@ -130,11 +130,11 @@ const DataCenterModule = () => {
                 <div className="grid grid-cols-3 gap-3 md:gap-4">
                     {/* 灵感数 */}
                     <motion.div variants={cardVariants}>
-                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 md:p-5 text-center hover:border-indigo-200 dark:hover:border-indigo-800/50 transition-all duration-300 hover:shadow-sm">
-                            <div className="mx-auto mb-3 w-10 h-10 flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
-                                <Lightbulb className="w-4 h-4 text-indigo-400" />
+                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 md:p-5 text-center hover:border-pink-200 dark:hover:border-pink-800/50 transition-all duration-300 hover:shadow-sm">
+                            <div className="mx-auto mb-3 w-10 h-10 flex items-center justify-center bg-pink-50 dark:bg-pink-900/20 rounded-xl">
+                                <Lightbulb className="w-4 h-4 text-pink-400" />
                             </div>
-                            <div className="text-2xl md:text-3xl font-light text-gray-900 dark:text-white mb-1">
+                            <div className="text-2xl md:text-3xl font-light text-pink-500 dark:text-pink-400 mb-1">
                                 {stats.inspirationCount}
                             </div>
                             <div className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 font-light uppercase tracking-wider">
@@ -145,11 +145,11 @@ const DataCenterModule = () => {
 
                     {/* 成长中项目 */}
                     <motion.div variants={cardVariants}>
-                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 md:p-5 text-center hover:border-indigo-200 dark:hover:border-indigo-800/50 transition-all duration-300 hover:shadow-sm">
-                            <div className="mx-auto mb-3 w-10 h-10 flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
-                                <Box className="w-4 h-4 text-indigo-400" />
+                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 md:p-5 text-center hover:border-purple-200 dark:hover:border-purple-800/50 transition-all duration-300 hover:shadow-sm">
+                            <div className="mx-auto mb-3 w-10 h-10 flex items-center justify-center bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+                                <Box className="w-4 h-4 text-purple-400" />
                             </div>
-                            <div className="text-2xl md:text-3xl font-light text-gray-900 dark:text-white mb-1">
+                            <div className="text-2xl md:text-3xl font-light text-purple-500 dark:text-purple-400 mb-1">
                                 {stats.growingCount}
                             </div>
                             <div className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 font-light uppercase tracking-wider">
@@ -160,11 +160,11 @@ const DataCenterModule = () => {
 
                     {/* 蓝图 & 指令 */}
                     <motion.div variants={cardVariants}>
-                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 md:p-5 text-center hover:border-indigo-200 dark:hover:border-indigo-800/50 transition-all duration-300 hover:shadow-sm">
-                            <div className="mx-auto mb-3 w-10 h-10 flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
-                                <Terminal className="w-4 h-4 text-indigo-400" />
+                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 md:p-5 text-center hover:border-sky-200 dark:hover:border-sky-800/50 transition-all duration-300 hover:shadow-sm">
+                            <div className="mx-auto mb-3 w-10 h-10 flex items-center justify-center bg-sky-50 dark:bg-sky-900/20 rounded-xl">
+                                <Terminal className="w-4 h-4 text-sky-400" />
                             </div>
-                            <div className="text-2xl md:text-3xl font-light text-gray-900 dark:text-white mb-1">
+                            <div className="text-2xl md:text-3xl font-light text-sky-500 dark:text-sky-400 mb-1">
                                 {stats.blueprintCount}
                             </div>
                             <div className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 font-light uppercase tracking-wider">
