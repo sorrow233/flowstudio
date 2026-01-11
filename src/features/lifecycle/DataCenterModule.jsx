@@ -78,6 +78,10 @@ const DataCenterModule = () => {
         visible: { opacity: 1, y: 0 }
     };
 
+    const conversionRate = stats.inspirationCount > 0
+        ? Math.round((stats.flowCount / stats.inspirationCount) * 100)
+        : 0;
+
     return (
         <div className="max-w-7xl mx-auto pt-8 px-4 md:px-6 min-h-[100dvh] pb-safe">
             {/* Header Area */}
@@ -91,7 +95,7 @@ const DataCenterModule = () => {
                             {t('navbar.data')}
                         </h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400 font-light">
-                            {t('data.subtitle', '可视化你的思维数字足迹')}
+                            {t('data.subtitle')}
                         </p>
                     </div>
                 </div>
@@ -115,7 +119,7 @@ const DataCenterModule = () => {
                                     <TrendingUp size={20} className="text-indigo-200 opacity-50" />
                                 </div>
                                 <div className="text-sm font-light text-indigo-100 mb-2 uppercase tracking-widest">
-                                    {t('data.totalWords', '文字总处理量')}
+                                    {t('data.totalWords')}
                                 </div>
                                 <div className="text-6xl font-extralight tracking-tighter mb-4">
                                     {stats.totalChars.toLocaleString()}
@@ -123,7 +127,7 @@ const DataCenterModule = () => {
                             </div>
                             <div className="flex items-center gap-2 text-sm text-indigo-100/70 font-light">
                                 <Zap size={14} className="text-yellow-300" />
-                                <span>{t('data.flowEfficiency', '心流产出持续活跃中')}</span>
+                                <span>{t('data.flowEfficiency')}</span>
                             </div>
                         </div>
                         {/* Background Decoration */}
@@ -182,44 +186,43 @@ const DataCenterModule = () => {
                                 {stats.totalItems}
                             </div>
                             <div className="text-xs text-gray-500 dark:text-gray-400 font-light uppercase tracking-wider">
-                                {t('data.totalItems', '总记录条数')}
+                                {t('data.totalItems')}
                             </div>
                         </div>
                     </motion.div>
 
-                    {/* Sprout/Flow ratio placeholder */}
+                    {/* Conversion Rate Card */}
                     <motion.div variants={cardVariants}>
                         <div className="bg-gray-900 dark:bg-white rounded-[2rem] p-6 flex items-center justify-between group overflow-hidden relative">
-                            <div className="text-2xl font-light text-white dark:text-gray-900 mb-1">
-                                {stats.inspirationCount > 0
-                                    ? Math.round((stats.flowCount / stats.inspirationCount) * 100)
-                                    : 0}%
+                            <div className="relative z-10">
+                                <div className="text-2xl font-light text-white dark:text-gray-900 mb-1">
+                                    {conversionRate}%
+                                </div>
+                                <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                                    {t('data.conversion')}
+                                </div>
                             </div>
-                            <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                                {t('data.conversion', '灵感转化率')}
+                            <div className="relative z-10 w-12 h-12 rounded-full border-4 border-indigo-500/30 flex items-center justify-center">
+                                <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
                             </div>
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-2xl -z-0" />
                         </div>
-                        <div className="relative z-10 w-12 h-12 rounded-full border-4 border-indigo-500/30 flex items-center justify-center">
-                            <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
-                        </div>
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-2xl -z-0" />
+                    </motion.div>
                 </div>
             </motion.div>
-        </div>
-            </motion.div >
 
-    {/* Footer Insight */ }
-    < motion.div
-initial = {{ opacity: 0 }}
-animate = {{ opacity: 1 }}
-transition = {{ delay: 0.8 }}
-className = "mt-12 text-center"
-    >
-    <p className="text-xs text-gray-400 dark:text-gray-600 font-light italic">
-        "Data is the shadow of thought. Keep creating."
-    </p>
-            </motion.div >
-        </div >
+            {/* Footer Insight */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="mt-12 text-center"
+            >
+                <p className="text-xs text-gray-400 dark:text-gray-600 font-light italic">
+                    "Data is the shadow of thought. Keep creating."
+                </p>
+            </motion.div>
+        </div>
     );
 };
 
