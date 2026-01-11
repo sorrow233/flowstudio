@@ -193,28 +193,32 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                                         transition={{ duration: 1, ease: "easeInOut" }}
                                     />
 
-                                    {/* Word Dots */}
+                                    {/* Word Dots & Persistent Labels */}
                                     {wordPoints.map((p, i) => (
                                         <g key={`w-${i}`} className="group cursor-help">
+                                            {/* Persistent Label */}
+                                            <text
+                                                x={p.x}
+                                                y={p.y - 12}
+                                                textAnchor="middle"
+                                                className="text-[9px] fill-indigo-400/80 dark:fill-indigo-300/60 font-medium tracking-tighter"
+                                            >
+                                                {formatNumber(p.value)}
+                                            </text>
+
                                             <motion.circle
                                                 cx={p.x}
                                                 cy={p.y}
-                                                r="3.5"
+                                                r="3"
                                                 initial={{ scale: 0 }}
                                                 animate={{ scale: 1 }}
                                                 transition={{ delay: 0.4 + i * 0.04 }}
-                                                className="fill-white dark:fill-gray-900 stroke-indigo-300 dark:stroke-indigo-700 stroke-[2px] group-hover:stroke-indigo-500 transition-colors"
+                                                className="fill-white dark:fill-gray-900 stroke-indigo-300 dark:stroke-indigo-700 stroke-[1.5px] group-hover:stroke-indigo-500 transition-colors"
                                             />
-                                            {/* Tooltip on hover */}
-                                            <foreignObject x={p.x - 30} y={p.y - 40} width="60" height="30" className="opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:-translate-y-1">
-                                                <div className="bg-indigo-500/90 dark:bg-indigo-600/90 backdrop-blur-md text-white text-[9px] px-2 py-1 rounded-lg shadow-xl text-center font-bold">
-                                                    {formatNumber(p.value)}
-                                                </div>
-                                            </foreignObject>
                                         </g>
                                     ))}
 
-                                    {/* Inspiration Dots (Conditional) */}
+                                    {/* Inspiration Dots & Labels (Conditional) */}
                                     <AnimatePresence>
                                         {showInspiration && inspirationPoints.map((p, i) => (
                                             <motion.g
@@ -225,17 +229,22 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                                                 exit={{ opacity: 0, scale: 0 }}
                                                 transition={{ delay: 0.2 + i * 0.03 }}
                                             >
+                                                {/* Persistent Label for Inspiration */}
+                                                <text
+                                                    x={p.x}
+                                                    y={p.y + 16}
+                                                    textAnchor="middle"
+                                                    className="text-[8px] fill-pink-400/70 dark:fill-pink-300/50 font-medium tracking-tighter"
+                                                >
+                                                    {p.value}
+                                                </text>
+
                                                 <circle
                                                     cx={p.x}
                                                     cy={p.y}
-                                                    r="2.5"
-                                                    className="fill-white dark:fill-gray-900 stroke-pink-200 dark:stroke-pink-900 stroke-[1.5px] group-hover:stroke-pink-400 transition-colors"
+                                                    r="2"
+                                                    className="fill-white dark:fill-gray-900 stroke-pink-200 dark:stroke-pink-900 stroke-[1px] group-hover:stroke-pink-400 transition-colors"
                                                 />
-                                                <foreignObject x={p.x - 30} y={p.y + 12} width="60" height="30" className="opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:translate-y-1">
-                                                    <div className="bg-pink-500/90 backdrop-blur-md text-white text-[9px] px-2 py-1 rounded-lg shadow-xl text-center font-bold">
-                                                        {p.value}
-                                                    </div>
-                                                </foreignObject>
                                             </motion.g>
                                         ))}
                                     </AnimatePresence>
