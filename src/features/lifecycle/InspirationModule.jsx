@@ -724,12 +724,9 @@ const InspirationModule = () => {
                                                                 <button
                                                                     key={week.key}
                                                                     onClick={() => scrollToWeek(week.key)}
-                                                                    className="text-left p-3 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 hover:bg-pink-50 dark:hover:bg-pink-900/40 group transition-all duration-300 border border-transparent hover:border-pink-100 dark:hover:border-pink-800/50"
+                                                                    className="text-center p-3 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 hover:bg-pink-50 dark:hover:bg-pink-900/40 group transition-all duration-300 border border-transparent hover:border-pink-100 dark:hover:border-pink-800/50 flex flex-col justify-center min-h-[50px]"
                                                                 >
-                                                                    <div className="text-[10px] text-gray-400 dark:text-gray-500 group-hover:text-pink-400 transition-colors mb-0.5">
-                                                                        {week.label}
-                                                                    </div>
-                                                                    <div className="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-300 truncate">
+                                                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-300">
                                                                         {week.start.getDate()} - {week.end.getDate()}日
                                                                     </div>
                                                                 </button>
