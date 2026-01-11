@@ -436,7 +436,8 @@ export default {
     data: {
         subtitle: '思考のデジタル足跡を可視化',
         totalWords: '総文字数',
-        projectCount: '進行中のプロジェクト',
+        growingCount: '成長中のプロジェクト',
+        blueprintCount: 'ブループリント計画',
         conversion: 'インスピレーション転換率',
         flowEfficiency: 'フロー出力が活発に成長中',
         emptyState: 'まだデータがありません。考えを記録し始めましょう。',
