@@ -238,12 +238,21 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
 
                                         {/* Word Points & Persistent Labels */}
                                         {wordPoints.map((p, i) => (
-                                            <g key={`w-${i}`} className="group transition-transform duration-300 hover:scale-110">
+                                            <g key={`w-${i}`} className="group">
+                                                {/* Invisible Hit Area for Stability */}
+                                                <circle
+                                                    cx={p.x}
+                                                    cy={p.y}
+                                                    r="15"
+                                                    fill="transparent"
+                                                    className="cursor-pointer"
+                                                />
                                                 <text
                                                     x={p.x}
                                                     y={p.y - 18}
                                                     textAnchor="middle"
-                                                    className={`text-[10px] fill-indigo-500/80 dark:fill-indigo-400 font-bold tracking-tighter transition-all duration-300 ${p.value === 0 ? 'opacity-0' : 'opacity-100'}`}
+                                                    style={{ transformOrigin: `${p.x}px ${p.y}px` }}
+                                                    className={`text-[10px] fill-indigo-500/80 dark:fill-indigo-400 font-bold tracking-tighter transition-all duration-300 pointer-events-none group-hover:scale-125 ${p.value === 0 ? 'opacity-0' : 'opacity-100'}`}
                                                 >
                                                     {formatNumber(p.value)}
                                                 </text>
@@ -253,8 +262,9 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                                                     r="4"
                                                     initial={{ scale: 0 }}
                                                     animate={{ scale: 1 }}
+                                                    style={{ transformOrigin: `${p.x}px ${p.y}px` }}
                                                     transition={{ delay: 0.4 + i * 0.04 }}
-                                                    className="fill-white dark:fill-gray-950 stroke-indigo-400 dark:stroke-indigo-600 stroke-[2px] group-hover:stroke-indigo-500 transition-colors shadow-lg"
+                                                    className="fill-white dark:fill-gray-950 stroke-indigo-400 dark:stroke-indigo-600 stroke-[2px] transition-all duration-300 group-hover:stroke-indigo-500 group-hover:scale-150 pointer-events-none shadow-lg"
                                                 />
                                             </g>
                                         ))}
@@ -264,17 +274,26 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                                             {showInspiration && inspirationPoints.map((p, i) => (
                                                 <motion.g
                                                     key={`i-${i}`}
-                                                    className="group cursor-help"
+                                                    className="group"
                                                     initial={{ opacity: 0, scale: 0 }}
                                                     animate={{ opacity: 1, scale: 1 }}
                                                     exit={{ opacity: 0, scale: 0 }}
                                                     transition={{ delay: 0.2 + i * 0.03 }}
                                                 >
+                                                    {/* Invisible Hit Area */}
+                                                    <circle
+                                                        cx={p.x}
+                                                        cy={p.y}
+                                                        r="12"
+                                                        fill="transparent"
+                                                        className="cursor-help"
+                                                    />
                                                     <text
                                                         x={p.x}
                                                         y={p.y + 24}
                                                         textAnchor="middle"
-                                                        className={`text-[9px] fill-pink-500/60 dark:fill-pink-400/50 font-medium tracking-tighter ${p.value === 0 ? 'opacity-0' : 'opacity-100'}`}
+                                                        style={{ transformOrigin: `${p.x}px ${p.y}px` }}
+                                                        className={`text-[9px] fill-pink-500/60 dark:fill-pink-400/50 font-medium tracking-tighter transition-all duration-300 pointer-events-none group-hover:scale-110 ${p.value === 0 ? 'opacity-0' : 'opacity-100'}`}
                                                     >
                                                         {p.value}
                                                     </text>
@@ -282,7 +301,8 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                                                         cx={p.x}
                                                         cy={p.y}
                                                         r="2.5"
-                                                        className="fill-white dark:fill-gray-950 stroke-pink-300 dark:stroke-pink-800 stroke-[1.5px]"
+                                                        style={{ transformOrigin: `${p.x}px ${p.y}px` }}
+                                                        className="fill-white dark:fill-gray-950 stroke-pink-300 dark:stroke-pink-800 stroke-[1.5px] transition-all duration-300 group-hover:scale-150 pointer-events-none"
                                                     />
                                                 </motion.g>
                                             ))}
