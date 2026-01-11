@@ -13,9 +13,14 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
         return [];
     }, [data, view]);
 
-    const maxVal = useMemo(() => {
+    const maxWords = useMemo(() => {
         const values = currentData.map(d => d.value);
-        return Math.max(...values, 10); // Minimum max of 10 for better scaling
+        return Math.max(...values, 10);
+    }, [currentData]);
+
+    const maxInspirations = useMemo(() => {
+        const values = currentData.map(d => d.inspirations);
+        return Math.max(...values, 5);
     }, [currentData]);
 
     // Chart Dimensions
@@ -23,19 +28,33 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
     const height = 300;
     const padding = 40;
 
-    const points = useMemo(() => {
-        if (currentData.length === 0) return '';
+    const wordPoints = useMemo(() => {
+        if (currentData.length === 0) return [];
         return currentData.map((d, i) => {
             const x = padding + (i / (currentData.length - 1)) * (width - padding * 2);
-            const y = height - padding - (d.value / maxVal) * (height - padding * 2);
+            const y = height - padding - (d.value / maxWords) * (height - padding * 2);
             return { x, y, value: d.value, label: d.label };
         });
-    }, [currentData, maxVal, width, height, padding]);
+    }, [currentData, maxWords, width, height, padding]);
 
-    const pathData = useMemo(() => {
-        if (points.length < 2) return '';
-        return `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`;
-    }, [points]);
+    const inspirationPoints = useMemo(() => {
+        if (currentData.length === 0) return [];
+        return currentData.map((d, i) => {
+            const x = padding + (i / (currentData.length - 1)) * (width - padding * 2);
+            const y = height - padding - (d.inspirations / maxInspirations) * (height - padding * 2);
+            return { x, y, value: d.inspirations, label: d.label };
+        });
+    }, [currentData, maxInspirations, width, height, padding]);
+
+    const wordPathData = useMemo(() => {
+        if (wordPoints.length < 2) return '';
+        return `M ${wordPoints.map(p => `${p.x},${p.y}`).join(' L ')}`;
+    }, [wordPoints]);
+
+    const inspirationPathData = useMemo(() => {
+        if (inspirationPoints.length < 2) return '';
+        return `M ${inspirationPoints.map(p => `${p.x},${p.y}`).join(' L ')}`;
+    }, [inspirationPoints]);
 
     return (
         <AnimatePresence>
@@ -64,8 +83,20 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                                     <TrendingUp className="w-5 h-5 text-indigo-500" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-light text-gray-900 dark:text-white">数据处理详情</h3>
-                                    <p className="text-xs text-gray-400 dark:text-gray-500 font-light">文字处理动态趋势回顾</p>
+                                    <div className="flex items-center gap-4">
+                                        <h3 className="text-xl font-light text-gray-900 dark:text-white">数据处理详情</h3>
+                                        <div className="flex items-center gap-4 text-[10px] font-light">
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-2h-0.5 border-b-2 border-indigo-500 w-3" />
+                                                <span className="text-gray-400">文字</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-2 h-0.5 border-b-2 border-pink-500 w-3" />
+                                                <span className="text-gray-400">灵感</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-400 dark:text-gray-500 font-light mt-1">处理总量与灵感采集的历史趋势</p>
                                 </div>
                             </div>
 
@@ -101,7 +132,7 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                         <div className="bg-gray-50/50 dark:bg-gray-950/20 rounded-[2rem] p-6 border border-gray-50 dark:border-gray-800/30">
                             <div className="relative h-[300px] w-full">
                                 <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
-                                    {/* Grid Lines (Simple) */}
+                                    {/* Grid Lines */}
                                     {[0, 0.25, 0.5, 0.75, 1].map((r) => (
                                         <line
                                             key={r}
@@ -115,11 +146,25 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                                         />
                                     ))}
 
-                                    {/* Main Line Path */}
+                                    {/* Inspiration Line (Behind) */}
                                     <motion.path
-                                        d={pathData}
+                                        d={inspirationPathData}
                                         fill="none"
-                                        stroke="url(#lineGradient)"
+                                        stroke="#f472b6"
+                                        strokeWidth="2"
+                                        strokeOpacity="0.6"
+                                        strokeLinecap="round"
+                                        strokeDasharray="5 5"
+                                        initial={{ pathLength: 0, opacity: 0 }}
+                                        animate={{ pathLength: 1, opacity: 0.6 }}
+                                        transition={{ duration: 1 }}
+                                    />
+
+                                    {/* Word Line (Front) */}
+                                    <motion.path
+                                        d={wordPathData}
+                                        fill="none"
+                                        stroke="#6366f1"
                                         strokeWidth="3"
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
@@ -128,17 +173,9 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                                         transition={{ duration: 1, ease: "easeInOut" }}
                                     />
 
-                                    {/* Gradient Definition */}
-                                    <defs>
-                                        <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                                            <stop offset="0%" stopColor="#6366f1" />
-                                            <stop offset="100%" stopColor="#a855f7" />
-                                        </linearGradient>
-                                    </defs>
-
-                                    {/* Dots */}
-                                    {points.map((p, i) => (
-                                        <g key={i} className="group cursor-help">
+                                    {/* Word Dots */}
+                                    {wordPoints.map((p, i) => (
+                                        <g key={`w-${i}`} className="group cursor-help">
                                             <motion.circle
                                                 cx={p.x}
                                                 cy={p.y}
@@ -146,19 +183,38 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                                                 initial={{ scale: 0 }}
                                                 animate={{ scale: 1 }}
                                                 transition={{ delay: 0.5 + i * 0.05 }}
-                                                className="fill-white dark:fill-gray-900 stroke-indigo-500 stroke-[2px]"
+                                                className="fill-white dark:fill-gray-900 stroke-indigo-500 stroke-[2.5px]"
                                             />
-                                            {/* Tooltip on hover */}
                                             <foreignObject x={p.x - 25} y={p.y - 45} width="80" height="40" className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                                                 <div className="bg-indigo-600 text-white text-[9px] px-2 py-1 rounded shadow-lg text-center font-bold">
-                                                    {p.value}
+                                                    {p.value} 字
+                                                </div>
+                                            </foreignObject>
+                                        </g>
+                                    ))}
+
+                                    {/* Inspiration Dots */}
+                                    {inspirationPoints.map((p, i) => (
+                                        <g key={`i-${i}`} className="group cursor-help">
+                                            <motion.circle
+                                                cx={p.x}
+                                                cy={p.y}
+                                                r="3"
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                transition={{ delay: 0.8 + i * 0.05 }}
+                                                className="fill-white dark:fill-gray-900 stroke-pink-400 stroke-[2px]"
+                                            />
+                                            <foreignObject x={p.x - 25} y={p.y + 15} width="80" height="40" className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                                <div className="bg-pink-500 text-white text-[9px] px-2 py-1 rounded shadow-lg text-center font-bold">
+                                                    {p.value} 灵感
                                                 </div>
                                             </foreignObject>
                                         </g>
                                     ))}
 
                                     {/* Axis Labels (X) */}
-                                    {points.filter((_, i) => i % (view === 'daily' ? 2 : 1) === 0).map((p, i) => (
+                                    {wordPoints.filter((_, i) => i % (view === 'daily' ? 2 : 1) === 0).map((p, i) => (
                                         <text
                                             key={i}
                                             x={p.x}
@@ -174,9 +230,14 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                         </div>
 
                         {/* Footer Hint */}
-                        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-400 dark:text-gray-500 font-light italic">
-                            <TrendingUp size={12} className="text-indigo-400" />
-                            <span>这是你与灵感共鸣的数字写照</span>
+                        <div className="mt-8 flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 font-light italic px-4">
+                            <div className="flex items-center gap-2">
+                                <TrendingUp size={12} className="text-indigo-400" />
+                                <span>这是你与灵感共鸣的数字写照</span>
+                            </div>
+                            <div className="text-[10px] opacity-50 not-italic">
+                                数据基于本地创作时间戳实时聚合
+                            </div>
                         </div>
                     </motion.div>
                 </div>
