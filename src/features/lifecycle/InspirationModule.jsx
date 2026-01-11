@@ -458,9 +458,9 @@ const InspirationModule = () => {
             {/* List Section */}
             <div className="space-y-6">
                 <AnimatePresence mode="popLayout">
-                    {/* Render recent ideas (within 7 days) without grouping */}
+                    {/* Render recent ideas (within 1 hour) without grouping */}
                     {sortedIdeas
-                        .filter(idea => Date.now() - (idea.timestamp || Date.now()) < 7 * 24 * 60 * 60 * 1000)
+                        .filter(idea => Date.now() - (idea.timestamp || Date.now()) < 60 * 60 * 1000)
                         .map((idea) => (
                             <InspirationItem
                                 key={idea.id}
@@ -477,51 +477,49 @@ const InspirationModule = () => {
                         ))}
                 </AnimatePresence>
 
-                {/* Render older ideas (beyond 7 days) grouped by week */}
+                {/* Render older ideas (beyond 1 hour) grouped by hour */}
                 {(() => {
-                    const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 7 * 24 * 60 * 60 * 1000);
+                    const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 60 * 60 * 1000);
                     if (olderIdeas.length === 0) return null;
 
-                    // Group by week
-                    const weekGroups = {};
+                    // Group by hour
+                    const hourGroups = {};
                     olderIdeas.forEach(idea => {
                         const date = new Date(idea.timestamp || Date.now());
-                        // Get the Monday of the week
-                        const day = date.getDay();
-                        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-                        const weekStart = new Date(date.setDate(diff));
-                        weekStart.setHours(0, 0, 0, 0);
-                        const weekEnd = new Date(weekStart);
-                        weekEnd.setDate(weekEnd.getDate() + 6);
+                        const hourStart = new Date(date);
+                        hourStart.setMinutes(0, 0, 0);
 
-                        const weekKey = weekStart.getTime();
-                        if (!weekGroups[weekKey]) {
-                            weekGroups[weekKey] = {
-                                start: weekStart,
-                                end: weekEnd,
+                        const hourEnd = new Date(hourStart);
+                        hourEnd.setHours(hourEnd.getHours() + 1);
+
+                        const hourKey = hourStart.getTime();
+                        if (!hourGroups[hourKey]) {
+                            hourGroups[hourKey] = {
+                                start: hourStart,
+                                end: hourEnd,
                                 ideas: []
                             };
                         }
-                        weekGroups[weekKey].ideas.push(idea);
+                        hourGroups[hourKey].ideas.push(idea);
                     });
 
-                    // Sort weeks in descending order (most recent first)
-                    const sortedWeeks = Object.values(weekGroups).sort((a, b) => b.start - a.start);
+                    // Sort hours in descending order
+                    const sortedHours = Object.values(hourGroups).sort((a, b) => b.start - a.start);
 
-                    return sortedWeeks.map(week => (
-                        <div key={week.start.getTime()}>
-                            {/* Week Header */}
+                    return sortedHours.map(hour => (
+                        <div key={hour.start.getTime()}>
+                            {/* Hour Header */}
                             <div className="flex items-center gap-3 mb-4 mt-8">
                                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent" />
                                 <span className="text-xs font-medium text-pink-300 dark:text-pink-600 tracking-wide whitespace-nowrap">
-                                    {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                    {hour.start.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                                     {' - '}
-                                    {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                    {hour.end.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent" />
                             </div>
                             <AnimatePresence mode="popLayout">
-                                {week.ideas.map((idea) => (
+                                {hour.ideas.map((idea) => (
                                     <InspirationItem
                                         key={idea.id}
                                         idea={idea}
