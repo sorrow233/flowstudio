@@ -9,6 +9,7 @@ import PendingModule from './features/lifecycle/PendingModule';
 import PrimaryDevModule from './features/lifecycle/PrimaryDevModule';
 import AdvancedDevModule from './features/lifecycle/AdvancedDevModule';
 import CommandCenterModule from './features/blueprint/CommandCenterModule';
+import DataCenterModule from './features/lifecycle/DataCenterModule';
 import ShareViewPage from './features/share/components/ShareViewPage';
 
 import { Toaster } from 'sonner';
@@ -43,6 +44,7 @@ function App() {
                                         <Route path="/flow" element={<PrimaryDevModule />} />
                                         <Route path="/advanced" element={<AdvancedDevModule />} />
                                         <Route path="/blueprint" element={<CommandCenterModule />} />
+                                        <Route path="/data" element={<DataCenterModule />} />
                                         <Route path="/share/:id" element={<ShareViewPage />} />
                                         <Route path="*" element={<Navigate to="/" replace />} />
                                     </Routes>

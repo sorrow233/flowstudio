@@ -11,7 +11,8 @@ import {
     Cloud,
     Settings,
     Sun,
-    Moon
+    Moon,
+    BarChart3
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../features/auth/AuthContext';
@@ -29,6 +30,7 @@ const tabIcons = {
     primary: Code2,
     advanced: CheckCircle2,
     command: Terminal,
+    data: BarChart3
 };
 
 const Navbar = () => {
@@ -47,6 +49,7 @@ const Navbar = () => {
         { id: 'pending', label: t('navbar.pending'), icon: tabIcons.pending, path: '/sprout' },
         { id: 'primary', label: t('navbar.primary'), icon: tabIcons.primary, path: '/flow' },
         { id: 'command', label: t('navbar.command'), icon: tabIcons.command, path: '/blueprint' },
+        { id: 'data', label: t('navbar.data'), icon: tabIcons.data, path: '/data' },
     ];
 
     // 进阶模块（需要用户开启）
@@ -62,6 +65,7 @@ const Navbar = () => {
         if (path.startsWith('/flow')) return 'purple';
         if (path.startsWith('/advanced')) return 'red';
         if (path.startsWith('/blueprint')) return 'sky';
+        if (path.startsWith('/data')) return 'indigo';
         return 'default';
     };
 
@@ -98,6 +102,12 @@ const Navbar = () => {
             iconHover: 'hover:bg-sky-50 dark:hover:bg-sky-900/20',
             sync: { dot: 'bg-sky-500', shadow: 'shadow-[0_0_8px_rgba(14,165,233,0.4)]', text: 'text-sky-600', bg: 'bg-sky-50/50 dark:bg-sky-900/20' }
         },
+        indigo: {
+            spotlight: isDark ? "rgba(99, 102, 241, 0.15)" : "rgba(99, 102, 241, 0.1)",
+            iconText: 'text-indigo-500 dark:text-indigo-400',
+            iconHover: 'hover:bg-indigo-50 dark:hover:bg-indigo-900/20',
+            sync: { dot: 'bg-indigo-500', shadow: 'shadow-[0_0_8px_rgba(99,102,241,0.4)]', text: 'text-indigo-600', bg: 'bg-indigo-50/50 dark:bg-indigo-900/20' }
+        },
         default: {
             spotlight: isDark ? "rgba(16, 185, 129, 0.15)" : "rgba(16, 185, 129, 0.1)",
             iconText: 'text-gray-400 dark:text-gray-500',
@@ -125,6 +135,7 @@ const Navbar = () => {
                                 primary: 'text-purple-500 dark:text-purple-400',
                                 advanced: 'text-red-500 dark:text-red-400',
                                 command: 'text-sky-500 dark:text-sky-400',
+                                data: 'text-indigo-500 dark:text-indigo-400',
                             };
 
                             const activeColorClass = activeColors[tab.id] || 'text-gray-900 dark:text-white';
@@ -145,7 +156,7 @@ const Navbar = () => {
                                         <div
                                             className="absolute inset-[-25%] z-[-1] pointer-events-none blur-2xl opacity-100"
                                             style={{
-                                                background: `radial-gradient(circle at center, ${themeConfigs[tab.id === 'pending' ? 'green' : tab.id === 'primary' ? 'purple' : tab.id === 'inspiration' ? 'pink' : tab.id === 'command' ? 'sky' : 'default'].spotlight.replace('0.15', '0.4').replace('0.1', '0.3').replace('0.12', '0.3')} 0%, transparent 75%)`
+                                                background: `radial-gradient(circle at center, ${themeConfigs[tab.id === 'pending' ? 'green' : tab.id === 'primary' ? 'purple' : tab.id === 'inspiration' ? 'pink' : tab.id === 'command' ? 'sky' : tab.id === 'data' ? 'indigo' : 'default'].spotlight.replace('0.15', '0.4').replace('0.1', '0.3').replace('0.12', '0.3')} 0%, transparent 75%)`
                                             }}
                                         />
                                     )}

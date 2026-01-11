@@ -12,6 +12,7 @@ export default {
         cloudSync: '클라우드 동기화',
         sync: '동기화',
         dataManagement: '데이터 관리',
+        data: '데이터',
     },
 
     // Common

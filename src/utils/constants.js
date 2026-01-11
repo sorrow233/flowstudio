@@ -4,6 +4,7 @@ export const STORAGE_KEYS = {
     PRIMARY: 'flowstudio_primary_projects',
     FINAL: 'flowstudio_final_projects',
     COMMANDS: 'flowstudio_commands',
+    ALL_PROJECTS: 'all_projects',
 };
 
 export const DEV_STAGES = [

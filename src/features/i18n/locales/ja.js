@@ -12,6 +12,7 @@ export default {
         cloudSync: 'クラウド同期',
         sync: '同期',
         dataManagement: 'データ管理',
+        data: 'データ',
     },
 
     // Common

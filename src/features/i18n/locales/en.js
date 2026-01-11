@@ -12,6 +12,7 @@ export default {
         cloudSync: 'Cloud Sync',
         sync: 'Sync',
         dataManagement: 'Data Management',
+        data: 'Data',
     },
 
     // Common
