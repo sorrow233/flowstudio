@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { ArrowRight, Lightbulb, Hash, X, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
+import { useImportQueue } from '../sync/hooks/useImportQueue';
+import { useAuth } from '../auth/AuthContext';
 import { useTranslation } from '../i18n';
 import InspirationItem from './components/inspiration/InspirationItem';
 import { COLOR_CONFIG } from './components/inspiration/InspirationUtils';
@@ -20,6 +22,7 @@ const getNextAutoColorIndex = (totalCount) => {
 
 const InspirationModule = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     // Sync - 使用 immediateSync 实现即时同步
     const { doc, immediateSync } = useSync();
     const { t } = useTranslation();
@@ -48,6 +51,9 @@ const InspirationModule = () => {
     const ideas = useMemo(() =>
         allProjects.filter(p => (p.stage || 'inspiration') === 'inspiration'),
         [allProjects]);
+
+    // 处理待导入队列（从外部项目发送的内容）
+    useImportQueue(user?.uid, addIdea, ideas.length, getNextAutoColorIndex);
 
     // Fetch existing projects for tags
     const primaryProjects = useMemo(() =>
