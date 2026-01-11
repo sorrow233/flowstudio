@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowRight, Lightbulb, Hash } from 'lucide-react';
+import { ArrowRight, Lightbulb, Hash, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -60,6 +60,7 @@ const InspirationModule = () => {
     const [input, setInput] = useState('');
     const [selectedColorIndex, setSelectedColorIndex] = useState(null);
     const [copiedId, setCopiedId] = useState(null);
+    const [showWeekSelector, setShowWeekSelector] = useState(false);
     const [deletedIdeas, setDeletedIdeas] = useState([]);
     const [archiveShake, setArchiveShake] = useState(false);
     const editorRef = useRef(null);
@@ -309,6 +310,41 @@ const InspirationModule = () => {
         return [...ideas].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     }, [ideas]);
 
+    // Extract all available weeks for navigation
+    const availableWeeks = useMemo(() => {
+        const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 7 * 24 * 60 * 60 * 1000);
+        const weekGroups = {};
+
+        olderIdeas.forEach(idea => {
+            const date = new Date(idea.timestamp || Date.now());
+            const day = date.getDay();
+            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+            const weekStart = new Date(date.setDate(diff));
+            weekStart.setHours(0, 0, 0, 0);
+
+            const weekKey = weekStart.getTime();
+            if (!weekGroups[weekKey]) {
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekEnd.getDate() + 6);
+                weekGroups[weekKey] = {
+                    start: weekStart,
+                    end: weekEnd,
+                    key: weekKey
+                };
+            }
+        });
+
+        return Object.values(weekGroups).sort((a, b) => b.key - a.key);
+    }, [sortedIdeas]);
+
+    const scrollToWeek = (weekKey) => {
+        const element = document.getElementById(`week-${weekKey}`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setShowWeekSelector(false);
+        }
+    };
+
     return (
         <div className="max-w-4xl mx-auto pt-14 px-6 md:px-10 pb-32">
             {/* Header Section */}
@@ -512,14 +548,18 @@ const InspirationModule = () => {
                     return sortedWeeks.map(week => (
                         <div key={week.start.getTime()}>
                             {/* Week Header */}
-                            <div className="flex items-center gap-3 mb-4 mt-8">
-                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent" />
-                                <span className="text-xs font-medium text-pink-300 dark:text-pink-600 tracking-wide whitespace-nowrap">
+                            <div
+                                id={`week-${week.start.getTime()}`}
+                                onDoubleClick={() => setShowWeekSelector(true)}
+                                className="flex items-center gap-3 mb-4 mt-8 cursor-pointer group"
+                            >
+                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
+                                <span className="text-xs font-medium text-pink-300 dark:text-pink-600 tracking-wide whitespace-nowrap group-hover:text-pink-400 transition-colors">
                                     {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                     {' - '}
                                     {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                 </span>
-                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent" />
+                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
                             </div>
                             <AnimatePresence mode="popLayout">
                                 {week.ideas.map((idea) => (
@@ -579,6 +619,66 @@ const InspirationModule = () => {
                             <span>{t('common.undo')}</span>
                             <kbd className="text-[10px] bg-pink-100 dark:bg-pink-800 px-1.5 py-0.5 rounded text-pink-600 dark:text-pink-200 font-mono border border-pink-200 dark:border-pink-700">⌘Z</kbd>
                         </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Week Selector Modal */}
+            <AnimatePresence>
+                {showWeekSelector && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-white/40 dark:bg-black/40 backdrop-blur-xl"
+                        onClick={() => setShowWeekSelector(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl border border-white/20 dark:border-gray-800 overflow-hidden"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <div className="p-8">
+                                <div className="flex items-center justify-between mb-8">
+                                    <div>
+                                        <h3 className="text-xl font-light text-gray-900 dark:text-white mb-1">选择周区间</h3>
+                                        <p className="text-xs text-gray-400 dark:text-gray-500 font-light">快速跳转到历史灵感</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowWeekSelector(false)}
+                                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors group"
+                                    >
+                                        <X size={20} className="text-gray-400 group-hover:text-pink-500 transition-colors" />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {availableWeeks.map((week) => (
+                                        <button
+                                            key={week.key}
+                                            onClick={() => scrollToWeek(week.key)}
+                                            className="w-full text-left p-4 rounded-2xl hover:bg-pink-50 dark:hover:bg-pink-900/30 group transition-all duration-300 border border-transparent hover:border-pink-100 dark:hover:border-pink-800/50 flex items-center justify-between"
+                                        >
+                                            <span className="text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-300 transition-colors">
+                                                {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                {' - '}
+                                                {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                            </span>
+                                            <div className="w-6 h-6 rounded-full bg-pink-100 dark:bg-pink-900/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                                                <ArrowRight size={14} className="text-pink-500" />
+                                            </div>
+                                        </button>
+                                    ))}
+                                    {availableWeeks.length === 0 && (
+                                        <div className="py-8 text-center text-gray-400 font-light text-sm italic">
+                                            暂无历史周区间
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
