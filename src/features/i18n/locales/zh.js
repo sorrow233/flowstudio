@@ -472,5 +472,6 @@ export default {
         emptyState: '还没有任何数据，开始记录你的所思所想吧',
         today: '今日新增',
         thisWeek: '本周新增',
+        chartDetailHint: '双击查看产出趋势',
     },
 };

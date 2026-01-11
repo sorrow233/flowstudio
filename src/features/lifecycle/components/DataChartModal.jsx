@@ -8,62 +8,83 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
 
     const currentData = useMemo(() => {
         if (!data) return [];
-        if (view === 'daily') return data.daily;
-        if (view === 'weekly') return data.weekly;
-        if (view === 'monthly') return data.monthly;
-        return [];
+        const d = view === 'daily' ? data.daily : view === 'weekly' ? data.weekly : data.monthly;
+        return d || [];
     }, [data, view]);
+
+    const hasData = useMemo(() => currentData.some(d => d.value > 0 || d.inspirations > 0), [currentData]);
 
     // Number formatting helper
     const formatNumber = (num) => {
-        if (num >= 1000) {
-            return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-        }
+        if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
         return num.toString();
     };
 
     const maxWords = useMemo(() => {
         const values = currentData.map(d => d.value);
-        return Math.max(...values, 10);
+        return Math.max(...values, 100);
     }, [currentData]);
 
     const maxInspirations = useMemo(() => {
         const values = currentData.map(d => d.inspirations);
-        return Math.max(...values, 5);
+        return Math.max(...values, 10);
     }, [currentData]);
 
     // Chart Dimensions
     const width = 600;
     const height = 300;
-    const padding = 40;
+    const paddingX = 40;
+    const paddingY = 60;
+
+    // Helper to generate points
+    const getPoint = (val, max, index, total) => {
+        const x = paddingX + (index / (total - 1)) * (width - paddingX * 2);
+        const y = height - paddingY - (val / max) * (height - paddingY * 2);
+        return { x, y };
+    };
+
+    // Helper to generate Bezier Path
+    const getBezierPath = (points, isArea = false) => {
+        if (points.length < 2) return '';
+        let d = `M ${points[0].x},${points[0].y}`;
+
+        for (let i = 0; i < points.length - 1; i++) {
+            const p0 = points[i];
+            const p1 = points[i + 1];
+            const cp1x = p0.x + (p1.x - p0.x) / 2;
+            const cp2x = p0.x + (p1.x - p0.x) / 2;
+            d += ` C ${cp1x},${p0.y} ${cp2x},${p1.y} ${p1.x},${p1.y}`;
+        }
+
+        if (isArea) {
+            d += ` L ${points[points.length - 1].x},${height - paddingY}`;
+            d += ` L ${points[0].x},${height - paddingY} Z`;
+        }
+        return d;
+    };
 
     const wordPoints = useMemo(() => {
         if (currentData.length === 0) return [];
-        return currentData.map((d, i) => {
-            const x = padding + (i / (currentData.length - 1)) * (width - padding * 2);
-            const y = height - padding - (d.value / maxWords) * (height - padding * 2);
-            return { x, y, value: d.value, label: d.label };
-        });
-    }, [currentData, maxWords, width, height, padding]);
+        return currentData.map((d, i) => ({
+            ...getPoint(d.value, maxWords, i, currentData.length),
+            value: d.value,
+            label: d.label
+        }));
+    }, [currentData, maxWords]);
 
     const inspirationPoints = useMemo(() => {
         if (currentData.length === 0) return [];
-        return currentData.map((d, i) => {
-            const x = padding + (i / (currentData.length - 1)) * (width - padding * 2);
-            const y = height - padding - (d.inspirations / maxInspirations) * (height - padding * 2);
-            return { x, y, value: d.inspirations, label: d.label };
-        });
-    }, [currentData, maxInspirations, width, height, padding]);
+        return currentData.map((d, i) => ({
+            ...getPoint(d.inspirations, maxInspirations, i, currentData.length),
+            value: d.inspirations,
+            label: d.label
+        }));
+    }, [currentData, maxInspirations]);
 
-    const wordPathData = useMemo(() => {
-        if (wordPoints.length < 2) return '';
-        return `M ${wordPoints.map(p => `${p.x},${p.y}`).join(' L ')}`;
-    }, [wordPoints]);
-
-    const inspirationPathData = useMemo(() => {
-        if (inspirationPoints.length < 2) return '';
-        return `M ${inspirationPoints.map(p => `${p.x},${p.y}`).join(' L ')}`;
-    }, [inspirationPoints]);
+    const wordPathLine = useMemo(() => getBezierPath(wordPoints), [wordPoints]);
+    const wordPathArea = useMemo(() => getBezierPath(wordPoints, true), [wordPoints]);
+    const inspirationPathLine = useMemo(() => getBezierPath(inspirationPoints), [inspirationPoints]);
 
     return (
         <AnimatePresence>
@@ -75,55 +96,54 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-white/40 dark:bg-black/40 backdrop-blur-xl"
+                        className="absolute inset-0 bg-white/40 dark:bg-black/60 backdrop-blur-2xl"
                     />
 
                     {/* Modal Content */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        initial={{ opacity: 0, scale: 0.95, y: 30 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="relative w-full max-w-3xl bg-white/95 dark:bg-gray-950/95 border border-white/20 dark:border-gray-800 shadow-2xl rounded-[2.5rem] overflow-hidden p-8"
+                        exit={{ opacity: 0, scale: 0.95, y: 30 }}
+                        className="relative w-full max-w-4xl bg-white/80 dark:bg-gray-950/90 border border-white/20 dark:border-gray-800 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] rounded-[3rem] overflow-hidden p-8 md:p-12"
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between mb-8">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2.5 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100/50 dark:border-indigo-800/30">
-                                    <TrendingUp className="w-5 h-5 text-indigo-400" />
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-indigo-500/10 dark:bg-indigo-400/10 rounded-2xl border border-indigo-100 dark:border-indigo-900/30">
+                                    <TrendingUp className="w-6 h-6 text-indigo-500" />
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-4">
-                                        <h3 className="text-xl font-light text-gray-900 dark:text-white">数据处理详情</h3>
-                                        {/* Legend with Toggles */}
-                                        <div className="flex items-center gap-3 text-[10px] font-medium tracking-tight">
-                                            <div className="flex items-center gap-1.5 opacity-60">
-                                                <div className="w-2.5 h-0.5 bg-indigo-400 rounded-full" />
-                                                <span className="text-gray-500">文字</span>
+                                        <h3 className="text-2xl font-light text-gray-900 dark:text-white tracking-tight">创作心律</h3>
+                                        <div className="hidden md:flex items-center gap-3">
+                                            <div className="flex items-center gap-2 px-2 py-1 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                                                <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                                                <span className="text-[10px] font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Word Flow</span>
                                             </div>
                                             <button
                                                 onClick={() => setShowInspiration(!showInspiration)}
-                                                className={`flex items-center gap-1.5 transition-all duration-300 px-2 py-0.5 rounded-full ${showInspiration ? 'opacity-100 bg-pink-50 dark:bg-pink-900/20' : 'opacity-30 hover:opacity-100'}`}
+                                                className={`flex items-center gap-2 px-2 py-1 rounded-lg transition-all duration-300 ${showInspiration ? 'bg-pink-50 dark:bg-pink-900/20 border border-pink-100 dark:border-pink-800/30' : 'opacity-40 hover:opacity-100'}`}
                                             >
-                                                <div className="w-2.5 h-0.5 bg-pink-400 rounded-full" />
-                                                <span className={`${showInspiration ? 'text-pink-500' : 'text-gray-500'}`}>灵感</span>
+                                                <div className="w-2 h-2 bg-pink-500 rounded-full" />
+                                                <span className={`text-[10px] font-medium uppercase tracking-wider ${showInspiration ? 'text-pink-600 dark:text-pink-400' : 'text-gray-500'}`}>Insights</span>
                                             </button>
                                         </div>
                                     </div>
-                                    <p className="text-[11px] text-gray-400 dark:text-gray-500 font-light mt-1">处理总量与灵感采集的历史趋势</p>
+                                    <p className="text-xs text-gray-400 dark:text-gray-500 font-light mt-1.5 uppercase tracking-widest italic opacity-60">Visualizing your creative engine</p>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2">
-                                {/* Toggles */}
-                                <div className="flex bg-gray-100/50 dark:bg-gray-900/50 p-1 rounded-2xl border border-gray-200/50 dark:border-gray-800/50 mr-2">
+                            <div className="flex items-center gap-3">
+                                {/* Interval Toggles */}
+                                <div className="flex bg-gray-100/80 dark:bg-gray-900/50 p-1 rounded-2xl border border-gray-200/50 dark:border-gray-800/50 shadow-inner">
                                     {['daily', 'weekly', 'monthly'].map((v) => (
                                         <button
                                             key={v}
                                             onClick={() => setView(v)}
                                             className={`
-                                                px-3.5 py-1.5 text-[10px] rounded-xl transition-all duration-500 uppercase tracking-tight
+                                                px-5 py-2 text-[11px] rounded-xl transition-all duration-500 uppercase tracking-widest font-medium
                                                 ${view === v
-                                                    ? 'bg-white dark:bg-gray-700 text-indigo-500 shadow-md shadow-indigo-100/50 dark:shadow-none font-bold scale-[1.02]'
+                                                    ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-white shadow-xl shadow-indigo-200/20 dark:shadow-none scale-[1.05]'
                                                     : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}
                                             `}
                                         >
@@ -134,145 +154,165 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
 
                                 <button
                                     onClick={onClose}
-                                    className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-2xl transition-all hover:scale-110 active:scale-95 group"
+                                    className="p-3 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl transition-all hover:scale-110 active:scale-95 group ml-2"
                                 >
-                                    <X size={18} className="text-gray-400 group-hover:text-gray-600 transition-colors" />
+                                    <X size={20} className="text-gray-400 group-hover:text-red-400 transition-colors" />
                                 </button>
                             </div>
                         </div>
 
                         {/* Chart Area */}
-                        <div className="bg-gradient-to-b from-gray-50/30 to-white dark:from-gray-900/30 dark:to-gray-950/20 rounded-[2.5rem] p-8 border border-gray-100/50 dark:border-gray-800/30">
-                            <div className="relative h-[300px] w-full">
-                                <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
-                                    {/* Grid Lines */}
-                                    {[0, 0.25, 0.5, 0.75, 1].map((r) => (
-                                        <line
-                                            key={r}
-                                            x1={padding}
-                                            y1={padding + r * (height - padding * 2)}
-                                            x2={width - padding}
-                                            y2={padding + r * (height - padding * 2)}
-                                            stroke="currentColor"
-                                            className="text-gray-100 dark:text-gray-800/30"
-                                            strokeDasharray="6 6"
+                        <div className="relative bg-white/50 dark:bg-black/20 rounded-[2.5rem] p-4 md:p-8 border border-white/40 dark:border-gray-800/50 backdrop-blur-sm min-h-[360px] flex items-center justify-center">
+                            {!hasData ? (
+                                <div className="flex flex-col items-center gap-4 text-gray-300 dark:text-gray-700 select-none">
+                                    <TrendingUp size={48} strokeWidth={1} className="opacity-20 animate-pulse" />
+                                    <p className="text-sm font-light uppercase tracking-[0.2em]">Silence is the canvas of future noise</p>
+                                </div>
+                            ) : (
+                                <div className="relative h-full w-full">
+                                    <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
+                                        <defs>
+                                            <linearGradient id="wordGradient" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stopColor="#818cf8" stopOpacity="0.2" />
+                                                <stop offset="100%" stopColor="#818cf8" stopOpacity="0" />
+                                            </linearGradient>
+                                        </defs>
+
+                                        {/* Grid Lines (Horizontal) */}
+                                        {[0, 0.25, 0.5, 0.75, 1].map((r) => (
+                                            <line
+                                                key={r}
+                                                x1={paddingX}
+                                                y1={paddingY + r * (height - paddingY * 2)}
+                                                x2={width - paddingX}
+                                                y2={paddingY + r * (height - paddingY * 2)}
+                                                stroke="currentColor"
+                                                className="text-gray-100 dark:text-gray-800/30"
+                                                strokeDasharray="8 8"
+                                                strokeWidth="1"
+                                            />
+                                        ))}
+
+                                        {/* Word Area Fill */}
+                                        <motion.path
+                                            d={wordPathArea}
+                                            fill="url(#wordGradient)"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ duration: 1.5 }}
                                         />
-                                    ))}
 
-                                    {/* Inspiration Line (Conditional) */}
-                                    <AnimatePresence>
-                                        {showInspiration && (
-                                            <motion.path
-                                                key="inspiration-line"
-                                                d={inspirationPathData}
-                                                fill="none"
-                                                stroke="#f472b6"
-                                                strokeWidth="2"
-                                                strokeOpacity="0.4"
-                                                strokeLinecap="round"
-                                                strokeDasharray="4 6"
-                                                initial={{ pathLength: 0, opacity: 0 }}
-                                                animate={{ pathLength: 1, opacity: 0.4 }}
-                                                exit={{ opacity: 0, transition: { duration: 0.3 } }}
-                                                transition={{ duration: 1.2, ease: "easeOut" }}
-                                            />
-                                        )}
-                                    </AnimatePresence>
+                                        {/* Inspiration Line (Conditional) */}
+                                        <AnimatePresence>
+                                            {showInspiration && (
+                                                <motion.path
+                                                    key="inspiration-line"
+                                                    d={inspirationPathLine}
+                                                    fill="none"
+                                                    stroke="#f472b6"
+                                                    strokeWidth="2"
+                                                    strokeOpacity="0.3"
+                                                    strokeLinecap="round"
+                                                    strokeDasharray="4 6"
+                                                    initial={{ pathLength: 0, opacity: 0 }}
+                                                    animate={{ pathLength: 1, opacity: 0.3 }}
+                                                    exit={{ opacity: 0, transition: { duration: 0.5 } }}
+                                                    transition={{ duration: 1.2, ease: "easeOut" }}
+                                                />
+                                            )}
+                                        </AnimatePresence>
 
-                                    {/* Word Line (Front) */}
-                                    <motion.path
-                                        d={wordPathData}
-                                        fill="none"
-                                        stroke="#818cf8"
-                                        strokeWidth="2.5"
-                                        strokeOpacity="0.8"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        initial={{ pathLength: 0, opacity: 0 }}
-                                        animate={{ pathLength: 1, opacity: 0.8 }}
-                                        transition={{ duration: 1, ease: "easeInOut" }}
-                                    />
+                                        {/* Word Line (Front) */}
+                                        <motion.path
+                                            d={wordPathLine}
+                                            fill="none"
+                                            stroke="#818cf8"
+                                            strokeWidth="3"
+                                            strokeOpacity="0.8"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            initial={{ pathLength: 0 }}
+                                            animate={{ pathLength: 1 }}
+                                            transition={{ duration: 1, ease: "easeInOut" }}
+                                        />
 
-                                    {/* Word Dots & Persistent Labels */}
-                                    {wordPoints.map((p, i) => (
-                                        <g key={`w-${i}`} className="group cursor-help">
-                                            {/* Persistent Label */}
-                                            <text
-                                                x={p.x}
-                                                y={p.y - 12}
-                                                textAnchor="middle"
-                                                className="text-[9px] fill-indigo-400/80 dark:fill-indigo-300/60 font-medium tracking-tighter"
-                                            >
-                                                {formatNumber(p.value)}
-                                            </text>
-
-                                            <motion.circle
-                                                cx={p.x}
-                                                cy={p.y}
-                                                r="3"
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                transition={{ delay: 0.4 + i * 0.04 }}
-                                                className="fill-white dark:fill-gray-900 stroke-indigo-300 dark:stroke-indigo-700 stroke-[1.5px] group-hover:stroke-indigo-500 transition-colors"
-                                            />
-                                        </g>
-                                    ))}
-
-                                    {/* Inspiration Dots & Labels (Conditional) */}
-                                    <AnimatePresence>
-                                        {showInspiration && inspirationPoints.map((p, i) => (
-                                            <motion.g
-                                                key={`i-${i}`}
-                                                className="group cursor-help"
-                                                initial={{ opacity: 0, scale: 0 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                exit={{ opacity: 0, scale: 0 }}
-                                                transition={{ delay: 0.2 + i * 0.03 }}
-                                            >
-                                                {/* Persistent Label for Inspiration */}
+                                        {/* Word Points & Persistent Labels */}
+                                        {wordPoints.map((p, i) => (
+                                            <g key={`w-${i}`} className="group transition-transform duration-300 hover:scale-110">
                                                 <text
                                                     x={p.x}
-                                                    y={p.y + 16}
+                                                    y={p.y - 18}
                                                     textAnchor="middle"
-                                                    className="text-[8px] fill-pink-400/70 dark:fill-pink-300/50 font-medium tracking-tighter"
+                                                    className={`text-[10px] fill-indigo-500/80 dark:fill-indigo-400 font-bold tracking-tighter transition-all duration-300 ${p.value === 0 ? 'opacity-0' : 'opacity-100'}`}
                                                 >
-                                                    {p.value}
+                                                    {formatNumber(p.value)}
                                                 </text>
-
-                                                <circle
+                                                <motion.circle
                                                     cx={p.x}
                                                     cy={p.y}
-                                                    r="2"
-                                                    className="fill-white dark:fill-gray-900 stroke-pink-200 dark:stroke-pink-900 stroke-[1px] group-hover:stroke-pink-400 transition-colors"
+                                                    r="4"
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    transition={{ delay: 0.4 + i * 0.04 }}
+                                                    className="fill-white dark:fill-gray-950 stroke-indigo-400 dark:stroke-indigo-600 stroke-[2px] group-hover:stroke-indigo-500 transition-colors shadow-lg"
                                                 />
-                                            </motion.g>
+                                            </g>
                                         ))}
-                                    </AnimatePresence>
 
-                                    {/* Axis Labels (X) */}
-                                    {wordPoints.filter((_, i) => i % (view === 'daily' ? 2 : 1) === 0).map((p, i) => (
-                                        <text
-                                            key={i}
-                                            x={p.x}
-                                            y={height - 10}
-                                            textAnchor="middle"
-                                            className="text-[9px] fill-gray-300 dark:fill-gray-600 font-light tracking-tighter"
-                                        >
-                                            {p.label}
-                                        </text>
-                                    ))}
-                                </svg>
-                            </div>
+                                        {/* Inspiration Points (Conditional) */}
+                                        <AnimatePresence>
+                                            {showInspiration && inspirationPoints.map((p, i) => (
+                                                <motion.g
+                                                    key={`i-${i}`}
+                                                    className="group cursor-help"
+                                                    initial={{ opacity: 0, scale: 0 }}
+                                                    animate={{ opacity: 1, scale: 1 }}
+                                                    exit={{ opacity: 0, scale: 0 }}
+                                                    transition={{ delay: 0.2 + i * 0.03 }}
+                                                >
+                                                    <text
+                                                        x={p.x}
+                                                        y={p.y + 24}
+                                                        textAnchor="middle"
+                                                        className={`text-[9px] fill-pink-500/60 dark:fill-pink-400/50 font-medium tracking-tighter ${p.value === 0 ? 'opacity-0' : 'opacity-100'}`}
+                                                    >
+                                                        {p.value}
+                                                    </text>
+                                                    <circle
+                                                        cx={p.x}
+                                                        cy={p.y}
+                                                        r="2.5"
+                                                        className="fill-white dark:fill-gray-950 stroke-pink-300 dark:stroke-pink-800 stroke-[1.5px]"
+                                                    />
+                                                </motion.g>
+                                            ))}
+                                        </AnimatePresence>
+
+                                        {/* X-Axis Labels */}
+                                        {wordPoints.filter((_, i) => i % (view === 'daily' ? 2 : 1) === 0).map((p, i) => (
+                                            <text
+                                                key={i}
+                                                x={p.x}
+                                                y={height - 15}
+                                                textAnchor="middle"
+                                                className="text-[10px] fill-gray-300 dark:fill-gray-600 font-light tracking-widest uppercase opacity-80"
+                                            >
+                                                {p.label}
+                                            </text>
+                                        ))}
+                                    </svg>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Footer Hint */}
-                        <div className="mt-8 flex items-center justify-between text-[11px] text-gray-400 dark:text-gray-500 font-light italic px-6 uppercase tracking-wider">
-                            <div className="flex items-center gap-2">
-                                <TrendingUp size={12} className="text-indigo-300" />
-                                <span>Rhythms of Thought</span>
+                        {/* Footer Info */}
+                        <div className="mt-12 flex items-center justify-between text-[11px] text-gray-400 dark:text-gray-500 font-light italic px-6 uppercase tracking-[0.2em] border-t border-gray-100/50 dark:border-gray-800/30 pt-8">
+                            <div className="flex items-center gap-3">
+                                <Sparkles size={14} className="text-indigo-300 dark:text-indigo-800" />
+                                <span>Soul Dynamics Engine</span>
                             </div>
-                            <div className="text-[9px] opacity-40 not-italic">
-                                Real-time dynamic aggregation
+                            <div className="text-[9px] opacity-30 not-italic hidden md:block">
+                                Locally computed • Privacy first
                             </div>
                         </div>
                     </motion.div>

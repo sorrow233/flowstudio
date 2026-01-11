@@ -443,5 +443,6 @@ export default {
         emptyState: 'まだデータがありません。考えを记录し始めましょう。',
         today: '今日',
         thisWeek: '今週',
+        chartDetailHint: 'ダブルクリックで詳細を表示',
     },
 };

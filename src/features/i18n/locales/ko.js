@@ -442,5 +442,6 @@ export default {
         emptyState: '아직 데이터가 없습니다. 생각을 기록하기 시작하세요.',
         today: '오늘',
         thisWeek: '이번 주',
+        chartDetailHint: '더블 클릭하여 상세 보기',
     },
 };

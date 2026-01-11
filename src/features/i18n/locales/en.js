@@ -454,5 +454,6 @@ export default {
         emptyState: 'No data yet. Start recording your thoughts.',
         today: 'Today',
         thisWeek: 'This Week',
+        chartDetailHint: 'Double-click for trends',
     },
 };
