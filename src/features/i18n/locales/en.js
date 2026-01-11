@@ -447,7 +447,8 @@ export default {
     data: {
         subtitle: 'Visualize your digital mind footprint',
         totalWords: 'Total Characters',
-        projectCount: 'Active Projects',
+        growingCount: 'Growing Projects',
+        blueprintCount: 'Blueprint Plans',
         conversion: 'Inspiration Conversion',
         flowEfficiency: 'Flow output is actively growing',
         emptyState: 'No data yet. Start recording your thoughts.',

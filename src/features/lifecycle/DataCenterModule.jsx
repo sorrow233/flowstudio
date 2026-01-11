@@ -26,7 +26,8 @@ const DataCenterModule = () => {
         let totalChars = 0;
         let inspirationCount = 0;
         let instructionCount = allCommands?.length || 0;
-        let activeProjectCount = 0;
+        let growingCount = 0;
+        let pendingProjectCount = 0;
 
         // Process Projects
         allProjects?.forEach(project => {
@@ -35,12 +36,10 @@ const DataCenterModule = () => {
 
             if (project.stage === 'inspiration') {
                 inspirationCount++;
-            } else if (
-                project.stage === 'pending' ||
-                project.stage === 'primary' ||
-                [1, 2, 3, 4, 5].includes(project.stage)
-            ) {
-                activeProjectCount++;
+            } else if (project.stage === 'primary') {
+                growingCount++;
+            } else if (project.stage === 'pending') {
+                pendingProjectCount++;
             }
         });
 
@@ -54,7 +53,8 @@ const DataCenterModule = () => {
             totalChars,
             inspirationCount,
             instructionCount,
-            projectCount: activeProjectCount
+            growingCount,
+            blueprintCount: pendingProjectCount + instructionCount
         };
     }, [allProjects, allCommands]);
 
@@ -143,32 +143,32 @@ const DataCenterModule = () => {
                         </div>
                     </motion.div>
 
-                    {/* 指令数 */}
+                    {/* 成长中项目 */}
                     <motion.div variants={cardVariants}>
                         <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 md:p-5 text-center hover:border-indigo-200 dark:hover:border-indigo-800/50 transition-all duration-300 hover:shadow-sm">
                             <div className="mx-auto mb-3 w-10 h-10 flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
-                                <Terminal className="w-4 h-4 text-indigo-400" />
+                                <Box className="w-4 h-4 text-indigo-400" />
                             </div>
                             <div className="text-2xl md:text-3xl font-light text-gray-900 dark:text-white mb-1">
-                                {stats.instructionCount}
+                                {stats.growingCount}
                             </div>
                             <div className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 font-light uppercase tracking-wider">
-                                {t('navbar.command')}
+                                {t('data.growingCount', '成长中项目')}
                             </div>
                         </div>
                     </motion.div>
 
-                    {/* 项目数 */}
+                    {/* 蓝图 & 指令 */}
                     <motion.div variants={cardVariants}>
                         <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 md:p-5 text-center hover:border-indigo-200 dark:hover:border-indigo-800/50 transition-all duration-300 hover:shadow-sm">
                             <div className="mx-auto mb-3 w-10 h-10 flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
                                 <Terminal className="w-4 h-4 text-indigo-400" />
                             </div>
                             <div className="text-2xl md:text-3xl font-light text-gray-900 dark:text-white mb-1">
-                                {stats.projectCount}
+                                {stats.blueprintCount}
                             </div>
                             <div className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 font-light uppercase tracking-wider">
-                                {t('data.projectCount', '进行中项目')}
+                                {t('data.blueprintCount', '蓝图计划')}
                             </div>
                         </div>
                     </motion.div>
