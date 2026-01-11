@@ -435,7 +435,7 @@ export default {
     data: {
         subtitle: '사고의 디지털 발자취를 시각화',
         totalWords: '총 문자 수',
-        totalItems: '총 기록 수',
+        projectCount: '진행 중인 프로젝트',
         conversion: '영감 전환율',
         flowEfficiency: '플로우 출력이 활발하게 성장 중',
         emptyState: '아직 데이터가 없습니다. 생각을 기록하기 시작하세요.',
