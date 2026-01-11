@@ -90,6 +90,29 @@ const InspirationModule = () => {
         }
     }, [deletedIdeas]);
 
+    // 跨项目内容接收：检测 URL 参数中的 import_text
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const importText = params.get('import_text');
+
+        if (importText) {
+            const decoded = decodeURIComponent(importText);
+            const newIdea = {
+                id: uuidv4(),
+                content: decoded,
+                timestamp: Date.now(),
+                colorIndex: getNextAutoColorIndex(ideas.length),
+                stage: 'inspiration',
+            };
+            addIdea(newIdea);
+
+            // 清理 URL 参数（避免刷新后重复创建）
+            const url = new URL(window.location);
+            url.searchParams.delete('import_text');
+            window.history.replaceState({}, '', url);
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
     // Keyboard shortcut: Cmd+Z to undo
     useEffect(() => {
         const handleKeyDown = (e) => {
