@@ -159,8 +159,11 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
             <div
                 className={`
                     relative flex-1 bg-white dark:bg-gray-900 rounded-xl p-5 
-                    border border-gray-100 dark:border-gray-800 shadow-sm 
+                    border shadow-sm 
                     transition-all duration-500 cursor-pointer active:scale-[0.99]
+                    ${idea.source && idea.source !== 'user'
+                        ? 'border-cyan-300 dark:border-cyan-600 ring-1 ring-cyan-200/50 dark:ring-cyan-700/30'
+                        : 'border-gray-100 dark:border-gray-800'}
                     ${isDragging ? '' : `hover:shadow-[0_0_20px_rgba(244,114,182,0.2)] hover:border-pink-200 dark:hover:border-pink-800/50`}
                     ${isCompleted ? 'opacity-50' : ''}
                     z-10
@@ -243,6 +246,20 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                                     hour: '2-digit',
                                     minute: '2-digit'
                                 })}
+                                {/* 来源标签 */}
+                                {idea.tags && idea.tags.length > 0 && (
+                                    <>
+                                        <span className="mx-1.5 text-pink-200/20 dark:text-pink-800/20">·</span>
+                                        {idea.tags.map((tag, idx) => (
+                                            <span
+                                                key={idx}
+                                                className="px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider bg-cyan-100 dark:bg-cyan-900/40 text-cyan-600 dark:text-cyan-400 rounded"
+                                            >
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </>
+                                )}
                             </div>
 
                             {isArchiveView && (

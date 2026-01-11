@@ -51,7 +51,8 @@ export const useImportQueue = (userId, addIdea, ideasCount, getNextColorIndex, i
                             timestamp: data.createdAt || Date.now(),
                             colorIndex: getNextColorIndex(ideasCount + colorOffset),
                             stage: 'inspiration',
-                            source: data.source || 'external'
+                            source: data.source || 'external',
+                            tags: data.source === 'nexmap' ? ['NexMap'] : ['API']  // 标记来源
                         };
 
                         addIdea(newIdea);
