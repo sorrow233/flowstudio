@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ArrowRight, Lightbulb, Hash, X } from 'lucide-react';
+import { ArrowRight, Lightbulb, Hash, X, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -310,31 +310,58 @@ const InspirationModule = () => {
         return [...ideas].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     }, [ideas]);
 
-    // Extract all available weeks for navigation
-    const availableWeeks = useMemo(() => {
+    // Extract all available weeks for navigation, grouped by Year and Month
+    const groupedWeeks = useMemo(() => {
         const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 7 * 24 * 60 * 60 * 1000);
-        const weekGroups = {};
+        const groups = {};
 
         olderIdeas.forEach(idea => {
             const date = new Date(idea.timestamp || Date.now());
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1; // 1-12
+
+            // Get the Monday of the week for grouping
             const day = date.getDay();
             const diff = date.getDate() - day + (day === 0 ? -6 : 1);
             const weekStart = new Date(date.setDate(diff));
             weekStart.setHours(0, 0, 0, 0);
 
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+            weekEnd.setHours(23, 59, 59, 999);
+
             const weekKey = weekStart.getTime();
-            if (!weekGroups[weekKey]) {
-                const weekEnd = new Date(weekStart);
-                weekEnd.setDate(weekEnd.getDate() + 6);
-                weekGroups[weekKey] = {
+
+            if (!groups[year]) groups[year] = {};
+            if (!groups[year][month]) groups[year][month] = [];
+
+            if (!groups[year][month].some(w => w.key === weekKey)) {
+                // Calculate week number within the month (approximate)
+                const monthStart = new Date(weekStart.getFullYear(), weekStart.getMonth(), 1);
+                const weekNum = Math.ceil((weekStart.getDate() + monthStart.getDay() - 1) / 7);
+                const weekNames = ['第一周', '第二周', '第三周', '第四周', '第五周', '第六周'];
+
+                groups[year][month].push({
                     start: weekStart,
                     end: weekEnd,
-                    key: weekKey
-                };
+                    key: weekKey,
+                    label: weekNames[weekNum - 1] || `${weekNum}周`
+                });
             }
         });
 
-        return Object.values(weekGroups).sort((a, b) => b.key - a.key);
+        // Convert to sorted structure
+        return Object.entries(groups)
+            .sort((a, b) => b[0] - a[0]) // Sort years desc
+            .map(([year, months]) => ({
+                year,
+                months: Object.entries(months)
+                    .sort((a, b) => b[0] - a[0]) // Sort months desc
+                    .map(([month, weeks]) => ({
+                        month,
+                        weeks: weeks.sort((a, b) => b.key - a.key) // Sort weeks desc
+                    }))
+            }));
     }, [sortedIdeas]);
 
     const scrollToWeek = (weekKey) => {
@@ -555,9 +582,9 @@ const InspirationModule = () => {
                             >
                                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
                                 <span className="text-xs font-medium text-pink-300 dark:text-pink-600 tracking-wide whitespace-nowrap group-hover:text-pink-400 transition-colors">
-                                    {week.start.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                    {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                     {' - '}
-                                    {week.end.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                    {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                 </span>
                                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
                             </div>
@@ -655,25 +682,50 @@ const InspirationModule = () => {
                                 </div>
 
                                 <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {availableWeeks.map((week) => (
-                                        <button
-                                            key={week.key}
-                                            onClick={() => scrollToWeek(week.key)}
-                                            className="w-full text-left p-4 rounded-2xl hover:bg-pink-50 dark:hover:bg-pink-900/30 group transition-all duration-300 border border-transparent hover:border-pink-100 dark:hover:border-pink-800/50 flex items-center justify-between"
-                                        >
-                                            <span className="text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-300 transition-colors">
-                                                {week.start.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-                                                {' - '}
-                                                {week.end.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-                                            </span>
-                                            <div className="w-6 h-6 rounded-full bg-pink-100 dark:bg-pink-900/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                                                <ArrowRight size={14} className="text-pink-500" />
-                                            </div>
-                                        </button>
+                                    {groupedWeeks.map((yearGroup) => (
+                                        <div key={yearGroup.year} className="space-y-4">
+                                            {groupedWeeks.length > 1 && (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-bold text-pink-400 bg-pink-50 dark:bg-pink-900/30 px-2 py-0.5 rounded uppercase tracking-tighter">
+                                                        {yearGroup.year}
+                                                    </span>
+                                                    <div className="h-px flex-1 bg-gray-100 dark:bg-gray-800" />
+                                                </div>
+                                            )}
+
+                                            {yearGroup.months.map((monthGroup) => (
+                                                <div key={monthGroup.month} className="space-y-2">
+                                                    <div className="flex items-center justify-between px-2">
+                                                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                                            {monthGroup.month}月
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        {monthGroup.weeks.map((week) => (
+                                                            <button
+                                                                key={week.key}
+                                                                onClick={() => scrollToWeek(week.key)}
+                                                                className="text-left p-3 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 hover:bg-pink-50 dark:hover:bg-pink-900/40 group transition-all duration-300 border border-transparent hover:border-pink-100 dark:hover:border-pink-800/50"
+                                                            >
+                                                                <div className="text-[10px] text-gray-400 dark:text-gray-500 group-hover:text-pink-400 transition-colors mb-0.5">
+                                                                    {week.label}
+                                                                </div>
+                                                                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-300 truncate">
+                                                                    {week.start.getDate()} - {week.end.getDate()}日
+                                                                </div>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     ))}
-                                    {availableWeeks.length === 0 && (
-                                        <div className="py-8 text-center text-gray-400 font-light text-sm italic">
-                                            暂无历史周区间
+
+                                    {groupedWeeks.length === 0 && (
+                                        <div className="py-12 text-center">
+                                            <Calendar className="mx-auto text-gray-200 dark:text-gray-800 mb-2" size={32} />
+                                            <p className="text-gray-400 font-light text-sm italic">暂无历史灵感回顾</p>
                                         </div>
                                     )}
                                 </div>
