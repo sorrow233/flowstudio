@@ -693,32 +693,46 @@ const InspirationModule = () => {
                                                 </div>
                                             )}
 
-                                            {yearGroup.months.map((monthGroup) => (
-                                                <div key={monthGroup.month} className="space-y-2">
-                                                    <div className="flex items-center justify-between px-2">
-                                                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                                                            {monthGroup.month}月
-                                                        </span>
-                                                    </div>
+                                            {yearGroup.months.map((monthGroup) => {
+                                                const SOLAR_TERMS = [
+                                                    ['小寒', '大寒'], ['立春', '雨水'], ['惊蛰', '春分'],
+                                                    ['清明', '谷雨'], ['立夏', '小满'], ['芒种', '夏至'],
+                                                    ['小暑', '大暑'], ['立秋', '处暑'], ['白露', '秋分'],
+                                                    ['寒露', '霜降'], ['立冬', '小雪'], ['大雪', '冬至']
+                                                ];
+                                                const terms = SOLAR_TERMS[parseInt(monthGroup.month) - 1] || [];
 
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        {monthGroup.weeks.map((week) => (
-                                                            <button
-                                                                key={week.key}
-                                                                onClick={() => scrollToWeek(week.key)}
-                                                                className="text-left p-3 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 hover:bg-pink-50 dark:hover:bg-pink-900/40 group transition-all duration-300 border border-transparent hover:border-pink-100 dark:hover:border-pink-800/50"
-                                                            >
-                                                                <div className="text-[10px] text-gray-400 dark:text-gray-500 group-hover:text-pink-400 transition-colors mb-0.5">
-                                                                    {week.label}
-                                                                </div>
-                                                                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-300 truncate">
-                                                                    {week.start.getDate()} - {week.end.getDate()}日
-                                                                </div>
-                                                            </button>
-                                                        ))}
+                                                return (
+                                                    <div key={monthGroup.month} className="space-y-2">
+                                                        <div className="flex items-center justify-between px-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                                                    {monthGroup.month}月
+                                                                </span>
+                                                                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-light mt-0.5">
+                                                                    · {terms.join(' ')}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            {monthGroup.weeks.map((week) => (
+                                                                <button
+                                                                    key={week.key}
+                                                                    onClick={() => scrollToWeek(week.key)}
+                                                                    className="text-left p-3 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 hover:bg-pink-50 dark:hover:bg-pink-900/40 group transition-all duration-300 border border-transparent hover:border-pink-100 dark:hover:border-pink-800/50"
+                                                                >
+                                                                    <div className="text-[10px] text-gray-400 dark:text-gray-500 group-hover:text-pink-400 transition-colors mb-0.5">
+                                                                        {week.label}
+                                                                    </div>
+                                                                    <div className="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-300 truncate">
+                                                                        {week.start.getDate()} - {week.end.getDate()}日
+                                                                    </div>
+                                                                </button>
+                                                            ))}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                ))}
                                         </div>
                                     ))}
 

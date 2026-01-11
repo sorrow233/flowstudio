@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import React, { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { format, isSameDay, isSameWeek, isSameMonth, subDays, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval } from 'date-fns';
 import {
     BarChart3,
     Lightbulb,
@@ -12,10 +13,12 @@ import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import { useTranslation } from '../i18n';
 import Spotlight from '../../components/shared/Spotlight';
+import DataChartModal from './components/DataChartModal';
 
 const DataCenterModule = () => {
     const { doc } = useSync();
     const { t } = useTranslation();
+    const [showChart, setShowChart] = useState(false);
 
     // Fetch all data sources
     const { projects: allProjects } = useSyncedProjects(doc, 'all_projects');
@@ -72,6 +75,55 @@ const DataCenterModule = () => {
             growingCount,
             blueprintCount: pendingProjectCount + instructionCount
         };
+    }, [allProjects, allCommands]);
+
+    // Aggregate Data for Chart
+    const chartData = useMemo(() => {
+        const now = new Date();
+
+        // Helper to sum chars for an interval
+        const getSumForInterval = (items, intervalStart, type) => {
+            return items?.reduce((sum, item) => {
+                const timestamp = new Date(item.timestamp || item.createdAt || 0);
+                let match = false;
+                if (type === 'day') match = isSameDay(timestamp, intervalStart);
+                if (type === 'week') match = isSameWeek(timestamp, intervalStart);
+                if (type === 'month') match = isSameMonth(timestamp, intervalStart);
+
+                if (match) {
+                    sum += (item.content?.length || 0) + (item.note?.length || 0) + (item.title?.length || 0);
+                }
+                return sum;
+            }, 0) || 0;
+        };
+
+        const combinedItems = [...(allProjects || []), ...(allCommands || [])];
+
+        // 1. Daily (Last 14 days)
+        const days = eachDayOfInterval({ start: subDays(now, 13), end: now });
+        const daily = days.map(day => ({
+            label: format(day, 'MM/dd'),
+            value: getSumForInterval(combinedItems, day, 'day'),
+            fullDate: day
+        }));
+
+        // 2. Weekly (Last 8 weeks)
+        const weeks = eachWeekOfInterval({ start: subDays(now, 7 * 7), end: now }, { weekStartsOn: 1 });
+        const weekly = weeks.map(week => ({
+            label: format(week, 'MM/dd'),
+            value: getSumForInterval(combinedItems, week, 'week'),
+            fullDate: week
+        }));
+
+        // 3. Monthly (Last 6 months)
+        const months = eachMonthOfInterval({ start: subDays(now, 30 * 5), end: now });
+        const monthly = months.map(month => ({
+            label: format(month, 'MMM'),
+            value: getSumForInterval(combinedItems, month, 'month'),
+            fullDate: month
+        }));
+
+        return { daily, weekly, monthly };
     }, [allProjects, allCommands]);
 
     const containerVariants = {
@@ -131,8 +183,15 @@ const DataCenterModule = () => {
                                         {t('data.totalWords')}
                                     </span>
                                 </div>
+                                <div className="text-[10px] text-gray-300 dark:text-gray-600 font-light hidden md:block italic">
+                                    Double-click to view details
+                                </div>
                             </div>
-                            <div className="text-5xl md:text-6xl font-extralight text-indigo-500 dark:text-indigo-400 tracking-tight mb-4">
+                            <div
+                                className="text-5xl md:text-6xl font-extralight text-indigo-500 dark:text-indigo-400 tracking-tight mb-4 cursor-pointer select-none"
+                                onDoubleClick={() => setShowChart(true)}
+                                title="Double-click for details"
+                            >
                                 {stats.totalChars.toLocaleString()}
                             </div>
                             <div className="flex items-center gap-6 text-xs font-light text-gray-400 dark:text-gray-500">
