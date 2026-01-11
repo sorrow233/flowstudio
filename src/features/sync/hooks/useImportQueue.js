@@ -62,7 +62,12 @@ export const useImportQueue = (userId, addIdea, ideasCount, getNextColorIndex) =
                 console.log(`[ImportQueue] Processed and cleaned ${snapshot.size} imports`);
 
             } catch (error) {
-                console.error('[ImportQueue] Error processing queue:', error);
+                // 权限错误时静默处理（用户可能未登录或安全规则未配置）
+                if (error.code === 'permission-denied') {
+                    console.debug('[ImportQueue] No pending imports or permission denied');
+                } else {
+                    console.error('[ImportQueue] Error processing queue:', error);
+                }
             }
         };
 
