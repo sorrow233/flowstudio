@@ -91,7 +91,26 @@ const seoConfig = {
             },
         },
 
-        '/pending': {
+        '/inspiration/archive': {
+            zh: {
+                title: '灵感归档 | Flow Studio',
+                description: '查看历史灵感记录，回顾创意历程。',
+            },
+            en: {
+                title: 'Inspiration Archive | Flow Studio',
+                description: 'View inspiration history and review your creative journey.',
+            },
+            ja: {
+                title: 'インスピレーションアーカイブ | Flow Studio',
+                description: '過去のインスピレーション履歴を表示し、クリエイティブな旅を振り返る。',
+            },
+            ko: {
+                title: '영감 보관소 | Flow Studio',
+                description: '영감 기록을 확인하고 창의적인 여정을 되돌아보세요.',
+            },
+        },
+
+        '/sprout': {
             zh: {
                 title: '待定项目 | Flow Studio',
                 description: '管理等待启动的项目构思。使用 Flow Studio 的灵魂四问验证项目可行性。',
@@ -110,7 +129,7 @@ const seoConfig = {
             },
         },
 
-        '/primary': {
+        '/flow': {
             zh: {
                 title: '主力开发 | Flow Studio',
                 description: '5 阶段开发流程：骨架 → 功能 → 模块 → 优化 → 完成。任务管理与进度追踪完美结合。',
@@ -148,45 +167,7 @@ const seoConfig = {
             },
         },
 
-        '/final': {
-            zh: {
-                title: '终稿开发 | Flow Studio',
-                description: '项目最终打磨阶段。模块优化、新功能追加、缺陷修复三阶段管理。',
-            },
-            en: {
-                title: 'Final Development | Flow Studio',
-                description: 'Project final polish stage. Three-phase management: optimization, feature additions, bug fixes.',
-            },
-            ja: {
-                title: 'ファイナル開発 | Flow Studio',
-                description: 'プロジェクトの最終ポリッシュ段階。最適化、新機能追加、バグ修正の3フェーズ管理。',
-            },
-            ko: {
-                title: '최종 개발 | Flow Studio',
-                description: '프로젝트 최종 마무리 단계. 최적화, 기능 추가, 버그 수정 3단계 관리.',
-            },
-        },
-
-        '/commercial': {
-            zh: {
-                title: '商业化 | Flow Studio',
-                description: '从开发到市场。定价策略、支付集成、营销渠道、上线清单一站式管理。',
-            },
-            en: {
-                title: 'Commercialization | Flow Studio',
-                description: 'From development to market. Pricing strategy, payment integration, marketing channels, launch checklist - all in one place.',
-            },
-            ja: {
-                title: '商業化 | Flow Studio',
-                description: '開発から市場へ。価格戦略、決済統合、マーケティングチャネル、ローンチチェックリストを一元管理。',
-            },
-            ko: {
-                title: '상용화 | Flow Studio',
-                description: '개발에서 시장으로. 가격 전략, 결제 통합, 마케팅 채널, 출시 체크리스트 올인원 관리.',
-            },
-        },
-
-        '/commands': {
+        '/blueprint': {
             zh: {
                 title: '命令中心 | Flow Studio',
                 description: '开发流程中的常用命令和链接管理。按阶段组织，一键复制，提升开发效率。',
@@ -204,14 +185,50 @@ const seoConfig = {
                 description: '개발 워크플로우에서 자주 사용하는 명령어와 링크 관리. 단계별 정리, 원클릭 복사로 개발 효율 향상.',
             },
         },
+
+        '/data': {
+            zh: {
+                title: '数据中心 | Flow Studio',
+                description: '管理您的数据和本地备份。导入、导出和数据恢复。',
+            },
+            en: {
+                title: 'Data Center | Flow Studio',
+                description: 'Manage your data and local backups. Import, export, and data recovery.',
+            },
+            ja: {
+                title: 'データセンター | Flow Studio',
+                description: 'データとローカルバックアップの管理。インポート、エクスポート、データ復元。',
+            },
+            ko: {
+                title: '데이터 센터 | Flow Studio',
+                description: '데이터 및 로컬 백업 관리. 가져오기, 내보내기 및 데이터 복구.',
+            },
+        },
     },
 
     // 获取页面 SEO 数据的辅助函数
     getPageSeo(path, lang) {
-        const normalizedPath = path === '/' ? '/' : path.replace(/\/$/, '');
+        // 移除语言前缀 (如果存在)
+        // 简单的正则表达式无法处理所有情况，但对于预定义语言列表足够
+        let normalizedPath = path;
+        for (const l of this.supportedLangs) {
+            if (path.startsWith('/' + l + '/') || path === '/' + l) {
+                normalizedPath = path.substring(l.length + 1);
+                if (!normalizedPath.startsWith('/')) normalizedPath = '/' + normalizedPath;
+                break;
+            }
+        }
+
+        if (normalizedPath === '') normalizedPath = '/';
+        // 去除尾部斜杠（除了根路径）
+        if (normalizedPath !== '/' && normalizedPath.endsWith('/')) {
+            normalizedPath = normalizedPath.slice(0, -1);
+        }
+
         const pageConfig = this.pages[normalizedPath];
 
         if (!pageConfig) {
+            // 尝试查找最接近的匹配项 (例如 /share/123 -> /share/:id 如果有通配符逻辑，目前没有)
             return this.site[lang] || this.site[this.defaultLang];
         }
 
@@ -220,26 +237,58 @@ const seoConfig = {
 
     // 获取规范 URL
     getCanonicalUrl(path, lang) {
-        const basePath = path === '/' ? '' : path;
-        if (lang === this.defaultLang) {
-            return `${this.siteUrl}${basePath}`;
+        let normalizedPath = path;
+        for (const l of this.supportedLangs) {
+            if (path.startsWith('/' + l + '/') || path === '/' + l) {
+                normalizedPath = path.substring(l.length + 1);
+                if (!normalizedPath.startsWith('/')) normalizedPath = '/' + normalizedPath;
+                break;
+            }
         }
-        return `${this.siteUrl}/${lang}${basePath}`;
+
+        if (normalizedPath !== '/' && normalizedPath.endsWith('/')) {
+            normalizedPath = normalizedPath.slice(0, -1);
+        }
+
+        if (lang === this.defaultLang) {
+            return `${this.siteUrl}${normalizedPath === '/' ? '' : normalizedPath}`;
+        }
+        return `${this.siteUrl}/${lang}${normalizedPath === '/' ? '' : normalizedPath}`;
     },
 
     // 获取所有语言的备用链接
     getAlternateLinks(path) {
+        let normalizedPath = path;
+        for (const l of this.supportedLangs) {
+            if (path.startsWith('/' + l + '/') || path === '/' + l) {
+                normalizedPath = path.substring(l.length + 1);
+                if (!normalizedPath.startsWith('/')) normalizedPath = '/' + normalizedPath;
+                break;
+            }
+        }
+
+        if (normalizedPath !== '/' && normalizedPath.endsWith('/')) {
+            normalizedPath = normalizedPath.slice(0, -1);
+        }
+
         const links = [];
         for (const lang of this.supportedLangs) {
+            let href;
+            if (lang === this.defaultLang) {
+                href = `${this.siteUrl}${normalizedPath === '/' ? '' : normalizedPath}`;
+            } else {
+                href = `${this.siteUrl}/${lang}${normalizedPath === '/' ? '' : normalizedPath}`;
+            }
+
             links.push({
                 hreflang: lang,
-                href: this.getCanonicalUrl(path, lang),
+                href: href,
             });
         }
         // x-default 指向默认语言
         links.push({
             hreflang: 'x-default',
-            href: this.getCanonicalUrl(path, this.defaultLang),
+            href: `${this.siteUrl}${normalizedPath === '/' ? '' : normalizedPath}`,
         });
         return links;
     },

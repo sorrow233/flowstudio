@@ -7,7 +7,7 @@
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
-        "generate:sitemap": "node scripts/generate-sitemap.cjs",
+        "generate:sitemap": "node scripts/generate-sitemap.js",
         "deploy:main": "npm run generate:sitemap && npm run build && npx wrangler pages deploy dist --project-name flow-studio --branch main --commit-dirty=true"
     },
     "dependencies": {
