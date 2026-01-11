@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useSync } from '../features/sync/SyncContext';
+import { useSyncedMap } from '../features/sync/useSyncStore';
 
 const ThemeContext = createContext();
 
@@ -18,18 +20,44 @@ export function useTheme() {
     return context;
 }
 
-export function ThemeProvider({ children }) {
-    const [theme, setTheme] = useState(() => {
+// 内部 Provider，需要在 SyncProvider 内使用
+function ThemeProviderInner({ children }) {
+    // 同步
+    const { doc } = useSync();
+    const { data: preferences, set } = useSyncedMap(doc, 'user_preferences');
+
+    const [theme, setThemeState] = useState(() => {
         const savedTheme = localStorage.getItem('theme');
         const hasOverride = localStorage.getItem('theme-override') === 'true';
 
         if (hasOverride && savedTheme) {
-            // 用户有覆盖，保持用户选择
             return savedTheme;
         }
-        // 没有覆盖，跟随系统
         return getSystemTheme();
     });
+
+    // 从云端同步主题设置
+    useEffect(() => {
+        if (preferences?.theme && preferences?.themeOverride !== undefined) {
+            const syncedTheme = preferences.theme;
+            const syncedOverride = preferences.themeOverride;
+
+            // 更新本地存储
+            localStorage.setItem('theme', syncedTheme);
+            if (syncedOverride) {
+                localStorage.setItem('theme-override', 'true');
+            } else {
+                localStorage.removeItem('theme-override');
+            }
+
+            // 如果有覆盖，使用同步的主题；否则跟随系统
+            if (syncedOverride) {
+                setThemeState(syncedTheme);
+            } else {
+                setThemeState(getSystemTheme());
+            }
+        }
+    }, [preferences?.theme, preferences?.themeOverride]);
 
     // 应用主题到 DOM
     useEffect(() => {
@@ -49,44 +77,53 @@ export function ThemeProvider({ children }) {
             const currentTheme = localStorage.getItem('theme');
 
             if (hasOverride) {
-                // 用户有覆盖状态
                 if (newSystemTheme === currentTheme) {
-                    // 系统主题变得和用户选择一致了，清除覆盖，开始同步
                     localStorage.removeItem('theme-override');
-                    // 主题不变，但现在是"跟随系统"状态
+                    // 同步到云端
+                    if (doc) {
+                        set('themeOverride', false);
+                    }
                 }
-                // 系统主题和用户选择不一致，保持用户选择，不做任何事
             } else {
-                // 没有覆盖，正常跟随系统
-                setTheme(newSystemTheme);
+                setThemeState(newSystemTheme);
             }
         };
 
         mediaQuery.addEventListener('change', handleSystemThemeChange);
         return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
-    }, []);
+    }, [doc, set]);
 
     const toggleTheme = () => {
         const currentSystemTheme = getSystemTheme();
         const newTheme = theme === 'light' ? 'dark' : 'light';
+        const hasOverride = newTheme !== currentSystemTheme;
 
-        if (newTheme !== currentSystemTheme) {
-            // 用户选择了和系统不一样的主题，设置覆盖标记
+        if (hasOverride) {
             localStorage.setItem('theme-override', 'true');
         } else {
-            // 用户选择了和系统一样的主题，清除覆盖
             localStorage.removeItem('theme-override');
         }
         localStorage.setItem('theme', newTheme);
-        setTheme(newTheme);
+        setThemeState(newTheme);
+
+        // 同步到云端
+        if (doc) {
+            set('theme', newTheme);
+            set('themeOverride', hasOverride);
+        }
     };
 
-    // 重置为跟随系统主题
     const useSystemTheme = () => {
         localStorage.removeItem('theme-override');
         const systemTheme = getSystemTheme();
         localStorage.setItem('theme', systemTheme);
-        setTheme(systemTheme);
+        setThemeState(systemTheme);
+
+        // 同步到云端
+        if (doc) {
+            set('theme', systemTheme);
+            set('themeOverride', false);
+        }
     };
 
     const value = {
@@ -95,13 +132,21 @@ export function ThemeProvider({ children }) {
         toggleTheme,
         setTheme: (newTheme) => {
             const currentSystemTheme = getSystemTheme();
-            if (newTheme !== currentSystemTheme) {
+            const hasOverride = newTheme !== currentSystemTheme;
+
+            if (hasOverride) {
                 localStorage.setItem('theme-override', 'true');
             } else {
                 localStorage.removeItem('theme-override');
             }
             localStorage.setItem('theme', newTheme);
-            setTheme(newTheme);
+            setThemeState(newTheme);
+
+            // 同步到云端
+            if (doc) {
+                set('theme', newTheme);
+                set('themeOverride', hasOverride);
+            }
         },
         useSystemTheme,
     };
@@ -111,6 +156,11 @@ export function ThemeProvider({ children }) {
             {children}
         </ThemeContext.Provider>
     );
+}
+
+// 外层 Provider，保持向后兼容
+export function ThemeProvider({ children }) {
+    return <ThemeProviderInner>{children}</ThemeProviderInner>;
 }
 
 export default ThemeContext;
