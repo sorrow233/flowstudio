@@ -555,9 +555,9 @@ const InspirationModule = () => {
                             >
                                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
                                 <span className="text-xs font-medium text-pink-300 dark:text-pink-600 tracking-wide whitespace-nowrap group-hover:text-pink-400 transition-colors">
-                                    {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                    {week.start.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                                     {' - '}
-                                    {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                    {week.end.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                                 </span>
                                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
                             </div>
@@ -662,9 +662,9 @@ const InspirationModule = () => {
                                             className="w-full text-left p-4 rounded-2xl hover:bg-pink-50 dark:hover:bg-pink-900/30 group transition-all duration-300 border border-transparent hover:border-pink-100 dark:hover:border-pink-800/50 flex items-center justify-between"
                                         >
                                             <span className="text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-300 transition-colors">
-                                                {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                {week.start.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                                                 {' - '}
-                                                {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                {week.end.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                                             </span>
                                             <div className="w-6 h-6 rounded-full bg-pink-100 dark:bg-pink-900/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
                                                 <ArrowRight size={14} className="text-pink-500" />
