@@ -4,6 +4,7 @@ import { X, Calendar, TrendingUp } from 'lucide-react';
 
 const DataChartModal = ({ isOpen, onClose, data }) => {
     const [view, setView] = useState('daily'); // daily, weekly, monthly
+    const [showInspiration, setShowInspiration] = useState(false);
 
     const currentData = useMemo(() => {
         if (!data) return [];
@@ -12,6 +13,14 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
         if (view === 'monthly') return data.monthly;
         return [];
     }, [data, view]);
+
+    // Number formatting helper
+    const formatNumber = (num) => {
+        if (num >= 1000) {
+            return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+        }
+        return num.toString();
+    };
 
     const maxWords = useMemo(() => {
         const values = currentData.map(d => d.value);
@@ -66,7 +75,7 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-md"
+                        className="absolute inset-0 bg-white/40 dark:bg-black/40 backdrop-blur-xl"
                     />
 
                     {/* Modal Content */}
@@ -74,43 +83,47 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="relative w-full max-w-3xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] shadow-2xl overflow-hidden p-8"
+                        className="relative w-full max-w-3xl bg-white/95 dark:bg-gray-950/95 border border-white/20 dark:border-gray-800 shadow-2xl rounded-[2.5rem] overflow-hidden p-8"
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
-                                    <TrendingUp className="w-5 h-5 text-indigo-500" />
+                                <div className="p-2.5 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100/50 dark:border-indigo-800/30">
+                                    <TrendingUp className="w-5 h-5 text-indigo-400" />
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-4">
                                         <h3 className="text-xl font-light text-gray-900 dark:text-white">数据处理详情</h3>
-                                        <div className="flex items-center gap-4 text-[10px] font-light">
-                                            <div className="flex items-center gap-1.5">
-                                                <div className="w-2h-0.5 border-b-2 border-indigo-500 w-3" />
-                                                <span className="text-gray-400">文字</span>
+                                        {/* Legend with Toggles */}
+                                        <div className="flex items-center gap-3 text-[10px] font-medium tracking-tight">
+                                            <div className="flex items-center gap-1.5 opacity-60">
+                                                <div className="w-2.5 h-0.5 bg-indigo-400 rounded-full" />
+                                                <span className="text-gray-500">文字</span>
                                             </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <div className="w-2 h-0.5 border-b-2 border-pink-500 w-3" />
-                                                <span className="text-gray-400">灵感</span>
-                                            </div>
+                                            <button
+                                                onClick={() => setShowInspiration(!showInspiration)}
+                                                className={`flex items-center gap-1.5 transition-all duration-300 px-2 py-0.5 rounded-full ${showInspiration ? 'opacity-100 bg-pink-50 dark:bg-pink-900/20' : 'opacity-30 hover:opacity-100'}`}
+                                            >
+                                                <div className="w-2.5 h-0.5 bg-pink-400 rounded-full" />
+                                                <span className={`${showInspiration ? 'text-pink-500' : 'text-gray-500'}`}>灵感</span>
+                                            </button>
                                         </div>
                                     </div>
-                                    <p className="text-xs text-gray-400 dark:text-gray-500 font-light mt-1">处理总量与灵感采集的历史趋势</p>
+                                    <p className="text-[11px] text-gray-400 dark:text-gray-500 font-light mt-1">处理总量与灵感采集的历史趋势</p>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-2">
                                 {/* Toggles */}
-                                <div className="flex bg-gray-50 dark:bg-gray-800/50 p-1 rounded-xl mr-4">
+                                <div className="flex bg-gray-100/50 dark:bg-gray-900/50 p-1 rounded-2xl border border-gray-200/50 dark:border-gray-800/50 mr-2">
                                     {['daily', 'weekly', 'monthly'].map((v) => (
                                         <button
                                             key={v}
                                             onClick={() => setView(v)}
                                             className={`
-                                                px-3 py-1.5 text-[10px] rounded-lg transition-all duration-300 uppercase tracking-tighter
+                                                px-3.5 py-1.5 text-[10px] rounded-xl transition-all duration-500 uppercase tracking-tight
                                                 ${view === v
-                                                    ? 'bg-white dark:bg-gray-700 text-indigo-500 shadow-sm font-bold'
+                                                    ? 'bg-white dark:bg-gray-700 text-indigo-500 shadow-md shadow-indigo-100/50 dark:shadow-none font-bold scale-[1.02]'
                                                     : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}
                                             `}
                                         >
@@ -121,15 +134,15 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
 
                                 <button
                                     onClick={onClose}
-                                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                                    className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-2xl transition-all hover:scale-110 active:scale-95 group"
                                 >
-                                    <X size={20} className="text-gray-400" />
+                                    <X size={18} className="text-gray-400 group-hover:text-gray-600 transition-colors" />
                                 </button>
                             </div>
                         </div>
 
                         {/* Chart Area */}
-                        <div className="bg-gray-50/50 dark:bg-gray-950/20 rounded-[2rem] p-6 border border-gray-50 dark:border-gray-800/30">
+                        <div className="bg-gradient-to-b from-gray-50/30 to-white dark:from-gray-900/30 dark:to-gray-950/20 rounded-[2.5rem] p-8 border border-gray-100/50 dark:border-gray-800/30">
                             <div className="relative h-[300px] w-full">
                                 <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
                                     {/* Grid Lines */}
@@ -141,35 +154,42 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                                             x2={width - padding}
                                             y2={padding + r * (height - padding * 2)}
                                             stroke="currentColor"
-                                            className="text-gray-100 dark:text-gray-800/50"
-                                            strokeDasharray="4 4"
+                                            className="text-gray-100 dark:text-gray-800/30"
+                                            strokeDasharray="6 6"
                                         />
                                     ))}
 
-                                    {/* Inspiration Line (Behind) */}
-                                    <motion.path
-                                        d={inspirationPathData}
-                                        fill="none"
-                                        stroke="#f472b6"
-                                        strokeWidth="2"
-                                        strokeOpacity="0.6"
-                                        strokeLinecap="round"
-                                        strokeDasharray="5 5"
-                                        initial={{ pathLength: 0, opacity: 0 }}
-                                        animate={{ pathLength: 1, opacity: 0.6 }}
-                                        transition={{ duration: 1 }}
-                                    />
+                                    {/* Inspiration Line (Conditional) */}
+                                    <AnimatePresence>
+                                        {showInspiration && (
+                                            <motion.path
+                                                key="inspiration-line"
+                                                d={inspirationPathData}
+                                                fill="none"
+                                                stroke="#f472b6"
+                                                strokeWidth="2"
+                                                strokeOpacity="0.4"
+                                                strokeLinecap="round"
+                                                strokeDasharray="4 6"
+                                                initial={{ pathLength: 0, opacity: 0 }}
+                                                animate={{ pathLength: 1, opacity: 0.4 }}
+                                                exit={{ opacity: 0, transition: { duration: 0.3 } }}
+                                                transition={{ duration: 1.2, ease: "easeOut" }}
+                                            />
+                                        )}
+                                    </AnimatePresence>
 
                                     {/* Word Line (Front) */}
                                     <motion.path
                                         d={wordPathData}
                                         fill="none"
-                                        stroke="#6366f1"
-                                        strokeWidth="3"
+                                        stroke="#818cf8"
+                                        strokeWidth="2.5"
+                                        strokeOpacity="0.8"
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                         initial={{ pathLength: 0, opacity: 0 }}
-                                        animate={{ pathLength: 1, opacity: 1 }}
+                                        animate={{ pathLength: 1, opacity: 0.8 }}
                                         transition={{ duration: 1, ease: "easeInOut" }}
                                     />
 
@@ -179,39 +199,46 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                                             <motion.circle
                                                 cx={p.x}
                                                 cy={p.y}
-                                                r="4"
+                                                r="3.5"
                                                 initial={{ scale: 0 }}
                                                 animate={{ scale: 1 }}
-                                                transition={{ delay: 0.5 + i * 0.05 }}
-                                                className="fill-white dark:fill-gray-900 stroke-indigo-500 stroke-[2.5px]"
+                                                transition={{ delay: 0.4 + i * 0.04 }}
+                                                className="fill-white dark:fill-gray-900 stroke-indigo-300 dark:stroke-indigo-700 stroke-[2px] group-hover:stroke-indigo-500 transition-colors"
                                             />
-                                            <foreignObject x={p.x - 25} y={p.y - 45} width="80" height="40" className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                                <div className="bg-indigo-600 text-white text-[9px] px-2 py-1 rounded shadow-lg text-center font-bold">
-                                                    {p.value} 字
+                                            {/* Tooltip on hover */}
+                                            <foreignObject x={p.x - 30} y={p.y - 40} width="60" height="30" className="opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:-translate-y-1">
+                                                <div className="bg-indigo-500/90 dark:bg-indigo-600/90 backdrop-blur-md text-white text-[9px] px-2 py-1 rounded-lg shadow-xl text-center font-bold">
+                                                    {formatNumber(p.value)}
                                                 </div>
                                             </foreignObject>
                                         </g>
                                     ))}
 
-                                    {/* Inspiration Dots */}
-                                    {inspirationPoints.map((p, i) => (
-                                        <g key={`i-${i}`} className="group cursor-help">
-                                            <motion.circle
-                                                cx={p.x}
-                                                cy={p.y}
-                                                r="3"
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                transition={{ delay: 0.8 + i * 0.05 }}
-                                                className="fill-white dark:fill-gray-900 stroke-pink-400 stroke-[2px]"
-                                            />
-                                            <foreignObject x={p.x - 25} y={p.y + 15} width="80" height="40" className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                                <div className="bg-pink-500 text-white text-[9px] px-2 py-1 rounded shadow-lg text-center font-bold">
-                                                    {p.value} 灵感
-                                                </div>
-                                            </foreignObject>
-                                        </g>
-                                    ))}
+                                    {/* Inspiration Dots (Conditional) */}
+                                    <AnimatePresence>
+                                        {showInspiration && inspirationPoints.map((p, i) => (
+                                            <motion.g
+                                                key={`i-${i}`}
+                                                className="group cursor-help"
+                                                initial={{ opacity: 0, scale: 0 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0 }}
+                                                transition={{ delay: 0.2 + i * 0.03 }}
+                                            >
+                                                <circle
+                                                    cx={p.x}
+                                                    cy={p.y}
+                                                    r="2.5"
+                                                    className="fill-white dark:fill-gray-900 stroke-pink-200 dark:stroke-pink-900 stroke-[1.5px] group-hover:stroke-pink-400 transition-colors"
+                                                />
+                                                <foreignObject x={p.x - 30} y={p.y + 12} width="60" height="30" className="opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:translate-y-1">
+                                                    <div className="bg-pink-500/90 backdrop-blur-md text-white text-[9px] px-2 py-1 rounded-lg shadow-xl text-center font-bold">
+                                                        {p.value}
+                                                    </div>
+                                                </foreignObject>
+                                            </motion.g>
+                                        ))}
+                                    </AnimatePresence>
 
                                     {/* Axis Labels (X) */}
                                     {wordPoints.filter((_, i) => i % (view === 'daily' ? 2 : 1) === 0).map((p, i) => (
@@ -220,7 +247,7 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                                             x={p.x}
                                             y={height - 10}
                                             textAnchor="middle"
-                                            className="text-[9px] fill-gray-400 dark:fill-gray-600 font-light"
+                                            className="text-[9px] fill-gray-300 dark:fill-gray-600 font-light tracking-tighter"
                                         >
                                             {p.label}
                                         </text>
@@ -230,13 +257,13 @@ const DataChartModal = ({ isOpen, onClose, data }) => {
                         </div>
 
                         {/* Footer Hint */}
-                        <div className="mt-8 flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 font-light italic px-4">
+                        <div className="mt-8 flex items-center justify-between text-[11px] text-gray-400 dark:text-gray-500 font-light italic px-6 uppercase tracking-wider">
                             <div className="flex items-center gap-2">
-                                <TrendingUp size={12} className="text-indigo-400" />
-                                <span>这是你与灵感共鸣的数字写照</span>
+                                <TrendingUp size={12} className="text-indigo-300" />
+                                <span>Rhythms of Thought</span>
                             </div>
-                            <div className="text-[10px] opacity-50 not-italic">
-                                数据基于本地创作时间戳实时聚合
+                            <div className="text-[9px] opacity-40 not-italic">
+                                Real-time dynamic aggregation
                             </div>
                         </div>
                     </motion.div>
