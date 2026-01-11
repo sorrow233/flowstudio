@@ -28,11 +28,21 @@ const DataCenterModule = () => {
         let instructionCount = allCommands?.length || 0;
         let growingCount = 0;
         let pendingProjectCount = 0;
+        let todayChars = 0;
+        let thisWeekChars = 0;
+
+        const now = Date.now();
+        const oneDay = 24 * 60 * 60 * 1000;
+        const oneWeek = 7 * oneDay;
 
         // Process Projects
         allProjects?.forEach(project => {
-            totalChars += (project.content?.length || 0);
-            totalChars += (project.note?.length || 0);
+            const itemChars = (project.content?.length || 0) + (project.note?.length || 0);
+            totalChars += itemChars;
+
+            const timestamp = project.timestamp || project.createdAt || 0;
+            if (now - timestamp < oneDay) todayChars += itemChars;
+            if (now - timestamp < oneWeek) thisWeekChars += itemChars;
 
             if (project.stage === 'inspiration') {
                 inspirationCount++;
@@ -45,12 +55,18 @@ const DataCenterModule = () => {
 
         // Process Commands
         allCommands?.forEach(cmd => {
-            totalChars += (cmd.content?.length || 0);
-            totalChars += (cmd.title?.length || 0);
+            const itemChars = (cmd.content?.length || 0) + (cmd.title?.length || 0);
+            totalChars += itemChars;
+
+            const timestamp = cmd.timestamp || cmd.createdAt || 0;
+            if (now - timestamp < oneDay) todayChars += itemChars;
+            if (now - timestamp < oneWeek) thisWeekChars += itemChars;
         });
 
         return {
             totalChars,
+            todayChars,
+            thisWeekChars,
             inspirationCount,
             instructionCount,
             growingCount,
@@ -116,11 +132,18 @@ const DataCenterModule = () => {
                                     </span>
                                 </div>
                             </div>
-                            <div className="text-5xl md:text-6xl font-extralight text-indigo-500 dark:text-indigo-400 tracking-tight">
+                            <div className="text-5xl md:text-6xl font-extralight text-indigo-500 dark:text-indigo-400 tracking-tight mb-4">
                                 {stats.totalChars.toLocaleString()}
                             </div>
-                            <div className="mt-4 text-xs text-indigo-300 dark:text-indigo-400/60 font-light">
-                                {t('data.flowEfficiency')}
+                            <div className="flex items-center gap-6 text-xs font-light text-gray-400 dark:text-gray-500">
+                                <div className="flex flex-col gap-1">
+                                    <span className="uppercase tracking-widest text-[9px] opacity-70">{t('data.today')}</span>
+                                    <span className="text-indigo-400 font-medium">{stats.todayChars.toLocaleString()}</span>
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <span className="uppercase tracking-widest text-[9px] opacity-70">{t('data.thisWeek')}</span>
+                                    <span className="text-indigo-400 font-medium">{stats.thisWeekChars.toLocaleString()}</span>
+                                </div>
                             </div>
                         </div>
                     </Spotlight>

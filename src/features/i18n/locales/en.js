@@ -452,5 +452,7 @@ export default {
         conversion: 'Inspiration Conversion',
         flowEfficiency: 'Flow output is actively growing',
         emptyState: 'No data yet. Start recording your thoughts.',
+        today: 'Today',
+        thisWeek: 'This Week',
     },
 };

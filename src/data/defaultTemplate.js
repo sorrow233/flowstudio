@@ -42,27 +42,14 @@ export const DEFAULT_TEMPLATE = {
             colorIndex: 0,
             timestamp: Date.now() - 300000
         },
-        {
-            id: "test-week-1",
-            content: "这是 1 周之前产生的灵感 [测试标签]",
-            note: "这是 1 周之前的备注",
-            colorIndex: 1,
-            timestamp: Date.now() - 8 * 24 * 60 * 60 * 1000
-        },
-        {
-            id: "test-week-2",
-            content: "这是 2 周之前产生的灵感 #!pale-green:通过 ID 快速跳转#",
-            note: "这是 2 周之前的备注",
-            colorIndex: 2,
-            timestamp: Date.now() - 15 * 24 * 60 * 60 * 1000
-        },
-        {
-            id: "test-week-3",
-            content: "这是 3 周之前产生的灵感 **加粗文本**",
-            note: "这是 3 周之前的备注",
-            colorIndex: 4,
-            timestamp: Date.now() - 22 * 24 * 60 * 60 * 1000
-        }
+        // 高压测试数据：生成 20 周的数据
+        ...Array.from({ length: 20 }).map((_, i) => ({
+            id: `pressure-test-${i}`,
+            content: `这是第 ${i + 1} 个测试灵感项，属于回溯第 ${i + 1} 周的内容 #!sky-blue:高压测试#`,
+            note: `第 ${i + 1} 周的备注信息`,
+            colorIndex: i % 6,
+            timestamp: Date.now() - (i + 1) * 7 * 24 * 60 * 60 * 1000 - 100000
+        }))
     ],
 
     // 默认指令集 - 空白开始

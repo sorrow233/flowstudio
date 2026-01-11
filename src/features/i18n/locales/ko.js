@@ -440,5 +440,7 @@ export default {
         conversion: '영감 전환율',
         flowEfficiency: '플로우 출력이 활발하게 성장 중',
         emptyState: '아직 데이터가 없습니다. 생각을 기록하기 시작하세요.',
+        today: '오늘',
+        thisWeek: '이번 주',
     },
 };

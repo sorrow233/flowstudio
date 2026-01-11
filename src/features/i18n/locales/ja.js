@@ -440,6 +440,8 @@ export default {
         blueprintCount: 'ブループリント計画',
         conversion: 'インスピレーション転換率',
         flowEfficiency: 'フロー出力が活発に成長中',
-        emptyState: 'まだデータがありません。考えを記録し始めましょう。',
+        emptyState: 'まだデータがありません。考えを记录し始めましょう。',
+        today: '今日',
+        thisWeek: '今週',
     },
 };

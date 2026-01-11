@@ -470,5 +470,7 @@ export default {
         conversion: '灵感转化率',
         flowEfficiency: '心流产出持续活跃中',
         emptyState: '还没有任何数据，开始记录你的所思所想吧',
+        today: '今日新增',
+        thisWeek: '本周新增',
     },
 };
