@@ -732,7 +732,8 @@ const InspirationModule = () => {
                                                             ))}
                                                         </div>
                                                     </div>
-                                                ))}
+                                                );
+                                            })}
                                         </div>
                                     ))}
 

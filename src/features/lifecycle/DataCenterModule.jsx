@@ -81,9 +81,11 @@ const DataCenterModule = () => {
     const chartData = useMemo(() => {
         const now = new Date();
 
-        // Helper to sum chars for an interval
-        const getSumForInterval = (items, intervalStart, type) => {
-            return items?.reduce((sum, item) => {
+        // Helper to sum stats for an interval
+        const getStatsForInterval = (projects, commands, intervalStart, type) => {
+            const result = { words: 0, inspirations: 0 };
+
+            projects?.forEach(item => {
                 const timestamp = new Date(item.timestamp || item.createdAt || 0);
                 let match = false;
                 if (type === 'day') match = isSameDay(timestamp, intervalStart);
@@ -91,37 +93,61 @@ const DataCenterModule = () => {
                 if (type === 'month') match = isSameMonth(timestamp, intervalStart);
 
                 if (match) {
-                    sum += (item.content?.length || 0) + (item.note?.length || 0) + (item.title?.length || 0);
+                    result.words += (item.content?.length || 0) + (item.note?.length || 0);
+                    if (item.stage === 'inspiration') result.inspirations++;
                 }
-                return sum;
-            }, 0) || 0;
-        };
+            });
 
-        const combinedItems = [...(allProjects || []), ...(allCommands || [])];
+            commands?.forEach(item => {
+                const timestamp = new Date(item.timestamp || item.createdAt || 0);
+                let match = false;
+                if (type === 'day') match = isSameDay(timestamp, intervalStart);
+                if (type === 'week') match = isSameWeek(timestamp, intervalStart);
+                if (type === 'month') match = isSameMonth(timestamp, intervalStart);
+
+                if (match) {
+                    result.words += (item.content?.length || 0) + (item.title?.length || 0);
+                }
+            });
+
+            return result;
+        };
 
         // 1. Daily (Last 14 days)
         const days = eachDayOfInterval({ start: subDays(now, 13), end: now });
-        const daily = days.map(day => ({
-            label: format(day, 'MM/dd'),
-            value: getSumForInterval(combinedItems, day, 'day'),
-            fullDate: day
-        }));
+        const daily = days.map(day => {
+            const s = getStatsForInterval(allProjects, allCommands, day, 'day');
+            return {
+                label: format(day, 'MM/dd'),
+                value: s.words,
+                inspirations: s.inspirations,
+                fullDate: day
+            };
+        });
 
         // 2. Weekly (Last 8 weeks)
         const weeks = eachWeekOfInterval({ start: subDays(now, 7 * 7), end: now }, { weekStartsOn: 1 });
-        const weekly = weeks.map(week => ({
-            label: format(week, 'MM/dd'),
-            value: getSumForInterval(combinedItems, week, 'week'),
-            fullDate: week
-        }));
+        const weekly = weeks.map(week => {
+            const s = getStatsForInterval(allProjects, allCommands, week, 'week');
+            return {
+                label: format(week, 'MM/dd'),
+                value: s.words,
+                inspirations: s.inspirations,
+                fullDate: week
+            };
+        });
 
         // 3. Monthly (Last 6 months)
         const months = eachMonthOfInterval({ start: subDays(now, 30 * 5), end: now });
-        const monthly = months.map(month => ({
-            label: format(month, 'MMM'),
-            value: getSumForInterval(combinedItems, month, 'month'),
-            fullDate: month
-        }));
+        const monthly = months.map(month => {
+            const s = getStatsForInterval(allProjects, allCommands, month, 'month');
+            return {
+                label: format(month, 'MMM'),
+                value: s.words,
+                inspirations: s.inspirations,
+                fullDate: month
+            };
+        });
 
         return { daily, weekly, monthly };
     }, [allProjects, allCommands]);
@@ -256,6 +282,12 @@ const DataCenterModule = () => {
                     </motion.div>
                 </div>
             </motion.div>
+
+            <DataChartModal
+                isOpen={showChart}
+                onClose={() => setShowChart(false)}
+                data={chartData}
+            />
 
             {/* Footer */}
             <motion.div
