@@ -25,7 +25,7 @@ const InspirationModule = () => {
     const { user } = useAuth();
     // Sync - 使用 immediateSync 实现即时同步
     const { doc, immediateSync, status } = useSync();
-    const isReady = status?.status === 'synced';
+    const isReady = status === 'synced';
 
     const { t } = useTranslation();
     const {
