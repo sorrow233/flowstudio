@@ -316,15 +316,18 @@ const InspirationModule = () => {
         const groups = {};
 
         olderIdeas.forEach(idea => {
-            const date = new Date(idea.timestamp || Date.now());
-            const year = date.getFullYear();
-            const month = date.getMonth() + 1; // 1-12
+            const ideaDate = new Date(idea.timestamp || Date.now());
 
-            // Get the Monday of the week for grouping
-            const day = date.getDay();
-            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-            const weekStart = new Date(date.setDate(diff));
-            weekStart.setHours(0, 0, 0, 0);
+            // 计算周一
+            const tempDate = new Date(ideaDate.getTime());
+            const day = tempDate.getDay();
+            const diff = tempDate.getDate() - day + (day === 0 ? -6 : 1);
+            tempDate.setDate(diff);
+            tempDate.setHours(0, 0, 0, 0);
+
+            const weekStart = new Date(tempDate);
+            const year = weekStart.getFullYear();
+            const month = weekStart.getMonth() + 1; // 1-12
 
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekEnd.getDate() + 6);
@@ -336,8 +339,9 @@ const InspirationModule = () => {
             if (!groups[year][month]) groups[year][month] = [];
 
             if (!groups[year][month].some(w => w.key === weekKey)) {
-                // Calculate week number within the month (approximate)
+                // 计算当前月内的周数
                 const monthStart = new Date(weekStart.getFullYear(), weekStart.getMonth(), 1);
+                // 周数：(当前日期 + 月初是周几 - 1) / 7
                 const weekNum = Math.ceil((weekStart.getDate() + monthStart.getDay() - 1) / 7);
                 const weekNames = ['第一周', '第二周', '第三周', '第四周', '第五周', '第六周'];
 
@@ -350,16 +354,16 @@ const InspirationModule = () => {
             }
         });
 
-        // Convert to sorted structure
+        // 转换为排序后的结构
         return Object.entries(groups)
-            .sort((a, b) => b[0] - a[0]) // Sort years desc
+            .sort((a, b) => Number(b[0]) - Number(a[0])) // 年份降序
             .map(([year, months]) => ({
                 year,
                 months: Object.entries(months)
-                    .sort((a, b) => b[0] - a[0]) // Sort months desc
+                    .sort((a, b) => Number(b[0]) - Number(a[0])) // 月份降序
                     .map(([month, weeks]) => ({
                         month,
-                        weeks: weeks.sort((a, b) => b.key - a.key) // Sort weeks desc
+                        weeks: weeks.sort((a, b) => b.key - a.key) // 周降序（最新在前）
                     }))
             }));
     }, [sortedIdeas]);
