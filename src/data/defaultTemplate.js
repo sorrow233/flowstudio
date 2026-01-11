@@ -41,15 +41,7 @@ export const DEFAULT_TEMPLATE = {
             content: "#!pale-pink:现在，祝你开启心流之旅#",
             colorIndex: 0,
             timestamp: Date.now() - 300000
-        },
-        // 高压测试数据：生成 20 周的数据
-        ...Array.from({ length: 20 }).map((_, i) => ({
-            id: `pressure-test-${i}`,
-            content: `这是第 ${i + 1} 个测试灵感项，属于回溯第 ${i + 1} 周的内容 #!sky-blue:高压测试#`,
-            note: `第 ${i + 1} 周的备注信息`,
-            colorIndex: i % 6,
-            timestamp: Date.now() - (i + 1) * 7 * 24 * 60 * 60 * 1000 - 100000
-        }))
+        }
     ],
 
     // 默认指令集 - 空白开始
