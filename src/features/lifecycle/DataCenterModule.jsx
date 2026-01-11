@@ -26,6 +26,7 @@ const DataCenterModule = () => {
         let totalChars = 0;
         let inspirationCount = 0;
         let instructionCount = allCommands?.length || 0;
+        let activeProjectCount = 0;
 
         // Process Projects
         allProjects?.forEach(project => {
@@ -34,6 +35,12 @@ const DataCenterModule = () => {
 
             if (project.stage === 'inspiration') {
                 inspirationCount++;
+            } else if (
+                project.stage === 'pending' ||
+                project.stage === 'primary' ||
+                [1, 2, 3, 4, 5].includes(project.stage)
+            ) {
+                activeProjectCount++;
             }
         });
 
@@ -47,7 +54,7 @@ const DataCenterModule = () => {
             totalChars,
             inspirationCount,
             instructionCount,
-            projectCount: (allProjects?.length || 0) - inspirationCount
+            projectCount: activeProjectCount
         };
     }, [allProjects, allCommands]);
 
