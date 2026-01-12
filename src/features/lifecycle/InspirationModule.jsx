@@ -451,8 +451,8 @@ const InspirationModule = () => {
                     <button
                         onClick={() => setActiveTab('inspiration')}
                         className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === 'inspiration'
-                                ? 'bg-white dark:bg-gray-700 text-pink-500 shadow-sm'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                            ? 'bg-white dark:bg-gray-700 text-pink-500 shadow-sm'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                             }`}
                     >
                         <Lightbulb size={14} />
@@ -461,54 +461,17 @@ const InspirationModule = () => {
                     <button
                         onClick={() => setActiveTab('writing')}
                         className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === 'writing'
-                                ? 'bg-white dark:bg-gray-700 text-indigo-500 shadow-sm'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                            ? 'bg-white dark:bg-gray-700 text-indigo-500 shadow-sm'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                             }`}
                     >
                         <PenTool size={14} />
                         <span>{t('inspiration.writing', '写作')}</span>
                     </button>
                 </div>
-                <p className="text-gray-500 dark:text-gray-400 text-base font-light tracking-wide max-w-md mx-auto md:mx-0 leading-relaxed">
-                    {t('inspiration.subtitle')}
-                </p>
-
                 <p className="text-gray-500 dark:text-gray-400 text-base font-light tracking-wide max-w-md mx-auto md:mx-0 leading-relaxed mb-6">
                     {activeTab === 'inspiration' ? t('inspiration.subtitle') : t('inspiration.writingSubtitle', '在这里沉浸式创作，记录更完整的思绪')}
                 </p>
-
-                {/* Category Selector - Only show in Inspiration mode */}
-                {activeTab === 'inspiration' && (
-                    <div className="mt-6 flex items-center justify-center md:justify-start">
-                        <div className="flex items-center p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner border border-gray-200/50 dark:border-gray-700">
-                            {/* Label Section */}
-                            <div className="hidden md:flex items-center px-4 border-r border-gray-200 dark:border-gray-700 mr-2 min-w-[80px] justify-center">
-                                <span className={`text-sm font-medium ${INSPIRATION_CATEGORIES.find(c => c.id === selectedCategory)?.textColor || 'text-gray-600 dark:text-gray-300'}`}>
-                                    {INSPIRATION_CATEGORIES.find(c => c.id === selectedCategory)?.label || '随记'}
-                                </span>
-                            </div>
-
-                            {/* Dots Section */}
-                            <div className="flex items-center gap-2">
-                                {INSPIRATION_CATEGORIES.map(cat => (
-                                    <button
-                                        key={cat.id}
-                                        onClick={() => setSelectedCategory(cat.id)}
-                                        title={cat.label}
-                                        className={`
-                                        w-8 h-8 flex items-center justify-center rounded-full transition-all shrink-0 relative
-                                        ${selectedCategory === cat.id
-                                                ? 'bg-white dark:bg-gray-700 shadow-md scale-110 z-10 ring-2 ring-gray-100 dark:ring-gray-600'
-                                                : 'hover:bg-white/50 dark:hover:bg-gray-700/50 hover:scale-105'}
-                                    `}
-                                    >
-                                        <div className={`w-3 h-3 rounded-full ${cat.dotColor} ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-transparent' : ''}`} />
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
 
 
@@ -630,6 +593,30 @@ const InspirationModule = () => {
                                     </div>
                                 </div>
                             </Spotlight>
+                        </div>
+
+                        {/* Category Selector - Small & Exquisite, positioned on the right between input and cards */}
+                        <div className="flex justify-end mb-6 -mt-12 px-2 relative z-20">
+                            <div className="flex items-center gap-1 p-1 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md rounded-full border border-gray-100/30 dark:border-gray-800/30 shadow-sm transition-all duration-300 hover:bg-white/60 dark:hover:bg-gray-900/60">
+                                {INSPIRATION_CATEGORIES.map(cat => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setSelectedCategory(cat.id)}
+                                        title={cat.label}
+                                        className={`
+                                            w-7 h-7 flex items-center justify-center rounded-full transition-all duration-500
+                                            ${selectedCategory === cat.id
+                                                ? 'bg-white dark:bg-gray-700 shadow-sm scale-110 z-10'
+                                                : 'opacity-40 hover:opacity-100 hover:scale-110'}
+                                        `}
+                                    >
+                                        <div className={`
+                                            w-2 h-2 rounded-full transition-all duration-500 ${cat.dotColor}
+                                            ${selectedCategory === cat.id ? 'ring-4 ring-offset-0 ring-white/10 dark:ring-black/10' : ''}
+                                        `} />
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {/* List Section */}
