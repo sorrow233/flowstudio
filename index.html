@@ -77,13 +77,20 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Outfit:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap"
         rel="stylesheet">
 
-    <!-- iOS PWA 背景色，防止白闪 (仅在 standalone 模式下) -->
     <style>
         @media (display-mode: standalone) {
 
             html,
             body {
                 background-color: #fdf2f8 !important;
+            }
+
+            @media (prefers-color-scheme: dark) {
+
+                html,
+                body {
+                    background-color: #0f172a !important;
+                }
             }
         }
     </style>
@@ -97,14 +104,25 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: #FFF5F7;
+        background: #fdf2f8;
         display: none;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 99999;
         transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-    ">
+    " class="splash-light">
+        <style>
+            @media (prefers-color-scheme: dark) {
+                #splash-screen {
+                    background: #0f172a !important;
+                }
+
+                #splash-text {
+                    color: #f5f5f5 !important;
+                }
+            }
+        </style>
         <img src="/apple-touch-icon.png" alt="Flow Studio" style="
             width: 80px;
             height: 80px;
@@ -113,7 +131,7 @@
             box-shadow: 0 12px 40px rgba(244, 114, 182, 0.2);
             animation: breathe 3s ease-in-out infinite;
         " />
-        <div style="
+        <div id="splash-text" style="
             color: #EC4899;
             font-family: 'Outfit', 'Inter', sans-serif;
             font-size: 18px;
