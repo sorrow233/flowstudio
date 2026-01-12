@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { ArrowRight, Lightbulb, Hash, X, Calendar } from 'lucide-react';
+import { ArrowRight, Lightbulb, Hash, X, Calendar, PenTool } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,6 +11,7 @@ import { useTranslation } from '../i18n';
 import InspirationItem from './components/inspiration/InspirationItem';
 import { COLOR_CONFIG } from './components/inspiration/InspirationUtils';
 import RichTextInput from './components/inspiration/RichTextInput';
+import WritingBoard from './components/writing/WritingBoard';
 import Spotlight from '../../components/shared/Spotlight';
 import { INSPIRATION_CATEGORIES } from '../../utils/constants';
 
@@ -73,6 +74,7 @@ const InspirationModule = () => {
     const [deletedIdeas, setDeletedIdeas] = useState([]);
     const [archiveShake, setArchiveShake] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('note'); // 分类状态
+    const [activeTab, setActiveTab] = useState('inspiration'); // 'inspiration' | 'writing'
     const editorRef = useRef(null);
 
     // Autocomplete State
@@ -443,11 +445,42 @@ const InspirationModule = () => {
                         <span className="absolute -bottom-1 left-0 w-full h-2 bg-gradient-to-r from-pink-200/80 via-pink-300/60 to-transparent dark:from-pink-700/50 dark:via-pink-600/30 dark:to-transparent rounded-full blur-[2px]" />
                     </h2>
                 </motion.div>
+
+                 {/* Tab Switcher */}
+                 <div className="flex items-center gap-1 mb-2 bg-gray-100/50 dark:bg-gray-800/50 p-1 rounded-full w-fit">
+                    <button
+                        onClick={() => setActiveTab('inspiration')}
+                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
+                            activeTab === 'inspiration' 
+                                ? 'bg-white dark:bg-gray-700 text-pink-500 shadow-sm' 
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                        }`}
+                    >
+                        <Lightbulb size={14} />
+                        <span>{t('inspiration.title', '灵感')}</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('writing')}
+                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
+                            activeTab === 'writing' 
+                                ? 'bg-white dark:bg-gray-700 text-indigo-500 shadow-sm' 
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                        }`}
+                    >
+                        <PenTool size={14} />
+                        <span>{t('inspiration.writing', '写作')}</span>
+                    </button>
+                </div>
                 <p className="text-gray-500 dark:text-gray-400 text-base font-light tracking-wide max-w-md mx-auto md:mx-0 leading-relaxed">
                     {t('inspiration.subtitle')}
                 </p>
 
-                {/* Category Selector - 分类选择器 */}
+                <p className="text-gray-500 dark:text-gray-400 text-base font-light tracking-wide max-w-md mx-auto md:mx-0 leading-relaxed mb-6">
+                    {activeTab === 'inspiration' ? t('inspiration.subtitle') : t('inspiration.writingSubtitle', '在这里沉浸式创作，记录更完整的思绪')}
+                </p>
+
+                {/* Category Selector - Only show in Inspiration mode */}
+                {activeTab === 'inspiration' && (
                 <div className="mt-6 flex items-center justify-center md:justify-start">
                     <div className="flex items-center p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner border border-gray-200/50 dark:border-gray-700">
                         {/* Label Section */}
@@ -477,8 +510,20 @@ const InspirationModule = () => {
                         </div>
                     </div>
                 </div>
+                )}
             </div>
 
+            </div>
+
+            <AnimatePresence mode="wait">
+                {activeTab === 'inspiration' ? (
+                    <motion.div
+                        key="inspiration"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ duration: 0.3 }}
+                    >
             {/* Input Section */}
             <div className="relative mb-20 group z-30">
                 <Spotlight className="rounded-2xl transition-all duration-300 focus-within:ring-1 focus-within:ring-pink-300 dark:focus-within:ring-pink-500 focus-within:shadow-[0_0_30px_-5px_rgba(244,114,182,0.4)]" spotColor="rgba(244, 114, 182, 0.12)">
@@ -694,130 +739,143 @@ const InspirationModule = () => {
                     </motion.div>
                 )}
             </div>
-
-            {/* Undo Toast */}
-            <AnimatePresence>
-                {deletedIdeas.length > 0 && (
+                    </motion.div>
+                ) : (
                     <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 50 }}
-                        className="fixed bottom-24 left-6 right-6 md:bottom-10 md:left-auto md:right-10 md:w-auto bg-pink-50 dark:bg-pink-900 text-pink-900 dark:text-pink-50 px-6 py-3 rounded-xl shadow-2xl shadow-pink-100 dark:shadow-pink-900/20 border border-pink-100 dark:border-pink-800 flex items-center justify-between md:justify-start gap-4 z-50"
+                        key="writing"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.3 }}
                     >
-                        <span className="text-sm font-medium">
-                            {deletedIdeas[deletedIdeas.length - 1]?.wasArchived
-                                ? t('inspiration.ideaArchived', '已归档')
-                                : t('inspiration.ideaDeleted')}
-                            {deletedIdeas.length > 1 && <span className="ml-1 opacity-70">({deletedIdeas.length})</span>}
-                        </span>
-                        <button
-                            onClick={handleUndo}
-                            className="text-sm font-bold text-pink-500 dark:text-pink-300 hover:text-pink-400 dark:hover:text-pink-200 transition-colors flex items-center gap-2"
-                        >
-                            <span>{t('common.undo')}</span>
-                            <kbd className="text-[10px] bg-pink-100 dark:bg-pink-800 px-1.5 py-0.5 rounded text-pink-600 dark:text-pink-200 font-mono border border-pink-200 dark:border-pink-700">⌘Z</kbd>
-                        </button>
+                        <WritingBoard />
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* Week Selector Modal */}
-            <AnimatePresence>
-                {showWeekSelector && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-white/40 dark:bg-black/40 backdrop-blur-xl"
-                        onClick={() => setShowWeekSelector(false)}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl border border-white/20 dark:border-gray-800 overflow-hidden"
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="p-8">
-                                <div className="flex items-center justify-between mb-8">
-                                    <div>
-                                        <h3 className="text-xl font-light text-gray-900 dark:text-white mb-1">选择周区间</h3>
-                                        <p className="text-xs text-gray-400 dark:text-gray-500 font-light">快速跳转到历史灵感</p>
-                                    </div>
-                                    <button
-                                        onClick={() => setShowWeekSelector(false)}
-                                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors group"
-                                    >
-                                        <X size={20} className="text-gray-400 group-hover:text-pink-500 transition-colors" />
-                                    </button>
-                                </div>
+            {/* Undo Toast */ }
+    <AnimatePresence>
+        {deletedIdeas.length > 0 && (
+            <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 50 }}
+                className="fixed bottom-24 left-6 right-6 md:bottom-10 md:left-auto md:right-10 md:w-auto bg-pink-50 dark:bg-pink-900 text-pink-900 dark:text-pink-50 px-6 py-3 rounded-xl shadow-2xl shadow-pink-100 dark:shadow-pink-900/20 border border-pink-100 dark:border-pink-800 flex items-center justify-between md:justify-start gap-4 z-50"
+            >
+                <span className="text-sm font-medium">
+                    {deletedIdeas[deletedIdeas.length - 1]?.wasArchived
+                        ? t('inspiration.ideaArchived', '已归档')
+                        : t('inspiration.ideaDeleted')}
+                    {deletedIdeas.length > 1 && <span className="ml-1 opacity-70">({deletedIdeas.length})</span>}
+                </span>
+                <button
+                    onClick={handleUndo}
+                    className="text-sm font-bold text-pink-500 dark:text-pink-300 hover:text-pink-400 dark:hover:text-pink-200 transition-colors flex items-center gap-2"
+                >
+                    <span>{t('common.undo')}</span>
+                    <kbd className="text-[10px] bg-pink-100 dark:bg-pink-800 px-1.5 py-0.5 rounded text-pink-600 dark:text-pink-200 font-mono border border-pink-200 dark:border-pink-700">⌘Z</kbd>
+                </button>
+            </motion.div>
+        )}
+    </AnimatePresence>
 
-                                <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {groupedWeeks.map((yearGroup) => (
-                                        <div key={yearGroup.year} className="space-y-4">
-                                            {groupedWeeks.length > 1 && (
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] font-bold text-pink-400 bg-pink-50 dark:bg-pink-900/30 px-2 py-0.5 rounded uppercase tracking-tighter">
-                                                        {yearGroup.year}
-                                                    </span>
-                                                    <div className="h-px flex-1 bg-gray-100 dark:bg-gray-800" />
-                                                </div>
-                                            )}
+    {/* Week Selector Modal */ }
+    <AnimatePresence>
+        {showWeekSelector && (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-white/40 dark:bg-black/40 backdrop-blur-xl"
+                onClick={() => setShowWeekSelector(false)}
+            >
+                <motion.div
+                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                    className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl border border-white/20 dark:border-gray-800 overflow-hidden"
+                    onClick={e => e.stopPropagation()}
+                >
+                    <div className="p-8">
+                        <div className="flex items-center justify-between mb-8">
+                            <div>
+                                <h3 className="text-xl font-light text-gray-900 dark:text-white mb-1">选择周区间</h3>
+                                <p className="text-xs text-gray-400 dark:text-gray-500 font-light">快速跳转到历史灵感</p>
+                            </div>
+                            <button
+                                onClick={() => setShowWeekSelector(false)}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors group"
+                            >
+                                <X size={20} className="text-gray-400 group-hover:text-pink-500 transition-colors" />
+                            </button>
+                        </div>
 
-                                            {yearGroup.months.map((monthGroup) => {
-                                                const SOLAR_TERMS = [
-                                                    ['小寒', '大寒'], ['立春', '雨水'], ['惊蛰', '春分'],
-                                                    ['清明', '谷雨'], ['立夏', '小满'], ['芒种', '夏至'],
-                                                    ['小暑', '大暑'], ['立秋', '处暑'], ['白露', '秋分'],
-                                                    ['寒露', '霜降'], ['立冬', '小雪'], ['大雪', '冬至']
-                                                ];
-                                                const terms = SOLAR_TERMS[parseInt(monthGroup.month) - 1] || [];
-
-                                                return (
-                                                    <div key={monthGroup.month} className="space-y-2">
-                                                        <div className="flex items-center justify-between px-2">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                                                                    {monthGroup.month}月
-                                                                </span>
-                                                                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-light mt-0.5">
-                                                                    · {terms.join(' ')}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="grid grid-cols-2 gap-2">
-                                                            {monthGroup.weeks.map((week) => (
-                                                                <button
-                                                                    key={week.key}
-                                                                    onClick={() => scrollToWeek(week.key)}
-                                                                    className="text-center p-3 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 hover:bg-pink-50 dark:hover:bg-pink-900/40 group transition-all duration-300 border border-transparent hover:border-pink-100 dark:hover:border-pink-800/50 flex flex-col justify-center min-h-[50px]"
-                                                                >
-                                                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-300">
-                                                                        {week.start.getDate()} - {week.end.getDate()}日
-                                                                    </div>
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    ))}
-
-                                    {groupedWeeks.length === 0 && (
-                                        <div className="py-12 text-center">
-                                            <Calendar className="mx-auto text-gray-200 dark:text-gray-800 mb-2" size={32} />
-                                            <p className="text-gray-400 font-light text-sm italic">暂无历史灵感回顾</p>
+                        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                            {groupedWeeks.map((yearGroup) => (
+                                <div key={yearGroup.year} className="space-y-4">
+                                    {groupedWeeks.length > 1 && (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] font-bold text-pink-400 bg-pink-50 dark:bg-pink-900/30 px-2 py-0.5 rounded uppercase tracking-tighter">
+                                                {yearGroup.year}
+                                            </span>
+                                            <div className="h-px flex-1 bg-gray-100 dark:bg-gray-800" />
                                         </div>
                                     )}
+
+                                    {yearGroup.months.map((monthGroup) => {
+                                        const SOLAR_TERMS = [
+                                            ['小寒', '大寒'], ['立春', '雨水'], ['惊蛰', '春分'],
+                                            ['清明', '谷雨'], ['立夏', '小满'], ['芒种', '夏至'],
+                                            ['小暑', '大暑'], ['立秋', '处暑'], ['白露', '秋分'],
+                                            ['寒露', '霜降'], ['立冬', '小雪'], ['大雪', '冬至']
+                                        ];
+                                        const terms = SOLAR_TERMS[parseInt(monthGroup.month) - 1] || [];
+
+                                        return (
+                                            <div key={monthGroup.month} className="space-y-2">
+                                                <div className="flex items-center justify-between px-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                                            {monthGroup.month}月
+                                                        </span>
+                                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-light mt-0.5">
+                                                            · {terms.join(' ')}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {monthGroup.weeks.map((week) => (
+                                                        <button
+                                                            key={week.key}
+                                                            onClick={() => scrollToWeek(week.key)}
+                                                            className="text-center p-3 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 hover:bg-pink-50 dark:hover:bg-pink-900/40 group transition-all duration-300 border border-transparent hover:border-pink-100 dark:hover:border-pink-800/50 flex flex-col justify-center min-h-[50px]"
+                                                        >
+                                                            <div className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-300">
+                                                                {week.start.getDate()} - {week.end.getDate()}日
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
+                            ))}
+
+                            {groupedWeeks.length === 0 && (
+                                <div className="py-12 text-center">
+                                    <Calendar className="mx-auto text-gray-200 dark:text-gray-800 mb-2" size={32} />
+                                    <p className="text-gray-400 font-light text-sm italic">暂无历史灵感回顾</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </motion.div>
+            </motion.div>
+        )}
+    </AnimatePresence>
+        </div >
     );
 };
 
