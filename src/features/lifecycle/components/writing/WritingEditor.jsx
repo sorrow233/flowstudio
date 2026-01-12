@@ -157,17 +157,14 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
     const wordCount = editorRef.current ? (editorRef.current.innerText || '').trim().length : 0; // Simplified count
 
     return (
-        <div className="flex-1 h-full flex flex-col bg-transparent relative">
-            {/* Background Texture/Gradient */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.03)_0%,transparent_50%)] pointer-events-none" />
-
+        <div className="flex-1 h-full flex flex-col bg-white dark:bg-gray-900 relative">
             {/* Sidebar Toggle Button - Top Left (Floating) */}
             <div className="absolute top-6 left-6 z-30">
                 <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={onToggleSidebar}
-                    className="p-2.5 text-gray-400 hover:text-sky-500 bg-white/40 dark:bg-gray-800/40 backdrop-blur-md border border-white/20 dark:border-gray-700/20 rounded-xl transition-all shadow-sm"
+                    className="p-2.5 text-gray-400 hover:text-sky-500 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-sm"
                     title={t('inspiration.toggleSidebar')}
                 >
                     {isSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
@@ -183,7 +180,7 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
                         exit={{ opacity: 0, y: 10, scale: 0.9 }}
                         transition={{ duration: 0.2 }}
                         style={{ top: toolbarPosition.top, left: toolbarPosition.left }}
-                        className="fixed z-50 flex items-center gap-2 p-1.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-full shadow-2xl border border-white/20 dark:border-gray-700/20 -translate-x-1/2"
+                        className="fixed z-50 flex items-center gap-2 p-1.5 bg-white dark:bg-gray-800 rounded-full shadow-xl border border-gray-200 dark:border-gray-700 -translate-x-1/2"
                     >
                         {COLOR_CONFIG.map((conf) => (
                             <button
@@ -198,13 +195,24 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
             </AnimatePresence>
 
             {/* Editor Container - Focused Area */}
-            <div className="flex-1 w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center">
-                <div className="w-full max-w-2xl px-8 py-20 md:py-32 animate-in fade-in zoom-in-95 duration-1000">
+            <div className="flex-1 w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center" onClick={(e) => {
+                // Clicking empty space focuses editor if not clicking title
+                if (e.target.tagName !== 'INPUT' && e.target !== editorRef.current) {
+                    editorRef.current?.focus();
+                }
+            }}>
+                <div className="w-full max-w-[65ch] px-6 py-16 md:py-24 animate-in fade-in zoom-in-95 duration-500">
                     <input
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full text-4xl md:text-5xl font-light text-gray-900 dark:text-white bg-transparent outline-none border-none placeholder-gray-200 dark:placeholder-gray-700 mb-16 tracking-tight shrink-0 leading-tight"
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                editorRef.current?.focus();
+                            }
+                        }}
+                        className="w-full text-4xl md:text-5xl font-bold text-gray-900 dark:text-white bg-transparent outline-none border-none placeholder-gray-300 dark:placeholder-gray-700 mb-8 tracking-tight shrink-0 leading-tight"
                         placeholder={t('inspiration.untitled')}
                     />
 
@@ -227,16 +235,16 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
                 </div>
             </div>
 
-            {/* Status Bar - Refined & Literary */}
-            <div className="px-10 py-5 text-[11px] text-gray-400 dark:text-gray-500 font-light flex justify-between items-center bg-transparent pointer-events-none">
-                <div className="flex gap-8 pointer-events-auto">
-                    <span className="tracking-widest uppercase">{wordCount} WORDS</span>
+            {/* Status Bar - Clean & Informative */}
+            <div className="px-6 py-3 text-[11px] text-gray-400 dark:text-gray-500 font-medium flex justify-between items-center bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 absolute bottom-0 w-full z-10">
+                <div className="flex gap-4">
+                    <span className="tabular-nums">{wordCount} words</span>
                 </div>
 
-                <div className="flex items-center gap-2 pointer-events-auto">
-                    <div className={`w-1 h-1 rounded-full transition-colors duration-500 ${isSaving ? 'bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)] animate-pulse' : 'bg-green-400/40'}`} />
-                    <span className="tracking-widest uppercase italic">
-                        {isSaving ? 'Writing to stars...' : 'Saved to soul'}
+                <div className="flex items-center gap-2">
+                    <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-200 ${isSaving ? 'bg-amber-400' : 'bg-green-500/50'}`} />
+                    <span className="uppercase text-[10px] tracking-wider opacity-80">
+                        {isSaving ? 'Saving' : 'Saved'}
                     </span>
                 </div>
             </div>

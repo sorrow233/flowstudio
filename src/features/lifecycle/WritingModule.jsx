@@ -37,12 +37,9 @@ const WritingModule = () => {
     };
 
     return (
-        <div className="flex h-[calc(100vh-80px)] overflow-hidden relative">
-            {/* Immersive Background Glow */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden -z-0">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-sky-200/20 dark:bg-sky-900/10 blur-[120px] rounded-full animate-pulse" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-200/20 dark:bg-blue-900/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
-            </div>
+        <div className="flex h-[calc(100vh-80px)] overflow-hidden relative bg-white dark:bg-gray-900">
+            {/* Background Texture - Subtle & Professional */}
+            <div className="absolute inset-0 bg-grid-slate-200/40 dark:bg-grid-slate-800/10 [mask-image:linear-gradient(to_bottom,white,transparent)] pointer-events-none" />
 
             {/* Main Content Area - Full screen for immersive writing */}
             <div className="w-full h-full flex flex-col relative z-10">

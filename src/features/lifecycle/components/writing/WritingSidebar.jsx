@@ -90,8 +90,8 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                 className={`
                     relative p-4 rounded-2xl cursor-pointer transition-all duration-300 group mb-2
                     ${isActive
-                        ? 'bg-white/60 dark:bg-gray-800/60 shadow-lg shadow-sky-100/20 dark:shadow-none border border-white/40 dark:border-gray-700/50'
-                        : 'hover:bg-white/30 dark:hover:bg-gray-800/30 border border-transparent'}
+                        ? 'bg-white dark:bg-gray-800 shadow-sm border border-sky-300 dark:border-sky-700 ring-1 ring-sky-300/20'
+                        : 'hover:bg-white dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700'}
                 `}
             >
                 <div className="flex items-start gap-3">
@@ -151,7 +151,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
     };
 
     return (
-        <div className="w-80 h-full flex flex-col border-r border-white/10 dark:border-gray-800/50 bg-white/10 dark:bg-gray-900/10 backdrop-blur-3xl relative">
+        <div className="w-80 h-full flex flex-col border-r border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900 relative">
             {/* Header: Title + Category Selector */}
             <div className="p-6 pb-2">
                 <div className="flex items-center justify-between mb-8">
@@ -163,7 +163,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                     </div>
 
                     {/* Minimal Category Selector */}
-                    <div className="flex items-center gap-1.5 p-1 bg-white/40 dark:bg-gray-800/40 rounded-full border border-white/20 dark:border-gray-700/20">
+                    <div className="flex items-center gap-1.5 p-1 bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
                         {WRITING_CATEGORIES.map(cat => (
                             <button
                                 key={cat.id}
@@ -179,16 +179,23 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                     </div>
                 </div>
 
-                {/* Search - Glassmorphism style */}
                 <div className="relative group mb-4">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-sky-400 transition-colors w-4 h-4" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-sky-500 transition-colors w-4 h-4" />
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder={t('inspiration.search')}
-                        className="w-full bg-white/30 dark:bg-gray-800/30 border border-white/20 dark:border-gray-700/20 focus:border-sky-300/50 dark:focus:border-sky-700/50 focus:ring-4 focus:ring-sky-500/5 rounded-2xl pl-10 pr-4 py-3 text-sm text-gray-700 dark:text-gray-200 outline-none transition-all duration-500 placeholder:text-gray-400/60"
+                        className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 outline-none transition-all placeholder:text-gray-400"
                     />
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        >
+                            <X size={14} />
+                        </button>
+                    )}
                 </div>
             </div>
 
