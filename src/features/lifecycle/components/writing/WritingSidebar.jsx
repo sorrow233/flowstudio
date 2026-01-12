@@ -39,12 +39,12 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
                 style={{ x }}
                 drag="x"
                 dragDirectionLock
-                dragConstraints={{ left: -150, right: 0 }}
-                dragElastic={{ left: 0.15, right: 0.05 }} // Tighter, more "跟手" feel
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={{ left: 0.2, right: 0.05 }} // Elastic for that premium snap-back feel
                 onDragEnd={(e, info) => {
-                    // Accidental touch protection: must swipe at least 80px AND have high velocity, 
-                    // or swipe a full 160px regardless of velocity.
-                    const isSwipeDelete = (info.offset.x < -160) || (info.offset.x < -80 && info.velocity.x < -600);
+                    // Optimized for iOS: lower thresholds for better responsiveness
+                    // Match InspirationItem's logic for consistency
+                    const isSwipeDelete = (info.offset.x < -180) || (info.offset.x < -60 && info.velocity.x < -400);
 
                     if (isSwipeDelete) {
                         onDelete(doc);
@@ -62,7 +62,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
                 }}
                 className={`
                     relative z-10 p-5 rounded-2xl cursor-pointer transition-shadow duration-300
-                    border border-transparent select-none active:scale-[0.99]
+                    border border-transparent select-none active:scale-[0.99] touch-none
                     ${isActive
                         ? 'bg-white/95 dark:bg-gray-800/95 shadow-[0_12px_24px_-8px_rgba(244,114,182,0.25)] border-pink-200/50 dark:border-pink-500/20'
                         : 'bg-white/40 dark:bg-gray-900/40 hover:bg-white/60 dark:hover:bg-gray-800/60 transition-colors'}
