@@ -118,9 +118,9 @@ export const COMMAND_CATEGORIES = [
 
 // Inspiration 页面分类配置
 export const INSPIRATION_CATEGORIES = [
-    { id: 'note', label: '随记', color: 'bg-violet-400', dotColor: 'bg-violet-400', textColor: 'text-violet-400' },
-    { id: 'todo', label: '代办', color: 'bg-emerald-400', dotColor: 'bg-emerald-400', textColor: 'text-emerald-400' },
-    { id: 'emotion', label: '情感', color: 'bg-rose-400', dotColor: 'bg-rose-400', textColor: 'text-rose-400' },
+    { id: 'note', label: '随记', color: 'bg-pink-400', dotColor: 'bg-pink-400', textColor: 'text-pink-400' },
+    { id: 'todo', label: '代办', color: 'bg-blue-400', dotColor: 'bg-blue-400', textColor: 'text-blue-400' },
+    { id: 'emotion', label: '情绪', color: 'bg-violet-400', dotColor: 'bg-violet-400', textColor: 'text-violet-400' },
 ];
 
 export const DEFAULT_PROJECT_IMAGES = [

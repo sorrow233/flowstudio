@@ -594,9 +594,9 @@ const InspirationModule = () => {
                                             animate={{ y: 0, opacity: 1 }}
                                             exit={{ y: -20, opacity: 0 }}
                                             transition={{ duration: 0.2, ease: "easeOut" }}
-                                            className={`text-xs font-medium bg-gradient-to-r bg-clip-text text-transparent ${selectedCategory === 'note' ? 'from-violet-500 to-fuchsia-500' :
-                                                selectedCategory === 'todo' ? 'from-emerald-500 to-teal-500' :
-                                                    'from-rose-500 to-pink-500'
+                                            className={`text-xs font-medium bg-gradient-to-r bg-clip-text text-transparent ${selectedCategory === 'note' ? 'from-pink-400 to-rose-500' :
+                                                selectedCategory === 'todo' ? 'from-blue-400 to-indigo-500' :
+                                                    'from-violet-500 to-fuchsia-500'
                                                 }`}
                                         >
                                             {INSPIRATION_CATEGORIES.find(c => c.id === selectedCategory)?.label}
