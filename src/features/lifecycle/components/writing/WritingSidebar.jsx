@@ -94,11 +94,12 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
     );
 };
 
-const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, onDelete, onUpdate }) => {
+const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, onDelete, onUpdate, isMobile }) => {
     const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(null);
 
+    // ... same filtering logic
     const filteredDocs = useMemo(() => {
         let docs = documents;
         if (selectedCategory) {
@@ -173,12 +174,17 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
     };
 
     return (
-        <div className="w-[340px] h-full flex flex-col border-r border-white/20 dark:border-gray-800/50 bg-white/20 dark:bg-gray-900/40 backdrop-blur-2xl relative z-20 shadow-2xl">
-            <div className="p-8 pb-4">
-                <div className="flex items-center justify-between mb-10">
+        <div className={`
+            h-full flex flex-col relative z-20 shadow-2xl
+            border-r border-white/20 dark:border-gray-800/50 
+            bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl
+            ${isMobile ? 'w-full rounded-t-[32px] sm:rounded-none' : 'w-[340px] bg-white/20 dark:bg-gray-900/40'}
+        `}>
+            <div className={`${isMobile ? 'p-6 pb-2' : 'p-8 pb-4'}`}>
+                <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-4">
                         <div className="relative">
-                            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
+                            <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-semibold text-gray-900 dark:text-white tracking-tight`}>
                                 {t('inspiration.writing')}
                             </h2>
                             <div className="absolute -bottom-1 left-0 w-8 h-1 bg-sky-500 rounded-full" />
@@ -194,19 +200,30 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                         </motion.button>
                     </div>
 
-                    <div className="flex items-center gap-2 p-1.5 bg-white/50 dark:bg-gray-800/50 rounded-2xl border border-white/40 dark:border-gray-700/40 shadow-inner backdrop-blur-md">
-                        {WRITING_CATEGORIES.map(cat => (
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 p-1.5 bg-white/50 dark:bg-gray-800/50 rounded-2xl border border-white/40 dark:border-gray-700/40 shadow-inner backdrop-blur-md">
+                            {WRITING_CATEGORIES.map(cat => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
+                                    className={`
+                                        w-4 h-4 rounded-lg transition-all duration-500 relative
+                                        ${cat.dotColor}
+                                        ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-gray-900 ring-sky-400 scale-125' : 'opacity-30 hover:opacity-100 grayscale-[0.5] hover:grayscale-0'}
+                                    `}
+                                    title={cat.label}
+                                />
+                            ))}
+                        </div>
+
+                        {isMobile && (
                             <button
-                                key={cat.id}
-                                onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
-                                className={`
-                                    w-4 h-4 rounded-lg transition-all duration-500 relative
-                                    ${cat.dotColor}
-                                    ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-gray-900 ring-sky-400 scale-125' : 'opacity-30 hover:opacity-100 grayscale-[0.5] hover:grayscale-0'}
-                                `}
-                                title={cat.label}
-                            />
-                        ))}
+                                onClick={() => onSelectDoc(activeDocId)} // Board handles close via onSelect
+                                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400"
+                            >
+                                <X size={18} />
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -234,7 +251,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-5 custom-scrollbar pb-32">
+            <div className={`flex-1 overflow-y-auto custom-scrollbar pb-32 ${isMobile ? 'px-4' : 'px-5'}`}>
                 {documents.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 opacity-30">
                         <div className="w-20 h-20 rounded-3xl bg-gray-50 dark:bg-gray-800/40 flex items-center justify-center mb-6 shadow-inner">
@@ -255,6 +272,12 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
             {/* Bottom Blur Mask */}
             <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white/40 dark:from-gray-900/40 to-transparent pointer-events-none z-30" />
         </div>
+    );
+};
+
+{/* Bottom Blur Mask */ }
+<div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white/40 dark:from-gray-900/40 to-transparent pointer-events-none z-30" />
+        </div >
     );
 };
 

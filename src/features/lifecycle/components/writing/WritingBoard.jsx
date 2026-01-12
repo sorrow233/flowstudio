@@ -1,15 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSync } from '../../../sync/SyncContext';
 import { useSyncedProjects } from '../../../sync/useSyncStore';
 import { useTranslation } from '../../../i18n';
+import { useIOSStandalone } from '../../../hooks/useIOSStandalone';
 import WritingSidebar from './WritingSidebar';
 import WritingEditor from './WritingEditor';
 
 const WritingBoard = () => {
     const { doc, immediateSync } = useSync();
     const { t } = useTranslation();
+    const { isIOSStandalone } = useIOSStandalone();
     const {
         projects: allProjects,
         addProject,
@@ -27,9 +29,24 @@ const WritingBoard = () => {
 
     const [selectedDocId, setSelectedDocId] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+    // Handle responsiveness
+    useEffect(() => {
+        const handleResize = () => {
+            const mobile = window.innerWidth < 1024;
+            setIsMobile(mobile);
+            // On mobile, default sidebar to closed if it was open from desktop
+            if (mobile && isSidebarOpen && window.innerWidth < 768) {
+                // setIsSidebarOpen(false); // Auto-close on small mobile
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [isSidebarOpen]);
 
     // Initial load: select first doc if none selected
-    React.useEffect(() => {
+    useEffect(() => {
         if (!selectedDocId && documents.length > 0) {
             setSelectedDocId(documents[0].id);
         }
@@ -46,14 +63,17 @@ const WritingBoard = () => {
             title: t('inspiration.untitled'),
             content: '',
             stage: 'writing',
-            category: category || 'draft', // Default to draft if none selected
+            category: category || 'draft',
             timestamp: Date.now(),
             lastModified: Date.now()
         };
         addProject(newDoc);
         immediateSync?.();
         setSelectedDocId(newDoc.id);
-        if (!isSidebarOpen) setIsSidebarOpen(true); // Open sidebar on create
+
+        // On mobile, stay in sidebar or jump to editor? 
+        // Usually, jump to editor and close sidebar.
+        if (isMobile) setIsSidebarOpen(false);
     };
 
     const handleUpdate = (id, updates) => {
@@ -66,10 +86,8 @@ const WritingBoard = () => {
         removeProject(id);
         immediateSync?.();
 
-        // Handle selection after delete
         if (selectedDocId === id) {
             if (documents.length > 1) {
-                // Select next or previous
                 const nextDoc = documents[index + 1] || documents[index - 1];
                 setSelectedDocId(nextDoc?.id || null);
             } else {
@@ -79,35 +97,69 @@ const WritingBoard = () => {
     };
 
     return (
-        <div className="flex w-full h-full bg-transparent overflow-hidden relative">
+        <div
+            className={`flex w-full bg-transparent overflow-hidden relative ${isIOSStandalone ? 'pt-safe pb-safe' : ''}`}
+            style={{ height: '100dvh' }} // Dynamic viewport height for mobile
+        >
             <AnimatePresence mode="wait">
                 {isSidebarOpen && (
-                    <motion.div
-                        initial={{ width: 0, opacity: 0, x: -20 }}
-                        animate={{ width: 'auto', opacity: 1, x: 0 }}
-                        exit={{ width: 0, opacity: 0, x: -20 }}
-                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                        className="h-full z-20 flex-shrink-0 relative"
-                    >
-                        <WritingSidebar
-                            documents={documents}
-                            activeDocId={selectedDocId}
-                            onSelectDoc={setSelectedDocId}
-                            onCreate={handleCreate}
-                            onDelete={handleDelete}
-                        />
-                    </motion.div>
+                    <>
+                        {/* Mobile Overlay Backdrop */}
+                        {isMobile && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setIsSidebarOpen(false)}
+                                className="absolute inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+                            />
+                        )}
+
+                        <motion.div
+                            initial={isMobile ? { y: '100%' } : { width: 0, opacity: 0, x: -20 }}
+                            animate={isMobile ? { y: 0 } : { width: 'auto', opacity: 1, x: 0 }}
+                            exit={isMobile ? { y: '100%' } : { width: 0, opacity: 0, x: -20 }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 400,
+                                damping: 40,
+                                opacity: { duration: 0.2 }
+                            }}
+                            className={`
+                                h-full flex-shrink-0 relative z-50
+                                ${isMobile ? 'fixed inset-x-0 bottom-0 top-12 sm:top-20' : 'relative'}
+                            `}
+                        >
+                            {/* Mobile Handle Bar */}
+                            {isMobile && (
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full z-[60] lg:hidden mb-2" />
+                            )}
+
+                            <WritingSidebar
+                                documents={filteredDocs || documents} // Pass everything, internal filters take care of it
+                                activeDocId={selectedDocId}
+                                onSelectDoc={(id) => {
+                                    setSelectedDocId(id);
+                                    if (isMobile) setIsSidebarOpen(false); // Auto close on select
+                                }}
+                                onCreate={handleCreate}
+                                onDelete={handleDelete}
+                                isMobile={isMobile}
+                            />
+                        </motion.div>
+                    </>
                 )}
             </AnimatePresence>
 
-            <div className="flex-1 h-full min-w-0 relative z-10">
+            <div className="flex-1 h-full min-w-0 relative z-10 flex flex-col">
                 {activeDoc ? (
                     <WritingEditor
-                        key={activeDoc.id} // Force re-mount on doc change
+                        key={activeDoc.id}
                         doc={activeDoc}
                         onUpdate={handleUpdate}
                         isSidebarOpen={isSidebarOpen}
                         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+                        isMobile={isMobile}
                     />
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto px-6 text-center">
@@ -134,6 +186,16 @@ const WritingBoard = () => {
                         >
                             {t('inspiration.newDoc')}
                         </motion.button>
+
+                        {/* Mobile sidebar toggle if empty and closed */}
+                        {isMobile && !isSidebarOpen && (
+                            <button
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="mt-4 text-xs text-sky-500 font-medium"
+                            >
+                                {t('inspiration.viewAll')}
+                            </button>
+                        )}
                     </div>
                 )}
             </div>

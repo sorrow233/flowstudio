@@ -74,14 +74,26 @@ body {
     padding-top: env(safe-area-inset-top, 0px);
 }
 
+.h-safe-bottom {
+    height: env(safe-area-inset-bottom, 0px);
+}
+
 /* iOS Standalone Mode - 从主屏幕打开时的样式 */
 .ios-standalone {
     padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Touch-friendly scrolling */
+.touch-scroll {
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Mobile viewport fix for iOS Safari */
 @supports (height: 100dvh) {
     .min-h-dvh {
         min-height: 100dvh;
+    }
+    .h-dvh {
+        height: 100dvh;
     }
 }
