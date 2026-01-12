@@ -116,6 +116,13 @@ export const COMMAND_CATEGORIES = [
     { id: 'testing', label: 'Travel', color: 'bg-rose-400 text-white', textColor: 'text-rose-400', icon: 'Plane' },
 ];
 
+// Inspiration 页面分类配置
+export const INSPIRATION_CATEGORIES = [
+    { id: 'note', label: '随记', color: 'bg-violet-400', dotColor: 'bg-violet-400', textColor: 'text-violet-400' },
+    { id: 'todo', label: '代办', color: 'bg-emerald-400', dotColor: 'bg-emerald-400', textColor: 'text-emerald-400' },
+    { id: 'emotion', label: '情感', color: 'bg-rose-400', dotColor: 'bg-rose-400', textColor: 'text-rose-400' },
+];
+
 export const DEFAULT_PROJECT_IMAGES = [
     'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop', // Tech Dark
     'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop', // Circuit

@@ -251,7 +251,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                     <div className="flex-shrink-0 mt-1.5 relative z-10">
                         <div
                             onClick={handleDotClick}
-                            className={`w-2.5 h-2.5 rounded-full ${config.dot} shadow-sm cursor-pointer transition-all duration-200 hover:scale-150 hover:ring-2 hover:ring-offset-2 hover:ring-pink-300 dark:hover:ring-pink-600 hover:ring-offset-white dark:hover:ring-offset-gray-900 ${isCompleted ? 'opacity-50' : ''}`}
+                            className={`w-2.5 h-2.5 rounded-full ${config.dot} shadow-sm cursor-pointer transition-all duration-200 hover:scale-125 hover:ring-1 hover:ring-offset-1 hover:ring-pink-300/60 dark:hover:ring-pink-500/40 hover:ring-offset-white dark:hover:ring-offset-gray-900 ${isCompleted ? 'opacity-50' : ''}`}
                             title={t('inspiration.addNote', '添加随记')}
                         />
                         {/* Note Edit Popover */}

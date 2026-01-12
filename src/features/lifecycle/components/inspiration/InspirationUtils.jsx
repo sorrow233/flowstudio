@@ -1,4 +1,5 @@
 import React from 'react';
+import { INSPIRATION_CATEGORIES } from '../../../../utils/constants';
 
 // Refined Color Configuration for "Crayon Highlighter" look
 export const COLOR_CONFIG = [
@@ -47,6 +48,12 @@ export const COLOR_CONFIG = [
 ];
 
 export const getColorConfig = (index) => COLOR_CONFIG[index % COLOR_CONFIG.length];
+
+// 根据分类获取颜色配置
+export const getCategoryConfig = (category) => {
+    const cat = INSPIRATION_CATEGORIES.find(c => c.id === category);
+    return cat || INSPIRATION_CATEGORIES[0]; // 默认返回「随记」
+};
 
 // Helper for parsing rich text
 export const parseRichText = (text) => {
