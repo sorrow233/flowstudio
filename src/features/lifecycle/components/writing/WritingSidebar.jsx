@@ -152,7 +152,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
             <div className="mb-8 last:mb-0">
                 <h5 className="px-5 mb-4 text-[11px] uppercase font-bold text-gray-400/70 dark:text-gray-600 tracking-[0.2em] flex items-center justify-between">
                     <span className="flex items-center gap-2">
-                        <span className="w-3 h-[1px] bg-sky-200 dark:bg-sky-800" />
+                        <span className="w-3 h-[1px] bg-pink-200 dark:bg-pink-800" />
                         {t(`inspiration.timeGroup.${titleKey}`)}
                     </span>
                     <span className="text-[9px] font-normal opacity-50 px-2 py-0.5 rounded-full border border-gray-100 dark:border-gray-800">
@@ -192,7 +192,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                                 <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-semibold text-gray-900 dark:text-white tracking-tight`}>
                                     {t('inspiration.writing')}
                                 </h2>
-                                <div className="absolute -bottom-1 left-0 w-6 h-1 bg-sky-500 rounded-full" />
+                                <div className="absolute -bottom-1 left-0 w-6 h-1 bg-pink-500 rounded-full" />
                             </div>
                         </div>
 
@@ -200,7 +200,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                             onClick={() => onCreate(selectedCategory)}
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
-                            className={`${isMobile ? 'w-10 h-10' : 'w-9 h-9'} flex items-center justify-center bg-sky-500 text-white rounded-2xl shadow-lg shadow-sky-500/20 hover:bg-sky-600 transition-colors`}
+                            className={`${isMobile ? 'w-10 h-10' : 'w-9 h-9'} flex items-center justify-center bg-pink-500 text-white rounded-2xl shadow-lg shadow-pink-500/20 hover:bg-pink-600 transition-colors`}
                             title={t('inspiration.newDoc')}
                         >
                             <Plus size={isMobile ? 22 : 20} strokeWidth={3} />
@@ -216,7 +216,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                                     className={`
                                         w-4 h-4 rounded-lg transition-all duration-500 relative
                                         ${cat.dotColor}
-                                        ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-gray-900 ring-sky-400 scale-125' : 'opacity-30 hover:opacity-100 grayscale-[0.5] hover:grayscale-0'}
+                                        ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-gray-900 ring-pink-400 scale-125' : 'opacity-30 hover:opacity-100 grayscale-[0.5] hover:grayscale-0'}
                                     `}
                                     title={cat.label}
                                 />
@@ -235,9 +235,9 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                 </div>
 
                 <div className="relative group mt-6 mb-4 z-30">
-                    <Spotlight className="rounded-2xl" spotColor="rgba(56, 189, 248, 0.15)">
+                    <Spotlight className="rounded-2xl" spotColor="rgba(244, 114, 182, 0.15)">
                         <div className="relative bg-white/40 dark:bg-gray-800/40 rounded-2xl border border-white/60 dark:border-gray-700/30 backdrop-blur-md overflow-hidden transition-all duration-500 shadow-sm">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-sky-500 transition-colors w-4 h-4" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-pink-500 transition-colors w-4 h-4" />
                             <input
                                 type="text"
                                 value={searchQuery}
