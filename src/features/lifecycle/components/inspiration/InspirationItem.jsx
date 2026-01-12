@@ -7,7 +7,7 @@ import { COLOR_CONFIG, getColorConfig, parseRichText, getCategoryConfig } from '
 
 // COLOR_CONFIG, getColorConfig, and parseRichText are now imported from InspirationUtils.js
 
-const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onUpdateNote, onUpdateContent, onToggleComplete, isArchiveView = false, copiedId }) => {
+const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onUpdateNote, onUpdateContent, onToggleComplete, isArchiveView = false, copiedId, isSelectionMode = false, isSelected = false, onSelect }) => {
     const [isDragging, setIsDragging] = React.useState(false);
     const [isEditingContent, setIsEditingContent] = React.useState(false);
     const [isEditingNote, setIsEditingNote] = React.useState(false);
@@ -199,7 +199,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                 : { opacity: 0, x: -500, rotate: -12, scale: 0.9, transition: { duration: 0.2, ease: "easeOut" } }
             }
             layout
-            className={`relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 touch-none select-none ${isCharging ? 'ring-2 ring-pink-400/60 shadow-lg shadow-pink-200/50 dark:shadow-pink-900/30' : ''}`}
+            className={`relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 touch-none select-none ${isCharging ? 'ring-2 ring-pink-400/60 shadow-lg shadow-pink-200/50 dark:shadow-pink-900/30' : ''} ${isSelected ? 'scale-[1.02]' : ''}`}
         >
             {/* Main Card Component */}
             <div
@@ -211,12 +211,17 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                         ? 'border-cyan-300 dark:border-cyan-600 ring-1 ring-cyan-200/50 dark:ring-cyan-700/30'
                         : 'border-gray-100 dark:border-gray-800'}
                     ${isDragging ? '' : `hover:shadow-[0_0_20px_rgba(244,114,182,0.2)] hover:border-pink-200 dark:hover:border-pink-800/50`}
+                    ${isSelected ? `ring-2 ${categoryConfig.textColor.replace('text-', 'ring-')} shadow-lg shadow-gray-200 dark:shadow-gray-950 border-transparent` : ''}
                     ${isCompleted ? 'opacity-50' : ''}
                     z-10
                     group/card
                 `}
                 onClick={() => {
                     if (isDragging || isEditingContent) return;
+                    if (isSelectionMode) {
+                        onSelect?.(idea.id);
+                        return;
+                    }
                     if (!window.getSelection().toString()) {
                         onCopy(idea.content, idea.id);
                     }
