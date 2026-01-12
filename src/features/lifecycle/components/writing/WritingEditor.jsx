@@ -40,7 +40,7 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
             // Only show if selection is within the editor
             if (editorRef.current && editorRef.current.contains(selection.anchorNode)) {
                 setToolbarPosition({
-                    top: rect.top - 50, // Position above selection
+                    top: rect.top - 60, // Position above selection
                     left: rect.left + rect.width / 2
                 });
             } else {
@@ -133,9 +133,6 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
     // Input Handler for Auto-Save logic
     const handleInput = useCallback(() => {
         if (!editorRef.current) return;
-        // The save logic is handled by the useEffect watching title and writingDoc
-        // But we can trigger a re-render to update word count if needed, 
-        // though setTitle already does that. For innerHTML changes, we might need a dummy state.
         setIsSaving(true);
     }, []);
 
@@ -157,14 +154,14 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
     const wordCount = editorRef.current ? (editorRef.current.innerText || '').trim().length : 0; // Simplified count
 
     return (
-        <div className="flex-1 h-full flex flex-col bg-white dark:bg-gray-900 relative">
+        <div className="flex-1 h-full flex flex-col bg-white/70 dark:bg-gray-900/70 backdrop-blur-md relative z-10">
             {/* Sidebar Toggle Button - Top Left (Floating) */}
             <div className="absolute top-6 left-6 z-30">
                 <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={onToggleSidebar}
-                    className="p-2.5 text-gray-400 hover:text-sky-500 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-sm"
+                    className="p-2.5 text-gray-400 hover:text-sky-500 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20 dark:border-gray-700/50 rounded-xl transition-all shadow-sm hover:shadow-md"
                     title={t('inspiration.toggleSidebar')}
                 >
                     {isSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
@@ -175,18 +172,18 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
             <AnimatePresence>
                 {toolbarPosition && (
                     <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                        initial={{ opacity: 0, y: 15, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
                         style={{ top: toolbarPosition.top, left: toolbarPosition.left }}
-                        className="fixed z-50 flex items-center gap-2 p-1.5 bg-white dark:bg-gray-800 rounded-full shadow-xl border border-gray-200 dark:border-gray-700 -translate-x-1/2"
+                        className="fixed z-50 flex items-center gap-2 p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-full shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-white/20 dark:border-gray-700/50 -translate-x-1/2"
                     >
                         {COLOR_CONFIG.map((conf) => (
                             <button
                                 key={conf.id}
                                 onMouseDown={(e) => { e.preventDefault(); applyColor(conf.id); }}
-                                className={`w-5 h-5 rounded-full transition-transform hover:scale-125 hover:rotate-12 ${conf.dot} shadow-sm`}
+                                className={`w-5 h-5 rounded-full transition-all hover:scale-125 hover:rotate-12 ${conf.dot} shadow-sm border border-white/20 dark:border-transparent`}
                                 title={conf.id}
                             />
                         ))}
@@ -201,7 +198,7 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
                     editorRef.current?.focus();
                 }
             }}>
-                <div className="w-full max-w-[65ch] px-6 py-16 md:py-24 animate-in fade-in zoom-in-95 duration-500">
+                <div className="w-full max-w-[65ch] px-6 py-16 md:py-24 animate-in fade-in zoom-in-95 duration-700 ease-out">
                     <input
                         type="text"
                         value={title}
@@ -212,7 +209,7 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
                                 editorRef.current?.focus();
                             }
                         }}
-                        className="w-full text-4xl md:text-5xl font-bold text-gray-900 dark:text-white bg-transparent outline-none border-none placeholder-gray-300 dark:placeholder-gray-700 mb-8 tracking-tight shrink-0 leading-tight"
+                        className="w-full text-4xl md:text-5xl font-bold bg-transparent outline-none border-none placeholder-gray-300 dark:placeholder-gray-700 mb-8 tracking-tight shrink-0 leading-tight transition-all duration-300 text-transparent bg-clip-text bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500 dark:from-white dark:via-gray-100 dark:to-gray-400 focus:drop-shadow-[0_2px_10px_rgba(56,189,248,0.2)]"
                         placeholder={t('inspiration.untitled')}
                     />
 
@@ -221,31 +218,39 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
                         contentEditable
                         suppressContentEditableWarning
                         onInput={handleInput}
-                        className="w-full outline-none text-gray-700 dark:text-gray-300 text-lg md:text-xl font-serif leading-[1.8] min-h-[50vh] empty:before:content-[attr(placeholder)] empty:before:text-gray-300 dark:empty:before:text-gray-600 focus:before:content-none selection:bg-sky-100 dark:selection:bg-sky-900/40"
+                        className="w-full outline-none text-gray-700 dark:text-gray-200 text-lg md:text-xl font-serif leading-[1.8] min-h-[50vh] empty:before:content-[attr(placeholder)] empty:before:text-gray-300 dark:empty:before:text-gray-600 focus:before:content-none selection:bg-sky-100/50 dark:selection:bg-sky-500/30 transition-all duration-300"
                         placeholder={t('inspiration.placeholder')}
                         style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
                     />
 
-                    {/* End of content indicator */}
-                    <div className="mt-32 flex flex-col items-center opacity-10">
-                        <div className="w-8 h-[1px] bg-sky-500 mb-1" />
-                        <div className="w-4 h-[1px] bg-sky-500" />
+                    {/* End of content indicator - Artistic Fade */}
+                    <div className="mt-32 flex flex-col items-center opacity-20">
+                        <div className="w-2 h-2 rounded-full bg-sky-400 mb-4" />
+                        <div className="w-1 h-1 rounded-full bg-sky-300" />
                     </div>
                     <div className="h-64" />
                 </div>
             </div>
 
-            {/* Status Bar - Clean & Informative */}
-            <div className="px-6 py-3 text-[11px] text-gray-400 dark:text-gray-500 font-medium flex justify-between items-center bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 absolute bottom-0 w-full z-10">
+            {/* Status Bar - Simple & Breathing */}
+            <div className="px-6 py-3 text-[11px] text-gray-400/80 dark:text-gray-500/80 font-medium flex justify-between items-center bg-white/0 absolute bottom-0 w-full z-10 pointer-events-none">
                 <div className="flex gap-4">
-                    <span className="tabular-nums">{wordCount} words</span>
+                    <span className="tabular-nums font-mono opacity-50 hover:opacity-100 transition-opacity cursor-default pointer-events-auto">{wordCount} words</span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-200 ${isSaving ? 'bg-amber-400' : 'bg-green-500/50'}`} />
-                    <span className="uppercase text-[10px] tracking-wider opacity-80">
-                        {isSaving ? 'Saving' : 'Saved'}
-                    </span>
+                <div className="flex items-center gap-2 pointer-events-auto">
+                    <div className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${isSaving ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]' : 'bg-green-500/40'}`} />
+                    <AnimatePresence mode="wait">
+                        <motion.span
+                            key={isSaving ? 'saving' : 'saved'}
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -5 }}
+                            className="uppercase text-[9px] tracking-widest opacity-60"
+                        >
+                            {isSaving ? 'Syncing...' : 'Synced'}
+                        </motion.span>
+                    </AnimatePresence>
                 </div>
             </div>
         </div>
