@@ -56,7 +56,10 @@ export default {
     inspiration: {
         title: '灵感',
         subtitle: '捕捉瞬时灵感，为未来积蓄能量。',
+        writing: '写作',
+        writingSubtitle: '在这里沉浸式创作，记录更完整的思绪',
         placeholder: '记录一闪而过的念头...',
+        addNote: '添加随记', // Add missing key
         emptyState: '暂无灵感，记录下第一个想法吧',
         ideaDeleted: '灵感已删除',
         ideaArchived: '已归档',

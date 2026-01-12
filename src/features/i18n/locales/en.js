@@ -56,7 +56,10 @@ export default {
     inspiration: {
         title: 'Inspiration',
         subtitle: 'Capture fleeting ideas, fuel your future.',
+        writing: 'Writing',
+        writingSubtitle: 'Immersive creation, capturing complete thoughts',
         placeholder: 'Record a fleeting thought...',
+        addNote: 'Add Note',
         emptyState: 'No inspirations yet, record your first idea',
         ideaDeleted: 'Idea deleted',
         cmdEnter: 'CMD + ENTER',

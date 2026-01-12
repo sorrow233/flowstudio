@@ -22,6 +22,9 @@ const WritingEditor = ({ document, onUpdate }) => {
     // Handle Text Selection for Floating Toolbar
     useEffect(() => {
         const handleSelection = () => {
+            // Safety check
+            if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
             const selection = window.getSelection();
             if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
                 setToolbarPosition(null);
@@ -42,8 +45,15 @@ const WritingEditor = ({ document, onUpdate }) => {
             }
         };
 
-        document.addEventListener('selectionchange', handleSelection);
-        return () => document.removeEventListener('selectionchange', handleSelection);
+        if (typeof document !== 'undefined') {
+            document.addEventListener('selectionchange', handleSelection);
+        }
+
+        return () => {
+            if (typeof document !== 'undefined') {
+                document.removeEventListener('selectionchange', handleSelection);
+            }
+        };
     }, []);
 
     // Apply Color to Selection
