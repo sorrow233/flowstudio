@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { COLOR_CONFIG } from '../inspiration/InspirationUtils';
 
-const WritingEditor = ({ document, onUpdate }) => {
+const WritingEditor = ({ doc: writingDoc, onUpdate }) => {
     const editorRef = useRef(null);
     const [title, setTitle] = useState('');
     const [toolbarPosition, setToolbarPosition] = useState(null);
@@ -10,14 +10,14 @@ const WritingEditor = ({ document, onUpdate }) => {
 
     // Sync local state with document prop
     useEffect(() => {
-        if (document) {
-            setTitle(document.title || '');
-            if (editorRef.current && document.content !== editorRef.current.innerHTML) {
+        if (writingDoc) {
+            setTitle(writingDoc.title || '');
+            if (editorRef.current && writingDoc.content !== editorRef.current.innerHTML) {
                 // Convert markup to HTML for display
-                editorRef.current.innerHTML = markupToHtml(document.content || '');
+                editorRef.current.innerHTML = markupToHtml(writingDoc.content || '');
             }
         }
-    }, [document?.id]);
+    }, [writingDoc?.id]);
 
     // Handle Text Selection for Floating Toolbar
     useEffect(() => {
@@ -45,12 +45,12 @@ const WritingEditor = ({ document, onUpdate }) => {
             }
         };
 
-        if (typeof document !== 'undefined') {
+        if (typeof document !== 'undefined' && document.addEventListener) {
             document.addEventListener('selectionchange', handleSelection);
         }
 
         return () => {
-            if (typeof document !== 'undefined') {
+            if (typeof document !== 'undefined' && document.removeEventListener) {
                 document.removeEventListener('selectionchange', handleSelection);
             }
         };
@@ -58,6 +58,8 @@ const WritingEditor = ({ document, onUpdate }) => {
 
     // Apply Color to Selection
     const applyColor = (colorId) => {
+        if (typeof window === 'undefined' || !window.getSelection) return;
+
         const selection = window.getSelection();
         if (!selection.rangeCount) return;
 
@@ -128,14 +130,10 @@ const WritingEditor = ({ document, onUpdate }) => {
     // Input Handler for Auto-Save logic
     const handleInput = useCallback(() => {
         if (!editorRef.current) return;
-        const newContent = htmlToMarkup(editorRef.current);
-
+        // The save logic is handled by the useEffect watching title and writingDoc
+        // But we can trigger a re-render to update word count if needed, 
+        // though setTitle already does that. For innerHTML changes, we might need a dummy state.
         setIsSaving(true);
-        // Debounce handled by parent or here? Let's implement simple debounce here for now
-        // But for consistency with previous step, let's just optimize the onUpdate call
-
-        // Actually, let's perform update immediately but let UI show "saving" for a bit
-        // For better performance, we should debounce the actual sync call
     }, []);
 
     // Auto-save effect
@@ -144,14 +142,14 @@ const WritingEditor = ({ document, onUpdate }) => {
             if (!editorRef.current) return;
             const currentContentMarkup = htmlToMarkup(editorRef.current);
 
-            if (document && (title !== (document.title || '') || currentContentMarkup !== (document.content || ''))) {
+            if (writingDoc && (title !== (writingDoc.title || '') || currentContentMarkup !== (writingDoc.content || ''))) {
                 setIsSaving(true);
-                onUpdate(document.id, { title, content: currentContentMarkup });
+                onUpdate(writingDoc.id, { title, content: currentContentMarkup });
                 setTimeout(() => setIsSaving(false), 500);
             }
         }, 1000);
         return () => clearTimeout(timer);
-    }, [title, document, onUpdate]); // content dependency removed, checking ref directly
+    }, [title, writingDoc, onUpdate]); // content dependency removed, checking ref directly
 
     const wordCount = editorRef.current ? (editorRef.current.innerText || '').trim().length : 0; // Simplified count
 

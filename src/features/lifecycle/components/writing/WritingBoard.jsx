@@ -84,7 +84,7 @@ const WritingBoard = () => {
             {activeDoc ? (
                 <WritingEditor
                     key={activeDoc.id} // Force re-mount on doc change to reset internal state if needed
-                    document={activeDoc}
+                    doc={activeDoc}
                     onUpdate={handleUpdate}
                 />
             ) : (

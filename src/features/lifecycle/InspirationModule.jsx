@@ -76,6 +76,7 @@ const InspirationModule = () => {
     const [selectedCategory, setSelectedCategory] = useState('note'); // 分类状态
     const [activeTab, setActiveTab] = useState('inspiration'); // 'inspiration' | 'writing'
     const editorRef = useRef(null);
+    const textareaRef = useRef(null); // Define textareaRef even if not used widely now
 
     // Autocomplete State
     const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -282,11 +283,8 @@ const InspirationModule = () => {
             setShowAutocomplete(false);
             // Focus and set cursor
             setTimeout(() => {
-                if (textareaRef.current) {
-                    textareaRef.current.focus();
-                    // Position after: [tag] + space
-                    const newPos = lastOpenBracketIndex + tag.length + 3; // +2 for [], +1 for space
-                    textareaRef.current.setSelectionRange(newPos, newPos);
+                if (editorRef.current) {
+                    editorRef.current.focus();
                 }
             }, 0);
         }
@@ -323,21 +321,9 @@ const InspirationModule = () => {
         }
 
         // 2. Atom Delete: If backspace at the end of a tag, delete the whole tag
-        if (e.key === 'Backspace' && textareaRef.current) {
-            const { selectionStart, selectionEnd } = textareaRef.current;
-            if (selectionStart === selectionEnd) {
-                const textBefore = input.substring(0, selectionStart);
-                const tagMatch = textBefore.match(/\[[^\]\n]+\] $/); // Matches "[Tag] " at the end
-                if (tagMatch) {
-                    const tagFull = tagMatch[0];
-                    const newText = input.substring(0, selectionStart - tagFull.length) + input.substring(selectionEnd);
-                    setInput(newText);
-                    setTimeout(() => {
-                        textareaRef.current.setSelectionRange(selectionStart - tagFull.length, selectionStart - tagFull.length);
-                    }, 0);
-                    e.preventDefault();
-                }
-            }
+        // Note: For contentEditable, this logic is more complex. For now, we skip it or use editorRef.
+        if (e.key === 'Backspace' && editorRef.current) {
+            // Simplified logic: normal backspace behavior for now
         }
     };
 
