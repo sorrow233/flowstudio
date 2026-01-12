@@ -40,9 +40,9 @@ const WritingModule = () => {
         <div className="flex h-[calc(100vh-80px)] overflow-hidden relative bg-transparent">
             {/* Background - Atmospheric & Breathing */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-pink-300/30 dark:bg-rose-900/10 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-pulse" style={{ animationDuration: '8s' }} />
-                <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-rose-300/30 dark:bg-pink-900/10 rounded-full blur-[100px] mix-blend-multiply dark:mix-blend-screen animate-pulse" style={{ animationDuration: '10s' }} />
-                <div className="absolute inset-0 bg-grid-pink-200/20 dark:bg-grid-pink-900/10 [mask-image:radial-gradient(ellipse_at_center,white,transparent_80%)]" />
+                <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-pink-100/40 dark:bg-rose-900/10 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-pulse" style={{ animationDuration: '8s' }} />
+                <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-rose-100/40 dark:bg-pink-900/10 rounded-full blur-[100px] mix-blend-multiply dark:mix-blend-screen animate-pulse" style={{ animationDuration: '10s' }} />
+                <div className="absolute inset-0 bg-grid-pink-100/20 dark:bg-grid-pink-900/5 [mask-image:radial-gradient(ellipse_at_center,white,transparent_80%)]" />
             </div>
 
             {/* Main Content Area - Full screen for immersive writing */}
