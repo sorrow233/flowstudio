@@ -116,9 +116,18 @@ const WritingBoard = () => {
                         )}
 
                         <motion.div
-                            initial={isMobile ? { y: '100%' } : { width: 0, opacity: 0, x: -20 }}
-                            animate={isMobile ? { y: 0 } : { width: 'auto', opacity: 1, x: 0 }}
-                            exit={isMobile ? { y: '100%' } : { width: 0, opacity: 0, x: -20 }}
+                            initial={isMobile ? { x: '-100%' } : { width: 0, opacity: 0, x: -20 }}
+                            animate={isMobile ? { x: 0 } : { width: 'auto', opacity: 1, x: 0 }}
+                            exit={isMobile ? { x: '-100%' } : { width: 0, opacity: 0, x: -20 }}
+                            drag={isMobile ? "x" : false}
+                            dragConstraints={isMobile ? { left: 0, right: 0 } : false}
+                            dragElastic={isMobile ? { left: 0.1, right: 0 } : 0}
+                            dragDirectionLock
+                            onDragEnd={(e, info) => {
+                                if (isMobile && info.offset.x < -100) {
+                                    setIsSidebarOpen(false);
+                                }
+                            }}
                             transition={{
                                 type: "spring",
                                 stiffness: 400,
@@ -127,7 +136,7 @@ const WritingBoard = () => {
                             }}
                             className={`
                                 h-full flex-shrink-0 relative z-50
-                                ${isMobile ? 'fixed inset-x-0 bottom-0 top-12 sm:top-20' : 'relative'}
+                                ${isMobile ? 'fixed inset-y-0 left-0 w-[85%] max-w-[340px]' : 'relative'}
                             `}
                         >
                             {/* Mobile Handle Bar */}
@@ -136,7 +145,7 @@ const WritingBoard = () => {
                             )}
 
                             <WritingSidebar
-                                documents={filteredDocs || documents} // Pass everything, internal filters take care of it
+                                documents={documents} // Pass everything, internal filters take care of it
                                 activeDocId={selectedDocId}
                                 onSelectDoc={(id) => {
                                     setSelectedDocId(id);
