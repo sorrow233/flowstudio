@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useSync } from '../../../sync/SyncContext';
 import { useSyncedProjects } from '../../../sync/useSyncStore';
 import { useTranslation } from '../../../i18n';
-import { useIOSStandalone } from '../../../hooks/useIOSStandalone';
+import { useIOSStandalone } from '../../../../hooks/useIOSStandalone';
 import WritingSidebar from './WritingSidebar';
 import WritingEditor from './WritingEditor';
 
@@ -124,7 +124,8 @@ const WritingBoard = () => {
                             dragElastic={isMobile ? { left: 0.1, right: 0 } : 0}
                             dragDirectionLock
                             onDragEnd={(e, info) => {
-                                if (isMobile && info.offset.x < -100) {
+                                // Close if swiped left more than 50px OR high velocity left
+                                if (isMobile && (info.offset.x < -50 || info.velocity.x < -300)) {
                                     setIsSidebarOpen(false);
                                 }
                             }}
@@ -136,25 +137,27 @@ const WritingBoard = () => {
                             }}
                             className={`
                                 h-full flex-shrink-0 relative z-50
-                                ${isMobile ? 'fixed inset-y-0 left-0 w-[85%] max-w-[340px]' : 'relative'}
+                                ${isMobile ? 'fixed inset-y-0 left-0 w-[55%] max-w-[260px]' : 'relative'}
                             `}
                         >
-                            {/* Mobile Handle Bar */}
-                            {isMobile && (
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full z-[60] lg:hidden mb-2" />
-                            )}
-
                             <WritingSidebar
-                                documents={documents} // Pass everything, internal filters take care of it
+                                documents={documents}
                                 activeDocId={selectedDocId}
                                 onSelectDoc={(id) => {
                                     setSelectedDocId(id);
-                                    if (isMobile) setIsSidebarOpen(false); // Auto close on select
+                                    if (isMobile) setIsSidebarOpen(false);
                                 }}
                                 onCreate={handleCreate}
                                 onDelete={handleDelete}
                                 isMobile={isMobile}
                             />
+
+                            {/* Visual Drag Handle on the right edge for mobile */}
+                            {isMobile && (
+                                <div className="absolute top-1/2 -right-4 -translate-y-1/2 w-8 h-24 flex items-center justify-center pointer-events-none">
+                                    <div className="w-1.5 h-12 bg-gray-300/40 dark:bg-gray-700/40 rounded-full blur-[1px]" />
+                                </div>
+                            )}
                         </motion.div>
                     </>
                 )}
