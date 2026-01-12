@@ -3,6 +3,7 @@ export default {
     // Navbar
     navbar: {
         inspiration: '인스피레이션',
+        writing: '글쓰기',
         pending: '새싹',
         primary: '플로우',
         advanced: '고급',
@@ -57,8 +58,25 @@ export default {
         subtitle: '순간의 영감을 포착하여 미래를 위해 축적하세요.',
         placeholder: '떠오르는 아이디어를 기록하세요...',
         emptyState: '영감이 없습니다. 첫 번째 아이디어를 기록해 보세요.',
+        writing: '글쓰기',
+        writingSubtitle: '몰입형 창작, 완전한 생각을 기록하세요',
+        placeholder: '떠오르는 아이디어를 기록하세요...',
+        emptyState: '영감이 없습니다. 첫 번째 아이디어를 기록해 보세요.',
         ideaDeleted: '영감이 삭제되었습니다',
         cmdEnter: 'CMD + ENTER',
+        // New Writing Module
+        newDoc: '새 글쓰기',
+        deleteConfirm: '정말 삭제하시겠습니까?',
+        noDocs: '문서 없음',
+        search: '검색...',
+        untitled: '제목 없음',
+        toggleSidebar: '사이드바 토글',
+        timeGroup: {
+            today: '오늘',
+            yesterday: '어제',
+            week: '최근 7일',
+            older: '이전'
+        },
     },
 
     // Pending Module

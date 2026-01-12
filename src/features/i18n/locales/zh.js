@@ -3,6 +3,7 @@ export default {
     // 导航栏
     navbar: {
         inspiration: '灵感',
+        writing: '写作',
         pending: '萌芽',
         primary: '心流',
         advanced: '进阶',
@@ -57,6 +58,7 @@ export default {
         title: '灵感',
         subtitle: '捕捉瞬时灵感，为未来积蓄能量。',
         writing: '写作',
+        writing: '写作',
         writingSubtitle: '在这里沉浸式创作，记录更完整的思绪',
         placeholder: '记录一闪而过的念头...',
         addNote: '添加随记', // Add missing key
@@ -67,6 +69,19 @@ export default {
         archiveSubtitle: '暂存的灵感碎片，点击标题返回',
         emptyArchive: '存档箱是空的',
         cmdEnter: 'CMD + ENTER',
+        // New Writing Module
+        newDoc: '新建写作',
+        deleteConfirm: '确定要删除吗？',
+        noDocs: '暂无文档',
+        search: '搜索...',
+        untitled: '无标题',
+        toggleSidebar: '切换侧边栏',
+        timeGroup: {
+            today: '今天',
+            yesterday: '昨天',
+            week: '最近 7 天',
+            older: '更早'
+        },
     },
 
     // 待定模块 (Renamed to Sprouting/萌芽)

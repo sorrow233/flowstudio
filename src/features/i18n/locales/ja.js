@@ -3,6 +3,7 @@ export default {
     // Navbar
     navbar: {
         inspiration: 'インスピレーション',
+        writing: 'ライティング',
         pending: '萌芽',
         primary: 'フロー',
         advanced: '高度',
@@ -57,8 +58,25 @@ export default {
         subtitle: '瞬間のひらめきを捉え、未来のために蓄える。',
         placeholder: 'アイデアを記録...',
         emptyState: 'インスピレーションはまだありません。最初のアイデアを記録しましょう。',
+        writing: 'ライティング',
+        writingSubtitle: '没入型の創作、完全な思考を記録する',
+        placeholder: 'アイデアを記録...',
+        emptyState: 'インスピレーションはまだありません。最初のアイデアを記録しましょう。',
         ideaDeleted: 'インスピレーションを削除しました',
         cmdEnter: 'CMD + ENTER',
+        // New Writing Module
+        newDoc: '新規作成',
+        deleteConfirm: '削除してもよろしいですか？',
+        noDocs: 'ドキュメントなし',
+        search: '検索...',
+        untitled: '無題',
+        toggleSidebar: 'サイドバー切替',
+        timeGroup: {
+            today: '今日',
+            yesterday: '昨日',
+            week: '過去7日間',
+            older: '以前'
+        },
     },
 
     // Pending Module

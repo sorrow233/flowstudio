@@ -3,6 +3,7 @@ export default {
     // Navigation
     navbar: {
         inspiration: 'Inspiration',
+        writing: 'Writing',
         pending: 'Sprout',
         primary: 'Flow',
         advanced: 'Advanced',
@@ -57,12 +58,26 @@ export default {
         title: 'Inspiration',
         subtitle: 'Capture fleeting ideas, fuel your future.',
         writing: 'Writing',
+        writing: 'Writing',
         writingSubtitle: 'Immersive creation, capturing complete thoughts',
         placeholder: 'Record a fleeting thought...',
         addNote: 'Add Note',
         emptyState: 'No inspirations yet, record your first idea',
         ideaDeleted: 'Idea deleted',
         cmdEnter: 'CMD + ENTER',
+        // New Writing Module
+        newDoc: 'New Writing',
+        deleteConfirm: 'Are you sure you want to delete this?',
+        noDocs: 'No documents',
+        search: 'Search...',
+        untitled: 'Untitled',
+        toggleSidebar: 'Toggle Sidebar',
+        timeGroup: {
+            today: 'Today',
+            yesterday: 'Yesterday',
+            week: 'Last 7 Days',
+            older: 'Older'
+        },
     },
 
     // Pending Module

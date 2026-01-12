@@ -1,8 +1,11 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { useTranslation } from '../../../../i18n';
 import { COLOR_CONFIG } from '../inspiration/InspirationUtils';
 
-const WritingEditor = ({ doc: writingDoc, onUpdate }) => {
+const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSidebar }) => {
+    const { t } = useTranslation();
     const editorRef = useRef(null);
     const [title, setTitle] = useState('');
     const [toolbarPosition, setToolbarPosition] = useState(null);
@@ -158,6 +161,17 @@ const WritingEditor = ({ doc: writingDoc, onUpdate }) => {
             {/* Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-pink-50/10 via-transparent to-blue-50/10 pointer-events-none" />
 
+            {/* Sidebar Toggle Button - Top Left */}
+            <div className="absolute top-4 left-4 z-30">
+                <button
+                    onClick={onToggleSidebar}
+                    className="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all"
+                    title={t('inspiration.toggleSidebar')}
+                >
+                    {isSidebarOpen ? <PanelLeftClose size={20} /> : <PanelLeftOpen size={20} />}
+                </button>
+            </div>
+
             {/* Floating Toolbar */}
             <AnimatePresence>
                 {toolbarPosition && (
@@ -189,7 +203,7 @@ const WritingEditor = ({ doc: writingDoc, onUpdate }) => {
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         className="w-full text-4xl md:text-5xl font-bold text-gray-900 dark:text-white bg-transparent outline-none border-none placeholder-gray-300 dark:placeholder-gray-700 mb-12 tracking-tight shrink-0 leading-tight"
-                        placeholder="未命名文档"
+                        placeholder={t('inspiration.untitled')}
                     />
 
                     <div
@@ -198,7 +212,7 @@ const WritingEditor = ({ doc: writingDoc, onUpdate }) => {
                         suppressContentEditableWarning
                         onInput={handleInput}
                         className="w-full outline-none text-gray-700 dark:text-gray-300 text-lg md:text-xl font-serif leading-[1.8] min-h-[60vh] empty:before:content-[attr(placeholder)] empty:before:text-gray-300 dark:empty:before:text-gray-600"
-                        placeholder="开始你的创作..."
+                        placeholder={t('inspiration.placeholder')}
                         style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
                     />
 
