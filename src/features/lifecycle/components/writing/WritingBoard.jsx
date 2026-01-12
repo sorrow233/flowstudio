@@ -169,13 +169,11 @@ const WritingBoard = () => {
                     />
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto px-6 text-center">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="w-32 h-32 mb-8 rounded-full bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 flex items-center justify-center shadow-2xl"
-                        >
-                            <WritingSidebar.Icon className="w-12 h-12 text-sky-400" />
-                        </motion.div>
+                        <div className="w-32 h-32 mb-8 rounded-full bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 flex items-center justify-center shadow-2xl">
+                            <svg className="w-12 h-12 text-sky-400 dark:text-sky-300 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </div>
                         <h3 className="text-2xl font-light text-gray-800 dark:text-gray-100 mb-2 tracking-tight">
                             {t('inspiration.emptyState')}
                         </h3>
