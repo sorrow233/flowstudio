@@ -446,26 +446,24 @@ const InspirationModule = () => {
                     </h2>
                 </motion.div>
 
-                 {/* Tab Switcher */}
-                 <div className="flex items-center gap-1 mb-2 bg-gray-100/50 dark:bg-gray-800/50 p-1 rounded-full w-fit">
+                {/* Tab Switcher */}
+                <div className="flex items-center gap-1 mb-2 bg-gray-100/50 dark:bg-gray-800/50 p-1 rounded-full w-fit">
                     <button
                         onClick={() => setActiveTab('inspiration')}
-                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
-                            activeTab === 'inspiration' 
-                                ? 'bg-white dark:bg-gray-700 text-pink-500 shadow-sm' 
+                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === 'inspiration'
+                                ? 'bg-white dark:bg-gray-700 text-pink-500 shadow-sm'
                                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                        }`}
+                            }`}
                     >
                         <Lightbulb size={14} />
                         <span>{t('inspiration.title', '灵感')}</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('writing')}
-                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
-                            activeTab === 'writing' 
-                                ? 'bg-white dark:bg-gray-700 text-indigo-500 shadow-sm' 
+                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === 'writing'
+                                ? 'bg-white dark:bg-gray-700 text-indigo-500 shadow-sm'
                                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                        }`}
+                            }`}
                     >
                         <PenTool size={14} />
                         <span>{t('inspiration.writing', '写作')}</span>
@@ -481,39 +479,39 @@ const InspirationModule = () => {
 
                 {/* Category Selector - Only show in Inspiration mode */}
                 {activeTab === 'inspiration' && (
-                <div className="mt-6 flex items-center justify-center md:justify-start">
-                    <div className="flex items-center p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner border border-gray-200/50 dark:border-gray-700">
-                        {/* Label Section */}
-                        <div className="hidden md:flex items-center px-4 border-r border-gray-200 dark:border-gray-700 mr-2 min-w-[80px] justify-center">
-                            <span className={`text-sm font-medium ${INSPIRATION_CATEGORIES.find(c => c.id === selectedCategory)?.textColor || 'text-gray-600 dark:text-gray-300'}`}>
-                                {INSPIRATION_CATEGORIES.find(c => c.id === selectedCategory)?.label || '随记'}
-                            </span>
-                        </div>
+                    <div className="mt-6 flex items-center justify-center md:justify-start">
+                        <div className="flex items-center p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner border border-gray-200/50 dark:border-gray-700">
+                            {/* Label Section */}
+                            <div className="hidden md:flex items-center px-4 border-r border-gray-200 dark:border-gray-700 mr-2 min-w-[80px] justify-center">
+                                <span className={`text-sm font-medium ${INSPIRATION_CATEGORIES.find(c => c.id === selectedCategory)?.textColor || 'text-gray-600 dark:text-gray-300'}`}>
+                                    {INSPIRATION_CATEGORIES.find(c => c.id === selectedCategory)?.label || '随记'}
+                                </span>
+                            </div>
 
-                        {/* Dots Section */}
-                        <div className="flex items-center gap-2">
-                            {INSPIRATION_CATEGORIES.map(cat => (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => setSelectedCategory(cat.id)}
-                                    title={cat.label}
-                                    className={`
+                            {/* Dots Section */}
+                            <div className="flex items-center gap-2">
+                                {INSPIRATION_CATEGORIES.map(cat => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setSelectedCategory(cat.id)}
+                                        title={cat.label}
+                                        className={`
                                         w-8 h-8 flex items-center justify-center rounded-full transition-all shrink-0 relative
                                         ${selectedCategory === cat.id
-                                            ? 'bg-white dark:bg-gray-700 shadow-md scale-110 z-10 ring-2 ring-gray-100 dark:ring-gray-600'
-                                            : 'hover:bg-white/50 dark:hover:bg-gray-700/50 hover:scale-105'}
+                                                ? 'bg-white dark:bg-gray-700 shadow-md scale-110 z-10 ring-2 ring-gray-100 dark:ring-gray-600'
+                                                : 'hover:bg-white/50 dark:hover:bg-gray-700/50 hover:scale-105'}
                                     `}
-                                >
-                                    <div className={`w-3 h-3 rounded-full ${cat.dotColor} ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-transparent' : ''}`} />
-                                </button>
-                            ))}
+                                    >
+                                        <div className={`w-3 h-3 rounded-full ${cat.dotColor} ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-transparent' : ''}`} />
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
-                </div>
                 )}
             </div>
 
-            </div>
+
 
             <AnimatePresence mode="wait">
                 {activeTab === 'inspiration' ? (
@@ -524,221 +522,221 @@ const InspirationModule = () => {
                         exit={{ opacity: 0, x: 20 }}
                         transition={{ duration: 0.3 }}
                     >
-            {/* Input Section */}
-            <div className="relative mb-20 group z-30">
-                <Spotlight className="rounded-2xl transition-all duration-300 focus-within:ring-1 focus-within:ring-pink-300 dark:focus-within:ring-pink-500 focus-within:shadow-[0_0_30px_-5px_rgba(244,114,182,0.4)]" spotColor="rgba(244, 114, 182, 0.12)">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 dark:from-gray-800 via-gray-50 dark:via-gray-900 to-gray-100 dark:to-gray-800 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                    <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 overflow-visible transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] group-hover:border-gray-200 dark:group-hover:border-gray-700">
+                        {/* Input Section */}
+                        <div className="relative mb-20 group z-30">
+                            <Spotlight className="rounded-2xl transition-all duration-300 focus-within:ring-1 focus-within:ring-pink-300 dark:focus-within:ring-pink-500 focus-within:shadow-[0_0_30px_-5px_rgba(244,114,182,0.4)]" spotColor="rgba(244, 114, 182, 0.12)">
+                                <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 dark:from-gray-800 via-gray-50 dark:via-gray-900 to-gray-100 dark:to-gray-800 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                                <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 overflow-visible transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] group-hover:border-gray-200 dark:group-hover:border-gray-700">
 
-                        {/* 富文本输入框 - 使用 contenteditable 实现 */}
-                        <RichTextInput
-                            ref={editorRef}
-                            value={input}
-                            onChange={setInput}
-                            onKeyDown={handleKeyDown}
-                            placeholder={t('inspiration.placeholder')}
-                            className="w-full bg-transparent text-lg text-gray-800 dark:text-gray-100 caret-pink-500 outline-none p-6 pb-20 min-h-[200px] font-light leading-relaxed relative z-10 break-words empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400/50"
-                            style={{
-                                fontFamily: 'inherit',
-                                lineHeight: '1.625',
-                                letterSpacing: 'normal',
-                                fontVariantLigatures: 'none',
-                                WebkitFontSmoothing: 'antialiased',
-                                MozOsxFontSmoothing: 'grayscale',
-                            }}
-                        />
+                                    {/* 富文本输入框 - 使用 contenteditable 实现 */}
+                                    <RichTextInput
+                                        ref={editorRef}
+                                        value={input}
+                                        onChange={setInput}
+                                        onKeyDown={handleKeyDown}
+                                        placeholder={t('inspiration.placeholder')}
+                                        className="w-full bg-transparent text-lg text-gray-800 dark:text-gray-100 caret-pink-500 outline-none p-6 pb-20 min-h-[200px] font-light leading-relaxed relative z-10 break-words empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400/50"
+                                        style={{
+                                            fontFamily: 'inherit',
+                                            lineHeight: '1.625',
+                                            letterSpacing: 'normal',
+                                            fontVariantLigatures: 'none',
+                                            WebkitFontSmoothing: 'antialiased',
+                                            MozOsxFontSmoothing: 'grayscale',
+                                        }}
+                                    />
 
-                        {/* Autocomplete Popover */}
-                        <AnimatePresence>
-                            {showAutocomplete && filteredTags.length > 0 && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 10 }}
-                                    className="absolute left-6 z-50 bg-white dark:bg-gray-900 rounded-lg shadow-xl shadow-pink-100 dark:shadow-pink-900/10 border border-gray-100 dark:border-gray-800 p-1 min-w-[200px] max-h-[200px] overflow-y-auto"
-                                    style={{
-                                        top: 'auto', // Dynamic positioning would require more complex calc, ensuring it shows below input or "near cursor"
-                                        bottom: '80px' // Show above toolbar
-                                    }}
-                                >
-                                    <div className="px-2 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                        Link Project
-                                    </div>
-                                    {filteredTags.map((tag, index) => (
-                                        <button
-                                            key={tag}
-                                            onClick={() => insertTag(tag)}
-                                            className={`
+                                    {/* Autocomplete Popover */}
+                                    <AnimatePresence>
+                                        {showAutocomplete && filteredTags.length > 0 && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 10 }}
+                                                className="absolute left-6 z-50 bg-white dark:bg-gray-900 rounded-lg shadow-xl shadow-pink-100 dark:shadow-pink-900/10 border border-gray-100 dark:border-gray-800 p-1 min-w-[200px] max-h-[200px] overflow-y-auto"
+                                                style={{
+                                                    top: 'auto', // Dynamic positioning would require more complex calc, ensuring it shows below input or "near cursor"
+                                                    bottom: '80px' // Show above toolbar
+                                                }}
+                                            >
+                                                <div className="px-2 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                                    Link Project
+                                                </div>
+                                                {filteredTags.map((tag, index) => (
+                                                    <button
+                                                        key={tag}
+                                                        onClick={() => insertTag(tag)}
+                                                        className={`
                                                 w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center gap-2
                                                 ${index === autocompleteIndex
-                                                    ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-300'
-                                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}
+                                                                ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-300'
+                                                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}
                                             `}
-                                        >
-                                            <Hash size={12} className="opacity-50" />
-                                            {tag}
-                                        </button>
-                                    ))}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                                    >
+                                                        <Hash size={12} className="opacity-50" />
+                                                        {tag}
+                                                    </button>
+                                                ))}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
 
-                        {/* Bottom Action Area */}
-                        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-4 z-20">
-                            <div className="flex items-center gap-4 flex-1 min-w-0">
-                                {/* Minimal Color Picker */}
-                                <div className="flex items-center gap-1.5 px-2 py-1.5 bg-gray-50/50 dark:bg-gray-800/50 rounded-full border border-gray-100/50 dark:border-gray-700/50 backdrop-blur-sm flex-shrink-0">
-                                    {COLOR_CONFIG.map((conf, index) => (
-                                        <button
-                                            key={conf.id}
-                                            onClick={() => handleColorClick(index)}
-                                            className={`relative w-3 h-3 rounded-full transition-all duration-300 ${conf.dot} ${index === selectedColorIndex ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 ring-gray-400 dark:ring-gray-500 scale-110' : 'opacity-40 hover:opacity-100 hover:scale-110'} after:absolute after:-inset-2`}
-                                            title={conf.id}
+                                    {/* Bottom Action Area */}
+                                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-4 z-20">
+                                        <div className="flex items-center gap-4 flex-1 min-w-0">
+                                            {/* Minimal Color Picker */}
+                                            <div className="flex items-center gap-1.5 px-2 py-1.5 bg-gray-50/50 dark:bg-gray-800/50 rounded-full border border-gray-100/50 dark:border-gray-700/50 backdrop-blur-sm flex-shrink-0">
+                                                {COLOR_CONFIG.map((conf, index) => (
+                                                    <button
+                                                        key={conf.id}
+                                                        onClick={() => handleColorClick(index)}
+                                                        className={`relative w-3 h-3 rounded-full transition-all duration-300 ${conf.dot} ${index === selectedColorIndex ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 ring-gray-400 dark:ring-gray-500 scale-110' : 'opacity-40 hover:opacity-100 hover:scale-110'} after:absolute after:-inset-2`}
+                                                        title={conf.id}
+                                                    />
+                                                ))}
+                                            </div>
+
+                                            {/* Project Tags Bar */}
+                                            <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2 mask-linear-fade">
+                                                {allProjectTags.length > 0 && (
+                                                    <>
+                                                        <Hash size={14} className="text-gray-300 dark:text-gray-600 flex-shrink-0" />
+                                                        {allProjectTags.map((tag) => (
+                                                            <button
+                                                                key={tag}
+                                                                onClick={() => handleTagClick(tag)}
+                                                                className="flex-shrink-0 px-2 py-1 bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-900/40 rounded-md text-[11px] font-medium transition-all duration-300 border border-pink-100 dark:border-pink-800/30 whitespace-nowrap"
+                                                            >
+                                                                {tag}
+                                                            </button>
+                                                        ))}
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-3 flex-shrink-0">
+                                            <span className="text-[10px] text-gray-300 dark:text-gray-600 font-mono hidden md:inline-block">
+                                                {t('inspiration.cmdEnter')}
+                                            </span>
+                                            <button
+                                                onClick={handleAdd}
+                                                disabled={!input.trim()}
+                                                className="flex items-center justify-center p-3 bg-pink-400 dark:bg-pink-500 text-white rounded-xl hover:bg-pink-500 dark:hover:bg-pink-400 disabled:opacity-30 transition-all duration-300 active:scale-95 shadow-lg shadow-pink-200 dark:shadow-pink-900/20"
+                                            >
+                                                <ArrowRight size={18} strokeWidth={2} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Spotlight>
+                        </div>
+
+                        {/* List Section */}
+                        <div className="space-y-6">
+                            <AnimatePresence mode="popLayout">
+                                {/* Render recent ideas (within 7 days) without grouping */}
+                                {sortedIdeas
+                                    .filter(idea => Date.now() - (idea.timestamp || Date.now()) < 7 * 24 * 60 * 60 * 1000)
+                                    .map((idea) => (
+                                        <InspirationItem
+                                            key={idea.id}
+                                            idea={idea}
+                                            onRemove={handleRemove}
+                                            onArchive={handleArchive}
+                                            onCopy={handleCopy}
+                                            onUpdateColor={handleUpdateColor}
+                                            onUpdateNote={handleUpdateNote}
+                                            onUpdateContent={handleUpdateContent}
+                                            onToggleComplete={handleToggleComplete}
+                                            copiedId={copiedId}
                                         />
                                     ))}
-                                </div>
-
-                                {/* Project Tags Bar */}
-                                <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2 mask-linear-fade">
-                                    {allProjectTags.length > 0 && (
-                                        <>
-                                            <Hash size={14} className="text-gray-300 dark:text-gray-600 flex-shrink-0" />
-                                            {allProjectTags.map((tag) => (
-                                                <button
-                                                    key={tag}
-                                                    onClick={() => handleTagClick(tag)}
-                                                    className="flex-shrink-0 px-2 py-1 bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-900/40 rounded-md text-[11px] font-medium transition-all duration-300 border border-pink-100 dark:border-pink-800/30 whitespace-nowrap"
-                                                >
-                                                    {tag}
-                                                </button>
-                                            ))}
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-3 flex-shrink-0">
-                                <span className="text-[10px] text-gray-300 dark:text-gray-600 font-mono hidden md:inline-block">
-                                    {t('inspiration.cmdEnter')}
-                                </span>
-                                <button
-                                    onClick={handleAdd}
-                                    disabled={!input.trim()}
-                                    className="flex items-center justify-center p-3 bg-pink-400 dark:bg-pink-500 text-white rounded-xl hover:bg-pink-500 dark:hover:bg-pink-400 disabled:opacity-30 transition-all duration-300 active:scale-95 shadow-lg shadow-pink-200 dark:shadow-pink-900/20"
-                                >
-                                    <ArrowRight size={18} strokeWidth={2} />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </Spotlight>
-            </div>
-
-            {/* List Section */}
-            <div className="space-y-6">
-                <AnimatePresence mode="popLayout">
-                    {/* Render recent ideas (within 7 days) without grouping */}
-                    {sortedIdeas
-                        .filter(idea => Date.now() - (idea.timestamp || Date.now()) < 7 * 24 * 60 * 60 * 1000)
-                        .map((idea) => (
-                            <InspirationItem
-                                key={idea.id}
-                                idea={idea}
-                                onRemove={handleRemove}
-                                onArchive={handleArchive}
-                                onCopy={handleCopy}
-                                onUpdateColor={handleUpdateColor}
-                                onUpdateNote={handleUpdateNote}
-                                onUpdateContent={handleUpdateContent}
-                                onToggleComplete={handleToggleComplete}
-                                copiedId={copiedId}
-                            />
-                        ))}
-                </AnimatePresence>
-
-                {/* Render older ideas (beyond 7 days) grouped by week */}
-                {(() => {
-                    const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 7 * 24 * 60 * 60 * 1000);
-                    if (olderIdeas.length === 0) return null;
-
-                    // Group by week
-                    const weekGroups = {};
-                    olderIdeas.forEach(idea => {
-                        const date = new Date(idea.timestamp || Date.now());
-                        // Get the Monday of the week
-                        const day = date.getDay();
-                        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-                        const weekStart = new Date(date.setDate(diff));
-                        weekStart.setHours(0, 0, 0, 0);
-                        const weekEnd = new Date(weekStart);
-                        weekEnd.setDate(weekEnd.getDate() + 6);
-                        weekEnd.setHours(23, 59, 59, 999);
-
-                        const weekKey = weekStart.getTime();
-                        if (!weekGroups[weekKey]) {
-                            weekGroups[weekKey] = {
-                                start: weekStart,
-                                end: weekEnd,
-                                ideas: []
-                            };
-                        }
-                        weekGroups[weekKey].ideas.push(idea);
-                    });
-
-                    // Sort weeks in descending order (most recent first)
-                    const sortedWeeks = Object.values(weekGroups).sort((a, b) => b.start - a.start);
-
-                    return sortedWeeks.map(week => (
-                        <div key={week.start.getTime()}>
-                            {/* Week Header */}
-                            <div
-                                id={`week-${week.start.getTime()}`}
-                                onDoubleClick={() => setShowWeekSelector(true)}
-                                className="flex items-center gap-3 mb-4 mt-8 cursor-pointer group"
-                            >
-                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
-                                <span className="text-xs font-medium text-pink-300 dark:text-pink-600 tracking-wide whitespace-nowrap group-hover:text-pink-400 transition-colors">
-                                    {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                    {' - '}
-                                    {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                </span>
-                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
-                            </div>
-                            <AnimatePresence mode="popLayout">
-                                {week.ideas.map((idea) => (
-                                    <InspirationItem
-                                        key={idea.id}
-                                        idea={idea}
-                                        onRemove={handleRemove}
-                                        onArchive={handleArchive}
-                                        onCopy={handleCopy}
-                                        onUpdateColor={handleUpdateColor}
-                                        onUpdateNote={handleUpdateNote}
-                                        onUpdateContent={handleUpdateContent}
-                                        onToggleComplete={handleToggleComplete}
-                                        copiedId={copiedId}
-                                    />
-                                ))}
                             </AnimatePresence>
-                        </div>
-                    ));
-                })()}
 
-                {ideas.length === 0 && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="py-32 text-center"
-                    >
-                        <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Lightbulb className="text-gray-300 dark:text-gray-600" size={24} />
+                            {/* Render older ideas (beyond 7 days) grouped by week */}
+                            {(() => {
+                                const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 7 * 24 * 60 * 60 * 1000);
+                                if (olderIdeas.length === 0) return null;
+
+                                // Group by week
+                                const weekGroups = {};
+                                olderIdeas.forEach(idea => {
+                                    const date = new Date(idea.timestamp || Date.now());
+                                    // Get the Monday of the week
+                                    const day = date.getDay();
+                                    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+                                    const weekStart = new Date(date.setDate(diff));
+                                    weekStart.setHours(0, 0, 0, 0);
+                                    const weekEnd = new Date(weekStart);
+                                    weekEnd.setDate(weekEnd.getDate() + 6);
+                                    weekEnd.setHours(23, 59, 59, 999);
+
+                                    const weekKey = weekStart.getTime();
+                                    if (!weekGroups[weekKey]) {
+                                        weekGroups[weekKey] = {
+                                            start: weekStart,
+                                            end: weekEnd,
+                                            ideas: []
+                                        };
+                                    }
+                                    weekGroups[weekKey].ideas.push(idea);
+                                });
+
+                                // Sort weeks in descending order (most recent first)
+                                const sortedWeeks = Object.values(weekGroups).sort((a, b) => b.start - a.start);
+
+                                return sortedWeeks.map(week => (
+                                    <div key={week.start.getTime()}>
+                                        {/* Week Header */}
+                                        <div
+                                            id={`week-${week.start.getTime()}`}
+                                            onDoubleClick={() => setShowWeekSelector(true)}
+                                            className="flex items-center gap-3 mb-4 mt-8 cursor-pointer group"
+                                        >
+                                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
+                                            <span className="text-xs font-medium text-pink-300 dark:text-pink-600 tracking-wide whitespace-nowrap group-hover:text-pink-400 transition-colors">
+                                                {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                {' - '}
+                                                {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                            </span>
+                                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
+                                        </div>
+                                        <AnimatePresence mode="popLayout">
+                                            {week.ideas.map((idea) => (
+                                                <InspirationItem
+                                                    key={idea.id}
+                                                    idea={idea}
+                                                    onRemove={handleRemove}
+                                                    onArchive={handleArchive}
+                                                    onCopy={handleCopy}
+                                                    onUpdateColor={handleUpdateColor}
+                                                    onUpdateNote={handleUpdateNote}
+                                                    onUpdateContent={handleUpdateContent}
+                                                    onToggleComplete={handleToggleComplete}
+                                                    copiedId={copiedId}
+                                                />
+                                            ))}
+                                        </AnimatePresence>
+                                    </div>
+                                ));
+                            })()}
+
+                            {ideas.length === 0 && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="py-32 text-center"
+                                >
+                                    <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Lightbulb className="text-gray-300 dark:text-gray-600" size={24} />
+                                    </div>
+                                    <p className="text-gray-400 dark:text-gray-500 text-sm font-light tracking-wide">
+                                        {t('inspiration.emptyState')}
+                                    </p>
+                                </motion.div>
+                            )}
                         </div>
-                        <p className="text-gray-400 dark:text-gray-500 text-sm font-light tracking-wide">
-                            {t('inspiration.emptyState')}
-                        </p>
-                    </motion.div>
-                )}
-            </div>
                     </motion.div>
                 ) : (
                     <motion.div
@@ -753,128 +751,128 @@ const InspirationModule = () => {
                 )}
             </AnimatePresence>
 
-            {/* Undo Toast */ }
-    <AnimatePresence>
-        {deletedIdeas.length > 0 && (
-            <motion.div
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 50 }}
-                className="fixed bottom-24 left-6 right-6 md:bottom-10 md:left-auto md:right-10 md:w-auto bg-pink-50 dark:bg-pink-900 text-pink-900 dark:text-pink-50 px-6 py-3 rounded-xl shadow-2xl shadow-pink-100 dark:shadow-pink-900/20 border border-pink-100 dark:border-pink-800 flex items-center justify-between md:justify-start gap-4 z-50"
-            >
-                <span className="text-sm font-medium">
-                    {deletedIdeas[deletedIdeas.length - 1]?.wasArchived
-                        ? t('inspiration.ideaArchived', '已归档')
-                        : t('inspiration.ideaDeleted')}
-                    {deletedIdeas.length > 1 && <span className="ml-1 opacity-70">({deletedIdeas.length})</span>}
-                </span>
-                <button
-                    onClick={handleUndo}
-                    className="text-sm font-bold text-pink-500 dark:text-pink-300 hover:text-pink-400 dark:hover:text-pink-200 transition-colors flex items-center gap-2"
-                >
-                    <span>{t('common.undo')}</span>
-                    <kbd className="text-[10px] bg-pink-100 dark:bg-pink-800 px-1.5 py-0.5 rounded text-pink-600 dark:text-pink-200 font-mono border border-pink-200 dark:border-pink-700">⌘Z</kbd>
-                </button>
-            </motion.div>
-        )}
-    </AnimatePresence>
+            {/* Undo Toast */}
+            <AnimatePresence>
+                {deletedIdeas.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 50 }}
+                        className="fixed bottom-24 left-6 right-6 md:bottom-10 md:left-auto md:right-10 md:w-auto bg-pink-50 dark:bg-pink-900 text-pink-900 dark:text-pink-50 px-6 py-3 rounded-xl shadow-2xl shadow-pink-100 dark:shadow-pink-900/20 border border-pink-100 dark:border-pink-800 flex items-center justify-between md:justify-start gap-4 z-50"
+                    >
+                        <span className="text-sm font-medium">
+                            {deletedIdeas[deletedIdeas.length - 1]?.wasArchived
+                                ? t('inspiration.ideaArchived', '已归档')
+                                : t('inspiration.ideaDeleted')}
+                            {deletedIdeas.length > 1 && <span className="ml-1 opacity-70">({deletedIdeas.length})</span>}
+                        </span>
+                        <button
+                            onClick={handleUndo}
+                            className="text-sm font-bold text-pink-500 dark:text-pink-300 hover:text-pink-400 dark:hover:text-pink-200 transition-colors flex items-center gap-2"
+                        >
+                            <span>{t('common.undo')}</span>
+                            <kbd className="text-[10px] bg-pink-100 dark:bg-pink-800 px-1.5 py-0.5 rounded text-pink-600 dark:text-pink-200 font-mono border border-pink-200 dark:border-pink-700">⌘Z</kbd>
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-    {/* Week Selector Modal */ }
-    <AnimatePresence>
-        {showWeekSelector && (
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-white/40 dark:bg-black/40 backdrop-blur-xl"
-                onClick={() => setShowWeekSelector(false)}
-            >
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                    className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl border border-white/20 dark:border-gray-800 overflow-hidden"
-                    onClick={e => e.stopPropagation()}
-                >
-                    <div className="p-8">
-                        <div className="flex items-center justify-between mb-8">
-                            <div>
-                                <h3 className="text-xl font-light text-gray-900 dark:text-white mb-1">选择周区间</h3>
-                                <p className="text-xs text-gray-400 dark:text-gray-500 font-light">快速跳转到历史灵感</p>
-                            </div>
-                            <button
-                                onClick={() => setShowWeekSelector(false)}
-                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors group"
-                            >
-                                <X size={20} className="text-gray-400 group-hover:text-pink-500 transition-colors" />
-                            </button>
-                        </div>
+            {/* Week Selector Modal */}
+            <AnimatePresence>
+                {showWeekSelector && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-white/40 dark:bg-black/40 backdrop-blur-xl"
+                        onClick={() => setShowWeekSelector(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl border border-white/20 dark:border-gray-800 overflow-hidden"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <div className="p-8">
+                                <div className="flex items-center justify-between mb-8">
+                                    <div>
+                                        <h3 className="text-xl font-light text-gray-900 dark:text-white mb-1">选择周区间</h3>
+                                        <p className="text-xs text-gray-400 dark:text-gray-500 font-light">快速跳转到历史灵感</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowWeekSelector(false)}
+                                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors group"
+                                    >
+                                        <X size={20} className="text-gray-400 group-hover:text-pink-500 transition-colors" />
+                                    </button>
+                                </div>
 
-                        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                            {groupedWeeks.map((yearGroup) => (
-                                <div key={yearGroup.year} className="space-y-4">
-                                    {groupedWeeks.length > 1 && (
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[10px] font-bold text-pink-400 bg-pink-50 dark:bg-pink-900/30 px-2 py-0.5 rounded uppercase tracking-tighter">
-                                                {yearGroup.year}
-                                            </span>
-                                            <div className="h-px flex-1 bg-gray-100 dark:bg-gray-800" />
+                                <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {groupedWeeks.map((yearGroup) => (
+                                        <div key={yearGroup.year} className="space-y-4">
+                                            {groupedWeeks.length > 1 && (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-bold text-pink-400 bg-pink-50 dark:bg-pink-900/30 px-2 py-0.5 rounded uppercase tracking-tighter">
+                                                        {yearGroup.year}
+                                                    </span>
+                                                    <div className="h-px flex-1 bg-gray-100 dark:bg-gray-800" />
+                                                </div>
+                                            )}
+
+                                            {yearGroup.months.map((monthGroup) => {
+                                                const SOLAR_TERMS = [
+                                                    ['小寒', '大寒'], ['立春', '雨水'], ['惊蛰', '春分'],
+                                                    ['清明', '谷雨'], ['立夏', '小满'], ['芒种', '夏至'],
+                                                    ['小暑', '大暑'], ['立秋', '处暑'], ['白露', '秋分'],
+                                                    ['寒露', '霜降'], ['立冬', '小雪'], ['大雪', '冬至']
+                                                ];
+                                                const terms = SOLAR_TERMS[parseInt(monthGroup.month) - 1] || [];
+
+                                                return (
+                                                    <div key={monthGroup.month} className="space-y-2">
+                                                        <div className="flex items-center justify-between px-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                                                    {monthGroup.month}月
+                                                                </span>
+                                                                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-light mt-0.5">
+                                                                    · {terms.join(' ')}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            {monthGroup.weeks.map((week) => (
+                                                                <button
+                                                                    key={week.key}
+                                                                    onClick={() => scrollToWeek(week.key)}
+                                                                    className="text-center p-3 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 hover:bg-pink-50 dark:hover:bg-pink-900/40 group transition-all duration-300 border border-transparent hover:border-pink-100 dark:hover:border-pink-800/50 flex flex-col justify-center min-h-[50px]"
+                                                                >
+                                                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-300">
+                                                                        {week.start.getDate()} - {week.end.getDate()}日
+                                                                    </div>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ))}
+
+                                    {groupedWeeks.length === 0 && (
+                                        <div className="py-12 text-center">
+                                            <Calendar className="mx-auto text-gray-200 dark:text-gray-800 mb-2" size={32} />
+                                            <p className="text-gray-400 font-light text-sm italic">暂无历史灵感回顾</p>
                                         </div>
                                     )}
-
-                                    {yearGroup.months.map((monthGroup) => {
-                                        const SOLAR_TERMS = [
-                                            ['小寒', '大寒'], ['立春', '雨水'], ['惊蛰', '春分'],
-                                            ['清明', '谷雨'], ['立夏', '小满'], ['芒种', '夏至'],
-                                            ['小暑', '大暑'], ['立秋', '处暑'], ['白露', '秋分'],
-                                            ['寒露', '霜降'], ['立冬', '小雪'], ['大雪', '冬至']
-                                        ];
-                                        const terms = SOLAR_TERMS[parseInt(monthGroup.month) - 1] || [];
-
-                                        return (
-                                            <div key={monthGroup.month} className="space-y-2">
-                                                <div className="flex items-center justify-between px-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                                                            {monthGroup.month}月
-                                                        </span>
-                                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-light mt-0.5">
-                                                            · {terms.join(' ')}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    {monthGroup.weeks.map((week) => (
-                                                        <button
-                                                            key={week.key}
-                                                            onClick={() => scrollToWeek(week.key)}
-                                                            className="text-center p-3 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 hover:bg-pink-50 dark:hover:bg-pink-900/40 group transition-all duration-300 border border-transparent hover:border-pink-100 dark:hover:border-pink-800/50 flex flex-col justify-center min-h-[50px]"
-                                                        >
-                                                            <div className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-300">
-                                                                {week.start.getDate()} - {week.end.getDate()}日
-                                                            </div>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
                                 </div>
-                            ))}
-
-                            {groupedWeeks.length === 0 && (
-                                <div className="py-12 text-center">
-                                    <Calendar className="mx-auto text-gray-200 dark:text-gray-800 mb-2" size={32} />
-                                    <p className="text-gray-400 font-light text-sm italic">暂无历史灵感回顾</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </motion.div>
-            </motion.div>
-        )}
-    </AnimatePresence>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div >
     );
 };
