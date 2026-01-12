@@ -37,9 +37,15 @@ const WritingModule = () => {
     };
 
     return (
-        <div className="flex h-[calc(100vh-80px)] overflow-hidden">
+        <div className="flex h-[calc(100vh-80px)] overflow-hidden relative">
+            {/* Immersive Background Glow */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden -z-0">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-sky-200/20 dark:bg-sky-900/10 blur-[120px] rounded-full animate-pulse" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-200/20 dark:bg-blue-900/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+            </div>
+
             {/* Main Content Area - Full screen for immersive writing */}
-            <div className="w-full h-full flex flex-col">
+            <div className="w-full h-full flex flex-col relative z-10">
                 <WritingBoard
                     documents={writingDocs}
                     onCreate={(doc) => addDoc({ ...doc, stage: 'writing', timestamp: Date.now() })}

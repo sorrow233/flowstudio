@@ -63,7 +63,7 @@ const Navbar = () => {
     const getActiveTheme = () => {
         const path = location.pathname;
         if (path.startsWith('/inspiration')) return 'pink';
-        if (path.startsWith('/writing')) return 'indigo';
+        if (path.startsWith('/writing')) return 'sky';
         if (path.startsWith('/sprout')) return 'green';
         if (path.startsWith('/flow')) return 'purple';
         if (path.startsWith('/advanced')) return 'red';
@@ -134,7 +134,7 @@ const Navbar = () => {
                             // Define active colors for each tab
                             const activeColors = {
                                 inspiration: '!text-pink-400 dark:!text-pink-300',
-                                writing: 'text-indigo-500 dark:text-indigo-400',
+                                writing: 'text-sky-500 dark:text-sky-400',
                                 pending: 'text-green-500 dark:text-green-400',
                                 primary: 'text-purple-500 dark:text-purple-400',
                                 advanced: 'text-red-500 dark:text-red-400',
@@ -147,7 +147,7 @@ const Navbar = () => {
                                 tab.id === 'pending' ? 'green'
                                     : tab.id === 'primary' ? 'purple'
                                         : tab.id === 'inspiration' ? 'pink'
-                                            : tab.id === 'writing' ? 'indigo'
+                                            : tab.id === 'writing' ? 'sky'
                                                 : tab.id === 'command' ? 'sky'
                                                     : tab.id === 'data' ? 'indigo'
                                                         : 'default'

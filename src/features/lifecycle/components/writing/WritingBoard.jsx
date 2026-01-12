@@ -79,15 +79,15 @@ const WritingBoard = () => {
     };
 
     return (
-        <div className="flex w-full h-full bg-white dark:bg-gray-900 overflow-hidden relative">
+        <div className="flex w-full h-full bg-transparent overflow-hidden relative">
             <AnimatePresence mode="wait">
                 {isSidebarOpen && (
                     <motion.div
-                        initial={{ width: 0, opacity: 0 }}
-                        animate={{ width: 'auto', opacity: 1 }}
-                        exit={{ width: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: 'easeInOut' }}
-                        className="h-full z-20 flex-shrink-0"
+                        initial={{ width: 0, opacity: 0, x: -20 }}
+                        animate={{ width: 'auto', opacity: 1, x: 0 }}
+                        exit={{ width: 0, opacity: 0, x: -20 }}
+                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                        className="h-full z-20 flex-shrink-0 relative"
                     >
                         <WritingSidebar
                             documents={documents}
@@ -100,7 +100,7 @@ const WritingBoard = () => {
                 )}
             </AnimatePresence>
 
-            <div className="flex-1 h-full min-w-0 relative bg-white dark:bg-gray-900 z-10">
+            <div className="flex-1 h-full min-w-0 relative z-10">
                 {activeDoc ? (
                     <WritingEditor
                         key={activeDoc.id} // Force re-mount on doc change
@@ -110,20 +110,30 @@ const WritingBoard = () => {
                         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
                     />
                 ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-300 dark:text-gray-600 font-light">
-                        <div className="w-24 h-24 mb-6 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
-                            <svg className="w-10 h-10 text-gray-200 dark:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto px-6 text-center">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="w-32 h-32 mb-8 rounded-full bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 flex items-center justify-center shadow-2xl shadow-sky-200/20 dark:shadow-none"
+                        >
+                            <svg className="w-12 h-12 text-sky-400 dark:text-sky-300 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
-                        </div>
-                        <p className="text-lg">{t('inspiration.emptyState')}</p>
-                        <p className="text-sm opacity-60 mt-2">{t('inspiration.writingSubtitle')}</p>
-                        <button
+                        </motion.div>
+                        <h3 className="text-2xl font-light text-gray-800 dark:text-gray-100 mb-2 tracking-tight">
+                            {t('inspiration.emptyState')}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs mx-auto leading-relaxed">
+                            {t('inspiration.writingSubtitle')}
+                        </p>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             onClick={() => handleCreate()}
-                            className="mt-6 px-6 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-full text-sm font-medium transition-colors shadow-lg shadow-pink-500/20"
+                            className="mt-10 px-8 py-3 bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white rounded-full text-sm font-medium transition-all shadow-xl shadow-sky-500/20"
                         >
                             {t('inspiration.newDoc')}
-                        </button>
+                        </motion.button>
                     </div>
                 )}
             </div>
