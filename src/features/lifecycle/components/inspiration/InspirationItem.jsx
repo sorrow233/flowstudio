@@ -10,12 +10,15 @@ import { COLOR_CONFIG, getColorConfig, parseRichText } from './InspirationUtils'
 const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onUpdateNote, onUpdateContent, onToggleComplete, isArchiveView = false, copiedId }) => {
     const [isDragging, setIsDragging] = React.useState(false);
     const [isEditingContent, setIsEditingContent] = React.useState(false);
+    const [isEditingNote, setIsEditingNote] = React.useState(false);
     const [exitDirection, setExitDirection] = React.useState(null); // 'right' for archive, 'left' for delete
     const [contentDraft, setContentDraft] = React.useState(idea.content || '');
+    const [noteDraft, setNoteDraft] = React.useState(idea.note || '');
     const [isCharging, setIsCharging] = React.useState(false); // Visual feedback for long press
     const longPressTimer = React.useRef(null);
     const inputRef = React.useRef(null);
     const contentTextareaRef = React.useRef(null);
+    const noteInputRef = React.useRef(null);
     const { t } = useTranslation();
 
     const config = getColorConfig(idea.colorIndex || 0);
@@ -28,12 +31,26 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
         }
     }, [isEditingContent]);
 
+    // Focus note input when entering note edit mode
+    React.useEffect(() => {
+        if (isEditingNote && noteInputRef.current) {
+            noteInputRef.current.focus();
+        }
+    }, [isEditingNote]);
+
     // Sync contentDraft when idea.content changes externally
     React.useEffect(() => {
         if (!isEditingContent) {
             setContentDraft(idea.content || '');
         }
     }, [idea.content, isEditingContent]);
+
+    // Sync noteDraft when idea.note changes externally
+    React.useEffect(() => {
+        if (!isEditingNote) {
+            setNoteDraft(idea.note || '');
+        }
+    }, [idea.note, isEditingNote]);
 
     // Handle double click to toggle completion (persisted)
     const handleDoubleClick = (e) => {
@@ -77,6 +94,34 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
         if (e.key === 'Escape') {
             setIsEditingContent(false);
             setContentDraft(idea.content || '');
+        }
+    };
+
+    // Note editing handlers
+    const handleNoteSave = () => {
+        const trimmedNote = noteDraft.trim();
+        if (trimmedNote !== (idea.note || '')) {
+            onUpdateNote?.(idea.id, trimmedNote || undefined);
+        }
+        setIsEditingNote(false);
+    };
+
+    const handleNoteKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleNoteSave();
+        }
+        if (e.key === 'Escape') {
+            setIsEditingNote(false);
+            setNoteDraft(idea.note || '');
+        }
+    };
+
+    // Handle dot click to edit note
+    const handleDotClick = (e) => {
+        e.stopPropagation();
+        if (!isArchiveView) {
+            setIsEditingNote(true);
         }
     };
 
@@ -205,8 +250,38 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                     {/* Color Status Dot - Click to Edit Note */}
                     <div className="flex-shrink-0 mt-1.5 relative z-10">
                         <div
-                            className={`w-2.5 h-2.5 rounded-full ${config.dot} shadow-sm ${isCompleted ? 'opacity-50' : ''}`}
+                            onClick={handleDotClick}
+                            className={`w-2.5 h-2.5 rounded-full ${config.dot} shadow-sm cursor-pointer transition-all duration-200 hover:scale-150 hover:ring-2 hover:ring-offset-2 hover:ring-pink-300 dark:hover:ring-pink-600 hover:ring-offset-white dark:hover:ring-offset-gray-900 ${isCompleted ? 'opacity-50' : ''}`}
+                            title={t('inspiration.addNote', '添加随记')}
                         />
+                        {/* Note Edit Popover */}
+                        <AnimatePresence>
+                            {isEditingNote && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.9, y: -5 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.9, y: -5 }}
+                                    className="absolute top-6 left-0 z-50 w-48 bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-pink-200 dark:border-pink-800 p-2"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <input
+                                        ref={noteInputRef}
+                                        type="text"
+                                        value={noteDraft}
+                                        onChange={(e) => setNoteDraft(e.target.value)}
+                                        onKeyDown={handleNoteKeyDown}
+                                        onBlur={handleNoteSave}
+                                        placeholder={t('inspiration.notePlaceholder', '添加随记...')}
+                                        className="w-full px-2 py-1.5 text-sm bg-pink-50 dark:bg-pink-900/30 rounded border-none outline-none text-gray-700 dark:text-gray-200 placeholder:text-gray-400"
+                                    />
+                                    <div className="mt-1.5 text-[9px] text-gray-400 flex items-center gap-2">
+                                        <span>Enter {t('common.save', '保存')}</span>
+                                        <span>·</span>
+                                        <span>Esc {t('common.cancel', '取消')}</span>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
                     <div className="flex-1 min-w-0">
