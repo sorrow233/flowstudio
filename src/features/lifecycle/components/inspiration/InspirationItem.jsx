@@ -3,7 +3,7 @@ import { Trash2, Check, Pencil, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
 import RichTextInput from './RichTextInput';
-import { COLOR_CONFIG, getColorConfig, parseRichText } from './InspirationUtils';
+import { COLOR_CONFIG, getColorConfig, parseRichText, getCategoryConfig } from './InspirationUtils';
 
 // COLOR_CONFIG, getColorConfig, and parseRichText are now imported from InspirationUtils.js
 
@@ -22,6 +22,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
     const { t } = useTranslation();
 
     const config = getColorConfig(idea.colorIndex || 0);
+    const categoryConfig = getCategoryConfig(idea.category); // 获取分类颜色配置
     const isCompleted = idea.completed || false;
 
     // Focus textarea when entering edit mode
@@ -251,7 +252,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                     <div className="flex-shrink-0 mt-1.5 relative z-10">
                         <div
                             onClick={handleDotClick}
-                            className={`w-2.5 h-2.5 rounded-full ${config.dot} shadow-sm cursor-pointer transition-all duration-200 hover:scale-125 hover:ring-1 hover:ring-offset-1 hover:ring-pink-300/60 dark:hover:ring-pink-500/40 hover:ring-offset-white dark:hover:ring-offset-gray-900 ${isCompleted ? 'opacity-50' : ''}`}
+                            className={`w-2.5 h-2.5 rounded-full ${categoryConfig.dotColor} shadow-sm cursor-pointer transition-all duration-200 hover:scale-125 hover:ring-1 hover:ring-offset-1 hover:ring-pink-300/60 dark:hover:ring-pink-500/40 hover:ring-offset-white dark:hover:ring-offset-gray-900 ${isCompleted ? 'opacity-50' : ''}`}
                             title={t('inspiration.addNote', '添加随记')}
                         />
                         {/* Note Edit Popover */}

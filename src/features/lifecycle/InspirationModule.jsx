@@ -12,6 +12,7 @@ import InspirationItem from './components/inspiration/InspirationItem';
 import { COLOR_CONFIG } from './components/inspiration/InspirationUtils';
 import RichTextInput from './components/inspiration/RichTextInput';
 import Spotlight from '../../components/shared/Spotlight';
+import { INSPIRATION_CATEGORIES } from '../../utils/constants';
 
 // Auto color logic: Every 3 items, switch to next color
 const getNextAutoColorIndex = (totalCount) => {
@@ -71,6 +72,7 @@ const InspirationModule = () => {
     const [showWeekSelector, setShowWeekSelector] = useState(false);
     const [deletedIdeas, setDeletedIdeas] = useState([]);
     const [archiveShake, setArchiveShake] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState('note'); // 分类状态
     const editorRef = useRef(null);
 
     // Autocomplete State
@@ -159,6 +161,7 @@ const InspirationModule = () => {
             content: input.trim(),
             timestamp: Date.now(),
             colorIndex: selectedColorIndex !== null ? selectedColorIndex : getNextAutoColorIndex(ideas.length),
+            category: selectedCategory, // 添加分类
             stage: 'inspiration',
         };
         addIdea(newIdea);
@@ -336,10 +339,12 @@ const InspirationModule = () => {
         }
     };
 
-    // Sort ideas by timestamp (memoized)
+    // Sort ideas by timestamp (memoized) and filter by category
     const sortedIdeas = useMemo(() => {
-        return [...ideas].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    }, [ideas]);
+        return [...ideas]
+            .filter(idea => (idea.category || 'note') === selectedCategory)
+            .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    }, [ideas, selectedCategory]);
 
     // Extract all available weeks for navigation, grouped by Year and Month
     const groupedWeeks = useMemo(() => {
@@ -441,6 +446,37 @@ const InspirationModule = () => {
                 <p className="text-gray-500 dark:text-gray-400 text-base font-light tracking-wide max-w-md mx-auto md:mx-0 leading-relaxed">
                     {t('inspiration.subtitle')}
                 </p>
+
+                {/* Category Selector - 分类选择器 */}
+                <div className="mt-6 flex items-center justify-center md:justify-start">
+                    <div className="flex items-center p-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner border border-gray-200/50 dark:border-gray-700">
+                        {/* Label Section */}
+                        <div className="hidden md:flex items-center px-4 border-r border-gray-200 dark:border-gray-700 mr-2 min-w-[80px] justify-center">
+                            <span className={`text-sm font-medium ${INSPIRATION_CATEGORIES.find(c => c.id === selectedCategory)?.textColor || 'text-gray-600 dark:text-gray-300'}`}>
+                                {INSPIRATION_CATEGORIES.find(c => c.id === selectedCategory)?.label || '随记'}
+                            </span>
+                        </div>
+
+                        {/* Dots Section */}
+                        <div className="flex items-center gap-2">
+                            {INSPIRATION_CATEGORIES.map(cat => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setSelectedCategory(cat.id)}
+                                    title={cat.label}
+                                    className={`
+                                        w-8 h-8 flex items-center justify-center rounded-full transition-all shrink-0 relative
+                                        ${selectedCategory === cat.id
+                                            ? 'bg-white dark:bg-gray-700 shadow-md scale-110 z-10 ring-2 ring-gray-100 dark:ring-gray-600'
+                                            : 'hover:bg-white/50 dark:hover:bg-gray-700/50 hover:scale-105'}
+                                    `}
+                                >
+                                    <div className={`w-3 h-3 rounded-full ${cat.dotColor} ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-transparent' : ''}`} />
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Input Section */}
