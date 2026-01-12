@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Search, Plus, Trash2, FileText, Check, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { toast } from 'sonner';
 import { useTranslation } from '../../../i18n';
 import Spotlight from '../../../../components/shared/Spotlight';
@@ -9,7 +9,6 @@ import { WRITING_CATEGORIES } from '../../../../utils/constants';
 const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, onDelete, onUpdate }) => {
     const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
-    const [hoveredDocId, setHoveredDocId] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState(null); // Filter state
 
     // Filter documents based on search & category
@@ -78,67 +77,83 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
         const category = WRITING_CATEGORIES.find(c => c.id === (doc.category || 'draft')) || WRITING_CATEGORIES[0];
         const isActive = activeDocId === doc.id;
 
+        // --- Swipe Logic (Parity with InspirationItem) ---
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const x = useMotionValue(0);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const deleteBackgroundColor = useTransform(
+            x,
+            [0, -80, -200],
+            ['rgba(244, 63, 94, 0)', 'rgba(244, 63, 94, 0.2)', 'rgba(244, 63, 94, 1)']
+        );
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const deleteIconOpacity = useTransform(x, [0, -60, -100], [0, 0, 1]);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const deleteIconScale = useTransform(x, [0, -80, -200], [0.5, 0.5, 1.2]);
+
         return (
-            <motion.div
-                key={doc.id}
-                layout
-                onClick={() => onSelectDoc && onSelectDoc(doc.id)}
-                onMouseEnter={() => setHoveredDocId(doc.id)}
-                onMouseLeave={() => setHoveredDocId(null)}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                whileHover={{ scale: 1.02, y: -2 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                className={`
-                    relative p-4 rounded-xl cursor-pointer mb-3 group/card
-                    border transition-all duration-300
-                    ${isActive
-                        ? 'bg-white dark:bg-gray-800 shadow-md border-sky-200 dark:border-sky-800'
-                        : 'bg-white/40 dark:bg-gray-800/40 border-transparent hover:bg-white dark:hover:bg-gray-800 hover:shadow-[0_4px_20px_-4px_rgba(56,189,248,0.3)] hover:border-sky-100 dark:hover:border-sky-900'}
-                `}
-            >
-                <div className="flex items-start gap-3">
-                    {/* Category Indicator - Glowing Dot */}
-                    <div className="relative mt-1">
-                        <div className={`w-1.5 h-1.5 rounded-full ${category.dotColor} ${isActive ? 'ring-2 ring-sky-200 dark:ring-sky-800 scale-110' : ''}`} />
-                        {isActive && <div className={`absolute inset-0 w-1.5 h-1.5 rounded-full ${category.dotColor} animate-ping opacity-75`} />}
-                    </div>
+            <div className="relative mb-3 group/swipe-container overflow-hidden rounded-xl">
+                {/* Swipe Background (Delete Action - Left) */}
+                <motion.div
+                    style={{ backgroundColor: deleteBackgroundColor }}
+                    className="absolute inset-0 flex items-center justify-end pr-6 z-0"
+                >
+                    <motion.div style={{ opacity: deleteIconOpacity, scale: deleteIconScale }}>
+                        <Trash2 className="text-white" size={20} />
+                    </motion.div>
+                </motion.div>
 
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                            <h4 className={`text-sm font-medium truncate transition-colors ${isActive ? 'text-sky-600 dark:text-sky-400' : 'text-gray-700 dark:text-gray-200 group-hover/card:text-gray-900 dark:group-hover/card:text-white'}`}>
-                                {doc.title || t('inspiration.untitled')}
-                            </h4>
-                            <span className="text-[10px] text-gray-400 font-light tabular-nums">
-                                {new Date(doc.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
+                <motion.div
+                    key={doc.id}
+                    layout
+                    style={{ x }}
+                    drag="x"
+                    dragDirectionLock
+                    dragConstraints={{ left: -250, right: 0 }}
+                    dragElastic={{ right: 0.1, left: 0.5 }}
+                    onDragEnd={(e, info) => {
+                        // If swiped far enough left, delete
+                        if (info.offset.x < -150 || (info.velocity.x < -400 && info.offset.x < -50)) {
+                            handleDelete(doc);
+                        }
+                    }}
+                    onClick={() => onSelectDoc && onSelectDoc(doc.id)}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    whileHover={{ y: -1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    className={`
+                        relative p-4 rounded-xl cursor-pointer z-10
+                        border transition-all duration-300
+                        ${isActive
+                            ? 'bg-white dark:bg-gray-800 shadow-md border-sky-200 dark:border-sky-800'
+                            : 'bg-white/60 dark:bg-gray-800/60 border-transparent hover:bg-white dark:hover:bg-gray-800 hover:shadow-[0_4px_20px_-4px_rgba(56,189,248,0.2)] hover:border-sky-100 dark:hover:border-sky-900/50'}
+                    `}
+                >
+                    <div className="flex items-start gap-3">
+                        {/* Category Indicator - Glowing Dot */}
+                        <div className="relative mt-1">
+                            <div className={`w-1.5 h-1.5 rounded-full ${category.dotColor} ${isActive ? 'ring-2 ring-sky-200 dark:ring-sky-800 scale-110' : ''}`} />
+                            {isActive && <div className={`absolute inset-0 w-1.5 h-1.5 rounded-full ${category.dotColor} animate-ping opacity-75`} />}
                         </div>
-                        <p className="text-xs text-gray-400 dark:text-gray-500 line-clamp-2 leading-relaxed font-light group-hover/card:text-gray-500 dark:group-hover/card:text-gray-400">
-                            {doc.content?.replace(/<[^>]*>?/gm, '') || t('inspiration.placeholder')}
-                        </p>
-                    </div>
-                </div>
 
-                {/* Delete Button - Premium position */}
-                <AnimatePresence>
-                    {hoveredDocId === doc.id && (
-                        <motion.button
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(doc);
-                            }}
-                            className="absolute -top-1 -right-1 p-1.5 bg-white dark:bg-gray-800 text-gray-400 hover:text-red-500 shadow-lg rounded-full border border-gray-100 dark:border-gray-700 transition-all z-10 hover:scale-110"
-                            title={t('common.delete')}
-                        >
-                            <Trash2 size={12} />
-                        </motion.button>
-                    )}
-                </AnimatePresence>
-            </motion.div>
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                                <h4 className={`text-sm font-medium truncate transition-colors ${isActive ? 'text-sky-600 dark:text-sky-400' : 'text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
+                                    {doc.title || t('inspiration.untitled')}
+                                </h4>
+                                <span className="text-[10px] text-gray-400 font-light tabular-nums">
+                                    {new Date(doc.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 line-clamp-2 leading-relaxed font-light group-hover:text-gray-500 dark:group-hover:text-gray-400">
+                                {doc.content?.replace(/<[^>]*>?/gm, '') || t('inspiration.placeholder')}
+                            </p>
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
         );
     };
 
@@ -159,15 +174,28 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
 
     return (
         <div className="w-80 h-full flex flex-col border-r border-white/20 dark:border-gray-800/50 bg-white/30 dark:bg-gray-900/40 backdrop-blur-xl relative z-20">
-            {/* Header: Title + Category Selector */}
+            {/* Header: Title + New Action + Category Selector */}
             <div className="p-6 pb-2">
                 <div className="flex items-center justify-between mb-8">
-                    <div className="relative">
-                        <h2 className="text-xl font-light text-gray-800 dark:text-gray-100 tracking-tight">
-                            {t('inspiration.writing')}
-                        </h2>
-                        {/* Underline Glow */}
-                        <div className="absolute -bottom-1 left-0 w-full h-1 bg-gradient-to-r from-sky-400/40 via-blue-400/20 to-transparent rounded-full blur-[2px]" />
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <h2 className="text-xl font-light text-gray-800 dark:text-gray-100 tracking-tight">
+                                {t('inspiration.writing')}
+                            </h2>
+                            {/* Underline Glow */}
+                            <div className="absolute -bottom-1 left-0 w-full h-1 bg-gradient-to-r from-sky-400/40 via-blue-400/20 to-transparent rounded-full blur-[2px]" />
+                        </div>
+
+                        {/* New Doc Icon Button - Minimal & Premium */}
+                        <motion.button
+                            onClick={() => onCreate(selectedCategory)}
+                            whileHover={{ scale: 1.1, backgroundColor: 'rgba(56, 189, 248, 0.1)' }}
+                            whileTap={{ scale: 0.95 }}
+                            className="p-1.5 text-sky-500 rounded-lg transition-colors border border-transparent hover:border-sky-200/50 dark:hover:border-sky-800/30"
+                            title={t('inspiration.newDoc')}
+                        >
+                            <Plus size={18} strokeWidth={2.5} />
+                        </motion.button>
                     </div>
 
                     {/* Gradient Capsule Category Selector */}
@@ -229,25 +257,6 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                         {renderGroup('older', groupedDocs.older)}
                     </AnimatePresence>
                 )}
-            </div>
-
-            {/* Bottom Actions - Floating style */}
-            <div className="p-6 absolute bottom-0 w-full pointer-events-none z-30">
-                <div className="pointer-events-auto">
-                    <motion.button
-                        onClick={() => onCreate(selectedCategory)}
-                        whileHover={{ y: -2, scale: 1.02, shadow: "0 10px 30px -5px rgba(56, 189, 248, 0.4)" }}
-                        whileTap={{ scale: 0.98 }}
-                        initial={{ shadow: "0 4px 6px -1px rgba(56, 189, 248, 0.2)" }}
-                        className="w-full py-4 bg-gradient-to-br from-sky-400 to-blue-500 hover:from-sky-400 hover:to-blue-500 text-white rounded-2xl transition-all flex items-center justify-center gap-3 relative overflow-hidden group"
-                    >
-                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 blur-xl" />
-                        <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center relative z-10">
-                            <Plus size={16} strokeWidth={3} />
-                        </div>
-                        <span className="text-sm font-semibold tracking-wider uppercase relative z-10 shadow-sm">{t('inspiration.newDoc')}</span>
-                    </motion.button>
-                </div>
             </div>
         </div>
     );
