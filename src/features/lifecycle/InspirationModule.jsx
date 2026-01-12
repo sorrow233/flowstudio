@@ -609,8 +609,8 @@ const InspirationModule = () => {
                                             exit={{ y: -20, opacity: 0 }}
                                             transition={{ duration: 0.2, ease: "easeOut" }}
                                             className={`text-xs font-medium bg-gradient-to-r bg-clip-text text-transparent ${selectedCategory === 'note' ? 'from-violet-500 to-fuchsia-500' :
-                                                    selectedCategory === 'todo' ? 'from-emerald-500 to-teal-500' :
-                                                        'from-rose-500 to-pink-500'
+                                                selectedCategory === 'todo' ? 'from-emerald-500 to-teal-500' :
+                                                    'from-rose-500 to-pink-500'
                                                 }`}
                                         >
                                             {INSPIRATION_CATEGORIES.find(c => c.id === selectedCategory)?.label}
@@ -644,110 +644,121 @@ const InspirationModule = () => {
                             </div>
                         </div>
 
-                        {/* List Section */}
-                        <div className="space-y-6">
-                            <AnimatePresence mode="popLayout">
-                                {/* Render recent ideas (within 7 days) without grouping */}
-                                {sortedIdeas
-                                    .filter(idea => Date.now() - (idea.timestamp || Date.now()) < 7 * 24 * 60 * 60 * 1000)
-                                    .map((idea) => (
-                                        <InspirationItem
-                                            key={idea.id}
-                                            idea={idea}
-                                            onRemove={handleRemove}
-                                            onArchive={handleArchive}
-                                            onCopy={handleCopy}
-                                            onUpdateColor={handleUpdateColor}
-                                            onUpdateNote={handleUpdateNote}
-                                            onUpdateContent={handleUpdateContent}
-                                            onToggleComplete={handleToggleComplete}
-                                            copiedId={copiedId}
-                                        />
-                                    ))}
-                            </AnimatePresence>
-
-                            {/* Render older ideas (beyond 7 days) grouped by week */}
-                            {(() => {
-                                const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 7 * 24 * 60 * 60 * 1000);
-                                if (olderIdeas.length === 0) return null;
-
-                                // Group by week
-                                const weekGroups = {};
-                                olderIdeas.forEach(idea => {
-                                    const date = new Date(idea.timestamp || Date.now());
-                                    // Get the Monday of the week
-                                    const day = date.getDay();
-                                    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-                                    const weekStart = new Date(date.setDate(diff));
-                                    weekStart.setHours(0, 0, 0, 0);
-                                    const weekEnd = new Date(weekStart);
-                                    weekEnd.setDate(weekEnd.getDate() + 6);
-                                    weekEnd.setHours(23, 59, 59, 999);
-
-                                    const weekKey = weekStart.getTime();
-                                    if (!weekGroups[weekKey]) {
-                                        weekGroups[weekKey] = {
-                                            start: weekStart,
-                                            end: weekEnd,
-                                            ideas: []
-                                        };
-                                    }
-                                    weekGroups[weekKey].ideas.push(idea);
-                                });
-
-                                // Sort weeks in descending order (most recent first)
-                                const sortedWeeks = Object.values(weekGroups).sort((a, b) => b.start - a.start);
-
-                                return sortedWeeks.map(week => (
-                                    <div key={week.start.getTime()}>
-                                        {/* Week Header */}
-                                        <div
-                                            id={`week-${week.start.getTime()}`}
-                                            onDoubleClick={() => setShowWeekSelector(true)}
-                                            className="flex items-center gap-3 mb-4 mt-8 cursor-pointer group"
-                                        >
-                                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
-                                            <span className="text-xs font-medium text-pink-300 dark:text-pink-600 tracking-wide whitespace-nowrap group-hover:text-pink-400 transition-colors">
-                                                {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                {' - '}
-                                                {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                            </span>
-                                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
-                                        </div>
-                                        <AnimatePresence mode="popLayout">
-                                            {week.ideas.map((idea) => (
-                                                <InspirationItem
-                                                    key={idea.id}
-                                                    idea={idea}
-                                                    onRemove={handleRemove}
-                                                    onArchive={handleArchive}
-                                                    onCopy={handleCopy}
-                                                    onUpdateColor={handleUpdateColor}
-                                                    onUpdateNote={handleUpdateNote}
-                                                    onUpdateContent={handleUpdateContent}
-                                                    onToggleComplete={handleToggleComplete}
-                                                    copiedId={copiedId}
-                                                />
-                                            ))}
+                        {/* List Section - Improved overall transition */}
+                        <div className="relative min-h-[400px]">
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={selectedCategory}
+                                    initial={{ opacity: 0, y: 15, filter: "blur(8px)" }}
+                                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                                    exit={{ opacity: 0, y: -15, filter: "blur(8px)" }}
+                                    transition={{
+                                        duration: 0.4,
+                                        ease: [0.23, 1, 0.32, 1] // Apple Style Ease Out
+                                    }}
+                                    className="space-y-6"
+                                >
+                                    {/* Recent Ideas - Individual entry/exit animations still apply but nested */}
+                                    <div className="space-y-6">
+                                        <AnimatePresence mode="popLayout" initial={false}>
+                                            {sortedIdeas
+                                                .filter(idea => Date.now() - (idea.timestamp || Date.now()) < 7 * 24 * 60 * 60 * 1000)
+                                                .map((idea) => (
+                                                    <InspirationItem
+                                                        key={idea.id}
+                                                        idea={idea}
+                                                        onRemove={handleRemove}
+                                                        onArchive={handleArchive}
+                                                        onCopy={handleCopy}
+                                                        onUpdateColor={handleUpdateColor}
+                                                        onUpdateNote={handleUpdateNote}
+                                                        onUpdateContent={handleUpdateContent}
+                                                        onToggleComplete={handleToggleComplete}
+                                                        copiedId={copiedId}
+                                                    />
+                                                ))}
                                         </AnimatePresence>
                                     </div>
-                                ));
-                            })()}
 
-                            {ideas.length === 0 && (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="py-32 text-center"
-                                >
-                                    <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <Lightbulb className="text-gray-300 dark:text-gray-600" size={24} />
-                                    </div>
-                                    <p className="text-gray-400 dark:text-gray-500 text-sm font-light tracking-wide">
-                                        {t('inspiration.emptyState')}
-                                    </p>
+                                    {/* Older Ideas - Grouped by week */}
+                                    {(() => {
+                                        const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 7 * 24 * 60 * 60 * 1000);
+                                        if (olderIdeas.length === 0) return null;
+
+                                        // Group by week
+                                        const weekGroups = {};
+                                        olderIdeas.forEach(idea => {
+                                            const date = new Date(idea.timestamp || Date.now());
+                                            const day = date.getDay();
+                                            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+                                            const weekStart = new Date(date.setDate(diff));
+                                            weekStart.setHours(0, 0, 0, 0);
+                                            const weekEnd = new Date(weekStart);
+                                            weekEnd.setDate(weekEnd.getDate() + 6);
+                                            weekEnd.setHours(23, 59, 59, 999);
+
+                                            const weekKey = weekStart.getTime();
+                                            if (!weekGroups[weekKey]) {
+                                                weekGroups[weekKey] = {
+                                                    start: weekStart,
+                                                    end: weekEnd,
+                                                    ideas: []
+                                                };
+                                            }
+                                            weekGroups[weekKey].ideas.push(idea);
+                                        });
+
+                                        const sortedWeeks = Object.values(weekGroups).sort((a, b) => b.start - a.start);
+
+                                        return sortedWeeks.map(week => (
+                                            <div key={week.start.getTime()}>
+                                                <div className="flex items-center gap-3 mb-4 mt-8 cursor-pointer group">
+                                                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
+                                                    <span className="text-xs font-medium text-pink-300 dark:text-pink-600 tracking-wide whitespace-nowrap group-hover:text-pink-400 transition-colors">
+                                                        {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                        {' - '}
+                                                        {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                    </span>
+                                                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
+                                                </div>
+                                                <div className="space-y-6">
+                                                    <AnimatePresence mode="popLayout" initial={false}>
+                                                        {week.ideas.map((idea) => (
+                                                            <InspirationItem
+                                                                key={idea.id}
+                                                                idea={idea}
+                                                                onRemove={handleRemove}
+                                                                onArchive={handleArchive}
+                                                                onCopy={handleCopy}
+                                                                onUpdateColor={handleUpdateColor}
+                                                                onUpdateNote={handleUpdateNote}
+                                                                onUpdateContent={handleUpdateContent}
+                                                                onToggleComplete={handleToggleComplete}
+                                                                copiedId={copiedId}
+                                                            />
+                                                        ))}
+                                                    </AnimatePresence>
+                                                </div>
+                                            </div>
+                                        ));
+                                    })()}
+
+                                    {ideas.length === 0 && (
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            className="py-32 text-center"
+                                        >
+                                            <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <Lightbulb className="text-gray-300 dark:text-gray-600" size={24} />
+                                            </div>
+                                            <p className="text-gray-400 dark:text-gray-500 text-sm font-light tracking-wide">
+                                                {t('inspiration.emptyState')}
+                                            </p>
+                                        </motion.div>
+                                    )}
                                 </motion.div>
-                            )}
+                            </AnimatePresence>
                         </div>
                     </motion.div>
                 ) : (
