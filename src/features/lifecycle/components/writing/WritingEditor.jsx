@@ -167,8 +167,8 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
                     whileTap={{ scale: 0.95 }}
                     onClick={onToggleSidebar}
                     className={`
-                        p-2.5 text-gray-400 hover:text-sky-500 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20 dark:border-gray-700/50 rounded-xl transition-all shadow-sm hover:shadow-md
-                        ${isMobile ? 'ring-2 ring-sky-100 dark:ring-sky-900/30' : ''}
+                        p-2.5 text-gray-400 hover:text-pink-500 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20 dark:border-gray-700/50 rounded-xl transition-all shadow-sm hover:shadow-md
+                        ${isMobile ? 'ring-2 ring-pink-100 dark:ring-pink-900/30' : ''}
                     `}
                     title={t('inspiration.toggleSidebar')}
                 >
@@ -217,7 +217,7 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
                             }
                         }}
                         className={`
-                            w-full font-bold bg-transparent outline-none border-none placeholder-gray-300 dark:placeholder-gray-700 mb-8 tracking-tight shrink-0 leading-tight transition-all duration-300 text-transparent bg-clip-text bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500 dark:from-white dark:via-gray-100 dark:to-gray-400 focus:drop-shadow-[0_2px_10px_rgba(56,189,248,0.2)]
+                            w-full font-bold bg-transparent outline-none border-none placeholder-gray-300 dark:placeholder-gray-700 mb-8 tracking-tight shrink-0 leading-tight transition-all duration-300 text-transparent bg-clip-text bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500 dark:from-white dark:via-gray-100 dark:to-gray-400 focus:drop-shadow-[0_2px_10px_rgba(244,114,182,0.2)]
                             ${isMobile ? 'text-3xl' : 'text-5xl'}
                         `}
                         placeholder={t('inspiration.untitled')}
@@ -229,7 +229,7 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
                         suppressContentEditableWarning
                         onInput={handleInput}
                         className={`
-                            w-full outline-none text-gray-700 dark:text-gray-200 font-serif leading-[1.8] min-h-[50vh] empty:before:content-[attr(placeholder)] empty:before:text-gray-300 dark:empty:before:text-gray-600 focus:before:content-none selection:bg-sky-100/50 dark:selection:bg-sky-500/30 transition-all duration-300
+                            w-full outline-none text-gray-700 dark:text-gray-200 font-serif leading-[1.8] min-h-[50vh] empty:before:content-[attr(placeholder)] empty:before:text-gray-300 dark:empty:before:text-gray-600 focus:before:content-none selection:bg-pink-100/50 dark:selection:bg-pink-500/30 transition-all duration-300
                             ${isMobile ? 'text-lg' : 'text-xl'}
                         `}
                         placeholder={t('inspiration.placeholder')}
@@ -238,8 +238,8 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
 
                     {/* End of content indicator */}
                     <div className="mt-32 flex flex-col items-center opacity-20">
-                        <div className="w-2 h-2 rounded-full bg-sky-400 mb-4" />
-                        <div className="w-1 h-1 rounded-full bg-sky-300" />
+                        <div className="w-2 h-2 rounded-full bg-pink-400 mb-4" />
+                        <div className="w-1 h-1 rounded-full bg-pink-300" />
                     </div>
                 </div>
             </div>

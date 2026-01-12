@@ -64,14 +64,14 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
                     relative z-10 p-5 rounded-2xl cursor-pointer transition-shadow duration-300
                     border border-transparent select-none active:scale-[0.99]
                     ${isActive
-                        ? 'bg-white/95 dark:bg-gray-800/95 shadow-[0_12px_24px_-8px_rgba(56,189,248,0.25)] border-sky-200/50 dark:border-sky-500/20'
+                        ? 'bg-white/95 dark:bg-gray-800/95 shadow-[0_12px_24px_-8px_rgba(244,114,182,0.25)] border-pink-200/50 dark:border-pink-500/20'
                         : 'bg-white/40 dark:bg-gray-900/40 hover:bg-white/60 dark:hover:bg-gray-800/60 transition-colors'}
                 `}
             >
                 <div className="flex items-start gap-4">
                     {/* Category Indicator - Status Glow */}
                     <div className="relative mt-2 flex-shrink-0">
-                        <div className={`w-2.5 h-2.5 rounded-full ${category.dotColor} shadow-sm ${isActive ? 'ring-2 ring-sky-200 dark:ring-sky-800 scale-125' : ''}`} />
+                        <div className={`w-2.5 h-2.5 rounded-full ${category.dotColor} shadow-sm ${isActive ? 'ring-2 ring-pink-200 dark:ring-pink-800 scale-125' : ''}`} />
                         {isActive && (
                             <div className={`absolute inset-0 w-2.5 h-2.5 rounded-full ${category.dotColor} animate-ping opacity-50`} />
                         )}
@@ -79,14 +79,14 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
 
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-2">
-                            <h4 className={`text-[15px] font-semibold truncate tracking-tight transition-colors ${isActive ? 'text-sky-600 dark:text-sky-400' : 'text-gray-800 dark:text-gray-100 group-hover:text-sky-500 dark:group-hover:text-sky-400'}`}>
+                            <h4 className={`text-[15px] font-semibold truncate tracking-tight transition-colors ${isActive ? 'text-pink-600 dark:text-pink-400' : 'text-gray-800 dark:text-gray-100 group-hover:text-pink-500 dark:group-hover:text-pink-400'}`}>
                                 {doc.title || t('inspiration.untitled')}
                             </h4>
                             <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium tabular-nums bg-gray-50 dark:bg-gray-900/40 px-1.5 py-0.5 rounded-md">
                                 {new Date(doc.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                         </div>
-                        <p className={`text-[13px] line-clamp-2 leading-relaxed transition-colors ${isActive ? 'text-sky-600/70 dark:text-sky-400/70' : 'text-gray-500 dark:text-gray-400 font-light'}`}>
+                        <p className={`text-[13px] line-clamp-2 leading-relaxed transition-colors ${isActive ? 'text-pink-600/70 dark:text-pink-400/70' : 'text-gray-500 dark:text-gray-400 font-light'}`}>
                             {doc.content?.replace(/<[^>]*>?/gm, '') || t('inspiration.placeholder')}
                         </p>
                     </div>

@@ -170,7 +170,7 @@ const WritingBoard = () => {
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto px-6 text-center">
                         <div className="w-32 h-32 mb-8 rounded-full bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 flex items-center justify-center shadow-2xl">
-                            <svg className="w-12 h-12 text-sky-400 dark:text-sky-300 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-12 h-12 text-pink-400 dark:text-pink-300 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                         </div>
@@ -184,7 +184,7 @@ const WritingBoard = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => handleCreate()}
-                            className="mt-10 px-8 py-3 bg-gradient-to-r from-sky-400 to-blue-500 text-white rounded-full text-sm font-medium shadow-xl"
+                            className="mt-10 px-8 py-3 bg-gradient-to-r from-pink-400 to-rose-500 text-white rounded-full text-sm font-medium shadow-xl"
                         >
                             {t('inspiration.newDoc')}
                         </motion.button>
@@ -192,7 +192,7 @@ const WritingBoard = () => {
                         {isMobile && !isSidebarOpen && (
                             <button
                                 onClick={() => setIsSidebarOpen(true)}
-                                className="mt-4 text-xs text-sky-500 font-medium"
+                                className="mt-4 text-xs text-pink-500 font-medium"
                             >
                                 {t('inspiration.viewAll')}
                             </button>
