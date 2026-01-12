@@ -58,7 +58,7 @@ export default {
         title: 'Inspiration',
         subtitle: 'Capture fleeting ideas, fuel your future.',
         writing: 'Writing',
-        writing: 'Writing',
+
         writingSubtitle: 'Immersive creation, capturing complete thoughts',
         placeholder: 'Record a fleeting thought...',
         addNote: 'Add Note',

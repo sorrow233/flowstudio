@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Search, Plus, Trash2, FileText, Check, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { useTranslation } from '../../../../i18n';
+import { useTranslation } from '../../../i18n';
 import { WRITING_CATEGORIES } from '../../../../utils/constants';
 
 const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, onDelete, onUpdate }) => {

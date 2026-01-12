@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import { useTranslation } from '../../../../i18n';
+import { useTranslation } from '../../../i18n';
 import { COLOR_CONFIG } from '../inspiration/InspirationUtils';
 
 const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSidebar }) => {
