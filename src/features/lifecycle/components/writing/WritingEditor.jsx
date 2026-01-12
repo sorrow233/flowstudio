@@ -14,12 +14,22 @@ const WritingEditor = ({ doc: writingDoc, onUpdate, isSidebarOpen, onToggleSideb
     // Sync local state with document prop
     useEffect(() => {
         if (writingDoc) {
-            setTitle(writingDoc.title || '');
-            if (editorRef.current && writingDoc.content !== editorRef.current.innerHTML) {
-                editorRef.current.innerHTML = markupToHtml(writingDoc.content || '');
+            // Update title if changed remotely
+            if (writingDoc.title !== title) {
+                setTitle(writingDoc.title || '');
+            }
+
+            // Update content if changed remotely
+            const remoteHtml = markupToHtml(writingDoc.content || '');
+            if (editorRef.current && remoteHtml !== editorRef.current.innerHTML) {
+                // If the user is currently focused on the editor, we should be careful.
+                // However, without a more complex selection restoration, we at least prevent 
+                // unnecessary overwrites if they match.
+                // If they DON'T match and it's from remote, we must apply it.
+                editorRef.current.innerHTML = remoteHtml;
             }
         }
-    }, [writingDoc?.id]);
+    }, [writingDoc?.id, writingDoc?.content, writingDoc?.title]);
 
     // Handle Text Selection for Floating Toolbar
     useEffect(() => {

@@ -298,8 +298,13 @@ export class SyncEngine {
                 // 4. 计算新版本号 (基于最新的 remoteVersion)
                 const newVersion = this.remoteVersion + 1;
 
+                // Safe binary to base64 conversion (prevents stack overflow on large docs)
+                const binaryString = Array.from(fullState)
+                    .map(byte => String.fromCharCode(byte))
+                    .join('');
+
                 transaction.set(stateDocRef, {
-                    state: btoa(String.fromCharCode.apply(null, fullState)),
+                    state: btoa(binaryString),
                     version: newVersion,
                     updatedAt: serverTimestamp(),
                     userId: this.userId,
