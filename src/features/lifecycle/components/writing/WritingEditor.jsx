@@ -181,25 +181,30 @@ const WritingEditor = ({ doc: writingDoc, onUpdate }) => {
                 )}
             </AnimatePresence>
 
-            {/* Editor Container */}
-            <div className="flex-1 w-full max-w-4xl mx-auto p-12 overflow-hidden flex flex-col">
-                <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full text-4xl md:text-5xl font-light text-gray-900 dark:text-white bg-transparent outline-none border-none placeholder-gray-300 dark:placeholder-gray-700 mb-10 tracking-tight shrink-0"
-                    placeholder="未命名文档"
-                />
+            {/* Editor Container - Scrollable Area */}
+            <div className="flex-1 w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center">
+                <div className="w-full max-w-3xl px-8 py-16 md:py-24 animate-in fade-in duration-700 slide-in-from-bottom-4">
+                    <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="w-full text-4xl md:text-5xl font-bold text-gray-900 dark:text-white bg-transparent outline-none border-none placeholder-gray-300 dark:placeholder-gray-700 mb-12 tracking-tight shrink-0 leading-tight"
+                        placeholder="未命名文档"
+                    />
 
-                <div
-                    ref={editorRef}
-                    contentEditable
-                    suppressContentEditableWarning
-                    onInput={handleInput}
-                    className="flex-1 w-full outline-none text-gray-600 dark:text-gray-300 text-lg md:text-xl font-light leading-relaxed custom-scrollbar empty:before:content-[attr(placeholder)] empty:before:text-gray-300"
-                    placeholder="开始你的创作..."
-                    style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
-                />
+                    <div
+                        ref={editorRef}
+                        contentEditable
+                        suppressContentEditableWarning
+                        onInput={handleInput}
+                        className="w-full outline-none text-gray-700 dark:text-gray-300 text-lg md:text-xl font-serif leading-[1.8] min-h-[60vh] empty:before:content-[attr(placeholder)] empty:before:text-gray-300 dark:empty:before:text-gray-600"
+                        placeholder="开始你的创作..."
+                        style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                    />
+
+                    {/* Bottom Spacer for comfortable scrolling */}
+                    <div className="h-32" />
+                </div>
             </div>
 
             {/* Status Bar */}

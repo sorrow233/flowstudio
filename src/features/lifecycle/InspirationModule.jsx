@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { ArrowRight, Lightbulb, Hash, X, Calendar, PenTool, CheckSquare, Trash2, Tag } from 'lucide-react';
+import { ArrowRight, Lightbulb, Hash, X, Calendar, PenTool, CheckSquare, Trash2, Tag, ListChecks } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,7 +11,6 @@ import { useTranslation } from '../i18n';
 import InspirationItem from './components/inspiration/InspirationItem';
 import { COLOR_CONFIG } from './components/inspiration/InspirationUtils';
 import RichTextInput from './components/inspiration/RichTextInput';
-import WritingBoard from './components/writing/WritingBoard';
 import Spotlight from '../../components/shared/Spotlight';
 import { INSPIRATION_CATEGORIES } from '../../utils/constants';
 
@@ -74,7 +73,6 @@ const InspirationModule = () => {
     const [deletedIdeas, setDeletedIdeas] = useState([]);
     const [archiveShake, setArchiveShake] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('note'); // 分类状态
-    const [activeTab, setActiveTab] = useState('inspiration'); // 'inspiration' | 'writing'
     const [isSelectionMode, setIsSelectionMode] = useState(false); // 多选模式
     const [selectedIdeaIds, setSelectedIdeaIds] = useState([]); // 已选中的 ID
     const editorRef = useRef(null);
@@ -88,13 +86,14 @@ const InspirationModule = () => {
 
 
     // 多选处理逻辑
-    const handleToggleSelect = (ideaId) => {
+    // 多选处理逻辑
+    const handleToggleSelect = useCallback((ideaId) => {
         setSelectedIdeaIds(prev =>
             prev.includes(ideaId)
                 ? prev.filter(id => id !== ideaId)
                 : [...prev, ideaId]
         );
-    };
+    }, []);
 
     const handleBatchMove = (category) => {
         if (selectedIdeaIds.length === 0) return;
@@ -167,7 +166,7 @@ const InspirationModule = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [deletedIdeas, addIdea]);
 
-    const handleColorClick = (index) => {
+    const handleColorClick = useCallback((index) => {
         const colorConfig = COLOR_CONFIG[index];
 
         // 使用 contenteditable 的 applyColor 方法
@@ -178,9 +177,9 @@ const InspirationModule = () => {
                 setSelectedColorIndex(prev => prev === index ? null : index);
             }
         }
-    };
+    }, [editorRef]);
 
-    const handleAdd = () => {
+    const handleAdd = useCallback(() => {
         if (!input.trim()) return;
         const newIdea = {
             id: uuidv4(),
@@ -194,25 +193,25 @@ const InspirationModule = () => {
         setInput('');
         // 清空 contenteditable 编辑器
         if (editorRef.current) editorRef.current.clear();
-    };
+    }, [input, selectedColorIndex, ideas.length, selectedCategory, addIdea]);
 
-    const handleUpdateColor = (id, newColorIndex) => {
+    const handleUpdateColor = useCallback((id, newColorIndex) => {
         updateIdea(id, { colorIndex: newColorIndex });
-    };
+    }, [updateIdea]);
 
-    const handleUpdateNote = (id, note) => {
+    const handleUpdateNote = useCallback((id, note) => {
         updateIdea(id, { note });
-    };
+    }, [updateIdea]);
 
-    const handleToggleComplete = (id, completed) => {
+    const handleToggleComplete = useCallback((id, completed) => {
         updateIdea(id, { completed });
-    };
+    }, [updateIdea]);
 
-    const handleUpdateContent = (id, content) => {
+    const handleUpdateContent = useCallback((id, content) => {
         updateIdea(id, { content });
-    };
+    }, [updateIdea]);
 
-    const handleCopy = async (content, id) => {
+    const handleCopy = useCallback(async (content, id) => {
         try {
             await navigator.clipboard.writeText(content);
             setCopiedId(id);
@@ -220,17 +219,27 @@ const InspirationModule = () => {
         } catch (err) {
             console.error('Failed to copy:', err);
         }
-    };
+    }, []);
 
-    const handleRemove = (id) => {
+    const handleRemove = useCallback((id) => {
+        // Optimistic update logic if needed, but simple state update here
+        // We need ideas from state or props? ideas is from useMemo. 
+        // We can't use 'ideas' directly in useCallback if we want it to be stable unless we access current state differently.
+        // Actually, removeIdea is stable. But we need 'idea' object to add to deletedIdeas.
+        // To make this stable, we probably need functional updates or rely on ideas changing not triggered often?
+        // Wait, ideas changes often. But handleRemove prop changing will trigger re-render.
+        // Simple fix: pass id to deletedIdeas functional update might be tricky if we need the object.
+        // Let's assume re-creating this function when 'ideas' changes is acceptable, BUT 'ideas' changes only when content changes.
+        // Selection doesn't change 'ideas'. So it IS stable during selection!
+        // So wrapping in useCallback with [ideas] dependency is enough to prevent re-render during selection toggling.
         const idea = ideas.find(i => i.id === id);
         if (idea) {
             setDeletedIdeas(prev => [...prev, { ...idea, wasArchived: false }]);
             removeIdea(id);
         }
-    };
+    }, [ideas, removeIdea]);
 
-    const handleArchive = (id) => {
+    const handleArchive = useCallback((id) => {
         const idea = ideas.find(i => i.id === id);
         if (idea) {
             setDeletedIdeas(prev => [...prev, { ...idea, wasArchived: true }]);
@@ -239,7 +248,7 @@ const InspirationModule = () => {
             setArchiveShake(true);
             setTimeout(() => setArchiveShake(false), 500);
         }
-    };
+    }, [ideas, updateIdea]);
 
     const handleUndo = () => {
         if (deletedIdeas.length > 0) {
@@ -455,386 +464,361 @@ const InspirationModule = () => {
                     </h2>
                 </motion.div>
 
-                {/* Tab Switcher */}
-                <div className="flex items-center gap-1 mb-2 bg-gray-100/50 dark:bg-gray-800/50 p-1 rounded-full w-fit">
-                    <button
-                        onClick={() => setActiveTab('inspiration')}
-                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === 'inspiration'
-                            ? 'bg-white dark:bg-gray-700 text-pink-500 shadow-sm'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                            }`}
-                    >
-                        <Lightbulb size={14} />
-                        <span>{t('inspiration.title', '灵感')}</span>
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('writing')}
-                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === 'writing'
-                            ? 'bg-white dark:bg-gray-700 text-indigo-500 shadow-sm'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                            }`}
-                    >
-                        <PenTool size={14} />
-                        <span>{t('inspiration.writing', '写作')}</span>
-                    </button>
-                </div>
                 <p className="text-gray-500 dark:text-gray-400 text-base font-light tracking-wide max-w-md mx-auto md:mx-0 leading-relaxed mb-6">
-                    {activeTab === 'inspiration' ? t('inspiration.subtitle') : t('inspiration.writingSubtitle', '在这里沉浸式创作，记录更完整的思绪')}
+                    {t('inspiration.subtitle')}
                 </p>
             </div>
 
 
 
             <AnimatePresence mode="wait">
-                {activeTab === 'inspiration' ? (
-                    <motion.div
-                        key="inspiration"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        {/* Input Section */}
-                        <div className="relative mb-20 group z-30">
-                            <Spotlight className="rounded-2xl transition-all duration-300 focus-within:ring-1 focus-within:ring-pink-300 dark:focus-within:ring-pink-500 focus-within:shadow-[0_0_30px_-5px_rgba(244,114,182,0.4)]" spotColor="rgba(244, 114, 182, 0.12)">
-                                <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 dark:from-gray-800 via-gray-50 dark:via-gray-900 to-gray-100 dark:to-gray-800 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                                <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 overflow-visible transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] group-hover:border-gray-200 dark:group-hover:border-gray-700">
+                <motion.div
+                    key="inspiration"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    {/* Input Section */}
+                    <div className="relative mb-20 group z-30">
+                        <Spotlight className="rounded-2xl transition-all duration-300 focus-within:ring-1 focus-within:ring-pink-300 dark:focus-within:ring-pink-500 focus-within:shadow-[0_0_30px_-5px_rgba(244,114,182,0.4)]" spotColor="rgba(244, 114, 182, 0.12)">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 dark:from-gray-800 via-gray-50 dark:via-gray-900 to-gray-100 dark:to-gray-800 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                            <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 overflow-visible transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] group-hover:border-gray-200 dark:group-hover:border-gray-700">
 
-                                    {/* 富文本输入框 - 使用 contenteditable 实现 */}
-                                    <RichTextInput
-                                        ref={editorRef}
-                                        value={input}
-                                        onChange={setInput}
-                                        onKeyDown={handleKeyDown}
-                                        placeholder={t('inspiration.placeholder')}
-                                        className="w-full bg-transparent text-lg text-gray-800 dark:text-gray-100 caret-pink-500 outline-none p-6 pb-20 min-h-[200px] font-light leading-relaxed relative z-10 break-words empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400/50"
-                                        style={{
-                                            fontFamily: 'inherit',
-                                            lineHeight: '1.625',
-                                            letterSpacing: 'normal',
-                                            fontVariantLigatures: 'none',
-                                            WebkitFontSmoothing: 'antialiased',
-                                            MozOsxFontSmoothing: 'grayscale',
-                                        }}
-                                    />
+                                {/* 富文本输入框 - 使用 contenteditable 实现 */}
+                                <RichTextInput
+                                    ref={editorRef}
+                                    value={input}
+                                    onChange={setInput}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder={t('inspiration.placeholder')}
+                                    className="w-full bg-transparent text-lg text-gray-800 dark:text-gray-100 caret-pink-500 outline-none p-6 pb-20 min-h-[200px] font-light leading-relaxed relative z-10 break-words empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400/50"
+                                    style={{
+                                        fontFamily: 'inherit',
+                                        lineHeight: '1.625',
+                                        letterSpacing: 'normal',
+                                        fontVariantLigatures: 'none',
+                                        WebkitFontSmoothing: 'antialiased',
+                                        MozOsxFontSmoothing: 'grayscale',
+                                    }}
+                                />
 
-                                    {/* Autocomplete Popover */}
-                                    <AnimatePresence>
-                                        {showAutocomplete && filteredTags.length > 0 && (
-                                            <motion.div
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: 10 }}
-                                                className="absolute left-6 z-50 bg-white dark:bg-gray-900 rounded-lg shadow-xl shadow-pink-100 dark:shadow-pink-900/10 border border-gray-100 dark:border-gray-800 p-1 min-w-[200px] max-h-[200px] overflow-y-auto"
-                                                style={{
-                                                    top: 'auto', // Dynamic positioning would require more complex calc, ensuring it shows below input or "near cursor"
-                                                    bottom: '80px' // Show above toolbar
-                                                }}
-                                            >
-                                                <div className="px-2 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                                    Link Project
-                                                </div>
-                                                {filteredTags.map((tag, index) => (
-                                                    <button
-                                                        key={tag}
-                                                        onClick={() => insertTag(tag)}
-                                                        className={`
+                                {/* Autocomplete Popover */}
+                                <AnimatePresence>
+                                    {showAutocomplete && filteredTags.length > 0 && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="absolute left-6 z-50 bg-white dark:bg-gray-900 rounded-lg shadow-xl shadow-pink-100 dark:shadow-pink-900/10 border border-gray-100 dark:border-gray-800 p-1 min-w-[200px] max-h-[200px] overflow-y-auto"
+                                            style={{
+                                                top: 'auto', // Dynamic positioning would require more complex calc, ensuring it shows below input or "near cursor"
+                                                bottom: '80px' // Show above toolbar
+                                            }}
+                                        >
+                                            <div className="px-2 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                                Link Project
+                                            </div>
+                                            {filteredTags.map((tag, index) => (
+                                                <button
+                                                    key={tag}
+                                                    onClick={() => insertTag(tag)}
+                                                    className={`
                                                 w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center gap-2
                                                 ${index === autocompleteIndex
-                                                                ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-300'
-                                                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}
+                                                            ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-300'
+                                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}
                                             `}
-                                                    >
-                                                        <Hash size={12} className="opacity-50" />
-                                                        {tag}
-                                                    </button>
-                                                ))}
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
+                                                >
+                                                    <Hash size={12} className="opacity-50" />
+                                                    {tag}
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
 
-                                    {/* Bottom Action Area */}
-                                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-4 z-20">
-                                        <div className="flex items-center gap-4 flex-1 min-w-0">
-                                            {/* Minimal Color Picker */}
-                                            <div className="flex items-center gap-1.5 px-2 py-1.5 bg-gray-50/50 dark:bg-gray-800/50 rounded-full border border-gray-100/50 dark:border-gray-700/50 backdrop-blur-sm flex-shrink-0">
-                                                {COLOR_CONFIG.map((conf, index) => (
-                                                    <button
-                                                        key={conf.id}
-                                                        onClick={() => handleColorClick(index)}
-                                                        className={`relative w-3 h-3 rounded-full transition-all duration-300 ${conf.dot} ${index === selectedColorIndex ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 ring-gray-400 dark:ring-gray-500 scale-110' : 'opacity-40 hover:opacity-100 hover:scale-110'} after:absolute after:-inset-2`}
-                                                        title={conf.id}
-                                                    />
-                                                ))}
-                                            </div>
-
-                                            {/* Project Tags Bar */}
-                                            <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2 mask-linear-fade">
-                                                {allProjectTags.length > 0 && (
-                                                    <>
-                                                        <Hash size={14} className="text-gray-300 dark:text-gray-600 flex-shrink-0" />
-                                                        {allProjectTags.map((tag) => (
-                                                            <button
-                                                                key={tag}
-                                                                onClick={() => handleTagClick(tag)}
-                                                                className="flex-shrink-0 px-2 py-1 bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-900/40 rounded-md text-[11px] font-medium transition-all duration-300 border border-pink-100 dark:border-pink-800/30 whitespace-nowrap"
-                                                            >
-                                                                {tag}
-                                                            </button>
-                                                        ))}
-                                                    </>
-                                                )}
-                                            </div>
+                                {/* Bottom Action Area */}
+                                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-4 z-20">
+                                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                                        {/* Minimal Color Picker */}
+                                        <div className="flex items-center gap-1.5 px-2 py-1.5 bg-gray-50/50 dark:bg-gray-800/50 rounded-full border border-gray-100/50 dark:border-gray-700/50 backdrop-blur-sm flex-shrink-0">
+                                            {COLOR_CONFIG.map((conf, index) => (
+                                                <button
+                                                    key={conf.id}
+                                                    onClick={() => handleColorClick(index)}
+                                                    className={`relative w-3 h-3 rounded-full transition-all duration-300 ${conf.dot} ${index === selectedColorIndex ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 ring-gray-400 dark:ring-gray-500 scale-110' : 'opacity-40 hover:opacity-100 hover:scale-110'} after:absolute after:-inset-2`}
+                                                    title={conf.id}
+                                                />
+                                            ))}
                                         </div>
 
-                                        <div className="flex items-center gap-3 flex-shrink-0">
-                                            <span className="text-[10px] text-gray-300 dark:text-gray-600 font-mono hidden md:inline-block">
-                                                {t('inspiration.cmdEnter')}
-                                            </span>
-                                            <button
-                                                onClick={handleAdd}
-                                                disabled={!input.trim()}
-                                                className="flex items-center justify-center p-3 bg-pink-400 dark:bg-pink-500 text-white rounded-xl hover:bg-pink-500 dark:hover:bg-pink-400 disabled:opacity-30 transition-all duration-300 active:scale-95 shadow-lg shadow-pink-200 dark:shadow-pink-900/20"
-                                            >
-                                                <ArrowRight size={18} strokeWidth={2} />
-                                            </button>
+                                        {/* Project Tags Bar */}
+                                        <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2 mask-linear-fade">
+                                            {allProjectTags.length > 0 && (
+                                                <>
+                                                    <Hash size={14} className="text-gray-300 dark:text-gray-600 flex-shrink-0" />
+                                                    {allProjectTags.map((tag) => (
+                                                        <button
+                                                            key={tag}
+                                                            onClick={() => handleTagClick(tag)}
+                                                            className="flex-shrink-0 px-2 py-1 bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-900/40 rounded-md text-[11px] font-medium transition-all duration-300 border border-pink-100 dark:border-pink-800/30 whitespace-nowrap"
+                                                        >
+                                                            {tag}
+                                                        </button>
+                                                    ))}
+                                                </>
+                                            )}
                                         </div>
                                     </div>
-                                </div>
-                            </Spotlight>
-                        </div>
 
-                        {/* Category Selector - Redesigned: Capsule with Name & Dots */}
-                        <div className="flex justify-end mb-6 -mt-12 px-2 relative z-20 gap-3 items-center">
-                            {/* Selection Toggle */}
-                            <button
-                                onClick={() => {
-                                    setIsSelectionMode(!isSelectionMode);
-                                    if (isSelectionMode) setSelectedIdeaIds([]); // 退出时清空选中
-                                }}
-                                className={`flex items-center justify-center p-2 rounded-full transition-all duration-300 backdrop-blur-md border ${isSelectionMode
-                                    ? 'bg-blue-500/20 border-blue-400 text-blue-500 shadow-sm'
-                                    : 'bg-white/40 dark:bg-gray-800/40 border-gray-100/50 dark:border-gray-800/50 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
-                                    }`}
-                                title={isSelectionMode ? "退出多选" : "开启多选"}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                    {isSelectionMode ? <path d="m9 11 3 3L22 4" /> : null}
-                                </svg>
-                            </button>
-
-                            <div className="flex items-center p-1 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-full border border-gray-100/50 dark:border-gray-800/50 shadow-sm transition-all duration-300 hover:bg-white/80 dark:hover:bg-gray-900/80 hover:shadow-md hover:border-pink-100/30 dark:hover:border-pink-900/30 group/selector">
-
-                                {/* Label Section - Animated */}
-                                <div className="flex items-center px-3 border-r border-gray-200/50 dark:border-gray-700/50 mr-1 min-w-[60px] justify-center relative overflow-hidden h-7">
-                                    <AnimatePresence mode="wait" initial={false}>
-                                        <motion.span
-                                            key={selectedCategory}
-                                            initial={{ y: 20, opacity: 0 }}
-                                            animate={{ y: 0, opacity: 1 }}
-                                            exit={{ y: -20, opacity: 0 }}
-                                            transition={{ duration: 0.2, ease: "easeOut" }}
-                                            className={`text-xs font-medium bg-gradient-to-r bg-clip-text text-transparent ${selectedCategory === 'note' ? 'from-pink-400 to-rose-500' :
-                                                selectedCategory === 'todo' ? 'from-blue-400 to-indigo-500' :
-                                                    'from-violet-500 to-fuchsia-500'
-                                                }`}
-                                        >
-                                            {INSPIRATION_CATEGORIES.find(c => c.id === selectedCategory)?.label}
-                                        </motion.span>
-                                    </AnimatePresence>
-                                </div>
-
-                                {/* Dots Section */}
-                                <div className="flex items-center gap-1">
-                                    {INSPIRATION_CATEGORIES.map(cat => (
+                                    <div className="flex items-center gap-3 flex-shrink-0">
+                                        <span className="text-[10px] text-gray-300 dark:text-gray-600 font-mono hidden md:inline-block">
+                                            {t('inspiration.cmdEnter')}
+                                        </span>
                                         <button
-                                            key={cat.id}
-                                            onClick={() => setSelectedCategory(cat.id)}
-                                            className="relative w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 group/dot"
+                                            onClick={handleAdd}
+                                            disabled={!input.trim()}
+                                            className="flex items-center justify-center p-3 bg-pink-400 dark:bg-pink-500 text-white rounded-xl hover:bg-pink-500 dark:hover:bg-pink-400 disabled:opacity-30 transition-all duration-300 active:scale-95 shadow-lg shadow-pink-200 dark:shadow-pink-900/20"
                                         >
-                                            {selectedCategory === cat.id && (
-                                                <motion.div
-                                                    layoutId="activeCategory"
-                                                    className="absolute inset-0 bg-white dark:bg-gray-700 rounded-full shadow-sm border border-gray-100 dark:border-gray-600"
-                                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                                />
-                                            )}
-                                            <div className={`
+                                            <ArrowRight size={18} strokeWidth={2} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Spotlight>
+                    </div>
+
+                    {/* Category Selector - Redesigned: Capsule with Name & Dots */}
+                    <div className="flex justify-end mb-6 -mt-12 px-2 relative z-20 gap-3 items-center">
+                        {/* Selection Toggle */}
+                        <button
+                            onClick={() => {
+                                setIsSelectionMode(!isSelectionMode);
+                                if (isSelectionMode) setSelectedIdeaIds([]); // 退出时清空选中
+                            }}
+                            className={`flex items-center justify-center p-2 rounded-full transition-all duration-300 backdrop-blur-md border ${isSelectionMode
+                                ? 'bg-blue-500/20 border-blue-400 text-blue-500 shadow-sm'
+                                : 'bg-white/40 dark:bg-gray-800/40 border-gray-100/50 dark:border-gray-800/50 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
+                                }`}
+                            title={isSelectionMode ? "退出多选" : "开启多选"}
+                        >
+                            {isSelectionMode ? <X size={18} /> : <ListChecks size={18} />}
+                        </button>
+
+                        <div className="flex items-center p-1 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-full border border-gray-100/50 dark:border-gray-800/50 shadow-sm transition-all duration-300 hover:bg-white/80 dark:hover:bg-gray-900/80 hover:shadow-md hover:border-pink-100/30 dark:hover:border-pink-900/30 group/selector">
+
+                            {/* Label Section - Animated */}
+                            <div className="flex items-center px-3 border-r border-gray-200/50 dark:border-gray-700/50 mr-1 min-w-[60px] justify-center relative overflow-hidden h-7">
+                                <AnimatePresence mode="wait" initial={false}>
+                                    <motion.span
+                                        key={selectedCategory}
+                                        initial={{ y: 20, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        exit={{ y: -20, opacity: 0 }}
+                                        transition={{ duration: 0.2, ease: "easeOut" }}
+                                        className={`text-xs font-medium bg-gradient-to-r bg-clip-text text-transparent ${selectedCategory === 'note' ? 'from-pink-400 to-rose-500' :
+                                            selectedCategory === 'todo' ? 'from-blue-400 to-indigo-500' :
+                                                'from-violet-500 to-fuchsia-500'
+                                            }`}
+                                    >
+                                        {INSPIRATION_CATEGORIES.find(c => c.id === selectedCategory)?.label}
+                                    </motion.span>
+                                </AnimatePresence>
+                            </div>
+
+                            {/* Dots Section */}
+                            <div className="flex items-center gap-1">
+                                {INSPIRATION_CATEGORIES.map(cat => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setSelectedCategory(cat.id)}
+                                        className="relative w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 group/dot"
+                                    >
+                                        {selectedCategory === cat.id && (
+                                            <motion.div
+                                                layoutId="activeCategory"
+                                                className="absolute inset-0 bg-white dark:bg-gray-700 rounded-full shadow-sm border border-gray-100 dark:border-gray-600"
+                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                            />
+                                        )}
+                                        <div className={`
                                                 relative z-10 w-2.5 h-2.5 rounded-full transition-all duration-300
                                                 ${cat.dotColor}
                                                 ${selectedCategory === cat.id ? 'scale-110' : 'opacity-40 group-hover/dot:opacity-100 group-hover/dot:scale-110'}
                                             `} />
-                                        </button>
-                                    ))}
-                                </div>
+                                    </button>
+                                ))}
                             </div>
                         </div>
+                    </div>
 
-                        {/* List Section - Improved overall transition */}
-                        <div className="relative min-h-[400px]">
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={selectedCategory}
-                                    initial={{ opacity: 0, y: 15, filter: "blur(8px)" }}
-                                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                                    exit={{ opacity: 0, y: -15, filter: "blur(8px)" }}
-                                    transition={{
-                                        duration: 0.4,
-                                        ease: [0.23, 1, 0.32, 1] // Apple Style Ease Out
-                                    }}
-                                    className="space-y-6"
-                                >
-                                    {/* Recent Ideas - Individual entry/exit animations still apply but nested */}
-                                    <div className="space-y-6">
-                                        <AnimatePresence mode="popLayout" initial={false}>
-                                            {sortedIdeas
-                                                .filter(idea => Date.now() - (idea.timestamp || Date.now()) < 7 * 24 * 60 * 60 * 1000)
-                                                .map((idea) => (
-                                                    <InspirationItem
-                                                        key={idea.id}
-                                                        idea={idea}
-                                                        onRemove={handleRemove}
-                                                        onArchive={handleArchive}
-                                                        onCopy={handleCopy}
-                                                        onUpdateColor={handleUpdateColor}
-                                                        onUpdateNote={handleUpdateNote}
-                                                        onUpdateContent={handleUpdateContent}
-                                                        onToggleComplete={handleToggleComplete}
-                                                        copiedId={copiedId}
-                                                        isSelectionMode={isSelectionMode}
-                                                        isSelected={selectedIdeaIds.includes(idea.id)}
-                                                        onSelect={handleToggleSelect}
-                                                    />
-                                                ))}
-                                        </AnimatePresence>
-                                    </div>
+                    {/* List Section - Improved overall transition */}
+                    <div className="relative min-h-[400px]">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={selectedCategory}
+                                initial={{ opacity: 0, y: 15, filter: "blur(8px)" }}
+                                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                                exit={{ opacity: 0, y: -15, filter: "blur(8px)" }}
+                                transition={{
+                                    duration: 0.4,
+                                    ease: [0.23, 1, 0.32, 1] // Apple Style Ease Out
+                                }}
+                                className="space-y-6"
+                            >
+                                {/* Recent Ideas - Individual entry/exit animations still apply but nested */}
+                                <div className="space-y-6">
+                                    <AnimatePresence mode="popLayout" initial={false}>
+                                        {sortedIdeas
+                                            .filter(idea => Date.now() - (idea.timestamp || Date.now()) < 7 * 24 * 60 * 60 * 1000)
+                                            .map((idea) => (
+                                                <InspirationItem
+                                                    key={idea.id}
+                                                    idea={idea}
+                                                    onRemove={handleRemove}
+                                                    onArchive={handleArchive}
+                                                    onCopy={handleCopy}
+                                                    onUpdateColor={handleUpdateColor}
+                                                    onUpdateNote={handleUpdateNote}
+                                                    onUpdateContent={handleUpdateContent}
+                                                    onToggleComplete={handleToggleComplete}
+                                                    copiedId={copiedId}
+                                                    isSelectionMode={isSelectionMode}
+                                                    isSelected={selectedIdeaIds.includes(idea.id)}
+                                                    onSelect={handleToggleSelect}
+                                                />
+                                            ))}
+                                    </AnimatePresence>
+                                </div>
 
-                                    {/* Older Ideas - Grouped by week */}
-                                    {(() => {
-                                        const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 7 * 24 * 60 * 60 * 1000);
-                                        if (olderIdeas.length === 0) return null;
+                                {/* Older Ideas - Grouped by week */}
+                                {(() => {
+                                    const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 7 * 24 * 60 * 60 * 1000);
+                                    if (olderIdeas.length === 0) return null;
 
-                                        // Group by week
-                                        const weekGroups = {};
-                                        olderIdeas.forEach(idea => {
-                                            const date = new Date(idea.timestamp || Date.now());
-                                            const day = date.getDay();
-                                            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-                                            const weekStart = new Date(date.setDate(diff));
-                                            weekStart.setHours(0, 0, 0, 0);
-                                            const weekEnd = new Date(weekStart);
-                                            weekEnd.setDate(weekEnd.getDate() + 6);
-                                            weekEnd.setHours(23, 59, 59, 999);
+                                    // Group by week
+                                    const weekGroups = {};
+                                    olderIdeas.forEach(idea => {
+                                        const date = new Date(idea.timestamp || Date.now());
+                                        const day = date.getDay();
+                                        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+                                        const weekStart = new Date(date.setDate(diff));
+                                        weekStart.setHours(0, 0, 0, 0);
+                                        const weekEnd = new Date(weekStart);
+                                        weekEnd.setDate(weekEnd.getDate() + 6);
+                                        weekEnd.setHours(23, 59, 59, 999);
 
-                                            const weekKey = weekStart.getTime();
-                                            if (!weekGroups[weekKey]) {
-                                                weekGroups[weekKey] = {
-                                                    start: weekStart,
-                                                    end: weekEnd,
-                                                    ideas: []
-                                                };
-                                            }
-                                            weekGroups[weekKey].ideas.push(idea);
-                                        });
+                                        const weekKey = weekStart.getTime();
+                                        if (!weekGroups[weekKey]) {
+                                            weekGroups[weekKey] = {
+                                                start: weekStart,
+                                                end: weekEnd,
+                                                ideas: []
+                                            };
+                                        }
+                                        weekGroups[weekKey].ideas.push(idea);
+                                    });
 
-                                        const sortedWeeks = Object.values(weekGroups).sort((a, b) => b.start - a.start);
+                                    const sortedWeeks = Object.values(weekGroups).sort((a, b) => b.start - a.start);
 
-                                        return sortedWeeks.map(week => (
-                                            <div key={week.start.getTime()}>
-                                                <div className="flex items-center gap-3 mb-4 mt-8 cursor-pointer group">
-                                                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
-                                                    <span className="text-xs font-medium text-pink-300 dark:text-pink-600 tracking-wide whitespace-nowrap group-hover:text-pink-400 transition-colors">
-                                                        {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                        {' - '}
-                                                        {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                    </span>
-                                                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
-                                                </div>
-                                                <div className="space-y-6">
-                                                    <AnimatePresence mode="popLayout" initial={false}>
-                                                        {week.ideas.map((idea) => (
-                                                            <InspirationItem
-                                                                key={idea.id}
-                                                                idea={idea}
-                                                                onRemove={handleRemove}
-                                                                onArchive={handleArchive}
-                                                                onCopy={handleCopy}
-                                                                onUpdateColor={handleUpdateColor}
-                                                                onUpdateNote={handleUpdateNote}
-                                                                onUpdateContent={handleUpdateContent}
-                                                                onToggleComplete={handleToggleComplete}
-                                                                copiedId={copiedId}
-                                                                isSelectionMode={isSelectionMode}
-                                                                isSelected={selectedIdeaIds.includes(idea.id)}
-                                                                onSelect={handleToggleSelect}
-                                                            />
-                                                        ))}
-                                                    </AnimatePresence>
-                                                </div>
+                                    return sortedWeeks.map(week => (
+                                        <div key={week.start.getTime()}>
+                                            <div className="flex items-center gap-3 mb-4 mt-8 cursor-pointer group">
+                                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
+                                                <span className="text-xs font-medium text-pink-300 dark:text-pink-600 tracking-wide whitespace-nowrap group-hover:text-pink-400 transition-colors">
+                                                    {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                    {' - '}
+                                                    {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                </span>
+                                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
                                             </div>
-                                        ));
-                                    })()}
-
-                                    {ideas.length === 0 && (
-                                        <motion.div
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            className="py-32 text-center"
-                                        >
-                                            <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                <Lightbulb className="text-gray-300 dark:text-gray-600" size={24} />
+                                            <div className="space-y-6">
+                                                <AnimatePresence mode="popLayout" initial={false}>
+                                                    {week.ideas.map((idea) => (
+                                                        <InspirationItem
+                                                            key={idea.id}
+                                                            idea={idea}
+                                                            onRemove={handleRemove}
+                                                            onArchive={handleArchive}
+                                                            onCopy={handleCopy}
+                                                            onUpdateColor={handleUpdateColor}
+                                                            onUpdateNote={handleUpdateNote}
+                                                            onUpdateContent={handleUpdateContent}
+                                                            onToggleComplete={handleToggleComplete}
+                                                            copiedId={copiedId}
+                                                            isSelectionMode={isSelectionMode}
+                                                            isSelected={selectedIdeaIds.includes(idea.id)}
+                                                            onSelect={handleToggleSelect}
+                                                        />
+                                                    ))}
+                                                </AnimatePresence>
                                             </div>
-                                            <p className="text-gray-400 dark:text-gray-500 text-sm font-light tracking-wide">
-                                                {t('inspiration.emptyState')}
-                                            </p>
-                                        </motion.div>
-                                    )}
-                                </motion.div>
-                            </AnimatePresence>
-                        </div>
-                    </motion.div>
+                                        </div>
+                                    ));
+                                })()}
+
+                                {ideas.length === 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="py-32 text-center"
+                                    >
+                                        <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <Lightbulb className="text-gray-300 dark:text-gray-600" size={24} />
+                                        </div>
+                                        <p className="text-gray-400 dark:text-gray-500 text-sm font-light tracking-wide">
+                                            {t('inspiration.emptyState')}
+                                        </p>
+                                    </motion.div>
+                                )}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+                </motion.div>
                 ) : (
-                    <motion.div
-                        key="writing"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        <WritingBoard />
-                    </motion.div>
+                <motion.div
+                    key="writing"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <WritingBoard />
+                </motion.div>
                 )}
             </AnimatePresence>
 
             {/* Undo Toast */}
             <AnimatePresence>
-                {deletedIdeas.length > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 50 }}
-                        className="fixed bottom-24 left-6 right-6 md:bottom-10 md:left-auto md:right-10 md:w-auto bg-pink-50 dark:bg-pink-900 text-pink-900 dark:text-pink-50 px-6 py-3 rounded-xl shadow-2xl shadow-pink-100 dark:shadow-pink-900/20 border border-pink-100 dark:border-pink-800 flex items-center justify-between md:justify-start gap-4 z-50"
-                    >
-                        <span className="text-sm font-medium">
-                            {deletedIdeas[deletedIdeas.length - 1]?.wasArchived
-                                ? t('inspiration.ideaArchived', '已归档')
-                                : t('inspiration.ideaDeleted')}
-                            {deletedIdeas.length > 1 && <span className="ml-1 opacity-70">({deletedIdeas.length})</span>}
-                        </span>
-                        <button
-                            onClick={handleUndo}
-                            className="text-sm font-bold text-pink-500 dark:text-pink-300 hover:text-pink-400 dark:hover:text-pink-200 transition-colors flex items-center gap-2"
+                {
+                    deletedIdeas.length > 0 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 50 }}
+                            className="fixed bottom-24 left-6 right-6 md:bottom-10 md:left-auto md:right-10 md:w-auto bg-pink-50 dark:bg-pink-900 text-pink-900 dark:text-pink-50 px-6 py-3 rounded-xl shadow-2xl shadow-pink-100 dark:shadow-pink-900/20 border border-pink-100 dark:border-pink-800 flex items-center justify-between md:justify-start gap-4 z-50"
                         >
-                            <span>{t('common.undo')}</span>
-                            <kbd className="text-[10px] bg-pink-100 dark:bg-pink-800 px-1.5 py-0.5 rounded text-pink-600 dark:text-pink-200 font-mono border border-pink-200 dark:border-pink-700">⌘Z</kbd>
-                        </button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                            <span className="text-sm font-medium">
+                                {deletedIdeas[deletedIdeas.length - 1]?.wasArchived
+                                    ? t('inspiration.ideaArchived', '已归档')
+                                    : t('inspiration.ideaDeleted')}
+                                {deletedIdeas.length > 1 && <span className="ml-1 opacity-70">({deletedIdeas.length})</span>}
+                            </span>
+                            <button
+                                onClick={handleUndo}
+                                className="text-sm font-bold text-pink-500 dark:text-pink-300 hover:text-pink-400 dark:hover:text-pink-200 transition-colors flex items-center gap-2"
+                            >
+                                <span>{t('common.undo')}</span>
+                                <kbd className="text-[10px] bg-pink-100 dark:bg-pink-800 px-1.5 py-0.5 rounded text-pink-600 dark:text-pink-200 font-mono border border-pink-200 dark:border-pink-700">⌘Z</kbd>
+                            </button>
+                        </motion.div>
+                    )
+                }
+            </AnimatePresence >
 
             {/* Week Selector Modal */}
-            <AnimatePresence>
+            < AnimatePresence >
                 {showWeekSelector && (
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -928,10 +912,10 @@ const InspirationModule = () => {
                         </motion.div>
                     </motion.div>
                 )}
-            </AnimatePresence>
+            </AnimatePresence >
 
             {/* Batch Action Bar */}
-            <AnimatePresence>
+            < AnimatePresence >
                 {isSelectionMode && selectedIdeaIds.length > 0 && (
                     <motion.div
                         initial={{ opacity: 0, y: 100 }}
@@ -971,7 +955,7 @@ const InspirationModule = () => {
                         </div>
                     </motion.div>
                 )}
-            </AnimatePresence>
+            </AnimatePresence >
         </div >
     );
 };

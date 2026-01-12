@@ -388,4 +388,4 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
     );
 };
 
-export default InspirationItem;
+export default React.memo(InspirationItem);

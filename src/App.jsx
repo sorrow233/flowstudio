@@ -4,6 +4,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ErrorBoundary from './components/ErrorBoundary';
 import InspirationModule from './features/lifecycle/InspirationModule';
+import WritingModule from './features/lifecycle/WritingModule';
 import InspirationArchiveModule from './features/lifecycle/InspirationArchiveModule';
 import PendingModule from './features/lifecycle/PendingModule';
 import PrimaryDevModule from './features/lifecycle/PrimaryDevModule';
@@ -39,6 +40,7 @@ function App() {
                                     <Routes location={location} key={location.pathname}>
                                         <Route path="/" element={<Navigate to="/inspiration" replace />} />
                                         <Route path="/inspiration" element={<InspirationModule />} />
+                                        <Route path="/writing" element={<WritingModule />} />
                                         <Route path="/inspiration/archive" element={<InspirationArchiveModule />} />
                                         <Route path="/sprout" element={<PendingModule />} />
                                         <Route path="/flow" element={<PrimaryDevModule />} />
