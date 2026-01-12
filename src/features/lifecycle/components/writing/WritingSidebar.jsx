@@ -103,7 +103,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
     };
 
     return (
-        <div className="w-80 h-full flex flex-col border-r border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-900/50 backdrop-blur-xl">
+        <div className="w-64 h-full flex flex-col border-r border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-900/50 backdrop-blur-xl">
             {/* Header / Search */}
             <div className="p-4 pt-6">
                 <div className="relative group">
