@@ -119,16 +119,6 @@ const WritingBoard = () => {
                             initial={isMobile ? { x: '-100%' } : { width: 0, opacity: 0, x: -20 }}
                             animate={isMobile ? { x: 0 } : { width: 'auto', opacity: 1, x: 0 }}
                             exit={isMobile ? { x: '-100%' } : { width: 0, opacity: 0, x: -20 }}
-                            drag={isMobile ? "x" : false}
-                            dragConstraints={isMobile ? { left: 0, right: 0 } : false}
-                            dragElastic={isMobile ? { left: 0.1, right: 0 } : 0}
-                            dragDirectionLock
-                            onDragEnd={(e, info) => {
-                                // Close if swiped left more than 50px OR high velocity left
-                                if (isMobile && (info.offset.x < -50 || info.velocity.x < -300)) {
-                                    setIsSidebarOpen(false);
-                                }
-                            }}
                             transition={{
                                 type: "spring",
                                 stiffness: 400,
@@ -137,7 +127,7 @@ const WritingBoard = () => {
                             }}
                             className={`
                                 h-full flex-shrink-0 relative z-50
-                                ${isMobile ? 'fixed inset-y-0 left-0 w-[55%] max-w-[260px]' : 'relative'}
+                                ${isMobile ? 'fixed inset-y-0 left-0 w-[60%] max-w-[280px]' : 'relative'}
                             `}
                         >
                             <WritingSidebar
@@ -152,11 +142,22 @@ const WritingBoard = () => {
                                 isMobile={isMobile}
                             />
 
-                            {/* Visual Drag Handle on the right edge for mobile */}
+                            {/* Specialized Sidebar Drag Handle for closing on mobile */}
                             {isMobile && (
-                                <div className="absolute top-1/2 -right-4 -translate-y-1/2 w-8 h-24 flex items-center justify-center pointer-events-none">
-                                    <div className="w-1.5 h-12 bg-gray-300/40 dark:bg-gray-700/40 rounded-full blur-[1px]" />
-                                </div>
+                                <motion.div
+                                    drag="x"
+                                    dragConstraints={{ left: 0, right: 0 }}
+                                    dragElastic={{ left: 0.1, right: 0 }}
+                                    onDragEnd={(e, info) => {
+                                        // If swiped left on the handle, close the sidebar
+                                        if (info.offset.x < -40 || info.velocity.x < -300) {
+                                            setIsSidebarOpen(false);
+                                        }
+                                    }}
+                                    className="absolute top-0 bottom-0 -right-8 w-10 flex items-center justify-center cursor-grab active:cursor-grabbing z-50 group"
+                                >
+                                    <div className="w-1 h-32 bg-gray-400/20 group-active:bg-sky-500/40 rounded-full blur-[0.5px] transition-colors duration-300" />
+                                </motion.div>
                             )}
                         </motion.div>
                     </>

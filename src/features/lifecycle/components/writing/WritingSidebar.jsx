@@ -10,37 +10,43 @@ import { WRITING_CATEGORIES } from '../../../../utils/constants';
 const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
     const category = WRITING_CATEGORIES.find(c => c.id === (doc.category || 'draft')) || WRITING_CATEGORIES[0];
 
-    // Hooks for precise gesture control (Synced with InspirationItem)
+    // Precise motion values for "fluid" follow-finger feel
     const x = useMotionValue(0);
 
-    // Scale transformations based on new narrower sidebar width
-    const deleteBackgroundColor = useTransform(x, [0, -60, -150], ['rgba(244, 63, 94, 0)', 'rgba(244, 63, 94, 0.2)', 'rgba(244, 63, 94, 1)']);
+    // Background color: transparent to vibrant ruby
+    const deleteBackgroundColor = useTransform(x, [0, -60, -150], ['rgba(244, 63, 94, 0)', 'rgba(244, 63, 94, 0.4)', 'rgba(244, 63, 94, 1)']);
+
+    // Icon scaling and opacity: only visible when swiping deep enough
     const deleteIconOpacity = useTransform(x, [0, -40, -100], [0, 0, 1]);
-    const deleteIconScale = useTransform(x, [0, -40, -120], [0.5, 0.5, 1.1]);
-    const deleteIconRotate = useTransform(x, [0, -120], [0, -15]);
+    const deleteIconScale = useTransform(x, [0, -40, -120], [0.6, 0.6, 1.1]);
+    const deleteIconRotate = useTransform(x, [0, -150], [0, -15]);
 
     return (
-        <div className="relative group overflow-hidden mb-1 mx-2">
-            {/* Delete Background Action Surface */}
+        <div className="relative group overflow-hidden mb-1.5 mx-2">
+            {/* Action Layer Below (Delete) */}
             <motion.div
                 style={{ backgroundColor: deleteBackgroundColor }}
                 className="absolute inset-0 rounded-2xl flex items-center justify-end px-6 z-0"
             >
                 <motion.div style={{ opacity: deleteIconOpacity, scale: deleteIconScale, rotate: deleteIconRotate }}>
-                    <Trash2 className="text-white w-5 h-5" />
+                    <Trash2 className="text-white w-5 h-5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.2)]" />
                 </motion.div>
             </motion.div>
 
+            {/* Content Layer Above (Fluid & Snappy) */}
             <motion.div
                 layout
                 style={{ x }}
                 drag="x"
                 dragDirectionLock
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={{ left: 0.6, right: 0.1 }}
+                dragConstraints={{ left: -150, right: 0 }}
+                dragElastic={{ left: 0.15, right: 0.05 }} // Tighter, more "跟手" feel
                 onDragEnd={(e, info) => {
-                    // Optimized threshold for narrow mobile sidebar (fixed at approx 260px)
-                    if (info.offset.x < -120 || (info.velocity.x < -400 && info.offset.x < -40)) {
+                    // Accidental touch protection: must swipe at least 80px AND have high velocity, 
+                    // or swipe a full 160px regardless of velocity.
+                    const isSwipeDelete = (info.offset.x < -160) || (info.offset.x < -80 && info.velocity.x < -600);
+
+                    if (isSwipeDelete) {
                         onDelete(doc);
                     }
                 }}
@@ -55,11 +61,11 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
                     opacity: { duration: 0.2 }
                 }}
                 className={`
-                    relative p-5 rounded-2xl cursor-pointer z-10
-                    border transition-all duration-300 backdrop-blur-md
+                    relative z-10 p-5 rounded-2xl cursor-pointer transition-shadow duration-300
+                    border border-transparent select-none active:scale-[0.99]
                     ${isActive
-                        ? 'bg-white dark:bg-gray-800 shadow-[0_10px_30px_-10px_rgba(56,189,248,0.3)] border-sky-300/60 dark:border-sky-700/60 ring-1 ring-sky-200/50 dark:ring-sky-800/30'
-                        : 'bg-white/70 dark:bg-gray-800/70 border-white/50 dark:border-gray-700/30 hover:bg-white dark:hover:bg-gray-800 hover:shadow-xl hover:shadow-sky-500/10 hover:border-sky-200 dark:hover:border-sky-800'}
+                        ? 'bg-white/95 dark:bg-gray-800/95 shadow-[0_12px_24px_-8px_rgba(56,189,248,0.25)] border-sky-200/50 dark:border-sky-500/20'
+                        : 'bg-white/40 dark:bg-gray-900/40 hover:bg-white/60 dark:hover:bg-gray-800/60 transition-colors'}
                 `}
             >
                 <div className="flex items-start gap-4">
