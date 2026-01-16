@@ -13,6 +13,9 @@ import { COLOR_CONFIG } from './components/inspiration/InspirationUtils';
 import RichTextInput from './components/inspiration/RichTextInput';
 import Spotlight from '../../components/shared/Spotlight';
 import { INSPIRATION_CATEGORIES } from '../../utils/constants';
+import { useSyncedCategories } from '../sync/useSyncStore';
+import CategoryManager from './components/inspiration/CategoryManager';
+import { Settings2 } from 'lucide-react';
 
 // Auto color logic: Every 3 items, switch to next color
 const getNextAutoColorIndex = (totalCount) => {
@@ -27,6 +30,11 @@ const InspirationModule = () => {
     // Sync - 使用 immediateSync 实现即时同步
     const { doc, immediateSync, status } = useSync();
     const isReady = status === 'synced';
+
+    // Custom Categories
+    const { categories: syncedCategories, addCategory, updateCategory, removeCategory } = useSyncedCategories(doc);
+    const categories = syncedCategories.length > 0 ? syncedCategories : INSPIRATION_CATEGORIES;
+    const [isCategoryManagerOpen, setCategoryManagerOpen] = useState(false);
 
     const { t } = useTranslation();
     const {
@@ -79,6 +87,14 @@ const InspirationModule = () => {
     const [selectedIdeaIds, setSelectedIdeaIds] = useState([]); // 已选中的 ID
     const editorRef = useRef(null);
     const textareaRef = useRef(null); // Define textareaRef even if not used widely now
+
+    // Validate selectedCategory (Correctly placed AFTER selectedCategory declaration)
+    useEffect(() => {
+        if (categories.length > 0 && !categories.find(c => c.id === selectedCategory)) {
+            const defaultCat = categories.find(c => c.id === 'note') || categories[0];
+            if (defaultCat) setSelectedCategory(defaultCat.id);
+        }
+    }, [categories, selectedCategory]);
 
     // Autocomplete State
     const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -619,23 +635,22 @@ const InspirationModule = () => {
                                         animate={{ y: 0, opacity: 1 }}
                                         exit={{ y: -20, opacity: 0 }}
                                         transition={{ duration: 0.2, ease: "easeOut" }}
-                                        className={`text-xs font-medium bg-gradient-to-r bg-clip-text text-transparent ${selectedCategory === 'note' ? 'from-pink-400 to-rose-500' :
-                                            selectedCategory === 'todo' ? 'from-blue-400 to-indigo-500' :
-                                                'from-violet-500 to-fuchsia-500'
+                                        className={`text-xs font-medium bg-gradient-to-r bg-clip-text text-transparent ${categories.find(c => c.id === selectedCategory)?.textColor?.replace('text-', 'from-').replace('400', '400 to-gray-500') || 'from-gray-500 to-gray-700'
                                             }`}
                                     >
-                                        {INSPIRATION_CATEGORIES.find(c => c.id === selectedCategory)?.label}
+                                        {categories.find(c => c.id === selectedCategory)?.label || 'Inspiration'}
                                     </motion.span>
                                 </AnimatePresence>
                             </div>
 
                             {/* Dots Section */}
                             <div className="flex items-center gap-1">
-                                {INSPIRATION_CATEGORIES.map(cat => (
+                                {categories.map(cat => (
                                     <button
                                         key={cat.id}
                                         onClick={() => setSelectedCategory(cat.id)}
                                         className="relative w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 group/dot"
+                                        title={cat.label}
                                     >
                                         {selectedCategory === cat.id && (
                                             <motion.div
@@ -651,6 +666,15 @@ const InspirationModule = () => {
                                             `} />
                                     </button>
                                 ))}
+
+                                {/* Settings Button */}
+                                <button
+                                    onClick={() => setCategoryManagerOpen(true)}
+                                    className="relative w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 group/settings hover:bg-gray-100 dark:hover:bg-gray-800 ml-1"
+                                    title="管理分类"
+                                >
+                                    <Settings2 size={14} className="text-gray-400 group-hover/settings:text-gray-600 dark:group-hover/settings:text-gray-300 transition-colors" />
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -912,17 +936,17 @@ const InspirationModule = () => {
                         initial={{ opacity: 0, y: 100 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 100 }}
-                        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[110] w-[90%] md:w-auto"
+                        className="fixed bottom-0 left-0 right-0 md:bottom-10 md:left-1/2 md:-translate-x-1/2 z-[110] md:w-auto"
                     >
-                        <div className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border border-gray-100 dark:border-gray-800 rounded-2xl shadow-2xl p-3 flex items-center gap-2 md:gap-3">
-                            {/* 已选项 - 固定在左侧 */}
+                        <div className="bg-white/90 dark:bg-gray-950/90 md:bg-white/80 md:dark:bg-gray-950/80 backdrop-blur-2xl border-t md:border border-gray-100 dark:border-gray-800 md:rounded-2xl shadow-[0_-8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.2)] md:shadow-2xl px-4 py-3 md:p-3 pb-[max(12px,env(safe-area-inset-bottom))] md:pb-3 flex items-center justify-between md:justify-start gap-4 md:gap-3 w-full md:w-auto transition-all duration-300">
+
+                            {/* 已选项 */}
                             <div className="px-3 py-2 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex-shrink-0">
                                 <span className="text-xs font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">{selectedIdeaIds.length} 项</span>
                             </div>
 
-                            {/* 转移按钮 - 可滚动区域 */}
-                            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar flex-1 min-w-0">
-                                {INSPIRATION_CATEGORIES.map(cat => (
+                            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar flex-1 min-w-0 justify-center md:justify-start">
+                                {categories.map(cat => (
                                     <button
                                         key={cat.id}
                                         onClick={() => handleBatchMove(cat.id)}
@@ -948,6 +972,15 @@ const InspirationModule = () => {
                     </motion.div>
                 )}
             </AnimatePresence >
+
+            <CategoryManager
+                isOpen={isCategoryManagerOpen}
+                onClose={() => setCategoryManagerOpen(false)}
+                categories={categories}
+                onAdd={addCategory}
+                onUpdate={updateCategory}
+                onRemove={removeCategory}
+            />
         </div >
     );
 };

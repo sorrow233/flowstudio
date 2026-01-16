@@ -78,22 +78,11 @@
         rel="stylesheet">
 
     <style>
-        @media (display-mode: standalone) {
-
-            html,
-            body {
-                background-color: #fdf2f8 !important;
-            }
-
-            @media (prefers-color-scheme: dark) {
-
-                html,
-                body {
-                    background-color: #0f172a !important;
-                }
-            }
+        <style>@media (display-mode: standalone) {
+            /* 移除强制背景色，交给 React 应用控制 */
         }
     </style>
+
 </head>
 
 <body>

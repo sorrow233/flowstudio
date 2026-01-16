@@ -6,6 +6,7 @@ import { SyncEngine } from './SyncEngine';
 export { useSyncedMap } from './hooks/useSyncedMap';
 export { useSyncedProjects, useProjectMigration } from './hooks/useSyncedProjects';
 export { useDataMigration } from './hooks/useDataMigration';
+export { useSyncedCategories } from './hooks/useSyncedCategories';
 
 // Global Map to store SyncEngines (one per docId)
 const engineMap = new Map();
