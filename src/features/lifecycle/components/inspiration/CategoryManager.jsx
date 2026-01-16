@@ -23,7 +23,8 @@ const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemov
     // Add new category state
     const [isAdding, setIsAdding] = useState(false);
     const [newLabel, setNewLabel] = useState('');
-    const [newColor, setNewColor] = useState(COLOR_PRESETS[0]);
+    // Random default color to avoid repetitive pink
+    const [newColor, setNewColor] = useState(() => COLOR_PRESETS[Math.floor(Math.random() * COLOR_PRESETS.length)]);
 
     const startEdit = (cat) => {
         setEditingId(cat.id);
@@ -50,7 +51,7 @@ const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemov
                 ...newColor
             });
             setNewLabel('');
-            setNewColor(COLOR_PRESETS[0]);
+            setNewColor(COLOR_PRESETS[Math.floor(Math.random() * COLOR_PRESETS.length)]);
             setIsAdding(false);
         }
     };

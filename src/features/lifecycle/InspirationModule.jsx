@@ -33,7 +33,25 @@ const InspirationModule = () => {
 
     // Custom Categories
     const { categories: syncedCategories, addCategory, updateCategory, removeCategory } = useSyncedCategories(doc);
-    const categories = syncedCategories.length > 0 ? syncedCategories : INSPIRATION_CATEGORIES;
+
+    // Merge synced categories with defaults to ensure colors exist (fixes missing colors in old data)
+    const categories = useMemo(() => {
+        const baseCategories = syncedCategories.length > 0 ? syncedCategories : INSPIRATION_CATEGORIES;
+        return baseCategories.map(cat => {
+            const defaultCat = INSPIRATION_CATEGORIES.find(d => d.id === cat.id);
+            if (defaultCat) {
+                return {
+                    ...defaultCat,
+                    ...cat,
+                    textColor: cat.textColor || defaultCat.textColor,
+                    dotColor: cat.dotColor || defaultCat.dotColor,
+                    color: cat.color || defaultCat.color
+                };
+            }
+            return cat;
+        });
+    }, [syncedCategories]);
+
     const [isCategoryManagerOpen, setCategoryManagerOpen] = useState(false);
 
     const { t } = useTranslation();
@@ -635,8 +653,7 @@ const InspirationModule = () => {
                                         animate={{ y: 0, opacity: 1 }}
                                         exit={{ y: -20, opacity: 0 }}
                                         transition={{ duration: 0.2, ease: "easeOut" }}
-                                        className={`text-xs font-medium bg-gradient-to-r bg-clip-text text-transparent ${categories.find(c => c.id === selectedCategory)?.textColor?.replace('text-', 'from-').replace('400', '400 to-gray-500') || 'from-gray-500 to-gray-700'
-                                            }`}
+                                        className={`text-xs font-medium ${categories.find(c => c.id === selectedCategory)?.textColor || 'text-gray-700 dark:text-gray-300'}`}
                                     >
                                         {categories.find(c => c.id === selectedCategory)?.label || 'Inspiration'}
                                     </motion.span>
