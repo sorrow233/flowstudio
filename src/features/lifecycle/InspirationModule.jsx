@@ -35,9 +35,18 @@ const InspirationModule = () => {
     const { categories: syncedCategories, addCategory, updateCategory, removeCategory } = useSyncedCategories(doc);
 
     // Merge synced categories with defaults to ensure colors exist (fixes missing colors in old data)
+    // Also deduplicate by ID to handle potential sync data corruption
     const categories = useMemo(() => {
         const baseCategories = syncedCategories.length > 0 ? syncedCategories : INSPIRATION_CATEGORIES;
-        return baseCategories.map(cat => {
+
+        const uniqueMap = new Map();
+        baseCategories.forEach(cat => {
+            if (!uniqueMap.has(cat.id)) {
+                uniqueMap.set(cat.id, cat);
+            }
+        });
+
+        return Array.from(uniqueMap.values()).map(cat => {
             const defaultCat = INSPIRATION_CATEGORIES.find(d => d.id === cat.id);
             if (defaultCat) {
                 return {
