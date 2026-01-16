@@ -914,32 +914,33 @@ const InspirationModule = () => {
                         exit={{ opacity: 0, y: 100 }}
                         className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[110] w-[90%] md:w-auto"
                     >
-                        <div className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border border-gray-100 dark:border-gray-800 rounded-2xl shadow-2xl p-3 flex flex-wrap items-center gap-3 overflow-hidden">
-                            <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 rounded-xl mr-2">
-                                <span className="text-xs font-bold text-blue-600 dark:text-blue-400">已选 {selectedIdeaIds.length} 项</span>
+                        <div className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border border-gray-100 dark:border-gray-800 rounded-2xl shadow-2xl p-3 flex items-center gap-2 md:gap-3">
+                            {/* 已选项 - 固定在左侧 */}
+                            <div className="px-3 py-2 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex-shrink-0">
+                                <span className="text-xs font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">{selectedIdeaIds.length} 项</span>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            {/* 转移按钮 - 可滚动区域 */}
+                            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar flex-1 min-w-0">
                                 {INSPIRATION_CATEGORIES.map(cat => (
                                     <button
                                         key={cat.id}
                                         onClick={() => handleBatchMove(cat.id)}
-                                        className={`px-4 py-2 rounded-xl text-xs font-medium transition-all duration-300 flex items-center gap-2 border ${cat.textColor} ${cat.color.replace('bg-', 'bg-opacity-10 dark:bg-opacity-20 ')} border-transparent hover:border-current shadow-sm active:scale-95`}
+                                        className={`px-3 py-2 rounded-xl text-xs font-medium transition-all duration-300 flex items-center gap-1.5 border flex-shrink-0 ${cat.textColor} ${cat.color.replace('bg-', 'bg-opacity-10 dark:bg-opacity-20 ')} border-transparent hover:border-current shadow-sm active:scale-95`}
                                     >
                                         <div className={`w-2 h-2 rounded-full ${cat.dotColor}`} />
-                                        转移至 {cat.label}
+                                        <span className="whitespace-nowrap">{cat.label}</span>
                                     </button>
                                 ))}
                             </div>
 
-                            <div className="h-4 w-px bg-gray-200 dark:bg-gray-800 mx-2 hidden md:block" />
-
+                            {/* 取消按钮 - 固定在右侧 */}
                             <button
                                 onClick={() => {
                                     setIsSelectionMode(false);
                                     setSelectedIdeaIds([]);
                                 }}
-                                className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-medium transition-colors active:scale-95"
+                                className="px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-medium transition-colors active:scale-95 flex-shrink-0"
                             >
                                 取消
                             </button>
