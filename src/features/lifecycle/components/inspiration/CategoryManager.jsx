@@ -26,6 +26,9 @@ const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemov
     // Random default color to avoid repetitive pink
     const [newColor, setNewColor] = useState(() => COLOR_PRESETS[Math.floor(Math.random() * COLOR_PRESETS.length)]);
 
+    // Delete confirmation state
+    const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+
     const startEdit = (cat) => {
         setEditingId(cat.id);
         setEditLabel(cat.label);
@@ -118,18 +121,43 @@ const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemov
                                             <span className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300">{cat.label}</span>
 
                                             <div className="opacity-100 sm:opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
-                                                <button onClick={() => startEdit(cat)} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
-                                                    <Edit2 size={14} />
-                                                </button>
-                                                {/* Prevent removing the last category */}
-                                                {categories.length > 1 && (
-                                                    <button onClick={() => {
-                                                        if (window.confirm(`确定要删除分类"${cat.label}"吗？该分类下的灵感将不再显示(需重新分类)。`)) {
-                                                            onRemove(cat.id);
-                                                        }
-                                                    }} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                                                        <Trash2 size={14} />
-                                                    </button>
+                                                {deleteConfirmId === cat.id ? (
+                                                    <div className="flex items-center animate-in fade-in zoom-in duration-200">
+                                                        <span className="text-xs text-red-500 mr-2 font-medium">确定删除?</span>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                onRemove(cat.id);
+                                                                setDeleteConfirmId(null);
+                                                            }}
+                                                            className="p-1 text-red-500 hover:bg-red-50 rounded bg-white shadow-sm border border-red-100 mr-1"
+                                                            title="确认删除"
+                                                        >
+                                                            <Check size={14} />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setDeleteConfirmId(null);
+                                                            }}
+                                                            className="p-1 text-gray-400 hover:bg-gray-100 rounded"
+                                                            title="取消"
+                                                        >
+                                                            <X size={14} />
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <button onClick={() => startEdit(cat)} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
+                                                            <Edit2 size={14} />
+                                                        </button>
+                                                        {/* Prevent removing the last category */}
+                                                        {categories.length > 1 && (
+                                                            <button onClick={() => setDeleteConfirmId(cat.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        )}
+                                                    </>
                                                 )}
                                             </div>
                                         </>
