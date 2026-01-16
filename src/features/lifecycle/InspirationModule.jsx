@@ -37,18 +37,20 @@ const InspirationModule = () => {
     } = useSyncedProjects(doc, 'all_projects');
 
     // 包装 CRUD 操作，添加即时同步（仅 Inspiration 页面）
-    const addIdea = (idea) => {
+    const addIdea = useCallback((idea) => {
         addProjectBase(idea);
         immediateSync?.();
-    };
-    const removeIdea = (id) => {
+    }, [addProjectBase, immediateSync]);
+
+    const removeIdea = useCallback((id) => {
         removeProjectBase(id);
         immediateSync?.();
-    };
-    const updateIdea = (id, updates) => {
+    }, [removeProjectBase, immediateSync]);
+
+    const updateIdea = useCallback((id, updates) => {
         updateProjectBase(id, updates);
         immediateSync?.();
-    };
+    }, [updateProjectBase, immediateSync]);
 
     // Filter for ideas (stage: 'inspiration')
     const ideas = useMemo(() =>

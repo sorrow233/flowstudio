@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Trash2, Check, Pencil, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
@@ -24,6 +24,9 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
     const config = getColorConfig(idea.colorIndex || 0);
     const categoryConfig = getCategoryConfig(idea.category); // 获取分类颜色配置
     const isCompleted = idea.completed || false;
+
+    // 缓存 parseRichText 计算结果，避免每次渲染都重新执行正则匹配
+    const parsedContent = useMemo(() => parseRichText(idea.content), [idea.content]);
 
     // Focus textarea when entering edit mode
     React.useEffect(() => {
@@ -311,7 +314,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                         ) : (
                             /* View Mode: Parsed Rich Text */
                             <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
-                                {parseRichText(idea.content)}
+                                {parsedContent}
                             </div>
                         )}
                         {/* Date/Time + Restore Button (Archive View) */}
