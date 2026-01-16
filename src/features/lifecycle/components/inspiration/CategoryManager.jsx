@@ -29,6 +29,17 @@ const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemov
     // Delete confirmation state
     const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
+    // Maximum categories limit
+    const MAX_CATEGORIES = 7;
+
+    // Get colors already in use (excluding the one being edited)
+    const usedColors = categories
+        .filter(c => c.id !== editingId)
+        .map(c => c.color);
+
+    // Available colors for new/editing category
+    const availableColors = COLOR_PRESETS.filter(p => !usedColors.includes(p.color));
+
     const startEdit = (cat) => {
         setEditingId(cat.id);
         setEditLabel(cat.label);
@@ -48,13 +59,20 @@ const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemov
     };
 
     const handleAdd = () => {
-        if (newLabel.trim()) {
+        if (newLabel.trim() && categories.length < MAX_CATEGORIES) {
             onAdd({
                 label: newLabel.trim(),
                 ...newColor
             });
             setNewLabel('');
-            setNewColor(COLOR_PRESETS[Math.floor(Math.random() * COLOR_PRESETS.length)]);
+            // Pick a random color from remaining available colors
+            const remainingColors = COLOR_PRESETS.filter(p =>
+                !categories.map(c => c.color).includes(p.color) && p.id !== newColor.id
+            );
+            setNewColor(remainingColors.length > 0
+                ? remainingColors[Math.floor(Math.random() * remainingColors.length)]
+                : COLOR_PRESETS[0]
+            );
             setIsAdding(false);
         }
     };
@@ -171,11 +189,11 @@ const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemov
                                     <div className="flex-shrink-0 relative">
                                         <div className={`w-4 h-4 rounded-full ${newColor.dotColor}`} />
                                         <select
-                                            value={COLOR_PRESETS.findIndex(p => p.id === newColor.id)}
-                                            onChange={e => setNewColor(COLOR_PRESETS[e.target.value])}
+                                            value={availableColors.findIndex(p => p.id === newColor.id)}
+                                            onChange={e => setNewColor(availableColors[e.target.value])}
                                             className="absolute inset-0 opacity-0 cursor-pointer"
                                         >
-                                            {COLOR_PRESETS.map((p, i) => (
+                                            {availableColors.map((p, i) => (
                                                 <option key={p.id} value={i}>{p.id}</option>
                                             ))}
                                         </select>
@@ -191,14 +209,24 @@ const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemov
                                     <button onClick={handleAdd} className="p-1 text-blue-500 hover:bg-blue-100 rounded"><Check size={16} /></button>
                                     <button onClick={() => setIsAdding(false)} className="p-1 text-gray-400 hover:bg-gray-100 rounded"><X size={16} /></button>
                                 </div>
-                            ) : (
+                            ) : categories.length < MAX_CATEGORIES ? (
                                 <button
-                                    onClick={() => setIsAdding(true)}
+                                    onClick={() => {
+                                        // Set initial color to first available
+                                        if (availableColors.length > 0) {
+                                            setNewColor(availableColors[Math.floor(Math.random() * availableColors.length)]);
+                                        }
+                                        setIsAdding(true);
+                                    }}
                                     className="w-full py-3 flex items-center justify-center gap-2 text-sm text-gray-500 hover:text-blue-500 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700 transition-all font-medium"
                                 >
                                     <Plus size={16} />
                                     添加分类
                                 </button>
+                            ) : (
+                                <div className="w-full py-3 text-center text-xs text-gray-400">
+                                    已达到最大分类数量 ({MAX_CATEGORIES})
+                                </div>
                             )}
                         </div>
                     </motion.div>
