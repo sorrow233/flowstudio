@@ -12,6 +12,7 @@ import AdvancedDevModule from './features/lifecycle/AdvancedDevModule';
 import CommandCenterModule from './features/blueprint/CommandCenterModule';
 import DataCenterModule from './features/lifecycle/DataCenterModule';
 import ShareViewPage from './features/share/components/ShareViewPage';
+import ShareReceiver from './features/share/ShareReceiver';
 
 import { Toaster } from 'sonner';
 import { KeymapProvider, ShortcutHelpModal, useBrowserIntercept } from './features/shortcuts';
@@ -48,6 +49,7 @@ function App() {
                                         <Route path="/blueprint" element={<CommandCenterModule />} />
                                         <Route path="/data" element={<DataCenterModule />} />
                                         <Route path="/share/:id" element={<ShareViewPage />} />
+                                        <Route path="/share-receiver" element={<ShareReceiver />} />
                                         <Route path="*" element={<Navigate to="/" replace />} />
                                     </Routes>
                                 </ErrorBoundary>
