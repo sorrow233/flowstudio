@@ -411,6 +411,47 @@ const InspirationModule = () => {
             .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     }, [ideas, selectedCategory]);
 
+    // 智能日期格式化函数（代办分类专用）
+    const formatDayLabel = useCallback((date) => {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const targetDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const diffDays = Math.floor((today - targetDay) / (24 * 60 * 60 * 1000));
+
+        if (diffDays === 0) return '今天';
+        if (diffDays === 1) return '昨天';
+        if (diffDays < 7) {
+            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            return weekdays[date.getDay()];
+        }
+        if (date.getFullYear() === now.getFullYear()) {
+            return date.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' });
+        }
+        return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+    }, []);
+
+    // 代办分类按天分组数据
+    const todosByDay = useMemo(() => {
+        if (selectedCategory !== 'todo') return null;
+
+        const groups = {};
+        sortedIdeas.forEach(idea => {
+            const date = new Date(idea.timestamp || Date.now());
+            const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+            if (!groups[dateKey]) {
+                groups[dateKey] = {
+                    date: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
+                    dateKey,
+                    ideas: []
+                };
+            }
+            groups[dateKey].ideas.push(idea);
+        });
+
+        return Object.values(groups).sort((a, b) => b.date - a.date);
+    }, [sortedIdeas, selectedCategory]);
+
     // Extract all available weeks for navigation, grouped by Year and Month
     const groupedWeeks = useMemo(() => {
         const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 7 * 24 * 60 * 60 * 1000);
@@ -719,75 +760,53 @@ const InspirationModule = () => {
                                 }}
                                 className="space-y-6"
                             >
-                                {/* Recent Ideas - Individual entry/exit animations still apply but nested */}
-                                <div className="space-y-6">
-                                    <AnimatePresence mode="popLayout" initial={false}>
-                                        {sortedIdeas
-                                            .filter(idea => Date.now() - (idea.timestamp || Date.now()) < 7 * 24 * 60 * 60 * 1000)
-                                            .map((idea) => (
-                                                <InspirationItem
-                                                    key={idea.id}
-                                                    idea={idea}
-                                                    onRemove={handleRemove}
-                                                    onArchive={handleArchive}
-                                                    onCopy={handleCopy}
-                                                    onUpdateColor={handleUpdateColor}
-                                                    onUpdateNote={handleUpdateNote}
-                                                    onUpdateContent={handleUpdateContent}
-                                                    onToggleComplete={handleToggleComplete}
-                                                    copiedId={copiedId}
-                                                    isSelectionMode={isSelectionMode}
-                                                    isSelected={selectedIdeaIds.includes(idea.id)}
-                                                    onSelect={handleToggleSelect}
-                                                />
-                                            ))}
-                                    </AnimatePresence>
-                                </div>
-
-                                {/* Older Ideas - Grouped by week */}
-                                {(() => {
-                                    const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 7 * 24 * 60 * 60 * 1000);
-                                    if (olderIdeas.length === 0) return null;
-
-                                    // Group by week
-                                    const weekGroups = {};
-                                    olderIdeas.forEach(idea => {
-                                        const date = new Date(idea.timestamp || Date.now());
-                                        const day = date.getDay();
-                                        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-                                        const weekStart = new Date(date.setDate(diff));
-                                        weekStart.setHours(0, 0, 0, 0);
-                                        const weekEnd = new Date(weekStart);
-                                        weekEnd.setDate(weekEnd.getDate() + 6);
-                                        weekEnd.setHours(23, 59, 59, 999);
-
-                                        const weekKey = weekStart.getTime();
-                                        if (!weekGroups[weekKey]) {
-                                            weekGroups[weekKey] = {
-                                                start: weekStart,
-                                                end: weekEnd,
-                                                ideas: []
-                                            };
-                                        }
-                                        weekGroups[weekKey].ideas.push(idea);
-                                    });
-
-                                    const sortedWeeks = Object.values(weekGroups).sort((a, b) => b.start - a.start);
-
-                                    return sortedWeeks.map(week => (
-                                        <div key={week.start.getTime()}>
-                                            <div className="flex items-center gap-3 mb-4 mt-8 cursor-pointer group">
-                                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
-                                                <span className="text-xs font-medium text-pink-300 dark:text-pink-600 tracking-wide whitespace-nowrap group-hover:text-pink-400 transition-colors">
-                                                    {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                    {' - '}
-                                                    {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                </span>
-                                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
+                                {/* 代办分类：按天分组显示 */}
+                                {selectedCategory === 'todo' && todosByDay && (
+                                    <div className="space-y-4">
+                                        {todosByDay.map((day, dayIndex) => (
+                                            <div key={day.dateKey}>
+                                                {/* 日期分隔线 - 蓝色主题 */}
+                                                <div className="flex items-center gap-3 mb-4 mt-6">
+                                                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-blue-200 dark:via-blue-800 to-transparent" />
+                                                    <span className="text-xs font-medium text-blue-400 dark:text-blue-500 tracking-wide whitespace-nowrap">
+                                                        {formatDayLabel(day.date)}
+                                                    </span>
+                                                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-blue-200 dark:via-blue-800 to-transparent" />
+                                                </div>
+                                                <div className="space-y-4">
+                                                    <AnimatePresence mode="popLayout" initial={false}>
+                                                        {day.ideas.map((idea) => (
+                                                            <InspirationItem
+                                                                key={idea.id}
+                                                                idea={idea}
+                                                                onRemove={handleRemove}
+                                                                onArchive={handleArchive}
+                                                                onCopy={handleCopy}
+                                                                onUpdateColor={handleUpdateColor}
+                                                                onUpdateNote={handleUpdateNote}
+                                                                onUpdateContent={handleUpdateContent}
+                                                                onToggleComplete={handleToggleComplete}
+                                                                copiedId={copiedId}
+                                                                isSelectionMode={isSelectionMode}
+                                                                isSelected={selectedIdeaIds.includes(idea.id)}
+                                                                onSelect={handleToggleSelect}
+                                                            />
+                                                        ))}
+                                                    </AnimatePresence>
+                                                </div>
                                             </div>
-                                            <div className="space-y-6">
-                                                <AnimatePresence mode="popLayout" initial={false}>
-                                                    {week.ideas.map((idea) => (
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* 其他分类：原有逻辑（最近7天平铺 + 更早按周分组） */}
+                                {selectedCategory !== 'todo' && (
+                                    <>
+                                        <div className="space-y-6">
+                                            <AnimatePresence mode="popLayout" initial={false}>
+                                                {sortedIdeas
+                                                    .filter(idea => Date.now() - (idea.timestamp || Date.now()) < 7 * 24 * 60 * 60 * 1000)
+                                                    .map((idea) => (
                                                         <InspirationItem
                                                             key={idea.id}
                                                             idea={idea}
@@ -804,11 +823,75 @@ const InspirationModule = () => {
                                                             onSelect={handleToggleSelect}
                                                         />
                                                     ))}
-                                                </AnimatePresence>
-                                            </div>
+                                            </AnimatePresence>
                                         </div>
-                                    ));
-                                })()}
+
+                                        {/* 更早的项目 - 按周分组 */}
+                                        {(() => {
+                                            const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 7 * 24 * 60 * 60 * 1000);
+                                            if (olderIdeas.length === 0) return null;
+
+                                            const weekGroups = {};
+                                            olderIdeas.forEach(idea => {
+                                                const date = new Date(idea.timestamp || Date.now());
+                                                const day = date.getDay();
+                                                const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+                                                const weekStart = new Date(date.setDate(diff));
+                                                weekStart.setHours(0, 0, 0, 0);
+                                                const weekEnd = new Date(weekStart);
+                                                weekEnd.setDate(weekEnd.getDate() + 6);
+                                                weekEnd.setHours(23, 59, 59, 999);
+
+                                                const weekKey = weekStart.getTime();
+                                                if (!weekGroups[weekKey]) {
+                                                    weekGroups[weekKey] = {
+                                                        start: weekStart,
+                                                        end: weekEnd,
+                                                        ideas: []
+                                                    };
+                                                }
+                                                weekGroups[weekKey].ideas.push(idea);
+                                            });
+
+                                            const sortedWeeks = Object.values(weekGroups).sort((a, b) => b.start - a.start);
+
+                                            return sortedWeeks.map(week => (
+                                                <div key={week.start.getTime()}>
+                                                    <div className="flex items-center gap-3 mb-4 mt-8 cursor-pointer group">
+                                                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
+                                                        <span className="text-xs font-medium text-pink-300 dark:text-pink-600 tracking-wide whitespace-nowrap group-hover:text-pink-400 transition-colors">
+                                                            {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                            {' - '}
+                                                            {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                        </span>
+                                                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
+                                                    </div>
+                                                    <div className="space-y-6">
+                                                        <AnimatePresence mode="popLayout" initial={false}>
+                                                            {week.ideas.map((idea) => (
+                                                                <InspirationItem
+                                                                    key={idea.id}
+                                                                    idea={idea}
+                                                                    onRemove={handleRemove}
+                                                                    onArchive={handleArchive}
+                                                                    onCopy={handleCopy}
+                                                                    onUpdateColor={handleUpdateColor}
+                                                                    onUpdateNote={handleUpdateNote}
+                                                                    onUpdateContent={handleUpdateContent}
+                                                                    onToggleComplete={handleToggleComplete}
+                                                                    copiedId={copiedId}
+                                                                    isSelectionMode={isSelectionMode}
+                                                                    isSelected={selectedIdeaIds.includes(idea.id)}
+                                                                    onSelect={handleToggleSelect}
+                                                                />
+                                                            ))}
+                                                        </AnimatePresence>
+                                                    </div>
+                                                </div>
+                                            ));
+                                        })()}
+                                    </>
+                                )}
 
                                 {ideas.length === 0 && (
                                     <motion.div
