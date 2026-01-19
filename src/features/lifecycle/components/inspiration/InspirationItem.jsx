@@ -319,13 +319,13 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                         )}
                         {/* Date/Time + Restore Button (Archive View) */}
                         <div className="mt-2 flex items-center justify-between">
-                            <div className="text-[11px] text-pink-300/30 dark:text-pink-500/30 font-medium group-hover/card:text-pink-300/80 dark:group-hover/card:text-pink-500/80 transition-colors">
+                            <div className={`text-[11px] font-medium transition-colors ${categoryConfig.textColor} opacity-30 group-hover/card:opacity-80`}>
                                 {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
                                     year: 'numeric',
                                     month: 'short',
                                     day: 'numeric',
                                 })}
-                                <span className="mx-1.5 text-pink-200/20 dark:text-pink-800/20">·</span>
+                                <span className="mx-1.5 opacity-30">·</span>
                                 {new Date(idea.timestamp || Date.now()).toLocaleTimeString(undefined, {
                                     hour: '2-digit',
                                     minute: '2-digit'
@@ -333,7 +333,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                                 {/* 来源标签 */}
                                 {idea.tags && idea.tags.length > 0 && (
                                     <>
-                                        <span className="mx-1.5 text-pink-200/20 dark:text-pink-800/20">·</span>
+                                        <span className="mx-1.5 opacity-30">·</span>
                                         {idea.tags.map((tag, idx) => (
                                             <span
                                                 key={idx}
@@ -382,7 +382,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
             {/* Note Display - Outside the Card */}
             {idea.note && (
                 <div className="w-full md:w-[140px] pt-1 md:pt-4 pl-4 md:pl-0 flex-shrink-0 animate-in fade-in slide-in-from-left-4 duration-500">
-                    <p className="text-[12px] font-medium text-pink-300 dark:text-pink-300/80 leading-relaxed italic break-words select-text">
+                    <p className={`text-[12px] font-medium ${categoryConfig.textColor} opacity-80 dark:opacity-70 leading-relaxed italic break-words select-text`}>
                         {idea.note}
                     </p>
                 </div>
