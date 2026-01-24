@@ -16,6 +16,7 @@ import { INSPIRATION_CATEGORIES } from '../../utils/constants';
 import { useSyncedCategories } from '../sync/useSyncStore';
 import CategoryManager from './components/inspiration/CategoryManager';
 import ImageUploader from './components/inspiration/ImageUploader';
+import { deleteImagesInContent } from './services/imageService';
 import { Settings2 } from 'lucide-react';
 
 // Auto color logic: Every 3 items, switch to next color
@@ -287,22 +288,19 @@ const InspirationModule = () => {
     }, []);
 
     const handleRemove = useCallback((id) => {
-        // Optimistic update logic if needed, but simple state update here
-        // We need ideas from state or props? ideas is from useMemo. 
-        // We can't use 'ideas' directly in useCallback if we want it to be stable unless we access current state differently.
-        // Actually, removeIdea is stable. But we need 'idea' object to add to deletedIdeas.
-        // To make this stable, we probably need functional updates or rely on ideas changing not triggered often?
-        // Wait, ideas changes often. But handleRemove prop changing will trigger re-render.
-        // Simple fix: pass id to deletedIdeas functional update might be tricky if we need the object.
-        // Let's assume re-creating this function when 'ideas' changes is acceptable, BUT 'ideas' changes only when content changes.
-        // Selection doesn't change 'ideas'. So it IS stable during selection!
-        // So wrapping in useCallback with [ideas] dependency is enough to prevent re-render during selection toggling.
         const idea = ideas.find(i => i.id === id);
         if (idea) {
             setDeletedIdeas(prev => [...prev, { ...idea, wasArchived: false }]);
             removeIdea(id);
+
+            // 异步删除 R2 中的图片（不阻塞 UI）
+            if (user?.uid && idea.content) {
+                deleteImagesInContent(idea.content, user.uid).catch(err => {
+                    console.warn('Failed to delete images:', err);
+                });
+            }
         }
-    }, [ideas, removeIdea]);
+    }, [ideas, removeIdea, user]);
 
     const handleArchive = useCallback((id) => {
         const idea = ideas.find(i => i.id === id);
