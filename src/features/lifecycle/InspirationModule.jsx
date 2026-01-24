@@ -293,14 +293,15 @@ const InspirationModule = () => {
             setDeletedIdeas(prev => [...prev, { ...idea, wasArchived: false }]);
             removeIdea(id);
 
-            // 异步删除 R2 中的图片（不阻塞 UI）
-            if (user?.uid && idea.content) {
-                deleteImagesInContent(idea.content, user.uid).catch(err => {
-                    console.warn('Failed to delete images:', err);
-                });
-            }
+            // 自动删除 R2 图片功能已关闭（避免误删）
+            // 如需启用，取消下面的注释
+            // if (user?.uid && idea.content) {
+            //     deleteImagesInContent(idea.content, user.uid).catch(err => {
+            //         console.warn('Failed to delete images:', err);
+            //     });
+            // }
         }
-    }, [ideas, removeIdea, user]);
+    }, [ideas, removeIdea]);
 
     const handleArchive = useCallback((id) => {
         const idea = ideas.find(i => i.id === id);
