@@ -64,9 +64,17 @@ const R2_IMAGE_REGEX = /(https:\/\/pub-[a-z0-9]+\.r2\.dev\/[^\s]+)/gi;
 export const parseRichText = (text) => {
     if (!text) return null;
 
-    // 首先分离图片 URL
-    const imageMatches = text.match(IMAGE_URL_REGEX) || text.match(R2_IMAGE_REGEX) || [];
-    const textWithoutImages = text.replace(IMAGE_URL_REGEX, '').replace(R2_IMAGE_REGEX, '').trim();
+    // 合并两种正则的匹配结果并去重
+    const matches1 = text.match(IMAGE_URL_REGEX) || [];
+    const matches2 = text.match(R2_IMAGE_REGEX) || [];
+    const imageMatches = [...new Set([...matches1, ...matches2])];
+
+    // 移除图片 URL 后的文本
+    let textWithoutImages = text;
+    imageMatches.forEach(url => {
+        textWithoutImages = textWithoutImages.replace(url, '');
+    });
+    textWithoutImages = textWithoutImages.trim();
 
     const parts = textWithoutImages.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]|#![^:]+:[^#]+#)/g);
 
