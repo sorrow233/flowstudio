@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { INSPIRATION_CATEGORIES } from '../../../../utils/constants';
 
 // Refined Color Configuration for "Crayon Highlighter" look
@@ -146,7 +147,66 @@ const InspirationImage = ({ src }) => {
     const [isLoaded, setIsLoaded] = React.useState(false);
     const [hasError, setHasError] = React.useState(false);
 
+    // ESC 键关闭
+    React.useEffect(() => {
+        if (!isZoomed) return;
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                setIsZoomed(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        // 禁止背景滚动
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = '';
+        };
+    }, [isZoomed]);
+
     if (hasError) return null;
+
+    // Modal 内容 - 使用 Portal 渲染到 body
+    const modal = isZoomed ? createPortal(
+        <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.95)' }}
+            onClick={() => setIsZoomed(false)}
+        >
+            {/* 图片容器 */}
+            <div
+                className="relative max-w-[90vw] max-h-[90vh] animate-in zoom-in-95 fade-in duration-200"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <img
+                    src={src}
+                    alt=""
+                    className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                    style={{ margin: 'auto' }}
+                />
+            </div>
+
+            {/* 关闭按钮 */}
+            <button
+                className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all duration-200 backdrop-blur-sm"
+                onClick={() => setIsZoomed(false)}
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+
+            {/* 提示文字 */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 text-sm">
+                点击任意位置关闭 · ESC
+            </div>
+        </div>,
+        document.body
+    ) : null;
 
     return (
         <>
@@ -157,10 +217,11 @@ const InspirationImage = ({ src }) => {
                     transition-all duration-300
                     ${isLoaded ? 'opacity-100' : 'opacity-0'}
                     hover:ring-2 hover:ring-pink-300 dark:hover:ring-pink-600
-                    hover:shadow-lg
+                    hover:shadow-lg hover:scale-[1.02]
                 `}
                 onClick={(e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     setIsZoomed(true);
                 }}
             >
@@ -173,33 +234,13 @@ const InspirationImage = ({ src }) => {
                     loading="lazy"
                 />
                 {!isLoaded && (
-                    <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg" />
+                    <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg w-32 h-32" />
                 )}
             </div>
 
-            {/* 放大查看 Modal */}
-            {isZoomed && (
-                <div
-                    className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4 cursor-zoom-out"
-                    onClick={() => setIsZoomed(false)}
-                >
-                    <img
-                        src={src}
-                        alt=""
-                        className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
-                        onClick={(e) => e.stopPropagation()}
-                    />
-                    <button
-                        className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
-                        onClick={() => setIsZoomed(false)}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-            )}
+            {/* Portal Modal */}
+            {modal}
         </>
     );
 };
+
