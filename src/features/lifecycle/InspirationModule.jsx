@@ -15,6 +15,7 @@ import Spotlight from '../../components/shared/Spotlight';
 import { INSPIRATION_CATEGORIES } from '../../utils/constants';
 import { useSyncedCategories } from '../sync/useSyncStore';
 import CategoryManager from './components/inspiration/CategoryManager';
+import ImageUploader from './components/inspiration/ImageUploader';
 import { Settings2 } from 'lucide-react';
 
 // Auto color logic: Every 3 items, switch to next color
@@ -638,6 +639,17 @@ const InspirationModule = () => {
                                                 />
                                             ))}
                                         </div>
+
+                                        {/* Image Upload Button */}
+                                        <ImageUploader
+                                            onUploadComplete={(imageUrl) => {
+                                                // 将图片 URL 添加到输入内容
+                                                setInput(prev => {
+                                                    const trimmed = prev.trim();
+                                                    return trimmed ? `${trimmed} ${imageUrl}` : imageUrl;
+                                                });
+                                            }}
+                                        />
 
                                         {/* Project Tags Bar */}
                                         <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2 mask-linear-fade">

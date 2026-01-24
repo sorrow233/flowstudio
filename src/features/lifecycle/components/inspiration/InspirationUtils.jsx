@@ -55,13 +55,21 @@ export const getCategoryConfig = (category) => {
     return cat || INSPIRATION_CATEGORIES[0]; // 默认返回「随记」
 };
 
-// Helper for parsing rich text
+// 图片 URL 正则匹配
+const IMAGE_URL_REGEX = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp)(?:\?[^\s]*)?)/gi;
+const R2_IMAGE_REGEX = /(https:\/\/pub-[a-z0-9]+\.r2\.dev\/[^\s]+)/gi;
+
+// Helper for parsing rich text (with image support)
 export const parseRichText = (text) => {
     if (!text) return null;
 
-    const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]|#![^:]+:[^#]+#)/g);
+    // 首先分离图片 URL
+    const imageMatches = text.match(IMAGE_URL_REGEX) || text.match(R2_IMAGE_REGEX) || [];
+    const textWithoutImages = text.replace(IMAGE_URL_REGEX, '').replace(R2_IMAGE_REGEX, '').trim();
 
-    return parts.map((part, index) => {
+    const parts = textWithoutImages.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]|#![^:]+:[^#]+#)/g);
+
+    const textElements = parts.map((part, index) => {
         if (part.startsWith('#!') && part.endsWith('#')) {
             const match = part.match(/#!([^:]+):([^#]+)#/);
             if (match) {
@@ -110,4 +118,88 @@ export const parseRichText = (text) => {
         }
         return <span key={index}>{part}</span>;
     });
+
+    // 如果有图片，添加图片元素
+    if (imageMatches.length > 0) {
+        const imageElements = imageMatches.map((url, idx) => (
+            <InspirationImage key={`img-${idx}`} src={url} />
+        ));
+
+        return (
+            <>
+                {textElements}
+                {imageElements.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                        {imageElements}
+                    </div>
+                )}
+            </>
+        );
+    }
+
+    return textElements;
+};
+
+// 灵感图片组件（支持点击放大）
+const InspirationImage = ({ src }) => {
+    const [isZoomed, setIsZoomed] = React.useState(false);
+    const [isLoaded, setIsLoaded] = React.useState(false);
+    const [hasError, setHasError] = React.useState(false);
+
+    if (hasError) return null;
+
+    return (
+        <>
+            {/* 缩略图 */}
+            <div
+                className={`
+                    relative rounded-lg overflow-hidden cursor-zoom-in
+                    transition-all duration-300
+                    ${isLoaded ? 'opacity-100' : 'opacity-0'}
+                    hover:ring-2 hover:ring-pink-300 dark:hover:ring-pink-600
+                    hover:shadow-lg
+                `}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setIsZoomed(true);
+                }}
+            >
+                <img
+                    src={src}
+                    alt=""
+                    className="max-h-48 max-w-full object-cover rounded-lg"
+                    onLoad={() => setIsLoaded(true)}
+                    onError={() => setHasError(true)}
+                    loading="lazy"
+                />
+                {!isLoaded && (
+                    <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg" />
+                )}
+            </div>
+
+            {/* 放大查看 Modal */}
+            {isZoomed && (
+                <div
+                    className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4 cursor-zoom-out"
+                    onClick={() => setIsZoomed(false)}
+                >
+                    <img
+                        src={src}
+                        alt=""
+                        className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                    <button
+                        className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
+                        onClick={() => setIsZoomed(false)}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            )}
+        </>
+    );
 };
