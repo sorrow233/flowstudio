@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { Image, X, Loader2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../auth/AuthContext';
@@ -9,11 +9,12 @@ import { useAuth } from '../../../auth/AuthContext';
  * 功能：
  * - 点击选择图片
  * - 拖拽上传
+ * - 粘贴上传（通过 ref.uploadFromClipboard）
  * - 客户端图片压缩
  * - 上传进度显示
  * - 白名单权限检查（服务端验证）
  */
-const ImageUploader = ({ onUploadComplete, disabled = false }) => {
+const ImageUploader = forwardRef(({ onUploadComplete, disabled = false }, ref) => {
     const { user } = useAuth();
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState(null);
@@ -46,7 +47,7 @@ const ImageUploader = ({ onUploadComplete, disabled = false }) => {
                 canvas.toBlob(
                     (blob) => {
                         if (blob) {
-                            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+                            resolve(new File([blob], file.name || 'pasted-image.jpg', { type: 'image/jpeg' }));
                         } else {
                             reject(new Error('Failed to compress image'));
                         }
@@ -67,7 +68,12 @@ const ImageUploader = ({ onUploadComplete, disabled = false }) => {
     const uploadImage = useCallback(async (file) => {
         if (!user?.uid) {
             setError('请先登录');
-            return;
+            return false;
+        }
+
+        if (!file || !file.type.startsWith('image/')) {
+            setError('请上传图片文件');
+            return false;
         }
 
         setIsUploading(true);
@@ -98,14 +104,40 @@ const ImageUploader = ({ onUploadComplete, disabled = false }) => {
 
             // 回调通知上传成功
             onUploadComplete?.(result.url);
+            return true;
 
         } catch (err) {
             console.error('Upload error:', err);
             setError(err.message || '上传失败');
+            return false;
         } finally {
             setIsUploading(false);
         }
     }, [user, compressImage, onUploadComplete]);
+
+    /**
+     * 从剪贴板数据中提取并上传图片
+     */
+    const uploadFromClipboard = useCallback(async (clipboardData) => {
+        if (!clipboardData?.items) return false;
+
+        for (const item of clipboardData.items) {
+            if (item.type.startsWith('image/')) {
+                const file = item.getAsFile();
+                if (file) {
+                    return await uploadImage(file);
+                }
+            }
+        }
+        return false;
+    }, [uploadImage]);
+
+    // 暴露方法给父组件
+    useImperativeHandle(ref, () => ({
+        uploadImage,
+        uploadFromClipboard,
+        isUploading
+    }), [uploadImage, uploadFromClipboard, isUploading]);
 
     /**
      * 处理文件选择
@@ -182,7 +214,7 @@ const ImageUploader = ({ onUploadComplete, disabled = false }) => {
                     hover:border-pink-200 dark:hover:border-pink-800
                     group
                 `}
-                title="上传图片"
+                title="上传图片 (可粘贴)"
             >
                 {isUploading ? (
                     <Loader2 size={16} className="text-pink-500 animate-spin" />
@@ -225,6 +257,9 @@ const ImageUploader = ({ onUploadComplete, disabled = false }) => {
             </AnimatePresence>
         </div>
     );
-};
+});
+
+ImageUploader.displayName = 'ImageUploader';
 
 export default ImageUploader;
+

@@ -115,6 +115,7 @@ const InspirationModule = () => {
     const [selectedIdeaIds, setSelectedIdeaIds] = useState([]); // 已选中的 ID
     const editorRef = useRef(null);
     const textareaRef = useRef(null); // Define textareaRef even if not used widely now
+    const imageUploaderRef = useRef(null); // 图片上传组件引用
 
     // Validate selectedCategory (Correctly placed AFTER selectedCategory declaration)
     useEffect(() => {
@@ -211,6 +212,24 @@ const InspirationModule = () => {
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [deletedIdeas, addIdea]);
+
+    // 粘贴图片上传支持
+    useEffect(() => {
+        const handlePaste = async (e) => {
+            // 检查是否有图片在剪贴板中
+            const hasImage = Array.from(e.clipboardData?.items || []).some(
+                item => item.type.startsWith('image/')
+            );
+
+            if (hasImage && imageUploaderRef.current) {
+                e.preventDefault();
+                await imageUploaderRef.current.uploadFromClipboard(e.clipboardData);
+            }
+        };
+
+        window.addEventListener('paste', handlePaste);
+        return () => window.removeEventListener('paste', handlePaste);
+    }, []);
 
     const handleColorClick = useCallback((index) => {
         const colorConfig = COLOR_CONFIG[index];
@@ -642,6 +661,7 @@ const InspirationModule = () => {
 
                                         {/* Image Upload Button */}
                                         <ImageUploader
+                                            ref={imageUploaderRef}
                                             onUploadComplete={(imageUrl) => {
                                                 // 将图片 URL 添加到输入内容
                                                 setInput(prev => {
