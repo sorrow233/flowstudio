@@ -52,36 +52,28 @@ const ImageUploader = forwardRef(({ onUploadComplete, disabled = false }, ref) =
     }, []);
 
     /**
-     * 压缩图片到指定最大尺寸，输出 WebP 格式
+     * 转换图片为 WebP 格式（保持原尺寸）
      */
-    const compressImage = useCallback((file, maxWidth = 1920, maxHeight = 1920, quality = 0.86) => {
+    const compressImage = useCallback((file, quality = 0.86) => {
         return new Promise((resolve, reject) => {
             const img = new window.Image();
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
 
             img.onload = () => {
-                let { width, height } = img;
+                // 保持原尺寸
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
 
-                // 计算缩放比例
-                if (width > maxWidth || height > maxHeight) {
-                    const ratio = Math.min(maxWidth / width, maxHeight / height);
-                    width = Math.round(width * ratio);
-                    height = Math.round(height * ratio);
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-                ctx.drawImage(img, 0, 0, width, height);
-
-                // 输出 WebP 格式，体积更小
+                // 输出 WebP 格式
                 canvas.toBlob(
                     (blob) => {
                         if (blob) {
                             const fileName = (file.name || 'pasted-image').replace(/\.[^.]+$/, '') + '.webp';
                             resolve(new File([blob], fileName, { type: 'image/webp' }));
                         } else {
-                            reject(new Error('图片压缩失败'));
+                            reject(new Error('图片转换失败'));
                         }
                     },
                     'image/webp',
