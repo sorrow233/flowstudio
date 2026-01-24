@@ -52,9 +52,9 @@ const ImageUploader = forwardRef(({ onUploadComplete, disabled = false }, ref) =
     }, []);
 
     /**
-     * 压缩图片到指定最大尺寸
+     * 压缩图片到指定最大尺寸，输出 WebP 格式
      */
-    const compressImage = useCallback((file, maxWidth = 1920, maxHeight = 1920, quality = 0.85) => {
+    const compressImage = useCallback((file, maxWidth = 1920, maxHeight = 1920, quality = 0.86) => {
         return new Promise((resolve, reject) => {
             const img = new window.Image();
             const canvas = document.createElement('canvas');
@@ -74,15 +74,17 @@ const ImageUploader = forwardRef(({ onUploadComplete, disabled = false }, ref) =
                 canvas.height = height;
                 ctx.drawImage(img, 0, 0, width, height);
 
+                // 输出 WebP 格式，体积更小
                 canvas.toBlob(
                     (blob) => {
                         if (blob) {
-                            resolve(new File([blob], file.name || 'pasted-image.jpg', { type: 'image/jpeg' }));
+                            const fileName = (file.name || 'pasted-image').replace(/\.[^.]+$/, '') + '.webp';
+                            resolve(new File([blob], fileName, { type: 'image/webp' }));
                         } else {
                             reject(new Error('图片压缩失败'));
                         }
                     },
-                    'image/jpeg',
+                    'image/webp',
                     quality
                 );
             };
