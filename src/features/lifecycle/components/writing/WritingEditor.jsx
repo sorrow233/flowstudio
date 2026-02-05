@@ -799,15 +799,15 @@ const WritingEditor = ({
                                                 animate={{ opacity: 1, y: 0 }}
                                                 exit={{ opacity: 0, y: 8 }}
                                                 ref={exportMenuRef}
-                                                className={`absolute mt-2 w-36 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-white/40 dark:border-gray-800/60 rounded-2xl shadow-xl p-2 z-40 ${isMobile ? 'left-0' : 'right-0'}`}
+                                                className={`absolute mt-2 min-w-[11rem] max-w-[70vw] bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-white/40 dark:border-gray-800/60 rounded-2xl shadow-xl p-2 z-40 ${isMobile ? 'left-0' : 'right-0'}`}
                                             >
-                                                <button onClick={() => exportDoc('md')} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-rose-50 dark:hover:bg-rose-900/20">
+                                                <button onClick={() => exportDoc('md')} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-rose-50 dark:hover:bg-rose-900/20 whitespace-nowrap">
                                                     {t('inspiration.exportMarkdown')}
                                                 </button>
-                                                <button onClick={() => exportDoc('html')} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-rose-50 dark:hover:bg-rose-900/20">
+                                                <button onClick={() => exportDoc('html')} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-rose-50 dark:hover:bg-rose-900/20 whitespace-nowrap">
                                                     {t('inspiration.exportHtml')}
                                                 </button>
-                                                <button onClick={() => exportDoc('txt')} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-rose-50 dark:hover:bg-rose-900/20">
+                                                <button onClick={() => exportDoc('txt')} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-rose-50 dark:hover:bg-rose-900/20 whitespace-nowrap">
                                                     {t('inspiration.exportTxt')}
                                                 </button>
                                             </motion.div>
