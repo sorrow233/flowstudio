@@ -241,39 +241,6 @@ const WritingEditor = ({
         onRedo?.();
     }, [canRedo, onRedo]);
 
-    // Undo / Redo keyboard shortcuts
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (!editorRef.current) return;
-            const isFocused = typeof document !== 'undefined' && document.activeElement === editorRef.current;
-            if (!isFocused) return;
-
-            const isMod = e.metaKey || e.ctrlKey;
-            if (!isMod) return;
-
-            const key = e.key.toLowerCase();
-            const isUndo = key === 'z' && !e.shiftKey;
-            const isRedo = (key === 'z' && e.shiftKey) || key === 'y';
-            const isSaveSnapshot = key === 's';
-
-            if (isSaveSnapshot) {
-                e.preventDefault();
-                handleManualSnapshot();
-                return;
-            }
-
-            if (isUndo) {
-                e.preventDefault();
-                handleUndo();
-            } else if (isRedo) {
-                e.preventDefault();
-                handleRedo();
-            }
-        };
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [handleManualSnapshot, handleRedo, handleUndo]);
-
     // Handle Text Selection for Floating Toolbar
     useEffect(() => {
         const handleSelection = () => {
@@ -462,6 +429,39 @@ const WritingEditor = ({
         lastSnapshotAtRef.current = now;
         lastSnapshotContentRef.current = contentMarkup || '';
     }, [addSnapshot, contentMarkup, title, wordCount, writingDoc]);
+
+    // Undo / Redo / Save keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (!editorRef.current) return;
+            const isFocused = typeof document !== 'undefined' && document.activeElement === editorRef.current;
+            if (!isFocused) return;
+
+            const isMod = e.metaKey || e.ctrlKey;
+            if (!isMod) return;
+
+            const key = e.key.toLowerCase();
+            const isUndo = key === 'z' && !e.shiftKey;
+            const isRedo = (key === 'z' && e.shiftKey) || key === 'y';
+            const isSaveSnapshot = key === 's';
+
+            if (isSaveSnapshot) {
+                e.preventDefault();
+                handleManualSnapshot();
+                return;
+            }
+
+            if (isUndo) {
+                e.preventDefault();
+                handleUndo();
+            } else if (isRedo) {
+                e.preventDefault();
+                handleRedo();
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [handleManualSnapshot, handleRedo, handleUndo]);
 
     const restoreSnapshot = (snapshot) => {
         if (!writingDoc || !snapshot) return;
