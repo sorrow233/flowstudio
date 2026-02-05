@@ -87,7 +87,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
                             </span>
                         </div>
                         <p className={`text-[13px] line-clamp-2 leading-relaxed transition-colors ${isActive ? 'text-pink-600/70 dark:text-pink-400/70' : 'text-gray-500 dark:text-gray-400 font-light'}`}>
-                            {doc.content?.replace(/<[^>]*>?/gm, '') || t('inspiration.placeholder')}
+                            {stripMarkup(doc.content) || t('inspiration.placeholder')}
                         </p>
                     </div>
                 </div>
@@ -96,7 +96,13 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
     );
 };
 
-const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, onDelete, onUpdate, isMobile }) => {
+const stripMarkup = (text = '') => {
+    if (!text) return '';
+    const withoutHighlights = text.replace(/#!([^:]+):([^#]+)#/g, '$2');
+    return withoutHighlights.replace(/<[^>]*>?/gm, '');
+};
+
+const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, onDelete, onRestore, onUpdate, isMobile }) => {
     const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(null);
@@ -111,7 +117,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
             const lowerQ = searchQuery.toLowerCase();
             docs = docs.filter(doc =>
                 (doc.title || '').toLowerCase().includes(lowerQ) ||
-                (doc.content || '').toLowerCase().includes(lowerQ)
+                stripMarkup(doc.content || '').toLowerCase().includes(lowerQ)
             );
         }
         return docs;
@@ -140,7 +146,13 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
             icon: <Trash2 className="w-4 h-4 text-rose-500" />,
             action: {
                 label: t('common.undo'),
-                onClick: () => onCreate(doc)
+                onClick: () => {
+                    if (onRestore) {
+                        onRestore(doc);
+                    } else {
+                        onCreate(doc);
+                    }
+                }
             },
             duration: 4000
         });

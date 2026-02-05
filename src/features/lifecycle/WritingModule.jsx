@@ -49,7 +49,13 @@ const WritingModule = () => {
             <div className="w-full h-full flex flex-col relative z-10">
                 <WritingBoard
                     documents={writingDocs}
-                    onCreate={(doc) => addDoc({ ...doc, stage: 'writing', timestamp: Date.now() })}
+                    onCreate={(doc) => {
+                        if (doc?.id) {
+                            addDoc({ ...doc, stage: 'writing' });
+                            return;
+                        }
+                        addDoc({ ...doc, stage: 'writing', timestamp: Date.now() });
+                    }}
                     onUpdate={updateDoc}
                     onDelete={removeDoc}
                 />

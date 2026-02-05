@@ -4,28 +4,44 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useSync } from '../../../sync/SyncContext';
 import { useSyncedProjects } from '../../../sync/useSyncStore';
 import { useTranslation } from '../../../i18n';
-import { useIOSStandalone } from '../../../../hooks/useIOSStandalone';
 import WritingSidebar from './WritingSidebar';
 import WritingEditor from './WritingEditor';
 
-const WritingBoard = () => {
+const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDelete }) => {
     const { doc, immediateSync } = useSync();
     const { t } = useTranslation();
-    const { isIOSStandalone } = useIOSStandalone();
     const {
         projects: allProjects,
         addProject,
         updateProject,
-        removeProject
+        removeProject,
+        undo,
+        redo,
+        canUndo,
+        canRedo
     } = useSyncedProjects(doc, 'all_projects');
 
     // Filter for writing documents
-    const documents = useMemo(() =>
+    const internalDocuments = useMemo(() =>
         allProjects
             .filter(p => p.stage === 'writing')
             .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)),
         [allProjects]
     );
+
+    const documents = externalDocuments ?? internalDocuments;
+    const createHandler = onCreate ?? ((docToCreate) => {
+        addProject(docToCreate);
+        immediateSync?.();
+    });
+    const updateHandler = onUpdate ?? ((id, updates) => {
+        updateProject(id, { ...updates, lastModified: Date.now() });
+        immediateSync?.();
+    });
+    const deleteHandler = onDelete ?? ((id) => {
+        removeProject(id);
+        immediateSync?.();
+    });
 
     const [selectedDocId, setSelectedDocId] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -53,32 +69,42 @@ const WritingBoard = () => {
         [documents, selectedDocId]
     );
 
-    const handleCreate = (category = null) => {
+    const handleCreate = (input = null) => {
+        if (input && typeof input === 'object') {
+            const restoredDoc = {
+                ...input,
+                stage: input.stage || 'writing',
+                lastModified: Date.now()
+            };
+            createHandler(restoredDoc);
+            setSelectedDocId(restoredDoc.id);
+
+            if (isMobile) setIsSidebarOpen(false);
+            return;
+        }
+
         const newDoc = {
             id: uuidv4(),
             title: t('inspiration.untitled'),
             content: '',
             stage: 'writing',
-            category: category || 'draft',
+            category: input || 'draft',
             timestamp: Date.now(),
             lastModified: Date.now()
         };
-        addProject(newDoc);
-        immediateSync?.();
+        createHandler(newDoc);
         setSelectedDocId(newDoc.id);
 
         if (isMobile) setIsSidebarOpen(false);
     };
 
     const handleUpdate = (id, updates) => {
-        updateProject(id, { ...updates, lastModified: Date.now() });
-        immediateSync?.();
+        updateHandler(id, { ...updates, lastModified: Date.now() });
     };
 
     const handleDelete = (id) => {
         const index = documents.findIndex(d => d.id === id);
-        removeProject(id);
-        immediateSync?.();
+        deleteHandler(id);
 
         if (selectedDocId === id) {
             if (documents.length > 1) {
@@ -133,6 +159,7 @@ const WritingBoard = () => {
                                 }}
                                 onCreate={handleCreate}
                                 onDelete={handleDelete}
+                                onRestore={(doc) => handleCreate(doc)}
                                 isMobile={isMobile}
                             />
 
@@ -166,6 +193,10 @@ const WritingBoard = () => {
                         isSidebarOpen={isSidebarOpen}
                         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
                         isMobile={isMobile}
+                        onUndo={undo}
+                        onRedo={redo}
+                        canUndo={canUndo}
+                        canRedo={canRedo}
                     />
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto px-6 text-center">
