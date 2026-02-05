@@ -1,15 +1,10 @@
 import React, { useMemo } from 'react';
-import { PenTool } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
-import { useTranslation } from '../i18n';
 import WritingBoard from './components/writing/WritingBoard';
 
 const WritingModule = () => {
-    const { doc, immediateSync } = useSync();
-    const { t } = useTranslation();
-
+    const { doc, immediateSync, status } = useSync();
     const {
         projects: allProjects,
         addProject: addProjectBase,
@@ -38,11 +33,14 @@ const WritingModule = () => {
 
     return (
         <div className="flex h-[calc(100vh-80px)] overflow-hidden relative bg-transparent">
-            {/* Background - Atmospheric & Breathing */}
+            {/* Background - Calm, minimal, premium */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-pink-100/40 dark:bg-rose-900/10 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-pulse" style={{ animationDuration: '8s' }} />
-                <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-rose-100/40 dark:bg-pink-900/10 rounded-full blur-[100px] mix-blend-multiply dark:mix-blend-screen animate-pulse" style={{ animationDuration: '10s' }} />
-                <div className="absolute inset-0 bg-grid-pink-100/20 dark:bg-grid-pink-900/5 [mask-image:radial-gradient(ellipse_at_center,white,transparent_80%)]" />
+                <div className="absolute inset-0 bg-gradient-to-br from-rose-50 via-white to-rose-50 dark:from-slate-950 dark:via-slate-900 dark:to-rose-950" />
+                <div className="absolute -top-24 -left-24 w-[40%] h-[40%] rounded-full bg-rose-200/20 dark:bg-rose-600/10 blur-[120px]" />
+                <div className="absolute -bottom-24 -right-24 w-[35%] h-[35%] rounded-full bg-rose-200/20 dark:bg-rose-600/10 blur-[120px]" />
+                <div className="absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,white,transparent_70%)] bg-[radial-gradient(circle_at_20%_10%,rgba(244,63,94,0.06),transparent_60%)]" />
+                <div className="absolute inset-0 opacity-[0.12] bg-[radial-gradient(circle_at_1px_1px,rgba(15,23,42,0.12)_1px,transparent_0)] [background-size:18px_18px] dark:opacity-[0.08]" />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.5)_0%,transparent_30%,transparent_70%,rgba(255,255,255,0.35)_100%)] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.6)_0%,transparent_35%,transparent_70%,rgba(15,23,42,0.5)_100%)]" />
             </div>
 
             {/* Main Content Area - Full screen for immersive writing */}
@@ -58,6 +56,7 @@ const WritingModule = () => {
                     }}
                     onUpdate={updateDoc}
                     onDelete={removeDoc}
+                    syncStatus={status}
                 />
             </div>
         </div>

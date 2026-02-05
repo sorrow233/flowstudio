@@ -7,8 +7,8 @@ import { useTranslation } from '../../../i18n';
 import WritingSidebar from './WritingSidebar';
 import WritingEditor from './WritingEditor';
 
-const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDelete }) => {
-    const { doc, immediateSync } = useSync();
+const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDelete, syncStatus }) => {
+    const { doc, immediateSync, status } = useSync();
     const { t } = useTranslation();
     const {
         projects: allProjects,
@@ -30,6 +30,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     );
 
     const documents = externalDocuments ?? internalDocuments;
+    const resolvedSyncStatus = syncStatus ?? status;
     const createHandler = onCreate ?? ((docToCreate) => {
         addProject(docToCreate);
         immediateSync?.();
@@ -131,7 +132,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                                 onClick={() => setIsSidebarOpen(false)}
-                                className="fixed inset-0 bg-white/5 dark:bg-black/5 backdrop-blur-[2px] z-40 lg:hidden"
+                                className="fixed inset-0 bg-white/10 dark:bg-black/10 backdrop-blur-[3px] z-40 lg:hidden"
                             />
                         )}
 
@@ -160,6 +161,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                 onCreate={handleCreate}
                                 onDelete={handleDelete}
                                 onRestore={(doc) => handleCreate(doc)}
+                                onClose={() => setIsSidebarOpen(false)}
                                 isMobile={isMobile}
                             />
 
@@ -197,11 +199,12 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                         onRedo={redo}
                         canUndo={canUndo}
                         canRedo={canRedo}
+                        syncStatus={resolvedSyncStatus}
                     />
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto px-6 text-center">
-                        <div className="w-32 h-32 mb-8 rounded-full bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 flex items-center justify-center shadow-2xl">
-                            <svg className="w-12 h-12 text-pink-400 dark:text-pink-300 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="w-32 h-32 mb-8 rounded-full bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl border border-white/30 dark:border-gray-700/30 flex items-center justify-center shadow-[0_20px_60px_-30px_rgba(244,63,94,0.45)]">
+                            <svg className="w-12 h-12 text-rose-400 dark:text-rose-300 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                         </div>
@@ -213,9 +216,9 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                         </p>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileTap={{ scale: 0.96 }}
                             onClick={() => handleCreate()}
-                            className="mt-10 px-8 py-3 bg-gradient-to-r from-pink-400 to-rose-500 text-white rounded-full text-sm font-medium shadow-xl"
+                            className="mt-10 px-9 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-500 text-white rounded-full text-sm font-semibold shadow-[0_18px_40px_-18px_rgba(244,63,94,0.65)] hover:shadow-[0_20px_50px_-18px_rgba(244,63,94,0.75)] transition-shadow"
                         >
                             {t('inspiration.newDoc')}
                         </motion.button>
@@ -223,7 +226,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                         {isMobile && !isSidebarOpen && (
                             <button
                                 onClick={() => setIsSidebarOpen(true)}
-                                className="mt-4 text-xs text-pink-500 font-medium"
+                                className="mt-4 text-xs text-rose-500 font-medium"
                             >
                                 {t('inspiration.viewAll')}
                             </button>

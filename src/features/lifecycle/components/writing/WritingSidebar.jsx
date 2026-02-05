@@ -61,17 +61,18 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
                     opacity: { duration: 0.2 }
                 }}
                 className={`
-                    relative z-10 p-5 rounded-2xl cursor-pointer transition-shadow duration-300
-                    border border-transparent select-none active:scale-[0.99] touch-none
+                    relative z-10 p-5 rounded-2xl cursor-pointer transition-all duration-300
+                    border border-transparent select-none active:scale-[0.99] touch-none overflow-hidden
+                    before:absolute before:left-2 before:top-4 before:bottom-4 before:w-1 before:rounded-full before:bg-gradient-to-b before:from-rose-400 before:to-pink-500 before:opacity-0 before:transition-opacity
                     ${isActive
-                        ? 'bg-white/95 dark:bg-gray-800/95 shadow-[0_12px_24px_-8px_rgba(244,114,182,0.25)] border-pink-200/50 dark:border-pink-500/20'
-                        : 'bg-white/40 dark:bg-gray-900/40 hover:bg-white/60 dark:hover:bg-gray-800/60 transition-colors'}
+                        ? 'bg-white/95 dark:bg-gray-800/95 shadow-[0_16px_32px_-14px_rgba(244,63,94,0.35)] border-rose-200/50 dark:border-rose-500/20 before:opacity-100'
+                        : 'bg-white/40 dark:bg-gray-900/40 hover:bg-white/70 dark:hover:bg-gray-800/70 hover:shadow-[0_14px_26px_-18px_rgba(244,63,94,0.25)] before:group-hover:opacity-40'}
                 `}
             >
                 <div className="flex items-start gap-4">
                     {/* Category Indicator - Status Glow */}
                     <div className="relative mt-2 flex-shrink-0">
-                        <div className={`w-2.5 h-2.5 rounded-full ${category.dotColor} shadow-sm ${isActive ? 'ring-2 ring-pink-200 dark:ring-pink-800 scale-125' : ''}`} />
+                        <div className={`w-2.5 h-2.5 rounded-full ${category.dotColor} shadow-sm ${isActive ? 'ring-2 ring-rose-200 dark:ring-rose-800 scale-125' : ''}`} />
                         {isActive && (
                             <div className={`absolute inset-0 w-2.5 h-2.5 rounded-full ${category.dotColor} animate-ping opacity-50`} />
                         )}
@@ -79,14 +80,14 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
 
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-2">
-                            <h4 className={`text-[15px] font-semibold truncate tracking-tight transition-colors ${isActive ? 'text-pink-600 dark:text-pink-400' : 'text-gray-800 dark:text-gray-100 group-hover:text-pink-500 dark:group-hover:text-pink-400'}`}>
+                            <h4 className={`text-[15px] font-semibold truncate tracking-tight transition-colors ${isActive ? 'text-rose-600 dark:text-rose-400' : 'text-gray-800 dark:text-gray-100 group-hover:text-rose-500 dark:group-hover:text-rose-400'}`}>
                                 {doc.title || t('inspiration.untitled')}
                             </h4>
                             <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium tabular-nums bg-gray-50 dark:bg-gray-900/40 px-1.5 py-0.5 rounded-md">
                                 {new Date(doc.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                         </div>
-                        <p className={`text-[13px] line-clamp-2 leading-relaxed transition-colors ${isActive ? 'text-pink-600/70 dark:text-pink-400/70' : 'text-gray-500 dark:text-gray-400 font-light'}`}>
+                        <p className={`text-[13px] line-clamp-2 leading-relaxed transition-colors ${isActive ? 'text-rose-600/70 dark:text-rose-400/70' : 'text-gray-500 dark:text-gray-400 font-light'}`}>
                             {stripMarkup(doc.content) || t('inspiration.placeholder')}
                         </p>
                     </div>
@@ -102,7 +103,7 @@ const stripMarkup = (text = '') => {
     return withoutHighlights.replace(/<[^>]*>?/gm, '');
 };
 
-const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, onDelete, onRestore, onUpdate, isMobile }) => {
+const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, onDelete, onRestore, onUpdate, onClose, isMobile }) => {
     const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(null);
@@ -164,7 +165,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
             <div className="mb-8 last:mb-0">
                 <h5 className="px-5 mb-4 text-[11px] uppercase font-bold text-gray-400/70 dark:text-gray-600 tracking-[0.2em] flex items-center justify-between">
                     <span className="flex items-center gap-2">
-                        <span className="w-3 h-[1px] bg-pink-200 dark:bg-pink-800" />
+                        <span className="w-3 h-[1px] bg-rose-200 dark:bg-rose-800" />
                         {t(`inspiration.timeGroup.${titleKey}`)}
                     </span>
                     <span className="text-[9px] font-normal opacity-50 px-2 py-0.5 rounded-full border border-gray-100 dark:border-gray-800">
@@ -190,8 +191,8 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
     return (
         <div className={`
             h-full flex flex-col relative z-20
-            bg-white/80 dark:bg-gray-900/80 backdrop-blur-3xl
-            ${isMobile ? 'w-full rounded-r-[32px] border-r border-white/20 shadow-[-20px_0_50px_-20px_rgba(0,0,0,0.1)]' : 'w-[340px] bg-white/20 dark:bg-gray-900/40 border-r border-white/20 dark:border-gray-800/50'}
+            bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xl
+            ${isMobile ? 'w-full rounded-r-[28px] border-r border-black/5 dark:border-white/10 shadow-[-18px_0_44px_-20px_rgba(0,0,0,0.12)]' : 'w-[336px] bg-white/75 dark:bg-slate-900/75 border-r border-black/5 dark:border-white/10 shadow-[16px_0_40px_-34px_rgba(0,0,0,0.25)]'}
         `}>
             {/* Safe area padding for mobile top */}
             {isMobile && <div className="h-4" />}
@@ -204,7 +205,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                                 <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-semibold text-gray-900 dark:text-white tracking-tight`}>
                                     {t('inspiration.writing')}
                                 </h2>
-                                <div className="absolute -bottom-1 left-0 w-6 h-1 bg-pink-500 rounded-full" />
+                                <div className="absolute -bottom-1 left-0 w-6 h-1 bg-rose-500 rounded-full" />
                             </div>
                         </div>
 
@@ -212,7 +213,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                             onClick={() => onCreate(selectedCategory)}
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
-                            className={`${isMobile ? 'w-10 h-10' : 'w-9 h-9'} flex items-center justify-center bg-pink-500 text-white rounded-2xl shadow-lg shadow-pink-500/20 hover:bg-pink-600 transition-colors`}
+                            className={`${isMobile ? 'w-10 h-10' : 'w-9 h-9'} flex items-center justify-center bg-rose-500 text-white rounded-2xl shadow-lg shadow-rose-500/20 hover:bg-rose-600 transition-colors`}
                             title={t('inspiration.newDoc')}
                         >
                             <Plus size={isMobile ? 22 : 20} strokeWidth={3} />
@@ -220,7 +221,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                     </div>
 
                     <div className={`flex items-center ${isMobile ? 'justify-between' : 'gap-3'}`}>
-                        <div className="flex items-center gap-2 p-1.5 bg-gray-100/50 dark:bg-gray-800/50 rounded-2xl border border-white/40 dark:border-gray-700/40 shadow-inner backdrop-blur-md">
+                        <div className="flex items-center gap-2 p-1.5 bg-gray-100/60 dark:bg-gray-800/60 rounded-2xl border border-white/50 dark:border-gray-700/40 shadow-inner backdrop-blur-md">
                             {WRITING_CATEGORIES.map(cat => (
                                 <button
                                     key={cat.id}
@@ -228,7 +229,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                                     className={`
                                         w-4 h-4 rounded-lg transition-all duration-500 relative
                                         ${cat.dotColor}
-                                        ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-gray-900 ring-pink-400 scale-125' : 'opacity-30 hover:opacity-100 grayscale-[0.5] hover:grayscale-0'}
+                                        ${selectedCategory === cat.id ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-gray-900 ring-rose-400 scale-125' : 'opacity-30 hover:opacity-100 grayscale-[0.5] hover:grayscale-0'}
                                     `}
                                     title={cat.label}
                                 />
@@ -237,7 +238,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
 
                         {isMobile && (
                             <button
-                                onClick={() => onSelectDoc(activeDocId)}
+                                onClick={() => onClose?.()}
                                 className="p-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-400 active:bg-gray-100 transition-colors"
                             >
                                 <X size={18} />
@@ -248,8 +249,8 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
 
                 <div className="relative group mt-6 mb-4 z-30">
                     <Spotlight className="rounded-2xl" spotColor="rgba(244, 114, 182, 0.15)">
-                        <div className="relative bg-white/40 dark:bg-gray-800/40 rounded-2xl border border-white/60 dark:border-gray-700/30 backdrop-blur-md overflow-hidden transition-all duration-500 shadow-sm">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-pink-500 transition-colors w-4 h-4" />
+                        <div className="relative bg-white/60 dark:bg-gray-800/50 rounded-2xl border border-white/70 dark:border-gray-700/40 backdrop-blur-md overflow-hidden transition-all duration-500 shadow-sm focus-within:shadow-[0_14px_30px_-18px_rgba(244,63,94,0.35)] focus-within:border-rose-200/80 dark:focus-within:border-rose-800/40">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-rose-500 transition-colors w-4 h-4" />
                             <input
                                 type="text"
                                 value={searchQuery}
