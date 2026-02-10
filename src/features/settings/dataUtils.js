@@ -4,9 +4,8 @@
  */
 
 import * as Y from 'yjs';
-import { STORAGE_KEYS } from '../../utils/constants';
 
-const EXPORT_VERSION = '2.0'; // Bumped version for new format
+const EXPORT_VERSION = '3.0';
 
 /**
  * 收集并返回所有用户数据
@@ -23,6 +22,10 @@ export const exportAllData = (doc) => {
             // Commands and categories
             allCommands: [],
             commandCategories: [],
+            // Writing V3 data
+            writingFolders: [],
+            writingDocs: [],
+            writingContent: {},
             // Legacy fields for backward compatibility (empty but present)
             pendingProjects: [],
             primaryProjects: [],
@@ -96,6 +99,41 @@ export const exportAllData = (doc) => {
         }
     }
 
+    // 4. Export writing_folders
+    try {
+        const writingFoldersArray = doc.getArray('writing_folders');
+        data.data.writingFolders = writingFoldersArray.toJSON();
+        console.info(`[Export] Exported ${data.data.writingFolders.length} writing folders.`);
+    } catch (e) {
+        console.warn('[Export] Failed to get writing_folders:', e);
+    }
+
+    // 5. Export writing_docs
+    try {
+        const writingDocsArray = doc.getArray('writing_docs');
+        data.data.writingDocs = writingDocsArray.toJSON();
+        console.info(`[Export] Exported ${data.data.writingDocs.length} writing docs.`);
+    } catch (e) {
+        console.warn('[Export] Failed to get writing_docs:', e);
+    }
+
+    // 6. Export writing_content
+    try {
+        const writingContentMap = doc.getMap('writing_content');
+        const content = {};
+        writingContentMap.forEach((value, key) => {
+            if (value instanceof Y.Text) {
+                content[key] = value.toString();
+            } else if (typeof value === 'string') {
+                content[key] = value;
+            }
+        });
+        data.data.writingContent = content;
+        console.info(`[Export] Exported ${Object.keys(content).length} writing content records.`);
+    } catch (e) {
+        console.warn('[Export] Failed to get writing_content:', e);
+    }
+
     return data;
 };
 
@@ -121,7 +159,18 @@ export const validateImportData = (data) => {
         return { valid: false, errors };
     }
 
-    const { allProjects, allCommands, commandCategories, pendingProjects, primaryProjects, commands, customCategories } = data.data;
+    const {
+        allProjects,
+        allCommands,
+        commandCategories,
+        writingFolders,
+        writingDocs,
+        writingContent,
+        pendingProjects,
+        primaryProjects,
+        commands,
+        customCategories
+    } = data.data;
 
     // Check new format arrays
     if (allProjects && !Array.isArray(allProjects)) {
@@ -132,6 +181,15 @@ export const validateImportData = (data) => {
     }
     if (commandCategories && !Array.isArray(commandCategories)) {
         errors.push('commandCategories 必须是数组');
+    }
+    if (writingFolders && !Array.isArray(writingFolders)) {
+        errors.push('writingFolders 必须是数组');
+    }
+    if (writingDocs && !Array.isArray(writingDocs)) {
+        errors.push('writingDocs 必须是数组');
+    }
+    if (writingContent && (typeof writingContent !== 'object' || Array.isArray(writingContent))) {
+        errors.push('writingContent 必须是对象');
     }
 
     // Check legacy format arrays (for backward compatibility)
@@ -160,6 +218,7 @@ export const validateImportData = (data) => {
 export const importData = (doc, data, mode = 'merge') => {
     const {
         allProjects, allCommands, commandCategories,
+        writingFolders, writingDocs, writingContent,
         // Legacy fields for backward compatibility
         pendingProjects, primaryProjects, inspirations, commands, customCategories
     } = data.data;
@@ -228,6 +287,70 @@ export const importData = (doc, data, mode = 'merge') => {
                 yCategories.push(yMaps);
                 console.info(`[Import] Imported ${yMaps.length} categories to command_categories.`);
             }
+        }
+
+        // === NEW FORMAT: writing_folders ===
+        if (Array.isArray(writingFolders)) {
+            const yWritingFolders = doc.getArray('writing_folders');
+            if (mode === 'replace') {
+                yWritingFolders.delete(0, yWritingFolders.length);
+            }
+
+            const existingIds = new Set(yWritingFolders.toJSON().map((folder) => folder.id));
+            const nextFolders = writingFolders.filter((folder) => folder?.id && !existingIds.has(folder.id));
+            const yMaps = nextFolders.map((folder) => {
+                const yMap = new Y.Map();
+                Object.entries(folder).forEach(([k, v]) => yMap.set(k, v));
+                return yMap;
+            });
+
+            if (yMaps.length > 0) {
+                yWritingFolders.push(yMaps);
+                console.info(`[Import] Imported ${yMaps.length} writing folders.`);
+            }
+        }
+
+        // === NEW FORMAT: writing_docs ===
+        if (Array.isArray(writingDocs)) {
+            const yWritingDocs = doc.getArray('writing_docs');
+            if (mode === 'replace') {
+                yWritingDocs.delete(0, yWritingDocs.length);
+            }
+
+            const existingIds = new Set(yWritingDocs.toJSON().map((item) => item.id));
+            const nextDocs = writingDocs.filter((item) => item?.id && !existingIds.has(item.id));
+            const yMaps = nextDocs.map((item) => {
+                const yMap = new Y.Map();
+                Object.entries(item).forEach(([k, v]) => yMap.set(k, v));
+                return yMap;
+            });
+
+            if (yMaps.length > 0) {
+                yWritingDocs.push(yMaps);
+                console.info(`[Import] Imported ${yMaps.length} writing docs.`);
+            }
+        }
+
+        // === NEW FORMAT: writing_content ===
+        if (writingContent && typeof writingContent === 'object') {
+            const yWritingContent = doc.getMap('writing_content');
+
+            if (mode === 'replace') {
+                const keys = [];
+                yWritingContent.forEach((_, key) => keys.push(key));
+                keys.forEach((key) => yWritingContent.delete(key));
+            }
+
+            Object.entries(writingContent).forEach(([docId, markdown]) => {
+                if (!docId || typeof markdown !== 'string') return;
+                if (mode === 'merge' && yWritingContent.has(docId)) return;
+
+                const yText = new Y.Text();
+                if (markdown) {
+                    yText.insert(0, markdown);
+                }
+                yWritingContent.set(docId, yText);
+            });
         }
 
         // === LEGACY FORMAT: Convert to new format ===

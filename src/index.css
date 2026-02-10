@@ -99,3 +99,41 @@ body {
         height: 100dvh;
     }
 }
+
+.writing-editor-prosemirror {
+    min-height: 58vh;
+    color: #1e293b;
+    line-height: 1.95;
+    font-size: 1.08rem;
+    letter-spacing: 0.01em;
+    font-family: "Fraunces", "Source Han Serif SC", "Noto Serif SC", Georgia, serif;
+}
+
+.dark .writing-editor-prosemirror {
+    color: #e2e8f0;
+}
+
+.writing-editor-prosemirror .ProseMirror {
+    min-height: 56vh;
+    outline: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.writing-editor-prosemirror .ProseMirror p {
+    margin: 0 0 0.9rem;
+}
+
+.writing-editor-prosemirror .ProseMirror p:last-child {
+    margin-bottom: 0;
+}
+
+.writing-editor-prosemirror .ProseMirror mark.writing-highlight {
+    background: linear-gradient(180deg, rgba(191, 219, 254, 0.75) 10%, rgba(147, 197, 253, 0.65) 100%);
+    border-radius: 0.18em;
+    padding: 0 0.16em;
+}
+
+.dark .writing-editor-prosemirror .ProseMirror mark.writing-highlight {
+    background: linear-gradient(180deg, rgba(30, 64, 175, 0.6) 10%, rgba(59, 130, 246, 0.45) 100%);
+}

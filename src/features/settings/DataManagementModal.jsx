@@ -157,7 +157,7 @@ const DataManagementModal = ({ isOpen, onClose }) => {
     const getDataSummary = useCallback(() => {
         if (!previewData?.data) return null;
         const {
-            allProjects, allCommands, commandCategories,
+            allProjects, allCommands, commandCategories, writingDocs,
             pendingProjects, primaryProjects, commands, customCategories
         } = previewData.data;
 
@@ -175,6 +175,7 @@ const DataManagementModal = ({ isOpen, onClose }) => {
             primary: (primaryProjects?.length || 0) + newPrimary,
             commands: (commands?.length || 0) + (allCommands?.length || 0),
             categories: (customCategories?.length || 0) + (commandCategories?.length || 0),
+            writing: writingDocs?.length || 0,
         };
     }, [previewData]);
 
@@ -182,8 +183,8 @@ const DataManagementModal = ({ isOpen, onClose }) => {
     const getBackupSummary = (backupData) => {
         // Fix: backupData already contains { timestamp, data }, but data itself has a nested { version, exportedAt, data }
         const innerData = backupData?.data?.data || {};
-        const { allProjects, allCommands } = innerData;
-        const count = (allProjects?.length || 0) + (allCommands?.length || 0);
+        const { allProjects, allCommands, writingDocs } = innerData;
+        const count = (allProjects?.length || 0) + (allCommands?.length || 0) + (writingDocs?.length || 0);
         return `${count} ${t('advanced.items')}`;
     };
 
@@ -411,6 +412,10 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                                         <div className="p-4 bg-purple-50/50 dark:bg-purple-900/10 rounded-2xl text-center border border-purple-100/50 dark:border-purple-900/20">
                                             <div className="text-2xl font-light text-purple-600 dark:text-purple-400">{summary.categories}</div>
                                             <div className="text-[10px] text-purple-500/80 uppercase tracking-widest font-bold mt-1">自定义分类</div>
+                                        </div>
+                                        <div className="p-4 bg-sky-50/50 dark:bg-sky-900/10 rounded-2xl text-center border border-sky-100/50 dark:border-sky-900/20">
+                                            <div className="text-2xl font-light text-sky-600 dark:text-sky-400">{summary.writing}</div>
+                                            <div className="text-[10px] text-sky-500/80 uppercase tracking-widest font-bold mt-1">写作文档</div>
                                         </div>
                                     </div>
                                 );

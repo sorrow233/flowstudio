@@ -25,6 +25,20 @@ const getNextAutoColorIndex = (totalCount) => {
 };
 
 const TODO_AI_HINT_SEEN_KEY = 'flowstudio_todo_ai_hint_seen';
+const TODO_AI_CLASS_UNCLASSIFIED = 'unclassified';
+
+const TODO_AI_CLASS_OPTIONS = [
+    { value: 'ai_done', label: 'AI 完成' },
+    { value: 'ai_high', label: 'AI 高度辅助' },
+    { value: 'ai_mid', label: 'AI 中度辅助' },
+    { value: 'self', label: '必须自己去完成' },
+];
+
+const TODO_AI_FILTER_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: TODO_AI_CLASS_UNCLASSIFIED, label: '未分类' },
+    ...TODO_AI_CLASS_OPTIONS,
+];
 
 
 const InspirationModule = () => {
@@ -121,10 +135,15 @@ const InspirationModule = () => {
     const [selectedCategory, setSelectedCategory] = useState('note'); // 分类状态
     const [isSelectionMode, setIsSelectionMode] = useState(false); // 多选模式
     const [selectedIdeaIds, setSelectedIdeaIds] = useState([]); // 已选中的 ID
+    const [todoAiFilter, setTodoAiFilter] = useState('all');
     const [isAiImportOpen, setIsAiImportOpen] = useState(false);
     const [aiImportText, setAiImportText] = useState('');
     const [aiImportError, setAiImportError] = useState('');
     const [aiImportSuccessCount, setAiImportSuccessCount] = useState(0);
+    const [aiClassifyText, setAiClassifyText] = useState('');
+    const [aiClassifyError, setAiClassifyError] = useState('');
+    const [aiClassifySuccessCount, setAiClassifySuccessCount] = useState(0);
+    const [isClassifyPromptCopied, setIsClassifyPromptCopied] = useState(false);
     const [isPromptCopied, setIsPromptCopied] = useState(false);
     const [isTodoCopied, setIsTodoCopied] = useState(false);
     const [isBatchCopied, setIsBatchCopied] = useState(false);
@@ -275,6 +294,7 @@ const InspirationModule = () => {
             timestamp: Date.now(),
             colorIndex: selectedColorIndex !== null ? selectedColorIndex : getNextAutoColorIndex(ideas.length),
             category: selectedCategory, // 添加分类
+            ...(selectedCategory === 'todo' ? { aiAssistClass: TODO_AI_CLASS_UNCLASSIFIED } : {}),
             stage: 'inspiration',
         };
         addIdea(newIdea);
@@ -457,18 +477,22 @@ const InspirationModule = () => {
             .trim();
     }, []);
 
-    const unfinishedTodoIdeas = useMemo(() => {
+    const unclassifiedTodoIdeas = useMemo(() => {
         return ideas
-            .filter(idea => (idea.category || 'note') === 'todo' && !idea.completed)
+            .filter(idea =>
+                (idea.category || 'note') === 'todo'
+                && !idea.completed
+                && (idea.aiAssistClass || TODO_AI_CLASS_UNCLASSIFIED) === TODO_AI_CLASS_UNCLASSIFIED
+            )
             .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
     }, [ideas]);
 
-    const unfinishedTodoNumberedText = useMemo(() => {
-        return unfinishedTodoIdeas
+    const unclassifiedTodoNumberedText = useMemo(() => {
+        return unclassifiedTodoIdeas
             .map((idea, index) => `${index + 1}. ${normalizeIdeaText(idea.content)}`)
             .filter(Boolean)
             .join('\n');
-    }, [unfinishedTodoIdeas, normalizeIdeaText]);
+    }, [unclassifiedTodoIdeas, normalizeIdeaText]);
 
     const aiPromptTemplate = useMemo(() => {
         return `你是任务结构化助手。请把我接下来输入的内容整理为可执行待办清单。输入可能来自：
@@ -486,6 +510,24 @@ const InspirationModule = () => {
 
 现在请基于我接下来给你的原始内容，直接输出最终清单。`;
     }, []);
+
+    const aiClassifyPromptTemplate = useMemo(() => {
+        return `你是任务分类助手。请将我给你的待办清单按以下四类分类：
+1. AI 完成
+2. AI 高度辅助
+3. AI 中度辅助
+4. 必须自己去完成
+
+规则：
+1. 不要改写任务内容，不要新增任务，不要删除任务。
+2. 只输出“编号 + 分类”，每行一个，例如：1. AI 高度辅助
+3. 分类名称必须严格使用这四个词中的一个。
+4. 不要输出解释、标题、代码块或其他文本。
+
+待分类清单：
+${unclassifiedTodoNumberedText || '暂无未分类待办'}
+`;
+    }, [unclassifiedTodoNumberedText]);
 
     const copyTextToClipboard = useCallback(async (text) => {
         if (!text || !text.trim()) return false;
@@ -618,21 +660,110 @@ const InspirationModule = () => {
         }
     }, [aiPromptTemplate, copyTextToClipboard]);
 
-    const handleCopyUnfinishedTodos = useCallback(async () => {
-        if (!unfinishedTodoNumberedText) {
-            setAiImportError('当前没有未完成代办可复制。');
+    const handleCopyUnclassifiedTodos = useCallback(async () => {
+        if (!unclassifiedTodoNumberedText) {
+            setAiImportError('当前没有未分类代办可复制。');
             return;
         }
 
-        const success = await copyTextToClipboard(unfinishedTodoNumberedText);
+        const success = await copyTextToClipboard(unclassifiedTodoNumberedText);
         if (success) {
             setIsTodoCopied(true);
             setTimeout(() => setIsTodoCopied(false), 1500);
             setAiImportError('');
         } else {
-            setAiImportError('未完成代办复制失败，请手动复制。');
+            setAiImportError('未分类代办复制失败，请手动复制。');
         }
-    }, [copyTextToClipboard, unfinishedTodoNumberedText]);
+    }, [copyTextToClipboard, unclassifiedTodoNumberedText]);
+
+    const handleCopyClassifyPrompt = useCallback(async () => {
+        if (!unclassifiedTodoNumberedText) {
+            setAiClassifyError('当前没有可分类的未分类代办。');
+            return;
+        }
+
+        const success = await copyTextToClipboard(aiClassifyPromptTemplate);
+        if (success) {
+            setIsClassifyPromptCopied(true);
+            setTimeout(() => setIsClassifyPromptCopied(false), 1500);
+            setAiClassifyError('');
+        } else {
+            setAiClassifyError('分类提示词复制失败，请手动复制。');
+        }
+    }, [copyTextToClipboard, aiClassifyPromptTemplate, unclassifiedTodoNumberedText]);
+
+    const handleApplyAiClassification = useCallback(() => {
+        if (!aiClassifyText.trim()) {
+            setAiClassifyError('请先粘贴 AI 分类结果。');
+            setAiClassifySuccessCount(0);
+            return;
+        }
+
+        if (unclassifiedTodoIdeas.length === 0) {
+            setAiClassifyError('当前没有未分类代办可导入。');
+            setAiClassifySuccessCount(0);
+            return;
+        }
+
+        const lines = aiClassifyText
+            .replace(/\r\n?/g, '\n')
+            .replace(/```[\w-]*\n?/g, '')
+            .replace(/```/g, '')
+            .split('\n')
+            .map(line => line.trim())
+            .filter(Boolean);
+
+        const resolveClassFromLine = (line) => {
+            const normalized = line.replace(/\s+/g, '');
+            if (/AI完成/.test(normalized)) return 'ai_done';
+            if (/AI高度辅助|高度辅助/.test(normalized)) return 'ai_high';
+            if (/AI中度辅助|中度辅助/.test(normalized)) return 'ai_mid';
+            if (/必须自己去完成|必须自己完成|自己去完成|自己完成|人工完成/.test(normalized)) return 'self';
+            return null;
+        };
+
+        const assignments = [];
+        let sequentialIndex = 0;
+
+        lines.forEach((line) => {
+            const matchedClass = resolveClassFromLine(line);
+            if (!matchedClass) return;
+
+            const numMatch = line.match(/^\s*(\d+)\s*[.)、:：-]/);
+            let targetIndex = sequentialIndex;
+
+            if (numMatch) {
+                targetIndex = Number(numMatch[1]) - 1;
+                sequentialIndex = Math.max(sequentialIndex, targetIndex + 1);
+            } else {
+                sequentialIndex += 1;
+            }
+
+            if (targetIndex < 0 || targetIndex >= unclassifiedTodoIdeas.length) return;
+            assignments.push({ index: targetIndex, aiAssistClass: matchedClass });
+        });
+
+        const latestByIndex = new Map();
+        assignments.forEach(item => latestByIndex.set(item.index, item.aiAssistClass));
+
+        if (latestByIndex.size === 0) {
+            setAiClassifyError('没有识别到有效分类，请确保每行包含四个分类之一。');
+            setAiClassifySuccessCount(0);
+            return;
+        }
+
+        let updated = 0;
+        latestByIndex.forEach((aiAssistClass, index) => {
+            const targetIdea = unclassifiedTodoIdeas[index];
+            if (!targetIdea) return;
+            updateIdea(targetIdea.id, { aiAssistClass });
+            updated += 1;
+        });
+
+        setAiClassifyError('');
+        setAiClassifySuccessCount(updated);
+        setAiClassifyText('');
+    }, [aiClassifyText, unclassifiedTodoIdeas, updateIdea]);
 
     const handleCopySelectedIdeas = useCallback(async () => {
         if (selectedIdeaIds.length === 0) return;
@@ -668,6 +799,8 @@ const InspirationModule = () => {
         setIsAiImportOpen(true);
         setAiImportError('');
         setAiImportSuccessCount(0);
+        setAiClassifyError('');
+        setAiClassifySuccessCount(0);
         setAiAssistTab('prompt');
         markTodoAiHintSeen();
         await handleCopyPrompt();
@@ -704,6 +837,7 @@ const InspirationModule = () => {
             timestamp: now + (tasks.length - index),
             colorIndex: getNextAutoColorIndex(ideas.length + index),
             category: 'todo',
+            aiAssistClass: TODO_AI_CLASS_UNCLASSIFIED,
             completed: false,
             stage: 'inspiration',
             source: 'ai-import',
@@ -716,12 +850,63 @@ const InspirationModule = () => {
         setAiImportSuccessCount(newIdeas.length);
     }, [aiImportText, parseAiTodoOutput, ideas.length, addIdeasBatch]);
 
+    const getTodoAiAssistClass = useCallback((idea) => {
+        return idea.aiAssistClass || TODO_AI_CLASS_UNCLASSIFIED;
+    }, []);
+
+    const todoIdeas = useMemo(() => {
+        return [...ideas]
+            .filter(idea => (idea.category || 'note') === 'todo')
+            .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    }, [ideas]);
+
+    const todoAiFilterCounts = useMemo(() => {
+        const counts = {
+            all: todoIdeas.length,
+            [TODO_AI_CLASS_UNCLASSIFIED]: 0,
+            ai_done: 0,
+            ai_high: 0,
+            ai_mid: 0,
+            self: 0,
+        };
+
+        todoIdeas.forEach((idea) => {
+            if (idea.completed) return;
+            const aiClass = getTodoAiAssistClass(idea);
+            if (Object.hasOwn(counts, aiClass)) {
+                counts[aiClass] += 1;
+            } else {
+                counts[TODO_AI_CLASS_UNCLASSIFIED] += 1;
+            }
+        });
+
+        return counts;
+    }, [todoIdeas, getTodoAiAssistClass]);
+
+    const filteredTodoIdeas = useMemo(() => {
+        if (todoAiFilter === 'all') return todoIdeas;
+
+        if (todoAiFilter === TODO_AI_CLASS_UNCLASSIFIED) {
+            return todoIdeas.filter(idea =>
+                !idea.completed && getTodoAiAssistClass(idea) === TODO_AI_CLASS_UNCLASSIFIED
+            );
+        }
+
+        return todoIdeas.filter(idea =>
+            !idea.completed && getTodoAiAssistClass(idea) === todoAiFilter
+        );
+    }, [todoIdeas, todoAiFilter, getTodoAiAssistClass]);
+
     // Sort ideas by timestamp (memoized) and filter by category
     const sortedIdeas = useMemo(() => {
+        if (selectedCategory === 'todo') {
+            return filteredTodoIdeas;
+        }
+
         return [...ideas]
             .filter(idea => (idea.category || 'note') === selectedCategory)
             .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    }, [ideas, selectedCategory]);
+    }, [ideas, selectedCategory, filteredTodoIdeas]);
 
     // 智能日期格式化函数（代办分类专用）
     const formatDayLabel = useCallback((date) => {
@@ -747,7 +932,7 @@ const InspirationModule = () => {
         if (selectedCategory !== 'todo') return null;
 
         const groups = {};
-        sortedIdeas.forEach(idea => {
+        filteredTodoIdeas.forEach(idea => {
             const date = new Date(idea.timestamp || Date.now());
             const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
@@ -762,7 +947,12 @@ const InspirationModule = () => {
         });
 
         return Object.values(groups).sort((a, b) => b.date - a.date);
-    }, [sortedIdeas, selectedCategory]);
+    }, [filteredTodoIdeas, selectedCategory]);
+
+    const visibleIdeaCount = useMemo(() => {
+        if (selectedCategory === 'todo') return filteredTodoIdeas.length;
+        return sortedIdeas.length;
+    }, [selectedCategory, filteredTodoIdeas.length, sortedIdeas.length]);
 
     // Extract all available weeks for navigation, grouped by Year and Month
     const groupedWeeks = useMemo(() => {
@@ -1086,11 +1276,37 @@ const InspirationModule = () => {
                         )}
                     </div>
 
+                    {selectedCategory === 'todo' && (
+                        <div className="mb-6 -mt-2 px-2">
+                            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                                {TODO_AI_FILTER_OPTIONS.map((option) => {
+                                    const count = todoAiFilterCounts[option.value] || 0;
+                                    const isActive = todoAiFilter === option.value;
+                                    return (
+                                        <button
+                                            key={option.value}
+                                            onClick={() => setTodoAiFilter(option.value)}
+                                            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${isActive
+                                                ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
+                                                : 'bg-white/70 dark:bg-gray-900/60 text-blue-500 dark:text-blue-300 border-blue-100 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                                                }`}
+                                        >
+                                            {option.label}
+                                            <span className={`ml-1.5 ${isActive ? 'text-white/85' : 'text-blue-400 dark:text-blue-400'}`}>
+                                                {count}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
                     {/* List Section - Improved overall transition */}
                     <div className="relative min-h-[400px]">
                         <AnimatePresence mode="wait">
                             <motion.div
-                                key={selectedCategory}
+                                key={selectedCategory === 'todo' ? `${selectedCategory}-${todoAiFilter}` : selectedCategory}
                                 initial={{ opacity: 0, y: 15, filter: "blur(8px)" }}
                                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                                 exit={{ opacity: 0, y: -15, filter: "blur(8px)" }}
@@ -1233,7 +1449,7 @@ const InspirationModule = () => {
                                     </>
                                 )}
 
-                                {ideas.length === 0 && (
+                                {visibleIdeaCount === 0 && (
                                     <motion.div
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
@@ -1322,7 +1538,7 @@ const InspirationModule = () => {
                             </div>
 
                             <div className="p-6 space-y-5 max-h-[72vh] overflow-y-auto">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                     <button
                                         onClick={handleCopyPrompt}
                                         className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-pink-400 text-white hover:bg-pink-500 transition-colors text-sm font-medium shadow-lg shadow-pink-100 dark:shadow-pink-900/30"
@@ -1331,11 +1547,18 @@ const InspirationModule = () => {
                                         {isPromptCopied ? '提示词已复制' : '复制 AI 提示词'}
                                     </button>
                                     <button
-                                        onClick={handleCopyUnfinishedTodos}
+                                        onClick={handleCopyUnclassifiedTodos}
                                         className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-gray-800 text-pink-500 dark:text-pink-300 border border-pink-100 dark:border-pink-800 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors text-sm font-medium"
                                     >
                                         <ListChecks size={14} />
-                                        {isTodoCopied ? '未完成代办已复制' : `复制未完成代办（${unfinishedTodoIdeas.length}）`}
+                                        {isTodoCopied ? '未分类代办已复制' : `复制未分类代办（${unclassifiedTodoIdeas.length}）`}
+                                    </button>
+                                    <button
+                                        onClick={handleCopyClassifyPrompt}
+                                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-gray-800 text-pink-500 dark:text-pink-300 border border-pink-100 dark:border-pink-800 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors text-sm font-medium"
+                                    >
+                                        <Copy size={14} />
+                                        {isClassifyPromptCopied ? '分类提示词已复制' : '复制 AI 分类提示词'}
                                     </button>
                                 </div>
 
@@ -1356,7 +1579,16 @@ const InspirationModule = () => {
                                             : 'text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-300'
                                             }`}
                                     >
-                                        待办清单
+                                        未分类清单
+                                    </button>
+                                    <button
+                                        onClick={() => setAiAssistTab('classify')}
+                                        className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${aiAssistTab === 'classify'
+                                            ? 'bg-white dark:bg-gray-800 text-pink-500 dark:text-pink-300 shadow-sm'
+                                            : 'text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-300'
+                                            }`}
+                                    >
+                                        导入分类
                                     </button>
                                 </div>
 
@@ -1376,20 +1608,20 @@ const InspirationModule = () => {
                                         <>
                                             <div className="flex items-center justify-between gap-2">
                                                 <div className="text-[11px] font-semibold tracking-wide uppercase text-pink-500 dark:text-pink-300">
-                                                    待办清单（未完成）
+                                                    待分类清单（未分类）
                                                 </div>
                                                 <span className="text-[11px] text-gray-400 dark:text-gray-500">
-                                                    {unfinishedTodoIdeas.length} 项
+                                                    {unclassifiedTodoIdeas.length} 项
                                                 </span>
                                             </div>
-                                            {unfinishedTodoIdeas.length === 0 && (
+                                            {unclassifiedTodoIdeas.length === 0 && (
                                                 <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                    当前没有未完成代办。
+                                                    当前没有未分类代办。
                                                 </p>
                                             )}
-                                            {unfinishedTodoIdeas.length > 0 && (
+                                            {unclassifiedTodoIdeas.length > 0 && (
                                                 <div className="mt-2 max-h-36 overflow-y-auto space-y-1.5 pr-1">
-                                                    {unfinishedTodoIdeas.map((idea, index) => (
+                                                    {unclassifiedTodoIdeas.map((idea, index) => (
                                                         <div
                                                             key={idea.id}
                                                             className="flex items-start gap-2 px-2 py-1.5 rounded-lg bg-white/70 dark:bg-gray-800/70 border border-pink-100/80 dark:border-pink-900/40"
@@ -1404,55 +1636,118 @@ const InspirationModule = () => {
                                             )}
                                         </>
                                     )}
+
+                                    {aiAssistTab === 'classify' && (
+                                        <>
+                                            <div className="text-[11px] font-semibold tracking-wide uppercase text-pink-500 dark:text-pink-300">
+                                                导入 AI 分类结果（按编号匹配未分类清单）
+                                            </div>
+                                            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                                示例：1. AI 高度辅助 / 2. 必须自己去完成
+                                            </p>
+                                        </>
+                                    )}
                                 </div>
 
-                                <div>
-                                    <p className="mb-3 text-xs text-gray-400 dark:text-gray-500">
-                                        统一导入：使用同一个 Prompt；无法识别的条目会自动留空占位，后续可手动补写。
-                                    </p>
+                                {aiAssistTab !== 'classify' && (
+                                    <>
+                                        <div>
+                                            <p className="mb-3 text-xs text-gray-400 dark:text-gray-500">
+                                                统一导入：使用同一个 Prompt；无法识别的条目会自动留空占位，后续可手动补写。
+                                            </p>
 
-                                    <label className="block text-xs font-semibold tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">
-                                        粘贴 AI 输出（支持编号/换行）
-                                    </label>
-                                    <textarea
-                                        value={aiImportText}
-                                        onChange={(e) => {
-                                            setAiImportText(e.target.value);
-                                            if (aiImportError) setAiImportError('');
-                                        }}
-                                        placeholder={'示例：\n1. 整理明天会议的目标\n2. 完成产品首页文案\n3. 联系设计师确认图标'}
-                                        className="w-full min-h-[220px] rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-200 p-4 outline-none focus:ring-2 focus:ring-pink-300/50 dark:focus:ring-pink-700/50 focus:border-pink-300 dark:focus:border-pink-700 transition-all"
-                                    />
-                                </div>
+                                            <label className="block text-xs font-semibold tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">
+                                                粘贴 AI 输出（支持编号/换行）
+                                            </label>
+                                            <textarea
+                                                value={aiImportText}
+                                                onChange={(e) => {
+                                                    setAiImportText(e.target.value);
+                                                    if (aiImportError) setAiImportError('');
+                                                }}
+                                                placeholder={'示例：\n1. 整理明天会议的目标\n2. 完成产品首页文案\n3. 联系设计师确认图标'}
+                                                className="w-full min-h-[220px] rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-200 p-4 outline-none focus:ring-2 focus:ring-pink-300/50 dark:focus:ring-pink-700/50 focus:border-pink-300 dark:focus:border-pink-700 transition-all"
+                                            />
+                                        </div>
 
-                                {aiImportError && (
-                                    <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/50 rounded-xl px-3 py-2">
-                                        {aiImportError}
-                                    </div>
+                                        {aiImportError && (
+                                            <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/50 rounded-xl px-3 py-2">
+                                                {aiImportError}
+                                            </div>
+                                        )}
+
+                                        {aiImportSuccessCount > 0 && (
+                                            <div className="text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 rounded-xl px-3 py-2">
+                                                已成功导入 {aiImportSuccessCount} 条代办。
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center justify-end gap-2 pt-1">
+                                            <button
+                                                onClick={() => setIsAiImportOpen(false)}
+                                                className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                关闭
+                                            </button>
+                                            <button
+                                                onClick={handleBatchImportFromAi}
+                                                disabled={!aiImportText.trim()}
+                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-pink-400 text-white text-sm font-medium hover:bg-pink-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-lg shadow-pink-100 dark:shadow-pink-900/30"
+                                            >
+                                                <ArrowRight size={14} />
+                                                批量导入
+                                            </button>
+                                        </div>
+                                    </>
                                 )}
 
-                                {aiImportSuccessCount > 0 && (
-                                    <div className="text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 rounded-xl px-3 py-2">
-                                        已成功导入 {aiImportSuccessCount} 条代办。
-                                    </div>
-                                )}
+                                {aiAssistTab === 'classify' && (
+                                    <>
+                                        <div>
+                                            <label className="block text-xs font-semibold tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">
+                                                粘贴 AI 分类输出（支持编号）
+                                            </label>
+                                            <textarea
+                                                value={aiClassifyText}
+                                                onChange={(e) => {
+                                                    setAiClassifyText(e.target.value);
+                                                    if (aiClassifyError) setAiClassifyError('');
+                                                }}
+                                                placeholder={'示例：\n1. AI 高度辅助\n2. 必须自己去完成\n3. AI 完成'}
+                                                className="w-full min-h-[220px] rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-200 p-4 outline-none focus:ring-2 focus:ring-pink-300/50 dark:focus:ring-pink-700/50 focus:border-pink-300 dark:focus:border-pink-700 transition-all"
+                                            />
+                                        </div>
 
-                                <div className="flex items-center justify-end gap-2 pt-1">
-                                    <button
-                                        onClick={() => setIsAiImportOpen(false)}
-                                        className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        关闭
-                                    </button>
-                                    <button
-                                        onClick={handleBatchImportFromAi}
-                                        disabled={!aiImportText.trim()}
-                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-pink-400 text-white text-sm font-medium hover:bg-pink-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-lg shadow-pink-100 dark:shadow-pink-900/30"
-                                    >
-                                        <ArrowRight size={14} />
-                                        批量导入
-                                    </button>
-                                </div>
+                                        {aiClassifyError && (
+                                            <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/50 rounded-xl px-3 py-2">
+                                                {aiClassifyError}
+                                            </div>
+                                        )}
+
+                                        {aiClassifySuccessCount > 0 && (
+                                            <div className="text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 rounded-xl px-3 py-2">
+                                                已成功分类 {aiClassifySuccessCount} 条未分类代办。
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center justify-end gap-2 pt-1">
+                                            <button
+                                                onClick={() => setIsAiImportOpen(false)}
+                                                className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                关闭
+                                            </button>
+                                            <button
+                                                onClick={handleApplyAiClassification}
+                                                disabled={!aiClassifyText.trim()}
+                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-pink-400 text-white text-sm font-medium hover:bg-pink-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-lg shadow-pink-100 dark:shadow-pink-900/30"
+                                            >
+                                                <ArrowRight size={14} />
+                                                导入分类
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </motion.div>
                     </motion.div>

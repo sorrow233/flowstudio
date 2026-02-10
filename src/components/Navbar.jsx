@@ -12,8 +12,7 @@ import {
     Settings,
     Sun,
     Moon,
-    BarChart3,
-    PenTool
+    BarChart3
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../features/auth/AuthContext';
@@ -47,7 +46,6 @@ const Navbar = () => {
     // 主流程：灵感 → 写作 → 萌芽 → 心流 → 蓝图 → 进阶（可选）
     const mainTabs = [
         { id: 'inspiration', label: t('navbar.inspiration'), icon: tabIcons.inspiration, path: '/inspiration' },
-        { id: 'writing', label: t('navbar.writing', '写作'), icon: PenTool, path: '/writing' },
         { id: 'pending', label: t('navbar.pending'), icon: tabIcons.pending, path: '/sprout' },
         { id: 'primary', label: t('navbar.primary'), icon: tabIcons.primary, path: '/flow' },
         { id: 'command', label: t('navbar.command'), icon: tabIcons.command, path: '/blueprint' },
@@ -63,7 +61,6 @@ const Navbar = () => {
     const getActiveTheme = () => {
         const path = location.pathname;
         if (path.startsWith('/inspiration')) return 'pink';
-        if (path.startsWith('/writing')) return 'pink'; // Changed from sky
         if (path.startsWith('/sprout')) return 'green';
         if (path.startsWith('/flow')) return 'purple';
         if (path.startsWith('/advanced')) return 'red';
@@ -134,7 +131,6 @@ const Navbar = () => {
                             // Define active colors for each tab
                             const activeColors = {
                                 inspiration: '!text-pink-400 dark:!text-pink-300',
-                                writing: 'text-pink-500 dark:text-pink-400', // Changed from sky
                                 pending: 'text-green-500 dark:text-green-400',
                                 primary: 'text-purple-500 dark:text-purple-400',
                                 advanced: 'text-red-500 dark:text-red-400',
@@ -147,16 +143,14 @@ const Navbar = () => {
                                 tab.id === 'pending' ? 'green'
                                     : tab.id === 'primary' ? 'purple'
                                         : tab.id === 'inspiration' ? 'pink'
-                                            : tab.id === 'writing' ? 'pink' // Changed from sky to pink
-                                                : tab.id === 'command' ? 'sky'
-                                                    : tab.id === 'data' ? 'indigo'
-                                                        : 'default'
+                                            : tab.id === 'command' ? 'sky'
+                                                : tab.id === 'data' ? 'indigo'
+                                                    : 'default'
                             ];
 
                             // Brush gradient definitions matching module headers
                             const brushGradients = {
                                 inspiration: 'from-pink-200/80 via-pink-300/60 to-transparent dark:from-pink-700/50 dark:via-pink-600/30',
-                                writing: 'from-pink-200/80 via-rose-300/60 to-transparent dark:from-rose-700/50 dark:via-pink-600/30', // Changed to pink/rose
                                 pending: 'from-green-200/80 via-green-300/60 to-transparent dark:from-green-700/50 dark:via-green-600/30',
                                 primary: 'from-purple-200/80 via-purple-300/60 to-transparent dark:from-purple-700/50 dark:via-purple-600/30',
                                 command: 'from-sky-200/80 via-sky-300/60 to-transparent dark:from-sky-700/50 dark:via-sky-600/30',

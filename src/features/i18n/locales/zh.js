@@ -109,6 +109,43 @@ export default {
         restore: '恢复',
     },
 
+    writing: {
+        library: '资料库',
+        documents: '文档',
+        search: '搜索文档...',
+        untitled: '无标题',
+        placeholder: '开始写作...',
+        emptyDocs: '此文件夹暂无文档',
+        emptySelection: '选择一篇文档开始写作',
+        system: {
+            all: '全部',
+            inbox: '收件箱',
+            trash: '废纸篓',
+        },
+        status: {
+            syncing: '同步中',
+            synced: '已同步',
+            offline: '离线',
+        },
+        stats: {
+            words: '词',
+            chars: '字',
+        },
+        actions: {
+            newDoc: '新建文档',
+            newFolder: '新建文件夹',
+            createFolder: '创建文件夹',
+            renameFolderPrompt: '重命名文件夹',
+            deleteFolderConfirm: '删除该文件夹？文档将移动到收件箱。',
+            rename: '重命名',
+            delete: '移入废纸篓',
+            restore: '恢复',
+            collapse: '收起',
+            expand: '展开',
+            syncNow: '立即同步',
+        },
+    },
+
     // 待定模块 (Renamed to Sprouting/萌芽)
     pending: {
         title: '萌芽',

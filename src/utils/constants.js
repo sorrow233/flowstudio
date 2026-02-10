@@ -123,14 +123,6 @@ export const INSPIRATION_CATEGORIES = [
     { id: 'emotion', label: '情绪', color: 'bg-violet-400', dotColor: 'bg-violet-400', textColor: 'text-violet-400' },
 ];
 
-// Writing 页面分类配置 (5色小点)
-export const WRITING_CATEGORIES = [
-    { id: 'draft', label: 'Draft', color: 'bg-stone-400', dotColor: 'bg-stone-400', textColor: 'text-stone-400' }, // Draft - Neutral
-    { id: 'plot', label: 'Plot', color: 'bg-blue-400', dotColor: 'bg-blue-400', textColor: 'text-blue-400' },     // Plot - Blue
-    { id: 'character', label: 'Character', color: 'bg-amber-400', dotColor: 'bg-amber-400', textColor: 'text-amber-400' }, // Character - Yellow
-    { id: 'world', label: 'World', color: 'bg-emerald-400', dotColor: 'bg-emerald-400', textColor: 'text-emerald-400' },   // World - Green
-    { id: 'final', label: 'Final', color: 'bg-rose-400', dotColor: 'bg-rose-400', textColor: 'text-rose-400' },     // Final - Red
-];
 
 export const DEFAULT_PROJECT_IMAGES = [
     'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop', // Tech Dark

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Trash2, Check, Pencil, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
@@ -7,7 +7,26 @@ import { COLOR_CONFIG, getColorConfig, parseRichText, getCategoryConfig } from '
 
 // COLOR_CONFIG, getColorConfig, and parseRichText are now imported from InspirationUtils.js
 
-const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onUpdateNote, onUpdateContent, onToggleComplete, isArchiveView = false, copiedId, isSelectionMode = false, isSelected = false, onSelect }) => {
+const InspirationItem = ({
+    idea,
+    onRemove,
+    onArchive,
+    onCopy,
+    onUpdateColor,
+    onUpdateNote,
+    onUpdateContent,
+    onToggleComplete,
+    isArchiveView = false,
+    copiedId,
+    isSelectionMode = false,
+    isSelected = false,
+    onSelect,
+    isTodoView = false,
+    aiAssistClass = 'unclassified',
+    aiAssistOptions = [],
+    onSetAiAssistClass,
+    showAiAssistControls = false,
+}) => {
     const [isDragging, setIsDragging] = React.useState(false);
     const [isEditingContent, setIsEditingContent] = React.useState(false);
     const [isEditingNote, setIsEditingNote] = React.useState(false);
@@ -28,6 +47,25 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
 
     // 缓存 parseRichText 计算结果，避免每次渲染都重新执行正则匹配
     const parsedContent = useMemo(() => parseRichText(idea.content), [idea.content]);
+
+    const getAiAssistButtonClass = useCallback((value, isActive) => {
+        if (!isActive) {
+            return 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800';
+        }
+
+        switch (value) {
+            case 'ai_done':
+                return 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
+            case 'ai_high':
+                return 'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800';
+            case 'ai_mid':
+                return 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800';
+            case 'self':
+                return 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
+            default:
+                return 'bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-800';
+        }
+    }, []);
 
     // Focus textarea when entering edit mode
     React.useEffect(() => {
@@ -150,6 +188,16 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
     const archiveIconScale = useTransform(x, [0, 80, 150], [0.5, 0.5, 1.2]);
 
     const y = useMotionValue(0);
+    const exitAnimation = useMemo(() => {
+        if (exitDirection === 'right') {
+            return { opacity: 0, x: 500, rotate: 12, scale: 0.9, transition: { duration: 0.2, ease: "easeOut" } };
+        }
+        if (exitDirection === 'left') {
+            return { opacity: 0, x: -500, rotate: -12, scale: 0.9, transition: { duration: 0.2, ease: "easeOut" } };
+        }
+        // Category/filter switching should not look like swipe-delete.
+        return { opacity: 0, y: -8, scale: 0.98, transition: { duration: 0.18, ease: "easeOut" } };
+    }, [exitDirection]);
 
     return (
         <motion.div
@@ -198,10 +246,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                 x: { type: "spring", stiffness: 600, damping: 25 },
                 scale: { type: "spring", stiffness: 300, damping: 20 }
             }}
-            exit={exitDirection === 'right'
-                ? { opacity: 0, x: 500, rotate: 12, scale: 0.9, transition: { duration: 0.2, ease: "easeOut" } }
-                : { opacity: 0, x: -500, rotate: -12, scale: 0.9, transition: { duration: 0.2, ease: "easeOut" } }
-            }
+            exit={exitAnimation}
             layout
             className={`relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 touch-none select-none ${isCharging ? 'ring-2 ring-pink-400/60 shadow-lg shadow-pink-200/50 dark:shadow-pink-900/30' : ''} ${isSelected ? 'scale-[1.02]' : ''}`}
         >
@@ -318,6 +363,32 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                                 {parsedContent}
                             </div>
                         )}
+
+                        {isTodoView && showAiAssistControls && aiAssistOptions.length > 0 && (
+                            <div
+                                className="mt-3 flex flex-wrap gap-1.5"
+                                onPointerDown={(e) => e.stopPropagation()}
+                                onClick={(e) => e.stopPropagation()}
+                                onDoubleClick={(e) => e.stopPropagation()}
+                            >
+                                {aiAssistOptions.map((option) => {
+                                    const isActive = aiAssistClass === option.value;
+                                    return (
+                                        <button
+                                            key={option.value}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onSetAiAssistClass?.(idea.id, option.value);
+                                            }}
+                                            className={`px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-colors ${getAiAssistButtonClass(option.value, isActive)}`}
+                                        >
+                                            {option.label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+
                         {/* Date/Time + Restore Button (Archive View) */}
                         <div className="mt-2 flex items-center justify-between">
                             <div className={`text-[11px] font-medium transition-colors ${categoryConfig.textColor} opacity-30 group-hover/card:opacity-80`}>
