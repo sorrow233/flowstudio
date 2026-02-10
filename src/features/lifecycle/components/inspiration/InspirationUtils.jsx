@@ -59,6 +59,7 @@ export const getCategoryConfig = (category) => {
 // 图片 URL 正则匹配
 const IMAGE_URL_REGEX = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp)(?:\?[^\s]*)?)/gi;
 const R2_IMAGE_REGEX = /(https:\/\/pub-[a-z0-9]+\.r2\.dev\/[^\s]+)/gi;
+const URL_REGEX = /(https?:\/\/[^\s]+)/gi;
 
 // Helper for parsing rich text (with image support)
 export const parseRichText = (text) => {
@@ -77,6 +78,38 @@ export const parseRichText = (text) => {
     textWithoutImages = textWithoutImages.trim();
 
     const parts = textWithoutImages.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]|#![^:]+:[^#]+#)/g);
+
+    const renderTextWithLinks = (part, index) => {
+        const segments = part.split(URL_REGEX);
+
+        return segments.map((segment, segIdx) => {
+            if (!segment) return null;
+
+            if (/^https?:\/\/\S+$/i.test(segment)) {
+                const matched = segment.match(/^(https?:\/\/\S*?)([)。，；;!?]+)?$/i);
+                const link = matched?.[1] || segment;
+                const trailing = matched?.[2] || '';
+
+                return (
+                    <React.Fragment key={`${index}-link-frag-${segIdx}`}>
+                        <a
+                            href={link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-pink-500 dark:text-pink-300 underline decoration-pink-300/70 dark:decoration-pink-700/70 hover:text-pink-600 dark:hover:text-pink-200 break-all"
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {link}
+                        </a>
+                        {trailing ? <span>{trailing}</span> : null}
+                    </React.Fragment>
+                );
+            }
+
+            return <span key={`${index}-text-${segIdx}`}>{segment}</span>;
+        });
+    };
 
     const textElements = parts.map((part, index) => {
         if (part.startsWith('#!') && part.endsWith('#')) {
@@ -125,7 +158,7 @@ export const parseRichText = (text) => {
                 </span>
             );
         }
-        return <span key={index}>{part}</span>;
+        return <span key={index}>{renderTextWithLinks(part, index)}</span>;
     });
 
     // 如果有图片，添加图片元素
@@ -251,4 +284,3 @@ const InspirationImage = ({ src }) => {
         </>
     );
 };
-

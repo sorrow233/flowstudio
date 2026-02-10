@@ -24,6 +24,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
     const config = getColorConfig(idea.colorIndex || 0);
     const categoryConfig = getCategoryConfig(idea.category); // 获取分类颜色配置
     const isCompleted = idea.completed || false;
+    const shouldHighlightExternalSource = Boolean(idea.source && !['user', 'ai-import'].includes(idea.source));
 
     // 缓存 parseRichText 计算结果，避免每次渲染都重新执行正则匹配
     const parsedContent = useMemo(() => parseRichText(idea.content), [idea.content]);
@@ -210,7 +211,7 @@ const InspirationItem = ({ idea, onRemove, onArchive, onCopy, onUpdateColor, onU
                     relative flex-1 bg-white dark:bg-gray-900 rounded-xl p-5 
                     border shadow-sm 
                     transition-all duration-500 cursor-pointer active:scale-[0.99]
-                    ${idea.source && idea.source !== 'user'
+                    ${shouldHighlightExternalSource
                         ? 'border-cyan-300 dark:border-cyan-600 ring-1 ring-cyan-200/50 dark:ring-cyan-700/30'
                         : 'border-gray-100 dark:border-gray-800'}
                     ${isDragging ? '' : `hover:shadow-[0_0_20px_rgba(244,114,182,0.2)] hover:border-pink-200 dark:hover:border-pink-800/50`}
