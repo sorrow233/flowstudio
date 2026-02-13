@@ -8,6 +8,15 @@
 import { useState, useEffect } from 'react';
 
 /**
+ * 临时浏览器模式开关（由 index.html 注入）
+ * 开启后强制视为非 standalone，避免触发 iOS 独立应用分支样式和行为
+ */
+const detectForceBrowserMode = () => {
+    if (typeof window === 'undefined') return false;
+    return window.__FLOW_STUDIO_FORCE_BROWSER_MODE__ === true;
+};
+
+/**
  * 检测是否为 iOS 设备
  */
 const detectIsIOS = () => {
@@ -21,6 +30,7 @@ const detectIsIOS = () => {
  */
 const detectIsStandalone = () => {
     if (typeof window === 'undefined') return false;
+    if (detectForceBrowserMode()) return false;
     return window.matchMedia('(display-mode: standalone)').matches ||
         window.navigator.standalone === true;
 };
