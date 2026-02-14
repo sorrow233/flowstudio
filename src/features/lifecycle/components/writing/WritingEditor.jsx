@@ -13,6 +13,7 @@ import {
     detectWordCountLabel,
     downloadContent,
 } from './editorUtils';
+import { clipboardToMarkup, insertMarkupAtCaret } from './pasteUtils';
 import EditorToolbar from './EditorToolbar';
 import EditorStatusBar from './EditorStatusBar';
 import FloatingColorPicker from './FloatingColorPicker';
@@ -50,6 +51,7 @@ const WritingEditor = ({
     const [copiedAt, setCopiedAt] = useState(null);
     const [isEditorFocused, setIsEditorFocused] = useState(false);
     const [isToolbarVisible, setIsToolbarVisible] = useState(true);
+    const [isDirty, setIsDirty] = useState(false);
 
     const statsTimeoutRef = useRef(null);
     const inactivityTimeoutRef = useRef(null);
@@ -95,21 +97,26 @@ const WritingEditor = ({
         editorRef,
         wordCount,
         onUpdate,
+        isDirty,
+        setIsDirty,
     });
 
     const {
         conflictPreview,
         conflictState,
         handleApplyPendingRemote,
+        handleApplyPendingRemoteOnBlur,
         handleConflictKeepLocal,
         handleConflictUseRemote,
         handleKeepPendingLocal,
-        pendingRemoteHtml,
+        pendingRemoteMarkup,
         requestForceRemoteApply,
     } = useEditorSync({
         writingDoc,
         title,
         setTitle,
+        isDirty,
+        setIsDirty,
         contentMarkup,
         setContentMarkup,
         editorRef,
@@ -252,29 +259,40 @@ const WritingEditor = ({
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [canRedo, canUndo, handleManualSnapshot, onRedo, onUndo, requestForceRemoteApply]);
 
-    const hasUnsavedChanges = useMemo(() => {
-        if (!writingDoc) return false;
-        return title !== (writingDoc.title || '') || contentMarkup !== (writingDoc.content || '');
-    }, [contentMarkup, title, writingDoc]);
-
     const statusLabel = useMemo(() => {
         if (syncStatus === 'offline' || syncStatus === 'disconnected') return t('inspiration.offline');
-        if (isSaving || hasUnsavedChanges) return t('inspiration.saving');
+        if (isSaving || isDirty) return t('inspiration.saving');
         if (syncStatus === 'syncing') return t('inspiration.syncing');
         return t('inspiration.synced');
-    }, [hasUnsavedChanges, isSaving, syncStatus, t]);
+    }, [isDirty, isSaving, syncStatus, t]);
 
     const isOffline = syncStatus === 'offline' || syncStatus === 'disconnected';
-    const isSyncing = isSaving || hasUnsavedChanges || syncStatus === 'syncing';
+    const isSyncing = isSaving || isDirty || syncStatus === 'syncing';
     const statusNeedsAttention = isOffline || isSyncing;
-    const hasPendingRemote = Boolean(pendingRemoteHtml);
+    const hasPendingRemote = Boolean(pendingRemoteMarkup);
     const canCopy = Boolean((title || '').trim() || (contentMarkup || '').trim());
 
     const handleInput = useCallback(() => {
         if (!editorRef.current) return;
         setContentMarkup(htmlToMarkup(editorRef.current));
+        setIsDirty(true);
         updateStatsFromEditor();
     }, [updateStatsFromEditor]);
+
+    const handlePaste = useCallback((event) => {
+        event.preventDefault();
+        if (!editorRef.current) return;
+
+        const markup = clipboardToMarkup(event.clipboardData);
+        if (!markup) return;
+
+        const inserted = insertMarkupAtCaret({
+            editorElement: editorRef.current,
+            markup,
+            markupToHtml,
+        });
+        if (inserted) handleInput();
+    }, [handleInput, markupToHtml]);
 
     const applyColor = (colorId) => {
         if (typeof window === 'undefined' || !window.getSelection) return;
@@ -442,7 +460,10 @@ const WritingEditor = ({
                         <input
                             type="text"
                             value={title}
-                            onChange={(event) => setTitle(event.target.value)}
+                            onChange={(event) => {
+                                setTitle(event.target.value);
+                                setIsDirty(true);
+                            }}
                             onKeyDown={(event) => {
                                 if (event.key === 'Enter') {
                                     event.preventDefault();
@@ -470,7 +491,7 @@ const WritingEditor = ({
                         />
                     </div>
 
-                    {pendingRemoteHtml && !conflictState && (
+                    {pendingRemoteMarkup && !conflictState && (
                         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-200/70 bg-sky-50/80 px-4 py-2.5 text-[12px] text-sky-700">
                             <span>{t('inspiration.pendingRemote')}</span>
                             <div className="flex items-center gap-2">
@@ -500,10 +521,14 @@ const WritingEditor = ({
                             contentEditable
                             suppressContentEditableWarning
                             onInput={handleInput}
+                            onPaste={handlePaste}
                             onFocus={() => {
                                 setIsEditorFocused(true);
                             }}
-                            onBlur={() => setIsEditorFocused(false)}
+                            onBlur={() => {
+                                setIsEditorFocused(false);
+                                handleApplyPendingRemoteOnBlur();
+                            }}
                             spellCheck
                             className="min-h-[55vh] w-full text-lg text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"
                             placeholder={t('inspiration.placeholder')}
