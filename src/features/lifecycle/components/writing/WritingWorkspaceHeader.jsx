@@ -14,7 +14,8 @@ const WritingWorkspaceHeader = ({
     onSearchQueryChange,
     onAddCategory,
     onUpdateCategory,
-    onRemoveCategory
+    onRemoveCategory,
+    isMobile = false
 }) => {
     const { t } = useTranslation();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -27,10 +28,10 @@ const WritingWorkspaceHeader = ({
     }, [searchQuery, isSearchOpen]);
 
     return (
-        <header className="relative z-20 border-b border-sky-100/50 bg-white px-6 pb-4 pt-6 dark:border-slate-800/60 dark:bg-slate-900">
-            <div className="flex items-end justify-between gap-6">
+        <header className="relative z-20 border-b border-sky-100/50 bg-white px-4 pb-4 pt-4 dark:border-slate-800/60 dark:bg-slate-900 md:px-6 md:pt-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
                 <div className="min-w-0 flex-1">
-                    <h2 className="line-clamp-1 text-[2.15rem] font-bold tracking-tight text-slate-800 dark:text-slate-100">
+                    <h2 className="line-clamp-1 text-[2rem] font-bold tracking-tight text-slate-800 dark:text-slate-100 md:text-[2.15rem]">
                         {t('inspiration.writing')}
                     </h2>
                     <p className="mt-1 line-clamp-1 text-sm font-medium text-slate-400 dark:text-slate-500">
@@ -38,7 +39,7 @@ const WritingWorkspaceHeader = ({
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 flex-col gap-3 md:items-end">
                     <AnimatePresence mode="wait">
                         {!isSearchOpen ? (
                             <motion.div
@@ -55,13 +56,23 @@ const WritingWorkspaceHeader = ({
                                 >
                                     <Search size={18} className="transition-transform group-hover:scale-110" />
                                 </button>
+
                                 <button
                                     onClick={() => onCreate(selectedCategory)}
                                     disabled={!selectedCategory}
-                                    className="inline-flex h-10 px-5 items-center justify-center gap-2 rounded-xl bg-sky-500 font-bold text-white shadow-[0_2px_8px_-2px_rgba(14,165,233,0.4)] transition-all hover:bg-sky-600 hover:shadow-[0_4px_12px_-2px_rgba(14,165,233,0.5)] active:scale-[0.97] disabled:opacity-50"
+                                    className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-transparent bg-sky-500 text-white shadow-[0_2px_8px_-2px_rgba(14,165,233,0.4)] transition-all hover:bg-sky-600 active:scale-[0.97] dark:border-sky-300/25 dark:bg-sky-600/90 dark:text-sky-50 dark:hover:border-sky-200/40 dark:hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-50 ${isMobile ? 'w-10 px-0' : 'px-5 font-bold'}`}
+                                    title={t('inspiration.newDoc')}
                                 >
-                                    <Plus size={18} strokeWidth={2.5} />
-                                    <span className="text-[13.5px] tracking-tight">{t('inspiration.newDoc')}</span>
+                                    {isMobile ? (
+                                        <Plus size={18} strokeWidth={2.6} />
+                                    ) : (
+                                        <>
+                                            <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-white/20 dark:bg-sky-200/20">
+                                                <Plus size={15} strokeWidth={2.6} />
+                                            </span>
+                                            <span className="text-[13.5px] tracking-tight">{t('inspiration.newDoc')}</span>
+                                        </>
+                                    )}
                                 </button>
                             </motion.div>
                         ) : (
@@ -70,9 +81,9 @@ const WritingWorkspaceHeader = ({
                                 initial={{ opacity: 0, width: 0 }}
                                 animate={{ opacity: 1, width: 'auto' }}
                                 exit={{ opacity: 0, width: 0 }}
-                                className="flex items-center gap-2 overflow-hidden"
+                                className="flex w-full items-center gap-2 overflow-hidden md:w-auto"
                             >
-                                <div className="relative w-64 lg:w-80">
+                                <div className={`relative ${isMobile ? 'w-full' : 'w-64 lg:w-80'}`}>
                                     <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400" />
                                     <input
                                         autoFocus
@@ -92,19 +103,29 @@ const WritingWorkspaceHeader = ({
                                         <X size={16} />
                                     </button>
                                 </div>
+
+                                <button
+                                    onClick={() => onCreate(selectedCategory)}
+                                    disabled={!selectedCategory}
+                                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500 text-white transition-all hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                    title={t('inspiration.newDoc')}
+                                >
+                                    <Plus size={18} strokeWidth={2.6} />
+                                </button>
                             </motion.div>
                         )}
                     </AnimatePresence>
 
-                    <div className="h-8 w-px bg-slate-200 dark:bg-slate-800" />
-
-                    <WritingCategorySelector
-                        categories={categories}
-                        selectedCategory={selectedCategory}
-                        onSelectCategory={onSelectCategory}
-                        onOpenManager={() => setCategoryManagerOpen(true)}
-                        t={t}
-                    />
+                    <div className="w-full md:w-auto">
+                        <WritingCategorySelector
+                            categories={categories}
+                            selectedCategory={selectedCategory}
+                            onSelectCategory={onSelectCategory}
+                            onOpenManager={() => setCategoryManagerOpen(true)}
+                            isMobile={isMobile}
+                            t={t}
+                        />
+                    </div>
                 </div>
             </div>
 
