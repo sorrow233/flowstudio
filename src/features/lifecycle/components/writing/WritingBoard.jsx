@@ -23,7 +23,8 @@ const detectCompactLayout = () => {
     return width < 1024 || (isCoarsePointer && width < 1366);
 };
 
-const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDelete, syncStatus }) => {
+const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDelete, syncStatus, isMobile: externalIsMobile }) => {
+    const isMobile = externalIsMobile !== undefined ? externalIsMobile : detectCompactLayout();
     const { doc, immediateSync, status } = useSync();
     const { t } = useTranslation();
     const {
@@ -92,23 +93,15 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     });
 
     const [selectedDocId, setSelectedDocId] = useState(null);
-    const [isMobile, setIsMobile] = useState(() => detectCompactLayout());
-    const [isSidebarOpen, setIsSidebarOpen] = useState(() => !detectCompactLayout());
+    const [isSidebarOpen, setIsSidebarOpen] = useState(() => !isMobile);
     const [selectedCategory, setSelectedCategory] = useState(() => categories[0]?.id || null);
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        const handleResize = () => {
-            const mobile = detectCompactLayout();
-            setIsMobile(mobile);
-            if (!mobile) {
-                setIsSidebarOpen(true);
-            }
-        };
-
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+        if (!isMobile) {
+            setIsSidebarOpen(true);
+        }
+    }, [isMobile]);
 
     useEffect(() => {
         if (categories.length === 0) {

@@ -121,10 +121,8 @@ const Navbar = () => {
 
     const currentConfig = themeConfigs[activeTheme] || themeConfigs.default;
 
-    const isWritingPath = location.pathname.startsWith('/writing');
-
     return (
-        <div className={`relative z-50 w-full justify-center px-3 pb-3 pt-4 md:px-4 md:pb-4 md:pt-10 ${isWritingPath ? 'hidden md:flex' : 'flex'}`}>
+        <div className="relative z-50 flex w-full justify-center px-3 pb-3 pt-4 md:px-4 md:pb-4 md:pt-10">
             <nav className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-full shadow-sm max-w-[95vw] md:max-w-full relative mx-auto">
                 <Spotlight spotColor={currentConfig.spotlight} size={300} className="rounded-full">
                     <div className="flex items-center gap-3 md:gap-8 px-2 py-2 md:px-6 md:py-3 overflow-x-auto no-scrollbar mask-linear-fade">
