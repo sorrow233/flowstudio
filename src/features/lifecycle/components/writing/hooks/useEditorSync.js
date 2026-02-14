@@ -11,8 +11,6 @@ export const useEditorSync = ({
     writingDoc,
     title,
     setTitle,
-    isDirty,
-    setIsDirty,
     contentMarkup,
     setContentMarkup,
     editorRef,
@@ -20,7 +18,7 @@ export const useEditorSync = ({
     onUpdate,
     addSnapshot,
 }) => {
-    const [pendingRemoteMarkup, setPendingRemoteMarkup] = useState(null);
+    const [pendingRemoteHtml, setPendingRemoteHtml] = useState(null);
     const [conflictState, setConflictState] = useState(null);
 
     const lastSeenRemoteContentRef = useRef('');
@@ -32,79 +30,63 @@ export const useEditorSync = ({
         return cleaned.length > 160 ? `${cleaned.slice(0, 160)}…` : cleaned;
     }, [conflictState?.remoteContent]);
 
-    const applyRemoteContent = useCallback((remoteMarkup = '', remoteTitle = '', options = {}) => {
-        const { dirtyOverride } = options;
-        if (editorRef.current) {
-            const html = markupToHtml(remoteMarkup);
-            if (editorRef.current.innerHTML !== html) {
-                editorRef.current.innerHTML = html;
-            }
-        }
-        setContentMarkup(remoteMarkup);
-        updateStatsFromEditor();
-        setPendingRemoteMarkup(null);
-        setConflictState(null);
-        if (typeof dirtyOverride === 'boolean') {
-            setIsDirty(dirtyOverride);
-        } else {
-            setIsDirty((title || '') !== (remoteTitle || ''));
-        }
-    }, [editorRef, setContentMarkup, setIsDirty, title, updateStatsFromEditor]);
-
     useEffect(() => {
         if (!writingDoc) return;
 
         const prevRemoteContentRaw = lastSeenRemoteContentRef.current;
         const prevRemoteContent = normalizeMarkupForSync(prevRemoteContentRaw);
-        const remoteTitle = writingDoc.title || '';
-        if (!isDirty && remoteTitle !== title) setTitle(remoteTitle);
+        if (writingDoc.title !== title) setTitle(writingDoc.title || '');
 
         const remoteContentRaw = writingDoc.content || '';
         const remoteContent = normalizeMarkupForSync(remoteContentRaw);
+        const remoteHtml = markupToHtml(remoteContentRaw);
         const liveLocalMarkupRaw = editorRef.current ? htmlToMarkup(editorRef.current) : contentMarkup;
         const liveLocalMarkup = normalizeMarkupForSync(liveLocalMarkupRaw);
+        const localStateMarkup = normalizeMarkupForSync(contentMarkup);
 
         const remoteChanged = remoteContent !== prevRemoteContent;
         const remoteMatchesLocal = remoteContent === liveLocalMarkup;
         const localDirtySinceLastRemote = liveLocalMarkup !== prevRemoteContent;
-        const isFocused = typeof document !== 'undefined' && document.activeElement === editorRef.current;
 
-        if (editorRef.current) {
-            const remoteHtml = markupToHtml(remoteContentRaw);
-            const remoteDomDiffers = remoteHtml !== editorRef.current.innerHTML;
+        if (editorRef.current && remoteHtml !== editorRef.current.innerHTML) {
+            const isFocused = typeof document !== 'undefined' && document.activeElement === editorRef.current;
             const shouldForceApply = forceRemoteApplyRef.current;
             if (shouldForceApply) forceRemoteApplyRef.current = false;
 
-            const shouldApplyImmediately = shouldForceApply || !isFocused;
-            if (remoteDomDiffers && shouldApplyImmediately) {
-                applyRemoteContent(remoteContentRaw, remoteTitle);
+            const shouldApplyImmediately = shouldForceApply || !isFocused || (remoteChanged && !localDirtySinceLastRemote);
+            if (shouldApplyImmediately) {
+                editorRef.current.innerHTML = remoteHtml;
+                updateStatsFromEditor();
+                setPendingRemoteHtml(null);
+                setConflictState(null);
             } else if (!remoteChanged) {
                 // 聚焦编辑期间的 DOM 结构差异（如 <div>/<br>）不应触发远端提示
             } else if (localDirtySinceLastRemote && !remoteMatchesLocal) {
-                setConflictState({ remoteContent, remoteTitle, timestamp: Date.now() });
-                setPendingRemoteMarkup(null);
+                setConflictState({ remoteContent, remoteTitle: writingDoc.title || '', timestamp: Date.now() });
+                setPendingRemoteHtml(null);
             } else if (!remoteMatchesLocal) {
-                setPendingRemoteMarkup(remoteContentRaw);
+                setPendingRemoteHtml(remoteHtml);
                 setConflictState(null);
             } else {
-                setPendingRemoteMarkup(null);
+                setPendingRemoteHtml(null);
                 setConflictState(null);
             }
         }
 
-        if (remoteMatchesLocal && normalizeMarkupForSync(contentMarkup) !== liveLocalMarkup) {
-            setContentMarkup(liveLocalMarkupRaw);
+        const isFocused = typeof document !== 'undefined' && document.activeElement === editorRef.current;
+        if (remoteContent !== localStateMarkup) {
+            if (!isFocused) setContentMarkup(remoteContentRaw);
+            else if (remoteMatchesLocal) setContentMarkup(liveLocalMarkupRaw);
         }
 
         lastSeenRemoteContentRef.current = remoteContentRaw;
     }, [
-        applyRemoteContent,
         contentMarkup,
         editorRef,
-        isDirty,
         setContentMarkup,
         setTitle,
         title,
+        updateStatsFromEditor,
         writingDoc,
     ]);
 
@@ -113,21 +95,19 @@ export const useEditorSync = ({
     }, []);
 
     const handleApplyPendingRemote = useCallback(() => {
-        if (!pendingRemoteMarkup || !writingDoc) return;
-        applyRemoteContent(pendingRemoteMarkup, writingDoc.title || '');
-        lastSeenRemoteContentRef.current = pendingRemoteMarkup;
-    }, [applyRemoteContent, pendingRemoteMarkup, writingDoc]);
+        if (!pendingRemoteHtml || !writingDoc) return;
+        if (editorRef.current) editorRef.current.innerHTML = pendingRemoteHtml;
+        setContentMarkup(writingDoc.content || '');
+        updateStatsFromEditor();
+        setPendingRemoteHtml(null);
+        setConflictState(null);
+        lastSeenRemoteContentRef.current = writingDoc.content || '';
+    }, [editorRef, pendingRemoteHtml, setContentMarkup, updateStatsFromEditor, writingDoc]);
 
     const handleKeepPendingLocal = useCallback(() => {
-        setPendingRemoteMarkup(null);
+        setPendingRemoteHtml(null);
         if (writingDoc?.content) lastSeenRemoteContentRef.current = writingDoc.content;
     }, [writingDoc?.content]);
-
-    const handleApplyPendingRemoteOnBlur = useCallback(() => {
-        if (!pendingRemoteMarkup || !writingDoc || conflictState) return;
-        applyRemoteContent(pendingRemoteMarkup, writingDoc.title || '');
-        lastSeenRemoteContentRef.current = pendingRemoteMarkup;
-    }, [applyRemoteContent, conflictState, pendingRemoteMarkup, writingDoc]);
 
     const handleConflictKeepLocal = useCallback(() => {
         if (!conflictState || !writingDoc) return;
@@ -142,7 +122,7 @@ export const useEditorSync = ({
 
         onUpdate(writingDoc.id, { title: title || '', content: contentMarkup || '' });
         setConflictState(null);
-        setPendingRemoteMarkup(null);
+        setPendingRemoteHtml(null);
         lastSeenRemoteContentRef.current = conflictState.remoteContent || '';
     }, [addSnapshot, conflictState, contentMarkup, onUpdate, title, writingDoc]);
 
@@ -152,19 +132,22 @@ export const useEditorSync = ({
         const remote = conflictState.remoteContent || '';
         const remoteTitle = conflictState.remoteTitle || '';
         setTitle(remoteTitle);
-        applyRemoteContent(remote, remoteTitle, { dirtyOverride: false });
+        setContentMarkup(remote);
+        if (editorRef.current) editorRef.current.innerHTML = markupToHtml(remote);
+        updateStatsFromEditor();
+        setConflictState(null);
+        setPendingRemoteHtml(null);
         lastSeenRemoteContentRef.current = remote;
-    }, [applyRemoteContent, conflictState, setTitle]);
+    }, [conflictState, editorRef, setContentMarkup, setTitle, updateStatsFromEditor]);
 
     return {
         conflictPreview,
         conflictState,
         handleApplyPendingRemote,
-        handleApplyPendingRemoteOnBlur,
         handleConflictKeepLocal,
         handleConflictUseRemote,
         handleKeepPendingLocal,
-        pendingRemoteMarkup,
+        pendingRemoteHtml,
         requestForceRemoteApply,
     };
 };
