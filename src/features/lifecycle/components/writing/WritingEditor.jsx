@@ -540,12 +540,11 @@ const WritingEditor = ({
 
                     {/* Content editor */}
                     <div
-                        className={`rounded-3xl border bg-white p-6 shadow-[0_20px_55px_-36px_rgba(37,99,235,0.45)] transition-all md:p-10 dark:bg-slate-900 dark:shadow-none ${isEditorFocused
-                            ? 'border-sky-200/70 shadow-[0_20px_60px_-34px_rgba(14,116,255,0.5)] dark:border-sky-800/60'
-                            : 'border-sky-100/70 dark:border-slate-800'
+                        className={`rounded-3xl bg-white p-6 transition-all md:p-10 dark:bg-slate-900 ${isEditorFocused
+                            ? 'shadow-[0_14px_30px_-24px_rgba(14,116,255,0.28)] dark:shadow-none'
+                            : 'shadow-none'
                             }`}
                     >
-                        <div className="mb-6 h-px bg-sky-100 dark:bg-slate-800/60" />
                         <div
                             ref={editorRef}
                             contentEditable
@@ -567,12 +566,6 @@ const WritingEditor = ({
                                 letterSpacing: 'normal',
                             }}
                         />
-
-                        {/* Bottom decoration */}
-                        <div className="mt-20 flex flex-col items-center opacity-35">
-                            <div className="mb-2 h-1.5 w-12 rounded-full bg-sky-300 dark:bg-sky-700" />
-                            <div className="h-1 w-1 rounded-full bg-sky-400 dark:bg-sky-600" />
-                        </div>
                     </div>
                 </div>
             </div>

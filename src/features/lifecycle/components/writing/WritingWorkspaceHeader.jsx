@@ -50,18 +50,18 @@ const WritingWorkspaceHeader = ({
                             >
                                 <button
                                     onClick={() => setIsSearchOpen(true)}
-                                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/60 bg-white/80 text-sky-500 transition-all hover:bg-white dark:border-slate-700/50 dark:bg-slate-800/80 dark:text-sky-400 dark:hover:bg-slate-800"
+                                    className="group inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/60 bg-white/80 text-sky-500 transition-all hover:border-sky-300 hover:bg-white dark:border-slate-700/50 dark:bg-slate-800/80 dark:text-sky-400 dark:hover:border-slate-600 dark:hover:bg-slate-800"
                                     title={t('inspiration.search')}
                                 >
-                                    <Search size={18} />
+                                    <Search size={18} className="transition-transform group-hover:scale-110" />
                                 </button>
                                 <button
                                     onClick={() => onCreate(selectedCategory)}
                                     disabled={!selectedCategory}
-                                    className="inline-flex h-10 px-4 items-center justify-center gap-2 rounded-xl bg-sky-500 text-white shadow-[0_4px_12px_-4px_rgba(14,165,233,0.5)] transition-all hover:bg-sky-600 active:scale-95 disabled:opacity-50"
+                                    className="inline-flex h-10 px-5 items-center justify-center gap-2 rounded-xl bg-sky-500 font-bold text-white shadow-[0_2px_8px_-2px_rgba(14,165,233,0.4)] transition-all hover:bg-sky-600 hover:shadow-[0_4px_12px_-2px_rgba(14,165,233,0.5)] active:scale-[0.97] disabled:opacity-50"
                                 >
-                                    <Plus size={18} />
-                                    <span className="text-sm font-bold">{t('inspiration.newDoc')}</span>
+                                    <Plus size={18} strokeWidth={2.5} />
+                                    <span className="text-[13.5px] tracking-tight">{t('inspiration.newDoc')}</span>
                                 </button>
                             </motion.div>
                         ) : (
