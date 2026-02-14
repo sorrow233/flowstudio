@@ -363,7 +363,7 @@ const WritingSidebar = ({
 
                 <div className="relative z-20 mt-5 flex items-center justify-center gap-2 px-1">
                     <div className="flex items-center rounded-full border border-sky-100 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900 group/selector">
-                        <div className="relative mr-1 flex h-7 min-w-[60px] items-center justify-center overflow-hidden border-r border-sky-200/50 px-3 dark:border-slate-700/50">
+                        <div className="relative mr-1 flex h-8 min-w-[60px] items-center justify-center overflow-hidden border-r border-sky-200/50 px-3 dark:border-slate-700/50">
                             <AnimatePresence mode="wait" initial={false}>
                                 <motion.span
                                     key={selectedCategory || 'none'}
@@ -383,7 +383,7 @@ const WritingSidebar = ({
                                 <button
                                     key={category.id}
                                     onClick={() => setSelectedCategory(category.id)}
-                                    className="group/dot relative h-8 w-8 flex-shrink-0 rounded-full transition-all duration-300"
+                                    className="group/dot relative flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-all duration-300"
                                     title={resolveCategoryLabel(category, t)}
                                 >
                                     {selectedCategory === category.id && (
@@ -394,7 +394,7 @@ const WritingSidebar = ({
                                         />
                                     )}
                                     <div
-                                        className={`relative z-10 m-auto mt-[11px] h-2.5 w-2.5 rounded-full transition-all duration-300 ${category.dotColor} ${selectedCategory === category.id
+                                        className={`relative z-10 h-2.5 w-2.5 rounded-full transition-all duration-300 ${category.dotColor} ${selectedCategory === category.id
                                             ? 'scale-110'
                                             : 'opacity-40 group-hover/dot:scale-110 group-hover/dot:opacity-100'
                                             }`}
