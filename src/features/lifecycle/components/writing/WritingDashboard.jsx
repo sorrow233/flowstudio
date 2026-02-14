@@ -138,7 +138,7 @@ const WritingDashboard = ({
 
                         <button
                             onClick={() => onCreate()}
-                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-500 px-5 py-2.5 text-sm font-medium text-white shadow-[0_16px_30px_-18px_rgba(37,99,235,0.9)] transition hover:brightness-105 active:scale-[0.98]"
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-slate-800 px-5 py-2.5 text-sm font-medium text-slate-100 shadow-sm transition hover:bg-slate-700 active:scale-[0.98] dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
                         >
                             <Plus size={16} />
                             {t('inspiration.newDoc')}
@@ -235,7 +235,7 @@ const WritingDashboard = ({
                         </p>
                         <button
                             onClick={() => onCreate()}
-                            className="mt-4 rounded-xl bg-gradient-to-r from-sky-500 to-blue-500 px-4 py-2 text-sm font-medium text-white transition hover:brightness-105"
+                            className="mt-4 rounded-xl border border-slate-300 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
                         >
                             {t('inspiration.newDoc')}
                         </button>

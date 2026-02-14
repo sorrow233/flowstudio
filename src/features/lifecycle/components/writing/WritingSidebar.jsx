@@ -318,7 +318,7 @@ const WritingSidebar = ({
 
                     <button
                         onClick={() => onCreate(selectedCategory || defaultCategoryId)}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-500 text-white shadow-[0_14px_30px_-18px_rgba(37,99,235,0.9)] transition hover:brightness-105"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-300 bg-slate-100 text-slate-700 shadow-sm transition hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
                         title={t('inspiration.newDoc')}
                     >
                         <Plus size={18} />
