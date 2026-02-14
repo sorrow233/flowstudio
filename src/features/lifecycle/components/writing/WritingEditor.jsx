@@ -1,9 +1,10 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { EditorState } from 'prosemirror-state';
+import { EditorView } from 'prosemirror-view';
 import { useTranslation } from '../../../i18n';
 import { COLOR_CONFIG } from '../inspiration/InspirationUtils';
 import {
-    htmlToMarkup,
     markupToHtml,
     markupToPlain,
     markupToMarkdown,
@@ -13,7 +14,8 @@ import {
     detectWordCountLabel,
     downloadContent,
 } from './editorUtils';
-import { clipboardToMarkup, insertMarkupAtCaret } from './pasteUtils';
+import { writingSchema } from './prosemirrorSchema';
+import { docToMarkup, markupToDoc, textToPasteSlice } from './prosemirrorMarkup';
 import EditorToolbar from './EditorToolbar';
 import EditorStatusBar from './EditorStatusBar';
 import FloatingColorPicker from './FloatingColorPicker';
@@ -28,6 +30,12 @@ const normalizeMarkupForSync = (value = '') =>
         .replace(/\r\n/g, '\n')
         .replace(/\u00A0/g, ' ')
         .replace(/\n+$/g, '');
+
+const createEditorState = (markup = '') =>
+    EditorState.create({
+        schema: writingSchema,
+        doc: markupToDoc(writingSchema, markup),
+    });
 
 const WritingEditor = ({
     doc: writingDoc,
@@ -44,6 +52,7 @@ const WritingEditor = ({
 }) => {
     const { t } = useTranslation();
     const editorRef = useRef(null);
+    const editorViewRef = useRef(null);
 
     // ---------- Local state ----------
     const [title, setTitle] = useState('');
@@ -54,7 +63,7 @@ const WritingEditor = ({
     const [wordCountLabelKey, setWordCountLabelKey] = useState('inspiration.words');
     const [charCount, setCharCount] = useState(0);
     const [readMinutes, setReadMinutes] = useState(0);
-    const [pendingRemoteHtml, setPendingRemoteHtml] = useState(null);
+    const [pendingRemoteMarkup, setPendingRemoteMarkup] = useState(null);
     const [showHistory, setShowHistory] = useState(false);
     const [showActions, setShowActions] = useState(false);
     const [conflictState, setConflictState] = useState(null);
@@ -63,6 +72,7 @@ const WritingEditor = ({
     const [copiedAt, setCopiedAt] = useState(null);
     const [isEditorFocused, setIsEditorFocused] = useState(false);
     const [isToolbarVisible, setIsToolbarVisible] = useState(true);
+    const [isDirty, setIsDirty] = useState(false);
 
     const lastSnapshotAtRef = useRef(0);
     const lastSnapshotContentRef = useRef('');
@@ -70,6 +80,19 @@ const WritingEditor = ({
     const forceRemoteApplyRef = useRef(false);
     const statsTimeoutRef = useRef(null);
     const inactivityTimeoutRef = useRef(null);
+    const selectionFrameRef = useRef(null);
+
+    const replaceEditorMarkup = useCallback((nextMarkup = '') => {
+        const view = editorViewRef.current;
+        if (!view) return;
+        view.updateState(createEditorState(nextMarkup));
+    }, []);
+
+    const getEditorMarkup = useCallback(() => {
+        const view = editorViewRef.current;
+        if (!view) return contentMarkup;
+        return docToMarkup(view.state.doc);
+    }, [contentMarkup]);
 
     // ---------- Inactivity Tracking ----------
     const resetInactivityTimer = useCallback(() => {
@@ -83,7 +106,6 @@ const WritingEditor = ({
         if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
 
         inactivityTimeoutRef.current = setTimeout(() => {
-            // Only hide if menus are closed and sidebar is possibly closed (optional, but requested to hide 2s after silence)
             if (!showActions && !showHistory) {
                 setIsToolbarVisible(false);
             }
@@ -100,11 +122,11 @@ const WritingEditor = ({
         const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
         const handler = () => resetInactivityTimer();
 
-        events.forEach(e => window.addEventListener(e, handler, { passive: true }));
+        events.forEach((e) => window.addEventListener(e, handler, { passive: true }));
         resetInactivityTimer();
 
         return () => {
-            events.forEach(e => window.removeEventListener(e, handler, { passive: true }));
+            events.forEach((e) => window.removeEventListener(e, handler, { passive: true }));
             if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
         };
     }, [isMobile, resetInactivityTimer]);
@@ -124,20 +146,23 @@ const WritingEditor = ({
     }, [isMobile, showActions, showHistory, resetInactivityTimer]);
 
     // ---------- Derived ----------
-    const hasUnsavedChanges = useMemo(() => {
-        if (!writingDoc) return false;
-        return title !== (writingDoc.title || '') || contentMarkup !== (writingDoc.content || '');
-    }, [contentMarkup, title, writingDoc]);
+    useEffect(() => {
+        if (!writingDoc) {
+            setIsDirty(false);
+            return;
+        }
+        setIsDirty(title !== (writingDoc.title || '') || contentMarkup !== (writingDoc.content || ''));
+    }, [title, contentMarkup, writingDoc?.id, writingDoc?.title, writingDoc?.content]);
 
     const statusLabel = useMemo(() => {
         if (syncStatus === 'offline' || syncStatus === 'disconnected') return t('inspiration.offline');
-        if (isSaving || hasUnsavedChanges) return t('inspiration.saving');
+        if (isSaving || isDirty) return t('inspiration.saving');
         if (syncStatus === 'syncing') return t('inspiration.syncing');
         return t('inspiration.synced');
-    }, [hasUnsavedChanges, isSaving, syncStatus, t]);
+    }, [isDirty, isSaving, syncStatus, t]);
 
     const isOffline = syncStatus === 'offline' || syncStatus === 'disconnected';
-    const isSyncing = isSaving || hasUnsavedChanges || syncStatus === 'syncing';
+    const isSyncing = isSaving || isDirty || syncStatus === 'syncing';
     const statusNeedsAttention = isOffline || isSyncing;
 
     const versions = useMemo(() => {
@@ -146,7 +171,7 @@ const WritingEditor = ({
     }, [writingDoc?.versions]);
 
     const canManualSnapshot = Boolean(writingDoc) && contentMarkup !== (lastSnapshotContentRef.current || '');
-    const hasPendingRemote = Boolean(pendingRemoteHtml);
+    const hasPendingRemote = Boolean(pendingRemoteMarkup);
     const canCopy = Boolean((title || '').trim() || (contentMarkup || '').trim());
 
     const conflictPreview = useMemo(() => {
@@ -156,17 +181,14 @@ const WritingEditor = ({
     }, [conflictState?.remoteContent]);
 
     // ---------- Stat helpers ----------
-    const updateStatsFromEditor = useCallback(() => {
-        if (statsTimeoutRef.current) clearTimeout(statsTimeoutRef.current);
-        statsTimeoutRef.current = setTimeout(() => {
-            const text = editorRef.current?.innerText || '';
-            const words = computeWordCount(text);
-            const chars = computeCharCount(text);
-            setWordCountLabelKey(detectWordCountLabel(text));
-            setWordCount(words);
-            setCharCount(chars);
-            setReadMinutes(computeReadMinutes(words, chars));
-        }, 800);
+    const updateStatsFromMarkup = useCallback((markup = '') => {
+        const text = markupToPlain(markup || '');
+        const words = computeWordCount(text);
+        const chars = computeCharCount(text);
+        setWordCountLabelKey(detectWordCountLabel(text));
+        setWordCount(words);
+        setCharCount(chars);
+        setReadMinutes(computeReadMinutes(words, chars));
     }, []);
 
     useEffect(() => {
@@ -174,6 +196,16 @@ const WritingEditor = ({
             if (statsTimeoutRef.current) clearTimeout(statsTimeoutRef.current);
         };
     }, []);
+
+    useEffect(() => {
+        if (statsTimeoutRef.current) clearTimeout(statsTimeoutRef.current);
+        statsTimeoutRef.current = setTimeout(() => {
+            updateStatsFromMarkup(contentMarkup);
+        }, 250);
+        return () => {
+            if (statsTimeoutRef.current) clearTimeout(statsTimeoutRef.current);
+        };
+    }, [contentMarkup, updateStatsFromMarkup]);
 
     // ---------- Snapshot helpers ----------
     const addSnapshot = useCallback(
@@ -199,7 +231,7 @@ const WritingEditor = ({
                 timestamp: now,
                 title: title || '',
                 content: markup || '',
-                wordCount: computeWordCount(editorRef.current?.innerText || ''),
+                wordCount: computeWordCount(markupToPlain(markup || '')),
             };
             addSnapshot(snapshot);
             lastSnapshotAtRef.current = now;
@@ -225,6 +257,58 @@ const WritingEditor = ({
 
     // ---------- Effects ----------
 
+    // Create ProseMirror editor view
+    useEffect(() => {
+        if (!editorRef.current || !writingDoc) return;
+
+        const initialMarkup = writingDoc.content || '';
+        let view;
+
+        view = new EditorView(editorRef.current, {
+            state: createEditorState(initialMarkup),
+            dispatchTransaction: (transaction) => {
+                const nextState = view.state.apply(transaction);
+                view.updateState(nextState);
+                if (transaction.docChanged) {
+                    setContentMarkup(docToMarkup(nextState.doc));
+                    setIsSaving(true);
+                }
+            },
+            attributes: {
+                class: 'min-h-[55vh] w-full outline-none caret-sky-500 selection:bg-sky-100/80 dark:caret-sky-400 dark:selection:bg-sky-900/40',
+                spellcheck: 'true',
+            },
+            handleDOMEvents: {
+                paste: (innerView, event) => {
+                    const text = event.clipboardData?.getData('text/plain');
+                    if (typeof text !== 'string') return false;
+                    event.preventDefault();
+                    const slice = textToPasteSlice(innerView.state.schema, text);
+                    innerView.dispatch(innerView.state.tr.replaceSelection(slice).scrollIntoView());
+                    return true;
+                },
+                focus: () => {
+                    setIsEditorFocused(true);
+                    return false;
+                },
+                blur: () => {
+                    setIsEditorFocused(false);
+                    return false;
+                },
+            },
+        });
+
+        editorViewRef.current = view;
+        setContentMarkup(initialMarkup);
+        setToolbarPosition(null);
+
+        return () => {
+            setToolbarPosition(null);
+            editorViewRef.current?.destroy();
+            editorViewRef.current = null;
+        };
+    }, [writingDoc?.id]);
+
     // Safe top inset
     useEffect(() => {
         const update = () => {
@@ -234,7 +318,6 @@ const WritingEditor = ({
             if (typeof window !== 'undefined' && window.visualViewport) {
                 const viewport = window.visualViewport;
                 const keyboardLikelyOpen = viewport.height < window.innerHeight - 120;
-                // iOS 输入法弹出时 offsetTop 可能出现异常跳变，导致内容被整体顶下去
                 if (keyboardLikelyOpen) {
                     setSafeTop(0);
                     return;
@@ -246,7 +329,10 @@ const WritingEditor = ({
         update();
         window.addEventListener('resize', update);
         window.visualViewport?.addEventListener('resize', update);
-        return () => { window.removeEventListener('resize', update); window.visualViewport?.removeEventListener('resize', update); };
+        return () => {
+            window.removeEventListener('resize', update);
+            window.visualViewport?.removeEventListener('resize', update);
+        };
     }, []);
 
     // Last saved
@@ -272,47 +358,52 @@ const WritingEditor = ({
 
         const remoteContentRaw = writingDoc.content || '';
         const remoteContent = normalizeMarkupForSync(remoteContentRaw);
-        const remoteHtml = markupToHtml(remoteContentRaw);
-        const liveLocalMarkupRaw = editorRef.current ? htmlToMarkup(editorRef.current) : contentMarkup;
+        const liveLocalMarkupRaw = getEditorMarkup();
         const liveLocalMarkup = normalizeMarkupForSync(liveLocalMarkupRaw);
         const localStateMarkup = normalizeMarkupForSync(contentMarkup);
         const remoteChanged = remoteContent !== prevRemoteContent;
         const remoteMatchesLocal = remoteContent === liveLocalMarkup;
         const localDirtySinceLastRemote = liveLocalMarkup !== prevRemoteContent;
+        const editorHasFocus = editorViewRef.current?.hasFocus() || false;
 
-        if (editorRef.current && remoteHtml !== editorRef.current.innerHTML) {
-            const isFocused = typeof document !== 'undefined' && document.activeElement === editorRef.current;
+        if (remoteContent !== liveLocalMarkup) {
             const shouldForceApply = forceRemoteApplyRef.current;
             if (shouldForceApply) forceRemoteApplyRef.current = false;
-            const shouldApplyImmediately = shouldForceApply || !isFocused || (remoteChanged && !localDirtySinceLastRemote);
+            const shouldApplyImmediately = shouldForceApply || !editorHasFocus || (remoteChanged && !localDirtySinceLastRemote);
 
             if (shouldApplyImmediately) {
-                editorRef.current.innerHTML = remoteHtml;
-                updateStatsFromEditor();
-                setPendingRemoteHtml(null);
+                replaceEditorMarkup(remoteContentRaw);
+                setContentMarkup(remoteContentRaw);
+                setPendingRemoteMarkup(null);
                 setConflictState(null);
             } else if (!remoteChanged) {
-                // 聚焦编辑期间的 DOM 结构差异（如 <div>/<br>）不应触发远端提示
+                // 忽略仅由本地 DOM 归一化带来的差异
             } else if (localDirtySinceLastRemote && !remoteMatchesLocal) {
                 setConflictState({ remoteContent, remoteTitle: writingDoc.title || '', timestamp: Date.now() });
-                setPendingRemoteHtml(null);
+                setPendingRemoteMarkup(null);
             } else if (!remoteMatchesLocal) {
-                setPendingRemoteHtml(remoteHtml);
+                setPendingRemoteMarkup(remoteContentRaw);
                 setConflictState(null);
             } else {
-                // 本地保存回写远端后，避免把确认同步误判为“远端更新”
-                setPendingRemoteHtml(null);
+                setPendingRemoteMarkup(null);
                 setConflictState(null);
             }
         }
 
-        const isFocused = typeof document !== 'undefined' && document.activeElement === editorRef.current;
         if (remoteContent !== localStateMarkup) {
-            if (!isFocused) setContentMarkup(remoteContentRaw);
+            if (!editorHasFocus) setContentMarkup(remoteContentRaw);
             else if (remoteMatchesLocal) setContentMarkup(liveLocalMarkupRaw);
         }
         lastSeenRemoteContentRef.current = remoteContentRaw;
-    }, [writingDoc?.id, writingDoc?.content, writingDoc?.title, contentMarkup, title, updateStatsFromEditor]);
+    }, [
+        writingDoc?.id,
+        writingDoc?.content,
+        writingDoc?.title,
+        contentMarkup,
+        title,
+        getEditorMarkup,
+        replaceEditorMarkup,
+    ]);
 
     // Init snapshot ref
     useEffect(() => {
@@ -328,7 +419,12 @@ const WritingEditor = ({
 
     // ESC closes
     useEffect(() => {
-        const h = (e) => { if (e.key === 'Escape') { setShowActions(false); setShowHistory(false); } };
+        const h = (e) => {
+            if (e.key === 'Escape') {
+                setShowActions(false);
+                setShowHistory(false);
+            }
+        };
         document.addEventListener('keydown', h);
         return () => document.removeEventListener('keydown', h);
     }, []);
@@ -336,7 +432,7 @@ const WritingEditor = ({
     // Auto-save debounced
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (!editorRef.current || !writingDoc) return;
+            if (!writingDoc) return;
             if (title !== (writingDoc.title || '') || contentMarkup !== (writingDoc.content || '')) {
                 setIsSaving(true);
                 onUpdate(writingDoc.id, { title, content: contentMarkup });
@@ -352,94 +448,132 @@ const WritingEditor = ({
 
     // Text Selection → Floating Color Picker
     useEffect(() => {
-        const handleSelection = () => {
+        const updateToolbarFromSelection = () => {
             if (typeof window === 'undefined') return;
             const selection = window.getSelection();
-            if (!selection || !selection.rangeCount || selection.isCollapsed) { setToolbarPosition(null); return; }
+            if (!selection || !selection.rangeCount || selection.isCollapsed) {
+                setToolbarPosition(null);
+                return;
+            }
 
             const range = selection.getRangeAt(0);
+            if (!editorRef.current) {
+                setToolbarPosition(null);
+                return;
+            }
+            const selectionInsideEditor = (
+                (selection.anchorNode && editorRef.current.contains(selection.anchorNode))
+                || (selection.focusNode && editorRef.current.contains(selection.focusNode))
+                || editorRef.current.contains(range.commonAncestorContainer)
+            );
+            if (!selectionInsideEditor) {
+                setToolbarPosition(null);
+                return;
+            }
+
             const rect = range.getBoundingClientRect();
-            if (editorRef.current && editorRef.current.contains(selection.anchorNode)) {
-                const offset = isMobile ? 80 : 60;
-                const toolbarWidth = isMobile ? 220 : 170;
-                const toolbarHeight = isMobile ? 56 : 46;
-                const padding = 12;
-                const maxLeft = window.innerWidth - toolbarWidth / 2 - padding;
-                const minLeft = toolbarWidth / 2 + padding;
-                const clampedLeft = Math.min(maxLeft, Math.max(minLeft, rect.left + rect.width / 2));
-                const minTop = padding + safeTop;
-                const maxTop = window.innerHeight - toolbarHeight - padding;
-                const clampedTop = Math.min(maxTop, Math.max(minTop, rect.top - offset));
-                setToolbarPosition({ top: clampedTop, left: clampedLeft });
-            } else { setToolbarPosition(null); }
+            if (!rect || (rect.width === 0 && rect.height === 0)) {
+                setToolbarPosition(null);
+                return;
+            }
+
+            const offset = isMobile ? 80 : 60;
+            const toolbarWidth = isMobile ? 220 : 170;
+            const toolbarHeight = isMobile ? 56 : 46;
+            const padding = 12;
+            const maxLeft = window.innerWidth - toolbarWidth / 2 - padding;
+            const minLeft = toolbarWidth / 2 + padding;
+            const clampedLeft = Math.min(maxLeft, Math.max(minLeft, rect.left + rect.width / 2));
+            const minTop = padding + safeTop;
+            const maxTop = window.innerHeight - toolbarHeight - padding;
+            const clampedTop = Math.min(maxTop, Math.max(minTop, rect.top - offset));
+            setToolbarPosition({ top: clampedTop, left: clampedLeft });
         };
+
+        const handleSelection = () => {
+            if (typeof window === 'undefined') return;
+            if (selectionFrameRef.current !== null) return;
+            selectionFrameRef.current = window.requestAnimationFrame(() => {
+                selectionFrameRef.current = null;
+                updateToolbarFromSelection();
+            });
+        };
+
         document.addEventListener('selectionchange', handleSelection);
-        return () => document.removeEventListener('selectionchange', handleSelection);
+        return () => {
+            document.removeEventListener('selectionchange', handleSelection);
+            if (typeof window !== 'undefined' && selectionFrameRef.current !== null) {
+                window.cancelAnimationFrame(selectionFrameRef.current);
+                selectionFrameRef.current = null;
+            }
+        };
     }, [isMobile, safeTop]);
 
     // Keyboard shortcuts
     useEffect(() => {
         const handleKeyDown = (e) => {
-            if (!editorRef.current || document.activeElement !== editorRef.current) return;
+            const view = editorViewRef.current;
+            if (!view || !view.hasFocus()) return;
             const isMod = e.metaKey || e.ctrlKey;
             if (!isMod) return;
             const key = e.key.toLowerCase();
-            if (key === 's') { e.preventDefault(); handleManualSnapshot(); return; }
-            if (key === 'z' && !e.shiftKey) { e.preventDefault(); if (canUndo) { forceRemoteApplyRef.current = true; onUndo?.(); } return; }
-            if ((key === 'z' && e.shiftKey) || key === 'y') { e.preventDefault(); if (canRedo) { forceRemoteApplyRef.current = true; onRedo?.(); } }
+            if (key === 's') {
+                e.preventDefault();
+                handleManualSnapshot();
+                return;
+            }
+            if (key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                if (canUndo) {
+                    forceRemoteApplyRef.current = true;
+                    onUndo?.();
+                }
+                return;
+            }
+            if ((key === 'z' && e.shiftKey) || key === 'y') {
+                e.preventDefault();
+                if (canRedo) {
+                    forceRemoteApplyRef.current = true;
+                    onRedo?.();
+                }
+            }
         };
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [handleManualSnapshot, canUndo, canRedo, onUndo, onRedo]);
 
     // ---------- Handlers ----------
-    const handleInput = useCallback(() => {
-        if (!editorRef.current) return;
-        setContentMarkup(htmlToMarkup(editorRef.current));
-        setIsSaving(true);
-        updateStatsFromEditor();
-    }, [updateStatsFromEditor]);
-
-    const handlePaste = useCallback((e) => {
-        e.preventDefault();
-        if (!editorRef.current) return;
-
-        const markup = clipboardToMarkup(e.clipboardData);
-        if (!markup) return;
-
-        const inserted = insertMarkupAtCaret({
-            editorElement: editorRef.current,
-            markup,
-            markupToHtml,
-        });
-        if (inserted) handleInput();
-    }, [handleInput]);
-
     const applyColor = (colorId) => {
-        if (typeof window === 'undefined' || !window.getSelection) return;
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
+        const view = editorViewRef.current;
+        if (!view) return;
+
         const colorConfig = COLOR_CONFIG.find((c) => c.id === colorId);
         if (!colorConfig) return;
-        const range = selection.getRangeAt(0);
-        const span = document.createElement('span');
-        const highlightColor = colorConfig.highlight || 'rgba(125, 211, 252, 0.55)';
-        span.style.background = `radial-gradient(ellipse 100% 40% at center 80%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%)`;
-        span.style.padding = '0 0.15em';
-        span.dataset.colorId = colorId;
-        span.className = 'colored-text relative inline';
-        try { range.surroundContents(span); selection.removeAllRanges(); handleInput(); }
-        catch (e) { console.warn('Could not wrap selection', e); }
+
+        const { from, to, empty } = view.state.selection;
+        if (empty) return;
+
+        const markType = view.state.schema.marks.highlight;
+        if (!markType) return;
+
+        const tr = view.state.tr
+            .removeMark(from, to, markType)
+            .addMark(from, to, markType.create({ colorId }))
+            .scrollIntoView();
+
+        view.dispatch(tr);
+        view.focus();
         setToolbarPosition(null);
     };
 
     const restoreSnapshot = (snapshot) => {
         if (!writingDoc || !snapshot) return;
-        setTitle(snapshot.title || '');
-        setContentMarkup(snapshot.content || '');
-        if (editorRef.current) editorRef.current.innerHTML = markupToHtml(snapshot.content || '');
-        updateStatsFromEditor();
-        onUpdate(writingDoc.id, { title: snapshot.title || '', content: snapshot.content || '' });
+        const snapshotTitle = snapshot.title || '';
+        const snapshotContent = snapshot.content || '';
+        setTitle(snapshotTitle);
+        setContentMarkup(snapshotContent);
+        replaceEditorMarkup(snapshotContent);
+        onUpdate(writingDoc.id, { title: snapshotTitle, content: snapshotContent });
         setShowHistory(false);
     };
 
@@ -465,24 +599,31 @@ const WritingEditor = ({
             if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(output);
             else {
                 const ta = document.createElement('textarea');
-                ta.value = output; ta.style.position = 'fixed'; ta.style.opacity = '0';
-                document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+                ta.value = output;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
             }
             setCopiedAt(Date.now());
-        } catch (err) { console.warn('Copy failed:', err); }
+        } catch (err) {
+            console.warn('Copy failed:', err);
+        }
     };
 
     const handleApplyPendingRemote = () => {
-        if (!pendingRemoteHtml || !writingDoc) return;
-        if (editorRef.current) editorRef.current.innerHTML = pendingRemoteHtml;
-        setContentMarkup(writingDoc.content || '');
-        updateStatsFromEditor();
-        setPendingRemoteHtml(null); setConflictState(null);
-        lastSeenRemoteContentRef.current = writingDoc.content || '';
+        if (!pendingRemoteMarkup || !writingDoc) return;
+        replaceEditorMarkup(pendingRemoteMarkup);
+        setContentMarkup(pendingRemoteMarkup);
+        setPendingRemoteMarkup(null);
+        setConflictState(null);
+        lastSeenRemoteContentRef.current = pendingRemoteMarkup;
     };
 
     const handleKeepPendingLocal = () => {
-        setPendingRemoteHtml(null);
+        setPendingRemoteMarkup(null);
         if (writingDoc?.content) lastSeenRemoteContentRef.current = writingDoc.content;
     };
 
@@ -490,12 +631,14 @@ const WritingEditor = ({
         if (!conflictState || !writingDoc) return;
         addSnapshot({
             id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            timestamp: Date.now(), title: conflictState.remoteTitle || '',
+            timestamp: Date.now(),
+            title: conflictState.remoteTitle || '',
             content: conflictState.remoteContent || '',
             wordCount: computeWordCount(markupToPlain(conflictState.remoteContent || '')),
         });
         onUpdate(writingDoc.id, { title: title || '', content: contentMarkup || '' });
-        setConflictState(null); setPendingRemoteHtml(null);
+        setConflictState(null);
+        setPendingRemoteMarkup(null);
         lastSeenRemoteContentRef.current = conflictState.remoteContent || '';
     };
 
@@ -503,10 +646,11 @@ const WritingEditor = ({
         if (!conflictState) return;
         const remote = conflictState.remoteContent || '';
         const remoteTitle = conflictState.remoteTitle || '';
-        setTitle(remoteTitle); setContentMarkup(remote);
-        if (editorRef.current) editorRef.current.innerHTML = markupToHtml(remote);
-        updateStatsFromEditor();
-        setConflictState(null); setPendingRemoteHtml(null);
+        setTitle(remoteTitle);
+        setContentMarkup(remote);
+        replaceEditorMarkup(remote);
+        setConflictState(null);
+        setPendingRemoteMarkup(null);
         lastSeenRemoteContentRef.current = remote;
     };
 
@@ -550,9 +694,8 @@ const WritingEditor = ({
                 className="relative z-10 flex-1 overflow-y-auto custom-scrollbar touch-scroll overscroll-y-contain"
                 style={{ paddingTop: conflictState ? safeTop + 82 : safeTop + 16 }}
                 onClick={(e) => {
-                    if (e.target === editorRef.current) return;
                     if (e.target instanceof Element && e.target.closest('button, input, [role="menu"]')) return;
-                    editorRef.current?.focus();
+                    editorViewRef.current?.focus();
                 }}
             >
                 <div className="mx-auto w-full max-w-4xl px-5 pb-24 md:px-10">
@@ -564,7 +707,7 @@ const WritingEditor = ({
                         animate={{
                             opacity: isToolbarVisible ? 1 : 0,
                             y: isToolbarVisible ? 0 : -8,
-                            pointerEvents: isToolbarVisible ? 'auto' : 'none'
+                            pointerEvents: isToolbarVisible ? 'auto' : 'none',
                         }}
                         transition={{ duration: 0.3, ease: 'easeInOut' }}
                     >
@@ -579,8 +722,18 @@ const WritingEditor = ({
                             canCopy={canCopy}
                             copiedAt={copiedAt}
                             showActions={showActions}
-                            onUndo={() => { if (canUndo) { forceRemoteApplyRef.current = true; onUndo?.(); } }}
-                            onRedo={() => { if (canRedo) { forceRemoteApplyRef.current = true; onRedo?.(); } }}
+                            onUndo={() => {
+                                if (canUndo) {
+                                    forceRemoteApplyRef.current = true;
+                                    onUndo?.();
+                                }
+                            }}
+                            onRedo={() => {
+                                if (canRedo) {
+                                    forceRemoteApplyRef.current = true;
+                                    onRedo?.();
+                                }
+                            }}
                             onManualSnapshot={handleManualSnapshot}
                             onShowHistory={() => setShowHistory(true)}
                             onCopy={handleCopy}
@@ -599,10 +752,12 @@ const WritingEditor = ({
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             onKeyDown={(e) => {
-                                if (e.key === 'Enter') { e.preventDefault(); editorRef.current?.focus(); }
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    editorViewRef.current?.focus();
+                                }
                             }}
-                            className={`w-full border-none bg-transparent font-semibold tracking-tight text-slate-800 outline-none placeholder:text-slate-300 dark:text-slate-100 dark:placeholder:text-slate-600 ${isMobile ? 'text-2xl' : 'text-3xl leading-tight'
-                                }`}
+                            className={`w-full border-none bg-transparent font-semibold tracking-tight text-slate-800 outline-none placeholder:text-slate-300 dark:text-slate-100 dark:placeholder:text-slate-600 ${isMobile ? 'text-2xl' : 'text-3xl leading-tight'}`}
                             placeholder={t('inspiration.untitled')}
                             style={{
                                 fontFamily: '"Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif',
@@ -625,7 +780,7 @@ const WritingEditor = ({
                     </div>
 
                     {/* Pending remote banner */}
-                    {pendingRemoteHtml && !conflictState && (
+                    {pendingRemoteMarkup && !conflictState && (
                         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-200/70 bg-sky-50/80 px-4 py-2.5 text-[12px] text-sky-700">
                             <span>{t('inspiration.pendingRemote')}</span>
                             <div className="flex items-center gap-2">
@@ -649,30 +804,11 @@ const WritingEditor = ({
                     <div
                         className={`rounded-3xl bg-white p-6 transition-all md:p-10 dark:bg-slate-900 ${isEditorFocused
                             ? 'shadow-[0_14px_30px_-24px_rgba(14,116,255,0.28)] dark:shadow-none'
-                            : 'shadow-none'
-                            }`}
+                            : 'shadow-none'}`}
                     >
-                        <div
-                            ref={editorRef}
-                            contentEditable
-                            suppressContentEditableWarning
-                            onInput={handleInput}
-                            onPaste={handlePaste}
-                            onFocus={() => {
-                                setIsEditorFocused(true);
-                            }}
-                            onBlur={() => setIsEditorFocused(false)}
-                            spellCheck
-                            className="min-h-[55vh] w-full text-lg text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"
-                            placeholder={t('inspiration.placeholder')}
-                            style={{
-                                whiteSpace: 'pre-wrap',
-                                wordBreak: 'break-word',
-                                lineHeight: 1.625,
-                                fontFamily: '"Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif',
-                                letterSpacing: 'normal',
-                            }}
-                        />
+                        <div className="writing-editor-prosemirror">
+                            <div ref={editorRef} aria-label={t('inspiration.placeholder')} />
+                        </div>
                     </div>
                 </div>
             </div>
