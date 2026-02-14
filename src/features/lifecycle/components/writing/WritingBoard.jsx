@@ -191,6 +191,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                     if (isMobile) setIsSidebarOpen(false);
                                 }}
                                 onCreate={handleCreate}
+                                onUpdate={handleUpdate}
                                 onDelete={handleDelete}
                                 onRestore={(docToRestore) => handleCreate(docToRestore)}
                                 onClose={() => setIsSidebarOpen(false)}

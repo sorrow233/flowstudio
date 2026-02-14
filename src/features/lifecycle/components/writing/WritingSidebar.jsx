@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { Search, Plus, Trash2, FileText, ArrowLeft, LayoutGrid } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { toast } from 'sonner';
@@ -16,8 +16,11 @@ const formatDocTime = (timestamp) => {
     });
 };
 
-const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
+const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, t }) => {
     const category = WRITING_CATEGORIES.find((item) => item.id === (doc.category || 'draft')) || WRITING_CATEGORIES[0];
+    const [isRenaming, setIsRenaming] = useState(false);
+    const [editTitle, setEditTitle] = useState(doc.title || '');
+    const inputRef = useRef(null);
 
     const x = useMotionValue(0);
     const deleteBackgroundColor = useTransform(
@@ -26,6 +29,36 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
         ['rgba(14, 165, 233, 0)', 'rgba(244, 63, 94, 0.35)', 'rgba(225, 29, 72, 0.95)']
     );
     const deleteIconOpacity = useTransform(x, [0, -50, -110], [0, 0, 1]);
+
+    useEffect(() => {
+        if (isRenaming && inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+        }
+    }, [isRenaming]);
+
+    // Update editTitle when doc.title changes externally, but only if not renaming
+    useEffect(() => {
+        if (!isRenaming) {
+            setEditTitle(doc.title || '');
+        }
+    }, [doc.title, isRenaming]);
+
+    const handleRename = () => {
+        if (editTitle.trim() !== (doc.title || '')) {
+            onUpdate?.(doc.id, { title: editTitle.trim() || t('inspiration.untitled') });
+        }
+        setIsRenaming(false);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleRename();
+        } else if (e.key === 'Escape') {
+            setEditTitle(doc.title || '');
+            setIsRenaming(false);
+        }
+    };
 
     return (
         <div className="relative overflow-hidden rounded-2xl">
@@ -51,22 +84,46 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
                         onDelete(doc);
                     }
                 }}
-                onClick={() => onSelect(doc.id)}
+                onClick={() => {
+                    if (!isRenaming) onSelect(doc.id);
+                }}
                 whileHover={{ scale: 1.007 }}
                 whileTap={{ scale: 0.995 }}
                 transition={{ x: { type: 'spring', stiffness: 520, damping: 30 } }}
                 className={[
-                    'cursor-pointer border px-4 py-3 transition',
+                    'cursor-pointer border px-4 py-3 transition rounded-2xl',
                     isActive
                         ? 'border-sky-200 bg-gradient-to-br from-sky-50 to-white shadow-[0_14px_34px_-24px_rgba(59,130,246,0.6)] dark:border-sky-800 dark:from-sky-950/30 dark:to-slate-900 dark:shadow-none'
                         : 'border-sky-100/80 bg-white/86 hover:border-sky-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/40 dark:hover:border-slate-700 dark:hover:bg-slate-900/80'
                 ].join(' ')}
             >
                 <div className="mb-2 flex items-center justify-between gap-2">
-                    <span className="line-clamp-1 text-sm font-medium text-slate-800 dark:text-slate-200">
-                        {doc.title || t('inspiration.untitled')}
-                    </span>
-                    <span className="shrink-0 text-[10px] font-medium tracking-wide text-sky-500/80 dark:text-sky-400/80">
+                    <div className="flex-1 min-w-0">
+                        {isRenaming ? (
+                            <input
+                                ref={inputRef}
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                onBlur={handleRename}
+                                onKeyDown={handleKeyDown}
+                                onClick={(e) => e.stopPropagation()}
+                                className="w-full bg-transparent text-sm font-medium text-slate-800 dark:text-slate-200 outline-none border-b border-sky-300 dark:border-sky-600 pb-0.5 placeholder:text-slate-400"
+                                placeholder={t('inspiration.untitled')}
+                            />
+                        ) : (
+                            <span
+                                onDoubleClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsRenaming(true);
+                                }}
+                                className="line-clamp-1 text-sm font-medium text-slate-800 dark:text-slate-200 select-none"
+                                title={t('common.doubleClickToRename', 'Double click to rename')}
+                            >
+                                {doc.title || t('inspiration.untitled')}
+                            </span>
+                        )}
+                    </div>
+                    <span className="shrink-0 text-[10px] font-medium tracking-wide text-sky-500/80 dark:text-sky-400/80 ml-2">
                         {formatDocTime(doc.lastModified || doc.timestamp)}
                     </span>
                 </div>
@@ -86,7 +143,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
     );
 };
 
-const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, onDelete, onRestore, onClose, isMobile }) => {
+const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, onUpdate, onDelete, onRestore, onClose, isMobile }) => {
     const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(null);
@@ -162,6 +219,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                             doc={doc}
                             isActive={activeDocId === doc.id}
                             onSelect={onSelectDoc}
+                            onUpdate={onUpdate}
                             onDelete={handleDelete}
                             t={t}
                         />

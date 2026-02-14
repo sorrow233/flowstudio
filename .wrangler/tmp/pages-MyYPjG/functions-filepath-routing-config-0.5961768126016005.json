@@ -1,0 +1,61 @@
+{
+  "routes": [
+    {
+      "routePath": "/api/delete-image",
+      "mountPath": "/api",
+      "method": "OPTIONS",
+      "module": [
+        "api/delete-image.js:onRequestOptions"
+      ]
+    },
+    {
+      "routePath": "/api/delete-image",
+      "mountPath": "/api",
+      "method": "POST",
+      "module": [
+        "api/delete-image.js:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/import",
+      "mountPath": "/api",
+      "method": "OPTIONS",
+      "module": [
+        "api/import.js:onRequestOptions"
+      ]
+    },
+    {
+      "routePath": "/api/import",
+      "mountPath": "/api",
+      "method": "POST",
+      "module": [
+        "api/import.js:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/upload",
+      "mountPath": "/api",
+      "method": "OPTIONS",
+      "module": [
+        "api/upload.js:onRequestOptions"
+      ]
+    },
+    {
+      "routePath": "/api/upload",
+      "mountPath": "/api",
+      "method": "POST",
+      "module": [
+        "api/upload.js:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/",
+      "mountPath": "/",
+      "method": "",
+      "middleware": [
+        "_middleware.js:onRequest"
+      ]
+    }
+  ],
+  "baseURL": "/"
+}
