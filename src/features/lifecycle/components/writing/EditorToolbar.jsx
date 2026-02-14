@@ -1,8 +1,6 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-    PanelLeftClose,
-    PanelLeftOpen,
     MoreHorizontal
 } from 'lucide-react';
 import ExportMenu from './ExportMenu';
@@ -49,13 +47,12 @@ const EditorToolbar = ({
         <div className="flex items-center gap-2">
             <button
                 onClick={onToggleSidebar}
-                className="relative inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition-all active:scale-95 hover:bg-sky-50 hover:text-sky-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-sky-400"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl transition-all active:scale-95 hover:bg-sky-50 dark:hover:bg-slate-800"
                 title={`${statusLabel} • ${t('inspiration.toggleSidebar')}`}
                 aria-label={statusLabel}
             >
-                {isSidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
                 <span
-                    className={`absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full transition-colors ${statusNeedsAttention
+                    className={`h-2.5 w-2.5 rounded-full transition-colors ${statusNeedsAttention
                         ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]'
                         : 'bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.45)] dark:bg-sky-400 dark:shadow-none'
                         }`}
