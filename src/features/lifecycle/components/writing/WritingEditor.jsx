@@ -228,10 +228,19 @@ const WritingEditor = ({
     useEffect(() => {
         const update = () => {
             const safeInset = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-top'));
-            if (!Number.isNaN(safeInset) && safeInset > 0) { setSafeTop(safeInset); return; }
+            const normalizedSafeTop = Number.isFinite(safeInset) ? Math.max(0, safeInset) : 0;
+
             if (typeof window !== 'undefined' && window.visualViewport) {
-                setSafeTop(Math.max(0, window.visualViewport.offsetTop || 0));
-            } else { setSafeTop(0); }
+                const viewport = window.visualViewport;
+                const keyboardLikelyOpen = viewport.height < window.innerHeight - 120;
+                // iOS 输入法弹出时 offsetTop 可能出现异常跳变，导致内容被整体顶下去
+                if (keyboardLikelyOpen) {
+                    setSafeTop(0);
+                    return;
+                }
+            }
+
+            setSafeTop(Math.min(normalizedSafeTop, 56));
         };
         update();
         window.addEventListener('resize', update);

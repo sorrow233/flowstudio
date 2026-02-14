@@ -8,6 +8,7 @@
     /* Pink background */
     --text-primary: #1a1a1a;
     --text-secondary: #666666;
+    --safe-top: env(safe-area-inset-top, 0px);
 }
 
 .dark {

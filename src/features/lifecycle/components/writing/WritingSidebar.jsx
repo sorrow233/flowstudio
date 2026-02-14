@@ -16,7 +16,7 @@ const formatDocTime = (timestamp) => {
     });
 };
 
-const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, categories, defaultCategoryId, t }) => {
+const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, categories, defaultCategoryId, isMobile, t }) => {
     const category = categories.find((item) => item.id === (doc.category || defaultCategoryId)) || categories[0];
     const [isRenaming, setIsRenaming] = useState(false);
     const [editTitle, setEditTitle] = useState(doc.title || '');
@@ -73,7 +73,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, categ
             <motion.div
                 layout
                 style={{ x }}
-                drag="x"
+                drag={isMobile ? 'x' : false}
                 dragDirectionLock
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={{ left: 0.22, right: 0.06 }}
@@ -209,6 +209,7 @@ const WritingSidebar = ({
                             doc={doc}
                             categories={categories}
                             defaultCategoryId={defaultCategoryId}
+                            isMobile={isMobile}
                             isActive={activeDocId === doc.id}
                             onSelect={onSelectDoc}
                             onUpdate={onUpdate}
