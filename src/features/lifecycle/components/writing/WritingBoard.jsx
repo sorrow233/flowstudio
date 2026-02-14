@@ -174,7 +174,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                 'relative z-50 h-full flex-shrink-0',
                                 isMobile
                                     ? 'fixed inset-y-0 left-0 w-[84vw] max-w-[360px]'
-                                    : 'w-[320px] border-r border-gray-200/70 dark:border-gray-800/80'
+                                    : 'w-[260px] border-r border-gray-200/70 dark:border-gray-800/80'
                             ].join(' ')}
                         >
                             <WritingSidebar
@@ -203,6 +203,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                         onUpdate={handleUpdate}
                         isSidebarOpen={isSidebarOpen}
                         onToggleSidebar={() => setIsSidebarOpen((open) => !open)}
+                        onCloseSidebar={() => setIsSidebarOpen(false)}
                         isMobile={isMobile}
                         onUndo={undo}
                         onRedo={redo}

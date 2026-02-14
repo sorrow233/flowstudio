@@ -28,6 +28,7 @@ const WritingEditor = ({
     onUpdate,
     isSidebarOpen,
     onToggleSidebar,
+    onCloseSidebar,
     isMobile,
     onUndo,
     onRedo,
@@ -304,7 +305,8 @@ const WritingEditor = ({
         setContentMarkup(htmlToMarkup(editorRef.current));
         setIsSaving(true);
         updateStatsFromEditor();
-    }, [updateStatsFromEditor]);
+        if (onCloseSidebar && !isMobile) onCloseSidebar();
+    }, [updateStatsFromEditor, onCloseSidebar, isMobile]);
 
     const applyColor = (colorId) => {
         if (typeof window === 'undefined' || !window.getSelection) return;
@@ -526,8 +528,8 @@ const WritingEditor = ({
                     {/* Content editor */}
                     <div
                         className={`rounded-3xl border bg-white/90 p-6 shadow-[0_8px_40px_-16px_rgba(0,0,0,0.08)] backdrop-blur-sm transition-all dark:bg-slate-900/85 md:p-10 ${isEditorFocused
-                                ? 'border-rose-200/50 shadow-[0_8px_40px_-12px_rgba(244,63,94,0.08)] dark:border-rose-800/30'
-                                : 'border-gray-200/50 dark:border-gray-800/50'
+                            ? 'border-rose-200/50 shadow-[0_8px_40px_-12px_rgba(244,63,94,0.08)] dark:border-rose-800/30'
+                            : 'border-gray-200/50 dark:border-gray-800/50'
                             }`}
                     >
                         <div
@@ -535,7 +537,10 @@ const WritingEditor = ({
                             contentEditable
                             suppressContentEditableWarning
                             onInput={handleInput}
-                            onFocus={() => setIsEditorFocused(true)}
+                            onFocus={() => {
+                                setIsEditorFocused(true);
+                                if (onCloseSidebar && !isMobile) onCloseSidebar();
+                            }}
                             onBlur={() => setIsEditorFocused(false)}
                             spellCheck
                             className={`min-h-[55vh] w-full text-gray-700 outline-none caret-rose-500 selection:bg-rose-100/60 empty:before:text-gray-300/70 dark:text-gray-200 dark:selection:bg-rose-500/20 dark:empty:before:text-gray-700 ${isMobile ? 'text-lg' : 'text-[1.15rem]'
