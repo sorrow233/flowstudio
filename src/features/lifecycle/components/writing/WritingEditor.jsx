@@ -22,6 +22,11 @@ import VersionHistoryModal from './VersionHistoryModal';
 const SNAPSHOT_INTERVAL_MS = 5 * 60 * 1000;
 const SNAPSHOT_MIN_CHANGE = 200;
 const MAX_VERSIONS = 50;
+const normalizeMarkupForSync = (value = '') =>
+    (value || '')
+        .replace(/\r\n/g, '\n')
+        .replace(/\u00A0/g, ' ')
+        .replace(/\n+$/g, '');
 
 const WritingEditor = ({
     doc: writingDoc,
@@ -233,22 +238,28 @@ const WritingEditor = ({
     // Sync local state with document prop
     useEffect(() => {
         if (!writingDoc) return;
-        const prevRemoteContent = lastSeenRemoteContentRef.current;
+        const prevRemoteContentRaw = lastSeenRemoteContentRef.current;
+        const prevRemoteContent = normalizeMarkupForSync(prevRemoteContentRaw);
 
         if (writingDoc.title !== title) setTitle(writingDoc.title || '');
 
-        const remoteContent = writingDoc.content || '';
-        const remoteHtml = markupToHtml(remoteContent);
+        const remoteContentRaw = writingDoc.content || '';
+        const remoteContent = normalizeMarkupForSync(remoteContentRaw);
+        const remoteHtml = markupToHtml(remoteContentRaw);
+        const liveLocalMarkupRaw = editorRef.current ? htmlToMarkup(editorRef.current) : contentMarkup;
+        const liveLocalMarkup = normalizeMarkupForSync(liveLocalMarkupRaw);
+        const localStateMarkup = normalizeMarkupForSync(contentMarkup);
         const remoteChanged = remoteContent !== prevRemoteContent;
-        const remoteMatchesLocal = remoteContent === contentMarkup;
-        const localDirtySinceLastRemote = contentMarkup !== prevRemoteContent;
+        const remoteMatchesLocal = remoteContent === liveLocalMarkup;
+        const localDirtySinceLastRemote = liveLocalMarkup !== prevRemoteContent;
 
         if (editorRef.current && remoteHtml !== editorRef.current.innerHTML) {
             const isFocused = typeof document !== 'undefined' && document.activeElement === editorRef.current;
             const shouldForceApply = forceRemoteApplyRef.current;
             if (shouldForceApply) forceRemoteApplyRef.current = false;
+            const shouldApplyImmediately = shouldForceApply || !isFocused || (remoteChanged && !localDirtySinceLastRemote);
 
-            if (shouldForceApply || !isFocused) {
+            if (shouldApplyImmediately) {
                 editorRef.current.innerHTML = remoteHtml;
                 updateStatsFromEditor();
                 setPendingRemoteHtml(null);
@@ -269,9 +280,11 @@ const WritingEditor = ({
         }
 
         const isFocused = typeof document !== 'undefined' && document.activeElement === editorRef.current;
-        const localDirty = contentMarkup !== remoteContent;
-        if (remoteContent !== contentMarkup && (!localDirty || !isFocused)) setContentMarkup(remoteContent);
-        lastSeenRemoteContentRef.current = remoteContent;
+        if (remoteContent !== localStateMarkup) {
+            if (!isFocused) setContentMarkup(remoteContentRaw);
+            else if (remoteMatchesLocal) setContentMarkup(liveLocalMarkupRaw);
+        }
+        lastSeenRemoteContentRef.current = remoteContentRaw;
     }, [writingDoc?.id, writingDoc?.content, writingDoc?.title, contentMarkup, title, updateStatsFromEditor]);
 
     // Init snapshot ref
