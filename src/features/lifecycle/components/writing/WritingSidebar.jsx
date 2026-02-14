@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { Trash2, FileText } from 'lucide-react';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useTranslation } from '../../../i18n';
 import { stripMarkup } from './editorUtils';
@@ -16,19 +16,11 @@ const formatDocTime = (timestamp) => {
     });
 };
 
-const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, categories, defaultCategoryId, isMobile, t }) => {
+const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, categories, defaultCategoryId, t }) => {
     const category = categories.find((item) => item.id === (doc.category || defaultCategoryId)) || categories[0];
     const [isRenaming, setIsRenaming] = useState(false);
     const [editTitle, setEditTitle] = useState(doc.title || '');
     const inputRef = useRef(null);
-
-    const x = useMotionValue(0);
-    const deleteBackgroundColor = useTransform(
-        x,
-        [0, -90, -170],
-        ['rgba(14, 165, 233, 0)', 'rgba(244, 63, 94, 0.35)', 'rgba(225, 29, 72, 0.95)']
-    );
-    const deleteIconOpacity = useTransform(x, [0, -50, -110], [0, 0, 1]);
 
     useEffect(() => {
         if (isRenaming && inputRef.current) {
@@ -59,38 +51,24 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, categ
         }
     };
 
+    const handleSelect = () => {
+        if (!isRenaming) onSelect(doc.id);
+    };
+
     return (
         <div className="relative overflow-hidden rounded-2xl">
-            <motion.div
-                style={{ backgroundColor: deleteBackgroundColor }}
-                className="absolute inset-0 flex items-center justify-end px-5"
-            >
-                <motion.div style={{ opacity: deleteIconOpacity }}>
-                    <Trash2 className="h-5 w-5 text-white" />
-                </motion.div>
-            </motion.div>
-
-            <motion.div
-                layout
-                style={{ x }}
-                drag={isMobile ? 'x' : false}
-                dragDirectionLock
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={{ left: 0.22, right: 0.06 }}
-                onDragEnd={(event, info) => {
-                    const shouldDelete = info.offset.x < -170 || (info.offset.x < -60 && info.velocity.x < -420);
-                    if (shouldDelete) {
-                        onDelete(doc);
+            <div
+                role="button"
+                tabIndex={0}
+                onClick={handleSelect}
+                onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        handleSelect();
                     }
                 }}
-                onClick={() => {
-                    if (!isRenaming) onSelect(doc.id);
-                }}
-                whileHover={{ scale: 1.007 }}
-                whileTap={{ scale: 0.995 }}
-                transition={{ x: { type: 'spring', stiffness: 520, damping: 30 } }}
                 className={[
-                    'cursor-pointer rounded-2xl border px-4 py-3 transition',
+                    'cursor-pointer rounded-2xl border px-4 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70',
                     isActive
                         ? 'border-sky-200 bg-sky-50 shadow-[0_14px_34px_-24px_rgba(59,130,246,0.6)] dark:border-sky-800 dark:bg-slate-900 dark:shadow-none'
                         : 'border-sky-100/80 bg-white/86 hover:border-sky-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/40 dark:hover:border-slate-700 dark:hover:bg-slate-900/80'
@@ -137,7 +115,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, categ
                         {resolveWritingCategoryLabel(category, t, t('common.noData'))}
                     </span>
                 </div>
-            </motion.div>
+            </div>
         </div>
     );
 };
@@ -209,11 +187,9 @@ const WritingSidebar = ({
                             doc={doc}
                             categories={categories}
                             defaultCategoryId={defaultCategoryId}
-                            isMobile={isMobile}
                             isActive={activeDocId === doc.id}
                             onSelect={onSelectDoc}
                             onUpdate={onUpdate}
-                            onDelete={handleDelete}
                             t={t}
                         />
                     ))}

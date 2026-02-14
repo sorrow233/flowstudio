@@ -99,6 +99,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     const [selectedDocId, setSelectedDocId] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => !isMobile);
     const [selectedCategory, setSelectedCategory] = useState(() => categories[0]?.id || null);
+    const [searchInput, setSearchInput] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
@@ -106,6 +107,13 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             setIsSidebarOpen(true);
         }
     }, [isMobile]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setSearchQuery(searchInput);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchInput]);
 
     useEffect(() => {
         if (categories.length === 0) {
@@ -119,22 +127,31 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     }, [categories, selectedCategory]);
 
     const defaultCategoryId = categories[0]?.id || 'draft';
+    const documentSearchIndex = useMemo(() =>
+        documents.map((docItem) => ({
+            doc: docItem,
+            category: docItem.category || defaultCategoryId,
+            title: (docItem.title || '').toLowerCase(),
+            content: stripMarkup(docItem.content || '').toLowerCase(),
+        })),
+        [documents, defaultCategoryId]
+    );
 
     const visibleDocuments = useMemo(() => {
         if (!selectedCategory) return [];
 
-        let list = documents.filter((docItem) => (docItem.category || defaultCategoryId) === selectedCategory);
+        let list = documentSearchIndex.filter((docItem) => docItem.category === selectedCategory);
 
         if (searchQuery.trim()) {
             const query = searchQuery.trim().toLowerCase();
             list = list.filter((docItem) =>
-                (docItem.title || '').toLowerCase().includes(query)
-                || stripMarkup(docItem.content || '').toLowerCase().includes(query)
+                docItem.title.includes(query)
+                || docItem.content.includes(query)
             );
         }
 
-        return list;
-    }, [documents, selectedCategory, searchQuery, defaultCategoryId]);
+        return list.map((docItem) => docItem.doc);
+    }, [documentSearchIndex, selectedCategory, searchQuery]);
 
     useEffect(() => {
         if (visibleDocuments.length === 0) {
@@ -188,6 +205,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
 
         createHandler(newDoc);
         setSelectedDocId(newDoc.id);
+        setSearchInput('');
         setSearchQuery('');
 
         if (isMobile) setIsSidebarOpen(false);
@@ -250,8 +268,8 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                     selectedCategory={selectedCategory}
                     onSelectCategory={setSelectedCategory}
                     onCreate={handleCreate}
-                    searchQuery={searchQuery}
-                    onSearchQueryChange={setSearchQuery}
+                    searchQuery={searchInput}
+                    onSearchQueryChange={setSearchInput}
                     onAddCategory={handleAddCategory}
                     onUpdateCategory={handleUpdateCategory}
                     onRemoveCategory={handleRemoveCategory}
@@ -283,7 +301,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                         mass: 1
                                     }}
                                     className={[
-                                        'relative z-50 h-full flex-shrink-0 border-r border-sky-100 bg-white dark:border-slate-800 dark:bg-slate-900',
+                                        'relative z-[70] h-full flex-shrink-0 border-r border-sky-100 bg-white pointer-events-auto dark:border-slate-800 dark:bg-slate-900',
                                         isMobile
                                             ? 'absolute inset-y-0 left-0 w-[84vw] max-w-[360px]'
                                             : 'overflow-hidden'
@@ -311,7 +329,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                         )}
                     </AnimatePresence>
 
-                    <section className="relative z-10 flex min-w-0 flex-1 flex-col">
+                    <section className="relative z-0 flex min-w-0 flex-1 flex-col">
                         {activeDoc ? (
                             <WritingEditor
                                 key={activeDoc.id}
