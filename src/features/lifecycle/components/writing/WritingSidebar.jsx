@@ -1,6 +1,7 @@
-import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { FileText } from 'lucide-react';
+import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
+import { FileText, Trash2 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import { useTranslation } from '../../../i18n';
 import { stripMarkup } from './editorUtils';
 
@@ -14,10 +15,13 @@ const formatDocTime = (timestamp) => {
     });
 };
 
-const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, t }) => {
+const LONG_PRESS_DELETE_MS = 650;
+
+const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, isMobile, t }) => {
     const [isRenaming, setIsRenaming] = useState(false);
     const [editTitle, setEditTitle] = useState(doc.title || '');
     const inputRef = useRef(null);
+    const longPressTimerRef = useRef(null);
 
     useEffect(() => {
         if (isRenaming && inputRef.current) {
@@ -52,12 +56,41 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, t }) => {
         if (!isRenaming) onSelect(doc.id);
     };
 
+    const clearLongPressTimer = useCallback(() => {
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+    }, []);
+
+    useEffect(() => clearLongPressTimer, [clearLongPressTimer]);
+
+    const handleDelete = useCallback((event) => {
+        event?.stopPropagation();
+        clearLongPressTimer();
+        onDelete?.(doc);
+    }, [clearLongPressTimer, doc, onDelete]);
+
+    const handlePointerDown = (event) => {
+        if (!isMobile || isRenaming) return;
+        if (event.pointerType && event.pointerType !== 'touch') return;
+        clearLongPressTimer();
+        longPressTimerRef.current = setTimeout(() => {
+            onDelete?.(doc);
+            longPressTimerRef.current = null;
+        }, LONG_PRESS_DELETE_MS);
+    };
+
     return (
         <div className="relative overflow-hidden rounded-2xl">
             <div
                 role="button"
                 tabIndex={0}
                 onClick={handleSelect}
+                onPointerDown={handlePointerDown}
+                onPointerUp={clearLongPressTimer}
+                onPointerLeave={clearLongPressTimer}
+                onPointerCancel={clearLongPressTimer}
                 onKeyDown={(event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault();
@@ -97,11 +130,23 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, t }) => {
                             </span>
                         )}
                     </div>
-                    {isActive && (
-                        <span className="ml-2 shrink-0 text-[10px] font-medium tracking-wide text-sky-500/80 dark:text-sky-400/80">
-                            {formatDocTime(doc.lastModified || doc.timestamp)}
-                        </span>
-                    )}
+                    <div className="ml-2 flex shrink-0 items-center gap-1.5">
+                        {isActive && (
+                            <span className="text-[10px] font-medium tracking-wide text-sky-500/80 dark:text-sky-400/80">
+                                {formatDocTime(doc.lastModified || doc.timestamp)}
+                            </span>
+                        )}
+                        <button
+                            type="button"
+                            onPointerDown={(event) => event.stopPropagation()}
+                            onClick={handleDelete}
+                            className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition hover:bg-rose-50 hover:text-rose-500 dark:text-slate-500 dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
+                            title={t('common.delete', '删除')}
+                            aria-label={t('common.delete', '删除')}
+                        >
+                            <Trash2 size={13} />
+                        </button>
+                    </div>
                 </div>
 
                 <p className="line-clamp-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
@@ -116,7 +161,10 @@ const WritingSidebar = ({
     documents = [],
     activeDocId,
     onSelectDoc,
+    onCreate,
     onUpdate,
+    onDelete,
+    onRestore,
     allDocumentsCount = 0,
     isMobile = false
 }) => {
@@ -157,12 +205,32 @@ const WritingSidebar = ({
                             isActive={activeDocId === doc.id}
                             onSelect={onSelectDoc}
                             onUpdate={onUpdate}
+                            onDelete={handleDelete}
+                            isMobile={isMobile}
                             t={t}
                         />
                     ))}
                 </div>
             </section>
         );
+    };
+
+    const handleDelete = (doc) => {
+        onDelete?.(doc.id);
+        toast.info(t('writing.docDeleted', '已删除文稿'), {
+            icon: <Trash2 className="h-4 w-4 text-rose-500" />,
+            action: {
+                label: t('common.undo', '撤销'),
+                onClick: () => {
+                    if (onRestore) {
+                        onRestore(doc);
+                        return;
+                    }
+                    onCreate?.(doc);
+                }
+            },
+            duration: 4000
+        });
     };
 
     return (
