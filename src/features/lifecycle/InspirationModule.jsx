@@ -160,6 +160,8 @@ const InspirationModule = () => {
     const [categoryTransferSuccessCount, setCategoryTransferSuccessCount] = useState(0);
     const [isCategoryPromptCopied, setIsCategoryPromptCopied] = useState(false);
     const [isCategoryContentCopied, setIsCategoryContentCopied] = useState(false);
+    const [isCategoryTransferTargetOnly, setIsCategoryTransferTargetOnly] = useState(false);
+    const [categoryTransferTargetId, setCategoryTransferTargetId] = useState('note');
     const [aiAssistTab, setAiAssistTab] = useState('prompt');
     const [showTodoAiHint, setShowTodoAiHint] = useState(() => {
         try {
@@ -187,6 +189,14 @@ const InspirationModule = () => {
             if (fallback) setCategoryTransferSourceId(fallback.id);
         }
     }, [categories, categoryTransferSourceId, selectedCategory]);
+
+    useEffect(() => {
+        if (categories.length === 0) return;
+        if (!categories.find(c => c.id === categoryTransferTargetId)) {
+            const fallback = categories.find(c => c.id === selectedCategory) || categories[0];
+            if (fallback) setCategoryTransferTargetId(fallback.id);
+        }
+    }, [categories, categoryTransferTargetId, selectedCategory]);
 
     // Autocomplete State
     const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -799,6 +809,10 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         return categories.find(cat => cat.id === categoryTransferSourceId) || categories[0] || null;
     }, [categories, categoryTransferSourceId]);
 
+    const categoryTransferTargetCategory = useMemo(() => {
+        return categories.find(cat => cat.id === categoryTransferTargetId) || categories[0] || null;
+    }, [categories, categoryTransferTargetId]);
+
     const categoryTransferIdeas = useMemo(() => {
         return ideas
             .filter(idea => (idea.category || 'note') === categoryTransferSourceId)
@@ -819,9 +833,15 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
 
     const handleOpenCategoryTransfer = useCallback(() => {
         const fallback = categories.find(c => c.id === selectedCategory) || categories[0];
+        const devCategory = categories.find((cat) => {
+            const normalized = String(cat?.label || cat?.id || '').toLowerCase();
+            return normalized.includes('开发') || normalized.includes('development') || normalized === 'dev';
+        });
         if (fallback) {
             setCategoryTransferSourceId(fallback.id);
+            setCategoryTransferTargetId(devCategory?.id || fallback.id);
         }
+        setIsCategoryTransferTargetOnly(false);
         setCategoryTransferText('');
         setCategoryTransferError('');
         setCategoryTransferSuccessCount(0);
@@ -885,8 +905,19 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             return;
         }
 
+        const appliedAssignments = isCategoryTransferTargetOnly
+            ? assignments.filter(item => item.categoryId === categoryTransferTargetId)
+            : assignments;
+
+        if (appliedAssignments.length === 0) {
+            const targetLabel = categories.find(cat => cat.id === categoryTransferTargetId)?.label || '目标分类';
+            setCategoryTransferError(`已解析分类结果，但没有识别到“${targetLabel}”条目。`);
+            setCategoryTransferSuccessCount(0);
+            return;
+        }
+
         let moved = 0;
-        assignments.forEach(({ index, categoryId }) => {
+        appliedAssignments.forEach(({ index, categoryId }) => {
             const targetIdea = categoryTransferIdeas[index];
             if (!targetIdea) return;
             const currentCategory = targetIdea.category || 'note';
@@ -904,7 +935,14 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         setCategoryTransferError('');
         setCategoryTransferSuccessCount(moved);
         setCategoryTransferText('');
-    }, [categoryTransferText, categories, categoryTransferIdeas, updateIdea]);
+    }, [
+        categoryTransferText,
+        categories,
+        categoryTransferIdeas,
+        isCategoryTransferTargetOnly,
+        categoryTransferTargetId,
+        updateIdea,
+    ]);
 
     const markTodoAiHintSeen = useCallback(() => {
         setShowTodoAiHint(false);
@@ -1964,6 +2002,47 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                     </div>
                                 </div>
 
+                                <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white/70 dark:bg-gray-900/60 p-4">
+                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                                        <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                                            <input
+                                                type="checkbox"
+                                                checked={isCategoryTransferTargetOnly}
+                                                onChange={(e) => {
+                                                    setIsCategoryTransferTargetOnly(e.target.checked);
+                                                    setCategoryTransferError('');
+                                                    setCategoryTransferSuccessCount(0);
+                                                }}
+                                                className="h-4 w-4 rounded border-gray-300 text-sky-500 focus:ring-sky-400"
+                                            />
+                                            <span className="text-sm text-gray-700 dark:text-gray-200 font-medium">
+                                                仅迁移到指定分类（忽略其他分类）
+                                            </span>
+                                        </label>
+
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">目标分类</span>
+                                            <select
+                                                value={categoryTransferTargetId}
+                                                onChange={(e) => {
+                                                    setCategoryTransferTargetId(e.target.value);
+                                                    setCategoryTransferError('');
+                                                    setCategoryTransferSuccessCount(0);
+                                                }}
+                                                disabled={!isCategoryTransferTargetOnly}
+                                                className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-sky-300/50 dark:focus:ring-sky-700/50 focus:border-sky-300 dark:focus:border-sky-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {categories.map((cat) => (
+                                                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                        打开后可直接粘贴全量 AI 结果，只会迁移命中目标分类的条目（例如只迁移“开发”）。
+                                    </p>
+                                </div>
+
                                 <div className="rounded-2xl border border-sky-100 dark:border-sky-800/40 bg-sky-50/60 dark:bg-sky-900/15 p-4">
                                     <div className="flex items-center justify-between gap-2">
                                         <div className="text-[11px] font-semibold tracking-wide uppercase text-sky-500 dark:text-sky-300">
@@ -2025,7 +2104,9 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                         className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-400 text-white text-sm font-medium hover:bg-sky-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-lg shadow-sky-100 dark:shadow-sky-900/30"
                                     >
                                         <ArrowRight size={14} />
-                                        导入并迁移
+                                        {isCategoryTransferTargetOnly
+                                            ? `仅迁移到 ${categoryTransferTargetCategory?.label || '目标分类'}`
+                                            : '导入并迁移'}
                                     </button>
                                 </div>
                             </div>
