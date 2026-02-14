@@ -62,6 +62,7 @@ export default {
         writing: '写作',
         writing: '写作',
         writingSubtitle: '在这里沉浸式创作，记录更完整的思绪',
+        totalDocs: '文档',
         placeholder: '记录一闪而过的念头...',
         addNote: '添加随记', // Add missing key
         emptyState: '暂无灵感，记录下第一个想法吧',

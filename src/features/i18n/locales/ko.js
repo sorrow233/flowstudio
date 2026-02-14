@@ -62,6 +62,7 @@ export default {
         emptyState: '영감이 없습니다. 첫 번째 아이디어를 기록해 보세요.',
         writing: '글쓰기',
         writingSubtitle: '몰입형 창작, 완전한 생각을 기록하세요',
+        totalDocs: '문서',
         placeholder: '떠오르는 아이디어를 기록하세요...',
         emptyState: '영감이 없습니다. 첫 번째 아이디어를 기록해 보세요.',
         ideaDeleted: '영감이 삭제되었습니다',

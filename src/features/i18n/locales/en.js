@@ -62,6 +62,7 @@ export default {
         writing: 'Writing',
 
         writingSubtitle: 'Immersive creation, capturing complete thoughts',
+        totalDocs: 'Documents',
         placeholder: 'Record a fleeting thought...',
         addNote: 'Add Note',
         emptyState: 'No inspirations yet, record your first idea',

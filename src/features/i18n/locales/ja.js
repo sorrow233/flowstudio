@@ -62,6 +62,7 @@ export default {
         emptyState: 'インスピレーションはまだありません。最初のアイデアを記録しましょう。',
         writing: 'ライティング',
         writingSubtitle: '没入型の創作、完全な思考を記録する',
+        totalDocs: 'ドキュメント',
         placeholder: 'アイデアを記録...',
         emptyState: 'インスピレーションはまだありません。最初のアイデアを記録しましょう。',
         ideaDeleted: 'インスピレーションを削除しました',
