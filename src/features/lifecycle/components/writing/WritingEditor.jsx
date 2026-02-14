@@ -202,10 +202,12 @@ const WritingEditor = ({
 
         const remoteContent = writingDoc.content || '';
         const remoteHtml = markupToHtml(remoteContent);
+        const remoteChanged = remoteContent !== prevRemoteContent;
+        const remoteMatchesLocal = remoteContent === contentMarkup;
+        const localDirtySinceLastRemote = contentMarkup !== prevRemoteContent;
 
         if (editorRef.current && remoteHtml !== editorRef.current.innerHTML) {
             const isFocused = typeof document !== 'undefined' && document.activeElement === editorRef.current;
-            const localDirty = contentMarkup !== remoteContent;
             const shouldForceApply = forceRemoteApplyRef.current;
             if (shouldForceApply) forceRemoteApplyRef.current = false;
 
@@ -214,14 +216,18 @@ const WritingEditor = ({
                 updateStatsFromEditor();
                 setPendingRemoteHtml(null);
                 setConflictState(null);
-            } else if (isFocused && localDirty && remoteContent !== prevRemoteContent) {
+            } else if (!remoteChanged) {
+                // 聚焦编辑期间的 DOM 结构差异（如 <div>/<br>）不应触发远端提示
+            } else if (localDirtySinceLastRemote && !remoteMatchesLocal) {
                 setConflictState({ remoteContent, remoteTitle: writingDoc.title || '', timestamp: Date.now() });
                 setPendingRemoteHtml(null);
-            } else if (isFocused) {
+            } else if (!remoteMatchesLocal) {
                 setPendingRemoteHtml(remoteHtml);
+                setConflictState(null);
             } else {
-                editorRef.current.innerHTML = remoteHtml;
-                updateStatsFromEditor();
+                // 本地保存回写远端后，避免把确认同步误判为“远端更新”
+                setPendingRemoteHtml(null);
+                setConflictState(null);
             }
         }
 
