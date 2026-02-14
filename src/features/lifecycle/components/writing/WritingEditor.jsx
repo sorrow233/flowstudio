@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
 import { COLOR_CONFIG } from '../inspiration/InspirationUtils';
 import {
@@ -56,12 +56,49 @@ const WritingEditor = ({
     const [lastSavedAt, setLastSavedAt] = useState(null);
     const [copiedAt, setCopiedAt] = useState(null);
     const [isEditorFocused, setIsEditorFocused] = useState(false);
+    const [isToolbarVisible, setIsToolbarVisible] = useState(true);
 
     const lastSnapshotAtRef = useRef(0);
     const lastSnapshotContentRef = useRef('');
     const lastSeenRemoteContentRef = useRef('');
     const forceRemoteApplyRef = useRef(false);
     const statsTimeoutRef = useRef(null);
+    const inactivityTimeoutRef = useRef(null);
+
+    // ---------- Inactivity Tracking ----------
+    const resetInactivityTimer = useCallback(() => {
+        setIsToolbarVisible(true);
+        if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
+
+        inactivityTimeoutRef.current = setTimeout(() => {
+            // Only hide if menus are closed and sidebar is possibly closed (optional, but requested to hide 2s after silence)
+            if (!showActions && !showHistory) {
+                setIsToolbarVisible(false);
+            }
+        }, 2000);
+    }, [showActions, showHistory]);
+
+    useEffect(() => {
+        const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+        const handler = () => resetInactivityTimer();
+
+        events.forEach(e => window.addEventListener(e, handler, { passive: true }));
+        resetInactivityTimer();
+
+        return () => {
+            events.forEach(e => window.removeEventListener(e, handler, { passive: true }));
+            if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
+        };
+    }, [resetInactivityTimer]);
+
+    useEffect(() => {
+        if (showActions || showHistory) {
+            setIsToolbarVisible(true);
+            if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
+        } else {
+            resetInactivityTimer();
+        }
+    }, [showActions, showHistory, resetInactivityTimer]);
 
     // ---------- Derived ----------
     const hasUnsavedChanges = useMemo(() => {
@@ -466,7 +503,17 @@ const WritingEditor = ({
             >
                 <div className="mx-auto w-full max-w-4xl px-5 pb-24 md:px-10">
                     {/* Toolbar */}
-                    <div className="sticky z-30" style={{ top: isMobile ? 6 : 12 }}>
+                    <motion.div
+                        className="sticky z-30"
+                        style={{ top: isMobile ? 6 : 12 }}
+                        initial={{ opacity: 1, y: 0 }}
+                        animate={{
+                            opacity: isToolbarVisible ? 1 : 0,
+                            y: isToolbarVisible ? 0 : -8,
+                            pointerEvents: isToolbarVisible ? 'auto' : 'none'
+                        }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    >
                         <EditorToolbar
                             isSidebarOpen={isSidebarOpen}
                             onToggleSidebar={onToggleSidebar}
@@ -489,7 +536,7 @@ const WritingEditor = ({
                             isMobile={isMobile}
                             t={t}
                         />
-                    </div>
+                    </motion.div>
 
                     {/* Title */}
                     <div className={`${isMobile ? 'mt-8' : 'mt-11'}`}>
