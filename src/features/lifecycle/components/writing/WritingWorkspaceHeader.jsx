@@ -50,7 +50,7 @@ const WritingWorkspaceHeader = ({
                             >
                                 <button
                                     onClick={() => setIsSearchOpen(true)}
-                                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-sky-100/80 bg-white text-sky-500 transition-all hover:border-sky-200 hover:bg-sky-50 dark:border-slate-700 dark:bg-slate-800 dark:text-sky-400 dark:hover:border-slate-600"
+                                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/60 bg-white/80 text-sky-500 transition-all hover:bg-white dark:border-slate-700/50 dark:bg-slate-800/80 dark:text-sky-400 dark:hover:bg-slate-800"
                                     title={t('inspiration.search')}
                                 >
                                     <Search size={18} />
@@ -58,10 +58,10 @@ const WritingWorkspaceHeader = ({
                                 <button
                                     onClick={() => onCreate(selectedCategory)}
                                     disabled={!selectedCategory}
-                                    className="inline-flex h-10 px-4 items-center justify-center gap-2 rounded-xl border border-sky-500 bg-sky-500 text-white shadow-sm transition-all hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="inline-flex h-10 px-4 items-center justify-center gap-2 rounded-xl bg-sky-500 text-white shadow-[0_4px_12px_-4px_rgba(14,165,233,0.5)] transition-all hover:bg-sky-600 active:scale-95 disabled:opacity-50"
                                 >
                                     <Plus size={18} />
-                                    <span className="text-sm font-semibold">{t('inspiration.newDoc')}</span>
+                                    <span className="text-sm font-bold">{t('inspiration.newDoc')}</span>
                                 </button>
                             </motion.div>
                         ) : (
@@ -73,14 +73,14 @@ const WritingWorkspaceHeader = ({
                                 className="flex items-center gap-2 overflow-hidden"
                             >
                                 <div className="relative w-64 lg:w-80">
-                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400" />
+                                    <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400" />
                                     <input
                                         autoFocus
                                         type="text"
                                         value={searchQuery}
                                         onChange={(event) => onSearchQueryChange(event.target.value)}
                                         placeholder={t('inspiration.search')}
-                                        className="h-10 w-full rounded-xl border border-sky-200 bg-white px-9 text-sm text-slate-700 outline-none transition-all focus:border-sky-400 focus:ring-4 focus:ring-sky-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-sky-600 dark:focus:ring-sky-900/10"
+                                        className="h-10 w-full rounded-xl border border-slate-200/60 bg-white/80 px-10 text-sm text-slate-700 outline-none transition-all focus:border-sky-400 focus:bg-white dark:border-slate-700/50 dark:bg-slate-800/80 dark:text-slate-200 dark:focus:border-sky-600 dark:focus:bg-slate-800"
                                     />
                                     <button
                                         onClick={() => {

@@ -28,23 +28,21 @@ const WritingCategorySelector = ({
                 <ListChecks size={16} />
             </button>
 
-            <div className="flex min-w-0 flex-1 items-center rounded-full border border-slate-200 bg-white p-1 shadow-[0_10px_24px_-18px_rgba(30,64,175,0.4)]">
-                {!shouldCompactCategoryBar && (
-                    <div className="relative mr-1 flex h-8 min-w-[72px] max-w-[120px] shrink-0 items-center justify-center overflow-hidden border-r border-slate-200 px-3">
-                        <AnimatePresence mode="wait" initial={false}>
-                            <motion.span
-                                key={selectedCategory || 'none'}
-                                initial={{ y: 18, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                exit={{ y: -18, opacity: 0 }}
-                                transition={{ duration: 0.2, ease: 'easeOut' }}
-                                className={`line-clamp-1 text-xs font-medium ${selectedCategoryInfo?.textColor || 'text-slate-600'}`}
-                            >
-                                {resolveWritingCategoryLabel(selectedCategoryInfo, t, t('common.noData'))}
-                            </motion.span>
-                        </AnimatePresence>
-                    </div>
-                )}
+            <div className="flex min-w-0 flex-1 items-center rounded-xl border border-slate-200/60 bg-white/80 p-1 shadow-sm transition-colors dark:border-slate-700/50 dark:bg-slate-800/80">
+                <div className="relative mr-1.5 flex h-8 min-w-[72px] max-w-[120px] shrink-0 items-center justify-center overflow-hidden border-r border-slate-200/60 px-3 dark:border-slate-700/50">
+                    <AnimatePresence mode="wait" initial={false}>
+                        <motion.span
+                            key={selectedCategory || 'none'}
+                            initial={{ y: 12, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: -12, opacity: 0 }}
+                            transition={{ duration: 0.2, ease: 'easeOut' }}
+                            className={`line-clamp-1 text-xs font-bold tracking-tight ${selectedCategoryInfo?.textColor || 'text-slate-600 dark:text-slate-300'}`}
+                        >
+                            {resolveWritingCategoryLabel(selectedCategoryInfo, t, t('common.noData'))}
+                        </motion.span>
+                    </AnimatePresence>
+                </div>
 
                 <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1 overflow-x-auto pl-0.5 pr-1">
                     {categories.map((category) => (
@@ -57,7 +55,7 @@ const WritingCategorySelector = ({
                             {selectedCategory === category.id && (
                                 <motion.div
                                     layoutId="writingActiveCategory"
-                                    className="absolute inset-0 rounded-full border border-slate-200 bg-white shadow-sm"
+                                    className="absolute inset-0 rounded-full border border-slate-200 bg-white shadow-sm dark:border-slate-600 dark:bg-slate-700"
                                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                                 />
                             )}
@@ -73,10 +71,10 @@ const WritingCategorySelector = ({
 
                 <button
                     onClick={onOpenManager}
-                    className="ml-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                    className="ml-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
                     title={managerTitle}
                 >
-                    <Settings2 size={14} />
+                    <Settings2 size={13} />
                 </button>
             </div>
         </div>
