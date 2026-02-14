@@ -200,24 +200,53 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                     />
                 </div>
 
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-                    {WRITING_CATEGORIES.map((cat) => {
-                        const isSelected = selectedCategory === cat.id;
-                        return (
+                <div className="flex items-center p-1 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-full border border-gray-100/50 dark:border-gray-800/50 shadow-sm transition-all duration-300 hover:bg-white/80 dark:hover:bg-gray-900/80 hover:shadow-md hover:border-pink-100/30 dark:hover:border-pink-900/30 w-fit">
+                    {/* Label Section - Animated */}
+                    <div className="flex items-center px-3 border-r border-gray-200/50 dark:border-gray-700/50 mr-1 min-w-[60px] justify-center relative overflow-hidden h-7">
+                        <AnimatePresence mode="wait" initial={false}>
+                            <motion.span
+                                key={selectedCategory || 'all'}
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: -20, opacity: 0 }}
+                                transition={{ duration: 0.2, ease: "easeOut" }}
+                                className={`text-xs font-medium ${selectedCategory
+                                    ? WRITING_CATEGORIES.find(c => c.id === selectedCategory)?.textColor
+                                    : 'text-gray-500 dark:text-gray-400'
+                                    }`}
+                            >
+                                {selectedCategory
+                                    ? WRITING_CATEGORIES.find(c => c.id === selectedCategory)?.label
+                                    : t('inspiration.system.all', '全部')
+                                }
+                            </motion.span>
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Dots Section */}
+                    <div className="flex items-center gap-1 pr-1">
+                        {WRITING_CATEGORIES.map(cat => (
                             <button
                                 key={cat.id}
-                                onClick={() => setSelectedCategory(isSelected ? null : cat.id)}
-                                className={[
-                                    'flex-shrink-0 rounded-full border px-3 py-1.5 text-xs transition',
-                                    isSelected
-                                        ? 'border-rose-200 bg-rose-50 text-rose-600 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-300'
-                                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-400 dark:hover:border-gray-700'
-                                ].join(' ')}
+                                onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
+                                className="relative w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 group/dot flex-shrink-0"
+                                title={cat.label}
                             >
-                                {cat.label}
+                                {selectedCategory === cat.id && (
+                                    <motion.div
+                                        layoutId="activeCategory"
+                                        className="absolute inset-0 bg-white dark:bg-gray-700 rounded-full shadow-sm border border-gray-100 dark:border-gray-600"
+                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                    />
+                                )}
+                                <div className={`
+                                    relative z-10 w-2.5 h-2.5 rounded-full transition-all duration-300
+                                    ${cat.dotColor}
+                                    ${selectedCategory === cat.id ? 'scale-110' : 'opacity-40 group-hover/dot:opacity-100 group-hover/dot:scale-110'}
+                                `} />
                             </button>
-                        );
-                    })}
+                        ))}
+                    </div>
                 </div>
             </header>
 
