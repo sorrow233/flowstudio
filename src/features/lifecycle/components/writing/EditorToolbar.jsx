@@ -3,13 +3,7 @@ import { AnimatePresence } from 'framer-motion';
 import {
     PanelLeftClose,
     PanelLeftOpen,
-    Undo2,
-    Redo2,
-    Save,
-    History,
-    Copy,
-    Download,
-    Check
+    Ellipsis
 } from 'lucide-react';
 import ExportMenu from './ExportMenu';
 
@@ -29,10 +23,6 @@ const IconBtn = ({ onClick, disabled, title, children, active, className = '' })
     </button>
 );
 
-const Divider = () => (
-    <div className="mx-1 h-4 w-px bg-sky-100/90 dark:bg-slate-700/90" />
-);
-
 const EditorToolbar = ({
     isSidebarOpen,
     onToggleSidebar,
@@ -43,15 +33,15 @@ const EditorToolbar = ({
     canManualSnapshot,
     canCopy,
     copiedAt,
-    showExport,
+    showActions,
     onUndo,
     onRedo,
     onManualSnapshot,
     onShowHistory,
     onCopy,
-    onToggleExport,
+    onToggleActions,
     onExport,
-    onCloseExport,
+    onCloseActions,
     isMobile,
     t
 }) => (
@@ -72,43 +62,27 @@ const EditorToolbar = ({
             </div>
         </div>
 
-        <div className="flex items-center gap-0.5">
-            <IconBtn onClick={onUndo} disabled={!canUndo} title={`${t('common.undo')} ⌘Z`}>
-                <Undo2 size={15} />
-            </IconBtn>
-            <IconBtn onClick={onRedo} disabled={!canRedo} title={`${t('common.redo')} ⌘⇧Z`}>
-                <Redo2 size={15} />
-            </IconBtn>
-
-            <Divider />
-
-            <IconBtn
-                onClick={onManualSnapshot}
-                disabled={!canManualSnapshot}
-                title={`${t('inspiration.saveVersion')} ⌘S`}
-            >
-                <Save size={15} />
-            </IconBtn>
-            <IconBtn onClick={onShowHistory} title={t('inspiration.versionHistory')}>
-                <History size={15} />
-            </IconBtn>
-
-            <Divider />
-
-            <IconBtn onClick={onCopy} disabled={!canCopy} title={t('common.copy')}>
-                {copiedAt ? <Check size={15} className="text-emerald-500" /> : <Copy size={15} />}
-            </IconBtn>
-
+        <div className="flex items-center">
             <div className="relative">
-                <IconBtn onClick={onToggleExport} title={t('inspiration.export')}>
-                    <Download size={15} />
+                <IconBtn onClick={onToggleActions} title={t('common.details', '详情')}>
+                    <Ellipsis size={16} />
                 </IconBtn>
                 <AnimatePresence>
-                    {showExport && (
+                    {showActions && (
                         <ExportMenu
-                            show={showExport}
+                            show={showActions}
+                            canUndo={canUndo}
+                            canRedo={canRedo}
+                            canManualSnapshot={canManualSnapshot}
+                            canCopy={canCopy}
+                            copiedAt={copiedAt}
+                            onUndo={onUndo}
+                            onRedo={onRedo}
+                            onManualSnapshot={onManualSnapshot}
+                            onShowHistory={onShowHistory}
+                            onCopy={onCopy}
                             onExport={onExport}
-                            onClose={onCloseExport}
+                            onClose={onCloseActions}
                             isMobile={isMobile}
                             t={t}
                         />

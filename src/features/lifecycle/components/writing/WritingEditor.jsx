@@ -50,7 +50,7 @@ const WritingEditor = ({
     const [readMinutes, setReadMinutes] = useState(0);
     const [pendingRemoteHtml, setPendingRemoteHtml] = useState(null);
     const [showHistory, setShowHistory] = useState(false);
-    const [showExport, setShowExport] = useState(false);
+    const [showActions, setShowActions] = useState(false);
     const [conflictState, setConflictState] = useState(null);
     const [safeTop, setSafeTop] = useState(0);
     const [lastSavedAt, setLastSavedAt] = useState(null);
@@ -461,15 +461,15 @@ const WritingEditor = ({
                             canManualSnapshot={canManualSnapshot}
                             canCopy={canCopy}
                             copiedAt={copiedAt}
-                            showExport={showExport}
+                            showActions={showActions}
                             onUndo={() => { if (canUndo) { forceRemoteApplyRef.current = true; onUndo?.(); } }}
                             onRedo={() => { if (canRedo) { forceRemoteApplyRef.current = true; onRedo?.(); } }}
                             onManualSnapshot={handleManualSnapshot}
                             onShowHistory={() => setShowHistory(true)}
                             onCopy={handleCopy}
-                            onToggleExport={() => setShowExport((v) => !v)}
+                            onToggleActions={() => setShowActions((v) => !v)}
                             onExport={exportDoc}
-                            onCloseExport={() => setShowExport(false)}
+                            onCloseActions={() => setShowActions(false)}
                             isMobile={isMobile}
                             t={t}
                         />
@@ -484,7 +484,7 @@ const WritingEditor = ({
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') { e.preventDefault(); editorRef.current?.focus(); }
                             }}
-                            className={`w-full border-none bg-transparent font-semibold tracking-tight text-slate-800 outline-none placeholder:text-slate-300 dark:text-slate-100 dark:placeholder:text-slate-600 ${isMobile ? 'text-[2rem]' : 'text-[3rem] leading-tight'
+                            className={`w-full border-none bg-transparent font-semibold tracking-tight text-slate-800 outline-none placeholder:text-slate-300 dark:text-slate-100 dark:placeholder:text-slate-600 ${isMobile ? 'text-2xl' : 'text-3xl leading-tight'
                                 }`}
                             placeholder={t('inspiration.untitled')}
                             style={{
@@ -547,15 +547,14 @@ const WritingEditor = ({
                             }}
                             onBlur={() => setIsEditorFocused(false)}
                             spellCheck
-                            className={`min-h-[55vh] w-full text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600 ${isMobile ? 'text-lg' : 'text-[1.18rem]'
-                                }`}
+                            className="min-h-[55vh] w-full text-lg text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"
                             placeholder={t('inspiration.placeholder')}
                             style={{
                                 whiteSpace: 'pre-wrap',
                                 wordBreak: 'break-word',
-                                lineHeight: 2.02,
+                                lineHeight: 1.625,
                                 fontFamily: '"Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif',
-                                letterSpacing: '0.012em',
+                                letterSpacing: 'normal',
                             }}
                         />
 

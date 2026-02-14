@@ -217,12 +217,12 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                     />
                 </div>
 
-                {/* New Category Selector: Capsule with Name & Dots */}
-                <div className="flex justify-center -mb-2 mt-4 px-1">
-                    <div className="flex items-center rounded-full border border-sky-100 bg-white p-1 shadow-sm transition-all duration-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 group/selector">
+                {/* Category Selector - Redesigned to match InspirationModule exactly */}
+                <div className="flex justify-center -mb-2 mt-4 px-1 relative z-20">
+                    <div className="flex items-center p-1 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-full border border-sky-100/50 dark:border-slate-800/50 shadow-sm transition-all duration-300 hover:bg-white/80 dark:hover:bg-slate-900/80 hover:shadow-md hover:border-sky-200/30 dark:hover:border-sky-800/30 group/selector">
 
                         {/* Label Section - Animated */}
-                        <div className="flex items-center px-3 border-r border-sky-100/50 dark:border-slate-700/50 mr-1 min-w-[60px] justify-center relative overflow-hidden h-7">
+                        <div className="flex items-center px-3 border-r border-sky-200/50 dark:border-slate-700/50 mr-1 min-w-[60px] justify-center relative overflow-hidden h-7">
                             <AnimatePresence mode="wait" initial={false}>
                                 <motion.span
                                     key={selectedCategory || 'all'}
@@ -260,7 +260,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                                     size={14}
                                     className={`relative z-10 transition-all duration-300 ${selectedCategory === null
                                         ? 'text-sky-500 dark:text-sky-400 scale-105'
-                                        : 'text-slate-400 opacity-60 group-hover/dot:opacity-100 group-hover/dot:scale-110'
+                                        : 'text-slate-400 opacity-40 group-hover/dot:opacity-100 group-hover/dot:scale-110'
                                         }`}
                                 />
                             </button>
