@@ -61,6 +61,7 @@ const WritingEditor = ({
     const lastSnapshotContentRef = useRef('');
     const lastSeenRemoteContentRef = useRef('');
     const forceRemoteApplyRef = useRef(false);
+    const statsTimeoutRef = useRef(null);
 
     // ---------- Derived ----------
     const hasUnsavedChanges = useMemo(() => {
@@ -96,13 +97,22 @@ const WritingEditor = ({
 
     // ---------- Stat helpers ----------
     const updateStatsFromEditor = useCallback(() => {
-        const text = editorRef.current?.innerText || '';
-        const words = computeWordCount(text);
-        const chars = computeCharCount(text);
-        setWordCountLabelKey(detectWordCountLabel(text));
-        setWordCount(words);
-        setCharCount(chars);
-        setReadMinutes(computeReadMinutes(words, chars));
+        if (statsTimeoutRef.current) clearTimeout(statsTimeoutRef.current);
+        statsTimeoutRef.current = setTimeout(() => {
+            const text = editorRef.current?.innerText || '';
+            const words = computeWordCount(text);
+            const chars = computeCharCount(text);
+            setWordCountLabelKey(detectWordCountLabel(text));
+            setWordCount(words);
+            setCharCount(chars);
+            setReadMinutes(computeReadMinutes(words, chars));
+        }, 800);
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (statsTimeoutRef.current) clearTimeout(statsTimeoutRef.current);
+        };
     }, []);
 
     // ---------- Snapshot helpers ----------
