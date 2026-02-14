@@ -1,6 +1,12 @@
 import React from 'react';
 import { formatTimeShort } from './editorUtils';
 
+const StatusBadge = ({ label }) => (
+    <span className="inline-flex items-center rounded-full border border-sky-100 bg-white px-2 py-0.5 font-mono tabular-nums text-[11px] text-sky-700/90">
+        {label}
+    </span>
+);
+
 const EditorStatusBar = ({
     wordCount,
     wordCountLabelKey,
@@ -11,33 +17,27 @@ const EditorStatusBar = ({
     isMobile,
     t
 }) => (
-    <div className={`flex ${isMobile ? 'flex-col gap-1.5' : 'items-center justify-between gap-4'} text-[11px]`}>
-        {/* Stats */}
-        <div className="flex flex-wrap items-center gap-3 text-gray-500/80 dark:text-gray-500">
-            <span className="font-mono tabular-nums">
-                {wordCount} {t(wordCountLabelKey)}
-            </span>
+    <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center justify-between gap-4'} text-[11px]`}>
+        <div className="flex flex-wrap items-center gap-2 text-slate-500">
+            <StatusBadge label={`${wordCount} ${t(wordCountLabelKey)}`} />
             {!isMobile && wordCountLabelKey !== 'inspiration.characters' && (
-                <span className="font-mono tabular-nums">
-                    {charCount} {t('inspiration.characters')}
-                </span>
+                <StatusBadge label={`${charCount} ${t('inspiration.characters')}`} />
             )}
             {!isMobile && readMinutes > 0 && (
-                <span className="font-mono tabular-nums">
-                    {readMinutes} {t('inspiration.readTime')}
-                </span>
+                <StatusBadge label={`${readMinutes} ${t('inspiration.readTime')}`} />
             )}
         </div>
 
-        {/* Save info */}
-        <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-gray-400/80 dark:text-gray-600">
+        <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-slate-400">
             {lastSavedAt ? (
                 <span>
                     {t('inspiration.lastSaved')} {formatTimeShort(lastSavedAt)}
                 </span>
             ) : null}
             {hasPendingRemote ? (
-                <span className="text-amber-500">{t('inspiration.pendingRemote')}</span>
+                <span className="rounded-full bg-sky-50 px-2 py-0.5 text-sky-600">
+                    {t('inspiration.pendingRemote')}
+                </span>
             ) : null}
         </div>
     </div>

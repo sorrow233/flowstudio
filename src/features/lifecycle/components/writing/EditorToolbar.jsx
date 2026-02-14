@@ -18,11 +18,11 @@ const IconBtn = ({ onClick, disabled, title, children, active, className = '' })
         onClick={onClick}
         disabled={disabled}
         title={title}
-        className={`inline-flex h-8 w-8 items-center justify-center rounded-xl transition-all ${disabled
-            ? 'cursor-not-allowed text-gray-300 dark:text-gray-700'
+        className={`inline-flex h-9 w-9 items-center justify-center rounded-xl transition-all ${disabled
+            ? 'cursor-not-allowed text-sky-200'
             : active
-                ? 'bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-400'
-                : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200'
+                ? 'bg-sky-100 text-sky-700'
+                : 'text-slate-500 hover:bg-sky-50 hover:text-sky-700'
             } ${className}`}
     >
         {children}
@@ -30,7 +30,7 @@ const IconBtn = ({ onClick, disabled, title, children, active, className = '' })
 );
 
 const Divider = () => (
-    <div className="mx-1 h-4 w-px bg-gray-200/70 dark:bg-gray-700/70" />
+    <div className="mx-1 h-4 w-px bg-sky-100/90" />
 );
 
 const EditorToolbar = ({
@@ -55,25 +55,23 @@ const EditorToolbar = ({
     isMobile,
     t
 }) => (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-200/50 bg-white/85 px-3 py-2 shadow-[0_2px_16px_-4px_rgba(0,0,0,0.06)] backdrop-blur-xl transition dark:border-gray-800/50 dark:bg-slate-900/80">
-        {/* Left: Sidebar toggle + Status */}
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-sky-100 bg-white/88 px-3 py-2 shadow-[0_8px_24px_-16px_rgba(37,99,235,0.45)] backdrop-blur-xl">
         <div className="flex items-center gap-2">
             <IconBtn onClick={onToggleSidebar} title={t('inspiration.toggleSidebar')}>
                 {isSidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
             </IconBtn>
 
-            <div className="flex items-center gap-1.5 rounded-full border border-gray-200/50 bg-gray-50/60 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-gray-500 dark:border-gray-700/50 dark:bg-slate-800/60 dark:text-gray-400">
+            <div className="flex items-center gap-1.5 rounded-full border border-sky-100 bg-sky-50/80 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-sky-700/80">
                 <span
                     className={`h-1.5 w-1.5 rounded-full transition-colors ${statusNeedsAttention
                         ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]'
-                        : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]'
+                        : 'bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.45)]'
                         }`}
                 />
                 {statusLabel}
             </div>
         </div>
 
-        {/* Right: Action buttons */}
         <div className="flex items-center gap-0.5">
             <IconBtn onClick={onUndo} disabled={!canUndo} title={`${t('common.undo')} ⌘Z`}>
                 <Undo2 size={15} />

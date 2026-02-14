@@ -12,19 +12,17 @@ const FloatingColorPicker = ({ position, onApplyColor, isMobile }) => {
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 400, damping: 26 }}
             style={{ top: position.top, left: position.left }}
-            className={`fixed z-50 -translate-x-1/2 rounded-full border border-gray-200/60 bg-white/95 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.12)] backdrop-blur-xl dark:border-gray-700/60 dark:bg-slate-900/95 ${isMobile ? 'flex items-center gap-3 px-4 py-3' : 'flex items-center gap-2.5 px-3.5 py-2.5'
-                }`}
+            className={`fixed z-50 -translate-x-1/2 rounded-full border border-sky-100 bg-white/95 shadow-[0_14px_32px_-16px_rgba(37,99,235,0.55)] backdrop-blur-xl ${isMobile ? 'flex items-center gap-3 px-4 py-3' : 'flex items-center gap-2.5 px-3.5 py-2.5'}`}
         >
-            {COLOR_CONFIG.map((conf) => (
+            {COLOR_CONFIG.map((config) => (
                 <button
-                    key={conf.id}
+                    key={config.id}
                     onMouseDown={(event) => {
                         event.preventDefault();
-                        onApplyColor(conf.id);
+                        onApplyColor(config.id);
                     }}
-                    className={`${isMobile ? 'h-7 w-7' : 'h-[22px] w-[22px]'
-                        } rounded-full border-2 border-white shadow-sm transition-transform hover:scale-125 active:scale-95 dark:border-gray-800 ${conf.dot}`}
-                    title={conf.id}
+                    className={`${isMobile ? 'h-7 w-7' : 'h-[22px] w-[22px]'} rounded-full border-2 border-white shadow-sm transition-transform hover:scale-125 active:scale-95 ${config.dot}`}
+                    title={config.id}
                 />
             ))}
         </motion.div>

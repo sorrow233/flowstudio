@@ -151,7 +151,13 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     };
 
     return (
-        <div className="relative flex h-full w-full overflow-hidden">
+        <div className="relative flex h-full w-full overflow-hidden rounded-[26px]">
+            <div className="pointer-events-none absolute inset-0">
+                <div className="absolute inset-0 bg-gradient-to-br from-sky-50/70 via-white/95 to-blue-100/45" />
+                <div className="absolute -top-24 left-12 h-72 w-72 rounded-full bg-sky-200/35 blur-3xl" />
+                <div className="absolute -bottom-24 right-12 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl" />
+            </div>
+
             <AnimatePresence>
                 {isSidebarOpen && (
                     <>
@@ -161,7 +167,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                                 onClick={() => setIsSidebarOpen(false)}
-                                className="fixed inset-0 z-40 bg-slate-900/25 backdrop-blur-[2px] lg:hidden"
+                                className="fixed inset-0 z-40 bg-slate-900/22 backdrop-blur-[3px] lg:hidden"
                             />
                         )}
 
@@ -171,10 +177,10 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                             exit={isMobile ? { x: '-100%' } : { x: -24, opacity: 0 }}
                             transition={{ type: 'spring', damping: 34, stiffness: 360 }}
                             className={[
-                                'relative z-50 h-full flex-shrink-0',
+                                'relative z-50 h-full flex-shrink-0 border-r border-sky-100/80 bg-white/80 backdrop-blur-2xl',
                                 isMobile
                                     ? 'fixed inset-y-0 left-0 w-[84vw] max-w-[360px]'
-                                    : 'w-[260px] border-r border-gray-200/70 dark:border-gray-800/80'
+                                    : 'w-[320px]'
                             ].join(' ')}
                         >
                             <WritingSidebar
@@ -195,7 +201,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                 )}
             </AnimatePresence>
 
-            <section className="relative flex min-w-0 flex-1 flex-col">
+            <section className="relative z-10 flex min-w-0 flex-1 flex-col">
                 {activeDoc ? (
                     <WritingEditor
                         key={activeDoc.id}

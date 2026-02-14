@@ -316,7 +316,7 @@ const WritingEditor = ({
         if (!colorConfig) return;
         const range = selection.getRangeAt(0);
         const span = document.createElement('span');
-        const highlightColor = colorConfig.highlight || 'rgba(167, 139, 250, 0.5)';
+        const highlightColor = colorConfig.highlight || 'rgba(125, 211, 252, 0.55)';
         span.style.background = `radial-gradient(ellipse 100% 40% at center 80%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%)`;
         span.style.padding = '0 0.15em';
         span.dataset.colorId = colorId;
@@ -408,9 +408,9 @@ const WritingEditor = ({
         <div className="relative z-10 flex h-full flex-1 flex-col overflow-hidden">
             {/* Background decorations */}
             <div className="pointer-events-none absolute inset-0">
-                <div className="absolute inset-0 bg-gradient-to-b from-white/50 via-white/20 to-transparent dark:from-slate-950/20 dark:via-transparent dark:to-transparent" />
-                <div className="absolute -top-16 right-20 h-56 w-56 rounded-full bg-rose-100/20 blur-[80px] dark:bg-rose-600/8" />
-                <div className="absolute -bottom-16 left-20 h-48 w-48 rounded-full bg-pink-100/15 blur-[80px] dark:bg-pink-600/5" />
+                <div className="absolute inset-0 bg-gradient-to-b from-sky-50/45 via-white/30 to-white/10" />
+                <div className="absolute -top-14 right-20 h-56 w-56 rounded-full bg-sky-200/28 blur-[88px]" />
+                <div className="absolute -bottom-16 left-20 h-48 w-48 rounded-full bg-blue-200/22 blur-[82px]" />
             </div>
 
             {/* Conflict banner */}
@@ -448,9 +448,9 @@ const WritingEditor = ({
                     editorRef.current?.focus();
                 }}
             >
-                <div className="mx-auto w-full max-w-3xl px-5 pb-24 md:px-8">
+                <div className="mx-auto w-full max-w-4xl px-5 pb-24 md:px-10">
                     {/* Toolbar */}
-                    <div className="sticky z-30" style={{ top: isMobile ? 6 : 10 }}>
+                    <div className="sticky z-30" style={{ top: isMobile ? 6 : 12 }}>
                         <EditorToolbar
                             isSidebarOpen={isSidebarOpen}
                             onToggleSidebar={onToggleSidebar}
@@ -476,7 +476,7 @@ const WritingEditor = ({
                     </div>
 
                     {/* Title */}
-                    <div className="mt-8">
+                    <div className="mt-9">
                         <input
                             type="text"
                             value={title}
@@ -484,14 +484,17 @@ const WritingEditor = ({
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') { e.preventDefault(); editorRef.current?.focus(); }
                             }}
-                            className={`w-full border-none bg-transparent font-semibold tracking-tight text-gray-900 outline-none placeholder:text-gray-300/80 dark:text-gray-100 dark:placeholder:text-gray-700 ${isMobile ? 'text-3xl' : 'text-[2.8rem] leading-tight'
+                            className={`w-full border-none bg-transparent font-semibold tracking-tight text-slate-800 outline-none placeholder:text-slate-300 ${isMobile ? 'text-[2rem]' : 'text-[3rem] leading-tight'
                                 }`}
                             placeholder={t('inspiration.untitled')}
+                            style={{
+                                fontFamily: '"Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif',
+                            }}
                         />
                     </div>
 
                     {/* Status bar */}
-                    <div className="mt-3 mb-6">
+                    <div className="mb-6 mt-3">
                         <EditorStatusBar
                             wordCount={wordCount}
                             wordCountLabelKey={wordCountLabelKey}
@@ -506,18 +509,18 @@ const WritingEditor = ({
 
                     {/* Pending remote banner */}
                     {pendingRemoteHtml && !conflictState && (
-                        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200/60 bg-amber-50/70 px-4 py-2.5 text-[12px] text-amber-700 dark:border-amber-800/50 dark:bg-amber-900/20 dark:text-amber-200">
+                        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-200/70 bg-sky-50/80 px-4 py-2.5 text-[12px] text-sky-700">
                             <span>{t('inspiration.pendingRemote')}</span>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={handleApplyPendingRemote}
-                                    className="rounded-full border border-amber-200/70 bg-white/90 px-3 py-1 text-xs transition hover:bg-white dark:border-amber-800/50 dark:bg-slate-800/60 dark:hover:bg-slate-800"
+                                    className="rounded-full border border-sky-200 bg-white/95 px-3 py-1 text-xs transition hover:bg-white"
                                 >
                                     {t('inspiration.applyRemote')}
                                 </button>
                                 <button
                                     onClick={handleKeepPendingLocal}
-                                    className="rounded-full bg-amber-500 px-3 py-1 text-xs text-white transition hover:bg-amber-600"
+                                    className="rounded-full bg-gradient-to-r from-sky-500 to-blue-500 px-3 py-1 text-xs text-white transition hover:brightness-105"
                                 >
                                     {t('inspiration.keepLocal')}
                                 </button>
@@ -527,11 +530,12 @@ const WritingEditor = ({
 
                     {/* Content editor */}
                     <div
-                        className={`rounded-3xl border bg-white/90 p-6 shadow-[0_8px_40px_-16px_rgba(0,0,0,0.08)] backdrop-blur-sm transition-all dark:bg-slate-900/85 md:p-10 ${isEditorFocused
-                            ? 'border-rose-200/50 shadow-[0_8px_40px_-12px_rgba(244,63,94,0.08)] dark:border-rose-800/30'
-                            : 'border-gray-200/50 dark:border-gray-800/50'
+                        className={`rounded-3xl border bg-white/92 p-6 shadow-[0_20px_55px_-36px_rgba(37,99,235,0.45)] backdrop-blur-sm transition-all md:p-10 ${isEditorFocused
+                            ? 'border-sky-200/70 shadow-[0_20px_60px_-34px_rgba(14,116,255,0.5)]'
+                            : 'border-sky-100/70'
                             }`}
                     >
+                        <div className="mb-6 h-px bg-gradient-to-r from-transparent via-sky-100 to-transparent" />
                         <div
                             ref={editorRef}
                             contentEditable
@@ -543,22 +547,22 @@ const WritingEditor = ({
                             }}
                             onBlur={() => setIsEditorFocused(false)}
                             spellCheck
-                            className={`min-h-[55vh] w-full text-gray-700 outline-none caret-rose-500 selection:bg-rose-100/60 empty:before:text-gray-300/70 dark:text-gray-200 dark:selection:bg-rose-500/20 dark:empty:before:text-gray-700 ${isMobile ? 'text-lg' : 'text-[1.15rem]'
+                            className={`min-h-[55vh] w-full text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 ${isMobile ? 'text-lg' : 'text-[1.18rem]'
                                 }`}
                             placeholder={t('inspiration.placeholder')}
                             style={{
                                 whiteSpace: 'pre-wrap',
                                 wordBreak: 'break-word',
-                                lineHeight: 2,
+                                lineHeight: 2.02,
                                 fontFamily: '"Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif',
-                                letterSpacing: '0.01em',
+                                letterSpacing: '0.012em',
                             }}
                         />
 
                         {/* Bottom decoration */}
-                        <div className="mt-20 flex flex-col items-center opacity-15">
-                            <div className="mb-2 h-1.5 w-1.5 rounded-full bg-rose-400" />
-                            <div className="h-1 w-1 rounded-full bg-rose-300" />
+                        <div className="mt-20 flex flex-col items-center opacity-35">
+                            <div className="mb-2 h-1.5 w-12 rounded-full bg-gradient-to-r from-transparent via-sky-300 to-transparent" />
+                            <div className="h-1 w-1 rounded-full bg-sky-400" />
                         </div>
                     </div>
                 </div>
