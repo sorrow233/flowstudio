@@ -36,7 +36,7 @@ function App() {
                         <Navbar />
 
                         <main className="flex-1 overflow-y-auto w-full no-scrollbar">
-                            <div className="max-w-7xl mx-auto h-full px-4 md:px-6 pb-20">
+                            <div className={`max-w-7xl mx-auto h-full px-4 md:px-6 ${location.pathname === '/writing' ? 'pb-0' : 'pb-20'}`}>
                                 <ErrorBoundary>
                                     <Routes location={location} key={location.pathname}>
                                         <Route path="/" element={<Navigate to="/inspiration" replace />} />

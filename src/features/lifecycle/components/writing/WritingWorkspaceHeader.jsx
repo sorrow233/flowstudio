@@ -28,21 +28,35 @@ const WritingWorkspaceHeader = ({
     }, [searchQuery, isSearchOpen]);
 
     return (
-        <header className={`relative z-20 border-b border-sky-100/50 bg-white dark:border-slate-800/60 dark:bg-slate-900 ${isMobile ? 'px-4 py-1.5' : 'px-6 pb-4 pt-6'}`}>
-            <div className={`flex ${isMobile ? 'items-center justify-between' : 'items-end justify-between gap-6'}`}>
-                <div className="min-w-0">
-                    <h2 className={`line-clamp-1 font-bold tracking-tight text-slate-800 dark:text-slate-100 ${isMobile ? 'text-xl' : 'text-[2rem] md:text-[2.15rem]'}`}>
-                        {t('inspiration.writing')}
-                    </h2>
-                    {!isMobile && (
+        <header className={`relative z-20 border-b border-sky-100/50 bg-white dark:border-slate-800/60 dark:bg-slate-900 ${isMobile ? 'px-3 py-1' : 'px-6 pb-4 pt-6'}`}>
+            <div className={`flex items-center justify-between ${isMobile ? 'gap-2' : 'gap-6'}`}>
+                {!isMobile && (
+                    <div className="min-w-0">
+                        <h2 className={`line-clamp-1 font-bold tracking-tight text-slate-800 dark:text-slate-100 ${isMobile ? 'text-xl' : 'text-[2rem] md:text-[2.15rem]'}`}>
+                            {t('inspiration.writing')}
+                        </h2>
                         <p className="mt-1 line-clamp-1 text-sm font-medium text-slate-400 dark:text-slate-500">
                             {t('inspiration.writingSubtitle')}
                         </p>
-                    )}
-                </div>
+                    </div>
+                )}
 
-                <div className={`flex items-center ${isMobile ? 'gap-1.5' : 'flex-col gap-3 md:items-end md:gap-3'}`}>
-                    <div className="flex items-center gap-1.5">
+                <div className={`flex flex-1 items-center ${isMobile ? 'justify-between min-w-0' : 'flex-col gap-3 md:items-end'}`}>
+                    {/* 移动端左侧：分类选择器 */}
+                    {isMobile && (
+                        <div className="min-w-0 flex-1">
+                            <WritingCategorySelector
+                                categories={categories}
+                                selectedCategory={selectedCategory}
+                                onSelectCategory={onSelectCategory}
+                                onOpenManager={() => setCategoryManagerOpen(true)}
+                                isMobile={isMobile}
+                                t={t}
+                            />
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-1.5 shrink-0">
                         <AnimatePresence mode="wait">
                             {!isSearchOpen ? (
                                 <motion.div
@@ -77,58 +91,46 @@ const WritingWorkspaceHeader = ({
                                     exit={{ opacity: 0, width: 0 }}
                                     className="flex items-center gap-1.5 overflow-hidden"
                                 >
-                                    <div className={`relative ${isMobile ? 'w-32 xs:w-40' : 'w-64 lg:w-80'}`}>
-                                        <Search className="absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-sky-400" />
+                                    <div className={`relative ${isMobile ? 'w-24 xs:w-32' : 'w-64 lg:w-80'}`}>
+                                        <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-sky-400" />
                                         <input
                                             autoFocus
                                             type="text"
                                             value={searchQuery}
                                             onChange={(event) => onSearchQueryChange(event.target.value)}
                                             placeholder={t('inspiration.search')}
-                                            className={`${isMobile ? 'h-8 px-7 text-[11px]' : 'h-10 px-10 text-sm'} w-full rounded-xl border border-slate-200/60 bg-white/80 text-slate-700 outline-none focus:border-sky-400 focus:bg-white dark:border-slate-700/50 dark:bg-slate-800/80 dark:text-slate-200 dark:focus:border-sky-600 dark:focus:bg-slate-800`}
+                                            className={`${isMobile ? 'h-7 px-6 text-[10px]' : 'h-10 px-10 text-sm'} w-full rounded-xl border border-slate-200/60 bg-white/80 text-slate-700 outline-none focus:border-sky-400 focus:bg-white dark:border-slate-700/50 dark:bg-slate-800/80 dark:text-slate-200 dark:focus:border-sky-600 dark:focus:bg-slate-800`}
                                         />
                                         <button
                                             onClick={() => {
                                                 onSearchQueryChange('');
                                                 setIsSearchOpen(false);
                                             }}
-                                            className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                            className="absolute right-1 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                                         >
-                                            <X size={12} />
+                                            <X size={10} />
                                         </button>
                                     </div>
                                 </motion.div>
                             )}
                         </AnimatePresence>
 
-                        {!isMobile && <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />}
+                        {!isMobile && (
+                            <>
+                                <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />
+                                <WritingCategorySelector
+                                    categories={categories}
+                                    selectedCategory={selectedCategory}
+                                    onSelectCategory={onSelectCategory}
+                                    onOpenManager={() => setCategoryManagerOpen(true)}
+                                    isMobile={isMobile}
+                                    t={t}
+                                />
+                            </>
+                        )}
                     </div>
-
-                    {!isMobile && (
-                        <WritingCategorySelector
-                            categories={categories}
-                            selectedCategory={selectedCategory}
-                            onSelectCategory={onSelectCategory}
-                            onOpenManager={() => setCategoryManagerOpen(true)}
-                            isMobile={isMobile}
-                            t={t}
-                        />
-                    )}
                 </div>
             </div>
-
-            {isMobile && (
-                <div className="mt-1.5">
-                    <WritingCategorySelector
-                        categories={categories}
-                        selectedCategory={selectedCategory}
-                        onSelectCategory={onSelectCategory}
-                        onOpenManager={() => setCategoryManagerOpen(true)}
-                        isMobile={isMobile}
-                        t={t}
-                    />
-                </div>
-            )}
 
             <WritingCategoryManager
                 isOpen={isCategoryManagerOpen}

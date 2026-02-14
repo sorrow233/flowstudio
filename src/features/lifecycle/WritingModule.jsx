@@ -50,7 +50,7 @@ const WritingModule = () => {
                 <div className={`absolute right-8 h-72 w-72 rounded-full bg-pink-200/20 blur-3xl dark:bg-rose-600/10 ${isMobile ? '-bottom-32' : '-bottom-24'}`} />
             </div>
 
-            <div className="relative z-10 h-full">
+            <div className={`relative z-10 h-full ${isMobile ? 'pb-2' : ''}`}>
                 <WritingBoard
                     documents={writingDocs}
                     onCreate={(docToCreate) => {
