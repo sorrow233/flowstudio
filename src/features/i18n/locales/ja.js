@@ -52,6 +52,8 @@ export default {
         deleteTasks: 'タスクを削除',
         deleteTasksConfirm: '{count}件のアイテムを削除しますか？',
         plantSeed: '新しい種を植える...',
+        details: '詳細',
+        doubleClickToRename: 'ダブルクリックで名前を変更',
     },
 
     // Inspiration Module

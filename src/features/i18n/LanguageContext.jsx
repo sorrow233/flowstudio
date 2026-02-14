@@ -57,7 +57,7 @@ const detectLanguage = () => {
  * 获取嵌套对象中的值
  * @param {object} obj - 对象
  * @param {string} path - 路径 (如 'navbar.inspiration')
- * @returns {string} 值或路径本身（未找到时）
+ * @returns {string|undefined} 值（未找到时返回 undefined）
  */
 const getNestedValue = (obj, path) => {
     const keys = path.split('.');
@@ -67,9 +67,7 @@ const getNestedValue = (obj, path) => {
         if (result && typeof result === 'object' && key in result) {
             result = result[key];
         } else {
-            // 未找到，返回路径本身作为 fallback
-            console.warn(`[i18n] Missing translation: ${path}`);
-            return path;
+            return undefined;
         }
     }
 
@@ -111,12 +109,18 @@ export const LanguageProvider = ({ children }) => {
         const translations = locales[language];
         const value = getNestedValue(translations, key);
 
-        // 如果返回的是路径本身，说明未找到，使用 fallback
-        if (value === key && fallback) {
+        // 有翻译直接返回
+        if (value !== undefined) {
+            return value;
+        }
+
+        // 未找到时优先使用 fallback，避免不必要的日志噪音
+        if (fallback !== undefined) {
             return fallback;
         }
 
-        return value;
+        console.warn(`[i18n] Missing translation: ${key}`);
+        return key;
     };
 
     const value = {

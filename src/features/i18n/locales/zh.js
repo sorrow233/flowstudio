@@ -53,6 +53,8 @@ export default {
         deleteTasks: '删除任务',
         deleteTasksConfirm: '删除 {count} 个项目？',
         plantSeed: '播下新的种子...',
+        details: '详情',
+        doubleClickToRename: '双击重命名',
     },
 
     // 灵感模块

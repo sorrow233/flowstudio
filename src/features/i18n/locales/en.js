@@ -53,6 +53,8 @@ export default {
         deleteTasks: 'Delete Tasks',
         deleteTasksConfirm: 'Delete {count} items?',
         plantSeed: 'Plant a new seed...',
+        details: 'Details',
+        doubleClickToRename: 'Double click to rename',
     },
 
     // Inspiration Module
