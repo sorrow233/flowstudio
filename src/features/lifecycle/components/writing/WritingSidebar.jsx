@@ -1,9 +1,9 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { Search, Plus, Trash2, FileText, ArrowLeft, LayoutGrid } from 'lucide-react';
+import { Search, Plus, Trash2, FileText, ArrowLeft, Settings2, X } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { toast } from 'sonner';
 import { useTranslation } from '../../../i18n';
-import { WRITING_CATEGORIES } from '../../../../utils/constants';
+import WritingCategoryManager from './WritingCategoryManager';
 import { stripMarkup } from './editorUtils';
 
 const formatDocTime = (timestamp) => {
@@ -16,8 +16,8 @@ const formatDocTime = (timestamp) => {
     });
 };
 
-const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, t }) => {
-    const category = WRITING_CATEGORIES.find((item) => item.id === (doc.category || 'draft')) || WRITING_CATEGORIES[0];
+const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, categories, defaultCategoryId, t }) => {
+    const category = categories.find((item) => item.id === (doc.category || defaultCategoryId)) || categories[0];
     const [isRenaming, setIsRenaming] = useState(false);
     const [editTitle, setEditTitle] = useState(doc.title || '');
     const inputRef = useRef(null);
@@ -37,7 +37,6 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, t }) 
         }
     }, [isRenaming]);
 
-    // Update editTitle when doc.title changes externally, but only if not renaming
     useEffect(() => {
         if (!isRenaming) {
             setEditTitle(doc.title || '');
@@ -51,10 +50,10 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, t }) 
         setIsRenaming(false);
     };
 
-    const handleKeyDown = (e) => {
-        if (e.key === 'Enter') {
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
             handleRename();
-        } else if (e.key === 'Escape') {
+        } else if (event.key === 'Escape') {
             setEditTitle(doc.title || '');
             setIsRenaming(false);
         }
@@ -91,39 +90,39 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, t }) 
                 whileTap={{ scale: 0.995 }}
                 transition={{ x: { type: 'spring', stiffness: 520, damping: 30 } }}
                 className={[
-                    'cursor-pointer border px-4 py-3 transition rounded-2xl',
+                    'cursor-pointer rounded-2xl border px-4 py-3 transition',
                     isActive
                         ? 'border-sky-200 bg-gradient-to-br from-sky-50 to-white shadow-[0_14px_34px_-24px_rgba(59,130,246,0.6)] dark:border-sky-800 dark:from-sky-950/30 dark:to-slate-900 dark:shadow-none'
                         : 'border-sky-100/80 bg-white/86 hover:border-sky-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/40 dark:hover:border-slate-700 dark:hover:bg-slate-900/80'
                 ].join(' ')}
             >
                 <div className="mb-2 flex items-center justify-between gap-2">
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0 flex-1">
                         {isRenaming ? (
                             <input
                                 ref={inputRef}
                                 value={editTitle}
-                                onChange={(e) => setEditTitle(e.target.value)}
+                                onChange={(event) => setEditTitle(event.target.value)}
                                 onBlur={handleRename}
                                 onKeyDown={handleKeyDown}
-                                onClick={(e) => e.stopPropagation()}
-                                className="w-full bg-transparent text-sm font-medium text-slate-800 dark:text-slate-200 outline-none border-b border-sky-300 dark:border-sky-600 pb-0.5 placeholder:text-slate-400"
+                                onClick={(event) => event.stopPropagation()}
+                                className="w-full border-b border-sky-300 bg-transparent pb-0.5 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 dark:border-sky-600 dark:text-slate-200"
                                 placeholder={t('inspiration.untitled')}
                             />
                         ) : (
                             <span
-                                onDoubleClick={(e) => {
-                                    e.stopPropagation();
+                                onDoubleClick={(event) => {
+                                    event.stopPropagation();
                                     setIsRenaming(true);
                                 }}
-                                className="line-clamp-1 text-sm font-medium text-slate-800 dark:text-slate-200 select-none"
+                                className="line-clamp-1 select-none text-sm font-medium text-slate-800 dark:text-slate-200"
                                 title={t('common.doubleClickToRename', 'Double click to rename')}
                             >
                                 {doc.title || t('inspiration.untitled')}
                             </span>
                         )}
                     </div>
-                    <span className="shrink-0 text-[10px] font-medium tracking-wide text-sky-500/80 dark:text-sky-400/80 ml-2">
+                    <span className="ml-2 shrink-0 text-[10px] font-medium tracking-wide text-sky-500/80 dark:text-sky-400/80">
                         {formatDocTime(doc.lastModified || doc.timestamp)}
                     </span>
                 </div>
@@ -134,8 +133,8 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, t }) 
 
                 <div className="mt-2.5 flex items-center justify-between">
                     <span className="inline-flex items-center gap-1 rounded-full border border-sky-100 bg-sky-50 px-2 py-0.5 text-[10px] text-sky-600 dark:border-sky-900/40 dark:bg-sky-900/20 dark:text-sky-400">
-                        <span className={`h-1.5 w-1.5 rounded-full ${category.dotColor}`} />
-                        {category.label}
+                        <span className={`h-1.5 w-1.5 rounded-full ${category?.dotColor || 'bg-sky-400'}`} />
+                        {category?.label || t('common.unknown', 'Unknown')}
                     </span>
                 </div>
             </motion.div>
@@ -143,17 +142,50 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, t }) 
     );
 };
 
-const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, onUpdate, onDelete, onRestore, onClose, isMobile }) => {
+const WritingSidebar = ({
+    documents = [],
+    categories = [],
+    activeDocId,
+    onSelectDoc,
+    onCreate,
+    onUpdate,
+    onDelete,
+    onAddCategory,
+    onUpdateCategory,
+    onRemoveCategory,
+    onRestore,
+    onClose,
+    isMobile
+}) => {
     const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isCategoryManagerOpen, setCategoryManagerOpen] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState(() => categories[0]?.id || null);
+
+    const defaultCategoryId = categories[0]?.id || null;
+
+    useEffect(() => {
+        if (searchQuery && !isSearchOpen) {
+            setIsSearchOpen(true);
+        }
+    }, [searchQuery, isSearchOpen]);
+
+    useEffect(() => {
+        if (categories.length === 0) {
+            setSelectedCategory(null);
+            return;
+        }
+        const exists = categories.some((category) => category.id === selectedCategory);
+        if (!exists) {
+            setSelectedCategory(categories[0].id);
+        }
+    }, [categories, selectedCategory]);
 
     const filteredDocs = useMemo(() => {
-        let list = documents;
+        if (!selectedCategory) return [];
 
-        if (selectedCategory) {
-            list = list.filter((doc) => (doc.category || 'draft') === selectedCategory);
-        }
+        let list = documents.filter((doc) => (doc.category || defaultCategoryId) === selectedCategory);
 
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
@@ -164,7 +196,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
         }
 
         return list;
-    }, [documents, searchQuery, selectedCategory]);
+    }, [documents, searchQuery, selectedCategory, defaultCategoryId]);
 
     const groupedDocs = useMemo(() => {
         const groups = { today: [], yesterday: [], week: [], older: [] };
@@ -174,10 +206,10 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
         const weekStart = todayStart - 86400000 * 6;
 
         filteredDocs.forEach((doc) => {
-            const ts = doc.lastModified || doc.timestamp || Date.now();
-            if (ts >= todayStart) groups.today.push(doc);
-            else if (ts >= yesterdayStart) groups.yesterday.push(doc);
-            else if (ts >= weekStart) groups.week.push(doc);
+            const timestamp = doc.lastModified || doc.timestamp || Date.now();
+            if (timestamp >= todayStart) groups.today.push(doc);
+            else if (timestamp >= yesterdayStart) groups.yesterday.push(doc);
+            else if (timestamp >= weekStart) groups.week.push(doc);
             else groups.older.push(doc);
         });
 
@@ -195,7 +227,6 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                         onRestore(doc);
                         return;
                     }
-
                     onCreate(doc);
                 }
             },
@@ -217,6 +248,8 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                         <WritingSidebarItem
                             key={doc.id}
                             doc={doc}
+                            categories={categories}
+                            defaultCategoryId={defaultCategoryId}
                             isActive={activeDocId === doc.id}
                             onSelect={onSelectDoc}
                             onUpdate={onUpdate}
@@ -228,6 +261,8 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
             </section>
         );
     };
+
+    const selectedCategoryInfo = categories.find((category) => category.id === selectedCategory) || categories[0];
 
     return (
         <div className="flex h-full flex-col bg-[linear-gradient(170deg,rgba(248,252,255,0.96),rgba(255,255,255,0.9))] dark:bg-[linear-gradient(170deg,rgba(15,23,42,0.96),rgba(30,41,59,0.9))]">
@@ -256,7 +291,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                     </div>
 
                     <button
-                        onClick={() => onCreate(selectedCategory)}
+                        onClick={() => onCreate(selectedCategory || defaultCategoryId)}
                         className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-500 text-white shadow-[0_14px_30px_-18px_rgba(37,99,235,0.9)] transition hover:brightness-105"
                         title={t('inspiration.newDoc')}
                     >
@@ -264,93 +299,96 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                     </button>
                 </div>
 
-                <div className="relative mb-3">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400/80" />
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(event) => setSearchQuery(event.target.value)}
-                        placeholder={t('inspiration.search')}
-                        className="w-full rounded-xl border border-sky-100 bg-white/95 px-9 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:shadow-[0_0_0_4px_rgba(125,211,252,0.25)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-sky-700 dark:focus:shadow-[0_0_0_4px_rgba(14,165,233,0.15)]"
-                    />
+                <div className="mb-3">
+                    {!isSearchOpen ? (
+                        <button
+                            onClick={() => setIsSearchOpen(true)}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-100 bg-white text-sky-500 transition hover:border-sky-200 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-sky-400 dark:hover:border-slate-600"
+                            title={t('inspiration.search')}
+                        >
+                            <Search size={16} />
+                        </button>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400/80" />
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(event) => setSearchQuery(event.target.value)}
+                                    placeholder={t('inspiration.search')}
+                                    className="w-full rounded-xl border border-sky-100 bg-white px-9 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:shadow-[0_0_0_4px_rgba(125,211,252,0.25)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-sky-700 dark:focus:shadow-[0_0_0_4px_rgba(14,165,233,0.15)]"
+                                />
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setIsSearchOpen(false);
+                                }}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-100 bg-white text-slate-400 transition hover:bg-sky-50 hover:text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                                title={t('common.close', '关闭')}
+                            >
+                                <X size={15} />
+                            </button>
+                        </div>
+                    )}
                 </div>
 
-                {/* Category Selector - Redesigned to match InspirationModule exactly */}
-                <div className="flex justify-center -mb-2 mt-4 px-1 relative z-20">
-                    <div className="flex items-center p-1 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-full border border-sky-100/50 dark:border-slate-800/50 shadow-sm transition-all duration-300 hover:bg-white/80 dark:hover:bg-slate-900/80 hover:shadow-md hover:border-sky-200/30 dark:hover:border-sky-800/30 group/selector">
-
-                        {/* Label Section - Animated */}
-                        <div className="flex items-center px-3 border-r border-sky-200/50 dark:border-slate-700/50 mr-1 min-w-[60px] justify-center relative overflow-hidden h-7">
+                <div className="relative z-20 mt-4 flex items-center justify-center gap-2 px-1">
+                    <div className="flex items-center rounded-full border border-sky-100 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900 group/selector">
+                        <div className="relative mr-1 flex h-7 min-w-[60px] items-center justify-center overflow-hidden border-r border-sky-200/50 px-3 dark:border-slate-700/50">
                             <AnimatePresence mode="wait" initial={false}>
                                 <motion.span
-                                    key={selectedCategory || 'all'}
+                                    key={selectedCategory || 'none'}
                                     initial={{ y: 20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     exit={{ y: -20, opacity: 0 }}
-                                    transition={{ duration: 0.2, ease: "easeOut" }}
-                                    className={`text-xs font-medium ${selectedCategory
-                                        ? (WRITING_CATEGORIES.find(c => c.id === selectedCategory)?.textColor || 'text-slate-700 dark:text-slate-300')
-                                        : 'text-slate-600 dark:text-slate-300'}`}
+                                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                                    className={`text-xs font-medium ${selectedCategoryInfo?.textColor || 'text-slate-600 dark:text-slate-300'}`}
                                 >
-                                    {selectedCategory
-                                        ? WRITING_CATEGORIES.find(c => c.id === selectedCategory)?.label
-                                        : t('common.all')}
+                                    {selectedCategoryInfo?.label || t('common.noData')}
                                 </motion.span>
                             </AnimatePresence>
                         </div>
 
-                        {/* Dots Section */}
                         <div className="flex items-center gap-1">
-                            {/* All Button */}
-                            <button
-                                onClick={() => setSelectedCategory(null)}
-                                className="relative w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 group/dot flex-shrink-0"
-                                title={t('common.all')}
-                            >
-                                {selectedCategory === null && (
-                                    <motion.div
-                                        layoutId="writingActiveCategory"
-                                        className="absolute inset-0 bg-white dark:bg-slate-700 rounded-full shadow-sm border border-sky-100 dark:border-slate-600"
-                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                    />
-                                )}
-                                <LayoutGrid
-                                    size={14}
-                                    className={`relative z-10 transition-all duration-300 ${selectedCategory === null
-                                        ? 'text-sky-500 dark:text-sky-400 scale-105'
-                                        : 'text-slate-400 opacity-40 group-hover/dot:opacity-100 group-hover/dot:scale-110'
-                                        }`}
-                                />
-                            </button>
-
-                            {/* Categories */}
-                            {WRITING_CATEGORIES.map(cat => (
+                            {categories.map((category) => (
                                 <button
-                                    key={cat.id}
-                                    onClick={() => setSelectedCategory(cat.id)}
-                                    className="relative w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 group/dot flex-shrink-0"
-                                    title={cat.label}
+                                    key={category.id}
+                                    onClick={() => setSelectedCategory(category.id)}
+                                    className="group/dot relative h-8 w-8 flex-shrink-0 rounded-full transition-all duration-300"
+                                    title={category.label}
                                 >
-                                    {selectedCategory === cat.id && (
+                                    {selectedCategory === category.id && (
                                         <motion.div
                                             layoutId="writingActiveCategory"
-                                            className="absolute inset-0 bg-white dark:bg-slate-700 rounded-full shadow-sm border border-sky-100 dark:border-slate-600"
-                                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                            className="absolute inset-0 rounded-full border border-sky-100 bg-white shadow-sm dark:border-slate-600 dark:bg-slate-700"
+                                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                                         />
                                     )}
-                                    <div className={`
-                                            relative z-10 w-2.5 h-2.5 rounded-full transition-all duration-300
-                                            ${cat.dotColor}
-                                            ${selectedCategory === cat.id ? 'scale-110' : 'opacity-40 group-hover/dot:opacity-100 group-hover/dot:scale-110'}
-                                        `} />
+                                    <div
+                                        className={`relative z-10 m-auto mt-[11px] h-2.5 w-2.5 rounded-full transition-all duration-300 ${category.dotColor} ${selectedCategory === category.id
+                                            ? 'scale-110'
+                                            : 'opacity-40 group-hover/dot:scale-110 group-hover/dot:opacity-100'
+                                            }`}
+                                    />
                                 </button>
                             ))}
                         </div>
                     </div>
+
+                    <button
+                        onClick={() => setCategoryManagerOpen(true)}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-100 bg-white text-slate-400 transition hover:border-sky-200 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-sky-400"
+                        title="管理分类"
+                    >
+                        <Settings2 size={15} />
+                    </button>
                 </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto px-3 py-4 custom-scrollbar">
+            <div className="custom-scrollbar flex-1 overflow-y-auto px-3 py-4">
                 {filteredDocs.length === 0 ? (
                     <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-sky-300">
                         <FileText size={34} strokeWidth={1.4} />
@@ -369,6 +407,15 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
             </div>
 
             {isMobile && <div className="h-safe-bottom" />}
+
+            <WritingCategoryManager
+                isOpen={isCategoryManagerOpen}
+                onClose={() => setCategoryManagerOpen(false)}
+                categories={categories}
+                onAdd={onAddCategory}
+                onUpdate={onUpdateCategory}
+                onRemove={onRemoveCategory}
+            />
         </div>
     );
 };

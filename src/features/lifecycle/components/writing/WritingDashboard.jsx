@@ -16,6 +16,7 @@ import { stripMarkup, computeWordCount } from './editorUtils';
 const WritingDashboard = ({
     onCreate,
     documents,
+    categories = WRITING_CATEGORIES,
     onToggleSidebar,
     isSidebarOpen,
     isMobile,
@@ -158,7 +159,7 @@ const WritingDashboard = ({
 
                         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                             {recentDocs.map((doc) => {
-                                const category = WRITING_CATEGORIES.find((cat) => cat.id === (doc.category || 'draft')) || WRITING_CATEGORIES[0];
+                                const category = categories.find((cat) => cat.id === (doc.category || categories[0]?.id)) || categories[0] || WRITING_CATEGORIES[0];
                                 return (
                                     <motion.button
                                         key={doc.id}

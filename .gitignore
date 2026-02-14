@@ -133,3 +133,4 @@ dist-ssr
 *.sln
 *.sw?
 flowstudio-backup-*.json
+.wrangler

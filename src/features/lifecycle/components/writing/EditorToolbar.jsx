@@ -45,7 +45,7 @@ const EditorToolbar = ({
     isMobile,
     t
 }) => (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border border-sky-100 bg-white px-3 py-2 shadow-[0_8px_24px_-16px_rgba(37,99,235,0.45)] dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
+    <div className="flex items-center justify-between py-1">
         <div className="flex items-center gap-2">
             <IconBtn onClick={onToggleSidebar} title={t('inspiration.toggleSidebar')}>
                 <AnimatePresence mode="wait" initial={false}>
@@ -62,14 +62,17 @@ const EditorToolbar = ({
                 </AnimatePresence>
             </IconBtn>
 
-            <div className="flex items-center gap-1.5 rounded-full border border-sky-100 bg-sky-50/80 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-sky-700/80 dark:border-slate-800 dark:bg-slate-800/50 dark:text-sky-400/80">
+            <div
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl"
+                title={statusLabel}
+                aria-label={statusLabel}
+            >
                 <span
-                    className={`h-1.5 w-1.5 rounded-full transition-colors ${statusNeedsAttention
+                    className={`h-2.5 w-2.5 rounded-full transition-colors ${statusNeedsAttention
                         ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]'
                         : 'bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.45)] dark:bg-sky-400 dark:shadow-none'
                         }`}
                 />
-                {statusLabel}
             </div>
         </div>
 

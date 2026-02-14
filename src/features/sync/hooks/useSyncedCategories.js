@@ -3,7 +3,7 @@ import * as Y from 'yjs';
 import { v4 as uuidv4 } from 'uuid';
 import { INSPIRATION_CATEGORIES } from '../../../utils/constants';
 
-export const useSyncedCategories = (doc, arrayName = 'inspiration_categories') => {
+export const useSyncedCategories = (doc, arrayName = 'inspiration_categories', defaultCategories = INSPIRATION_CATEGORIES) => {
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
@@ -19,7 +19,7 @@ export const useSyncedCategories = (doc, arrayName = 'inspiration_categories') =
         if (yArray.length === 0) {
             doc.transact(() => {
                 if (yArray.length === 0) {
-                    INSPIRATION_CATEGORIES.forEach(cat => {
+                    defaultCategories.forEach(cat => {
                         const yMap = new Y.Map();
                         Object.entries(cat).forEach(([key, value]) => yMap.set(key, value));
                         yArray.push([yMap]);
@@ -34,7 +34,7 @@ export const useSyncedCategories = (doc, arrayName = 'inspiration_categories') =
         return () => {
             yArray.unobserveDeep(handleChange);
         };
-    }, [doc, arrayName]);
+    }, [doc, arrayName, defaultCategories]);
 
     const addCategory = useCallback((category) => {
         if (!doc) return;

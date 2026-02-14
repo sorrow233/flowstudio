@@ -3,7 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSync } from '../../../sync/SyncContext';
 import { useSyncedProjects } from '../../../sync/useSyncStore';
+import { useSyncedCategories } from '../../../sync/hooks/useSyncedCategories';
 import { useTranslation } from '../../../i18n';
+import { WRITING_CATEGORIES } from '../../../../utils/constants';
 import WritingSidebar from './WritingSidebar';
 import WritingEditor from './WritingEditor';
 import WritingDashboard from './WritingDashboard';
@@ -21,6 +23,22 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         canUndo,
         canRedo
     } = useSyncedProjects(doc, 'all_projects');
+    const {
+        categories: syncedCategories,
+        addCategory: addCategoryBase,
+        updateCategory: updateCategoryBase,
+        removeCategory: removeCategoryBase,
+    } = useSyncedCategories(doc, 'writing_categories', WRITING_CATEGORIES);
+
+    const categories = useMemo(() => {
+        const base = syncedCategories.length > 0 ? syncedCategories : WRITING_CATEGORIES;
+        const map = new Map();
+        base.forEach((category) => {
+            if (!category?.id || map.has(category.id)) return;
+            map.set(category.id, category);
+        });
+        return Array.from(map.values());
+    }, [syncedCategories]);
 
     const internalDocuments = useMemo(() =>
         allProjects
@@ -96,6 +114,8 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         [documents, selectedDocId]
     );
 
+    const defaultCategoryId = categories[0]?.id || 'draft';
+
     const handleCreate = (input = null) => {
         if (input && typeof input === 'object') {
             if (input.id && documents.some((docItem) => docItem.id === input.id)) {
@@ -121,7 +141,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             title: t('inspiration.untitled'),
             content: '',
             stage: 'writing',
-            category: input || 'draft',
+            category: input || defaultCategoryId,
             timestamp: Date.now(),
             lastModified: Date.now()
         };
@@ -148,6 +168,31 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                 setSelectedDocId(null);
             }
         }
+    };
+
+    const handleAddCategory = (categoryInput) => {
+        addCategoryBase(categoryInput);
+        immediateSync?.();
+    };
+
+    const handleUpdateCategory = (id, updates) => {
+        updateCategoryBase(id, updates);
+        immediateSync?.();
+    };
+
+    const handleRemoveCategory = (id) => {
+        if (categories.length <= 1) return;
+        const fallback = categories.find((category) => category.id !== id);
+        if (!fallback) return;
+
+        documents
+            .filter((docItem) => (docItem.category || defaultCategoryId) === id)
+            .forEach((docItem) => {
+                handleUpdate(docItem.id, { category: fallback.id });
+            });
+
+        removeCategoryBase(id);
+        immediateSync?.();
     };
 
     return (
@@ -185,6 +230,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                         >
                             <WritingSidebar
                                 documents={documents}
+                                categories={categories}
                                 activeDocId={selectedDocId}
                                 onSelectDoc={(id) => {
                                     setSelectedDocId(id);
@@ -193,6 +239,9 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                 onCreate={handleCreate}
                                 onUpdate={handleUpdate}
                                 onDelete={handleDelete}
+                                onAddCategory={handleAddCategory}
+                                onUpdateCategory={handleUpdateCategory}
+                                onRemoveCategory={handleRemoveCategory}
                                 onRestore={(docToRestore) => handleCreate(docToRestore)}
                                 onClose={() => setIsSidebarOpen(false)}
                                 isMobile={isMobile}
@@ -222,6 +271,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                     <WritingDashboard
                         onCreate={handleCreate}
                         documents={documents}
+                        categories={categories}
                         onToggleSidebar={() => setIsSidebarOpen((open) => !open)}
                         isSidebarOpen={isSidebarOpen}
                         isMobile={isMobile}
