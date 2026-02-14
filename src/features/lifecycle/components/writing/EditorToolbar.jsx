@@ -47,24 +47,10 @@ const EditorToolbar = ({
 }) => (
     <div className="flex items-center justify-between py-1">
         <div className="flex items-center gap-2">
-            <IconBtn onClick={onToggleSidebar} title={t('inspiration.toggleSidebar')}>
-                <AnimatePresence mode="wait" initial={false}>
-                    <motion.div
-                        key={isSidebarOpen ? 'close' : 'open'}
-                        initial={{ opacity: 0, rotate: -20, scale: 0.8 }}
-                        animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                        exit={{ opacity: 0, rotate: 20, scale: 0.8 }}
-                        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                        className="flex items-center justify-center"
-                    >
-                        {isSidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
-                    </motion.div>
-                </AnimatePresence>
-            </IconBtn>
-
-            <div
-                className="inline-flex h-9 w-9 items-center justify-center rounded-xl"
-                title={statusLabel}
+            <button
+                onClick={onToggleSidebar}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl transition-all active:scale-95 hover:bg-sky-50 dark:hover:bg-slate-800"
+                title={`${statusLabel} • ${t('inspiration.toggleSidebar')}`}
                 aria-label={statusLabel}
             >
                 <span
@@ -73,7 +59,7 @@ const EditorToolbar = ({
                         : 'bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.45)] dark:bg-sky-400 dark:shadow-none'
                         }`}
                 />
-            </div>
+            </button>
         </div>
 
         <div className="flex items-center">
