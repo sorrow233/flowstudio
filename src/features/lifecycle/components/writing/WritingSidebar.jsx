@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Search, Plus, Trash2, FileText, ArrowLeft } from 'lucide-react';
+import { Search, Plus, Trash2, FileText, ArrowLeft, LayoutGrid } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { toast } from 'sonner';
 import { useTranslation } from '../../../i18n';
@@ -59,7 +59,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
                     'cursor-pointer border px-4 py-3 transition',
                     isActive
                         ? 'border-sky-200 bg-gradient-to-br from-sky-50 to-white shadow-[0_14px_34px_-24px_rgba(59,130,246,0.6)] dark:border-sky-800 dark:from-sky-950/30 dark:to-slate-900 dark:shadow-none'
-                        : 'border-sky-100 bg-white hover:border-sky-200 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700'
+                        : 'border-sky-100/80 bg-white/86 hover:border-sky-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/40 dark:hover:border-slate-700 dark:hover:bg-slate-900/80'
                 ].join(' ')}
             >
                 <div className="mb-2 flex items-center justify-between gap-2">
@@ -213,43 +213,82 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                         value={searchQuery}
                         onChange={(event) => setSearchQuery(event.target.value)}
                         placeholder={t('inspiration.search')}
-                        className="w-full rounded-xl border border-sky-100 bg-white px-9 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:shadow-[0_0_0_4px_rgba(125,211,252,0.25)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-sky-700 dark:focus:shadow-[0_0_0_4px_rgba(14,165,233,0.15)]"
+                        className="w-full rounded-xl border border-sky-100 bg-white/95 px-9 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:shadow-[0_0_0_4px_rgba(125,211,252,0.25)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-sky-700 dark:focus:shadow-[0_0_0_4px_rgba(14,165,233,0.15)]"
                     />
                 </div>
 
-                <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                    <button
-                        onClick={() => setSelectedCategory(null)}
-                        className={[
-                            'shrink-0 rounded-full border px-2.5 py-1 text-[11px] transition',
-                            selectedCategory === null
-                                ? 'border-sky-300 bg-sky-50 text-sky-700 dark:border-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
-                                : 'border-sky-100 bg-white text-slate-500 hover:border-sky-200 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-sky-400'
-                        ].join(' ')}
-                    >
-                        {t('common.all')}
-                    </button>
+                {/* New Category Selector: Capsule with Name & Dots */}
+                <div className="flex justify-center -mb-2 mt-4 px-1">
+                    <div className="flex items-center rounded-full border border-sky-100 bg-white p-1 shadow-sm transition-all duration-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 group/selector">
 
-                    {WRITING_CATEGORIES.map((cat) => {
-                        const active = selectedCategory === cat.id;
-                        return (
+                        {/* Label Section - Animated */}
+                        <div className="flex items-center px-3 border-r border-sky-100/50 dark:border-slate-700/50 mr-1 min-w-[60px] justify-center relative overflow-hidden h-7">
+                            <AnimatePresence mode="wait" initial={false}>
+                                <motion.span
+                                    key={selectedCategory || 'all'}
+                                    initial={{ y: 20, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    exit={{ y: -20, opacity: 0 }}
+                                    transition={{ duration: 0.2, ease: "easeOut" }}
+                                    className={`text-xs font-medium ${selectedCategory
+                                        ? (WRITING_CATEGORIES.find(c => c.id === selectedCategory)?.textColor || 'text-slate-700 dark:text-slate-300')
+                                        : 'text-slate-600 dark:text-slate-300'}`}
+                                >
+                                    {selectedCategory
+                                        ? WRITING_CATEGORIES.find(c => c.id === selectedCategory)?.label
+                                        : t('common.all')}
+                                </motion.span>
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Dots Section */}
+                        <div className="flex items-center gap-1">
+                            {/* All Button */}
                             <button
-                                key={cat.id}
-                                onClick={() => setSelectedCategory(active ? null : cat.id)}
-                                className={[
-                                    'shrink-0 rounded-full border px-2.5 py-1 text-[11px] transition',
-                                    active
-                                        ? 'border-sky-300 bg-sky-50 text-sky-700 dark:border-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
-                                        : 'border-sky-100 bg-white text-slate-500 hover:border-sky-200 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-sky-400'
-                                ].join(' ')}
+                                onClick={() => setSelectedCategory(null)}
+                                className="relative w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 group/dot flex-shrink-0"
+                                title={t('common.all')}
                             >
-                                <span className="inline-flex items-center gap-1.5">
-                                    <span className={`h-1.5 w-1.5 rounded-full ${cat.dotColor}`} />
-                                    {cat.label}
-                                </span>
+                                {selectedCategory === null && (
+                                    <motion.div
+                                        layoutId="writingActiveCategory"
+                                        className="absolute inset-0 bg-white dark:bg-slate-700 rounded-full shadow-sm border border-sky-100 dark:border-slate-600"
+                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                    />
+                                )}
+                                <LayoutGrid
+                                    size={14}
+                                    className={`relative z-10 transition-all duration-300 ${selectedCategory === null
+                                        ? 'text-sky-500 dark:text-sky-400 scale-105'
+                                        : 'text-slate-400 opacity-60 group-hover/dot:opacity-100 group-hover/dot:scale-110'
+                                        }`}
+                                />
                             </button>
-                        );
-                    })}
+
+                            {/* Categories */}
+                            {WRITING_CATEGORIES.map(cat => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setSelectedCategory(cat.id)}
+                                    className="relative w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 group/dot flex-shrink-0"
+                                    title={cat.label}
+                                >
+                                    {selectedCategory === cat.id && (
+                                        <motion.div
+                                            layoutId="writingActiveCategory"
+                                            className="absolute inset-0 bg-white dark:bg-slate-700 rounded-full shadow-sm border border-sky-100 dark:border-slate-600"
+                                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                        />
+                                    )}
+                                    <div className={`
+                                            relative z-10 w-2.5 h-2.5 rounded-full transition-all duration-300
+                                            ${cat.dotColor}
+                                            ${selectedCategory === cat.id ? 'scale-110' : 'opacity-40 group-hover/dot:opacity-100 group-hover/dot:scale-110'}
+                                        `} />
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </header>
 
