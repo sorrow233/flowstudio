@@ -141,6 +141,15 @@ export default {
             expand: '展開',
             syncNow: '同期',
         },
+        categoryDraft: '下書き',
+        categoryPlot: 'プロット',
+        categoryCharacter: 'キャラクター',
+        categoryWorld: '世界観',
+        categoryFinal: '完成稿',
+        manageCategories: '執筆カテゴリ管理',
+        categoryNamePlaceholder: 'カテゴリ名を入力',
+        addCategoryLimit10: 'カテゴリを追加（最大10件）',
+        categoryLimitReached: 'カテゴリ上限に達しました（10）',
     },
 
     // Pending Module

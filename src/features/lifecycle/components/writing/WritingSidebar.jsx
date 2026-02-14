@@ -6,6 +6,22 @@ import { useTranslation } from '../../../i18n';
 import WritingCategoryManager from './WritingCategoryManager';
 import { stripMarkup } from './editorUtils';
 
+const DEFAULT_WRITING_CATEGORY_LABELS = {
+    draft: 'Draft',
+    plot: 'Plot',
+    character: 'Character',
+    world: 'World',
+    final: 'Final',
+};
+
+const DEFAULT_WRITING_CATEGORY_I18N_KEYS = {
+    draft: 'writing.categoryDraft',
+    plot: 'writing.categoryPlot',
+    character: 'writing.categoryCharacter',
+    world: 'writing.categoryWorld',
+    final: 'writing.categoryFinal',
+};
+
 const formatDocTime = (timestamp) => {
     if (!timestamp) return '';
     return new Date(timestamp).toLocaleString([], {
@@ -14,6 +30,16 @@ const formatDocTime = (timestamp) => {
         hour: '2-digit',
         minute: '2-digit'
     });
+};
+
+const resolveCategoryLabel = (category, t) => {
+    if (!category) return t('common.noData');
+    const key = DEFAULT_WRITING_CATEGORY_I18N_KEYS[category.id];
+    const defaultLabel = DEFAULT_WRITING_CATEGORY_LABELS[category.id];
+    if (key && (!category.label || category.label === defaultLabel)) {
+        return t(key, defaultLabel);
+    }
+    return category.label || t('common.noData');
 };
 
 const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, categories, defaultCategoryId, t }) => {
@@ -134,7 +160,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, categ
                 <div className="mt-2.5 flex items-center justify-between">
                     <span className="inline-flex items-center gap-1 rounded-full border border-sky-100 bg-sky-50 px-2 py-0.5 text-[10px] text-sky-600 dark:border-sky-900/40 dark:bg-sky-900/20 dark:text-sky-400">
                         <span className={`h-1.5 w-1.5 rounded-full ${category?.dotColor || 'bg-sky-400'}`} />
-                        {category?.label || t('common.unknown', 'Unknown')}
+                        {resolveCategoryLabel(category, t)}
                     </span>
                 </div>
             </motion.div>
@@ -269,7 +295,7 @@ const WritingSidebar = ({
             {isMobile && <div className="pt-safe" />}
 
             <header className="border-b border-sky-100/90 px-4 pb-4 pt-5 dark:border-slate-800/90">
-                <div className="mb-4 flex items-start justify-between gap-3">
+                <div className="mb-6 flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-2">
                         {isMobile && (
                             <button
@@ -281,10 +307,10 @@ const WritingSidebar = ({
                         )}
 
                         <div className="min-w-0">
-                            <h2 className="line-clamp-1 text-lg font-semibold tracking-tight text-slate-800 dark:text-slate-100">
+                            <h2 className="line-clamp-1 text-[2.15rem] font-semibold leading-none tracking-tight text-slate-800 dark:text-slate-100">
                                 {t('inspiration.writing')}
                             </h2>
-                            <p className="line-clamp-1 text-[11px] text-slate-400 dark:text-slate-500">
+                            <p className="mt-2 line-clamp-1 text-[15px] leading-relaxed text-slate-400 dark:text-slate-500">
                                 {t('inspiration.writingSubtitle')}
                             </p>
                         </div>
@@ -299,7 +325,7 @@ const WritingSidebar = ({
                     </button>
                 </div>
 
-                <div className="mb-3">
+                <div className="mb-4">
                     {!isSearchOpen ? (
                         <button
                             onClick={() => setIsSearchOpen(true)}
@@ -335,7 +361,7 @@ const WritingSidebar = ({
                     )}
                 </div>
 
-                <div className="relative z-20 mt-4 flex items-center justify-center gap-2 px-1">
+                <div className="relative z-20 mt-5 flex items-center justify-center gap-2 px-1">
                     <div className="flex items-center rounded-full border border-sky-100 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900 group/selector">
                         <div className="relative mr-1 flex h-7 min-w-[60px] items-center justify-center overflow-hidden border-r border-sky-200/50 px-3 dark:border-slate-700/50">
                             <AnimatePresence mode="wait" initial={false}>
@@ -347,7 +373,7 @@ const WritingSidebar = ({
                                     transition={{ duration: 0.2, ease: 'easeOut' }}
                                     className={`text-xs font-medium ${selectedCategoryInfo?.textColor || 'text-slate-600 dark:text-slate-300'}`}
                                 >
-                                    {selectedCategoryInfo?.label || t('common.noData')}
+                                    {resolveCategoryLabel(selectedCategoryInfo, t)}
                                 </motion.span>
                             </AnimatePresence>
                         </div>
@@ -358,7 +384,7 @@ const WritingSidebar = ({
                                     key={category.id}
                                     onClick={() => setSelectedCategory(category.id)}
                                     className="group/dot relative h-8 w-8 flex-shrink-0 rounded-full transition-all duration-300"
-                                    title={category.label}
+                                    title={resolveCategoryLabel(category, t)}
                                 >
                                     {selectedCategory === category.id && (
                                         <motion.div

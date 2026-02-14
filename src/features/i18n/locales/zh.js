@@ -146,6 +146,15 @@ export default {
             expand: '展开',
             syncNow: '立即同步',
         },
+        categoryDraft: '草稿',
+        categoryPlot: '情节',
+        categoryCharacter: '角色',
+        categoryWorld: '世界观',
+        categoryFinal: '定稿',
+        manageCategories: '管理写作分类',
+        categoryNamePlaceholder: '输入分类名称',
+        addCategoryLimit10: '添加分类（最多10个）',
+        categoryLimitReached: '已达到分类上限（10）',
     },
 
     // 待定模块 (Renamed to Sprouting/萌芽)

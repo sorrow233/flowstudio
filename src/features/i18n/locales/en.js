@@ -142,6 +142,15 @@ export default {
             expand: 'Expand',
             syncNow: 'Sync',
         },
+        categoryDraft: 'Draft',
+        categoryPlot: 'Plot',
+        categoryCharacter: 'Character',
+        categoryWorld: 'World',
+        categoryFinal: 'Final',
+        manageCategories: 'Manage Writing Categories',
+        categoryNamePlaceholder: 'Enter category name',
+        addCategoryLimit10: 'Add category (up to 10)',
+        categoryLimitReached: 'Category limit reached (10)',
     },
 
     // Pending Module

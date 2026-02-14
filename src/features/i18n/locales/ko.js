@@ -141,6 +141,15 @@ export default {
             expand: '펼치기',
             syncNow: '동기화',
         },
+        categoryDraft: '초안',
+        categoryPlot: '플롯',
+        categoryCharacter: '캐릭터',
+        categoryWorld: '세계관',
+        categoryFinal: '최종본',
+        manageCategories: '글쓰기 분류 관리',
+        categoryNamePlaceholder: '분류 이름 입력',
+        addCategoryLimit10: '분류 추가 (최대 10개)',
+        categoryLimitReached: '분류 상한 도달 (10개)',
     },
 
     // Pending Module
