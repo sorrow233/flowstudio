@@ -13,6 +13,7 @@ import {
     detectWordCountLabel,
     downloadContent,
 } from './editorUtils';
+import { clipboardToMarkup, insertMarkupAtCaret } from './pasteUtils';
 import EditorToolbar from './EditorToolbar';
 import EditorStatusBar from './EditorStatusBar';
 import FloatingColorPicker from './FloatingColorPicker';
@@ -399,6 +400,21 @@ const WritingEditor = ({
         updateStatsFromEditor();
     }, [updateStatsFromEditor]);
 
+    const handlePaste = useCallback((e) => {
+        e.preventDefault();
+        if (!editorRef.current) return;
+
+        const markup = clipboardToMarkup(e.clipboardData);
+        if (!markup) return;
+
+        const inserted = insertMarkupAtCaret({
+            editorElement: editorRef.current,
+            markup,
+            markupToHtml,
+        });
+        if (inserted) handleInput();
+    }, [handleInput]);
+
     const applyColor = (colorId) => {
         if (typeof window === 'undefined' || !window.getSelection) return;
         const selection = window.getSelection();
@@ -641,6 +657,7 @@ const WritingEditor = ({
                             contentEditable
                             suppressContentEditableWarning
                             onInput={handleInput}
+                            onPaste={handlePaste}
                             onFocus={() => {
                                 setIsEditorFocused(true);
                             }}
