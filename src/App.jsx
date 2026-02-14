@@ -13,7 +13,7 @@ import CommandCenterModule from './features/blueprint/CommandCenterModule';
 import DataCenterModule from './features/lifecycle/DataCenterModule';
 import ShareViewPage from './features/share/components/ShareViewPage';
 import ShareReceiver from './features/share/ShareReceiver';
-import WritingV2Page from './features/writing_v2/WritingV2Page';
+import WritingBetaPage from './features/writing-beta/WritingBetaPage';
 
 import { Toaster } from 'sonner';
 import { KeymapProvider, ShortcutHelpModal, useBrowserIntercept } from './features/shortcuts';
@@ -49,7 +49,7 @@ function App() {
                                         <Route path="/advanced" element={<AdvancedDevModule />} />
                                         <Route path="/blueprint" element={<CommandCenterModule />} />
                                         <Route path="/data" element={<DataCenterModule />} />
-                                        <Route path="/beta-writing-2" element={<WritingV2Page />} />
+                                        <Route path="/beta写作" element={<WritingBetaPage />} />
                                         <Route path="/share/:id" element={<ShareViewPage />} />
                                         <Route path="/share-receiver" element={<ShareReceiver />} />
                                         <Route path="*" element={<Navigate to="/" replace />} />
