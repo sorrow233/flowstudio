@@ -38,6 +38,7 @@ export default {
         noData: '暂无数据',
         lightMode: '亮色模式',
         darkMode: '暗色模式',
+        followSystem: '跟随系统',
         back: '返回',
         close: '关闭',
         settings: '设置',

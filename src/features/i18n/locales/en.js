@@ -38,6 +38,7 @@ export default {
         noData: 'No data',
         lightMode: 'Light Mode',
         darkMode: 'Dark Mode',
+        followSystem: 'Follow System',
         back: 'Back',
         close: 'Close',
         settings: 'Settings',

@@ -3,6 +3,10 @@ import { useSync } from '../features/sync/SyncContext';
 import { useSyncedMap } from '../features/sync/useSyncStore';
 
 const ThemeContext = createContext();
+const THEME_KEY = 'theme';
+const THEME_OVERRIDE_KEY = 'theme-override';
+const THEME_MANUAL_UNTIL_KEY = 'theme-manual-until';
+const MANUAL_THEME_LOCK_MS = 5 * 60 * 60 * 1000;
 
 // 获取系统主题偏好
 const getSystemTheme = () => {
@@ -11,6 +15,15 @@ const getSystemTheme = () => {
     }
     return 'light';
 };
+
+const parseTimestamp = (value) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const isManualLockActive = (manualUntil) => manualUntil > Date.now();
+
+const normalizeTheme = (value) => (value === 'dark' || value === 'light' ? value : null);
 
 export function useTheme() {
     const context = useContext(ThemeContext);
@@ -26,46 +39,100 @@ function ThemeProviderInner({ children }) {
     const { doc } = useSync();
     const { data: preferences, set } = useSyncedMap(doc, 'user_preferences');
 
-    const [theme, setThemeState] = useState(() => {
-        const savedTheme = localStorage.getItem('theme');
-        const hasOverride = localStorage.getItem('theme-override') === 'true';
+    const getStoredManualUntil = () => {
+        if (typeof window === 'undefined') return 0;
+        return parseTimestamp(localStorage.getItem(THEME_MANUAL_UNTIL_KEY));
+    };
 
-        if (hasOverride && savedTheme) {
+    const [theme, setThemeState] = useState(() => {
+        const savedTheme = normalizeTheme(localStorage.getItem(THEME_KEY));
+        const hasOverride = localStorage.getItem(THEME_OVERRIDE_KEY) === 'true';
+        const manualUntil = getStoredManualUntil();
+
+        if (hasOverride && isManualLockActive(manualUntil) && savedTheme) {
             return savedTheme;
         }
-        return getSystemTheme();
+        return savedTheme || getSystemTheme();
     });
+
+    const [manualUntil, setManualUntilState] = useState(() => getStoredManualUntil());
+
+    const applyTheme = (nextTheme, nextManualUntil = 0) => {
+        localStorage.setItem(THEME_KEY, nextTheme);
+
+        if (isManualLockActive(nextManualUntil)) {
+            localStorage.setItem(THEME_OVERRIDE_KEY, 'true');
+            localStorage.setItem(THEME_MANUAL_UNTIL_KEY, String(nextManualUntil));
+            setManualUntilState(nextManualUntil);
+        } else {
+            localStorage.removeItem(THEME_OVERRIDE_KEY);
+            localStorage.removeItem(THEME_MANUAL_UNTIL_KEY);
+            setManualUntilState(0);
+        }
+
+        setThemeState(nextTheme);
+    };
+
+    const syncThemeToCloud = (nextTheme, nextManualUntil = 0) => {
+        if (!doc) return;
+
+        const hasManualLock = isManualLockActive(nextManualUntil);
+        set('theme', nextTheme);
+        set('themeOverride', hasManualLock);
+        set('themeManualUntil', hasManualLock ? nextManualUntil : 0);
+    };
 
     // 从云端同步主题设置
     useEffect(() => {
-        console.log('[ThemeSync] preferences changed:', preferences);
+        if (!preferences) return;
 
-        // 只要云端有主题设置就应用
-        if (preferences?.theme) {
-            const syncedTheme = preferences.theme;
-            const syncedOverride = preferences.themeOverride ?? true; // 默认为 true（用户手动设置）
+        const syncedTheme = normalizeTheme(preferences.theme);
+        const syncedOverride = preferences.themeOverride === true;
+        const syncedManualUntil = parseTimestamp(preferences.themeManualUntil);
+        const hasActiveManualLock = syncedOverride && isManualLockActive(syncedManualUntil);
 
-            console.log('[ThemeSync] Applying synced theme:', syncedTheme, 'override:', syncedOverride);
-
-            // 更新本地存储
-            localStorage.setItem('theme', syncedTheme);
-            if (syncedOverride) {
-                localStorage.setItem('theme-override', 'true');
-            } else {
-                localStorage.removeItem('theme-override');
-            }
-
-            // 应用主题
-            setThemeState(syncedTheme);
+        if (hasActiveManualLock) {
+            applyTheme(syncedTheme || getSystemTheme(), syncedManualUntil);
+            return;
         }
-    }, [preferences?.theme, preferences?.themeOverride]);
+
+        // 手动锁定已过期，回到系统主题并同步，确保所有设备恢复跟随
+        if (syncedOverride && !hasActiveManualLock) {
+            const systemTheme = getSystemTheme();
+            applyTheme(systemTheme, 0);
+            syncThemeToCloud(systemTheme, 0);
+            return;
+        }
+
+        // 跟随模式：优先使用云端主题以保证多设备一致
+        const followTheme = syncedTheme || getSystemTheme();
+        applyTheme(followTheme, 0);
+
+        // 清理遗留字段（如旧数据没有 theme 或残留 manualUntil）
+        if (!syncedTheme || syncedManualUntil > 0) {
+            syncThemeToCloud(followTheme, 0);
+        }
+    }, [doc, preferences?.theme, preferences?.themeOverride, preferences?.themeManualUntil, set]);
+
+    // 手动锁定到期后自动恢复系统跟随
+    useEffect(() => {
+        if (!isManualLockActive(manualUntil)) return;
+
+        const timeoutId = window.setTimeout(() => {
+            const systemTheme = getSystemTheme();
+            applyTheme(systemTheme, 0);
+            syncThemeToCloud(systemTheme, 0);
+        }, manualUntil - Date.now());
+
+        return () => window.clearTimeout(timeoutId);
+    }, [manualUntil, doc, set]);
 
     // 应用主题到 DOM
     useEffect(() => {
         const root = window.document.documentElement;
         root.classList.remove('light', 'dark');
         root.classList.add(theme);
-        localStorage.setItem('theme', theme);
+        localStorage.setItem(THEME_KEY, theme);
     }, [theme]);
 
     // 监听系统主题变化
@@ -74,20 +141,11 @@ function ThemeProviderInner({ children }) {
 
         const handleSystemThemeChange = (e) => {
             const newSystemTheme = e.matches ? 'dark' : 'light';
-            const hasOverride = localStorage.getItem('theme-override') === 'true';
-            const currentTheme = localStorage.getItem('theme');
+            const hasManualLock = isManualLockActive(parseTimestamp(localStorage.getItem(THEME_MANUAL_UNTIL_KEY)));
+            if (hasManualLock) return;
 
-            if (hasOverride) {
-                if (newSystemTheme === currentTheme) {
-                    localStorage.removeItem('theme-override');
-                    // 同步到云端
-                    if (doc) {
-                        set('themeOverride', false);
-                    }
-                }
-            } else {
-                setThemeState(newSystemTheme);
-            }
+            applyTheme(newSystemTheme, 0);
+            syncThemeToCloud(newSystemTheme, 0);
         };
 
         mediaQuery.addEventListener('change', handleSystemThemeChange);
@@ -95,64 +153,30 @@ function ThemeProviderInner({ children }) {
     }, [doc, set]);
 
     const toggleTheme = () => {
-        const currentSystemTheme = getSystemTheme();
         const newTheme = theme === 'light' ? 'dark' : 'light';
-        const hasOverride = newTheme !== currentSystemTheme;
+        const lockUntil = Date.now() + MANUAL_THEME_LOCK_MS;
 
-        console.log('[ThemeSync] Toggle theme:', newTheme, 'override:', hasOverride, 'doc:', !!doc);
-
-        if (hasOverride) {
-            localStorage.setItem('theme-override', 'true');
-        } else {
-            localStorage.removeItem('theme-override');
-        }
-        localStorage.setItem('theme', newTheme);
-        setThemeState(newTheme);
-
-        // 同步到云端
-        if (doc) {
-            console.log('[ThemeSync] Writing to cloud...');
-            set('theme', newTheme);
-            set('themeOverride', hasOverride);
-        } else {
-            console.warn('[ThemeSync] No doc available, cannot sync!');
-        }
+        applyTheme(newTheme, lockUntil);
+        syncThemeToCloud(newTheme, lockUntil);
     };
 
     const useSystemTheme = () => {
-        localStorage.removeItem('theme-override');
         const systemTheme = getSystemTheme();
-        localStorage.setItem('theme', systemTheme);
-        setThemeState(systemTheme);
-
-        // 同步到云端
-        if (doc) {
-            set('theme', systemTheme);
-            set('themeOverride', false);
-        }
+        applyTheme(systemTheme, 0);
+        syncThemeToCloud(systemTheme, 0);
     };
 
     const value = {
         isDark: theme === 'dark',
         theme,
+        isManualThemeLocked: isManualLockActive(manualUntil),
+        manualThemeLockUntil: manualUntil,
         toggleTheme,
         setTheme: (newTheme) => {
-            const currentSystemTheme = getSystemTheme();
-            const hasOverride = newTheme !== currentSystemTheme;
-
-            if (hasOverride) {
-                localStorage.setItem('theme-override', 'true');
-            } else {
-                localStorage.removeItem('theme-override');
-            }
-            localStorage.setItem('theme', newTheme);
-            setThemeState(newTheme);
-
-            // 同步到云端
-            if (doc) {
-                set('theme', newTheme);
-                set('themeOverride', hasOverride);
-            }
+            const normalized = normalizeTheme(newTheme) || 'light';
+            const lockUntil = Date.now() + MANUAL_THEME_LOCK_MS;
+            applyTheme(normalized, lockUntil);
+            syncThemeToCloud(normalized, lockUntil);
         },
         useSystemTheme,
     };

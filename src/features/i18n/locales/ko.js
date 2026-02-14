@@ -37,6 +37,7 @@ export default {
         noData: '데이터 없음',
         lightMode: '라이트 모드',
         darkMode: '다크 모드',
+        followSystem: '시스템 설정 따르기',
         back: '뒤로',
         close: '닫기',
         settings: '설정',
