@@ -19,10 +19,10 @@ const WritingCategorySelector = ({
     }
 
     return (
-        <div className={`relative z-20 flex items-center gap-1.5 ${isMobile ? 'w-full' : ''}`}>
-            <div className="flex min-w-0 flex-1 items-center rounded-full border border-slate-200/60 bg-white/60 p-1 shadow-sm backdrop-blur-md transition-all hover:bg-white/80 dark:border-slate-800/50 dark:bg-slate-900/60 dark:hover:bg-slate-900/80">
+        <div className={`relative z-20 flex items-center gap-2 ${isMobile ? 'w-full' : ''}`}>
+            <div className={`flex min-w-0 flex-1 items-center border border-slate-200/60 bg-white/60 shadow-sm backdrop-blur-md transition-all hover:bg-white/80 dark:border-slate-800/50 dark:bg-slate-900/60 dark:hover:bg-slate-900/80 ${isMobile ? 'rounded-2xl px-1.5 py-1.5' : 'rounded-full p-1'}`}>
                 {/* 类别名称显示 - 移动端也保留 */}
-                <div className="relative flex h-7 min-w-[60px] max-w-[100px] shrink-0 items-center justify-center overflow-hidden border-r border-slate-200/50 px-3 dark:border-slate-700/50">
+                <div className={`relative flex shrink-0 items-center justify-center overflow-hidden border-r border-slate-200/50 dark:border-slate-700/50 ${isMobile ? 'h-8 min-w-[70px] max-w-[110px] px-3.5' : 'h-7 min-w-[60px] max-w-[100px] px-3'}`}>
                     <AnimatePresence mode="wait" initial={false}>
                         <motion.span
                             key={selectedCategory || 'none'}
@@ -38,12 +38,12 @@ const WritingCategorySelector = ({
                 </div>
 
                 {/* 滑动圆点容器 */}
-                <div className={`no-scrollbar flex items-center gap-1 overflow-x-auto ${isMobile ? 'w-[140px] px-1' : 'min-w-0 flex-1 pl-1 pr-1'}`}>
+                <div className={`no-scrollbar flex min-w-0 items-center gap-1 overflow-x-auto ${isMobile ? 'flex-1 px-1.5' : 'flex-1 pl-1 pr-1'}`}>
                     {categories.map((category) => (
                         <button
                             key={category.id}
                             onClick={() => onSelectCategory(category.id)}
-                            className="group/dot relative flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full transition-all duration-300"
+                            className={`group/dot relative flex flex-shrink-0 items-center justify-center rounded-full transition-all duration-300 ${isMobile ? 'h-8 w-8' : 'h-7 w-7'}`}
                             title={resolveWritingCategoryLabel(category, t, t('common.noData'))}
                         >
                             {selectedCategory === category.id && (
@@ -66,7 +66,7 @@ const WritingCategorySelector = ({
                 {/* 设置/管理按钮 */}
                 <button
                     onClick={onOpenManager}
-                    className="ml-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100/50 hover:text-slate-600 dark:hover:bg-slate-800/50 dark:hover:text-slate-300"
+                    className={`ml-1 inline-flex shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100/50 hover:text-slate-600 dark:hover:bg-slate-800/50 dark:hover:text-slate-300 ${isMobile ? 'h-8 w-8' : 'h-7 w-7'}`}
                     title={managerTitle}
                 >
                     <Settings2 size={13} />

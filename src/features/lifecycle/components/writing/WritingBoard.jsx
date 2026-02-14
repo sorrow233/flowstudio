@@ -15,12 +15,16 @@ import { stripMarkup } from './editorUtils';
 const detectCompactLayout = () => {
     if (typeof window === 'undefined') return false;
     const width = window.innerWidth;
+    const hasTouchPoints = typeof navigator !== 'undefined' ? navigator.maxTouchPoints > 0 : false;
+    const isIOS = typeof navigator !== 'undefined'
+        ? /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+        : false;
     const isCoarsePointer = typeof window.matchMedia === 'function'
         ? window.matchMedia('(pointer: coarse)').matches
         : false;
 
-    // iOS Safari 在“桌面网站”模式下可能给出较大宽度，这里优先按触控设备走紧凑布局。
-    return width < 1024 || (isCoarsePointer && width < 1366);
+    // iOS Safari 在“桌面网站”模式下可能给出较大宽度，触控设备统一优先走紧凑布局。
+    return width < 1024 || ((isCoarsePointer || hasTouchPoints || isIOS) && width < 1366);
 };
 
 const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDelete, syncStatus, isMobile: externalIsMobile }) => {
