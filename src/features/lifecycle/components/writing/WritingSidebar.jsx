@@ -1,10 +1,8 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { Trash2, FileText } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
 import { useTranslation } from '../../../i18n';
 import { stripMarkup } from './editorUtils';
-import { resolveWritingCategoryLabel } from './writingCategoryUtils';
 
 const formatDocTime = (timestamp) => {
     if (!timestamp) return '';
@@ -16,8 +14,7 @@ const formatDocTime = (timestamp) => {
     });
 };
 
-const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, categories, defaultCategoryId, t }) => {
-    const category = categories.find((item) => item.id === (doc.category || defaultCategoryId)) || categories[0];
+const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, t }) => {
     const [isRenaming, setIsRenaming] = useState(false);
     const [editTitle, setEditTitle] = useState(doc.title || '');
     const inputRef = useRef(null);
@@ -100,21 +97,16 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, categories, def
                             </span>
                         )}
                     </div>
-                    <span className="ml-2 shrink-0 text-[10px] font-medium tracking-wide text-sky-500/80 dark:text-sky-400/80">
-                        {formatDocTime(doc.lastModified || doc.timestamp)}
-                    </span>
+                    {isActive && (
+                        <span className="ml-2 shrink-0 text-[10px] font-medium tracking-wide text-sky-500/80 dark:text-sky-400/80">
+                            {formatDocTime(doc.lastModified || doc.timestamp)}
+                        </span>
+                    )}
                 </div>
 
                 <p className="line-clamp-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                     {stripMarkup(doc.content || '') || t('inspiration.placeholder')}
                 </p>
-
-                <div className="mt-2.5 flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1 rounded-full border border-sky-100 bg-sky-50 px-2 py-0.5 text-[10px] text-sky-600 dark:border-sky-900/40 dark:bg-sky-900/20 dark:text-sky-400">
-                        <span className={`h-1.5 w-1.5 rounded-full ${category?.dotColor || 'bg-sky-400'}`} />
-                        {resolveWritingCategoryLabel(category, t, t('common.noData'))}
-                    </span>
-                </div>
             </div>
         </div>
     );
@@ -122,18 +114,13 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, categories, def
 
 const WritingSidebar = ({
     documents = [],
-    categories = [],
     activeDocId,
     onSelectDoc,
-    onCreate,
     onUpdate,
-    onDelete,
-    onRestore,
     allDocumentsCount = 0,
     isMobile = false
 }) => {
     const { t } = useTranslation();
-    const defaultCategoryId = categories[0]?.id || null;
 
     const groupedDocs = useMemo(() => {
         const groups = { today: [], yesterday: [], week: [], older: [] };
@@ -153,24 +140,6 @@ const WritingSidebar = ({
         return groups;
     }, [documents]);
 
-    const handleDelete = (doc) => {
-        onDelete(doc.id);
-        toast.info(t('inspiration.ideaDeleted'), {
-            icon: <Trash2 className="h-4 w-4 text-rose-500" />,
-            action: {
-                label: t('common.undo'),
-                onClick: () => {
-                    if (onRestore) {
-                        onRestore(doc);
-                        return;
-                    }
-                    onCreate(doc);
-                }
-            },
-            duration: 4000
-        });
-    };
-
     const renderGroup = (titleKey, docsInGroup) => {
         if (docsInGroup.length === 0) return null;
 
@@ -185,8 +154,6 @@ const WritingSidebar = ({
                         <WritingSidebarItem
                             key={doc.id}
                             doc={doc}
-                            categories={categories}
-                            defaultCategoryId={defaultCategoryId}
                             isActive={activeDocId === doc.id}
                             onSelect={onSelectDoc}
                             onUpdate={onUpdate}

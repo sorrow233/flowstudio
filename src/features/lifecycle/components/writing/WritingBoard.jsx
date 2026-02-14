@@ -27,7 +27,7 @@ const detectCompactLayout = () => {
     return width < 1024 || ((isCoarsePointer || hasTouchPoints || isIOS) && width < 1366);
 };
 
-const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDelete, syncStatus, isMobile: externalIsMobile }) => {
+const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, syncStatus, isMobile: externalIsMobile }) => {
     const isMobile = externalIsMobile !== undefined ? externalIsMobile : detectCompactLayout();
     const { doc, immediateSync, status } = useSync();
     const { t } = useTranslation();
@@ -35,7 +35,6 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         projects: allProjects,
         addProject,
         updateProject,
-        removeProject,
         undo,
         redo,
         canUndo,
@@ -91,10 +90,6 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         immediateSync?.();
     });
 
-    const deleteHandler = onDelete ?? ((id) => {
-        removeProject(id);
-        immediateSync?.();
-    });
 
     const [selectedDocId, setSelectedDocId] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => !isMobile);
@@ -215,20 +210,6 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         updateHandler(id, { ...updates, lastModified: Date.now() });
     };
 
-    const handleDelete = (id) => {
-        const index = documents.findIndex((docItem) => docItem.id === id);
-        deleteHandler(id);
-
-        if (selectedDocId === id) {
-            if (documents.length > 1) {
-                const nextDoc = documents[index + 1] || documents[index - 1];
-                setSelectedDocId(nextDoc?.id || null);
-            } else {
-                setSelectedDocId(null);
-            }
-        }
-    };
-
     const handleAddCategory = (categoryInput) => {
         addCategoryBase(categoryInput);
         immediateSync?.();
@@ -311,17 +292,13 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                         <WritingSidebar
                                             documents={visibleDocuments}
                                             allDocumentsCount={documents.length}
-                                            categories={categories}
                                             isMobile={isMobile}
                                             activeDocId={selectedDocId}
                                             onSelectDoc={(id) => {
                                                 setSelectedDocId(id);
                                                 if (isMobile) setIsSidebarOpen(false);
                                             }}
-                                            onCreate={handleCreate}
                                             onUpdate={handleUpdate}
-                                            onDelete={handleDelete}
-                                            onRestore={(docToRestore) => handleCreate(docToRestore)}
                                         />
                                     </div>
                                 </motion.aside>
