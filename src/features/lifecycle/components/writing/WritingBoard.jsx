@@ -203,7 +203,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                 <div className="absolute -bottom-24 right-12 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl dark:bg-blue-900/20" />
             </div>
 
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
                 {isSidebarOpen && (
                     <>
                         {isMobile && (
@@ -217,35 +217,42 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                         )}
 
                         <motion.aside
-                            initial={isMobile ? { x: '-100%' } : { x: -24, opacity: 0 }}
-                            animate={isMobile ? { x: 0 } : { x: 0, opacity: 1 }}
-                            exit={isMobile ? { x: '-100%' } : { x: -24, opacity: 0 }}
-                            transition={{ type: 'spring', damping: 34, stiffness: 360 }}
+                            initial={isMobile ? { x: '-100%' } : { width: 0, opacity: 0 }}
+                            animate={isMobile ? { x: 0 } : { width: 320, opacity: 1 }}
+                            exit={isMobile ? { x: '-100%' } : { width: 0, opacity: 0 }}
+                            transition={{
+                                type: 'spring',
+                                stiffness: 400,
+                                damping: 40,
+                                mass: 1
+                            }}
                             className={[
                                 'relative z-50 h-full flex-shrink-0 border-r border-sky-100 bg-white dark:border-slate-800 dark:bg-slate-900',
                                 isMobile
                                     ? 'fixed inset-y-0 left-0 w-[84vw] max-w-[360px]'
-                                    : 'w-[320px]'
+                                    : 'overflow-hidden'
                             ].join(' ')}
                         >
-                            <WritingSidebar
-                                documents={documents}
-                                categories={categories}
-                                activeDocId={selectedDocId}
-                                onSelectDoc={(id) => {
-                                    setSelectedDocId(id);
-                                    if (isMobile) setIsSidebarOpen(false);
-                                }}
-                                onCreate={handleCreate}
-                                onUpdate={handleUpdate}
-                                onDelete={handleDelete}
-                                onAddCategory={handleAddCategory}
-                                onUpdateCategory={handleUpdateCategory}
-                                onRemoveCategory={handleRemoveCategory}
-                                onRestore={(docToRestore) => handleCreate(docToRestore)}
-                                onClose={() => setIsSidebarOpen(false)}
-                                isMobile={isMobile}
-                            />
+                            <div className="h-full w-full lg:w-[320px]">
+                                <WritingSidebar
+                                    documents={documents}
+                                    categories={categories}
+                                    activeDocId={selectedDocId}
+                                    onSelectDoc={(id) => {
+                                        setSelectedDocId(id);
+                                        if (isMobile) setIsSidebarOpen(false);
+                                    }}
+                                    onCreate={handleCreate}
+                                    onUpdate={handleUpdate}
+                                    onDelete={handleDelete}
+                                    onAddCategory={handleAddCategory}
+                                    onUpdateCategory={handleUpdateCategory}
+                                    onRemoveCategory={handleRemoveCategory}
+                                    onRestore={(docToRestore) => handleCreate(docToRestore)}
+                                    onClose={() => setIsSidebarOpen(false)}
+                                    isMobile={isMobile}
+                                />
+                            </div>
                         </motion.aside>
                     </>
                 )}
