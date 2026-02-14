@@ -28,8 +28,8 @@ const WritingWorkspaceHeader = ({
     }, [searchQuery, isSearchOpen]);
 
     return (
-        <header className={`relative z-20 border-b border-sky-100/50 bg-white dark:border-slate-800/60 dark:bg-slate-900 ${isMobile ? 'px-4 py-3' : 'px-4 pb-4 pt-4 md:px-6 md:pt-6'}`}>
-            <div className={`flex ${isMobile ? 'items-center justify-between gap-3' : 'flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6'}`}>
+        <header className={`relative z-20 border-b border-sky-100/50 bg-white dark:border-slate-800/60 dark:bg-slate-900 ${isMobile ? 'px-4 py-3' : 'px-6 pb-4 pt-6'}`}>
+            <div className={`flex ${isMobile ? 'items-center justify-between gap-3' : 'items-end justify-between gap-6'}`}>
                 <div className="min-w-0">
                     <h2 className={`line-clamp-1 font-bold tracking-tight text-slate-800 dark:text-slate-100 ${isMobile ? 'text-2xl' : 'text-[2rem] md:text-[2.15rem]'}`}>
                         {t('inspiration.writing')}
@@ -113,7 +113,7 @@ const WritingWorkspaceHeader = ({
                             isMobile={isMobile}
                             t={t}
                         />
-                    </div>
+                    )}
                 </div>
             </div>
 
