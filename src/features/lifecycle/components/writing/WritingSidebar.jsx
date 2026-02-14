@@ -317,11 +317,13 @@ const WritingSidebar = ({
                     </div>
 
                     <button
-                        onClick={() => onCreate(selectedCategory || defaultCategoryId)}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-300 bg-slate-100 text-slate-700 shadow-sm transition hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+                        onClick={() => onCreate(selectedCategory)}
+                        disabled={!selectedCategory}
+                        className="inline-flex h-11 items-center gap-2.5 rounded-2xl border border-slate-300 bg-[linear-gradient(135deg,#4b5563,#3f4751)] px-4 text-sm font-semibold text-slate-100 shadow-sm transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-[linear-gradient(135deg,#3f4751,#374151)]"
                         title={t('inspiration.newDoc')}
                     >
                         <Plus size={18} />
+                        <span>{t('inspiration.newDoc')}</span>
                     </button>
                 </div>
 
