@@ -418,7 +418,7 @@ const WritingEditor = ({
         <div className="relative z-10 flex h-full flex-1 flex-col overflow-hidden">
             {/* Background decorations */}
             <div className="pointer-events-none absolute inset-0">
-                <div className="absolute inset-0 bg-gradient-to-b from-sky-50/45 via-white/30 to-white/10 dark:from-slate-900/45 dark:via-slate-900/30 dark:to-slate-950/10" />
+                <div className="absolute inset-0 bg-white/30 dark:bg-slate-900/30" />
                 <div className="absolute -top-14 right-20 h-56 w-56 rounded-full bg-sky-200/28 blur-[88px] dark:bg-sky-900/10" />
                 <div className="absolute -bottom-16 left-20 h-48 w-48 rounded-full bg-blue-200/22 blur-[82px] dark:bg-blue-900/10" />
             </div>
@@ -530,7 +530,7 @@ const WritingEditor = ({
                                 </button>
                                 <button
                                     onClick={handleKeepPendingLocal}
-                                    className="rounded-full bg-gradient-to-r from-sky-500 to-blue-500 px-3 py-1 text-xs text-white transition hover:brightness-105"
+                                    className="rounded-full bg-sky-600 px-3 py-1 text-xs text-white transition hover:bg-sky-500 dark:bg-sky-500 dark:hover:bg-sky-400"
                                 >
                                     {t('inspiration.keepLocal')}
                                 </button>
@@ -545,7 +545,7 @@ const WritingEditor = ({
                             : 'border-sky-100/70 dark:border-slate-800'
                             }`}
                     >
-                        <div className="mb-6 h-px bg-gradient-to-r from-transparent via-sky-100 to-transparent dark:via-slate-800/60" />
+                        <div className="mb-6 h-px bg-sky-100 dark:bg-slate-800/60" />
                         <div
                             ref={editorRef}
                             contentEditable
@@ -570,7 +570,7 @@ const WritingEditor = ({
 
                         {/* Bottom decoration */}
                         <div className="mt-20 flex flex-col items-center opacity-35">
-                            <div className="mb-2 h-1.5 w-12 rounded-full bg-gradient-to-r from-transparent via-sky-300 to-transparent dark:via-sky-700" />
+                            <div className="mb-2 h-1.5 w-12 rounded-full bg-sky-300 dark:bg-sky-700" />
                             <div className="h-1 w-1 rounded-full bg-sky-400 dark:bg-sky-600" />
                         </div>
                     </div>

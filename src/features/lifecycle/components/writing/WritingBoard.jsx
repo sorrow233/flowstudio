@@ -198,7 +198,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     return (
         <div className="relative flex h-full w-full overflow-hidden rounded-[26px]">
             <div className="pointer-events-none absolute inset-0">
-                <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800" />
+                <div className="absolute inset-0 bg-white dark:bg-slate-900" />
                 <div className="absolute -top-24 left-12 h-72 w-72 rounded-full bg-sky-200/35 blur-3xl dark:bg-sky-900/20" />
                 <div className="absolute -bottom-24 right-12 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl dark:bg-blue-900/20" />
             </div>

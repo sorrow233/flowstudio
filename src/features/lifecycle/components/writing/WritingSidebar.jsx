@@ -118,7 +118,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, categ
                 className={[
                     'cursor-pointer rounded-2xl border px-4 py-3 transition',
                     isActive
-                        ? 'border-sky-200 bg-gradient-to-br from-sky-50 to-white shadow-[0_14px_34px_-24px_rgba(59,130,246,0.6)] dark:border-sky-800 dark:from-sky-950/30 dark:to-slate-900 dark:shadow-none'
+                        ? 'border-sky-200 bg-sky-50 shadow-[0_14px_34px_-24px_rgba(59,130,246,0.6)] dark:border-sky-800 dark:bg-slate-900 dark:shadow-none'
                         : 'border-sky-100/80 bg-white/86 hover:border-sky-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/40 dark:hover:border-slate-700 dark:hover:bg-slate-900/80'
                 ].join(' ')}
             >
@@ -291,7 +291,7 @@ const WritingSidebar = ({
     const selectedCategoryInfo = categories.find((category) => category.id === selectedCategory) || categories[0];
 
     return (
-        <div className="flex h-full flex-col bg-[linear-gradient(170deg,rgba(248,252,255,0.96),rgba(255,255,255,0.9))] dark:bg-[linear-gradient(170deg,rgba(15,23,42,0.96),rgba(30,41,59,0.9))]">
+        <div className="flex h-full flex-col bg-white dark:bg-slate-900">
             {isMobile && <div className="pt-safe" />}
 
             <header className="border-b border-sky-100/90 px-4 pb-4 pt-5 dark:border-slate-800/90">
@@ -319,7 +319,7 @@ const WritingSidebar = ({
                     <button
                         onClick={() => onCreate(selectedCategory)}
                         disabled={!selectedCategory}
-                        className="inline-flex h-11 items-center gap-2.5 rounded-2xl border border-slate-300 bg-[linear-gradient(135deg,#4b5563,#3f4751)] px-4 text-sm font-semibold text-slate-100 shadow-sm transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-[linear-gradient(135deg,#3f4751,#374151)]"
+                        className="inline-flex h-11 items-center gap-2.5 rounded-2xl border border-slate-300 bg-slate-700 px-4 text-sm font-semibold text-slate-100 shadow-sm transition hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600"
                         title={t('inspiration.newDoc')}
                     >
                         <Plus size={18} />

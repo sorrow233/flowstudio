@@ -14,7 +14,7 @@ const ConflictBanner = ({
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -12 }}
-        className="absolute inset-x-0 top-0 z-40 border-b border-sky-200 bg-[linear-gradient(180deg,#e0f2fe,#eff6ff)] dark:border-sky-900 dark:bg-[linear-gradient(180deg,#0f172a,#1e293b)]"
+        className="absolute inset-x-0 top-0 z-40 border-b border-sky-200 bg-sky-50 dark:border-sky-900 dark:bg-slate-900"
         style={{ paddingTop: safeTop ? safeTop + 8 : undefined }}
     >
         <div className={`mx-auto flex w-full max-w-5xl px-5 py-3 ${isMobile ? 'flex-col gap-3' : 'items-center justify-between gap-6'}`}>
@@ -41,7 +41,7 @@ const ConflictBanner = ({
                 </button>
                 <button
                     onClick={onKeepLocal}
-                    className="rounded-full bg-gradient-to-r from-sky-500 to-blue-500 px-3.5 py-1.5 text-[12px] font-medium text-white transition hover:brightness-105 active:scale-[0.97]"
+                    className="rounded-full bg-sky-600 px-3.5 py-1.5 text-[12px] font-medium text-white transition hover:bg-sky-500 active:scale-[0.97] dark:bg-sky-500 dark:hover:bg-sky-400"
                 >
                     {t('inspiration.keepLocal')}
                 </button>
