@@ -1,26 +1,12 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { Search, Plus, Trash2, FileText, ArrowLeft, Settings2, X } from 'lucide-react';
+import { Search, Plus, Trash2, FileText, ArrowLeft, X } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { toast } from 'sonner';
 import { useTranslation } from '../../../i18n';
 import WritingCategoryManager from './WritingCategoryManager';
+import WritingCategorySelector from './WritingCategorySelector';
 import { stripMarkup } from './editorUtils';
-
-const DEFAULT_WRITING_CATEGORY_LABELS = {
-    draft: 'Draft',
-    plot: 'Plot',
-    character: 'Character',
-    world: 'World',
-    final: 'Final',
-};
-
-const DEFAULT_WRITING_CATEGORY_I18N_KEYS = {
-    draft: 'writing.categoryDraft',
-    plot: 'writing.categoryPlot',
-    character: 'writing.categoryCharacter',
-    world: 'writing.categoryWorld',
-    final: 'writing.categoryFinal',
-};
+import { resolveWritingCategoryLabel } from './writingCategoryUtils';
 
 const formatDocTime = (timestamp) => {
     if (!timestamp) return '';
@@ -30,16 +16,6 @@ const formatDocTime = (timestamp) => {
         hour: '2-digit',
         minute: '2-digit'
     });
-};
-
-const resolveCategoryLabel = (category, t) => {
-    if (!category) return t('common.noData');
-    const key = DEFAULT_WRITING_CATEGORY_I18N_KEYS[category.id];
-    const defaultLabel = DEFAULT_WRITING_CATEGORY_LABELS[category.id];
-    if (key && (!category.label || category.label === defaultLabel)) {
-        return t(key, defaultLabel);
-    }
-    return category.label || t('common.noData');
 };
 
 const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, categories, defaultCategoryId, t }) => {
@@ -160,7 +136,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, categ
                 <div className="mt-2.5 flex items-center justify-between">
                     <span className="inline-flex items-center gap-1 rounded-full border border-sky-100 bg-sky-50 px-2 py-0.5 text-[10px] text-sky-600 dark:border-sky-900/40 dark:bg-sky-900/20 dark:text-sky-400">
                         <span className={`h-1.5 w-1.5 rounded-full ${category?.dotColor || 'bg-sky-400'}`} />
-                        {resolveCategoryLabel(category, t)}
+                        {resolveWritingCategoryLabel(category, t, t('common.noData'))}
                     </span>
                 </div>
             </motion.div>
@@ -288,9 +264,6 @@ const WritingSidebar = ({
         );
     };
 
-    const selectedCategoryInfo = categories.find((category) => category.id === selectedCategory) || categories[0];
-    const shouldCompactCategoryBar = categories.length > 6;
-
     return (
         <div className="flex h-full flex-col bg-white dark:bg-slate-900">
             {isMobile && <div className="pt-safe" />}
@@ -373,59 +346,13 @@ const WritingSidebar = ({
                     )}
                 </div>
 
-                <div className="relative z-20 mt-5 flex items-center gap-2 px-1">
-                    <div className="group/selector flex min-w-0 flex-1 items-center rounded-full border border-sky-100 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        {!shouldCompactCategoryBar && (
-                            <div className="relative mr-1 flex h-8 min-w-[60px] max-w-[112px] shrink-0 items-center justify-center overflow-hidden border-r border-sky-200/50 px-3 dark:border-slate-700/50">
-                                <AnimatePresence mode="wait" initial={false}>
-                                    <motion.span
-                                        key={selectedCategory || 'none'}
-                                        initial={{ y: 20, opacity: 0 }}
-                                        animate={{ y: 0, opacity: 1 }}
-                                        exit={{ y: -20, opacity: 0 }}
-                                        transition={{ duration: 0.2, ease: 'easeOut' }}
-                                        className={`line-clamp-1 text-xs font-medium ${selectedCategoryInfo?.textColor || 'text-slate-600 dark:text-slate-300'}`}
-                                    >
-                                        {resolveCategoryLabel(selectedCategoryInfo, t)}
-                                    </motion.span>
-                                </AnimatePresence>
-                            </div>
-                        )}
-
-                        <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1 overflow-x-auto pl-0.5 pr-1">
-                            {categories.map((category) => (
-                                <button
-                                    key={category.id}
-                                    onClick={() => setSelectedCategory(category.id)}
-                                    className="group/dot relative flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-all duration-300"
-                                    title={resolveCategoryLabel(category, t)}
-                                >
-                                    {selectedCategory === category.id && (
-                                        <motion.div
-                                            layoutId="writingActiveCategory"
-                                            className="absolute inset-0 rounded-full border border-sky-100 bg-white shadow-sm dark:border-slate-600 dark:bg-slate-700"
-                                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                                        />
-                                    )}
-                                    <div
-                                        className={`relative z-10 h-2.5 w-2.5 rounded-full transition-all duration-300 ${category.dotColor} ${selectedCategory === category.id
-                                            ? 'scale-110'
-                                            : 'opacity-40 group-hover/dot:scale-110 group-hover/dot:opacity-100'
-                                            }`}
-                                    />
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={() => setCategoryManagerOpen(true)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-100 bg-white text-slate-400 transition hover:border-sky-200 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-sky-400"
-                        title="管理分类"
-                    >
-                        <Settings2 size={15} />
-                    </button>
-                </div>
+                <WritingCategorySelector
+                    categories={categories}
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={setSelectedCategory}
+                    onOpenManager={() => setCategoryManagerOpen(true)}
+                    t={t}
+                />
             </header>
 
             <div className="custom-scrollbar flex-1 overflow-y-auto px-3 py-4">

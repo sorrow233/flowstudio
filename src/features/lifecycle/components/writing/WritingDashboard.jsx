@@ -12,32 +12,7 @@ import {
 } from 'lucide-react';
 import { WRITING_CATEGORIES } from '../../../../utils/constants';
 import { stripMarkup, computeWordCount } from './editorUtils';
-
-const DEFAULT_WRITING_CATEGORY_LABELS = {
-    draft: 'Draft',
-    plot: 'Plot',
-    character: 'Character',
-    world: 'World',
-    final: 'Final',
-};
-
-const DEFAULT_WRITING_CATEGORY_I18N_KEYS = {
-    draft: 'writing.categoryDraft',
-    plot: 'writing.categoryPlot',
-    character: 'writing.categoryCharacter',
-    world: 'writing.categoryWorld',
-    final: 'writing.categoryFinal',
-};
-
-const resolveCategoryLabel = (category, t) => {
-    if (!category) return '';
-    const key = DEFAULT_WRITING_CATEGORY_I18N_KEYS[category.id];
-    const defaultLabel = DEFAULT_WRITING_CATEGORY_LABELS[category.id];
-    if (key && (!category.label || category.label === defaultLabel)) {
-        return t(key, defaultLabel);
-    }
-    return category.label || '';
-};
+import { resolveWritingCategoryLabel } from './writingCategoryUtils';
 
 const WritingDashboard = ({
     onCreate,
@@ -211,7 +186,7 @@ const WritingDashboard = ({
                                             {stripMarkup(doc.content || '') || t('inspiration.placeholder')}
                                         </p>
                                         <p className="mt-2 text-[10px] text-slate-400">
-                                            {resolveCategoryLabel(category, t)}
+                                            {resolveWritingCategoryLabel(category, t, '')}
                                         </p>
                                     </motion.button>
                                 );

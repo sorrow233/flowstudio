@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Plus, Trash2, Check, Edit2 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
+import { resolveWritingCategoryLabel } from './writingCategoryUtils';
 
 const COLOR_PRESETS = [
     { id: 'stone', color: 'bg-stone-400', dotColor: 'bg-stone-400', textColor: 'text-stone-400' },
@@ -26,29 +27,6 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
     const [newLabel, setNewLabel] = useState('');
     const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
-    const defaultLabelMap = {
-        draft: 'Draft',
-        plot: 'Plot',
-        character: 'Character',
-        world: 'World',
-        final: 'Final',
-    };
-    const defaultKeyMap = {
-        draft: 'writing.categoryDraft',
-        plot: 'writing.categoryPlot',
-        character: 'writing.categoryCharacter',
-        world: 'writing.categoryWorld',
-        final: 'writing.categoryFinal',
-    };
-    const resolveCategoryLabel = (category) => {
-        const key = defaultKeyMap[category?.id];
-        const defaultLabel = defaultLabelMap[category?.id];
-        if (key && (!category?.label || category.label === defaultLabel)) {
-            return t(key, defaultLabel);
-        }
-        return category?.label || t('common.noData');
-    };
-
     const usedColorSet = useMemo(() => new Set(categories.map((cat) => cat.color)), [categories]);
 
     const normalizedCategories = categories.map((cat) => {
@@ -58,7 +36,7 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
 
     const startEdit = (category) => {
         setEditingId(category.id);
-        setEditLabel(resolveCategoryLabel(category));
+        setEditLabel(resolveWritingCategoryLabel(category, t, t('common.noData')));
         setDeleteConfirmId(null);
     };
 
@@ -135,7 +113,7 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
                                         ) : (
                                             <>
                                                 <span className={`h-2.5 w-2.5 rounded-full ${category.dotColor}`} />
-                                                <span className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-slate-200">{resolveCategoryLabel(category)}</span>
+                                                <span className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-slate-200">{resolveWritingCategoryLabel(category, t, t('common.noData'))}</span>
                                                 <button
                                                     onClick={() => startEdit(category)}
                                                     className="rounded p-1.5 text-slate-400 transition hover:bg-sky-50 hover:text-sky-600 dark:hover:bg-slate-800 dark:hover:text-sky-400"
