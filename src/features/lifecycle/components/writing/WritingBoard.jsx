@@ -12,6 +12,17 @@ import WritingDashboard from './WritingDashboard';
 import WritingWorkspaceHeader from './WritingWorkspaceHeader';
 import { stripMarkup } from './editorUtils';
 
+const detectCompactLayout = () => {
+    if (typeof window === 'undefined') return false;
+    const width = window.innerWidth;
+    const isCoarsePointer = typeof window.matchMedia === 'function'
+        ? window.matchMedia('(pointer: coarse)').matches
+        : false;
+
+    // iOS Safari 在“桌面网站”模式下可能给出较大宽度，这里优先按触控设备走紧凑布局。
+    return width < 1024 || (isCoarsePointer && width < 1366);
+};
+
 const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDelete, syncStatus }) => {
     const { doc, immediateSync, status } = useSync();
     const { t } = useTranslation();
@@ -81,14 +92,14 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     });
 
     const [selectedDocId, setSelectedDocId] = useState(null);
-    const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 1024 : false));
-    const [isSidebarOpen, setIsSidebarOpen] = useState(() => (typeof window !== 'undefined' ? window.innerWidth >= 1024 : true));
+    const [isMobile, setIsMobile] = useState(() => detectCompactLayout());
+    const [isSidebarOpen, setIsSidebarOpen] = useState(() => !detectCompactLayout());
     const [selectedCategory, setSelectedCategory] = useState(() => categories[0]?.id || null);
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const handleResize = () => {
-            const mobile = window.innerWidth < 1024;
+            const mobile = detectCompactLayout();
             setIsMobile(mobile);
             if (!mobile) {
                 setIsSidebarOpen(true);

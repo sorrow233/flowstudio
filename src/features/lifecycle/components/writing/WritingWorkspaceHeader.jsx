@@ -28,13 +28,13 @@ const WritingWorkspaceHeader = ({
     }, [searchQuery, isSearchOpen]);
 
     return (
-        <header className="relative z-20 border-b border-sky-100/50 bg-white px-4 pb-4 pt-4 dark:border-slate-800/60 dark:bg-slate-900 md:px-6 md:pt-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
+        <header className={`relative z-20 border-b border-sky-100/50 bg-white dark:border-slate-800/60 dark:bg-slate-900 ${isMobile ? 'px-4 pb-3 pt-3' : 'px-4 pb-4 pt-4 md:px-6 md:pt-6'}`}>
+            <div className={`flex flex-col ${isMobile ? 'gap-3' : 'gap-4'} md:flex-row md:items-end md:justify-between md:gap-6`}>
                 <div className="min-w-0 flex-1">
-                    <h2 className="line-clamp-1 text-[2rem] font-bold tracking-tight text-slate-800 dark:text-slate-100 md:text-[2.15rem]">
+                    <h2 className={`line-clamp-1 font-bold tracking-tight text-slate-800 dark:text-slate-100 ${isMobile ? 'text-[1.85rem]' : 'text-[2rem] md:text-[2.15rem]'}`}>
                         {t('inspiration.writing')}
                     </h2>
-                    <p className="mt-1 line-clamp-1 text-sm font-medium text-slate-400 dark:text-slate-500">
+                    <p className={`mt-1 line-clamp-1 font-medium text-slate-400 dark:text-slate-500 ${isMobile ? 'text-[13px]' : 'text-sm'}`}>
                         {t('inspiration.writingSubtitle')}
                     </p>
                 </div>

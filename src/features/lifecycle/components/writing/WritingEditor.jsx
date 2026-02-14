@@ -486,7 +486,7 @@ const WritingEditor = ({
                     </div>
 
                     {/* Title */}
-                    <div className="mt-9">
+                    <div className={`${isMobile ? 'mt-8' : 'mt-11'}`}>
                         <input
                             type="text"
                             value={title}
