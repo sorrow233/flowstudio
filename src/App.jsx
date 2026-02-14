@@ -31,7 +31,7 @@ function App() {
         <ThemeProvider>
             <LanguageProvider>
                 <KeymapProvider>
-                    <div className={`flex flex-col h-screen overflow-hidden bg-gray-50/50 dark:bg-gray-950 ${isIOSStandalone ? 'ios-standalone' : ''}`}>
+                    <div className={`flex flex-col h-screen min-h-dvh h-dvh overflow-hidden bg-gray-50/50 dark:bg-gray-950 ${isIOSStandalone ? 'ios-standalone' : ''}`}>
                         <Toaster position="top-right" richColors />
                         <Navbar />
 
@@ -66,4 +66,3 @@ function App() {
 }
 
 export default App;
-

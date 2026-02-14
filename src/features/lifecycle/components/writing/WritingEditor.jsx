@@ -450,7 +450,7 @@ const WritingEditor = ({
 
             {/* Main scrollable area */}
             <div
-                className="relative z-10 flex-1 overflow-y-auto custom-scrollbar"
+                className="relative z-10 flex-1 overflow-y-auto custom-scrollbar touch-scroll overscroll-y-contain"
                 style={{ paddingTop: conflictState ? safeTop + 82 : safeTop + 16 }}
                 onClick={(e) => {
                     if (e.target === editorRef.current) return;

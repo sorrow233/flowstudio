@@ -247,6 +247,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                     onAddCategory={handleAddCategory}
                     onUpdateCategory={handleUpdateCategory}
                     onRemoveCategory={handleRemoveCategory}
+                    isMobile={isMobile}
                 />
 
                 <div className="relative flex min-h-0 flex-1">
@@ -259,7 +260,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
                                         onClick={() => setIsSidebarOpen(false)}
-                                        className="fixed inset-0 z-40 bg-slate-900/35 lg:hidden"
+                                        className="absolute inset-0 z-40 bg-slate-900/35 lg:hidden"
                                     />
                                 )}
 
@@ -276,7 +277,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                     className={[
                                         'relative z-50 h-full flex-shrink-0 border-r border-sky-100 bg-white dark:border-slate-800 dark:bg-slate-900',
                                         isMobile
-                                            ? 'fixed inset-y-0 left-0 w-[84vw] max-w-[360px]'
+                                            ? 'absolute inset-y-0 left-0 w-[84vw] max-w-[360px]'
                                             : 'overflow-hidden'
                                     ].join(' ')}
                                 >
@@ -285,6 +286,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                             documents={visibleDocuments}
                                             allDocumentsCount={documents.length}
                                             categories={categories}
+                                            isMobile={isMobile}
                                             activeDocId={selectedDocId}
                                             onSelectDoc={(id) => {
                                                 setSelectedDocId(id);

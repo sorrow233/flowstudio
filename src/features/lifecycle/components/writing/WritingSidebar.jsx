@@ -151,7 +151,8 @@ const WritingSidebar = ({
     onUpdate,
     onDelete,
     onRestore,
-    allDocumentsCount = 0
+    allDocumentsCount = 0,
+    isMobile = false
 }) => {
     const { t } = useTranslation();
     const defaultCategoryId = categories[0]?.id || null;
@@ -222,7 +223,10 @@ const WritingSidebar = ({
 
     return (
         <div className="flex h-full flex-col bg-white dark:bg-slate-900">
-            <div className="custom-scrollbar flex-1 overflow-y-auto px-3 py-4">
+            <div
+                className="custom-scrollbar touch-scroll flex-1 overflow-y-auto px-3 py-4"
+                style={isMobile ? { paddingBottom: 'max(16px, env(safe-area-inset-bottom, 0px))' } : undefined}
+            >
                 {documents.length === 0 ? (
                     <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-sky-300">
                         <FileText size={34} strokeWidth={1.4} />

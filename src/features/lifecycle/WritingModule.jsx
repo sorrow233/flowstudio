@@ -33,7 +33,7 @@ const WritingModule = () => {
     };
 
     return (
-        <div className="relative h-[calc(100vh-80px)] overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-[0_24px_55px_-38px_rgba(15,23,42,0.55)] dark:border-gray-800 dark:bg-gray-900">
+        <div className="relative h-full min-h-0 overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-[0_24px_55px_-38px_rgba(15,23,42,0.55)] dark:border-gray-800 dark:bg-gray-900 md:rounded-[28px]">
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
                 <div className="absolute inset-0 bg-white dark:bg-slate-900" />
                 <div className="absolute -top-24 left-10 h-72 w-72 rounded-full bg-rose-200/30 blur-3xl dark:bg-rose-500/10" />

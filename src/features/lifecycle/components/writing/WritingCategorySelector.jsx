@@ -8,10 +8,10 @@ const WritingCategorySelector = ({
     selectedCategory,
     onSelectCategory,
     onOpenManager,
+    isMobile = false,
     t,
 }) => {
     const selectedCategoryInfo = categories.find((category) => category.id === selectedCategory) || categories[0];
-    const shouldCompactCategoryBar = categories.length > 6;
     const managerTitle = t('writing.manageCategories', '管理分类');
 
     if (categories.length === 0) {
@@ -19,32 +19,34 @@ const WritingCategorySelector = ({
     }
 
     return (
-        <div className="relative z-20 flex items-center gap-2">
+        <div className={`relative z-20 flex items-center gap-2 ${isMobile ? 'w-full' : ''}`}>
             <button
                 onClick={onOpenManager}
-                className="group inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200/60 bg-white/80 text-slate-400 shadow-sm backdrop-blur-sm transition-all hover:border-slate-300 hover:bg-white hover:text-slate-600 dark:border-slate-700/50 dark:bg-slate-800/80 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                className={`group inline-flex shrink-0 items-center justify-center rounded-full border border-slate-200/60 bg-white/80 text-slate-400 shadow-sm backdrop-blur-sm transition-all hover:border-slate-300 hover:bg-white hover:text-slate-600 dark:border-slate-700/50 dark:bg-slate-800/80 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200 ${isMobile ? 'h-9 w-9' : 'h-10 w-10'}`}
                 title={managerTitle}
             >
                 <ListChecks size={14} className="transition-transform group-hover:scale-110" />
             </button>
 
             <div className="flex min-w-0 flex-1 items-center rounded-xl border border-slate-200/60 bg-white/80 p-1 shadow-sm transition-colors dark:border-slate-700/50 dark:bg-slate-800/80">
-                <div className="relative mr-1.5 flex h-8 min-w-[72px] max-w-[120px] shrink-0 items-center justify-center overflow-hidden border-r border-slate-200/60 px-3 dark:border-slate-700/50">
-                    <AnimatePresence mode="wait" initial={false}>
-                        <motion.span
-                            key={selectedCategory || 'none'}
-                            initial={{ y: 12, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: -12, opacity: 0 }}
-                            transition={{ duration: 0.2, ease: 'easeOut' }}
-                            className={`line-clamp-1 text-xs font-bold tracking-tight ${selectedCategoryInfo?.textColor || 'text-slate-600 dark:text-slate-300'}`}
-                        >
-                            {resolveWritingCategoryLabel(selectedCategoryInfo, t, t('common.noData'))}
-                        </motion.span>
-                    </AnimatePresence>
-                </div>
+                {!isMobile && (
+                    <div className="relative mr-1.5 flex h-8 min-w-[72px] max-w-[120px] shrink-0 items-center justify-center overflow-hidden border-r border-slate-200/60 px-3 dark:border-slate-700/50">
+                        <AnimatePresence mode="wait" initial={false}>
+                            <motion.span
+                                key={selectedCategory || 'none'}
+                                initial={{ y: 12, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: -12, opacity: 0 }}
+                                transition={{ duration: 0.2, ease: 'easeOut' }}
+                                className={`line-clamp-1 text-xs font-bold tracking-tight ${selectedCategoryInfo?.textColor || 'text-slate-600 dark:text-slate-300'}`}
+                            >
+                                {resolveWritingCategoryLabel(selectedCategoryInfo, t, t('common.noData'))}
+                            </motion.span>
+                        </AnimatePresence>
+                    </div>
+                )}
 
-                <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1 overflow-x-auto pl-0.5 pr-1">
+                <div className={`no-scrollbar flex min-w-0 flex-1 items-center gap-1 overflow-x-auto ${isMobile ? 'px-1' : 'pl-0.5 pr-1'}`}>
                     {categories.map((category) => (
                         <button
                             key={category.id}
@@ -69,13 +71,15 @@ const WritingCategorySelector = ({
                     ))}
                 </div>
 
-                <button
-                    onClick={onOpenManager}
-                    className="ml-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
-                    title={managerTitle}
-                >
-                    <Settings2 size={13} />
-                </button>
+                {!isMobile && (
+                    <button
+                        onClick={onOpenManager}
+                        className="ml-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        title={managerTitle}
+                    >
+                        <Settings2 size={13} />
+                    </button>
+                )}
             </div>
         </div>
     );
