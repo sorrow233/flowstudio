@@ -240,7 +240,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     };
 
     return (
-        <div className={`relative flex h-full w-full overflow-hidden ${isMobile ? 'rounded-2xl' : 'rounded-[26px]'}`}>
+        <div className={`relative flex h-full w-full overflow-hidden ${isMobile ? 'rounded-none' : 'rounded-[26px]'}`}>
             <div className="pointer-events-none absolute inset-0">
                 <div className="absolute inset-0 bg-white dark:bg-slate-900" />
                 <div className={`absolute left-12 h-72 w-72 rounded-full bg-sky-200/35 blur-3xl dark:bg-sky-900/20 ${isMobile ? '-top-32' : '-top-24'}`} />
