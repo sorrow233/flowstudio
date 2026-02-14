@@ -289,6 +289,7 @@ const WritingSidebar = ({
     };
 
     const selectedCategoryInfo = categories.find((category) => category.id === selectedCategory) || categories[0];
+    const shouldCompactCategoryBar = categories.length > 6;
 
     return (
         <div className="flex h-full flex-col bg-white dark:bg-slate-900">
@@ -374,22 +375,24 @@ const WritingSidebar = ({
 
                 <div className="relative z-20 mt-5 flex items-center gap-2 px-1">
                     <div className="group/selector flex min-w-0 flex-1 items-center rounded-full border border-sky-100 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <div className="relative mr-1 flex h-8 min-w-[60px] shrink-0 items-center justify-center overflow-hidden border-r border-sky-200/50 px-3 dark:border-slate-700/50">
-                            <AnimatePresence mode="wait" initial={false}>
-                                <motion.span
-                                    key={selectedCategory || 'none'}
-                                    initial={{ y: 20, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    exit={{ y: -20, opacity: 0 }}
-                                    transition={{ duration: 0.2, ease: 'easeOut' }}
-                                    className={`text-xs font-medium ${selectedCategoryInfo?.textColor || 'text-slate-600 dark:text-slate-300'}`}
-                                >
-                                    {resolveCategoryLabel(selectedCategoryInfo, t)}
-                                </motion.span>
-                            </AnimatePresence>
-                        </div>
+                        {!shouldCompactCategoryBar && (
+                            <div className="relative mr-1 flex h-8 min-w-[60px] max-w-[112px] shrink-0 items-center justify-center overflow-hidden border-r border-sky-200/50 px-3 dark:border-slate-700/50">
+                                <AnimatePresence mode="wait" initial={false}>
+                                    <motion.span
+                                        key={selectedCategory || 'none'}
+                                        initial={{ y: 20, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        exit={{ y: -20, opacity: 0 }}
+                                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                                        className={`line-clamp-1 text-xs font-medium ${selectedCategoryInfo?.textColor || 'text-slate-600 dark:text-slate-300'}`}
+                                    >
+                                        {resolveCategoryLabel(selectedCategoryInfo, t)}
+                                    </motion.span>
+                                </AnimatePresence>
+                            </div>
+                        )}
 
-                        <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1 overflow-x-auto pr-1">
+                        <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1 overflow-x-auto pl-0.5 pr-1">
                             {categories.map((category) => (
                                 <button
                                     key={category.id}
