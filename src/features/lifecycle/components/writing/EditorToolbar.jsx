@@ -1,5 +1,5 @@
 import React from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
     PanelLeftClose,
     PanelLeftOpen,
@@ -12,7 +12,7 @@ const IconBtn = ({ onClick, disabled, title, children, active, className = '' })
         onClick={onClick}
         disabled={disabled}
         title={title}
-        className={`inline-flex h-9 w-9 items-center justify-center rounded-xl transition-all ${disabled
+        className={`inline-flex h-9 w-9 items-center justify-center rounded-xl transition-all active:scale-95 ${disabled
             ? 'cursor-not-allowed text-sky-200 dark:text-slate-700'
             : active
                 ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400'
@@ -48,7 +48,18 @@ const EditorToolbar = ({
     <div className="flex items-center justify-between gap-3 rounded-2xl border border-sky-100 bg-white px-3 py-2 shadow-[0_8px_24px_-16px_rgba(37,99,235,0.45)] dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
         <div className="flex items-center gap-2">
             <IconBtn onClick={onToggleSidebar} title={t('inspiration.toggleSidebar')}>
-                {isSidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
+                <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                        key={isSidebarOpen ? 'close' : 'open'}
+                        initial={{ opacity: 0, rotate: -20, scale: 0.8 }}
+                        animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                        exit={{ opacity: 0, rotate: 20, scale: 0.8 }}
+                        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                        className="flex items-center justify-center"
+                    >
+                        {isSidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
+                    </motion.div>
+                </AnimatePresence>
             </IconBtn>
 
             <div className="flex items-center gap-1.5 rounded-full border border-sky-100 bg-sky-50/80 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-sky-700/80 dark:border-slate-800 dark:bg-slate-800/50 dark:text-sky-400/80">
