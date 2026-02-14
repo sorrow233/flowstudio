@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { format, isSameDay, isSameWeek, isSameMonth, subDays, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval } from 'date-fns';
 
-export const useDataCenterStats = (allProjects, allCommands, writingDocs = [], writingContent = {}) => {
+export const useDataCenterStats = (allProjects, allCommands) => {
     return useMemo(() => {
         let totalChars = 0;
         let inspirationCount = 0;
@@ -36,16 +36,7 @@ export const useDataCenterStats = (allProjects, allCommands, writingDocs = [], w
             if (now - timestamp < oneWeek) thisWeekChars += itemChars;
         });
 
-        writingDocs?.forEach((meta) => {
-            const markdown = writingContent?.[meta.id] || '';
-            const itemChars = markdown.length;
-            totalChars += itemChars;
-            writingDocCount += 1;
 
-            const timestamp = meta.updatedAt || meta.createdAt || 0;
-            if (now - timestamp < oneDay) todayChars += itemChars;
-            if (now - timestamp < oneWeek) thisWeekChars += itemChars;
-        });
 
         return {
             totalChars,
@@ -57,13 +48,13 @@ export const useDataCenterStats = (allProjects, allCommands, writingDocs = [], w
             writingDocCount,
             blueprintCount: pendingProjectCount + instructionCount
         };
-    }, [allProjects, allCommands, writingDocs, writingContent]);
+    }, [allProjects, allCommands]);
 };
 
-export const useChartData = (allProjects, allCommands, writingDocs = [], writingContent = {}) => {
+export const useChartData = (allProjects, allCommands) => {
     return useMemo(() => {
         const now = new Date();
-        const getStatsForInterval = (projects, commands, writingEntries, intervalStart, type) => {
+        const getStatsForInterval = (projects, commands, intervalStart, type) => {
             const result = { words: 0, inspirations: 0 };
             projects?.forEach(item => {
                 const ts = new Date(item.timestamp || item.createdAt || 0);
@@ -85,32 +76,25 @@ export const useChartData = (allProjects, allCommands, writingDocs = [], writing
                 else if (type === 'month') match = isSameMonth(ts, intervalStart);
                 if (match) result.words += (item.content?.length || 0) + (item.title?.length || 0);
             });
-            writingEntries?.forEach((item) => {
-                const ts = new Date(item.updatedAt || item.createdAt || 0);
-                let match = false;
-                if (type === 'day') match = isSameDay(ts, intervalStart);
-                else if (type === 'week') match = isSameWeek(ts, intervalStart);
-                else if (type === 'month') match = isSameMonth(ts, intervalStart);
-                if (match) result.words += (writingContent?.[item.id]?.length || 0);
-            });
+
             return result;
         };
 
         const daily = eachDayOfInterval({ start: subDays(now, 13), end: now }).map(d => {
-            const s = getStatsForInterval(allProjects, allCommands, writingDocs, d, 'day');
+            const s = getStatsForInterval(allProjects, allCommands, d, 'day');
             return { label: format(d, 'MM/dd'), value: s.words, inspirations: s.inspirations };
         });
 
         const weekly = eachWeekOfInterval({ start: subDays(now, 7 * 7), end: now }, { weekStartsOn: 1 }).map(w => {
-            const s = getStatsForInterval(allProjects, allCommands, writingDocs, w, 'week');
+            const s = getStatsForInterval(allProjects, allCommands, w, 'week');
             return { label: format(w, 'MM/dd'), value: s.words, inspirations: s.inspirations };
         });
 
         const monthly = eachMonthOfInterval({ start: subDays(now, 30 * 5), end: now }).map(m => {
-            const s = getStatsForInterval(allProjects, allCommands, writingDocs, m, 'month');
+            const s = getStatsForInterval(allProjects, allCommands, m, 'month');
             return { label: format(m, 'MMM'), value: s.words, inspirations: s.inspirations };
         });
 
         return { daily, weekly, monthly };
-    }, [allProjects, allCommands, writingDocs, writingContent]);
+    }, [allProjects, allCommands]);
 };

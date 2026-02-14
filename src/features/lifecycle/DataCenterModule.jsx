@@ -23,42 +23,20 @@ const DataCenterModule = () => {
     const { doc } = useSync();
     const { t } = useTranslation();
     const [showChart, setShowChart] = useState(false);
-    const [writingContentVersion, setWritingContentVersion] = useState(0);
+
 
     // Fetch all data sources
     const { projects: allProjects } = useSyncedProjects(doc, 'all_projects');
     const { projects: allCommands } = useSyncedProjects(doc, 'all_commands');
-    const { projects: writingDocs } = useSyncedProjects(doc, 'writing_docs');
 
-    useEffect(() => {
-        if (!doc) return undefined;
 
-        const yWritingContent = doc.getMap('writing_content');
-        const handleChange = () => setWritingContentVersion((value) => value + 1);
 
-        yWritingContent.observe(handleChange);
-        return () => {
-            yWritingContent.unobserve(handleChange);
-        };
-    }, [doc]);
 
-    const writingContent = useMemo(() => {
-        if (!doc) return {};
-        const yWritingContent = doc.getMap('writing_content');
-        const output = {};
-        yWritingContent.forEach((value, key) => {
-            if (value instanceof Y.Text) {
-                output[key] = value.toString();
-            } else if (typeof value === 'string') {
-                output[key] = value;
-            }
-        });
-        return output;
-    }, [doc, writingContentVersion]);
+
 
     // Use hooks for logic
-    const stats = useDataCenterStats(allProjects, allCommands, writingDocs, writingContent);
-    const chartData = useChartData(allProjects, allCommands, writingDocs, writingContent);
+    const stats = useDataCenterStats(allProjects, allCommands);
+    const chartData = useChartData(allProjects, allCommands);
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -188,20 +166,7 @@ const DataCenterModule = () => {
                         </div>
                     </motion.div>
 
-                    {/* 写作文档 */}
-                    <motion.div variants={cardVariants}>
-                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 md:p-5 text-center hover:border-blue-200 dark:hover:border-blue-800/50 transition-all duration-300 hover:shadow-sm">
-                            <div className="mx-auto mb-3 w-10 h-10 flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                                <PenTool className="w-4 h-4 text-blue-500" />
-                            </div>
-                            <div className="text-2xl md:text-3xl font-light text-blue-500 dark:text-blue-400 mb-1">
-                                {stats.writingDocCount}
-                            </div>
-                            <div className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 font-light uppercase tracking-wider">
-                                {t('navbar.writing')}
-                            </div>
-                        </div>
-                    </motion.div>
+
                 </div>
             </motion.div>
 

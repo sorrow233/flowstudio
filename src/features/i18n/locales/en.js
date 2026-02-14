@@ -3,7 +3,7 @@ export default {
     // Navigation
     navbar: {
         inspiration: 'Inspiration',
-        writing: 'Writing',
+
         pending: 'Sprout',
         primary: 'Flow',
         advanced: 'Advanced',
@@ -68,13 +68,7 @@ export default {
         emptyState: 'No inspirations yet, record your first idea',
         ideaDeleted: 'Idea deleted',
         cmdEnter: 'CMD + ENTER',
-        // New Writing Module
-        newDoc: 'New Writing',
-        deleteConfirm: 'Are you sure you want to delete this?',
-        noDocs: 'No documents',
-        search: 'Search...',
-        untitled: 'Untitled',
-        toggleSidebar: 'Toggle Sidebar',
+
         timeGroup: {
             today: 'Today',
             yesterday: 'Yesterday',
@@ -107,42 +101,7 @@ export default {
         restore: 'Restore',
     },
 
-    writing: {
-        library: 'Library',
-        documents: 'Documents',
-        search: 'Search documents...',
-        untitled: 'Untitled',
-        placeholder: 'Start writing...',
-        emptyDocs: 'No documents in this folder',
-        emptySelection: 'Select a document to start writing',
-        system: {
-            all: 'All',
-            inbox: 'Inbox',
-            trash: 'Trash',
-        },
-        status: {
-            syncing: 'Syncing',
-            synced: 'Synced',
-            offline: 'Offline',
-        },
-        stats: {
-            words: 'words',
-            chars: 'chars',
-        },
-        actions: {
-            newDoc: 'New doc',
-            newFolder: 'New folder',
-            createFolder: 'Create folder',
-            renameFolderPrompt: 'Rename folder',
-            deleteFolderConfirm: 'Delete this folder? Documents will be moved to Inbox.',
-            rename: 'Rename',
-            delete: 'Move to Trash',
-            restore: 'Restore',
-            collapse: 'Collapse',
-            expand: 'Expand',
-            syncNow: 'Sync',
-        },
-    },
+
 
     // Pending Module
     pending: {
