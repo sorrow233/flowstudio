@@ -4,7 +4,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ErrorBoundary from './components/ErrorBoundary';
 import InspirationModule from './features/lifecycle/InspirationModule';
-
+import WritingModule from './features/lifecycle/WritingModule';
 import InspirationArchiveModule from './features/lifecycle/InspirationArchiveModule';
 import PendingModule from './features/lifecycle/PendingModule';
 import PrimaryDevModule from './features/lifecycle/PrimaryDevModule';
@@ -13,8 +13,6 @@ import CommandCenterModule from './features/blueprint/CommandCenterModule';
 import DataCenterModule from './features/lifecycle/DataCenterModule';
 import ShareViewPage from './features/share/components/ShareViewPage';
 import ShareReceiver from './features/share/ShareReceiver';
-import WritingBetaPage from './features/writing-beta/WritingBetaPage';
-import WritingBetaV3Page from './features/writing-beta-v3/WritingBetaV3Page';
 
 import { Toaster } from 'sonner';
 import { KeymapProvider, ShortcutHelpModal, useBrowserIntercept } from './features/shortcuts';
@@ -43,16 +41,13 @@ function App() {
                                     <Routes location={location} key={location.pathname}>
                                         <Route path="/" element={<Navigate to="/inspiration" replace />} />
                                         <Route path="/inspiration" element={<InspirationModule />} />
-
+                                        <Route path="/writing" element={<WritingModule />} />
                                         <Route path="/inspiration/archive" element={<InspirationArchiveModule />} />
                                         <Route path="/sprout" element={<PendingModule />} />
                                         <Route path="/flow" element={<PrimaryDevModule />} />
                                         <Route path="/advanced" element={<AdvancedDevModule />} />
                                         <Route path="/blueprint" element={<CommandCenterModule />} />
                                         <Route path="/data" element={<DataCenterModule />} />
-                                        <Route path="/beta写作" element={<WritingBetaPage />} />
-                                        <Route path="/beta-writing-3" element={<WritingBetaV3Page />} />
-                                        <Route path="/beta写作3" element={<Navigate to="/beta-writing-3" replace />} />
                                         <Route path="/share/:id" element={<ShareViewPage />} />
                                         <Route path="/share-receiver" element={<ShareReceiver />} />
                                         <Route path="*" element={<Navigate to="/" replace />} />
@@ -71,3 +66,4 @@ function App() {
 }
 
 export default App;
+

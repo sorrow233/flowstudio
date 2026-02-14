@@ -3,7 +3,7 @@ export default {
     // Navbar
     navbar: {
         inspiration: '인스피레이션',
-
+        writing: '글쓰기',
         pending: '새싹',
         primary: '플로우',
         advanced: '고급',
@@ -60,12 +60,20 @@ export default {
         subtitle: '순간의 영감을 포착하여 미래를 위해 축적하세요.',
         placeholder: '떠오르는 아이디어를 기록하세요...',
         emptyState: '영감이 없습니다. 첫 번째 아이디어를 기록해 보세요.',
-
+        writing: '글쓰기',
+        writingSubtitle: '몰입형 창작, 완전한 생각을 기록하세요',
+        totalDocs: '문서',
         placeholder: '떠오르는 아이디어를 기록하세요...',
         emptyState: '영감이 없습니다. 첫 번째 아이디어를 기록해 보세요.',
         ideaDeleted: '영감이 삭제되었습니다',
         cmdEnter: 'CMD + ENTER',
-
+        // New Writing Module
+        newDoc: '새 글쓰기',
+        deleteConfirm: '정말 삭제하시겠습니까?',
+        noDocs: '문서 없음',
+        search: '검색...',
+        untitled: '제목 없음',
+        toggleSidebar: '사이드바 토글',
         timeGroup: {
             today: '오늘',
             yesterday: '어제',
@@ -98,7 +106,42 @@ export default {
         restore: '복원',
     },
 
-
+    writing: {
+        library: '라이브러리',
+        documents: '문서',
+        search: '문서 검색...',
+        untitled: '제목 없음',
+        placeholder: '글쓰기를 시작하세요...',
+        emptyDocs: '이 폴더에 문서가 없습니다',
+        emptySelection: '문서를 선택해 작성 시작',
+        system: {
+            all: '전체',
+            inbox: '받은 편지함',
+            trash: '휴지통',
+        },
+        status: {
+            syncing: '동기화 중',
+            synced: '동기화됨',
+            offline: '오프라인',
+        },
+        stats: {
+            words: '단어',
+            chars: '글자',
+        },
+        actions: {
+            newDoc: '새 문서',
+            newFolder: '새 폴더',
+            createFolder: '폴더 만들기',
+            renameFolderPrompt: '폴더 이름 변경',
+            deleteFolderConfirm: '이 폴더를 삭제할까요? 문서는 받은 편지함으로 이동됩니다.',
+            rename: '이름 변경',
+            delete: '휴지통으로 이동',
+            restore: '복원',
+            collapse: '접기',
+            expand: '펼치기',
+            syncNow: '동기화',
+        },
+    },
 
     // Pending Module
     pending: {

@@ -668,6 +668,9 @@ var seoConfig = {
     return links;
   }
 };
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = seoConfig;
+}
 var seo_config_default = seoConfig;
 async function onRequest(context) {
   const request = context.request;

@@ -3,7 +3,7 @@ export default {
     // 导航栏
     navbar: {
         inspiration: '灵感',
-
+        writing: '写作',
         pending: '萌芽',
         primary: '心流',
         advanced: '进阶',
@@ -59,7 +59,10 @@ export default {
     inspiration: {
         title: '灵感',
         subtitle: '捕捉瞬时灵感，为未来积蓄能量。',
-
+        writing: '写作',
+        writing: '写作',
+        writingSubtitle: '在这里沉浸式创作，记录更完整的思绪',
+        totalDocs: '文档',
         placeholder: '记录一闪而过的念头...',
         addNote: '添加随记', // Add missing key
         emptyState: '暂无灵感，记录下第一个想法吧',
@@ -69,7 +72,13 @@ export default {
         archiveSubtitle: '暂存的灵感碎片，点击标题返回',
         emptyArchive: '存档箱是空的',
         cmdEnter: 'CMD + ENTER',
-
+        // New Writing Module
+        newDoc: '新建写作',
+        deleteConfirm: '确定要删除吗？',
+        noDocs: '暂无文档',
+        search: '搜索...',
+        untitled: '无标题',
+        toggleSidebar: '切换侧边栏',
         timeGroup: {
             today: '今天',
             yesterday: '昨天',
@@ -102,7 +111,42 @@ export default {
         restore: '恢复',
     },
 
-
+    writing: {
+        library: '资料库',
+        documents: '文档',
+        search: '搜索文档...',
+        untitled: '无标题',
+        placeholder: '开始写作...',
+        emptyDocs: '此文件夹暂无文档',
+        emptySelection: '选择一篇文档开始写作',
+        system: {
+            all: '全部',
+            inbox: '收件箱',
+            trash: '废纸篓',
+        },
+        status: {
+            syncing: '同步中',
+            synced: '已同步',
+            offline: '离线',
+        },
+        stats: {
+            words: '词',
+            chars: '字',
+        },
+        actions: {
+            newDoc: '新建文档',
+            newFolder: '新建文件夹',
+            createFolder: '创建文件夹',
+            renameFolderPrompt: '重命名文件夹',
+            deleteFolderConfirm: '删除该文件夹？文档将移动到收件箱。',
+            rename: '重命名',
+            delete: '移入废纸篓',
+            restore: '恢复',
+            collapse: '收起',
+            expand: '展开',
+            syncNow: '立即同步',
+        },
+    },
 
     // 待定模块 (Renamed to Sprouting/萌芽)
     pending: {

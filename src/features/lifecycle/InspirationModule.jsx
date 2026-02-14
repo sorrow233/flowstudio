@@ -1426,6 +1426,15 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                             </div>
                         </div>
 
+                        <button
+                            onClick={handleOpenCategoryTransfer}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/70 dark:bg-gray-900/70 border border-sky-100 dark:border-sky-800 text-sky-500 dark:text-sky-300 text-xs font-medium hover:bg-sky-50 dark:hover:bg-sky-900/25 transition-colors whitespace-nowrap"
+                            title="按分类导出并导入 AI 分类结果"
+                        >
+                            <Sparkles size={12} />
+                            AI一键分类
+                        </button>
+
                         {selectedCategory === 'todo' && showTodoAiHint && (
                             <div className="hidden md:flex items-center gap-1.5 text-[11px] text-blue-400 dark:text-blue-500 px-2">
                                 <Sparkles size={12} />
@@ -2261,7 +2270,6 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                 onAdd={addCategory}
                 onUpdate={updateCategory}
                 onRemove={removeCategory}
-                onOpenAiCategoryTransfer={handleOpenCategoryTransfer}
             />
         </div >
     );

@@ -3,7 +3,7 @@ export default {
     // Navbar
     navbar: {
         inspiration: 'インスピレーション',
-
+        writing: 'ライティング',
         pending: '萌芽',
         primary: 'フロー',
         advanced: '高度',
@@ -60,12 +60,20 @@ export default {
         subtitle: '瞬間のひらめきを捉え、未来のために蓄える。',
         placeholder: 'アイデアを記録...',
         emptyState: 'インスピレーションはまだありません。最初のアイデアを記録しましょう。',
-
+        writing: 'ライティング',
+        writingSubtitle: '没入型の創作、完全な思考を記録する',
+        totalDocs: 'ドキュメント',
         placeholder: 'アイデアを記録...',
         emptyState: 'インスピレーションはまだありません。最初のアイデアを記録しましょう。',
         ideaDeleted: 'インスピレーションを削除しました',
         cmdEnter: 'CMD + ENTER',
-
+        // New Writing Module
+        newDoc: '新規作成',
+        deleteConfirm: '削除してもよろしいですか？',
+        noDocs: 'ドキュメントなし',
+        search: '検索...',
+        untitled: '無題',
+        toggleSidebar: 'サイドバー切替',
         timeGroup: {
             today: '今日',
             yesterday: '昨日',
@@ -98,7 +106,42 @@ export default {
         restore: '復元',
     },
 
-
+    writing: {
+        library: 'ライブラリ',
+        documents: 'ドキュメント',
+        search: 'ドキュメントを検索...',
+        untitled: '無題',
+        placeholder: '書き始めましょう...',
+        emptyDocs: 'このフォルダにはドキュメントがありません',
+        emptySelection: 'ドキュメントを選択して執筆を開始',
+        system: {
+            all: 'すべて',
+            inbox: '受信箱',
+            trash: 'ゴミ箱',
+        },
+        status: {
+            syncing: '同期中',
+            synced: '同期済み',
+            offline: 'オフライン',
+        },
+        stats: {
+            words: '語',
+            chars: '文字',
+        },
+        actions: {
+            newDoc: '新規ドキュメント',
+            newFolder: '新規フォルダ',
+            createFolder: 'フォルダ作成',
+            renameFolderPrompt: 'フォルダ名を変更',
+            deleteFolderConfirm: 'このフォルダを削除しますか？ドキュメントは受信箱へ移動します。',
+            rename: '名前変更',
+            delete: 'ゴミ箱へ移動',
+            restore: '復元',
+            collapse: '折りたたむ',
+            expand: '展開',
+            syncNow: '同期',
+        },
+    },
 
     // Pending Module
     pending: {

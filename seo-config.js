@@ -294,5 +294,10 @@ const seoConfig = {
     },
 };
 
+// CommonJS 导出 (用于 Node.js 脚本)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = seoConfig;
+}
+
 // ES Module 导出 (用于前端)
 export default seoConfig;
