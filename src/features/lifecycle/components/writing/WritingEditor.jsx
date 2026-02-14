@@ -1,10 +1,9 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { EditorState } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
 import { useTranslation } from '../../../i18n';
 import { COLOR_CONFIG } from '../inspiration/InspirationUtils';
 import {
+    htmlToMarkup,
     markupToHtml,
     markupToPlain,
     markupToMarkdown,
@@ -14,28 +13,14 @@ import {
     detectWordCountLabel,
     downloadContent,
 } from './editorUtils';
-import { writingSchema } from './prosemirrorSchema';
-import { docToMarkup, markupToDoc, textToPasteSlice } from './prosemirrorMarkup';
 import EditorToolbar from './EditorToolbar';
 import EditorStatusBar from './EditorStatusBar';
 import FloatingColorPicker from './FloatingColorPicker';
 import ConflictBanner from './ConflictBanner';
 import VersionHistoryModal from './VersionHistoryModal';
-
-const SNAPSHOT_INTERVAL_MS = 5 * 60 * 1000;
-const SNAPSHOT_MIN_CHANGE = 200;
-const MAX_VERSIONS = 50;
-const normalizeMarkupForSync = (value = '') =>
-    (value || '')
-        .replace(/\r\n/g, '\n')
-        .replace(/\u00A0/g, ' ')
-        .replace(/\n+$/g, '');
-
-const createEditorState = (markup = '') =>
-    EditorState.create({
-        schema: writingSchema,
-        doc: markupToDoc(writingSchema, markup),
-    });
+import { useEditorAutoSave } from './hooks/useEditorAutoSave';
+import { useFloatingToolbar } from './hooks/useFloatingToolbar';
+import { useEditorSync } from './hooks/useEditorSync';
 
 const WritingEditor = ({
     doc: writingDoc,
@@ -52,49 +37,93 @@ const WritingEditor = ({
 }) => {
     const { t } = useTranslation();
     const editorRef = useRef(null);
-    const editorViewRef = useRef(null);
 
-    // ---------- Local state ----------
     const [title, setTitle] = useState('');
     const [contentMarkup, setContentMarkup] = useState('');
-    const [toolbarPosition, setToolbarPosition] = useState(null);
-    const [isSaving, setIsSaving] = useState(false);
     const [wordCount, setWordCount] = useState(0);
     const [wordCountLabelKey, setWordCountLabelKey] = useState('inspiration.words');
     const [charCount, setCharCount] = useState(0);
     const [readMinutes, setReadMinutes] = useState(0);
-    const [pendingRemoteMarkup, setPendingRemoteMarkup] = useState(null);
     const [showHistory, setShowHistory] = useState(false);
     const [showActions, setShowActions] = useState(false);
-    const [conflictState, setConflictState] = useState(null);
     const [safeTop, setSafeTop] = useState(0);
-    const [lastSavedAt, setLastSavedAt] = useState(null);
     const [copiedAt, setCopiedAt] = useState(null);
     const [isEditorFocused, setIsEditorFocused] = useState(false);
     const [isToolbarVisible, setIsToolbarVisible] = useState(true);
-    const [isDirty, setIsDirty] = useState(false);
 
-    const lastSnapshotAtRef = useRef(0);
-    const lastSnapshotContentRef = useRef('');
-    const lastSeenRemoteContentRef = useRef('');
-    const forceRemoteApplyRef = useRef(false);
     const statsTimeoutRef = useRef(null);
     const inactivityTimeoutRef = useRef(null);
-    const selectionFrameRef = useRef(null);
 
-    const replaceEditorMarkup = useCallback((nextMarkup = '') => {
-        const view = editorViewRef.current;
-        if (!view) return;
-        view.updateState(createEditorState(nextMarkup));
+    const updateStatsFromText = useCallback((text) => {
+        const words = computeWordCount(text);
+        const chars = computeCharCount(text);
+        setWordCountLabelKey(detectWordCountLabel(text));
+        setWordCount(words);
+        setCharCount(chars);
+        setReadMinutes(computeReadMinutes(words, chars));
     }, []);
 
-    const getEditorMarkup = useCallback(() => {
-        const view = editorViewRef.current;
-        if (!view) return contentMarkup;
-        return docToMarkup(view.state.doc);
-    }, [contentMarkup]);
+    const updateStatsFromEditor = useCallback(() => {
+        if (statsTimeoutRef.current) clearTimeout(statsTimeoutRef.current);
+        statsTimeoutRef.current = setTimeout(() => {
+            updateStatsFromText(editorRef.current?.innerText || '');
+        }, 250);
+    }, [updateStatsFromText]);
 
-    // ---------- Inactivity Tracking ----------
+    useEffect(() => {
+        if (statsTimeoutRef.current) clearTimeout(statsTimeoutRef.current);
+        statsTimeoutRef.current = setTimeout(() => {
+            updateStatsFromText(markupToPlain(contentMarkup || ''));
+        }, 250);
+
+        return () => {
+            if (statsTimeoutRef.current) clearTimeout(statsTimeoutRef.current);
+        };
+    }, [contentMarkup, updateStatsFromText]);
+
+    const {
+        addSnapshot,
+        canManualSnapshot,
+        handleManualSnapshot,
+        isSaving,
+        lastSavedAt,
+        versions,
+    } = useEditorAutoSave({
+        writingDoc,
+        title,
+        contentMarkup,
+        editorRef,
+        wordCount,
+        onUpdate,
+    });
+
+    const {
+        conflictPreview,
+        conflictState,
+        handleApplyPendingRemote,
+        handleConflictKeepLocal,
+        handleConflictUseRemote,
+        handleKeepPendingLocal,
+        pendingRemoteHtml,
+        requestForceRemoteApply,
+    } = useEditorSync({
+        writingDoc,
+        title,
+        setTitle,
+        contentMarkup,
+        setContentMarkup,
+        editorRef,
+        updateStatsFromEditor,
+        onUpdate,
+        addSnapshot,
+    });
+
+    const { toolbarPosition, setToolbarPosition } = useFloatingToolbar({
+        editorRef,
+        isMobile,
+        safeTop,
+    });
+
     const resetInactivityTimer = useCallback(() => {
         if (!isMobile) {
             setIsToolbarVisible(true);
@@ -122,11 +151,11 @@ const WritingEditor = ({
         const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
         const handler = () => resetInactivityTimer();
 
-        events.forEach((e) => window.addEventListener(e, handler, { passive: true }));
+        events.forEach((eventName) => window.addEventListener(eventName, handler, { passive: true }));
         resetInactivityTimer();
 
         return () => {
-            events.forEach((e) => window.removeEventListener(e, handler, { passive: true }));
+            events.forEach((eventName) => window.removeEventListener(eventName, handler, { passive: true }));
             if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
         };
     }, [isMobile, resetInactivityTimer]);
@@ -145,171 +174,6 @@ const WritingEditor = ({
         }
     }, [isMobile, showActions, showHistory, resetInactivityTimer]);
 
-    // ---------- Derived ----------
-    useEffect(() => {
-        if (!writingDoc) {
-            setIsDirty(false);
-            return;
-        }
-        setIsDirty(title !== (writingDoc.title || '') || contentMarkup !== (writingDoc.content || ''));
-    }, [title, contentMarkup, writingDoc?.id, writingDoc?.title, writingDoc?.content]);
-
-    const statusLabel = useMemo(() => {
-        if (syncStatus === 'offline' || syncStatus === 'disconnected') return t('inspiration.offline');
-        if (isSaving || isDirty) return t('inspiration.saving');
-        if (syncStatus === 'syncing') return t('inspiration.syncing');
-        return t('inspiration.synced');
-    }, [isDirty, isSaving, syncStatus, t]);
-
-    const isOffline = syncStatus === 'offline' || syncStatus === 'disconnected';
-    const isSyncing = isSaving || isDirty || syncStatus === 'syncing';
-    const statusNeedsAttention = isOffline || isSyncing;
-
-    const versions = useMemo(() => {
-        if (!writingDoc?.versions || !Array.isArray(writingDoc.versions)) return [];
-        return [...writingDoc.versions].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    }, [writingDoc?.versions]);
-
-    const canManualSnapshot = Boolean(writingDoc) && contentMarkup !== (lastSnapshotContentRef.current || '');
-    const hasPendingRemote = Boolean(pendingRemoteMarkup);
-    const canCopy = Boolean((title || '').trim() || (contentMarkup || '').trim());
-
-    const conflictPreview = useMemo(() => {
-        if (!conflictState?.remoteContent) return '';
-        const cleaned = markupToPlain(conflictState.remoteContent).replace(/\s+/g, ' ').trim();
-        return cleaned.length > 160 ? `${cleaned.slice(0, 160)}…` : cleaned;
-    }, [conflictState?.remoteContent]);
-
-    // ---------- Stat helpers ----------
-    const updateStatsFromMarkup = useCallback((markup = '') => {
-        const text = markupToPlain(markup || '');
-        const words = computeWordCount(text);
-        const chars = computeCharCount(text);
-        setWordCountLabelKey(detectWordCountLabel(text));
-        setWordCount(words);
-        setCharCount(chars);
-        setReadMinutes(computeReadMinutes(words, chars));
-    }, []);
-
-    useEffect(() => {
-        return () => {
-            if (statsTimeoutRef.current) clearTimeout(statsTimeoutRef.current);
-        };
-    }, []);
-
-    useEffect(() => {
-        if (statsTimeoutRef.current) clearTimeout(statsTimeoutRef.current);
-        statsTimeoutRef.current = setTimeout(() => {
-            updateStatsFromMarkup(contentMarkup);
-        }, 250);
-        return () => {
-            if (statsTimeoutRef.current) clearTimeout(statsTimeoutRef.current);
-        };
-    }, [contentMarkup, updateStatsFromMarkup]);
-
-    // ---------- Snapshot helpers ----------
-    const addSnapshot = useCallback(
-        (snapshot) => {
-            if (!writingDoc) return;
-            const existing = Array.isArray(writingDoc.versions) ? writingDoc.versions : [];
-            const next = [snapshot, ...existing].slice(0, MAX_VERSIONS);
-            onUpdate(writingDoc.id, { versions: next });
-        },
-        [onUpdate, writingDoc],
-    );
-
-    const maybeSnapshot = useCallback(
-        (markup) => {
-            if (!writingDoc) return;
-            const now = Date.now();
-            if (now - lastSnapshotAtRef.current < SNAPSHOT_INTERVAL_MS) return;
-            const delta = Math.abs((markup || '').length - (lastSnapshotContentRef.current || '').length);
-            if (delta < SNAPSHOT_MIN_CHANGE) return;
-
-            const snapshot = {
-                id: `${now}-${Math.random().toString(36).slice(2, 8)}`,
-                timestamp: now,
-                title: title || '',
-                content: markup || '',
-                wordCount: computeWordCount(markupToPlain(markup || '')),
-            };
-            addSnapshot(snapshot);
-            lastSnapshotAtRef.current = now;
-            lastSnapshotContentRef.current = markup || '';
-        },
-        [addSnapshot, title, writingDoc],
-    );
-
-    const handleManualSnapshot = useCallback(() => {
-        if (!writingDoc) return;
-        const now = Date.now();
-        const snapshot = {
-            id: `${now}-${Math.random().toString(36).slice(2, 8)}`,
-            timestamp: now,
-            title: title || '',
-            content: contentMarkup || '',
-            wordCount,
-        };
-        addSnapshot(snapshot);
-        lastSnapshotAtRef.current = now;
-        lastSnapshotContentRef.current = contentMarkup || '';
-    }, [addSnapshot, contentMarkup, title, wordCount, writingDoc]);
-
-    // ---------- Effects ----------
-
-    // Create ProseMirror editor view
-    useEffect(() => {
-        if (!editorRef.current || !writingDoc) return;
-
-        const initialMarkup = writingDoc.content || '';
-        let view;
-
-        view = new EditorView(editorRef.current, {
-            state: createEditorState(initialMarkup),
-            dispatchTransaction: (transaction) => {
-                const nextState = view.state.apply(transaction);
-                view.updateState(nextState);
-                if (transaction.docChanged) {
-                    setContentMarkup(docToMarkup(nextState.doc));
-                    setIsSaving(true);
-                }
-            },
-            attributes: {
-                class: 'min-h-[55vh] w-full outline-none caret-sky-500 selection:bg-sky-100/80 dark:caret-sky-400 dark:selection:bg-sky-900/40',
-                spellcheck: 'true',
-            },
-            handleDOMEvents: {
-                paste: (innerView, event) => {
-                    const text = event.clipboardData?.getData('text/plain');
-                    if (typeof text !== 'string') return false;
-                    event.preventDefault();
-                    const slice = textToPasteSlice(innerView.state.schema, text);
-                    innerView.dispatch(innerView.state.tr.replaceSelection(slice).scrollIntoView());
-                    return true;
-                },
-                focus: () => {
-                    setIsEditorFocused(true);
-                    return false;
-                },
-                blur: () => {
-                    setIsEditorFocused(false);
-                    return false;
-                },
-            },
-        });
-
-        editorViewRef.current = view;
-        setContentMarkup(initialMarkup);
-        setToolbarPosition(null);
-
-        return () => {
-            setToolbarPosition(null);
-            editorViewRef.current?.destroy();
-            editorViewRef.current = null;
-        };
-    }, [writingDoc?.id]);
-
-    // Safe top inset
     useEffect(() => {
         const update = () => {
             const safeInset = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-top'));
@@ -326,6 +190,7 @@ const WritingEditor = ({
 
             setSafeTop(Math.min(normalizedSafeTop, 56));
         };
+
         update();
         window.addEventListener('resize', update);
         window.visualViewport?.addEventListener('resize', update);
@@ -335,250 +200,122 @@ const WritingEditor = ({
         };
     }, []);
 
-    // Last saved
-    useEffect(() => {
-        if (writingDoc?.lastModified) setLastSavedAt(writingDoc.lastModified);
-        else if (writingDoc?.timestamp) setLastSavedAt(writingDoc.timestamp);
-    }, [writingDoc?.lastModified, writingDoc?.timestamp]);
-
-    // Copied toast auto-clear
     useEffect(() => {
         if (!copiedAt) return;
         const timer = setTimeout(() => setCopiedAt(null), 1800);
         return () => clearTimeout(timer);
     }, [copiedAt]);
 
-    // Sync local state with document prop
     useEffect(() => {
-        if (!writingDoc) return;
-        const prevRemoteContentRaw = lastSeenRemoteContentRef.current;
-        const prevRemoteContent = normalizeMarkupForSync(prevRemoteContentRaw);
-
-        if (writingDoc.title !== title) setTitle(writingDoc.title || '');
-
-        const remoteContentRaw = writingDoc.content || '';
-        const remoteContent = normalizeMarkupForSync(remoteContentRaw);
-        const liveLocalMarkupRaw = getEditorMarkup();
-        const liveLocalMarkup = normalizeMarkupForSync(liveLocalMarkupRaw);
-        const localStateMarkup = normalizeMarkupForSync(contentMarkup);
-        const remoteChanged = remoteContent !== prevRemoteContent;
-        const remoteMatchesLocal = remoteContent === liveLocalMarkup;
-        const localDirtySinceLastRemote = liveLocalMarkup !== prevRemoteContent;
-        const editorHasFocus = editorViewRef.current?.hasFocus() || false;
-
-        if (remoteContent !== liveLocalMarkup) {
-            const shouldForceApply = forceRemoteApplyRef.current;
-            if (shouldForceApply) forceRemoteApplyRef.current = false;
-            const shouldApplyImmediately = shouldForceApply || !editorHasFocus || (remoteChanged && !localDirtySinceLastRemote);
-
-            if (shouldApplyImmediately) {
-                replaceEditorMarkup(remoteContentRaw);
-                setContentMarkup(remoteContentRaw);
-                setPendingRemoteMarkup(null);
-                setConflictState(null);
-            } else if (!remoteChanged) {
-                // 忽略仅由本地 DOM 归一化带来的差异
-            } else if (localDirtySinceLastRemote && !remoteMatchesLocal) {
-                setConflictState({ remoteContent, remoteTitle: writingDoc.title || '', timestamp: Date.now() });
-                setPendingRemoteMarkup(null);
-            } else if (!remoteMatchesLocal) {
-                setPendingRemoteMarkup(remoteContentRaw);
-                setConflictState(null);
-            } else {
-                setPendingRemoteMarkup(null);
-                setConflictState(null);
-            }
-        }
-
-        if (remoteContent !== localStateMarkup) {
-            if (!editorHasFocus) setContentMarkup(remoteContentRaw);
-            else if (remoteMatchesLocal) setContentMarkup(liveLocalMarkupRaw);
-        }
-        lastSeenRemoteContentRef.current = remoteContentRaw;
-    }, [
-        writingDoc?.id,
-        writingDoc?.content,
-        writingDoc?.title,
-        contentMarkup,
-        title,
-        getEditorMarkup,
-        replaceEditorMarkup,
-    ]);
-
-    // Init snapshot ref
-    useEffect(() => {
-        if (!writingDoc) return;
-        if (versions.length > 0) {
-            lastSnapshotAtRef.current = versions[0].timestamp || Date.now();
-            lastSnapshotContentRef.current = versions[0].content || '';
-        } else {
-            lastSnapshotAtRef.current = Date.now();
-            lastSnapshotContentRef.current = writingDoc.content || '';
-        }
-    }, [writingDoc?.id, versions]);
-
-    // ESC closes
-    useEffect(() => {
-        const h = (e) => {
-            if (e.key === 'Escape') {
+        const handleEscape = (event) => {
+            if (event.key === 'Escape') {
                 setShowActions(false);
                 setShowHistory(false);
             }
         };
-        document.addEventListener('keydown', h);
-        return () => document.removeEventListener('keydown', h);
+
+        document.addEventListener('keydown', handleEscape);
+        return () => document.removeEventListener('keydown', handleEscape);
     }, []);
 
-    // Auto-save debounced
     useEffect(() => {
-        const timer = setTimeout(() => {
-            if (!writingDoc) return;
-            if (title !== (writingDoc.title || '') || contentMarkup !== (writingDoc.content || '')) {
-                setIsSaving(true);
-                onUpdate(writingDoc.id, { title, content: contentMarkup });
-                setLastSavedAt(Date.now());
-                setTimeout(() => setIsSaving(false), 500);
-                maybeSnapshot(contentMarkup);
-            } else {
-                setIsSaving(false);
-            }
-        }, 1000);
-        return () => clearTimeout(timer);
-    }, [title, contentMarkup, writingDoc, onUpdate, maybeSnapshot]);
+        const handleKeyDown = (event) => {
+            if (!editorRef.current || document.activeElement !== editorRef.current) return;
 
-    // Text Selection → Floating Color Picker
-    useEffect(() => {
-        const updateToolbarFromSelection = () => {
-            if (typeof window === 'undefined') return;
-            const selection = window.getSelection();
-            if (!selection || !selection.rangeCount || selection.isCollapsed) {
-                setToolbarPosition(null);
-                return;
-            }
-
-            const range = selection.getRangeAt(0);
-            if (!editorRef.current) {
-                setToolbarPosition(null);
-                return;
-            }
-            const selectionInsideEditor = (
-                (selection.anchorNode && editorRef.current.contains(selection.anchorNode))
-                || (selection.focusNode && editorRef.current.contains(selection.focusNode))
-                || editorRef.current.contains(range.commonAncestorContainer)
-            );
-            if (!selectionInsideEditor) {
-                setToolbarPosition(null);
-                return;
-            }
-
-            const rect = range.getBoundingClientRect();
-            if (!rect || (rect.width === 0 && rect.height === 0)) {
-                setToolbarPosition(null);
-                return;
-            }
-
-            const offset = isMobile ? 80 : 60;
-            const toolbarWidth = isMobile ? 220 : 170;
-            const toolbarHeight = isMobile ? 56 : 46;
-            const padding = 12;
-            const maxLeft = window.innerWidth - toolbarWidth / 2 - padding;
-            const minLeft = toolbarWidth / 2 + padding;
-            const clampedLeft = Math.min(maxLeft, Math.max(minLeft, rect.left + rect.width / 2));
-            const minTop = padding + safeTop;
-            const maxTop = window.innerHeight - toolbarHeight - padding;
-            const clampedTop = Math.min(maxTop, Math.max(minTop, rect.top - offset));
-            setToolbarPosition({ top: clampedTop, left: clampedLeft });
-        };
-
-        const handleSelection = () => {
-            if (typeof window === 'undefined') return;
-            if (selectionFrameRef.current !== null) return;
-            selectionFrameRef.current = window.requestAnimationFrame(() => {
-                selectionFrameRef.current = null;
-                updateToolbarFromSelection();
-            });
-        };
-
-        document.addEventListener('selectionchange', handleSelection);
-        return () => {
-            document.removeEventListener('selectionchange', handleSelection);
-            if (typeof window !== 'undefined' && selectionFrameRef.current !== null) {
-                window.cancelAnimationFrame(selectionFrameRef.current);
-                selectionFrameRef.current = null;
-            }
-        };
-    }, [isMobile, safeTop]);
-
-    // Keyboard shortcuts
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            const view = editorViewRef.current;
-            if (!view || !view.hasFocus()) return;
-            const isMod = e.metaKey || e.ctrlKey;
+            const isMod = event.metaKey || event.ctrlKey;
             if (!isMod) return;
-            const key = e.key.toLowerCase();
+
+            const key = event.key.toLowerCase();
             if (key === 's') {
-                e.preventDefault();
+                event.preventDefault();
                 handleManualSnapshot();
                 return;
             }
-            if (key === 'z' && !e.shiftKey) {
-                e.preventDefault();
+            if (key === 'z' && !event.shiftKey) {
+                event.preventDefault();
                 if (canUndo) {
-                    forceRemoteApplyRef.current = true;
+                    requestForceRemoteApply();
                     onUndo?.();
                 }
                 return;
             }
-            if ((key === 'z' && e.shiftKey) || key === 'y') {
-                e.preventDefault();
+            if ((key === 'z' && event.shiftKey) || key === 'y') {
+                event.preventDefault();
                 if (canRedo) {
-                    forceRemoteApplyRef.current = true;
+                    requestForceRemoteApply();
                     onRedo?.();
                 }
             }
         };
+
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [handleManualSnapshot, canUndo, canRedo, onUndo, onRedo]);
+    }, [canRedo, canUndo, handleManualSnapshot, onRedo, onUndo, requestForceRemoteApply]);
 
-    // ---------- Handlers ----------
+    const hasUnsavedChanges = useMemo(() => {
+        if (!writingDoc) return false;
+        return title !== (writingDoc.title || '') || contentMarkup !== (writingDoc.content || '');
+    }, [contentMarkup, title, writingDoc]);
+
+    const statusLabel = useMemo(() => {
+        if (syncStatus === 'offline' || syncStatus === 'disconnected') return t('inspiration.offline');
+        if (isSaving || hasUnsavedChanges) return t('inspiration.saving');
+        if (syncStatus === 'syncing') return t('inspiration.syncing');
+        return t('inspiration.synced');
+    }, [hasUnsavedChanges, isSaving, syncStatus, t]);
+
+    const isOffline = syncStatus === 'offline' || syncStatus === 'disconnected';
+    const isSyncing = isSaving || hasUnsavedChanges || syncStatus === 'syncing';
+    const statusNeedsAttention = isOffline || isSyncing;
+    const hasPendingRemote = Boolean(pendingRemoteHtml);
+    const canCopy = Boolean((title || '').trim() || (contentMarkup || '').trim());
+
+    const handleInput = useCallback(() => {
+        if (!editorRef.current) return;
+        setContentMarkup(htmlToMarkup(editorRef.current));
+        updateStatsFromEditor();
+    }, [updateStatsFromEditor]);
+
     const applyColor = (colorId) => {
-        const view = editorViewRef.current;
-        if (!view) return;
+        if (typeof window === 'undefined' || !window.getSelection) return;
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
 
-        const colorConfig = COLOR_CONFIG.find((c) => c.id === colorId);
+        const colorConfig = COLOR_CONFIG.find((color) => color.id === colorId);
         if (!colorConfig) return;
 
-        const { from, to, empty } = view.state.selection;
-        if (empty) return;
+        const range = selection.getRangeAt(0);
+        const span = document.createElement('span');
+        const highlightColor = colorConfig.highlight || 'rgba(125, 211, 252, 0.55)';
+        span.style.background = `radial-gradient(ellipse 100% 40% at center 80%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%)`;
+        span.style.padding = '0 0.15em';
+        span.dataset.colorId = colorId;
+        span.className = 'colored-text relative inline';
 
-        const markType = view.state.schema.marks.highlight;
-        if (!markType) return;
+        try {
+            range.surroundContents(span);
+            selection.removeAllRanges();
+            handleInput();
+        } catch (error) {
+            console.warn('Could not wrap selection', error);
+        }
 
-        const tr = view.state.tr
-            .removeMark(from, to, markType)
-            .addMark(from, to, markType.create({ colorId }))
-            .scrollIntoView();
-
-        view.dispatch(tr);
-        view.focus();
         setToolbarPosition(null);
     };
 
     const restoreSnapshot = (snapshot) => {
         if (!writingDoc || !snapshot) return;
-        const snapshotTitle = snapshot.title || '';
-        const snapshotContent = snapshot.content || '';
-        setTitle(snapshotTitle);
-        setContentMarkup(snapshotContent);
-        replaceEditorMarkup(snapshotContent);
-        onUpdate(writingDoc.id, { title: snapshotTitle, content: snapshotContent });
+        setTitle(snapshot.title || '');
+        setContentMarkup(snapshot.content || '');
+        if (editorRef.current) editorRef.current.innerHTML = markupToHtml(snapshot.content || '');
+        updateStatsFromEditor();
+        onUpdate(writingDoc.id, { title: snapshot.title || '', content: snapshot.content || '' });
         setShowHistory(false);
     };
 
     const exportDoc = (format) => {
         if (!writingDoc) return;
+
         const markup = contentMarkup || '';
         if (format === 'md') {
             downloadContent(`# ${title || ''}\n\n${markupToMarkdown(markup)}`, 'text/markdown', 'md', title);
@@ -588,83 +325,42 @@ const WritingEditor = ({
         } else {
             downloadContent(`${title ? `${title}\n\n` : ''}${markupToPlain(markup)}`, 'text/plain', 'txt', title);
         }
+
         setShowActions(false);
     };
 
     const handleCopy = async () => {
         if (!canCopy) return;
+
         const plain = markupToPlain(contentMarkup || '');
         const output = title ? `${title}\n\n${plain}` : plain;
         try {
-            if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(output);
-            else {
-                const ta = document.createElement('textarea');
-                ta.value = output;
-                ta.style.position = 'fixed';
-                ta.style.opacity = '0';
-                document.body.appendChild(ta);
-                ta.select();
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(output);
+            } else {
+                const textarea = document.createElement('textarea');
+                textarea.value = output;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
                 document.execCommand('copy');
-                ta.remove();
+                textarea.remove();
             }
             setCopiedAt(Date.now());
-        } catch (err) {
-            console.warn('Copy failed:', err);
+        } catch (error) {
+            console.warn('Copy failed:', error);
         }
     };
 
-    const handleApplyPendingRemote = () => {
-        if (!pendingRemoteMarkup || !writingDoc) return;
-        replaceEditorMarkup(pendingRemoteMarkup);
-        setContentMarkup(pendingRemoteMarkup);
-        setPendingRemoteMarkup(null);
-        setConflictState(null);
-        lastSeenRemoteContentRef.current = pendingRemoteMarkup;
-    };
-
-    const handleKeepPendingLocal = () => {
-        setPendingRemoteMarkup(null);
-        if (writingDoc?.content) lastSeenRemoteContentRef.current = writingDoc.content;
-    };
-
-    const handleConflictKeepLocal = () => {
-        if (!conflictState || !writingDoc) return;
-        addSnapshot({
-            id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            timestamp: Date.now(),
-            title: conflictState.remoteTitle || '',
-            content: conflictState.remoteContent || '',
-            wordCount: computeWordCount(markupToPlain(conflictState.remoteContent || '')),
-        });
-        onUpdate(writingDoc.id, { title: title || '', content: contentMarkup || '' });
-        setConflictState(null);
-        setPendingRemoteMarkup(null);
-        lastSeenRemoteContentRef.current = conflictState.remoteContent || '';
-    };
-
-    const handleConflictUseRemote = () => {
-        if (!conflictState) return;
-        const remote = conflictState.remoteContent || '';
-        const remoteTitle = conflictState.remoteTitle || '';
-        setTitle(remoteTitle);
-        setContentMarkup(remote);
-        replaceEditorMarkup(remote);
-        setConflictState(null);
-        setPendingRemoteMarkup(null);
-        lastSeenRemoteContentRef.current = remote;
-    };
-
-    // ---------- Render ----------
     return (
         <div className="relative z-10 flex h-full flex-1 flex-col overflow-hidden">
-            {/* Background decorations */}
             <div className="pointer-events-none absolute inset-0">
                 <div className="absolute inset-0 bg-white/30 dark:bg-slate-900/30" />
                 <div className="absolute -top-14 right-20 h-56 w-56 rounded-full bg-sky-200/28 blur-[88px] dark:bg-sky-900/10" />
                 <div className="absolute -bottom-16 left-20 h-48 w-48 rounded-full bg-blue-200/22 blur-[82px] dark:bg-blue-900/10" />
             </div>
 
-            {/* Conflict banner */}
             <AnimatePresence>
                 {conflictState && (
                     <ConflictBanner
@@ -678,7 +374,6 @@ const WritingEditor = ({
                 )}
             </AnimatePresence>
 
-            {/* Floating color picker */}
             <AnimatePresence>
                 {toolbarPosition && (
                     <FloatingColorPicker
@@ -689,17 +384,16 @@ const WritingEditor = ({
                 )}
             </AnimatePresence>
 
-            {/* Main scrollable area */}
             <div
                 className="relative z-10 flex-1 overflow-y-auto custom-scrollbar touch-scroll overscroll-y-contain"
                 style={{ paddingTop: conflictState ? safeTop + 82 : safeTop + 16 }}
-                onClick={(e) => {
-                    if (e.target instanceof Element && e.target.closest('button, input, [role="menu"]')) return;
-                    editorViewRef.current?.focus();
+                onClick={(event) => {
+                    if (event.target === editorRef.current) return;
+                    if (event.target instanceof Element && event.target.closest('button, input, [role="menu"]')) return;
+                    editorRef.current?.focus();
                 }}
             >
                 <div className="mx-auto w-full max-w-4xl px-5 pb-24 md:px-10">
-                    {/* Toolbar */}
                     <motion.div
                         className="sticky z-30"
                         style={{ top: isMobile ? 6 : 12 }}
@@ -714,6 +408,7 @@ const WritingEditor = ({
                         <EditorToolbar
                             isSidebarOpen={isSidebarOpen}
                             onToggleSidebar={onToggleSidebar}
+                            onCloseSidebar={onCloseSidebar}
                             statusLabel={statusLabel}
                             statusNeedsAttention={statusNeedsAttention}
                             canUndo={canUndo}
@@ -723,21 +418,19 @@ const WritingEditor = ({
                             copiedAt={copiedAt}
                             showActions={showActions}
                             onUndo={() => {
-                                if (canUndo) {
-                                    forceRemoteApplyRef.current = true;
-                                    onUndo?.();
-                                }
+                                if (!canUndo) return;
+                                requestForceRemoteApply();
+                                onUndo?.();
                             }}
                             onRedo={() => {
-                                if (canRedo) {
-                                    forceRemoteApplyRef.current = true;
-                                    onRedo?.();
-                                }
+                                if (!canRedo) return;
+                                requestForceRemoteApply();
+                                onRedo?.();
                             }}
                             onManualSnapshot={handleManualSnapshot}
                             onShowHistory={() => setShowHistory(true)}
                             onCopy={handleCopy}
-                            onToggleActions={() => setShowActions((v) => !v)}
+                            onToggleActions={() => setShowActions((value) => !value)}
                             onExport={exportDoc}
                             onCloseActions={() => setShowActions(false)}
                             isMobile={isMobile}
@@ -745,16 +438,15 @@ const WritingEditor = ({
                         />
                     </motion.div>
 
-                    {/* Title */}
                     <div className={`${isMobile ? 'mt-8' : 'mt-11'}`}>
                         <input
                             type="text"
                             value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    editorViewRef.current?.focus();
+                            onChange={(event) => setTitle(event.target.value)}
+                            onKeyDown={(event) => {
+                                if (event.key === 'Enter') {
+                                    event.preventDefault();
+                                    editorRef.current?.focus();
                                 }
                             }}
                             className={`w-full border-none bg-transparent font-semibold tracking-tight text-slate-800 outline-none placeholder:text-slate-300 dark:text-slate-100 dark:placeholder:text-slate-600 ${isMobile ? 'text-2xl' : 'text-3xl leading-tight'}`}
@@ -765,7 +457,6 @@ const WritingEditor = ({
                         />
                     </div>
 
-                    {/* Status bar */}
                     <div className="mb-6 mt-3">
                         <EditorStatusBar
                             wordCount={wordCount}
@@ -779,8 +470,7 @@ const WritingEditor = ({
                         />
                     </div>
 
-                    {/* Pending remote banner */}
-                    {pendingRemoteMarkup && !conflictState && (
+                    {pendingRemoteHtml && !conflictState && (
                         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-200/70 bg-sky-50/80 px-4 py-2.5 text-[12px] text-sky-700">
                             <span>{t('inspiration.pendingRemote')}</span>
                             <div className="flex items-center gap-2">
@@ -800,22 +490,37 @@ const WritingEditor = ({
                         </div>
                     )}
 
-                    {/* Content editor */}
                     <div
                         className={`rounded-3xl bg-white p-6 transition-all md:p-10 dark:bg-slate-900 ${isEditorFocused
                             ? 'shadow-[0_14px_30px_-24px_rgba(14,116,255,0.28)] dark:shadow-none'
                             : 'shadow-none'}`}
                     >
-                        <div className="writing-editor-prosemirror">
-                            <div ref={editorRef} aria-label={t('inspiration.placeholder')} />
-                        </div>
+                        <div
+                            ref={editorRef}
+                            contentEditable
+                            suppressContentEditableWarning
+                            onInput={handleInput}
+                            onFocus={() => {
+                                setIsEditorFocused(true);
+                            }}
+                            onBlur={() => setIsEditorFocused(false)}
+                            spellCheck
+                            className="min-h-[55vh] w-full text-lg text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"
+                            placeholder={t('inspiration.placeholder')}
+                            style={{
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word',
+                                lineHeight: 1.625,
+                                fontFamily: '"Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif',
+                                letterSpacing: 'normal',
+                            }}
+                        />
                     </div>
                 </div>
             </div>
 
             {isMobile && <div className="h-safe-bottom" />}
 
-            {/* Version History Modal */}
             <AnimatePresence>
                 {showHistory && (
                     <VersionHistoryModal
