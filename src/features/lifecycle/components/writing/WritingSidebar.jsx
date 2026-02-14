@@ -316,26 +316,27 @@ const WritingSidebar = ({
                         </div>
                     </div>
 
-                    <button
-                        onClick={() => onCreate(selectedCategory)}
-                        disabled={!selectedCategory}
-                        className="inline-flex h-11 items-center gap-2.5 rounded-2xl border border-slate-300 bg-slate-700 px-4 text-sm font-semibold text-slate-100 shadow-sm transition hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600"
-                        title={t('inspiration.newDoc')}
-                    >
-                        <Plus size={18} />
-                        <span>{t('inspiration.newDoc')}</span>
-                    </button>
                 </div>
 
                 <div className="mb-4">
                     {!isSearchOpen ? (
-                        <button
-                            onClick={() => setIsSearchOpen(true)}
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-100 bg-white text-sky-500 transition hover:border-sky-200 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-sky-400 dark:hover:border-slate-600"
-                            title={t('inspiration.search')}
-                        >
-                            <Search size={16} />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setIsSearchOpen(true)}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-100 bg-white text-sky-500 transition hover:border-sky-200 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-sky-400 dark:hover:border-slate-600"
+                                title={t('inspiration.search')}
+                            >
+                                <Search size={16} />
+                            </button>
+                            <button
+                                onClick={() => onCreate(selectedCategory)}
+                                disabled={!selectedCategory}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                title={t('inspiration.newDoc')}
+                            >
+                                <Plus size={16} />
+                            </button>
+                        </div>
                     ) : (
                         <div className="flex items-center gap-2">
                             <div className="relative flex-1">
@@ -359,13 +360,21 @@ const WritingSidebar = ({
                             >
                                 <X size={15} />
                             </button>
+                            <button
+                                onClick={() => onCreate(selectedCategory)}
+                                disabled={!selectedCategory}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                title={t('inspiration.newDoc')}
+                            >
+                                <Plus size={16} />
+                            </button>
                         </div>
                     )}
                 </div>
 
-                <div className="relative z-20 mt-5 flex items-center justify-center gap-2 px-1">
-                    <div className="flex items-center rounded-full border border-sky-100 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900 group/selector">
-                        <div className="relative mr-1 flex h-8 min-w-[60px] items-center justify-center overflow-hidden border-r border-sky-200/50 px-3 dark:border-slate-700/50">
+                <div className="relative z-20 mt-5 flex items-center gap-2 px-1">
+                    <div className="group/selector flex min-w-0 flex-1 items-center rounded-full border border-sky-100 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div className="relative mr-1 flex h-8 min-w-[60px] shrink-0 items-center justify-center overflow-hidden border-r border-sky-200/50 px-3 dark:border-slate-700/50">
                             <AnimatePresence mode="wait" initial={false}>
                                 <motion.span
                                     key={selectedCategory || 'none'}
@@ -380,7 +389,7 @@ const WritingSidebar = ({
                             </AnimatePresence>
                         </div>
 
-                        <div className="flex items-center gap-1">
+                        <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1 overflow-x-auto pr-1">
                             {categories.map((category) => (
                                 <button
                                     key={category.id}
