@@ -153,9 +153,9 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     return (
         <div className="relative flex h-full w-full overflow-hidden rounded-[26px]">
             <div className="pointer-events-none absolute inset-0">
-                <div className="absolute inset-0 bg-gradient-to-br from-sky-50/70 via-white/95 to-blue-100/45" />
-                <div className="absolute -top-24 left-12 h-72 w-72 rounded-full bg-sky-200/35 blur-3xl" />
-                <div className="absolute -bottom-24 right-12 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800" />
+                <div className="absolute -top-24 left-12 h-72 w-72 rounded-full bg-sky-200/35 blur-3xl dark:bg-sky-900/20" />
+                <div className="absolute -bottom-24 right-12 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl dark:bg-blue-900/20" />
             </div>
 
             <AnimatePresence>
@@ -167,7 +167,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                                 onClick={() => setIsSidebarOpen(false)}
-                                className="fixed inset-0 z-40 bg-slate-900/22 backdrop-blur-[3px] lg:hidden"
+                                className="fixed inset-0 z-40 bg-slate-900/35 lg:hidden"
                             />
                         )}
 
@@ -177,7 +177,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                             exit={isMobile ? { x: '-100%' } : { x: -24, opacity: 0 }}
                             transition={{ type: 'spring', damping: 34, stiffness: 360 }}
                             className={[
-                                'relative z-50 h-full flex-shrink-0 border-r border-sky-100/80 bg-white/80 backdrop-blur-2xl',
+                                'relative z-50 h-full flex-shrink-0 border-r border-sky-100 bg-white dark:border-slate-800 dark:bg-slate-900',
                                 isMobile
                                     ? 'fixed inset-y-0 left-0 w-[84vw] max-w-[360px]'
                                     : 'w-[320px]'

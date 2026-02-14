@@ -63,7 +63,7 @@ const WritingDashboard = ({
     return (
         <div className="relative h-full w-full overflow-y-auto custom-scrollbar">
             <div className="pointer-events-none absolute inset-0">
-                <div className="absolute inset-0 bg-gradient-to-b from-sky-50/70 via-white to-white" />
+                <div className="absolute inset-0 bg-gradient-to-b from-sky-50 via-white to-white" />
                 <div className="absolute top-6 right-20 h-56 w-56 rounded-full bg-sky-200/30 blur-[90px]" />
                 <div className="absolute -left-16 bottom-16 h-48 w-48 rounded-full bg-blue-200/20 blur-[70px]" />
             </div>
@@ -74,7 +74,7 @@ const WritingDashboard = ({
                         {onToggleSidebar && (
                             <button
                                 onClick={onToggleSidebar}
-                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-100 bg-white/90 text-sky-600 shadow-sm transition hover:border-sky-200"
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-100 bg-white text-sky-600 shadow-sm transition hover:border-sky-200"
                                 title={t('inspiration.toggleSidebar')}
                             >
                                 {isSidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
@@ -91,7 +91,7 @@ const WritingDashboard = ({
                     initial={{ opacity: 0, y: 18 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.35 }}
-                    className="mb-10 rounded-3xl border border-sky-100 bg-white/90 p-6 shadow-[0_30px_70px_-45px_rgba(14,116,255,0.5)] backdrop-blur-xl md:p-8"
+                    className="mb-10 rounded-3xl border border-sky-100 bg-white p-6 shadow-[0_30px_70px_-45px_rgba(14,116,255,0.5)] md:p-8"
                 >
                     <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
                         <div className="space-y-3">
@@ -128,7 +128,7 @@ const WritingDashboard = ({
                     {statCards.map(({ icon: Icon, value, label, tint }, index) => (
                         <div
                             key={index}
-                            className="rounded-2xl border border-sky-100/80 bg-white/88 p-4 backdrop-blur-sm"
+                            className="rounded-2xl border border-sky-100 bg-white p-4"
                         >
                             <div className={`mb-2.5 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${tint}`}>
                                 <Icon size={16} />
@@ -167,7 +167,7 @@ const WritingDashboard = ({
                                         animate={{ opacity: 1, y: 0 }}
                                         whileHover={{ y: -3 }}
                                         onClick={() => onCreate(doc)}
-                                        className="group rounded-2xl border border-sky-100 bg-white/90 p-4 text-left shadow-sm transition hover:border-sky-200 hover:shadow-[0_18px_36px_-24px_rgba(37,99,235,0.65)]"
+                                        className="group rounded-2xl border border-sky-100 bg-white p-4 text-left shadow-sm transition hover:border-sky-200 hover:shadow-[0_18px_36px_-24px_rgba(37,99,235,0.65)]"
                                     >
                                         <div className="mb-2 flex items-center justify-between gap-2">
                                             <div className="flex items-center gap-2">
@@ -195,7 +195,7 @@ const WritingDashboard = ({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-sky-200 bg-white/75 py-16 text-center"
+                        className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-sky-200 bg-white py-16 text-center"
                     >
                         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 text-sky-600">
                             <PenSquare size={28} strokeWidth={1.5} />

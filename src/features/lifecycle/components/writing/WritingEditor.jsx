@@ -408,9 +408,9 @@ const WritingEditor = ({
         <div className="relative z-10 flex h-full flex-1 flex-col overflow-hidden">
             {/* Background decorations */}
             <div className="pointer-events-none absolute inset-0">
-                <div className="absolute inset-0 bg-gradient-to-b from-sky-50/45 via-white/30 to-white/10" />
-                <div className="absolute -top-14 right-20 h-56 w-56 rounded-full bg-sky-200/28 blur-[88px]" />
-                <div className="absolute -bottom-16 left-20 h-48 w-48 rounded-full bg-blue-200/22 blur-[82px]" />
+                <div className="absolute inset-0 bg-gradient-to-b from-sky-50/45 via-white/30 to-white/10 dark:from-slate-900/45 dark:via-slate-900/30 dark:to-slate-950/10" />
+                <div className="absolute -top-14 right-20 h-56 w-56 rounded-full bg-sky-200/28 blur-[88px] dark:bg-sky-900/10" />
+                <div className="absolute -bottom-16 left-20 h-48 w-48 rounded-full bg-blue-200/22 blur-[82px] dark:bg-blue-900/10" />
             </div>
 
             {/* Conflict banner */}
@@ -484,7 +484,7 @@ const WritingEditor = ({
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') { e.preventDefault(); editorRef.current?.focus(); }
                             }}
-                            className={`w-full border-none bg-transparent font-semibold tracking-tight text-slate-800 outline-none placeholder:text-slate-300 ${isMobile ? 'text-[2rem]' : 'text-[3rem] leading-tight'
+                            className={`w-full border-none bg-transparent font-semibold tracking-tight text-slate-800 outline-none placeholder:text-slate-300 dark:text-slate-100 dark:placeholder:text-slate-600 ${isMobile ? 'text-[2rem]' : 'text-[3rem] leading-tight'
                                 }`}
                             placeholder={t('inspiration.untitled')}
                             style={{
@@ -514,7 +514,7 @@ const WritingEditor = ({
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={handleApplyPendingRemote}
-                                    className="rounded-full border border-sky-200 bg-white/95 px-3 py-1 text-xs transition hover:bg-white"
+                                    className="rounded-full border border-sky-200 bg-white px-3 py-1 text-xs transition hover:bg-sky-50"
                                 >
                                     {t('inspiration.applyRemote')}
                                 </button>
@@ -530,12 +530,12 @@ const WritingEditor = ({
 
                     {/* Content editor */}
                     <div
-                        className={`rounded-3xl border bg-white/92 p-6 shadow-[0_20px_55px_-36px_rgba(37,99,235,0.45)] backdrop-blur-sm transition-all md:p-10 ${isEditorFocused
-                            ? 'border-sky-200/70 shadow-[0_20px_60px_-34px_rgba(14,116,255,0.5)]'
-                            : 'border-sky-100/70'
+                        className={`rounded-3xl border bg-white p-6 shadow-[0_20px_55px_-36px_rgba(37,99,235,0.45)] transition-all md:p-10 dark:bg-slate-900 dark:shadow-none ${isEditorFocused
+                            ? 'border-sky-200/70 shadow-[0_20px_60px_-34px_rgba(14,116,255,0.5)] dark:border-sky-800/60'
+                            : 'border-sky-100/70 dark:border-slate-800'
                             }`}
                     >
-                        <div className="mb-6 h-px bg-gradient-to-r from-transparent via-sky-100 to-transparent" />
+                        <div className="mb-6 h-px bg-gradient-to-r from-transparent via-sky-100 to-transparent dark:via-slate-800/60" />
                         <div
                             ref={editorRef}
                             contentEditable
@@ -547,7 +547,7 @@ const WritingEditor = ({
                             }}
                             onBlur={() => setIsEditorFocused(false)}
                             spellCheck
-                            className={`min-h-[55vh] w-full text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 ${isMobile ? 'text-lg' : 'text-[1.18rem]'
+                            className={`min-h-[55vh] w-full text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600 ${isMobile ? 'text-lg' : 'text-[1.18rem]'
                                 }`}
                             placeholder={t('inspiration.placeholder')}
                             style={{
@@ -561,8 +561,8 @@ const WritingEditor = ({
 
                         {/* Bottom decoration */}
                         <div className="mt-20 flex flex-col items-center opacity-35">
-                            <div className="mb-2 h-1.5 w-12 rounded-full bg-gradient-to-r from-transparent via-sky-300 to-transparent" />
-                            <div className="h-1 w-1 rounded-full bg-sky-400" />
+                            <div className="mb-2 h-1.5 w-12 rounded-full bg-gradient-to-r from-transparent via-sky-300 to-transparent dark:via-sky-700" />
+                            <div className="h-1 w-1 rounded-full bg-sky-400 dark:bg-sky-600" />
                         </div>
                     </div>
                 </div>

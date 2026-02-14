@@ -12,7 +12,7 @@ const FloatingColorPicker = ({ position, onApplyColor, isMobile }) => {
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 400, damping: 26 }}
             style={{ top: position.top, left: position.left }}
-            className={`fixed z-50 -translate-x-1/2 rounded-full border border-sky-100 bg-white/95 shadow-[0_14px_32px_-16px_rgba(37,99,235,0.55)] backdrop-blur-xl ${isMobile ? 'flex items-center gap-3 px-4 py-3' : 'flex items-center gap-2.5 px-3.5 py-2.5'}`}
+            className={`fixed z-50 -translate-x-1/2 rounded-full border border-sky-100 bg-white shadow-[0_14px_32px_-16px_rgba(37,99,235,0.55)] dark:border-slate-700 dark:bg-slate-800 dark:shadow-none ${isMobile ? 'flex items-center gap-3 px-4 py-3' : 'flex items-center gap-2.5 px-3.5 py-2.5'}`}
         >
             {COLOR_CONFIG.map((config) => (
                 <button
@@ -21,7 +21,7 @@ const FloatingColorPicker = ({ position, onApplyColor, isMobile }) => {
                         event.preventDefault();
                         onApplyColor(config.id);
                     }}
-                    className={`${isMobile ? 'h-7 w-7' : 'h-[22px] w-[22px]'} rounded-full border-2 border-white shadow-sm transition-transform hover:scale-125 active:scale-95 ${config.dot}`}
+                    className={`${isMobile ? 'h-7 w-7' : 'h-[22px] w-[22px]'} rounded-full border-2 border-white shadow-sm transition-transform hover:scale-125 active:scale-95 dark:border-slate-800 ${config.dot}`}
                     title={config.id}
                 />
             ))}

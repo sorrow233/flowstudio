@@ -58,25 +58,25 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onDelete, t }) => {
                 className={[
                     'cursor-pointer border px-4 py-3 transition',
                     isActive
-                        ? 'border-sky-200 bg-gradient-to-br from-sky-50 to-white shadow-[0_14px_34px_-24px_rgba(59,130,246,0.6)]'
-                        : 'border-sky-100/80 bg-white/86 hover:border-sky-200 hover:bg-white'
+                        ? 'border-sky-200 bg-gradient-to-br from-sky-50 to-white shadow-[0_14px_34px_-24px_rgba(59,130,246,0.6)] dark:border-sky-800 dark:from-sky-950/30 dark:to-slate-900 dark:shadow-none'
+                        : 'border-sky-100 bg-white hover:border-sky-200 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700'
                 ].join(' ')}
             >
                 <div className="mb-2 flex items-center justify-between gap-2">
-                    <span className="line-clamp-1 text-sm font-medium text-slate-800">
+                    <span className="line-clamp-1 text-sm font-medium text-slate-800 dark:text-slate-200">
                         {doc.title || t('inspiration.untitled')}
                     </span>
-                    <span className="shrink-0 text-[10px] font-medium tracking-wide text-sky-500/80">
+                    <span className="shrink-0 text-[10px] font-medium tracking-wide text-sky-500/80 dark:text-sky-400/80">
                         {formatDocTime(doc.lastModified || doc.timestamp)}
                     </span>
                 </div>
 
-                <p className="line-clamp-2 text-xs leading-relaxed text-slate-500">
+                <p className="line-clamp-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                     {stripMarkup(doc.content || '') || t('inspiration.placeholder')}
                 </p>
 
                 <div className="mt-2.5 flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1 rounded-full border border-sky-100 bg-sky-50 px-2 py-0.5 text-[10px] text-sky-600">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-sky-100 bg-sky-50 px-2 py-0.5 text-[10px] text-sky-600 dark:border-sky-900/40 dark:bg-sky-900/20 dark:text-sky-400">
                         <span className={`h-1.5 w-1.5 rounded-full ${category.dotColor}`} />
                         {category.label}
                     </span>
@@ -172,26 +172,26 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
     };
 
     return (
-        <div className="flex h-full flex-col bg-[linear-gradient(170deg,rgba(248,252,255,0.96),rgba(255,255,255,0.9))]">
+        <div className="flex h-full flex-col bg-[linear-gradient(170deg,rgba(248,252,255,0.96),rgba(255,255,255,0.9))] dark:bg-[linear-gradient(170deg,rgba(15,23,42,0.96),rgba(30,41,59,0.9))]">
             {isMobile && <div className="pt-safe" />}
 
-            <header className="border-b border-sky-100/90 px-4 pb-4 pt-5">
+            <header className="border-b border-sky-100/90 px-4 pb-4 pt-5 dark:border-slate-800/90">
                 <div className="mb-4 flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-2">
                         {isMobile && (
                             <button
                                 onClick={onClose}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-sky-100 bg-white text-sky-500"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-sky-100 bg-white text-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-sky-400"
                             >
                                 <ArrowLeft size={16} />
                             </button>
                         )}
 
                         <div className="min-w-0">
-                            <h2 className="line-clamp-1 text-lg font-semibold tracking-tight text-slate-800">
+                            <h2 className="line-clamp-1 text-lg font-semibold tracking-tight text-slate-800 dark:text-slate-100">
                                 {t('inspiration.writing')}
                             </h2>
-                            <p className="line-clamp-1 text-[11px] text-slate-400">
+                            <p className="line-clamp-1 text-[11px] text-slate-400 dark:text-slate-500">
                                 {t('inspiration.writingSubtitle')}
                             </p>
                         </div>
@@ -213,7 +213,7 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                         value={searchQuery}
                         onChange={(event) => setSearchQuery(event.target.value)}
                         placeholder={t('inspiration.search')}
-                        className="w-full rounded-xl border border-sky-100 bg-white/95 px-9 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:shadow-[0_0_0_4px_rgba(125,211,252,0.25)]"
+                        className="w-full rounded-xl border border-sky-100 bg-white px-9 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:shadow-[0_0_0_4px_rgba(125,211,252,0.25)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-sky-700 dark:focus:shadow-[0_0_0_4px_rgba(14,165,233,0.15)]"
                     />
                 </div>
 
@@ -223,8 +223,8 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                         className={[
                             'shrink-0 rounded-full border px-2.5 py-1 text-[11px] transition',
                             selectedCategory === null
-                                ? 'border-sky-300 bg-sky-50 text-sky-700'
-                                : 'border-sky-100 bg-white text-slate-500 hover:border-sky-200 hover:text-sky-600'
+                                ? 'border-sky-300 bg-sky-50 text-sky-700 dark:border-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
+                                : 'border-sky-100 bg-white text-slate-500 hover:border-sky-200 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-sky-400'
                         ].join(' ')}
                     >
                         {t('common.all')}
@@ -239,8 +239,8 @@ const WritingSidebar = ({ documents = [], activeDocId, onSelectDoc, onCreate, on
                                 className={[
                                     'shrink-0 rounded-full border px-2.5 py-1 text-[11px] transition',
                                     active
-                                        ? 'border-sky-300 bg-sky-50 text-sky-700'
-                                        : 'border-sky-100 bg-white text-slate-500 hover:border-sky-200 hover:text-sky-600'
+                                        ? 'border-sky-300 bg-sky-50 text-sky-700 dark:border-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
+                                        : 'border-sky-100 bg-white text-slate-500 hover:border-sky-200 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-sky-400'
                                 ].join(' ')}
                             >
                                 <span className="inline-flex items-center gap-1.5">

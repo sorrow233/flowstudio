@@ -8,7 +8,7 @@ const VersionHistoryModal = ({ versions, onRestore, onClose, t }) => (
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/22 px-4 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 px-4"
         onClick={onClose}
     >
         <motion.div
@@ -16,21 +16,21 @@ const VersionHistoryModal = ({ versions, onRestore, onClose, t }) => (
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.97 }}
             transition={{ type: 'spring', damping: 28, stiffness: 360 }}
-            className="w-full max-w-lg rounded-3xl border border-sky-100 bg-white/98 p-0 shadow-[0_32px_70px_-20px_rgba(37,99,235,0.35)] backdrop-blur-xl"
+            className="w-full max-w-lg rounded-3xl border border-sky-100 bg-white p-0 shadow-[0_32px_70px_-20px_rgba(37,99,235,0.35)] dark:border-slate-800 dark:bg-slate-900 dark:shadow-none"
             onClick={(event) => event.stopPropagation()}
         >
-            <div className="flex items-center justify-between border-b border-sky-100 px-6 py-4">
+            <div className="flex items-center justify-between border-b border-sky-100 px-6 py-4 dark:border-slate-800">
                 <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-100 text-sky-600">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400">
                         <History size={16} />
                     </div>
-                    <h3 className="text-[15px] font-semibold text-slate-800">
+                    <h3 className="text-[15px] font-semibold text-slate-800 dark:text-slate-100">
                         {t('inspiration.versionHistory')}
                     </h3>
                 </div>
                 <button
                     onClick={onClose}
-                    className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition hover:bg-sky-50 hover:text-slate-600"
+                    className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition hover:bg-sky-50 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
                 >
                     <X size={16} />
                 </button>
@@ -47,14 +47,14 @@ const VersionHistoryModal = ({ versions, onRestore, onClose, t }) => (
                         </p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-sky-100/80">
+                    <div className="divide-y divide-sky-100/80 dark:divide-slate-800/80">
                         {versions.map((version) => (
                             <div
                                 key={version.id}
                                 className="group flex items-center justify-between gap-4 py-3.5"
                             >
                                 <div className="min-w-0 flex-1">
-                                    <p className="truncate text-[13px] font-medium text-slate-800">
+                                    <p className="truncate text-[13px] font-medium text-slate-800 dark:text-slate-200">
                                         {version.title || t('inspiration.untitled')}
                                     </p>
                                     <p className="mt-1 flex items-center gap-2 text-[11px] text-slate-400">
@@ -65,7 +65,7 @@ const VersionHistoryModal = ({ versions, onRestore, onClose, t }) => (
                                 </div>
                                 <button
                                     onClick={() => onRestore(version)}
-                                    className="flex items-center gap-1.5 rounded-xl border border-sky-100 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-600 opacity-0 transition group-hover:opacity-100 hover:border-sky-200 hover:text-sky-700"
+                                    className="flex items-center gap-1.5 rounded-xl border border-sky-100 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-600 opacity-0 transition group-hover:opacity-100 hover:border-sky-200 hover:text-sky-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-sky-700 dark:hover:text-sky-400"
                                 >
                                     <RotateCcw size={12} />
                                     {t('inspiration.restore')}

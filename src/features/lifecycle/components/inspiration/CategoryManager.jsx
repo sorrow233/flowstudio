@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Trash2, Check, Edit2 } from 'lucide-react';
+import { X, Plus, Trash2, Check, Edit2, Sparkles } from 'lucide-react';
 
 const COLOR_PRESETS = [
     { id: 'pink', color: 'bg-pink-400', dotColor: 'bg-pink-400', textColor: 'text-pink-400' },
@@ -15,7 +15,7 @@ const COLOR_PRESETS = [
     { id: 'indigo', color: 'bg-indigo-400', dotColor: 'bg-indigo-400', textColor: 'text-indigo-400' },
 ];
 
-const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemove }) => {
+const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemove, onOpenAiCategoryTransfer }) => {
     const [editingId, setEditingId] = useState(null);
     const [editLabel, setEditLabel] = useState('');
     const [editColor, setEditColor] = useState(COLOR_PRESETS[0]);
@@ -77,6 +77,13 @@ const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemov
         }
     };
 
+    const handleOpenAiCategoryTransfer = () => {
+        onClose?.();
+        setTimeout(() => {
+            onOpenAiCategoryTransfer?.();
+        }, 0);
+    };
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -97,11 +104,21 @@ const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemov
                         onClick={e => e.stopPropagation()}
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
+                        <div className="flex items-center justify-between gap-2 p-4 border-b border-gray-100 dark:border-gray-800">
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">管理分类</h3>
-                            <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
-                                <X size={20} className="text-gray-500" />
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={handleOpenAiCategoryTransfer}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800 text-sky-500 dark:text-sky-300 text-xs font-medium hover:bg-sky-100 dark:hover:bg-sky-900/35 transition-colors"
+                                    title="按分类导出并导入 AI 分类结果"
+                                >
+                                    <Sparkles size={12} />
+                                    AI一键分类
+                                </button>
+                                <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+                                    <X size={20} className="text-gray-500" />
+                                </button>
+                            </div>
                         </div>
 
                         {/* List */}

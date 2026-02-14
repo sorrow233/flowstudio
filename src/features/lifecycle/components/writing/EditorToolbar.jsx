@@ -19,10 +19,10 @@ const IconBtn = ({ onClick, disabled, title, children, active, className = '' })
         disabled={disabled}
         title={title}
         className={`inline-flex h-9 w-9 items-center justify-center rounded-xl transition-all ${disabled
-            ? 'cursor-not-allowed text-sky-200'
+            ? 'cursor-not-allowed text-sky-200 dark:text-slate-700'
             : active
-                ? 'bg-sky-100 text-sky-700'
-                : 'text-slate-500 hover:bg-sky-50 hover:text-sky-700'
+                ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400'
+                : 'text-slate-500 hover:bg-sky-50 hover:text-sky-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-sky-400'
             } ${className}`}
     >
         {children}
@@ -30,7 +30,7 @@ const IconBtn = ({ onClick, disabled, title, children, active, className = '' })
 );
 
 const Divider = () => (
-    <div className="mx-1 h-4 w-px bg-sky-100/90" />
+    <div className="mx-1 h-4 w-px bg-sky-100/90 dark:bg-slate-700/90" />
 );
 
 const EditorToolbar = ({
@@ -55,17 +55,17 @@ const EditorToolbar = ({
     isMobile,
     t
 }) => (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border border-sky-100 bg-white/88 px-3 py-2 shadow-[0_8px_24px_-16px_rgba(37,99,235,0.45)] backdrop-blur-xl">
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-sky-100 bg-white px-3 py-2 shadow-[0_8px_24px_-16px_rgba(37,99,235,0.45)] dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
         <div className="flex items-center gap-2">
             <IconBtn onClick={onToggleSidebar} title={t('inspiration.toggleSidebar')}>
                 {isSidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
             </IconBtn>
 
-            <div className="flex items-center gap-1.5 rounded-full border border-sky-100 bg-sky-50/80 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-sky-700/80">
+            <div className="flex items-center gap-1.5 rounded-full border border-sky-100 bg-sky-50/80 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-sky-700/80 dark:border-slate-800 dark:bg-slate-800/50 dark:text-sky-400/80">
                 <span
                     className={`h-1.5 w-1.5 rounded-full transition-colors ${statusNeedsAttention
                         ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]'
-                        : 'bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.45)]'
+                        : 'bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.45)] dark:bg-sky-400 dark:shadow-none'
                         }`}
                 />
                 {statusLabel}
