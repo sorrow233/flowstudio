@@ -1,10 +1,8 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { Search, Plus, Trash2, FileText, ArrowLeft, X } from 'lucide-react';
+import { Trash2, FileText } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { toast } from 'sonner';
 import { useTranslation } from '../../../i18n';
-import WritingCategoryManager from './WritingCategoryManager';
-import WritingCategorySelector from './WritingCategorySelector';
 import { stripMarkup } from './editorUtils';
 import { resolveWritingCategoryLabel } from './writingCategoryUtils';
 
@@ -152,53 +150,11 @@ const WritingSidebar = ({
     onCreate,
     onUpdate,
     onDelete,
-    onAddCategory,
-    onUpdateCategory,
-    onRemoveCategory,
     onRestore,
-    onClose,
-    isMobile
+    allDocumentsCount = 0
 }) => {
     const { t } = useTranslation();
-    const [searchQuery, setSearchQuery] = useState('');
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [isCategoryManagerOpen, setCategoryManagerOpen] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState(() => categories[0]?.id || null);
-
     const defaultCategoryId = categories[0]?.id || null;
-
-    useEffect(() => {
-        if (searchQuery && !isSearchOpen) {
-            setIsSearchOpen(true);
-        }
-    }, [searchQuery, isSearchOpen]);
-
-    useEffect(() => {
-        if (categories.length === 0) {
-            setSelectedCategory(null);
-            return;
-        }
-        const exists = categories.some((category) => category.id === selectedCategory);
-        if (!exists) {
-            setSelectedCategory(categories[0].id);
-        }
-    }, [categories, selectedCategory]);
-
-    const filteredDocs = useMemo(() => {
-        if (!selectedCategory) return [];
-
-        let list = documents.filter((doc) => (doc.category || defaultCategoryId) === selectedCategory);
-
-        if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            list = list.filter((doc) =>
-                (doc.title || '').toLowerCase().includes(query)
-                || stripMarkup(doc.content || '').toLowerCase().includes(query)
-            );
-        }
-
-        return list;
-    }, [documents, searchQuery, selectedCategory, defaultCategoryId]);
 
     const groupedDocs = useMemo(() => {
         const groups = { today: [], yesterday: [], week: [], older: [] };
@@ -207,7 +163,7 @@ const WritingSidebar = ({
         const yesterdayStart = todayStart - 86400000;
         const weekStart = todayStart - 86400000 * 6;
 
-        filteredDocs.forEach((doc) => {
+        documents.forEach((doc) => {
             const timestamp = doc.lastModified || doc.timestamp || Date.now();
             if (timestamp >= todayStart) groups.today.push(doc);
             else if (timestamp >= yesterdayStart) groups.yesterday.push(doc);
@@ -216,7 +172,7 @@ const WritingSidebar = ({
         });
 
         return groups;
-    }, [filteredDocs]);
+    }, [documents]);
 
     const handleDelete = (doc) => {
         onDelete(doc.id);
@@ -266,101 +222,12 @@ const WritingSidebar = ({
 
     return (
         <div className="flex h-full flex-col bg-white dark:bg-slate-900">
-            {isMobile && <div className="pt-safe" />}
-
-            <header className="border-b border-sky-100/90 px-4 pb-4 pt-5 dark:border-slate-800/90">
-                <div className="mb-6 flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-2">
-                        {isMobile && (
-                            <button
-                                onClick={onClose}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-sky-100 bg-white text-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-sky-400"
-                            >
-                                <ArrowLeft size={16} />
-                            </button>
-                        )}
-
-                        <div className="min-w-0">
-                            <h2 className="line-clamp-1 text-[2.15rem] font-semibold leading-none tracking-tight text-slate-800 dark:text-slate-100">
-                                {t('inspiration.writing')}
-                            </h2>
-                            <p className="mt-2 line-clamp-1 text-[15px] leading-relaxed text-slate-400 dark:text-slate-500">
-                                {t('inspiration.writingSubtitle')}
-                            </p>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div className="mb-4">
-                    {!isSearchOpen ? (
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setIsSearchOpen(true)}
-                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-100 bg-white text-sky-500 transition hover:border-sky-200 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-sky-400 dark:hover:border-slate-600"
-                                title={t('inspiration.search')}
-                            >
-                                <Search size={16} />
-                            </button>
-                            <button
-                                onClick={() => onCreate(selectedCategory)}
-                                disabled={!selectedCategory}
-                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                                title={t('inspiration.newDoc')}
-                            >
-                                <Plus size={16} />
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-2">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400/80" />
-                                <input
-                                    autoFocus
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={(event) => setSearchQuery(event.target.value)}
-                                    placeholder={t('inspiration.search')}
-                                    className="w-full rounded-xl border border-sky-100 bg-white px-9 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:shadow-[0_0_0_4px_rgba(125,211,252,0.25)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-sky-700 dark:focus:shadow-[0_0_0_4px_rgba(14,165,233,0.15)]"
-                                />
-                            </div>
-                            <button
-                                onClick={() => {
-                                    setSearchQuery('');
-                                    setIsSearchOpen(false);
-                                }}
-                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-100 bg-white text-slate-400 transition hover:bg-sky-50 hover:text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:text-slate-200"
-                                title={t('common.close', '关闭')}
-                            >
-                                <X size={15} />
-                            </button>
-                            <button
-                                onClick={() => onCreate(selectedCategory)}
-                                disabled={!selectedCategory}
-                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                                title={t('inspiration.newDoc')}
-                            >
-                                <Plus size={16} />
-                            </button>
-                        </div>
-                    )}
-                </div>
-
-                <WritingCategorySelector
-                    categories={categories}
-                    selectedCategory={selectedCategory}
-                    onSelectCategory={setSelectedCategory}
-                    onOpenManager={() => setCategoryManagerOpen(true)}
-                    t={t}
-                />
-            </header>
-
             <div className="custom-scrollbar flex-1 overflow-y-auto px-3 py-4">
-                {filteredDocs.length === 0 ? (
+                {documents.length === 0 ? (
                     <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-sky-300">
                         <FileText size={34} strokeWidth={1.4} />
                         <p className="mt-3 text-xs text-slate-400">
-                            {documents.length === 0 ? t('inspiration.noDocs') : t('common.noData')}
+                            {allDocumentsCount === 0 ? t('inspiration.noDocs') : t('common.noData')}
                         </p>
                     </div>
                 ) : (
@@ -372,17 +239,6 @@ const WritingSidebar = ({
                     </AnimatePresence>
                 )}
             </div>
-
-            {isMobile && <div className="h-safe-bottom" />}
-
-            <WritingCategoryManager
-                isOpen={isCategoryManagerOpen}
-                onClose={() => setCategoryManagerOpen(false)}
-                categories={categories}
-                onAdd={onAddCategory}
-                onUpdate={onUpdateCategory}
-                onRemove={onRemoveCategory}
-            />
         </div>
     );
 };
