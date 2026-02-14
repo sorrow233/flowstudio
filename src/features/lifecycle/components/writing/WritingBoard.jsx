@@ -240,14 +240,14 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     };
 
     return (
-        <div className="relative flex h-full w-full overflow-hidden rounded-[26px]">
+        <div className={`relative flex h-full w-full overflow-hidden ${isMobile ? 'rounded-2xl' : 'rounded-[26px]'}`}>
             <div className="pointer-events-none absolute inset-0">
                 <div className="absolute inset-0 bg-white dark:bg-slate-900" />
-                <div className="absolute -top-24 left-12 h-72 w-72 rounded-full bg-sky-200/35 blur-3xl dark:bg-sky-900/20" />
-                <div className="absolute -bottom-24 right-12 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl dark:bg-blue-900/20" />
+                <div className={`absolute left-12 h-72 w-72 rounded-full bg-sky-200/35 blur-3xl dark:bg-sky-900/20 ${isMobile ? '-top-32' : '-top-24'}`} />
+                <div className={`absolute right-12 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl dark:bg-blue-900/20 ${isMobile ? '-bottom-32' : '-bottom-24'}`} />
             </div>
 
-            <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+            <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col">
                 <WritingWorkspaceHeader
                     categories={categories}
                     selectedCategory={selectedCategory}
