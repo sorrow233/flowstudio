@@ -17,6 +17,12 @@ import { useSyncedCategories } from '../sync/useSyncStore';
 import CategoryManager from './components/inspiration/CategoryManager';
 import ImageUploader from './components/inspiration/ImageUploader';
 import { deleteImagesInContent } from './services/imageService';
+import {
+    buildCategoryExportText,
+    buildCategoryTransferPrompt,
+    normalizeIdeaTextForExport,
+    parseCategoryTransferOutput,
+} from './components/inspiration/categoryTransferUtils';
 
 // Auto color logic: Every 3 items, switch to next color
 const getNextAutoColorIndex = (totalCount) => {
@@ -147,6 +153,13 @@ const InspirationModule = () => {
     const [isPromptCopied, setIsPromptCopied] = useState(false);
     const [isTodoCopied, setIsTodoCopied] = useState(false);
     const [isBatchCopied, setIsBatchCopied] = useState(false);
+    const [isCategoryTransferOpen, setIsCategoryTransferOpen] = useState(false);
+    const [categoryTransferSourceId, setCategoryTransferSourceId] = useState('note');
+    const [categoryTransferText, setCategoryTransferText] = useState('');
+    const [categoryTransferError, setCategoryTransferError] = useState('');
+    const [categoryTransferSuccessCount, setCategoryTransferSuccessCount] = useState(0);
+    const [isCategoryPromptCopied, setIsCategoryPromptCopied] = useState(false);
+    const [isCategoryContentCopied, setIsCategoryContentCopied] = useState(false);
     const [aiAssistTab, setAiAssistTab] = useState('prompt');
     const [showTodoAiHint, setShowTodoAiHint] = useState(() => {
         try {
@@ -166,6 +179,14 @@ const InspirationModule = () => {
             if (defaultCat) setSelectedCategory(defaultCat.id);
         }
     }, [categories, selectedCategory]);
+
+    useEffect(() => {
+        if (categories.length === 0) return;
+        if (!categories.find(c => c.id === categoryTransferSourceId)) {
+            const fallback = categories.find(c => c.id === selectedCategory) || categories[0];
+            if (fallback) setCategoryTransferSourceId(fallback.id);
+        }
+    }, [categories, categoryTransferSourceId, selectedCategory]);
 
     // Autocomplete State
     const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -465,18 +486,6 @@ const InspirationModule = () => {
         }
     };
 
-    const normalizeIdeaText = useCallback((content = '') => {
-        return content
-            .replace(/#![^:]+:([^#]+)#/g, '$1')
-            .replace(/`([^`]+)`/g, '$1')
-            .replace(/\*\*([^*]+)\*\*/g, '$1')
-            .replace(/\[([^\]]+)\]/g, '$1')
-            .replace(/https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp)(?:\?[^\s]*)?/gi, '')
-            .replace(/https:\/\/pub-[a-z0-9]+\.r2\.dev\/[^\s]+/gi, '')
-            .replace(/\s+/g, ' ')
-            .trim();
-    }, []);
-
     const unclassifiedTodoIdeas = useMemo(() => {
         return ideas
             .filter(idea =>
@@ -489,10 +498,10 @@ const InspirationModule = () => {
 
     const unclassifiedTodoNumberedText = useMemo(() => {
         return unclassifiedTodoIdeas
-            .map((idea, index) => `${index + 1}. ${normalizeIdeaText(idea.content)}`)
+            .map((idea, index) => `${index + 1}. ${normalizeIdeaTextForExport(idea.content)}`)
             .filter(Boolean)
             .join('\n');
-    }, [unclassifiedTodoIdeas, normalizeIdeaText]);
+    }, [unclassifiedTodoIdeas]);
 
     const aiPromptTemplate = useMemo(() => {
         return `你是任务结构化助手。请把我接下来输入的内容整理为可执行待办清单。输入可能来自：
@@ -599,7 +608,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                 .replace(/[；;。]+$/g, '')
                 .trim();
 
-            cleaned = normalizeIdeaText(cleaned);
+            cleaned = normalizeIdeaTextForExport(cleaned);
             if (!cleaned) {
                 if (isNumberedLikeLine(originalLine)) {
                     output.push(getBlankPlaceholder());
@@ -647,7 +656,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         }
 
         return deduped.slice(0, 100);
-    }, [normalizeIdeaText]);
+    }, []);
 
     const handleCopyPrompt = useCallback(async () => {
         const success = await copyTextToClipboard(aiPromptTemplate);
@@ -773,7 +782,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
         const numberedText = selectedIdeas
-            .map((idea, index) => `${index + 1}. ${normalizeIdeaText(idea.content)}`)
+            .map((idea, index) => `${index + 1}. ${normalizeIdeaTextForExport(idea.content)}`)
             .filter(Boolean)
             .join('\n');
 
@@ -784,7 +793,118 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             setIsBatchCopied(true);
             setTimeout(() => setIsBatchCopied(false), 1500);
         }
-    }, [selectedIdeaIds, ideas, normalizeIdeaText, copyTextToClipboard]);
+    }, [selectedIdeaIds, ideas, copyTextToClipboard]);
+
+    const categoryTransferSourceCategory = useMemo(() => {
+        return categories.find(cat => cat.id === categoryTransferSourceId) || categories[0] || null;
+    }, [categories, categoryTransferSourceId]);
+
+    const categoryTransferIdeas = useMemo(() => {
+        return ideas
+            .filter(idea => (idea.category || 'note') === categoryTransferSourceId)
+            .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+    }, [ideas, categoryTransferSourceId]);
+
+    const categoryTransferNumberedText = useMemo(() => {
+        return buildCategoryExportText(categoryTransferIdeas);
+    }, [categoryTransferIdeas]);
+
+    const categoryTransferPrompt = useMemo(() => {
+        return buildCategoryTransferPrompt({
+            sourceCategoryLabel: categoryTransferSourceCategory?.label || '当前分类',
+            categories,
+            numberedIdeasText: categoryTransferNumberedText,
+        });
+    }, [categoryTransferSourceCategory, categories, categoryTransferNumberedText]);
+
+    const handleOpenCategoryTransfer = useCallback(() => {
+        const fallback = categories.find(c => c.id === selectedCategory) || categories[0];
+        if (fallback) {
+            setCategoryTransferSourceId(fallback.id);
+        }
+        setCategoryTransferText('');
+        setCategoryTransferError('');
+        setCategoryTransferSuccessCount(0);
+        setIsCategoryTransferOpen(true);
+    }, [categories, selectedCategory]);
+
+    const handleCopyCategoryTransferPrompt = useCallback(async () => {
+        if (categoryTransferIdeas.length === 0) {
+            setCategoryTransferError('当前分类没有可导出的内容。');
+            return;
+        }
+
+        const success = await copyTextToClipboard(categoryTransferPrompt);
+        if (success) {
+            setIsCategoryPromptCopied(true);
+            setTimeout(() => setIsCategoryPromptCopied(false), 1500);
+            setCategoryTransferError('');
+        } else {
+            setCategoryTransferError('分类指令复制失败，请手动复制。');
+        }
+    }, [categoryTransferIdeas.length, categoryTransferPrompt, copyTextToClipboard]);
+
+    const handleCopyCategoryTransferContent = useCallback(async () => {
+        if (!categoryTransferNumberedText.trim()) {
+            setCategoryTransferError('当前分类没有可复制的内容。');
+            return;
+        }
+
+        const success = await copyTextToClipboard(categoryTransferNumberedText);
+        if (success) {
+            setIsCategoryContentCopied(true);
+            setTimeout(() => setIsCategoryContentCopied(false), 1500);
+            setCategoryTransferError('');
+        } else {
+            setCategoryTransferError('分类内容复制失败，请手动复制。');
+        }
+    }, [categoryTransferNumberedText, copyTextToClipboard]);
+
+    const handleApplyCategoryTransfer = useCallback(() => {
+        if (!categoryTransferText.trim()) {
+            setCategoryTransferError('请先粘贴 AI 分类结果。');
+            setCategoryTransferSuccessCount(0);
+            return;
+        }
+
+        if (categoryTransferIdeas.length === 0) {
+            setCategoryTransferError('当前分类没有可导入的内容。');
+            setCategoryTransferSuccessCount(0);
+            return;
+        }
+
+        const assignments = parseCategoryTransferOutput({
+            rawText: categoryTransferText,
+            categories,
+            maxIndex: categoryTransferIdeas.length,
+        });
+
+        if (assignments.length === 0) {
+            setCategoryTransferError('没有识别到有效分类，请确认输出格式为“编号. 分类名”。');
+            setCategoryTransferSuccessCount(0);
+            return;
+        }
+
+        let moved = 0;
+        assignments.forEach(({ index, categoryId }) => {
+            const targetIdea = categoryTransferIdeas[index];
+            if (!targetIdea) return;
+            const currentCategory = targetIdea.category || 'note';
+            if (currentCategory === categoryId) return;
+            updateIdea(targetIdea.id, { category: categoryId });
+            moved += 1;
+        });
+
+        if (moved === 0) {
+            setCategoryTransferError('已解析分类结果，但没有条目需要迁移。');
+            setCategoryTransferSuccessCount(0);
+            return;
+        }
+
+        setCategoryTransferError('');
+        setCategoryTransferSuccessCount(moved);
+        setCategoryTransferText('');
+    }, [categoryTransferText, categories, categoryTransferIdeas, updateIdea]);
 
     const markTodoAiHintSeen = useCallback(() => {
         setShowTodoAiHint(false);
@@ -1268,6 +1388,15 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                             </div>
                         </div>
 
+                        <button
+                            onClick={handleOpenCategoryTransfer}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/70 dark:bg-gray-900/70 border border-sky-100 dark:border-sky-800 text-sky-500 dark:text-sky-300 text-xs font-medium hover:bg-sky-50 dark:hover:bg-sky-900/25 transition-colors whitespace-nowrap"
+                            title="按分类导出并导入 AI 分类结果"
+                        >
+                            <Sparkles size={12} />
+                            AI一键分类
+                        </button>
+
                         {selectedCategory === 'todo' && showTodoAiHint && (
                             <div className="hidden md:flex items-center gap-1.5 text-[11px] text-blue-400 dark:text-blue-500 px-2">
                                 <Sparkles size={12} />
@@ -1628,7 +1757,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                         >
                                                             <span className="mt-0.5 w-3.5 h-3.5 rounded-[4px] border border-pink-300/80 dark:border-pink-700/80 flex-shrink-0" />
                                                             <span className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                                                                {index + 1}. {normalizeIdeaText(idea.content)}
+                                                                {index + 1}. {normalizeIdeaTextForExport(idea.content)}
                                                             </span>
                                                         </div>
                                                     ))}
@@ -1748,6 +1877,157 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                         </div>
                                     </>
                                 )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* AI Category Transfer Modal */}
+            <AnimatePresence>
+                {isCategoryTransferOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[125] flex items-center justify-center p-4 md:p-6 bg-white/45 dark:bg-black/45 backdrop-blur-xl"
+                        onClick={() => setIsCategoryTransferOpen(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.96, opacity: 0, y: 18 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.96, opacity: 0, y: 18 }}
+                            transition={{ duration: 0.24 }}
+                            className="w-full max-w-[860px] bg-white/95 dark:bg-gray-900/95 border border-white/60 dark:border-gray-800 rounded-[2rem] shadow-[0_24px_60px_-24px_rgba(0,0,0,0.25)] overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="px-6 py-5 border-b border-sky-100/70 dark:border-sky-900/30 bg-gradient-to-r from-sky-50/90 via-cyan-50/70 to-sky-50/90 dark:from-sky-900/30 dark:via-cyan-900/20 dark:to-sky-900/30">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div>
+                                        <div className="inline-flex items-center gap-2 text-sky-500 dark:text-sky-300 mb-2">
+                                            <Sparkles size={16} />
+                                            <span className="text-xs font-semibold tracking-wide uppercase">AI Category Transfer</span>
+                                        </div>
+                                        <h3 className="text-[30px] leading-tight font-light text-gray-900 dark:text-white tracking-tight">AI 一键分类迁移</h3>
+                                        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 font-light">
+                                            先导出一个分类的内容给 AI 分类，再把结果粘贴回来自动迁移到目标分类。
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => setIsCategoryTransferOpen(false)}
+                                        className="p-2 rounded-full hover:bg-white/70 dark:hover:bg-gray-800 text-gray-400 hover:text-sky-500 dark:hover:text-sky-300 transition-colors"
+                                        title={t('common.close', '关闭')}
+                                    >
+                                        <X size={18} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="p-6 space-y-5 max-h-[72vh] overflow-y-auto">
+                                <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-3 items-end">
+                                    <label className="block">
+                                        <span className="block text-xs font-semibold tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">
+                                            导出源分类
+                                        </span>
+                                        <select
+                                            value={categoryTransferSourceId}
+                                            onChange={(e) => {
+                                                setCategoryTransferSourceId(e.target.value);
+                                                setCategoryTransferError('');
+                                                setCategoryTransferSuccessCount(0);
+                                            }}
+                                            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-sky-300/50 dark:focus:ring-sky-700/50 focus:border-sky-300 dark:focus:border-sky-700 transition-all"
+                                        >
+                                            {categories.map((cat) => (
+                                                <option key={cat.id} value={cat.id}>{cat.label}</option>
+                                            ))}
+                                        </select>
+                                    </label>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <button
+                                            onClick={handleCopyCategoryTransferPrompt}
+                                            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sky-400 text-white hover:bg-sky-500 transition-colors text-sm font-medium shadow-lg shadow-sky-100 dark:shadow-sky-900/30"
+                                        >
+                                            <Copy size={14} />
+                                            {isCategoryPromptCopied ? '分类指令已复制' : '复制完整分类指令'}
+                                        </button>
+                                        <button
+                                            onClick={handleCopyCategoryTransferContent}
+                                            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-gray-800 text-sky-500 dark:text-sky-300 border border-sky-100 dark:border-sky-800 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-colors text-sm font-medium"
+                                        >
+                                            <ListChecks size={14} />
+                                            {isCategoryContentCopied
+                                                ? '分类内容已复制'
+                                                : `复制分类内容（${categoryTransferIdeas.length}）`}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="rounded-2xl border border-sky-100 dark:border-sky-800/40 bg-sky-50/60 dark:bg-sky-900/15 p-4">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <div className="text-[11px] font-semibold tracking-wide uppercase text-sky-500 dark:text-sky-300">
+                                            {categoryTransferSourceCategory?.label || '当前分类'} 内容预览
+                                        </div>
+                                        <span className="text-[11px] text-gray-400 dark:text-gray-500">
+                                            {categoryTransferIdeas.length} 项
+                                        </span>
+                                    </div>
+                                    {categoryTransferIdeas.length === 0 && (
+                                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                            当前分类没有可导出的内容。
+                                        </p>
+                                    )}
+                                    {categoryTransferIdeas.length > 0 && (
+                                        <pre className="mt-2 text-xs leading-relaxed text-gray-600 dark:text-gray-300 whitespace-pre-wrap font-mono max-h-36 overflow-y-auto">
+                                            {categoryTransferNumberedText}
+                                        </pre>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">
+                                        粘贴 AI 分类输出（格式：编号. 分类名）
+                                    </label>
+                                    <textarea
+                                        value={categoryTransferText}
+                                        onChange={(e) => {
+                                            setCategoryTransferText(e.target.value);
+                                            if (categoryTransferError) setCategoryTransferError('');
+                                        }}
+                                        placeholder={'示例：\n1. 代办\n2. 情绪\n3. 随记'}
+                                        className="w-full min-h-[220px] rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-200 p-4 outline-none focus:ring-2 focus:ring-sky-300/50 dark:focus:ring-sky-700/50 focus:border-sky-300 dark:focus:border-sky-700 transition-all"
+                                    />
+                                </div>
+
+                                {categoryTransferError && (
+                                    <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/50 rounded-xl px-3 py-2">
+                                        {categoryTransferError}
+                                    </div>
+                                )}
+
+                                {categoryTransferSuccessCount > 0 && (
+                                    <div className="text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 rounded-xl px-3 py-2">
+                                        已成功迁移 {categoryTransferSuccessCount} 条内容。
+                                    </div>
+                                )}
+
+                                <div className="flex items-center justify-end gap-2 pt-1">
+                                    <button
+                                        onClick={() => setIsCategoryTransferOpen(false)}
+                                        className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                    >
+                                        关闭
+                                    </button>
+                                    <button
+                                        onClick={handleApplyCategoryTransfer}
+                                        disabled={!categoryTransferText.trim() || categoryTransferIdeas.length === 0}
+                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-400 text-white text-sm font-medium hover:bg-sky-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-lg shadow-sky-100 dark:shadow-sky-900/30"
+                                    >
+                                        <ArrowRight size={14} />
+                                        导入并迁移
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
                     </motion.div>
