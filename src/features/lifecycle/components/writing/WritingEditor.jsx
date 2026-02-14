@@ -72,6 +72,12 @@ const WritingEditor = ({
 
     // ---------- Inactivity Tracking ----------
     const resetInactivityTimer = useCallback(() => {
+        if (!isMobile) {
+            setIsToolbarVisible(true);
+            if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
+            return;
+        }
+
         setIsToolbarVisible(true);
         if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
 
@@ -81,9 +87,15 @@ const WritingEditor = ({
                 setIsToolbarVisible(false);
             }
         }, 2000);
-    }, [showActions, showHistory]);
+    }, [isMobile, showActions, showHistory]);
 
     useEffect(() => {
+        if (!isMobile) {
+            setIsToolbarVisible(true);
+            if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
+            return undefined;
+        }
+
         const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
         const handler = () => resetInactivityTimer();
 
@@ -94,16 +106,21 @@ const WritingEditor = ({
             events.forEach(e => window.removeEventListener(e, handler, { passive: true }));
             if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
         };
-    }, [resetInactivityTimer]);
+    }, [isMobile, resetInactivityTimer]);
 
     useEffect(() => {
+        if (!isMobile) {
+            setIsToolbarVisible(true);
+            return;
+        }
+
         if (showActions || showHistory) {
             setIsToolbarVisible(true);
             if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
         } else {
             resetInactivityTimer();
         }
-    }, [showActions, showHistory, resetInactivityTimer]);
+    }, [isMobile, showActions, showHistory, resetInactivityTimer]);
 
     // ---------- Derived ----------
     const hasUnsavedChanges = useMemo(() => {
@@ -301,7 +318,7 @@ const WritingEditor = ({
 
     // ESC closes
     useEffect(() => {
-        const h = (e) => { if (e.key === 'Escape') { setShowExport(false); setShowHistory(false); } };
+        const h = (e) => { if (e.key === 'Escape') { setShowActions(false); setShowHistory(false); } };
         document.addEventListener('keydown', h);
         return () => document.removeEventListener('keydown', h);
     }, []);
@@ -371,8 +388,7 @@ const WritingEditor = ({
         setContentMarkup(htmlToMarkup(editorRef.current));
         setIsSaving(true);
         updateStatsFromEditor();
-        if (onCloseSidebar && !isMobile) onCloseSidebar();
-    }, [updateStatsFromEditor, onCloseSidebar, isMobile]);
+    }, [updateStatsFromEditor]);
 
     const applyColor = (colorId) => {
         if (typeof window === 'undefined' || !window.getSelection) return;
@@ -413,7 +429,7 @@ const WritingEditor = ({
         } else {
             downloadContent(`${title ? `${title}\n\n` : ''}${markupToPlain(markup)}`, 'text/plain', 'txt', title);
         }
-        setShowExport(false);
+        setShowActions(false);
     };
 
     const handleCopy = async () => {
@@ -618,7 +634,6 @@ const WritingEditor = ({
                             onInput={handleInput}
                             onFocus={() => {
                                 setIsEditorFocused(true);
-                                if (onCloseSidebar && !isMobile) onCloseSidebar();
                             }}
                             onBlur={() => setIsEditorFocused(false)}
                             spellCheck
