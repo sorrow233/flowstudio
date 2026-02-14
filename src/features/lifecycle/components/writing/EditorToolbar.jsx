@@ -3,7 +3,7 @@ import { AnimatePresence } from 'framer-motion';
 import {
     PanelLeftClose,
     PanelLeftOpen,
-    Ellipsis
+    MoreHorizontal
 } from 'lucide-react';
 import ExportMenu from './ExportMenu';
 
@@ -65,7 +65,7 @@ const EditorToolbar = ({
         <div className="flex items-center">
             <div className="relative">
                 <IconBtn onClick={onToggleActions} title={t('common.details', '详情')}>
-                    <Ellipsis size={16} />
+                    <MoreHorizontal size={16} />
                 </IconBtn>
                 <AnimatePresence>
                     {showActions && (
