@@ -22,13 +22,10 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
     const { t } = useTranslation();
     const [editingId, setEditingId] = useState(null);
     const [editLabel, setEditLabel] = useState('');
-    const [editColorId, setEditColorId] = useState(COLOR_PRESETS[0].id);
     const [isAdding, setIsAdding] = useState(false);
     const [newLabel, setNewLabel] = useState('');
-    const [newColorId, setNewColorId] = useState(COLOR_PRESETS[1].id);
     const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
-    const findColor = (id) => COLOR_PRESETS.find((color) => color.id === id) || COLOR_PRESETS[0];
     const defaultLabelMap = {
         draft: 'Draft',
         plot: 'Plot',
@@ -62,22 +59,22 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
     const startEdit = (category) => {
         setEditingId(category.id);
         setEditLabel(resolveCategoryLabel(category));
-        const preset = COLOR_PRESETS.find((p) => p.color === category.color || p.dotColor === category.dotColor) || COLOR_PRESETS[0];
-        setEditColorId(preset.id);
         setDeleteConfirmId(null);
     };
 
     const saveEdit = () => {
         const label = editLabel.trim();
         if (!editingId || !label) return;
-        onUpdate(editingId, { label, ...findColor(editColorId) });
+        onUpdate(editingId, { label });
         setEditingId(null);
     };
 
     const handleAdd = () => {
         const label = newLabel.trim();
         if (!label || categories.length >= MAX_CATEGORIES) return;
-        onAdd({ label, ...findColor(newColorId) });
+        const unusedPreset = COLOR_PRESETS.find((preset) => !usedColorSet.has(preset.color));
+        const fallbackPreset = COLOR_PRESETS[categories.length % COLOR_PRESETS.length];
+        onAdd({ label, ...(unusedPreset || fallbackPreset) });
         setIsAdding(false);
         setNewLabel('');
     };
@@ -117,15 +114,7 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
                                     <div key={category.id} className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/40">
                                         {editingId === category.id ? (
                                             <>
-                                                <select
-                                                    value={editColorId}
-                                                    onChange={(event) => setEditColorId(event.target.value)}
-                                                    className="rounded-md border border-sky-200 bg-white px-1.5 py-1 text-xs text-slate-600 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                                                >
-                                                    {COLOR_PRESETS.map((preset) => (
-                                                        <option key={preset.id} value={preset.id}>{preset.id}</option>
-                                                    ))}
-                                                </select>
+                                                <span className={`h-2.5 w-2.5 rounded-full ${category.dotColor}`} />
                                                 <input
                                                     autoFocus
                                                     value={editLabel}
@@ -196,15 +185,7 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
                             <div className="mt-4 border-t border-sky-100 pt-4 dark:border-slate-800">
                                 {isAdding ? (
                                     <div className="flex items-center gap-2 rounded-xl border border-sky-100 bg-sky-50/70 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
-                                        <select
-                                            value={newColorId}
-                                            onChange={(event) => setNewColorId(event.target.value)}
-                                            className="rounded-md border border-sky-200 bg-white px-1.5 py-1 text-xs text-slate-600 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                                        >
-                                            {COLOR_PRESETS.map((preset) => (
-                                                <option key={preset.id} value={preset.id}>{preset.id}</option>
-                                            ))}
-                                        </select>
+                                        <span className="h-2.5 w-2.5 rounded-full bg-sky-400" />
                                         <input
                                             autoFocus
                                             placeholder={t('writing.categoryNamePlaceholder', '输入分类名称')}
@@ -225,11 +206,7 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
                                     </div>
                                 ) : categories.length < MAX_CATEGORIES ? (
                                     <button
-                                        onClick={() => {
-                                            const available = COLOR_PRESETS.find((preset) => !usedColorSet.has(preset.color)) || COLOR_PRESETS[0];
-                                            setNewColorId(available.id);
-                                            setIsAdding(true);
-                                        }}
+                                        onClick={() => setIsAdding(true)}
                                         className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-sky-200 py-2.5 text-sm text-slate-500 transition hover:border-sky-300 hover:text-sky-600 dark:border-slate-700 dark:text-slate-400 dark:hover:border-sky-700 dark:hover:text-sky-400"
                                     >
                                         <Plus size={15} />
