@@ -294,32 +294,92 @@ const WritingEditor = ({
         if (inserted) handleInput();
     }, [handleInput, markupToHtml]);
 
-    const applyColor = (colorId) => {
-        if (typeof window === 'undefined' || !window.getSelection) return;
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-
+    const createHighlightElement = useCallback((colorId) => {
         const colorConfig = COLOR_CONFIG.find((color) => color.id === colorId);
-        if (!colorConfig) return;
-
-        const range = selection.getRangeAt(0);
+        const highlightColor = colorConfig?.highlight || 'rgba(125, 211, 252, 0.55)';
         const span = document.createElement('span');
-        const highlightColor = colorConfig.highlight || 'rgba(125, 211, 252, 0.55)';
         span.style.background = `radial-gradient(ellipse 100% 40% at center 80%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%)`;
         span.style.padding = '0 0.15em';
         span.dataset.colorId = colorId;
         span.className = 'colored-text relative inline';
+        return span;
+    }, []);
 
-        try {
-            range.surroundContents(span);
-            selection.removeAllRanges();
+    const unwrapColoredSpan = useCallback((node) => {
+        if (!node?.parentNode) return;
+        const parent = node.parentNode;
+        while (node.firstChild) {
+            parent.insertBefore(node.firstChild, node);
+        }
+        parent.removeChild(node);
+    }, []);
+
+    const stripColoredSpansInFragment = useCallback((fragment) => {
+        if (!fragment || typeof fragment.querySelectorAll !== 'function') return false;
+        const coloredSpans = Array.from(fragment.querySelectorAll('span.colored-text'));
+        if (coloredSpans.length === 0) return false;
+        for (let index = coloredSpans.length - 1; index >= 0; index -= 1) {
+            unwrapColoredSpan(coloredSpans[index]);
+        }
+        return true;
+    }, [unwrapColoredSpan]);
+
+    const clearColor = useCallback(() => {
+        if (typeof window === 'undefined' || !window.getSelection || !editorRef.current) return;
+        const selection = window.getSelection();
+        if (!selection || !selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        if (!editorRef.current.contains(range.commonAncestorContainer)) return;
+
+        // 光标在高亮内时，直接清掉当前高亮包裹
+        if (range.collapsed) {
+            const anchorElement = selection.anchorNode?.nodeType === Node.ELEMENT_NODE
+                ? selection.anchorNode
+                : selection.anchorNode?.parentElement;
+            const coloredNode = anchorElement?.closest?.('span.colored-text');
+            if (!coloredNode || !editorRef.current.contains(coloredNode)) return;
+            unwrapColoredSpan(coloredNode);
             handleInput();
-        } catch (error) {
-            console.warn('Could not wrap selection', error);
+            setToolbarPosition(null);
+            return;
         }
 
+        const fragment = range.extractContents();
+        const removed = stripColoredSpansInFragment(fragment);
+        range.insertNode(fragment);
+        if (!removed) return;
+
+        selection.removeAllRanges();
+        handleInput();
         setToolbarPosition(null);
-    };
+    }, [handleInput, setToolbarPosition, stripColoredSpansInFragment, unwrapColoredSpan]);
+
+    const applyColor = useCallback((colorId) => {
+        if (typeof window === 'undefined' || !window.getSelection) return;
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        if (range.collapsed) return;
+        if (!editorRef.current?.contains(range.commonAncestorContainer)) return;
+
+        const fragment = range.extractContents();
+        stripColoredSpansInFragment(fragment);
+
+        const hasVisibleText = (fragment.textContent || '').trim().length > 0;
+        if (!hasVisibleText) {
+            range.insertNode(fragment);
+            return;
+        }
+
+        const span = createHighlightElement(colorId);
+        span.appendChild(fragment);
+        range.insertNode(span);
+        selection.removeAllRanges();
+        setToolbarPosition(null);
+        handleInput();
+    }, [createHighlightElement, handleInput, setToolbarPosition, stripColoredSpansInFragment]);
 
     const restoreSnapshot = (snapshot) => {
         if (!writingDoc || !snapshot) return;
@@ -397,7 +457,9 @@ const WritingEditor = ({
                     <FloatingColorPicker
                         position={toolbarPosition}
                         onApplyColor={applyColor}
+                        onClearColor={clearColor}
                         isMobile={isMobile}
+                        t={t}
                     />
                 )}
             </AnimatePresence>
