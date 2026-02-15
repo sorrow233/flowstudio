@@ -25,19 +25,17 @@ Flow Studio 是一款追求**极致视觉**与**心流体验**的全流程工作
 
 ### Gallery
 
-> *请在 `docs/images/` 目录下放入对应截图*
-
 **01 Inspiration / 灵感**
-![Inspiration](docs/images/01-inspiration.png)
+![Inspiration](docs/images/灵感.png)
 
 **02 Flow Writing / 写作**
-![Writing](docs/images/02-writing.png)
+![Writing](docs/images/写作.png)
 
 **03 Lifecycle / 孵化**
-![Lifecycle](docs/images/03-lifecycle.png)
+![Lifecycle](docs/images/蓝图.png)
 
 **04 Data / 洞察**
-![Data](docs/images/04-datacenter.png)
+![Data](docs/images/数据.png)
 
 ---
 
