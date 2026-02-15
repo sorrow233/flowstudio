@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import {
     PanelLeftClose,
     PanelLeftOpen,
-    PenSquare,
     Plus,
     FileText,
     Clock,
@@ -23,6 +22,41 @@ const WritingDashboard = ({
     isMobile,
     t,
 }) => {
+    if (documents.length === 0) {
+        return (
+            <div className="relative h-full w-full overflow-y-auto custom-scrollbar">
+                <div className="pointer-events-none absolute inset-0">
+                    <div className="absolute inset-0 bg-white" />
+                    <div className="absolute top-12 right-20 h-52 w-52 rounded-full bg-sky-100/30 blur-[92px]" />
+                    <div className="absolute -left-20 bottom-10 h-56 w-56 rounded-full bg-blue-100/20 blur-[86px]" />
+                </div>
+
+                <div className="relative z-10 mx-auto flex min-h-full w-full max-w-4xl items-center justify-center px-6 py-16 md:px-10">
+                    <motion.section
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.32 }}
+                        className="w-full max-w-2xl rounded-3xl border border-sky-100/80 bg-white/90 p-8 text-center shadow-[0_26px_62px_-42px_rgba(14,116,255,0.5)] md:p-10"
+                    >
+                        <h1 className="text-[2.1rem] font-semibold tracking-tight text-slate-800 md:text-[2.5rem]">
+                            {t('inspiration.writing')}
+                        </h1>
+                        <p className="mt-3 text-base text-slate-500">
+                            {t('inspiration.writingSubtitle')}
+                        </p>
+                        <button
+                            onClick={() => onCreate()}
+                            className="mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-slate-800 px-5 text-sm font-semibold text-white transition hover:bg-slate-700 active:scale-[0.98]"
+                        >
+                            <Plus size={16} />
+                            {t('inspiration.newDoc')}
+                        </button>
+                    </motion.section>
+                </div>
+            </div>
+        );
+    }
+
     const recentDocs = useMemo(() => documents.slice(0, 6), [documents]);
 
     const stats = useMemo(() => {
@@ -195,27 +229,6 @@ const WritingDashboard = ({
                     </motion.section>
                 )}
 
-                {documents.length === 0 && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-sky-200 bg-white py-16 text-center"
-                    >
-                        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                            <PenSquare size={28} strokeWidth={1.5} />
-                        </div>
-                        <p className="text-sm text-slate-500">
-                            {t('inspiration.noDocs')}
-                        </p>
-                        <button
-                            onClick={() => onCreate()}
-                            className="mt-4 rounded-xl border border-slate-300 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
-                        >
-                            {t('inspiration.newDoc')}
-                        </button>
-                    </motion.div>
-                )}
             </div>
         </div>
     );

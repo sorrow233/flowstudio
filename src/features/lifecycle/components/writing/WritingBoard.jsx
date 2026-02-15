@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSync } from '../../../sync/SyncContext';
@@ -98,16 +98,26 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
 
 
     const [selectedDocId, setSelectedDocId] = useState(null);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(() => !isMobile);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(() => !isMobile && documents.length > 0);
     const [selectedCategory, setSelectedCategory] = useState(() => categories[0]?.id || null);
     const [searchInput, setSearchInput] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+    const hasAutoOpenedSidebarRef = useRef(documents.length > 0);
 
     useEffect(() => {
-        if (!isMobile) {
-            setIsSidebarOpen(true);
+        if (isMobile) return;
+
+        if (documents.length === 0) {
+            setIsSidebarOpen(false);
+            hasAutoOpenedSidebarRef.current = false;
+            return;
         }
-    }, [isMobile]);
+
+        if (!hasAutoOpenedSidebarRef.current) {
+            setIsSidebarOpen(true);
+            hasAutoOpenedSidebarRef.current = true;
+        }
+    }, [documents.length, isMobile]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
