@@ -8,6 +8,16 @@ import { resolveWritingCategoryLabel, WRITING_CATEGORY_COLORS } from './writingC
 
 
 const MAX_CATEGORIES = 10;
+const pickPresetStyle = (preset) => {
+    if (!preset) return {};
+    return {
+        color: preset.color,
+        dotColor: preset.dotColor,
+        textColor: preset.textColor,
+        buttonClass: preset.buttonClass,
+        darkButtonClass: preset.darkButtonClass,
+    };
+};
 
 const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemove }) => {
     const { t } = useTranslation();
@@ -21,7 +31,7 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
 
     const normalizedCategories = categories.map((cat) => {
         const preset = WRITING_CATEGORY_COLORS.find((p) => p.color === cat.color || p.dotColor === cat.dotColor);
-        return preset ? { ...cat, ...preset } : cat;
+        return preset ? { ...cat, ...pickPresetStyle(preset) } : cat;
     });
 
     const startEdit = (category) => {
@@ -42,7 +52,7 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
         if (!label || categories.length >= MAX_CATEGORIES) return;
         const unusedPreset = WRITING_CATEGORY_COLORS.find((preset) => !usedColorSet.has(preset.color));
         const fallbackPreset = WRITING_CATEGORY_COLORS[categories.length % WRITING_CATEGORY_COLORS.length];
-        onAdd({ label, ...(unusedPreset || fallbackPreset) });
+        onAdd({ label, ...pickPresetStyle(unusedPreset || fallbackPreset) });
         setIsAdding(false);
         setNewLabel('');
     };
