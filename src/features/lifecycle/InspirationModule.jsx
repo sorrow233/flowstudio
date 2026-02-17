@@ -9,7 +9,7 @@ import { useImportQueue } from '../sync/hooks/useImportQueue';
 import { useAuth } from '../auth/AuthContext';
 import { useTranslation } from '../i18n';
 import InspirationItem from './components/inspiration/InspirationItem';
-import { COLOR_CONFIG } from './components/inspiration/InspirationUtils';
+import { COLOR_CONFIG, copyImageToClipboard, IMAGE_URL_REGEX, R2_IMAGE_REGEX } from './components/inspiration/InspirationUtils';
 import RichTextInput from './components/inspiration/RichTextInput';
 import Spotlight from '../../components/shared/Spotlight';
 import { INSPIRATION_CATEGORIES } from '../../utils/constants';
@@ -352,6 +352,27 @@ const InspirationModule = () => {
 
     const handleCopy = useCallback(async (content, id) => {
         try {
+            // 检测内容中是否包含图片 URL
+            const imgMatches1 = content.match(new RegExp(IMAGE_URL_REGEX.source, 'gi')) || [];
+            const imgMatches2 = content.match(new RegExp(R2_IMAGE_REGEX.source, 'gi')) || [];
+            const imageUrls = [...new Set([...imgMatches1, ...imgMatches2])];
+
+            if (imageUrls.length > 0) {
+                // 有图片：提取纯文字部分
+                let textPart = content;
+                imageUrls.forEach(url => { textPart = textPart.replace(url, ''); });
+                textPart = textPart.trim();
+
+                // 复制第一张图片 + 文字到剪贴板
+                const result = await copyImageToClipboard(imageUrls[0], textPart);
+                if (result) {
+                    setCopiedId(id);
+                    setTimeout(() => setCopiedId(null), 2000);
+                    return;
+                }
+            }
+
+            // 无图片或图片复制失败：降级为纯文本复制
             await navigator.clipboard.writeText(content);
             setCopiedId(id);
             setTimeout(() => setCopiedId(null), 2000);

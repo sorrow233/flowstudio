@@ -234,7 +234,7 @@ const InspirationItem = ({
             onPointerUp={cancelLongPress}
             onPointerCancel={cancelLongPress}
             onPointerLeave={cancelLongPress}
-            onContextMenu={(e) => e.preventDefault()}
+
             initial={{ opacity: 0, y: 20, scale: 0.98 }}
             animate={{
                 opacity: 1,

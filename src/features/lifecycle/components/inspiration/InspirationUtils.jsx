@@ -56,9 +56,9 @@ export const getCategoryConfig = (category) => {
     return cat || INSPIRATION_CATEGORIES[0]; // 默认返回「随记」
 };
 
-// 图片 URL 正则匹配
-const IMAGE_URL_REGEX = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp)(?:\?[^\s]*)?)/gi;
-const R2_IMAGE_REGEX = /(https:\/\/pub-[a-z0-9]+\.r2\.dev\/[^\s]+)/gi;
+// 图片 URL 正则匹配（导出供外部使用）
+export const IMAGE_URL_REGEX = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp)(?:\?[^\s]*)?)/gi;
+export const R2_IMAGE_REGEX = /(https:\/\/pub-[a-z0-9]+\.r2\.dev\/[^\s]+)/gi;
 const URL_REGEX = /(https?:\/\/[^\s]+)/gi;
 
 // Helper for parsing rich text (with image support)
@@ -183,7 +183,7 @@ export const parseRichText = (text) => {
 };
 
 // 复制图片到剪贴板的工具函数
-const copyImageToClipboard = async (src, textContent = '') => {
+export const copyImageToClipboard = async (src, textContent = '') => {
     try {
         // 通过 fetch 下载图片
         const response = await fetch(src);
@@ -332,8 +332,8 @@ const InspirationImage = ({ src, textContent = '' }) => {
                 {/* 复制状态提示 */}
                 {copyStatus && (
                     <span className={`text-sm font-medium px-3 py-1 rounded-full backdrop-blur-sm ${copyStatus === 'error'
-                            ? 'bg-red-500/20 text-red-300'
-                            : 'bg-green-500/20 text-green-300'
+                        ? 'bg-red-500/20 text-red-300'
+                        : 'bg-green-500/20 text-green-300'
                         }`}>
                         {getCopyStatusText()}
                     </span>
