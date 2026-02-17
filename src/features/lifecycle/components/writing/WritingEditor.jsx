@@ -22,6 +22,7 @@ import VersionHistoryModal from './VersionHistoryModal';
 import { useEditorAutoSave } from './hooks/useEditorAutoSave';
 import { useFloatingToolbar } from './hooks/useFloatingToolbar';
 import { useEditorSync } from './hooks/useEditorSync';
+import { useImageUpload } from './hooks/useImageUpload';
 
 const WritingEditor = ({
     doc: writingDoc,
@@ -55,6 +56,7 @@ const WritingEditor = ({
 
     const statsTimeoutRef = useRef(null);
     const inactivityTimeoutRef = useRef(null);
+    const { uploadImage } = useImageUpload();
 
     const updateStatsFromText = useCallback((text) => {
         const words = computeWordCount(text);
@@ -279,7 +281,66 @@ const WritingEditor = ({
         updateStatsFromEditor();
     }, [updateStatsFromEditor]);
 
+    const handleImageUpload = useCallback(async (file) => {
+        if (!editorRef.current) return;
+
+        editorRef.current.focus();
+        const selection = window.getSelection();
+        if (!selection || !selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+
+        const tempId = `uploading-${Date.now()}`;
+        const blobUrl = URL.createObjectURL(file);
+
+        const img = document.createElement('img');
+        img.src = blobUrl;
+        img.alt = 'Uploading...';
+        img.className = 'max-w-full rounded-lg my-2 opacity-50 blur-sm transition-all';
+        img.dataset.tempId = tempId;
+
+        range.insertNode(img);
+        range.setStartAfter(img);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        handleInput();
+
+        try {
+            const url = await uploadImage(file);
+            const targetImg = editorRef.current.querySelector(`img[data-temp-id="${tempId}"]`);
+            if (targetImg) {
+                targetImg.src = url;
+                targetImg.alt = 'Image';
+                targetImg.classList.remove('opacity-50', 'blur-sm');
+                targetImg.removeAttribute('data-temp-id');
+                handleInput();
+            }
+        } catch (error) {
+            console.error('Upload failed:', error);
+            const targetImg = editorRef.current.querySelector(`img[data-temp-id="${tempId}"]`);
+            if (targetImg) {
+                targetImg.remove();
+                handleInput();
+            }
+            alert(error.message || t('common.uploadFailed', '上传失败'));
+        } finally {
+            URL.revokeObjectURL(blobUrl);
+        }
+    }, [handleInput, uploadImage, t]);
+
     const handlePaste = useCallback((event) => {
+        // Handle images first
+        if (event.clipboardData.files.length > 0) {
+            const file = event.clipboardData.files[0];
+            if (file.type.startsWith('image/')) {
+                event.preventDefault();
+                handleImageUpload(file);
+                return;
+            }
+        }
+
         event.preventDefault();
         if (!editorRef.current) return;
 
@@ -292,7 +353,7 @@ const WritingEditor = ({
             markupToHtml,
         });
         if (inserted) handleInput();
-    }, [handleInput, markupToHtml]);
+    }, [handleInput, markupToHtml, handleImageUpload]);
 
     const createHighlightElement = useCallback((colorId) => {
         const colorConfig = COLOR_CONFIG.find((color) => color.id === colorId);
