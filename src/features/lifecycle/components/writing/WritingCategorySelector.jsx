@@ -54,7 +54,7 @@ const WritingCategorySelector = ({
                                 />
                             )}
                             <div
-                                className={`relative z-10 h-2.5 w-2.5 rounded-full transition-all duration-300 ${category.dotColor} ${selectedCategory === category.id
+                                className={`relative z-10 h-3 w-3 rounded-full transition-all duration-300 ${category.dotColor} ${selectedCategory === category.id
                                     ? 'scale-110'
                                     : 'opacity-40 group-hover/dot:scale-110 group-hover/dot:opacity-100'
                                     }`}

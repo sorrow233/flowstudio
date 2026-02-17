@@ -28,25 +28,20 @@ const WritingWorkspaceHeader = ({
         }
     }, [searchQuery, isSearchOpen]);
 
-    const getButtonStyle = () => {
-        if (!selectedCategory) {
-            return {
-                className: 'bg-sky-500 text-white hover:bg-sky-600 shadow-[0_2px_8px_-2px_rgba(14,165,233,0.4)]',
-                iconColor: 'text-white'
-            };
-        }
+    const selectedCategoryObj = categories.find(c => c.id === selectedCategory);
 
-        const categoryColor = WRITING_CATEGORY_COLORS.find(c => c.color === selectedCategory.color || c.dotColor === selectedCategory.dotColor);
-        if (!categoryColor) {
-            return {
-                className: 'bg-sky-500 text-white hover:bg-sky-600 shadow-[0_2px_8px_-2px_rgba(14,165,233,0.4)]',
-                iconColor: 'text-white'
-            };
-        }
+    const getButtonStyle = () => {
+        const fallback = {
+            className: 'bg-sky-100 text-sky-600 hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-400 dark:hover:bg-sky-900/50',
+        };
+
+        if (!selectedCategoryObj) return fallback;
+
+        const preset = WRITING_CATEGORY_COLORS.find(c => c.color === selectedCategoryObj.color || c.dotColor === selectedCategoryObj.dotColor);
+        if (!preset) return fallback;
 
         return {
-            className: `${categoryColor.buttonClass} ${categoryColor.darkButtonClass}`,
-            iconColor: 'currentColor'
+            className: `${preset.buttonClass} ${preset.darkButtonClass}`,
         };
     };
 
