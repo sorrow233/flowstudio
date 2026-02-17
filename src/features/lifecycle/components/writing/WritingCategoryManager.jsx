@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Plus, Trash2, Check, Edit2 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
@@ -57,10 +58,10 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
         setNewLabel('');
     };
 
-    return (
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 sm:p-6">
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -198,7 +199,8 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
                     </motion.div>
                 </div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 };
 
