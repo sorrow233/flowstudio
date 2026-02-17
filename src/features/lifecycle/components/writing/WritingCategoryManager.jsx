@@ -65,7 +65,7 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-black/40"
+                        className="absolute inset-0 bg-black/30 backdrop-blur-md"
                         onClick={onClose}
                     />
 
