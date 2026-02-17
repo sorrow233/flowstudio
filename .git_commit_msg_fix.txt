@@ -1,4 +1,0 @@
-feat: 修复 WritingEditor 重复属性导致构建失败
-
-WritingEditor.jsx 中存在重复的 onInput 和 onPaste 属性，导致 esbuild 构建失败。
-此修复移除了多余的事件处理器绑定。
