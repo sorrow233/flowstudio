@@ -1,13 +1,16 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-    MoreHorizontal
+    FileCode2,
+    MoreHorizontal,
 } from 'lucide-react';
 import ExportMenu from './ExportMenu';
+import MarkdownQuickMenu from './MarkdownQuickMenu';
 
-const IconBtn = ({ onClick, disabled, title, children, active, className = '' }) => (
+const IconBtn = ({ onClick, onMouseDown, disabled, title, children, active, className = '' }) => (
     <button
         onClick={onClick}
+        onMouseDown={onMouseDown}
         disabled={disabled}
         title={title}
         className={`inline-flex h-9 w-9 items-center justify-center rounded-xl transition-all active:scale-95 ${disabled
@@ -31,12 +34,17 @@ const EditorToolbar = ({
     canManualSnapshot,
     canCopy,
     copiedAt,
+    showMarkdownMenu,
     showActions,
     onUndo,
     onRedo,
     onManualSnapshot,
     onShowHistory,
     onCopy,
+    onToggleMarkdownMenu,
+    onInsertMarkdown,
+    onCloseMarkdownMenu,
+    onPrepareMarkdownInsert,
     onToggleActions,
     onExport,
     onCloseActions,
@@ -61,10 +69,33 @@ const EditorToolbar = ({
         </div>
 
         <div className="flex items-center">
-            <div className="relative">
+            <div className="relative flex items-center gap-1">
+                <IconBtn
+                    onMouseDown={(event) => {
+                        event.preventDefault();
+                        onPrepareMarkdownInsert?.();
+                    }}
+                    onClick={onToggleMarkdownMenu}
+                    active={showMarkdownMenu}
+                    title={t('writing.markdownQuickMenu', 'Markdown 快捷')}
+                >
+                    <FileCode2 size={15} />
+                </IconBtn>
                 <IconBtn onClick={onToggleActions} title={t('common.details', '详情')}>
                     <MoreHorizontal size={16} />
                 </IconBtn>
+                <AnimatePresence>
+                    {showMarkdownMenu && (
+                        <MarkdownQuickMenu
+                            show={showMarkdownMenu}
+                            onInsert={onInsertMarkdown}
+                            onClose={onCloseMarkdownMenu}
+                            onPrepareInsert={onPrepareMarkdownInsert}
+                            isMobile={isMobile}
+                            t={t}
+                        />
+                    )}
+                </AnimatePresence>
                 <AnimatePresence>
                     {showActions && (
                         <ExportMenu

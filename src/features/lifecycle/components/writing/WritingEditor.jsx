@@ -15,6 +15,7 @@ import {
     stripAllMarkdown as markupToPlain,
     markupToMarkdownFull as markupToMarkdown,
 } from './markdownParser';
+import { buildMarkdownSnippet } from './markdown/quickActions';
 import WritingImageOverlay from './WritingImageOverlay';
 import { clipboardToMarkup, insertMarkupAtCaret } from './pasteUtils';
 import EditorToolbar from './EditorToolbar';
@@ -52,6 +53,7 @@ const WritingEditor = ({
     const [readMinutes, setReadMinutes] = useState(0);
     const [showHistory, setShowHistory] = useState(false);
     const [showActions, setShowActions] = useState(false);
+    const [showMarkdownMenu, setShowMarkdownMenu] = useState(false);
     const [safeTop, setSafeTop] = useState(0);
     const [copiedAt, setCopiedAt] = useState(null);
     const [isEditorFocused, setIsEditorFocused] = useState(false);
@@ -61,6 +63,7 @@ const WritingEditor = ({
 
     const statsTimeoutRef = useRef(null);
     const inactivityTimeoutRef = useRef(null);
+    const selectionRangeRef = useRef(null);
     const { uploadImage } = useImageUpload();
 
     const updateStatsFromText = useCallback((text) => {
@@ -149,11 +152,11 @@ const WritingEditor = ({
         if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
 
         inactivityTimeoutRef.current = setTimeout(() => {
-            if (!showActions && !showHistory) {
+            if (!showActions && !showHistory && !showMarkdownMenu) {
                 setIsToolbarVisible(false);
             }
         }, 2000);
-    }, [isMobile, showActions, showHistory]);
+    }, [isMobile, showActions, showHistory, showMarkdownMenu]);
 
     useEffect(() => {
         if (!isMobile) {
@@ -180,13 +183,13 @@ const WritingEditor = ({
             return;
         }
 
-        if (showActions || showHistory) {
+        if (showActions || showHistory || showMarkdownMenu) {
             setIsToolbarVisible(true);
             if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
         } else {
             resetInactivityTimer();
         }
-    }, [isMobile, showActions, showHistory, resetInactivityTimer]);
+    }, [isMobile, showActions, showHistory, showMarkdownMenu, resetInactivityTimer]);
 
     useEffect(() => {
         const update = () => {
@@ -225,6 +228,7 @@ const WritingEditor = ({
             if (event.key === 'Escape') {
                 setShowActions(false);
                 setShowHistory(false);
+                setShowMarkdownMenu(false);
             }
         };
 
@@ -279,12 +283,63 @@ const WritingEditor = ({
     const hasPendingRemote = Boolean(pendingRemoteMarkup);
     const canCopy = Boolean((title || '').trim() || (contentMarkup || '').trim());
 
+    const cacheEditorSelection = useCallback(() => {
+        if (typeof window === 'undefined' || !editorRef.current) return;
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return;
+        const range = selection.getRangeAt(0);
+        if (!editorRef.current.contains(range.commonAncestorContainer)) return;
+        selectionRangeRef.current = range.cloneRange();
+    }, []);
+
+    const restoreCachedSelection = useCallback(() => {
+        if (typeof window === 'undefined' || !editorRef.current) return false;
+        const selection = window.getSelection();
+        const range = selectionRangeRef.current;
+        if (!selection || !range) return false;
+        if (!editorRef.current.contains(range.commonAncestorContainer)) return false;
+        selection.removeAllRanges();
+        selection.addRange(range);
+        return true;
+    }, []);
+
+    const getEditorSelectedText = useCallback(() => {
+        if (typeof window === 'undefined' || !editorRef.current) return '';
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return '';
+        const range = selection.getRangeAt(0);
+        if (!editorRef.current.contains(range.commonAncestorContainer)) return '';
+        return selection.toString() || '';
+    }, []);
+
     const handleInput = useCallback(() => {
         if (!editorRef.current) return;
         setContentMarkup(htmlToMarkup(editorRef.current));
         setIsDirty(true);
         updateStatsFromEditor();
     }, [updateStatsFromEditor]);
+
+    const handleInsertMarkdown = useCallback((actionId) => {
+        if (!editorRef.current) return;
+
+        editorRef.current.focus();
+        restoreCachedSelection();
+
+        const selectedText = getEditorSelectedText();
+        const snippet = buildMarkdownSnippet(actionId, selectedText);
+        if (!snippet) return;
+
+        const inserted = insertMarkupAtCaret({
+            editorElement: editorRef.current,
+            markup: snippet,
+            markupToHtml,
+        });
+
+        if (!inserted) return;
+        handleInput();
+        cacheEditorSelection();
+        setShowMarkdownMenu(false);
+    }, [cacheEditorSelection, getEditorSelectedText, handleInput, markupToHtml, restoreCachedSelection]);
 
     // ---------- Image selection / deletion ----------
     const handleEditorClick = useCallback((event) => {
@@ -293,13 +348,15 @@ const WritingEditor = ({
             event.preventDefault();
             event.stopPropagation();
             setSelectedImage(target);
+            cacheEditorSelection();
             return;
         }
         // 点击非图片区域时取消选中
         if (selectedImage && target !== selectedImage) {
             setSelectedImage(null);
         }
-    }, [selectedImage]);
+        cacheEditorSelection();
+    }, [cacheEditorSelection, selectedImage]);
 
     // 处理删除图片的逻辑
     const handleDeleteImage = useCallback(() => {
@@ -612,7 +669,15 @@ const WritingEditor = ({
                             canManualSnapshot={canManualSnapshot}
                             canCopy={canCopy}
                             copiedAt={copiedAt}
+                            showMarkdownMenu={showMarkdownMenu}
                             showActions={showActions}
+                            onToggleMarkdownMenu={() => {
+                                setShowActions(false);
+                                setShowMarkdownMenu((value) => !value);
+                            }}
+                            onInsertMarkdown={handleInsertMarkdown}
+                            onCloseMarkdownMenu={() => setShowMarkdownMenu(false)}
+                            onPrepareMarkdownInsert={cacheEditorSelection}
                             onUndo={() => {
                                 if (!canUndo) return;
                                 requestForceRemoteApply();
@@ -624,9 +689,15 @@ const WritingEditor = ({
                                 onRedo?.();
                             }}
                             onManualSnapshot={handleManualSnapshot}
-                            onShowHistory={() => setShowHistory(true)}
+                            onShowHistory={() => {
+                                setShowMarkdownMenu(false);
+                                setShowHistory(true);
+                            }}
                             onCopy={handleCopy}
-                            onToggleActions={() => setShowActions((value) => !value)}
+                            onToggleActions={() => {
+                                setShowMarkdownMenu(false);
+                                setShowActions((value) => !value);
+                            }}
                             onExport={exportDoc}
                             onCloseActions={() => setShowActions(false)}
                             isMobile={isMobile}
@@ -702,6 +773,8 @@ const WritingEditor = ({
                                 onPaste={handlePaste}
                                 onClick={handleEditorClick}
                                 onKeyDown={handleEditorKeyDown}
+                                onMouseUp={cacheEditorSelection}
+                                onKeyUp={cacheEditorSelection}
                                 onFocus={() => {
                                     setIsEditorFocused(true);
                                 }}
