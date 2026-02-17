@@ -16,7 +16,8 @@ const WritingWorkspaceHeader = ({
     onAddCategory,
     onUpdateCategory,
     onRemoveCategory,
-    isMobile = false
+    isMobile = false,
+    isCollapsed = false,
 }) => {
     const { t } = useTranslation();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -49,7 +50,18 @@ const WritingWorkspaceHeader = ({
 
 
     return (
-        <header className={`relative z-20 border-b border-sky-100/50 bg-white dark:border-slate-800/60 dark:bg-slate-900 ${isMobile ? 'px-4 pb-4 pt-4' : 'px-6 pb-4 pt-6'}`}>
+        <motion.header
+            className={`relative z-20 border-b border-sky-100/50 bg-white dark:border-slate-800/60 dark:bg-slate-900 overflow-hidden ${isMobile ? 'px-4' : 'px-6'}`}
+            initial={false}
+            animate={{
+                height: isCollapsed ? 0 : 'auto',
+                paddingTop: isCollapsed ? 0 : (isMobile ? 16 : 24),
+                paddingBottom: isCollapsed ? 0 : 16,
+                borderBottomWidth: isCollapsed ? 0 : 1,
+                opacity: isCollapsed ? 0 : 1,
+            }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+        >
             <div className={`flex flex-col ${isMobile ? 'gap-4' : 'gap-5'}`}>
                 <div className="min-w-0">
                     <h2 className={`line-clamp-1 font-bold tracking-tight text-slate-800 dark:text-slate-100 ${isMobile ? 'text-[2rem]' : 'text-[2.15rem]'}`}>
@@ -155,7 +167,7 @@ const WritingWorkspaceHeader = ({
                 onUpdate={onUpdateCategory}
                 onRemove={onRemoveCategory}
             />
-        </header>
+        </motion.header>
     );
 };
 

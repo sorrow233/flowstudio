@@ -99,6 +99,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
 
     const [selectedDocId, setSelectedDocId] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => !isMobile && documents.length > 0);
+    const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(() => categories[0]?.id || null);
     const [searchInput, setSearchInput] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -285,6 +286,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                     onUpdateCategory={handleUpdateCategory}
                     onRemoveCategory={handleRemoveCategory}
                     isMobile={isMobile}
+                    isCollapsed={isHeaderCollapsed}
                 />
 
                 <div className="relative flex min-h-0 flex-1">
@@ -346,7 +348,10 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                 doc={activeDoc}
                                 onUpdate={handleUpdate}
                                 isSidebarOpen={isSidebarOpen}
-                                onToggleSidebar={() => setIsSidebarOpen((open) => !open)}
+                                onToggleSidebar={() => {
+                                    setIsSidebarOpen((open) => !open);
+                                    setIsHeaderCollapsed((c) => !c);
+                                }}
                                 onCloseSidebar={() => setIsSidebarOpen(false)}
                                 isMobile={isMobile}
                                 onUndo={undo}
@@ -364,7 +369,10 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                 onCreate={handleCreate}
                                 documents={documents}
                                 categories={categories}
-                                onToggleSidebar={() => setIsSidebarOpen((open) => !open)}
+                                onToggleSidebar={() => {
+                                    setIsSidebarOpen((open) => !open);
+                                    setIsHeaderCollapsed((c) => !c);
+                                }}
                                 isSidebarOpen={isSidebarOpen}
                                 isMobile={isMobile}
                                 t={t}

@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { COLOR_CONFIG } from '../inspiration/InspirationUtils';
 import {
@@ -53,6 +54,7 @@ const WritingEditor = ({
     const [isEditorFocused, setIsEditorFocused] = useState(false);
     const [isToolbarVisible, setIsToolbarVisible] = useState(true);
     const [isDirty, setIsDirty] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
 
     const statsTimeoutRef = useRef(null);
     const inactivityTimeoutRef = useRef(null);
@@ -280,6 +282,43 @@ const WritingEditor = ({
         setIsDirty(true);
         updateStatsFromEditor();
     }, [updateStatsFromEditor]);
+
+    // ---------- Image selection / deletion ----------
+    const handleEditorClick = useCallback((event) => {
+        const target = event.target;
+        if (target.tagName === 'IMG' && editorRef.current?.contains(target)) {
+            event.preventDefault();
+            event.stopPropagation();
+            setSelectedImage(target);
+            return;
+        }
+        // 点击非图片区域时取消选中
+        if (selectedImage && target !== selectedImage) {
+            setSelectedImage(null);
+        }
+    }, [selectedImage]);
+
+    const handleDeleteImage = useCallback(() => {
+        if (!selectedImage || !editorRef.current?.contains(selectedImage)) {
+            setSelectedImage(null);
+            return;
+        }
+        selectedImage.remove();
+        setSelectedImage(null);
+        // 触发 input 更新 markup
+        if (editorRef.current) {
+            setContentMarkup(htmlToMarkup(editorRef.current));
+            setIsDirty(true);
+            updateStatsFromEditor();
+        }
+    }, [selectedImage, updateStatsFromEditor]);
+
+    // 图片被删除后（如外部操作），检查是否仍在 DOM 内
+    useEffect(() => {
+        if (selectedImage && !editorRef.current?.contains(selectedImage)) {
+            setSelectedImage(null);
+        }
+    }, [contentMarkup, selectedImage]);
 
     const handleImageUpload = useCallback(async (file) => {
         if (!editorRef.current) return;
@@ -638,30 +677,71 @@ const WritingEditor = ({
                             </div>
                         )}
 
-                        <div
-                            ref={editorRef}
-                            contentEditable
-                            suppressContentEditableWarning
-                            onInput={handleInput}
-                            onPaste={handlePaste}
-                            onFocus={() => {
-                                setIsEditorFocused(true);
-                            }}
-                            onBlur={() => {
-                                setIsEditorFocused(false);
-                                handleApplyPendingRemoteOnBlur();
-                            }}
-                            spellCheck
-                            className="min-h-[55vh] w-full text-lg text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"
-                            placeholder={t('inspiration.placeholder')}
-                            style={{
-                                whiteSpace: 'pre-wrap',
-                                wordBreak: 'break-word',
-                                lineHeight: 1.625,
-                                fontFamily: '"Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif',
-                                letterSpacing: 'normal',
-                            }}
-                        />
+                        <div className="relative">
+                            <div
+                                ref={editorRef}
+                                contentEditable
+                                suppressContentEditableWarning
+                                onInput={handleInput}
+                                onPaste={handlePaste}
+                                onClick={handleEditorClick}
+                                onFocus={() => {
+                                    setIsEditorFocused(true);
+                                }}
+                                onBlur={() => {
+                                    setIsEditorFocused(false);
+                                    handleApplyPendingRemoteOnBlur();
+                                }}
+                                spellCheck
+                                className="min-h-[55vh] w-full text-lg text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"
+                                placeholder={t('inspiration.placeholder')}
+                                style={{
+                                    whiteSpace: 'pre-wrap',
+                                    wordBreak: 'break-word',
+                                    lineHeight: 1.625,
+                                    fontFamily: '"Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif',
+                                    letterSpacing: 'normal',
+                                }}
+                            />
+
+                            {/* 图片选中时的删除覆盖层 */}
+                            <AnimatePresence>
+                                {selectedImage && editorRef.current?.contains(selectedImage) && (() => {
+                                    const editorRect = editorRef.current.getBoundingClientRect();
+                                    const imgRect = selectedImage.getBoundingClientRect();
+                                    const top = imgRect.top - editorRect.top;
+                                    const left = imgRect.left - editorRect.left;
+                                    const width = imgRect.width;
+                                    const height = imgRect.height;
+                                    return (
+                                        <motion.div
+                                            key="img-overlay"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            transition={{ duration: 0.15 }}
+                                            className="pointer-events-none absolute"
+                                            style={{ top, left, width, height }}
+                                        >
+                                            {/* 高亮边框 */}
+                                            <div className="absolute inset-0 rounded-lg border-2 border-sky-400 bg-sky-400/10" />
+                                            {/* 删除按钮 */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    handleDeleteImage();
+                                                }}
+                                                className="pointer-events-auto absolute -right-2 -top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-white shadow-lg transition-all hover:bg-red-600 hover:scale-110 active:scale-95"
+                                                title={t('common.delete', '删除')}
+                                            >
+                                                <X size={14} strokeWidth={2.5} />
+                                            </button>
+                                        </motion.div>
+                                    );
+                                })()}
+                            </AnimatePresence>
+                        </div>
                     </div>
                 </div>
             </div>

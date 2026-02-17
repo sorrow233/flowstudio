@@ -1,75 +1,28 @@
 import { COLOR_CONFIG } from '../inspiration/InspirationUtils';
+import {
+    markupToHtmlFull,
+    htmlToMarkupFull,
+    stripAllMarkdown,
+    markupToMarkdownFull,
+} from './markdownParser';
 
 // ---------- Serialization ----------
 
-export const htmlToMarkup = (element) => {
-    if (!element) return '';
-    let result = '';
-    element.childNodes.forEach((node) => {
-        if (node.nodeType === Node.TEXT_NODE) {
-            result += node.textContent;
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-            if (node.tagName === 'BR') {
-                result += '\n';
-            } else if (node.classList?.contains('colored-text')) {
-                const colorId = node.dataset.colorId;
-                result += `#!${colorId}:${node.textContent}#`;
-            } else if (node.tagName === 'IMG') {
-                const src = node.getAttribute('src');
-                const alt = node.getAttribute('alt') || '';
-                // 如果是 loading 状态的占位符（blob URL），我们暂时保留，或者由 handleInput 处理
-                // 但为了避免持久化 blob URL，最好是只在 src 非 blob 时保存？
-                // 不，用户可能想保存 blob 暂时。
-                if (src) {
-                    result += `![${alt}](${src})`;
-                }
-            } else if (node.tagName === 'DIV') {
-                const inner = htmlToMarkup(node);
-                if (result && !result.endsWith('\n')) result += '\n';
-                result += inner;
-            } else {
-                result += htmlToMarkup(node);
-            }
-        }
-    });
-    return result;
-};
+export const htmlToMarkup = (element) => htmlToMarkupFull(element);
 
-export const markupToHtml = (text) => {
-    if (!text) return '';
-    return text
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/#!([^:]+):([^#]+)#/g, (_, colorId, content) => {
-            const colorConfig = COLOR_CONFIG.find((c) => c.id === colorId);
-            const highlightColor = colorConfig?.highlight || 'rgba(167, 139, 250, 0.5)';
-            const style = `background: radial-gradient(ellipse 100% 40% at center 80%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%); padding: 0 0.15em;`;
-            return `<span class="colored-text relative inline" data-color-id="${colorId}" style="${style}">${content}</span>`;
-        })
-        .replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" class="max-w-full rounded-lg my-2" />')
-        .replace(/\n/g, '<br>');
-};
+export const markupToHtml = (text) => markupToHtmlFull(text);
 
 export const markupToPlain = (text) => {
     if (!text) return '';
-    return text
-        .replace(/#!([^:]+):([^#]+)#/g, (_, __, content) => content)
-        .replace(/!\[(.*?)\]\((.*?)\)/g, '[图片: $1]');
+    return stripAllMarkdown(text);
 };
 
 export const markupToMarkdown = (text) => {
     if (!text) return '';
-    return text
-        .replace(/#!([^:]+):([^#]+)#/g, (_, __, content) => `==${content}==`);
-    // 图片语法本身就是 Markdown，无需转换
+    return markupToMarkdownFull(text);
 };
 
-export const stripMarkup = (text = '') =>
-    text
-        .replace(/#!([^:]+):([^#]+)#/g, '$2')
-        .replace(/!\[(.*?)\]\((.*?)\)/g, '') // 移除图片
-        .replace(/<[^>]*>?/gm, '')
-        .trim();
+export const stripMarkup = (text = '') => stripAllMarkdown(text);
 
 // ---------- Statistics ----------
 

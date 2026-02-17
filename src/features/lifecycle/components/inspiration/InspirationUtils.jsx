@@ -217,8 +217,53 @@ export const copyImageToClipboard = async (src, textContent = '') => {
         await navigator.clipboard.write([new ClipboardItem(items)]);
         return true;
     } catch (err) {
-        console.error('Failed to copy image:', err);
-        // 回退：尝试只复制文字
+        console.error('Failed to copy image via Clipboard API:', err);
+
+        // 降级方案：使用 document.execCommand('copy') 选中 HTML 内容
+        // 这通常能解决跨域图片无法通过 JS 读取数据的问题，交给浏览器处理
+        try {
+            const div = document.createElement('div');
+            div.contentEditable = 'true';
+            div.style.position = 'fixed';
+            div.style.left = '-9999px';
+            div.style.top = '0';
+            div.style.whiteSpace = 'pre-wrap'; // 保持换行
+
+            // 插入图片
+            const img = document.createElement('img');
+            img.src = src;
+            div.appendChild(img);
+
+            // 插入文字
+            if (textContent) {
+                //换行
+                div.appendChild(document.createElement('br'));
+                const textNode = document.createTextNode(textContent);
+                div.appendChild(textNode);
+            }
+
+            document.body.appendChild(div);
+
+            // 选中
+            const range = document.createRange();
+            range.selectNodeContents(div);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            // 执行复制
+            const success = document.execCommand('copy');
+
+            // 清理
+            document.body.removeChild(div);
+            selection.removeAllRanges();
+
+            if (success) return 'html-fallback';
+        } catch (e) {
+            console.error('Fallback copy failed:', e);
+        }
+
+        // 最后的回退：尝试只复制文字
         if (textContent) {
             try {
                 await navigator.clipboard.writeText(textContent);
@@ -261,7 +306,7 @@ const InspirationImage = ({ src, textContent = '' }) => {
         e.stopPropagation();
         setCopyStatus(null);
         const result = await copyImageToClipboard(src, textContent);
-        if (result === true) {
+        if (result === true || result === 'html-fallback') {
             setCopyStatus('success');
         } else if (result === 'text-only') {
             setCopyStatus('text-only');
