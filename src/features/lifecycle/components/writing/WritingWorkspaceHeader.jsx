@@ -50,7 +50,7 @@ const WritingWorkspaceHeader = ({
                         >
                             <button
                                 onClick={() => setIsSearchOpen(true)}
-                                className="group inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/60 bg-white/80 text-sky-500 transition-all hover:border-sky-300 hover:bg-white dark:border-slate-700/50 dark:bg-slate-800/80 dark:text-sky-400 dark:hover:border-slate-600 dark:hover:bg-slate-800"
+                                className="group inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200/60 bg-white/80 text-sky-500 transition-all hover:border-sky-300 hover:bg-white dark:border-slate-700/50 dark:bg-slate-800/80 dark:text-sky-400 dark:hover:border-slate-600 dark:hover:bg-slate-800"
                                 title={t('inspiration.search')}
                             >
                                 <Search size={18} className="transition-transform group-hover:scale-110" />
@@ -58,12 +58,22 @@ const WritingWorkspaceHeader = ({
                             <button
                                 onClick={() => onCreate(selectedCategory)}
                                 disabled={!selectedCategory}
-                                className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-sky-500 font-bold text-white shadow-[0_2px_8px_-2px_rgba(14,165,233,0.4)] transition-all hover:bg-sky-600 active:scale-[0.97] disabled:opacity-50 ${isMobile ? 'w-10 px-0' : 'px-5'}`}
+                                className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-sky-500 font-bold text-white shadow-[0_2px_8px_-2px_rgba(14,165,233,0.4)] transition-all hover:bg-sky-600 active:scale-[0.97] disabled:opacity-50 ${isMobile ? 'w-10 px-0' : 'px-5'}`}
                                 title={t('inspiration.newDoc')}
                             >
                                 <Plus size={18} strokeWidth={2.5} />
                                 {!isMobile && <span className="text-[13.5px] tracking-tight">{t('inspiration.newDoc')}</span>}
                             </button>
+                            <div className="min-w-0 flex-1">
+                                <WritingCategorySelector
+                                    categories={categories}
+                                    selectedCategory={selectedCategory}
+                                    onSelectCategory={onSelectCategory}
+                                    onOpenManager={() => setCategoryManagerOpen(true)}
+                                    isMobile={isMobile}
+                                    t={t}
+                                />
+                            </div>
                         </motion.div>
                     ) : (
                         <motion.div
@@ -96,23 +106,24 @@ const WritingWorkspaceHeader = ({
                             <button
                                 onClick={() => onCreate(selectedCategory)}
                                 disabled={!selectedCategory}
-                                className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500 text-white transition-all hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-500 text-white transition-all hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
                                 title={t('inspiration.newDoc')}
                             >
                                 <Plus size={18} strokeWidth={2.5} />
                             </button>
+                            <div className="shrink-0">
+                                <WritingCategorySelector
+                                    categories={categories}
+                                    selectedCategory={selectedCategory}
+                                    onSelectCategory={onSelectCategory}
+                                    onOpenManager={() => setCategoryManagerOpen(true)}
+                                    isMobile={isMobile}
+                                    t={t}
+                                />
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
-
-                <WritingCategorySelector
-                    categories={categories}
-                    selectedCategory={selectedCategory}
-                    onSelectCategory={onSelectCategory}
-                    onOpenManager={() => setCategoryManagerOpen(true)}
-                    isMobile={isMobile}
-                    t={t}
-                />
             </div>
 
             <WritingCategoryManager
