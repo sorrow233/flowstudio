@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { computeWordCount, htmlToMarkup, markupToHtml, markupToPlain } from '../editorUtils';
+import { computeWordCount } from '../editorUtils';
+import {
+    htmlToMarkupFull as htmlToMarkup,
+    markupToHtmlFull as markupToHtml,
+    stripAllMarkdown as markupToPlain,
+} from '../markdownParser';
 
 const normalizeMarkupForSync = (value = '') =>
     (value || '')

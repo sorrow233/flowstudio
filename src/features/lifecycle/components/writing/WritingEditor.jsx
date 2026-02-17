@@ -4,16 +4,18 @@ import { X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { COLOR_CONFIG } from '../inspiration/InspirationUtils';
 import {
-    htmlToMarkup,
-    markupToHtml,
-    markupToPlain,
-    markupToMarkdown,
     computeWordCount,
     computeCharCount,
     computeReadMinutes,
     detectWordCountLabel,
     downloadContent,
 } from './editorUtils';
+import {
+    htmlToMarkupFull as htmlToMarkup,
+    markupToHtmlFull as markupToHtml,
+    markupToMarkdownFull as markupToMarkdown,
+} from './markdownParser';
+import WritingImageOverlay from './WritingImageOverlay';
 import { clipboardToMarkup, insertMarkupAtCaret } from './pasteUtils';
 import EditorToolbar from './EditorToolbar';
 import EditorStatusBar from './EditorStatusBar';
@@ -298,6 +300,7 @@ const WritingEditor = ({
         }
     }, [selectedImage]);
 
+    // 处理删除图片的逻辑
     const handleDeleteImage = useCallback(() => {
         if (!selectedImage || !editorRef.current?.contains(selectedImage)) {
             setSelectedImage(null);
@@ -311,7 +314,19 @@ const WritingEditor = ({
             setIsDirty(true);
             updateStatsFromEditor();
         }
+        // 保持聚焦
+        editorRef.current?.focus();
     }, [selectedImage, updateStatsFromEditor]);
+
+    // 处理键盘事件（特别是删除图片）
+    const handleEditorKeyDown = useCallback((event) => {
+        if (selectedImage && (event.key === 'Backspace' || event.key === 'Delete')) {
+            event.preventDefault();
+            event.stopPropagation();
+            handleDeleteImage();
+        }
+    }, [selectedImage, handleDeleteImage]);
+
 
     // 图片被删除后（如外部操作），检查是否仍在 DOM 内
     useEffect(() => {
@@ -682,9 +697,9 @@ const WritingEditor = ({
                                 ref={editorRef}
                                 contentEditable
                                 suppressContentEditableWarning
-                                onInput={handleInput}
-                                onPaste={handlePaste}
+
                                 onClick={handleEditorClick}
+                                onKeyDown={handleEditorKeyDown}
                                 onFocus={() => {
                                     setIsEditorFocused(true);
                                 }}
@@ -704,42 +719,14 @@ const WritingEditor = ({
                                 }}
                             />
 
-                            {/* 图片选中时的删除覆盖层 */}
                             <AnimatePresence>
-                                {selectedImage && editorRef.current?.contains(selectedImage) && (() => {
-                                    const editorRect = editorRef.current.getBoundingClientRect();
-                                    const imgRect = selectedImage.getBoundingClientRect();
-                                    const top = imgRect.top - editorRect.top;
-                                    const left = imgRect.left - editorRect.left;
-                                    const width = imgRect.width;
-                                    const height = imgRect.height;
-                                    return (
-                                        <motion.div
-                                            key="img-overlay"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            transition={{ duration: 0.15 }}
-                                            className="pointer-events-none absolute"
-                                            style={{ top, left, width, height }}
-                                        >
-                                            {/* 高亮边框 */}
-                                            <div className="absolute inset-0 rounded-lg border-2 border-sky-400 bg-sky-400/10" />
-                                            {/* 删除按钮 */}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    handleDeleteImage();
-                                                }}
-                                                className="pointer-events-auto absolute -right-2 -top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-white shadow-lg transition-all hover:bg-red-600 hover:scale-110 active:scale-95"
-                                                title={t('common.delete', '删除')}
-                                            >
-                                                <X size={14} strokeWidth={2.5} />
-                                            </button>
-                                        </motion.div>
-                                    );
-                                })()}
+                                {selectedImage && (
+                                    <WritingImageOverlay
+                                        selectedImage={selectedImage}
+                                        editorRef={editorRef}
+                                        onDelete={handleDeleteImage}
+                                    />
+                                )}
                             </AnimatePresence>
                         </div>
                     </div>

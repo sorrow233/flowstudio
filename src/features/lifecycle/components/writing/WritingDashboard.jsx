@@ -10,7 +10,8 @@ import {
     Sparkles
 } from 'lucide-react';
 import { WRITING_CATEGORIES } from '../../../../utils/constants';
-import { stripMarkup, computeWordCount } from './editorUtils';
+import { computeWordCount } from './editorUtils';
+import { stripAllMarkdown as stripMarkup } from './markdownParser';
 import { resolveWritingCategoryLabel } from './writingCategoryUtils';
 
 const WritingDashboard = ({

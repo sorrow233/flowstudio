@@ -10,7 +10,7 @@ import WritingSidebar from './WritingSidebar';
 import WritingEditor from './WritingEditor';
 import WritingDashboard from './WritingDashboard';
 import WritingWorkspaceHeader from './WritingWorkspaceHeader';
-import { stripMarkup } from './editorUtils';
+import { stripAllMarkdown as stripMarkup } from './markdownParser';
 
 const detectCompactLayout = () => {
     if (typeof window === 'undefined') return false;

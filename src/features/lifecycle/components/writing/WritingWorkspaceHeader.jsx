@@ -60,7 +60,7 @@ const WritingWorkspaceHeader = ({
                 borderBottomWidth: isCollapsed ? 0 : 1,
                 opacity: isCollapsed ? 0 : 1,
             }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.5, ease: [0.32, 0.725, 0.25, 1] }}
         >
             <div className={`flex flex-col ${isMobile ? 'gap-4' : 'gap-5'}`}>
                 <div className="min-w-0">
