@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import { COLOR_CONFIG } from '../inspiration/InspirationUtils';
 import {
@@ -13,6 +12,7 @@ import {
 import {
     htmlToMarkupFull as htmlToMarkup,
     markupToHtmlFull as markupToHtml,
+    stripAllMarkdown as markupToPlain,
     markupToMarkdownFull as markupToMarkdown,
 } from './markdownParser';
 import WritingImageOverlay from './WritingImageOverlay';
@@ -26,6 +26,7 @@ import { useEditorAutoSave } from './hooks/useEditorAutoSave';
 import { useFloatingToolbar } from './hooks/useFloatingToolbar';
 import { useEditorSync } from './hooks/useEditorSync';
 import { useImageUpload } from './hooks/useImageUpload';
+import './writingEditorTypography.css';
 
 const WritingEditor = ({
     doc: writingDoc,
@@ -697,7 +698,8 @@ const WritingEditor = ({
                                 ref={editorRef}
                                 contentEditable
                                 suppressContentEditableWarning
-
+                                onInput={handleInput}
+                                onPaste={handlePaste}
                                 onClick={handleEditorClick}
                                 onKeyDown={handleEditorKeyDown}
                                 onFocus={() => {
@@ -708,15 +710,8 @@ const WritingEditor = ({
                                     handleApplyPendingRemoteOnBlur();
                                 }}
                                 spellCheck
-                                className="min-h-[55vh] w-full text-lg text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"
+                                className="writing-editor-content min-h-[55vh] w-full text-lg text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"
                                 placeholder={t('inspiration.placeholder')}
-                                style={{
-                                    whiteSpace: 'pre-wrap',
-                                    wordBreak: 'break-word',
-                                    lineHeight: 1.625,
-                                    fontFamily: '"Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif',
-                                    letterSpacing: 'normal',
-                                }}
                             />
 
                             <AnimatePresence>

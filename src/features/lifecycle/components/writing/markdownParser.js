@@ -20,7 +20,7 @@ export const parseInlineMarkdown = (text) => {
         const colorConfig = COLOR_CONFIG.find((c) => c.id === colorId);
         const highlightColor = colorConfig?.highlight || 'rgba(167, 139, 250, 0.5)';
         const style = `background: radial-gradient(ellipse 100% 40% at center 80%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%); padding: 0 0.15em;`;
-        return `<span class="colored-text relative inline-block rounded-md px-1 align-baseline break-inside-avoid" data-color-id="${colorId}" style="${style}">${content}</span>`;
+        return `<span class="colored-text relative inline align-baseline" data-color-id="${colorId}" style="${style}">${content}</span>`;
     });
 
     // 3. 图片
@@ -115,7 +115,7 @@ export const markupToHtmlFull = (text) => {
 
         // ── 空行 ──
         if (trimmed === '') {
-            htmlParts.push('<div class="h-6"><br></div>'); // 使用带高度的 div 避免折叠
+            htmlParts.push('<div class="md-empty-line" aria-hidden="true"><br></div>');
             i++;
             continue;
         }
@@ -235,10 +235,9 @@ export const markupToHtmlFull = (text) => {
         }
 
         // ── 普通文本行 ──
-        // 关键逻辑：普通文本行也包裹在 DIV 中，以确保换行符正确
-        // 并且如果文本行为空，需插入 BR 撑开
+        // 保持块级结构，段间节奏统一由写作排版样式控制
         const parsedLine = parseInlineMarkdown(line);
-        htmlParts.push(`<div class="md-paragraph min-h-[1.5em] break-words">${parsedLine || '<br>'}</div>`);
+        htmlParts.push(`<div class="md-paragraph break-words">${parsedLine || '<br>'}</div>`);
         i++;
     }
 

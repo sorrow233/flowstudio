@@ -1,0 +1,52 @@
+.writing-editor-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.86;
+    letter-spacing: 0.012em;
+    text-rendering: optimizeLegibility;
+    font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif;
+}
+
+.writing-editor-content > div,
+.writing-editor-content > p {
+    margin: 0 0 1.05em;
+    min-height: 1.86em;
+}
+
+.writing-editor-content > div:last-child,
+.writing-editor-content > p:last-child {
+    margin-bottom: 0;
+}
+
+.writing-editor-content > .md-empty-line {
+    min-height: 0.96em;
+    margin-bottom: 0.96em;
+}
+
+.writing-editor-content .md-heading {
+    line-height: 1.32;
+}
+
+.writing-editor-content img {
+    display: block;
+    max-width: 100%;
+    margin: 1.2em 0;
+}
+
+@media (max-width: 767px) {
+    .writing-editor-content {
+        line-height: 1.8;
+        letter-spacing: 0.008em;
+    }
+
+    .writing-editor-content > div,
+    .writing-editor-content > p {
+        margin-bottom: 0.95em;
+        min-height: 1.8em;
+    }
+
+    .writing-editor-content > .md-empty-line {
+        margin-bottom: 0.88em;
+        min-height: 0.88em;
+    }
+}
