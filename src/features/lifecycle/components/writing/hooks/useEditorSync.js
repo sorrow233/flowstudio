@@ -11,6 +11,8 @@ export const useEditorSync = ({
     writingDoc,
     title,
     setTitle,
+    isDirty,
+    setIsDirty,
     contentMarkup,
     setContentMarkup,
     editorRef,
@@ -22,6 +24,7 @@ export const useEditorSync = ({
     const [conflictState, setConflictState] = useState(null);
 
     const lastSeenRemoteContentRef = useRef('');
+    const lastSeenRemoteTitleRef = useRef('');
     const forceRemoteApplyRef = useRef(false);
 
     const conflictPreview = useMemo(() => {
@@ -35,7 +38,13 @@ export const useEditorSync = ({
 
         const prevRemoteContentRaw = lastSeenRemoteContentRef.current;
         const prevRemoteContent = normalizeMarkupForSync(prevRemoteContentRaw);
-        if (writingDoc.title !== title) setTitle(writingDoc.title || '');
+
+        // 仅当远端标题真正变化时才同步，避免覆盖用户正在输入的标题
+        const remoteTitle = writingDoc.title || '';
+        if (remoteTitle !== lastSeenRemoteTitleRef.current) {
+            lastSeenRemoteTitleRef.current = remoteTitle;
+            if (remoteTitle !== title) setTitle(remoteTitle);
+        }
 
         const remoteContentRaw = writingDoc.content || '';
         const remoteContent = normalizeMarkupForSync(remoteContentRaw);
@@ -104,6 +113,16 @@ export const useEditorSync = ({
         lastSeenRemoteContentRef.current = writingDoc.content || '';
     }, [editorRef, pendingRemoteHtml, setContentMarkup, updateStatsFromEditor, writingDoc]);
 
+    const handleApplyPendingRemoteOnBlur = useCallback(() => {
+        if (!pendingRemoteHtml || !writingDoc || conflictState) return;
+        if (editorRef.current) editorRef.current.innerHTML = pendingRemoteHtml;
+        setContentMarkup(writingDoc.content || '');
+        updateStatsFromEditor();
+        setPendingRemoteHtml(null);
+        setConflictState(null);
+        lastSeenRemoteContentRef.current = writingDoc.content || '';
+    }, [conflictState, editorRef, pendingRemoteHtml, setContentMarkup, updateStatsFromEditor, writingDoc]);
+
     const handleKeepPendingLocal = useCallback(() => {
         setPendingRemoteHtml(null);
         if (writingDoc?.content) lastSeenRemoteContentRef.current = writingDoc.content;
@@ -138,16 +157,28 @@ export const useEditorSync = ({
         setConflictState(null);
         setPendingRemoteHtml(null);
         lastSeenRemoteContentRef.current = remote;
+        lastSeenRemoteTitleRef.current = remoteTitle;
     }, [conflictState, editorRef, setContentMarkup, setTitle, updateStatsFromEditor]);
+
+    const handleApplyPendingRemoteOnBlur = useCallback(() => {
+        if (!pendingRemoteHtml || !writingDoc) return;
+        if (editorRef.current) editorRef.current.innerHTML = pendingRemoteHtml;
+        setContentMarkup(writingDoc.content || '');
+        updateStatsFromEditor();
+        setPendingRemoteHtml(null);
+        setConflictState(null);
+        lastSeenRemoteContentRef.current = writingDoc.content || '';
+    }, [editorRef, pendingRemoteHtml, setContentMarkup, updateStatsFromEditor, writingDoc]);
 
     return {
         conflictPreview,
         conflictState,
         handleApplyPendingRemote,
+        handleApplyPendingRemoteOnBlur,
         handleConflictKeepLocal,
         handleConflictUseRemote,
         handleKeepPendingLocal,
-        pendingRemoteHtml,
+        pendingRemoteMarkup: pendingRemoteHtml,
         requestForceRemoteApply,
     };
 };

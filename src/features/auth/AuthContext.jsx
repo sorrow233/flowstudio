@@ -21,11 +21,6 @@ export const AuthProvider = ({ children }) => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setUser(user);
             setLoading(false);
-        }, (error) => {
-            // Token 刷新失败时不要直接清除用户状态
-            // 避免网络波动导致用户被踢出登录
-            console.warn('[Auth] onAuthStateChanged error:', error.code, error.message);
-            setLoading(false);
         });
 
         return unsubscribe;
