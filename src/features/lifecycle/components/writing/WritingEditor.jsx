@@ -518,7 +518,12 @@ const WritingEditor = ({
                         />
                     </motion.div>
 
-                    <div className={`${isMobile ? 'mt-8' : 'mt-11'}`}>
+                    <div
+                        className={`rounded-3xl bg-white p-6 transition-all md:p-10 dark:bg-slate-900 ${isEditorFocused
+                            ? 'shadow-[0_14px_30px_-24px_rgba(14,116,255,0.28)] dark:shadow-none'
+                            : 'shadow-none'}`}
+                        style={{ marginTop: isMobile ? 32 : 44 }}
+                    >
                         <input
                             type="text"
                             value={title}
@@ -538,46 +543,40 @@ const WritingEditor = ({
                                 fontFamily: '"Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif',
                             }}
                         />
-                    </div>
 
-                    <div className="mb-6 mt-3">
-                        <EditorStatusBar
-                            wordCount={wordCount}
-                            wordCountLabelKey={wordCountLabelKey}
-                            charCount={charCount}
-                            readMinutes={readMinutes}
-                            lastSavedAt={lastSavedAt}
-                            hasPendingRemote={hasPendingRemote}
-                            isMobile={isMobile}
-                            t={t}
-                        />
-                    </div>
-
-                    {pendingRemoteMarkup && !conflictState && (
-                        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-200/70 bg-sky-50/80 px-4 py-2.5 text-[12px] text-sky-700">
-                            <span>{t('inspiration.pendingRemote')}</span>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={handleApplyPendingRemote}
-                                    className="rounded-full border border-sky-200 bg-white px-3 py-1 text-xs transition hover:bg-sky-50"
-                                >
-                                    {t('inspiration.applyRemote')}
-                                </button>
-                                <button
-                                    onClick={handleKeepPendingLocal}
-                                    className="rounded-full bg-sky-600 px-3 py-1 text-xs text-white transition hover:bg-sky-500 dark:bg-sky-500 dark:hover:bg-sky-400"
-                                >
-                                    {t('inspiration.keepLocal')}
-                                </button>
-                            </div>
+                        <div className="mb-6 mt-3">
+                            <EditorStatusBar
+                                wordCount={wordCount}
+                                wordCountLabelKey={wordCountLabelKey}
+                                charCount={charCount}
+                                readMinutes={readMinutes}
+                                lastSavedAt={lastSavedAt}
+                                hasPendingRemote={hasPendingRemote}
+                                isMobile={isMobile}
+                                t={t}
+                            />
                         </div>
-                    )}
 
-                    <div
-                        className={`rounded-3xl bg-white p-6 transition-all md:p-10 dark:bg-slate-900 ${isEditorFocused
-                            ? 'shadow-[0_14px_30px_-24px_rgba(14,116,255,0.28)] dark:shadow-none'
-                            : 'shadow-none'}`}
-                    >
+                        {pendingRemoteMarkup && !conflictState && (
+                            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-200/70 bg-sky-50/80 px-4 py-2.5 text-[12px] text-sky-700">
+                                <span>{t('inspiration.pendingRemote')}</span>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={handleApplyPendingRemote}
+                                        className="rounded-full border border-sky-200 bg-white px-3 py-1 text-xs transition hover:bg-sky-50"
+                                    >
+                                        {t('inspiration.applyRemote')}
+                                    </button>
+                                    <button
+                                        onClick={handleKeepPendingLocal}
+                                        className="rounded-full bg-sky-600 px-3 py-1 text-xs text-white transition hover:bg-sky-500 dark:bg-sky-500 dark:hover:bg-sky-400"
+                                    >
+                                        {t('inspiration.keepLocal')}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         <div
                             ref={editorRef}
                             contentEditable

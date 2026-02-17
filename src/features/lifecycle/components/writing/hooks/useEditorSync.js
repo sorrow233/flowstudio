@@ -39,11 +39,11 @@ export const useEditorSync = ({
         const prevRemoteContentRaw = lastSeenRemoteContentRef.current;
         const prevRemoteContent = normalizeMarkupForSync(prevRemoteContentRaw);
 
-        // 仅当远端标题真正变化时才同步，避免覆盖用户正在输入的标题
+        // 仅当远端标题真正变化且用户未在编辑时才同步，避免覆盖用户正在输入的标题
         const remoteTitle = writingDoc.title || '';
         if (remoteTitle !== lastSeenRemoteTitleRef.current) {
             lastSeenRemoteTitleRef.current = remoteTitle;
-            if (remoteTitle !== title) setTitle(remoteTitle);
+            if (remoteTitle !== title && !isDirty) setTitle(remoteTitle);
         }
 
         const remoteContentRaw = writingDoc.content || '';
@@ -92,6 +92,7 @@ export const useEditorSync = ({
     }, [
         contentMarkup,
         editorRef,
+        isDirty,
         setContentMarkup,
         setTitle,
         title,
