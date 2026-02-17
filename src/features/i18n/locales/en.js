@@ -153,6 +153,15 @@ export default {
         categoryNamePlaceholder: 'Enter category name',
         addCategoryLimit10: 'Add category (up to 10)',
         categoryLimitReached: 'Category limit reached (10)',
+        categoryCountLabel: 'Categories',
+        categoryNameRequired: 'Please enter a category name',
+        categoryNameDuplicate: 'Category name already exists',
+        categoryNameTooLong: 'Category name can be at most 24 characters',
+        categoryColorFixed: 'Default category colors are fixed',
+        categoryColorChange: 'Change category color',
+        categoryColorInUse: 'This color is already in use',
+        categoryColorSelect: 'Select color',
+        categoryDeleteMoveHint: 'Documents in this category will be moved automatically after deletion.',
     },
 
     // Pending Module

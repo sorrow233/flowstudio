@@ -14,6 +14,8 @@ export const DEFAULT_WRITING_CATEGORY_I18N_KEYS = {
     final: 'writing.categoryFinal',
 };
 
+export const MAX_WRITING_CATEGORIES = 10;
+
 export const resolveWritingCategoryLabel = (category, t, fallback = '') => {
     if (!category) return fallback;
 
@@ -109,3 +111,25 @@ export const WRITING_CATEGORY_COLORS = [
         darkButtonClass: 'dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50'
     },
 ];
+
+export const isDefaultWritingCategoryId = (categoryId) => Boolean(DEFAULT_WRITING_CATEGORY_LABELS[categoryId]);
+
+export const getDefaultWritingCategoryLabel = (categoryId) => DEFAULT_WRITING_CATEGORY_LABELS[categoryId] || '';
+
+export const findWritingCategoryPreset = (category) => {
+    if (!category) return null;
+    return WRITING_CATEGORY_COLORS.find((preset) => (
+        preset.color === category.color || preset.dotColor === category.dotColor
+    )) || null;
+};
+
+export const pickWritingCategoryStyle = (preset) => {
+    if (!preset) return {};
+    return {
+        color: preset.color,
+        dotColor: preset.dotColor,
+        textColor: preset.textColor,
+        buttonClass: preset.buttonClass,
+        darkButtonClass: preset.darkButtonClass,
+    };
+};

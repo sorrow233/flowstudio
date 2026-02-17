@@ -4,7 +4,7 @@ import { Search, Plus, X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import WritingCategorySelector from './WritingCategorySelector';
 import WritingCategoryManager from './WritingCategoryManager';
-import { WRITING_CATEGORY_COLORS } from './writingCategoryUtils';
+import { findWritingCategoryPreset } from './writingCategoryUtils';
 
 const WritingWorkspaceHeader = ({
     categories = [],
@@ -16,6 +16,7 @@ const WritingWorkspaceHeader = ({
     onAddCategory,
     onUpdateCategory,
     onRemoveCategory,
+    categoryDocCountMap = {},
     isMobile = false,
     isCollapsed = false,
 }) => {
@@ -38,7 +39,7 @@ const WritingWorkspaceHeader = ({
 
         if (!selectedCategoryObj) return fallback;
 
-        const preset = WRITING_CATEGORY_COLORS.find(c => c.color === selectedCategoryObj.color || c.dotColor === selectedCategoryObj.dotColor);
+        const preset = findWritingCategoryPreset(selectedCategoryObj);
         if (!preset) return fallback;
 
         return {
@@ -103,6 +104,7 @@ const WritingWorkspaceHeader = ({
                                     selectedCategory={selectedCategory}
                                     onSelectCategory={onSelectCategory}
                                     onOpenManager={() => setCategoryManagerOpen(true)}
+                                    categoryDocCountMap={categoryDocCountMap}
                                     isMobile={isMobile}
                                     t={t}
                                 />
@@ -150,6 +152,7 @@ const WritingWorkspaceHeader = ({
                                     selectedCategory={selectedCategory}
                                     onSelectCategory={onSelectCategory}
                                     onOpenManager={() => setCategoryManagerOpen(true)}
+                                    categoryDocCountMap={categoryDocCountMap}
                                     isMobile={isMobile}
                                     t={t}
                                 />
@@ -166,6 +169,7 @@ const WritingWorkspaceHeader = ({
                 onAdd={onAddCategory}
                 onUpdate={onUpdateCategory}
                 onRemove={onRemoveCategory}
+                categoryDocCountMap={categoryDocCountMap}
             />
         </motion.header>
     );

@@ -184,6 +184,15 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         return list.map((docItem) => docItem.doc);
     }, [documentSearchIndex, selectedCategory, searchQuery]);
 
+    const categoryDocCountMap = useMemo(() => {
+        const counter = {};
+        documents.forEach((docItem) => {
+            const categoryId = docItem.category || defaultCategoryId;
+            counter[categoryId] = (counter[categoryId] || 0) + 1;
+        });
+        return counter;
+    }, [defaultCategoryId, documents]);
+
     useEffect(() => {
         if (visibleDocuments.length === 0) {
             if (selectedDocId !== null) {
@@ -275,10 +284,11 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         const fallback = categories.find((category) => category.id !== id);
         if (!fallback) return;
 
+        const now = Date.now();
         documents
             .filter((docItem) => (docItem.category || defaultCategoryId) === id)
             .forEach((docItem) => {
-                handleUpdate(docItem.id, { category: fallback.id });
+                updateProject(docItem.id, { category: fallback.id, lastModified: now });
             });
 
         removeCategoryBase(id);
@@ -304,6 +314,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                     onAddCategory={handleAddCategory}
                     onUpdateCategory={handleUpdateCategory}
                     onRemoveCategory={handleRemoveCategory}
+                    categoryDocCountMap={categoryDocCountMap}
                     isMobile={isMobile}
                     isCollapsed={isHeaderCollapsed}
                 />

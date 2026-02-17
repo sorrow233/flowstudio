@@ -157,6 +157,15 @@ export default {
         categoryNamePlaceholder: '输入分类名称',
         addCategoryLimit10: '添加分类（最多10个）',
         categoryLimitReached: '已达到分类上限（10）',
+        categoryCountLabel: '分类',
+        categoryNameRequired: '请输入分类名称',
+        categoryNameDuplicate: '分类名称已存在，请换一个名称',
+        categoryNameTooLong: '分类名称最多 24 个字符',
+        categoryColorFixed: '默认分类颜色固定',
+        categoryColorChange: '切换分类颜色',
+        categoryColorInUse: '该颜色已被使用',
+        categoryColorSelect: '选择颜色',
+        categoryDeleteMoveHint: '删除后，该分类文稿会自动迁移到其他分类。',
     },
 
     // 待定模块 (Renamed to Sprouting/萌芽)

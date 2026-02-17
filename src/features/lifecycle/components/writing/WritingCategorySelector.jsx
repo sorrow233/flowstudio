@@ -1,6 +1,6 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ListChecks, Settings2 } from 'lucide-react';
+import { Settings2 } from 'lucide-react';
 import { resolveWritingCategoryLabel } from './writingCategoryUtils';
 
 const WritingCategorySelector = ({
@@ -8,10 +8,12 @@ const WritingCategorySelector = ({
     selectedCategory,
     onSelectCategory,
     onOpenManager,
+    categoryDocCountMap = {},
     isMobile = false,
     t,
 }) => {
     const selectedCategoryInfo = categories.find((category) => category.id === selectedCategory) || categories[0];
+    const selectedCategoryCount = selectedCategoryInfo ? Number(categoryDocCountMap[selectedCategoryInfo.id] || 0) : 0;
     const managerTitle = t('writing.manageCategories', '管理分类');
 
     if (categories.length === 0) {
@@ -32,7 +34,7 @@ const WritingCategorySelector = ({
                             transition={{ duration: 0.2, ease: 'easeOut' }}
                             className={`line-clamp-1 text-[11px] font-bold tracking-tight ${selectedCategoryInfo?.textColor || 'text-slate-600 dark:text-slate-300'}`}
                         >
-                            {resolveWritingCategoryLabel(selectedCategoryInfo, t, t('common.noData'))}
+                            {`${resolveWritingCategoryLabel(selectedCategoryInfo, t, t('common.noData'))} · ${selectedCategoryCount}`}
                         </motion.span>
                     </AnimatePresence>
                 </div>
@@ -44,7 +46,8 @@ const WritingCategorySelector = ({
                             key={category.id}
                             onClick={() => onSelectCategory(category.id)}
                             className={`group/dot relative flex flex-shrink-0 items-center justify-center rounded-full transition-all duration-300 ${isMobile ? 'h-8 w-8' : 'h-7 w-7'}`}
-                            title={resolveWritingCategoryLabel(category, t, t('common.noData'))}
+                            title={`${resolveWritingCategoryLabel(category, t, t('common.noData'))} (${Number(categoryDocCountMap[category.id] || 0)})`}
+                            aria-label={`${resolveWritingCategoryLabel(category, t, t('common.noData'))} ${Number(categoryDocCountMap[category.id] || 0)}`}
                         >
                             {selectedCategory === category.id && (
                                 <motion.div
