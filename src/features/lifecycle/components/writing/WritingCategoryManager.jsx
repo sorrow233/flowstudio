@@ -3,20 +3,9 @@ import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Plus, Trash2, Check, Edit2 } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
-import { resolveWritingCategoryLabel } from './writingCategoryUtils';
+import { resolveWritingCategoryLabel, WRITING_CATEGORY_COLORS } from './writingCategoryUtils';
 
-const COLOR_PRESETS = [
-    { id: 'stone', color: 'bg-stone-400', dotColor: 'bg-stone-400', textColor: 'text-stone-400' },
-    { id: 'blue', color: 'bg-blue-400', dotColor: 'bg-blue-400', textColor: 'text-blue-400' },
-    { id: 'amber', color: 'bg-amber-400', dotColor: 'bg-amber-400', textColor: 'text-amber-400' },
-    { id: 'emerald', color: 'bg-emerald-400', dotColor: 'bg-emerald-400', textColor: 'text-emerald-400' },
-    { id: 'rose', color: 'bg-rose-400', dotColor: 'bg-rose-400', textColor: 'text-rose-400' },
-    { id: 'violet', color: 'bg-violet-400', dotColor: 'bg-violet-400', textColor: 'text-violet-400' },
-    { id: 'cyan', color: 'bg-cyan-400', dotColor: 'bg-cyan-400', textColor: 'text-cyan-400' },
-    { id: 'orange', color: 'bg-orange-400', dotColor: 'bg-orange-400', textColor: 'text-orange-400' },
-    { id: 'teal', color: 'bg-teal-400', dotColor: 'bg-teal-400', textColor: 'text-teal-400' },
-    { id: 'indigo', color: 'bg-indigo-400', dotColor: 'bg-indigo-400', textColor: 'text-indigo-400' },
-];
+
 
 const MAX_CATEGORIES = 10;
 
@@ -31,7 +20,7 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
     const usedColorSet = useMemo(() => new Set(categories.map((cat) => cat.color)), [categories]);
 
     const normalizedCategories = categories.map((cat) => {
-        const preset = COLOR_PRESETS.find((p) => p.color === cat.color || p.dotColor === cat.dotColor);
+        const preset = WRITING_CATEGORY_COLORS.find((p) => p.color === cat.color || p.dotColor === cat.dotColor);
         return preset ? { ...cat, ...preset } : cat;
     });
 
@@ -51,8 +40,8 @@ const WritingCategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, 
     const handleAdd = () => {
         const label = newLabel.trim();
         if (!label || categories.length >= MAX_CATEGORIES) return;
-        const unusedPreset = COLOR_PRESETS.find((preset) => !usedColorSet.has(preset.color));
-        const fallbackPreset = COLOR_PRESETS[categories.length % COLOR_PRESETS.length];
+        const unusedPreset = WRITING_CATEGORY_COLORS.find((preset) => !usedColorSet.has(preset.color));
+        const fallbackPreset = WRITING_CATEGORY_COLORS[categories.length % WRITING_CATEGORY_COLORS.length];
         onAdd({ label, ...(unusedPreset || fallbackPreset) });
         setIsAdding(false);
         setNewLabel('');

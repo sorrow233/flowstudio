@@ -4,6 +4,7 @@ import { Search, Plus, X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import WritingCategorySelector from './WritingCategorySelector';
 import WritingCategoryManager from './WritingCategoryManager';
+import { WRITING_CATEGORY_COLORS } from './writingCategoryUtils';
 
 const WritingWorkspaceHeader = ({
     categories = [],
@@ -26,6 +27,31 @@ const WritingWorkspaceHeader = ({
             setIsSearchOpen(true);
         }
     }, [searchQuery, isSearchOpen]);
+
+    const getButtonStyle = () => {
+        if (!selectedCategory) {
+            return {
+                className: 'bg-sky-500 text-white hover:bg-sky-600 shadow-[0_2px_8px_-2px_rgba(14,165,233,0.4)]',
+                iconColor: 'text-white'
+            };
+        }
+
+        const categoryColor = WRITING_CATEGORY_COLORS.find(c => c.color === selectedCategory.color || c.dotColor === selectedCategory.dotColor);
+        if (!categoryColor) {
+            return {
+                className: 'bg-sky-500 text-white hover:bg-sky-600 shadow-[0_2px_8px_-2px_rgba(14,165,233,0.4)]',
+                iconColor: 'text-white'
+            };
+        }
+
+        return {
+            className: `${categoryColor.buttonClass} ${categoryColor.darkButtonClass}`,
+            iconColor: 'currentColor'
+        };
+    };
+
+    const buttonStyle = getButtonStyle();
+
 
     return (
         <header className={`relative z-20 border-b border-sky-100/50 bg-white dark:border-slate-800/60 dark:bg-slate-900 ${isMobile ? 'px-4 pb-4 pt-4' : 'px-6 pb-4 pt-6'}`}>
@@ -58,10 +84,10 @@ const WritingWorkspaceHeader = ({
                             <button
                                 onClick={() => onCreate(selectedCategory)}
                                 disabled={!selectedCategory}
-                                className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-sky-500 font-bold text-white shadow-[0_2px_8px_-2px_rgba(14,165,233,0.4)] transition-all hover:bg-sky-600 active:scale-[0.97] disabled:opacity-50 ${isMobile ? 'w-10 px-0' : 'px-5'}`}
+                                className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl font-bold transition-all active:scale-[0.97] disabled:opacity-50 ${isMobile ? 'w-10 px-0' : 'px-5'} ${buttonStyle.className}`}
                                 title={t('inspiration.newDoc')}
                             >
-                                <Plus size={18} strokeWidth={2.5} />
+                                <Plus size={22} strokeWidth={2.5} />
                                 {!isMobile && <span className="text-[13.5px] tracking-tight">{t('inspiration.newDoc')}</span>}
                             </button>
                             <div className="min-w-0 flex-1">
@@ -106,10 +132,10 @@ const WritingWorkspaceHeader = ({
                             <button
                                 onClick={() => onCreate(selectedCategory)}
                                 disabled={!selectedCategory}
-                                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-500 text-white transition-all hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all disabled:cursor-not-allowed disabled:opacity-50 ${buttonStyle.className}`}
                                 title={t('inspiration.newDoc')}
                             >
-                                <Plus size={18} strokeWidth={2.5} />
+                                <Plus size={22} strokeWidth={2.5} />
                             </button>
                             <div className="shrink-0">
                                 <WritingCategorySelector
