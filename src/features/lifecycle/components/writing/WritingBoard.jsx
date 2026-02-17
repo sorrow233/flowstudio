@@ -58,12 +58,19 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         base.forEach((category) => {
             if (!category?.id || map.has(category.id)) return;
 
-            // If this is a default category, merge with the latest constant values
-            // This ensures code changes to colors/labels reflect immediately
+            // If this is a default category, merge ONLY style properties from constants
+            // We MUST preserve the 'label' from the synced data so renaming works!
             const defaultCategory = defaultCategoryMap.get(category.id);
-            const mergedCategory = defaultCategory
-                ? { ...category, ...defaultCategory }
-                : category;
+            let mergedCategory = category;
+
+            if (defaultCategory) {
+                mergedCategory = {
+                    ...category,
+                    color: defaultCategory.color,
+                    dotColor: defaultCategory.dotColor,
+                    textColor: defaultCategory.textColor,
+                };
+            }
 
             map.set(category.id, mergedCategory);
         });
