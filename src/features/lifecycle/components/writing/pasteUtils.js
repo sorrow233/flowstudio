@@ -1,26 +1,5 @@
-const BLOCK_TAGS = new Set([
-    'P',
-    'DIV',
-    'H1',
-    'H2',
-    'H3',
-    'H4',
-    'H5',
-    'H6',
-    'UL',
-    'OL',
-    'LI',
-    'PRE',
-    'BLOCKQUOTE',
-    'SECTION',
-    'ARTICLE',
-    'TABLE',
-    'TR',
-    'TD',
-    'TH',
-]);
 
-const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'OBJECT', 'SVG']);
+import { htmlToMarkup } from './editorUtils';
 
 const normalizeMarkupText = (input = '') =>
     (input || '')
@@ -32,75 +11,6 @@ const normalizeMarkupText = (input = '') =>
         .replace(/\n{3,}/g, '\n\n')
         .trim();
 
-const ensureLineBreak = (chunks) => {
-    if (!chunks.length) return;
-    if (chunks[chunks.length - 1] !== '\n') chunks.push('\n');
-};
-
-const resolveListPrefix = (node) => {
-    const parent = node.parentElement;
-    if (!parent) return '- ';
-    if (parent.tagName === 'OL') {
-        const allItems = Array.from(parent.children).filter((child) => child.tagName === 'LI');
-        const index = allItems.indexOf(node);
-        return `${index + 1}. `;
-    }
-    return '- ';
-};
-
-const extractMarkupFromNode = (node, chunks) => {
-    if (!node) return;
-
-    if (node.nodeType === Node.TEXT_NODE) {
-        chunks.push(node.textContent || '');
-        return;
-    }
-
-    if (node.nodeType !== Node.ELEMENT_NODE) return;
-
-    const tag = node.tagName;
-    if (SKIP_TAGS.has(tag)) return;
-
-    if (node.classList?.contains('colored-text') && node.dataset?.colorId) {
-        const colorId = node.dataset.colorId;
-        const text = normalizeMarkupText(node.textContent || '');
-        if (!text) return;
-        chunks.push(`#!${colorId}:${text}#`);
-        return;
-    }
-
-    if (tag === 'BR') {
-        chunks.push('\n');
-        return;
-    }
-
-    if (tag === 'LI') {
-        ensureLineBreak(chunks);
-        chunks.push(resolveListPrefix(node));
-        Array.from(node.childNodes).forEach((child) => extractMarkupFromNode(child, chunks));
-        ensureLineBreak(chunks);
-        return;
-    }
-
-    if (tag === 'TR') {
-        ensureLineBreak(chunks);
-        const cells = Array.from(node.children).filter((child) => child.tagName === 'TD' || child.tagName === 'TH');
-        cells.forEach((cell, index) => {
-            if (index > 0) chunks.push(' | ');
-            extractMarkupFromNode(cell, chunks);
-        });
-        ensureLineBreak(chunks);
-        return;
-    }
-
-    const isBlock = BLOCK_TAGS.has(tag);
-    if (isBlock) ensureLineBreak(chunks);
-
-    Array.from(node.childNodes).forEach((child) => extractMarkupFromNode(child, chunks));
-
-    if (isBlock) ensureLineBreak(chunks);
-};
-
 export const clipboardToMarkup = (clipboardData) => {
     if (!clipboardData) return '';
 
@@ -108,9 +18,9 @@ export const clipboardToMarkup = (clipboardData) => {
     if (html) {
         const parser = new DOMParser();
         const parsed = parser.parseFromString(html, 'text/html');
-        const chunks = [];
-        Array.from(parsed.body.childNodes).forEach((node) => extractMarkupFromNode(node, chunks));
-        const normalized = normalizeMarkupText(chunks.join(''));
+        // 使用 unified parser 提取
+        const markup = htmlToMarkup(parsed.body);
+        const normalized = normalizeMarkupText(markup);
         if (normalized) return normalized;
     }
 
@@ -162,4 +72,3 @@ export const insertMarkupAtCaret = ({ editorElement, markup, markupToHtml }) => 
 
     return true;
 };
-

@@ -51,9 +51,21 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     const categories = useMemo(() => {
         const base = syncedCategories.length > 0 ? syncedCategories : WRITING_CATEGORIES;
         const map = new Map();
+
+        // Create a lookup map for default categories from constants
+        const defaultCategoryMap = new Map(WRITING_CATEGORIES.map(c => [c.id, c]));
+
         base.forEach((category) => {
             if (!category?.id || map.has(category.id)) return;
-            map.set(category.id, category);
+
+            // If this is a default category, merge with the latest constant values
+            // This ensures code changes to colors/labels reflect immediately
+            const defaultCategory = defaultCategoryMap.get(category.id);
+            const mergedCategory = defaultCategory
+                ? { ...category, ...defaultCategory }
+                : category;
+
+            map.set(category.id, mergedCategory);
         });
         return Array.from(map.values());
     }, [syncedCategories]);

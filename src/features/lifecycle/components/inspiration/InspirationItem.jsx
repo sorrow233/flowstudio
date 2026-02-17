@@ -102,7 +102,10 @@ const InspirationItem = ({
     };
 
     // Long press (1 second) to enter edit mode (or just visual feedback in archive)
-    const handlePointerDown = () => {
+    const handlePointerDown = (e) => {
+        // Only trigger on left click
+        if (e.button !== 0) return;
+
         setIsCharging(true);
         longPressTimer.current = setTimeout(() => {
             setIsCharging(false);
