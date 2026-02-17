@@ -160,16 +160,6 @@ export const useEditorSync = ({
         lastSeenRemoteTitleRef.current = remoteTitle;
     }, [conflictState, editorRef, setContentMarkup, setTitle, updateStatsFromEditor]);
 
-    const handleApplyPendingRemoteOnBlur = useCallback(() => {
-        if (!pendingRemoteHtml || !writingDoc) return;
-        if (editorRef.current) editorRef.current.innerHTML = pendingRemoteHtml;
-        setContentMarkup(writingDoc.content || '');
-        updateStatsFromEditor();
-        setPendingRemoteHtml(null);
-        setConflictState(null);
-        lastSeenRemoteContentRef.current = writingDoc.content || '';
-    }, [editorRef, pendingRemoteHtml, setContentMarkup, updateStatsFromEditor, writingDoc]);
-
     return {
         conflictPreview,
         conflictState,
