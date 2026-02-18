@@ -1,3 +1,5 @@
+import { EMPTY_LINE_TOKEN } from './constants';
+
 const normalize = (value = '') =>
     value
         .replace(/\r\n?/g, '\n')
@@ -5,10 +7,15 @@ const normalize = (value = '') =>
         .replace(/\n{3,}/g, '\n\n')
         .trim();
 
+const escapeRegExp = (value = '') => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const EMPTY_LINE_TOKEN_RE = new RegExp(escapeRegExp(EMPTY_LINE_TOKEN), 'g');
+
 export const stripAllMarkdown = (text = '') => {
     if (!text) return '';
 
     const output = text
+        .replace(EMPTY_LINE_TOKEN_RE, '\n')
         // 自定义高亮
         .replace(/#!([^:\n#]+):([^\n#]+)#/g, '$2')
         // 代码块
@@ -57,6 +64,7 @@ export const markupToMarkdownFull = (text = '') => {
 
     return normalize(
         text
+            .replace(EMPTY_LINE_TOKEN_RE, '\n')
             .replace(/#!([^:\n#]+):([^\n#]+)#/g, (_match, _colorId, content) => `==${content}==`),
     );
 };

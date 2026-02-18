@@ -1,6 +1,7 @@
 import MarkdownIt from 'markdown-it';
 import markdownItMark from 'markdown-it-mark';
 import { COLOR_CONFIG } from '../../inspiration/InspirationUtils';
+import { EMPTY_LINE_TOKEN } from './constants';
 
 const COLOR_MARKUP_RE = /^#!([^:\n#]+):([^\n#]+)#/;
 
@@ -10,6 +11,8 @@ const escapeAttr = (value = '') =>
         .replace(/"/g, '&quot;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
+
+const escapeRegExp = (value = '') => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const appendClass = (token, className) => {
     if (!token || !className) return;
@@ -254,5 +257,7 @@ const markdownRenderer = createMarkdownRenderer();
 
 export const markupToHtmlFull = (text) => {
     if (!text) return '';
-    return markdownRenderer.render(text);
+    const rendered = markdownRenderer.render(text);
+    const emptyLineParagraphPattern = new RegExp(`<p>${escapeRegExp(EMPTY_LINE_TOKEN)}<\\/p>`, 'g');
+    return rendered.replace(emptyLineParagraphPattern, '<div class="md-empty-line"><br /></div>');
 };

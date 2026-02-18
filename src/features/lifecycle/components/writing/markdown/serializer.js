@@ -1,3 +1,5 @@
+import { EMPTY_LINE_TOKEN } from './constants';
+
 const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'OBJECT', 'SVG', 'META', 'LINK']);
 
 const normalizeOutput = (value = '') =>
@@ -15,6 +17,12 @@ const normalizeInlineText = (value = '') =>
         .trim();
 
 const escapeTableCell = (value = '') => normalizeInlineText(value).replace(/\|/g, '\\|');
+
+const isEmptyBlockContent = (value = '') =>
+    value
+        .replace(/\n/g, '')
+        .trim()
+        .length === 0;
 
 const serializeChildren = (element, context = {}) => {
     if (!element || !element.childNodes) return '';
@@ -241,11 +249,12 @@ function serializeNode(node, context = {}) {
     if (tag === 'P') {
         const content = serializeChildren(node, { ...context, inParagraph: true });
         if (context.inListItem) return `${content}\n`;
+        if (isEmptyBlockContent(content)) return `${EMPTY_LINE_TOKEN}\n\n`;
         return `${content}\n\n`;
     }
 
     if (tag === 'DIV') {
-        if (node.classList?.contains('md-empty-line')) return '\n\n';
+        if (node.classList?.contains('md-empty-line')) return `${EMPTY_LINE_TOKEN}\n\n`;
 
         const content = serializeChildren(node, context);
         if (context.inListItem) return `${content}\n`;
