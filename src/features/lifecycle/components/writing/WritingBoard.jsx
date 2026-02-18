@@ -11,6 +11,11 @@ import WritingEditor from './WritingEditor';
 import WritingDashboard from './WritingDashboard';
 import WritingWorkspaceHeader from './WritingWorkspaceHeader';
 import { stripAllMarkdown as stripMarkup } from './markdownParser';
+import {
+    TRASH_RETENTION_DAYS,
+    isInWritingTrash,
+    isTrashExpired,
+} from './writingTrashUtils';
 
 const detectCompactLayout = () => {
     if (typeof window === 'undefined') return false;
@@ -89,13 +94,23 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     );
 
     const rawDocuments = externalDocuments ?? internalDocuments;
-    const documents = useMemo(() =>
+    const allDocuments = useMemo(() =>
         [...rawDocuments].sort((a, b) => {
             const left = b.lastModified || b.timestamp || 0;
             const right = a.lastModified || a.timestamp || 0;
             return left - right;
         }),
         [rawDocuments]
+    );
+
+    const activeDocuments = useMemo(
+        () => allDocuments.filter((docItem) => !isInWritingTrash(docItem)),
+        [allDocuments]
+    );
+
+    const trashDocuments = useMemo(
+        () => allDocuments.filter((docItem) => isInWritingTrash(docItem)),
+        [allDocuments]
     );
 
     const resolvedSyncStatus = syncStatus ?? status;
@@ -110,24 +125,28 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         immediateSync?.();
     });
 
-    const deleteHandler = onDelete ?? ((id) => {
+    const hardDeleteHandler = onDelete ?? ((id) => {
         removeProject(id);
         immediateSync?.();
     });
 
 
     const [selectedDocId, setSelectedDocId] = useState(null);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(() => !isMobile && documents.length > 0);
+    const [viewMode, setViewMode] = useState('active');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(() => !isMobile && activeDocuments.length > 0);
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(() => categories[0]?.id || null);
     const [searchInput, setSearchInput] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
-    const hasAutoOpenedSidebarRef = useRef(documents.length > 0);
+    const hasAutoOpenedSidebarRef = useRef(activeDocuments.length > 0);
+
+    const isTrashView = viewMode === 'trash';
+    const docsForView = isTrashView ? trashDocuments : activeDocuments;
 
     useEffect(() => {
         if (isMobile) return;
 
-        if (documents.length === 0) {
+        if (docsForView.length === 0) {
             setIsSidebarOpen(false);
             hasAutoOpenedSidebarRef.current = false;
             return;
@@ -137,7 +156,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             setIsSidebarOpen(true);
             hasAutoOpenedSidebarRef.current = true;
         }
-    }, [documents.length, isMobile]);
+    }, [docsForView.length, isMobile]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -159,19 +178,21 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
 
     const defaultCategoryId = categories[0]?.id || 'draft';
     const documentSearchIndex = useMemo(() =>
-        documents.map((docItem) => ({
+        docsForView.map((docItem) => ({
             doc: docItem,
             category: docItem.category || defaultCategoryId,
             title: (docItem.title || '').toLowerCase(),
             content: stripMarkup(docItem.content || '').toLowerCase(),
         })),
-        [documents, defaultCategoryId]
+        [docsForView, defaultCategoryId]
     );
 
     const visibleDocuments = useMemo(() => {
-        if (!selectedCategory) return [];
-
-        let list = documentSearchIndex.filter((docItem) => docItem.category === selectedCategory);
+        let list = documentSearchIndex;
+        if (!isTrashView) {
+            if (!selectedCategory) return [];
+            list = list.filter((docItem) => docItem.category === selectedCategory);
+        }
 
         if (searchQuery.trim()) {
             const query = searchQuery.trim().toLowerCase();
@@ -182,16 +203,16 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         }
 
         return list.map((docItem) => docItem.doc);
-    }, [documentSearchIndex, selectedCategory, searchQuery]);
+    }, [documentSearchIndex, isTrashView, searchQuery, selectedCategory]);
 
     const categoryDocCountMap = useMemo(() => {
         const counter = {};
-        documents.forEach((docItem) => {
+        activeDocuments.forEach((docItem) => {
             const categoryId = docItem.category || defaultCategoryId;
             counter[categoryId] = (counter[categoryId] || 0) + 1;
         });
         return counter;
-    }, [defaultCategoryId, documents]);
+    }, [activeDocuments, defaultCategoryId]);
 
     useEffect(() => {
         if (visibleDocuments.length === 0) {
@@ -208,15 +229,24 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     }, [visibleDocuments, selectedDocId]);
 
     const activeDoc = useMemo(() =>
-        documents.find((docItem) => docItem.id === selectedDocId),
-        [documents, selectedDocId]
+        docsForView.find((docItem) => docItem.id === selectedDocId),
+        [docsForView, selectedDocId]
     );
-    const hasNoFilteredResults = documents.length > 0 && visibleDocuments.length === 0;
+    const hasNoFilteredResults = docsForView.length > 0 && visibleDocuments.length === 0;
 
     const handleCreate = (input = null) => {
         if (input && typeof input === 'object') {
-            if (input.id && documents.some((docItem) => docItem.id === input.id)) {
-                setSelectedDocId(input.id);
+            const existingDoc = input.id ? allDocuments.find((docItem) => docItem.id === input.id) : null;
+            if (existingDoc) {
+                updateHandler(existingDoc.id, {
+                    ...input,
+                    isDeleted: false,
+                    deletedAt: null,
+                    stage: 'writing',
+                    lastModified: Date.now(),
+                });
+                setViewMode('active');
+                setSelectedDocId(existingDoc.id);
                 if (isMobile) setIsSidebarOpen(false);
                 return;
             }
@@ -224,9 +254,12 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             const restoredDoc = {
                 ...input,
                 stage: input.stage || 'writing',
+                isDeleted: false,
+                deletedAt: null,
                 lastModified: Date.now()
             };
             createHandler(restoredDoc);
+            setViewMode('active');
             setSelectedDocId(restoredDoc.id);
 
             if (isMobile) setIsSidebarOpen(false);
@@ -240,6 +273,8 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             stage: 'writing',
             category: input || selectedCategory || defaultCategoryId,
             timestamp: Date.now(),
+            isDeleted: false,
+            deletedAt: null,
             lastModified: Date.now()
         };
 
@@ -255,19 +290,45 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         updateHandler(id, { ...updates, lastModified: Date.now() });
     };
 
+    const handleMoveToTrash = (id) => {
+        updateHandler(id, {
+            isDeleted: true,
+            deletedAt: Date.now(),
+            lastModified: Date.now(),
+        });
+    };
+
+    const handleRestoreFromTrash = (id) => {
+        updateHandler(id, {
+            isDeleted: false,
+            deletedAt: null,
+            lastModified: Date.now(),
+        });
+        setViewMode('active');
+    };
+
     const handleDelete = (id) => {
-        const index = documents.findIndex((docItem) => docItem.id === id);
-        deleteHandler(id);
+        const index = visibleDocuments.findIndex((docItem) => docItem.id === id);
+        if (isTrashView) hardDeleteHandler(id);
+        else handleMoveToTrash(id);
 
         if (selectedDocId === id) {
-            if (documents.length > 1) {
-                const nextDoc = documents[index + 1] || documents[index - 1];
+            if (visibleDocuments.length > 1) {
+                const nextDoc = visibleDocuments[index + 1] || visibleDocuments[index - 1];
                 setSelectedDocId(nextDoc?.id || null);
             } else {
                 setSelectedDocId(null);
             }
         }
     };
+
+    useEffect(() => {
+        if (trashDocuments.length === 0) return;
+        const now = Date.now();
+        trashDocuments
+            .filter((docItem) => isTrashExpired(docItem, now))
+            .forEach((docItem) => hardDeleteHandler(docItem.id));
+    }, [hardDeleteHandler, trashDocuments]);
 
     const handleAddCategory = (categoryInput) => {
         addCategoryBase(categoryInput);
@@ -285,7 +346,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         if (!fallback) return;
 
         const now = Date.now();
-        documents
+        allDocuments
             .filter((docItem) => (docItem.category || defaultCategoryId) === id)
             .forEach((docItem) => {
                 updateProject(docItem.id, { category: fallback.id, lastModified: now });
@@ -309,6 +370,9 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                     selectedCategory={selectedCategory}
                     onSelectCategory={setSelectedCategory}
                     onCreate={handleCreate}
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
+                    trashCount={trashDocuments.length}
                     searchQuery={searchInput}
                     onSearchQueryChange={setSearchInput}
                     onAddCategory={handleAddCategory}
@@ -353,8 +417,9 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                     <div className="h-full w-full lg:w-[320px]">
                                         <WritingSidebar
                                             documents={visibleDocuments}
-                                            allDocumentsCount={documents.length}
+                                            allDocumentsCount={docsForView.length}
                                             isMobile={isMobile}
+                                            viewMode={viewMode}
                                             activeDocId={selectedDocId}
                                             onSelectDoc={(id) => {
                                                 setSelectedDocId(id);
@@ -363,7 +428,11 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                             onCreate={handleCreate}
                                             onUpdate={handleUpdate}
                                             onDelete={handleDelete}
-                                            onRestore={(docToRestore) => handleCreate(docToRestore)}
+                                            onRestore={(docToRestore) => {
+                                                const targetId = docToRestore?.id || docToRestore;
+                                                if (!targetId) return;
+                                                handleRestoreFromTrash(targetId);
+                                            }}
                                         />
                                     </div>
                                 </motion.aside>
@@ -394,10 +463,14 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                             <div className="flex h-full items-center justify-center bg-white/70 text-slate-400 dark:bg-slate-900/70 dark:text-slate-500">
                                 <p className="text-sm">{t('common.noData')}</p>
                             </div>
+                        ) : isTrashView ? (
+                            <div className="flex h-full items-center justify-center bg-white/70 text-slate-400 dark:bg-slate-900/70 dark:text-slate-500">
+                                <p className="text-sm">{t('writing.emptyTrash', '回收站为空')}</p>
+                            </div>
                         ) : (
                             <WritingDashboard
                                 onCreate={handleCreate}
-                                documents={documents}
+                                documents={activeDocuments}
                                 categories={categories}
                                 onToggleSidebar={() => {
                                     setIsSidebarOpen((open) => !open);

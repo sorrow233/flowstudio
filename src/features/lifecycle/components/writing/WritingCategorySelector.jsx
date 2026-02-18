@@ -9,6 +9,7 @@ const WritingCategorySelector = ({
     onSelectCategory,
     onOpenManager,
     categoryDocCountMap = {},
+    disabled = false,
     isMobile = false,
     t,
 }) => {
@@ -22,7 +23,10 @@ const WritingCategorySelector = ({
 
     return (
         <div className={`relative z-20 flex items-center gap-2 ${isMobile ? 'w-full' : ''}`}>
-            <div className={`flex min-w-0 flex-1 items-center border border-slate-200/60 bg-white/60 shadow-sm backdrop-blur-md transition-all hover:bg-white/80 dark:border-slate-800/50 dark:bg-slate-900/60 dark:hover:bg-slate-900/80 ${isMobile ? 'rounded-2xl px-1.5 py-1.5' : 'rounded-full p-1'}`}>
+            <div className={`flex min-w-0 flex-1 items-center border border-slate-200/60 bg-white/60 shadow-sm backdrop-blur-md transition-all dark:border-slate-800/50 dark:bg-slate-900/60 ${disabled
+                ? 'cursor-not-allowed opacity-55'
+                : 'hover:bg-white/80 dark:hover:bg-slate-900/80'
+                } ${isMobile ? 'rounded-2xl px-1.5 py-1.5' : 'rounded-full p-1'}`}>
                 {/* 类别名称显示 - 移动端也保留 */}
                 <div className={`relative flex shrink-0 items-center justify-center overflow-hidden border-r border-slate-200/50 dark:border-slate-700/50 ${isMobile ? 'h-8 min-w-[70px] max-w-[110px] px-3.5' : 'h-7 min-w-[60px] max-w-[100px] px-3'}`}>
                     <AnimatePresence mode="wait" initial={false}>
@@ -45,6 +49,7 @@ const WritingCategorySelector = ({
                         <button
                             key={category.id}
                             onClick={() => onSelectCategory(category.id)}
+                            disabled={disabled}
                             className={`group/dot relative flex flex-shrink-0 items-center justify-center rounded-full transition-all duration-300 ${isMobile ? 'h-8 w-8' : 'h-7 w-7'}`}
                             title={`${resolveWritingCategoryLabel(category, t, t('common.noData'))} (${Number(categoryDocCountMap[category.id] || 0)})`}
                             aria-label={`${resolveWritingCategoryLabel(category, t, t('common.noData'))} ${Number(categoryDocCountMap[category.id] || 0)}`}
@@ -69,6 +74,7 @@ const WritingCategorySelector = ({
                 {/* 设置/管理按钮 */}
                 <button
                     onClick={onOpenManager}
+                    disabled={disabled}
                     className={`ml-1 inline-flex shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100/50 hover:text-slate-600 dark:hover:bg-slate-800/50 dark:hover:text-slate-300 ${isMobile ? 'h-8 w-8' : 'h-7 w-7'}`}
                     title={managerTitle}
                 >

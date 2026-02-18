@@ -1,9 +1,10 @@
 import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
-import { FileText, Trash2 } from 'lucide-react';
+import { FileText, RotateCcw, Trash2 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useTranslation } from '../../../i18n';
 import { stripMarkup } from './editorUtils';
+import { getTrashRemainingDays, TRASH_RETENTION_DAYS } from './writingTrashUtils';
 
 const formatDocTime = (timestamp) => {
     if (!timestamp) return '';
@@ -17,7 +18,7 @@ const formatDocTime = (timestamp) => {
 
 const LONG_PRESS_DELETE_MS = 650;
 
-const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, isMobile, t }) => {
+const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRestore, isTrashView, isMobile, t }) => {
     const [isRenaming, setIsRenaming] = useState(false);
     const [editTitle, setEditTitle] = useState(doc.title || '');
     const inputRef = useRef(null);
@@ -37,6 +38,10 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, isMob
     }, [doc.title, isRenaming]);
 
     const handleRename = () => {
+        if (isTrashView) {
+            setIsRenaming(false);
+            return;
+        }
         if (editTitle.trim() !== (doc.title || '')) {
             onUpdate?.(doc.id, { title: editTitle.trim() || t('inspiration.untitled') });
         }
@@ -71,7 +76,14 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, isMob
         onDelete?.(doc);
     }, [clearLongPressTimer, doc, onDelete]);
 
+    const handleRestore = useCallback((event) => {
+        event?.stopPropagation();
+        clearLongPressTimer();
+        onRestore?.(doc.id);
+    }, [clearLongPressTimer, doc.id, onRestore]);
+
     const handlePointerDown = (event) => {
+        if (isTrashView) return;
         if (!isMobile || isRenaming) return;
         if (event.pointerType && event.pointerType !== 'touch') return;
         clearLongPressTimer();
@@ -80,6 +92,8 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, isMob
             longPressTimerRef.current = null;
         }, LONG_PRESS_DELETE_MS);
     };
+
+    const remainingDays = useMemo(() => getTrashRemainingDays(doc), [doc]);
 
     return (
         <div className="relative overflow-hidden rounded-2xl">
@@ -106,7 +120,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, isMob
             >
                 <div className="mb-2 flex items-center justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                        {isRenaming ? (
+                        {isRenaming && !isTrashView ? (
                             <input
                                 ref={inputRef}
                                 value={editTitle}
@@ -120,6 +134,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, isMob
                         ) : (
                             <span
                                 onDoubleClick={(event) => {
+                                    if (isTrashView) return;
                                     event.stopPropagation();
                                     setIsRenaming(true);
                                 }}
@@ -136,13 +151,25 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, isMob
                                 {formatDocTime(doc.lastModified || doc.timestamp)}
                             </span>
                         )}
+                        {isTrashView && (
+                            <button
+                                type="button"
+                                onPointerDown={(event) => event.stopPropagation()}
+                                onClick={handleRestore}
+                                className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition hover:bg-emerald-50 hover:text-emerald-600 dark:text-slate-500 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400"
+                                title={t('writing.actions.restore', '恢复')}
+                                aria-label={t('writing.actions.restore', '恢复')}
+                            >
+                                <RotateCcw size={13} />
+                            </button>
+                        )}
                         <button
                             type="button"
                             onPointerDown={(event) => event.stopPropagation()}
                             onClick={handleDelete}
                             className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition hover:bg-rose-50 hover:text-rose-500 dark:text-slate-500 dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
-                            title={t('common.delete', '删除')}
-                            aria-label={t('common.delete', '删除')}
+                            title={isTrashView ? t('writing.deletePermanent', '永久删除') : t('common.delete', '删除')}
+                            aria-label={isTrashView ? t('writing.deletePermanent', '永久删除') : t('common.delete', '删除')}
                         >
                             <Trash2 size={13} />
                         </button>
@@ -152,6 +179,11 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, isMob
                 <p className="line-clamp-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                     {stripMarkup(doc.content || '') || t('inspiration.placeholder')}
                 </p>
+                {isTrashView && (
+                    <p className="mt-2 text-[11px] font-medium text-amber-500/90 dark:text-amber-400/90">
+                        {t('writing.trashExpireHint', `回收站保留 ${TRASH_RETENTION_DAYS} 天`)} · {remainingDays} {t('writing.daysRemaining', '天后过期')}
+                    </p>
+                )}
             </div>
         </div>
     );
@@ -166,9 +198,11 @@ const WritingSidebar = ({
     onDelete,
     onRestore,
     allDocumentsCount = 0,
+    viewMode = 'active',
     isMobile = false
 }) => {
     const { t } = useTranslation();
+    const isTrashView = viewMode === 'trash';
 
     const groupedDocs = useMemo(() => {
         const groups = { today: [], yesterday: [], week: [], older: [] };
@@ -206,6 +240,8 @@ const WritingSidebar = ({
                             onSelect={onSelectDoc}
                             onUpdate={onUpdate}
                             onDelete={handleDelete}
+                            onRestore={onRestore}
+                            isTrashView={isTrashView}
                             isMobile={isMobile}
                             t={t}
                         />
@@ -217,13 +253,21 @@ const WritingSidebar = ({
 
     const handleDelete = (doc) => {
         onDelete?.(doc.id);
-        toast.info(t('writing.docDeleted', '已删除文稿'), {
+        if (isTrashView) {
+            toast.info(t('writing.docDeletedPermanent', '已永久删除'), {
+                icon: <Trash2 className="h-4 w-4 text-rose-500" />,
+                duration: 3000
+            });
+            return;
+        }
+
+        toast.info(t('writing.docMovedToTrash', '已移入回收站'), {
             icon: <Trash2 className="h-4 w-4 text-rose-500" />,
             action: {
-                label: t('common.undo', '撤销'),
+                label: t('writing.actions.restore', '恢复'),
                 onClick: () => {
                     if (onRestore) {
-                        onRestore(doc);
+                        onRestore(doc.id);
                         return;
                     }
                     onCreate?.(doc);
@@ -243,7 +287,9 @@ const WritingSidebar = ({
                     <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-sky-300">
                         <FileText size={34} strokeWidth={1.4} />
                         <p className="mt-3 text-xs text-slate-400">
-                            {allDocumentsCount === 0 ? t('inspiration.noDocs') : t('common.noData')}
+                            {allDocumentsCount === 0
+                                ? (isTrashView ? t('writing.emptyTrash', '回收站为空') : t('inspiration.noDocs'))
+                                : t('common.noData')}
                         </p>
                     </div>
                 ) : (

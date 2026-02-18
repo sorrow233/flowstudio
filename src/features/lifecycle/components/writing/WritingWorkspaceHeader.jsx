@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, Plus, X } from 'lucide-react';
+import { ArchiveRestore, Search, Plus, X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import WritingCategorySelector from './WritingCategorySelector';
 import WritingCategoryManager from './WritingCategoryManager';
@@ -11,6 +11,9 @@ const WritingWorkspaceHeader = ({
     selectedCategory,
     onSelectCategory,
     onCreate,
+    viewMode = 'active',
+    onViewModeChange,
+    trashCount = 0,
     searchQuery,
     onSearchQueryChange,
     onAddCategory,
@@ -23,6 +26,7 @@ const WritingWorkspaceHeader = ({
     const { t } = useTranslation();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isCategoryManagerOpen, setCategoryManagerOpen] = useState(false);
+    const isTrashView = viewMode === 'trash';
 
     useEffect(() => {
         if (searchQuery && !isSearchOpen) {
@@ -91,12 +95,29 @@ const WritingWorkspaceHeader = ({
                             </button>
                             <button
                                 onClick={() => onCreate(selectedCategory)}
-                                disabled={!selectedCategory}
+                                disabled={!selectedCategory || isTrashView}
                                 className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl font-bold transition-all active:scale-[0.97] disabled:opacity-50 ${isMobile ? 'w-10 px-0' : 'px-5'} ${buttonStyle.className}`}
                                 title={t('inspiration.newDoc')}
                             >
                                 <Plus size={22} strokeWidth={2.5} />
                                 {!isMobile && <span className="text-[13.5px] tracking-tight">{t('inspiration.newDoc')}</span>}
+                            </button>
+                            <button
+                                onClick={() => onViewModeChange?.(isTrashView ? 'active' : 'trash')}
+                                className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border px-3 text-sm font-medium transition ${isTrashView
+                                    ? 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300'
+                                    : 'border-slate-200/70 bg-white/80 text-slate-600 hover:border-sky-300 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800/70 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400'
+                                    }`}
+                                title={isTrashView ? t('writing.system.all', '全部') : t('writing.system.trash', '回收站')}
+                            >
+                                <ArchiveRestore size={16} />
+                                {!isMobile && (
+                                    <span className="text-[12.5px]">
+                                        {isTrashView
+                                            ? t('writing.system.all', '全部')
+                                            : `${t('writing.system.trash', '回收站')} (${trashCount})`}
+                                    </span>
+                                )}
                             </button>
                             <div className="min-w-0 flex-1">
                                 <WritingCategorySelector
@@ -105,6 +126,7 @@ const WritingWorkspaceHeader = ({
                                     onSelectCategory={onSelectCategory}
                                     onOpenManager={() => setCategoryManagerOpen(true)}
                                     categoryDocCountMap={categoryDocCountMap}
+                                    disabled={isTrashView}
                                     isMobile={isMobile}
                                     t={t}
                                 />
@@ -140,11 +162,21 @@ const WritingWorkspaceHeader = ({
                             </div>
                             <button
                                 onClick={() => onCreate(selectedCategory)}
-                                disabled={!selectedCategory}
+                                disabled={!selectedCategory || isTrashView}
                                 className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all disabled:cursor-not-allowed disabled:opacity-50 ${buttonStyle.className}`}
                                 title={t('inspiration.newDoc')}
                             >
                                 <Plus size={22} strokeWidth={2.5} />
+                            </button>
+                            <button
+                                onClick={() => onViewModeChange?.(isTrashView ? 'active' : 'trash')}
+                                className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition ${isTrashView
+                                    ? 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300'
+                                    : 'border-slate-200/70 bg-white/80 text-slate-600 hover:border-sky-300 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800/70 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400'
+                                    }`}
+                                title={isTrashView ? t('writing.system.all', '全部') : `${t('writing.system.trash', '回收站')} (${trashCount})`}
+                            >
+                                <ArchiveRestore size={16} />
                             </button>
                             <div className="shrink-0">
                                 <WritingCategorySelector
@@ -153,6 +185,7 @@ const WritingWorkspaceHeader = ({
                                     onSelectCategory={onSelectCategory}
                                     onOpenManager={() => setCategoryManagerOpen(true)}
                                     categoryDocCountMap={categoryDocCountMap}
+                                    disabled={isTrashView}
                                     isMobile={isMobile}
                                     t={t}
                                 />
