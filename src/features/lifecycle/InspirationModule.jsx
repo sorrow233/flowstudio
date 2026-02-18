@@ -690,6 +690,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
     }, []);
 
     const handleCopyPrompt = useCallback(async () => {
+        setAiAssistTab('prompt');
         const success = await copyTextToClipboard(aiPromptTemplate);
         if (success) {
             setIsPromptCopied(true);
@@ -701,6 +702,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
     }, [aiPromptTemplate, copyTextToClipboard]);
 
     const handleCopyUnclassifiedTodos = useCallback(async () => {
+        setAiAssistTab('todo');
         if (!unclassifiedTodoNumberedText) {
             setAiImportError('当前没有未分类代办可复制。');
             return;
@@ -717,6 +719,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
     }, [copyTextToClipboard, unclassifiedTodoNumberedText]);
 
     const handleCopyClassifyPrompt = useCallback(async () => {
+        setAiAssistTab('classify');
         if (!unclassifiedTodoNumberedText) {
             setAiClassifyError('当前没有可分类的未分类代办。');
             return;
@@ -1743,28 +1746,31 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
 
                                 <div className="inline-flex rounded-xl p-1 bg-pink-50 dark:bg-pink-900/20 border border-pink-100 dark:border-pink-800/40">
                                     <button
-                                        onClick={() => setAiAssistTab('prompt')}
+                                        type="button"
+                                        disabled
                                         className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${aiAssistTab === 'prompt'
                                             ? 'bg-white dark:bg-gray-800 text-pink-500 dark:text-pink-300 shadow-sm'
-                                            : 'text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-300'
+                                            : 'text-gray-500 dark:text-gray-400'
                                             }`}
                                     >
                                         AI 提示词
                                     </button>
                                     <button
-                                        onClick={() => setAiAssistTab('todo')}
+                                        type="button"
+                                        disabled
                                         className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${aiAssistTab === 'todo'
                                             ? 'bg-white dark:bg-gray-800 text-pink-500 dark:text-pink-300 shadow-sm'
-                                            : 'text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-300'
+                                            : 'text-gray-500 dark:text-gray-400'
                                             }`}
                                     >
                                         未分类清单
                                     </button>
                                     <button
-                                        onClick={() => setAiAssistTab('classify')}
+                                        type="button"
+                                        disabled
                                         className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${aiAssistTab === 'classify'
                                             ? 'bg-white dark:bg-gray-800 text-pink-500 dark:text-pink-300 shadow-sm'
-                                            : 'text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-300'
+                                            : 'text-gray-500 dark:text-gray-400'
                                             }`}
                                     >
                                         导入分类
