@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
-import { Check, FileText, RotateCcw, Trash2, X } from 'lucide-react';
+import { FileText, RotateCcw, Trash2, X } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useTranslation } from '../../../i18n';
@@ -185,22 +185,6 @@ const WritingSidebarItem = ({
                         )}
                     </div>
                     <div className="ml-2 flex shrink-0 items-center gap-1.5">
-                        {isSelectionMode ? (
-                            <button
-                                type="button"
-                                onClick={(event) => {
-                                    event.stopPropagation();
-                                    onToggleSelect?.(doc.id);
-                                }}
-                                className={`inline-flex h-6 w-6 items-center justify-center rounded-md border transition ${isSelected
-                                    ? 'border-sky-400 bg-sky-500 text-white'
-                                    : 'border-slate-300 bg-white text-transparent dark:border-slate-600 dark:bg-slate-900'
-                                    }`}
-                                aria-label={isSelected ? t('common.selected', '已选中') : t('common.select', '选择')}
-                            >
-                                <Check size={13} strokeWidth={2.8} />
-                            </button>
-                        ) : null}
                         {isActive && !isSelectionMode && (
                             <span className="text-[10px] font-medium tracking-wide text-sky-500/80 dark:text-sky-400/80">
                                 {formatDocTime(doc.lastModified || doc.timestamp)}

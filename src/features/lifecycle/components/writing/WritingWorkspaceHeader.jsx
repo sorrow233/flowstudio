@@ -69,6 +69,42 @@ const WritingWorkspaceHeader = ({
         ? selectedCategoryObj.dotColor.replace('bg-', 'text-')
         : 'text-slate-500';
 
+    const renderCompactCategoryBar = () => (
+        <div className={`${isTrashView ? 'pointer-events-none opacity-55' : ''}`}>
+            <div className="flex h-10 items-center rounded-full border border-slate-200/70 bg-white/72 px-1 backdrop-blur-sm dark:border-slate-700/65 dark:bg-slate-800/65">
+                <div className="flex shrink-0 items-center gap-1.5 px-1.5">
+                    <span className={`max-w-[4.6rem] truncate text-[12px] font-semibold ${selectedCategoryTextClass}`}>
+                        {selectedCategoryLabel}
+                    </span>
+                    <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+                </div>
+                <div className="min-w-0 flex-1 overflow-x-auto">
+                    <div className="flex min-w-max items-center gap-1 pr-1">
+                        {compactCategories.map((category) => {
+                            const label = resolveWritingCategoryLabel(category, t, t('common.noData'));
+                            const isActive = selectedCategory === category.id;
+
+                            return (
+                                <button
+                                    key={category.id}
+                                    onClick={() => onSelectCategory(category.id)}
+                                    className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${isActive
+                                        ? 'border-slate-200 bg-white shadow-[0_6px_14px_-10px_rgba(15,23,42,0.6)] dark:border-slate-600 dark:bg-slate-700'
+                                        : 'border-transparent hover:border-slate-200/80 hover:bg-slate-50/80 dark:hover:border-slate-600 dark:hover:bg-slate-700/70'
+                                        }`}
+                                    title={label}
+                                    aria-label={label}
+                                >
+                                    <span className={`rounded-full transition-all duration-300 ${category.dotColor} ${isActive ? 'h-3 w-3' : 'h-2.5 w-2.5 opacity-75'}`} />
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
     const renderCompactHeader = () => (
         <>
             <motion.div
@@ -109,6 +145,8 @@ const WritingWorkspaceHeader = ({
                     <Settings2 size={16} />
                 </button>
             </motion.div>
+
+            {renderCompactCategoryBar()}
 
             <AnimatePresence>
                 {isCompactPanelOpen && (
@@ -155,40 +193,6 @@ const WritingWorkspaceHeader = ({
                             >
                                 <Settings2 size={14} />
                             </button>
-                        </div>
-
-                        <div className={`${isTrashView ? 'pointer-events-none opacity-55' : ''}`}>
-                            <div className="flex h-10 items-center rounded-full border border-slate-200/70 bg-white/72 px-1 backdrop-blur-sm dark:border-slate-700/65 dark:bg-slate-800/65">
-                                <div className="flex shrink-0 items-center gap-1.5 px-1.5">
-                                    <span className={`max-w-[4.6rem] truncate text-[12px] font-semibold ${selectedCategoryTextClass}`}>
-                                        {selectedCategoryLabel}
-                                    </span>
-                                    <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
-                                </div>
-                                <div className="min-w-0 flex-1 overflow-x-auto">
-                                    <div className="flex min-w-max items-center gap-1 pr-1">
-                                        {compactCategories.map((category) => {
-                                            const label = resolveWritingCategoryLabel(category, t, t('common.noData'));
-                                            const isActive = selectedCategory === category.id;
-
-                                            return (
-                                                <button
-                                                    key={category.id}
-                                                    onClick={() => onSelectCategory(category.id)}
-                                                    className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${isActive
-                                                        ? 'border-slate-200 bg-white shadow-[0_6px_14px_-10px_rgba(15,23,42,0.6)] dark:border-slate-600 dark:bg-slate-700'
-                                                        : 'border-transparent hover:border-slate-200/80 hover:bg-slate-50/80 dark:hover:border-slate-600 dark:hover:bg-slate-700/70'
-                                                        }`}
-                                                    title={label}
-                                                    aria-label={label}
-                                                >
-                                                    <span className={`rounded-full transition-all duration-300 ${category.dotColor} ${isActive ? 'h-3 w-3' : 'h-2.5 w-2.5 opacity-75'}`} />
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </motion.div>
                 )}
