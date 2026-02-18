@@ -167,24 +167,22 @@ const WritingWorkspaceHeader = ({
 
             <div className={`flex flex-col gap-1.5 ${isTrashView ? 'pointer-events-none opacity-55' : ''}`}>
                 {compactCategoryRows.map((row, rowIndex) => (
-                    <div key={`row-${rowIndex}`} className="grid grid-cols-5 gap-1.5">
+                    <div key={`row-${rowIndex}`} className="grid grid-cols-5 gap-2">
                         {row.map((category) => {
                             const label = resolveWritingCategoryLabel(category, t, t('common.noData'));
-                            const count = Number(categoryDocCountMap[category.id] || 0);
                             const isActive = selectedCategory === category.id;
-                            const preset = findWritingCategoryPreset(category);
 
                             return (
                                 <button
                                     key={category.id}
                                     onClick={() => onSelectCategory(category.id)}
-                                    className={`flex h-8 min-w-0 items-center justify-center gap-1 rounded-lg border px-1.5 text-[11px] font-semibold transition ${isActive
-                                        ? `${preset?.buttonClass || 'bg-sky-100 text-sky-600'} border-slate-300/60 ${preset?.darkButtonClass || 'dark:bg-sky-900/30 dark:text-sky-400'} dark:border-slate-700/60`
-                                        : 'border-slate-200/70 bg-white/85 text-slate-500 hover:border-sky-300 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400'
+                                    className={`flex h-10 min-w-0 items-center justify-center gap-1.5 rounded-2xl border px-2.5 text-[12px] font-semibold tracking-tight transition ${isActive
+                                        ? 'border-sky-400/70 bg-white text-slate-700 shadow-[0_10px_20px_-14px_rgba(59,130,246,0.65)] dark:border-sky-500/60 dark:bg-slate-800 dark:text-slate-100 dark:shadow-none'
+                                        : 'border-slate-300/75 bg-slate-50/80 text-slate-600 hover:border-slate-400/80 hover:bg-white dark:border-slate-700/65 dark:bg-slate-800/85 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800'
                                         }`}
-                                    title={`${label} (${count})`}
+                                    title={label}
                                 >
-                                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${category.dotColor}`} />
+                                    <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${category.dotColor}`} />
                                     <span className="truncate">{label}</span>
                                 </button>
                             );
