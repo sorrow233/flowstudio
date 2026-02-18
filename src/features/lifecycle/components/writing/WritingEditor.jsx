@@ -319,6 +319,20 @@ const WritingEditor = ({
         updateStatsFromEditor();
     }, [updateStatsFromEditor]);
 
+    const normalizeEditorMarkdownView = useCallback(() => {
+        if (!editorRef.current) return;
+
+        const latestMarkup = htmlToMarkup(editorRef.current);
+        const normalizedHtml = markupToHtml(latestMarkup);
+
+        if (editorRef.current.innerHTML !== normalizedHtml) {
+            editorRef.current.innerHTML = normalizedHtml;
+        }
+
+        setContentMarkup(latestMarkup);
+        updateStatsFromEditor();
+    }, [updateStatsFromEditor]);
+
     const handleInsertMarkdown = useCallback((actionId) => {
         if (!editorRef.current) return;
 
@@ -781,6 +795,7 @@ const WritingEditor = ({
                                 onBlur={() => {
                                     setIsEditorFocused(false);
                                     handleApplyPendingRemoteOnBlur();
+                                    normalizeEditorMarkdownView();
                                 }}
                                 spellCheck
                                 className="writing-editor-content min-h-[55vh] w-full text-lg text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"
