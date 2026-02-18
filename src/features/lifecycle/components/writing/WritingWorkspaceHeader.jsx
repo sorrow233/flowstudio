@@ -236,10 +236,11 @@ const WritingWorkspaceHeader = ({
                                 <Settings2 size={14} />
                             </button>
                         </div>
-                        {renderCompactCategoryBar()}
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {renderCompactCategoryBar()}
         </>
     );
 
