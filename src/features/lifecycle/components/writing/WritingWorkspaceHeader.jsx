@@ -4,7 +4,7 @@ import { ArchiveRestore, Plus, Search, Settings2, X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import WritingCategorySelector from './WritingCategorySelector';
 import WritingCategoryManager from './WritingCategoryManager';
-import { findWritingCategoryPreset, resolveWritingCategoryLabel } from './writingCategoryUtils';
+import { findWritingCategoryPreset, getWritingCategoryToolTone, resolveWritingCategoryLabel } from './writingCategoryUtils';
 
 const WritingWorkspaceHeader = ({
     compact = false,
@@ -37,23 +37,22 @@ const WritingWorkspaceHeader = ({
     }, [searchQuery, isSearchOpen]);
 
     const selectedCategoryObj = categories.find((item) => item.id === selectedCategory);
+    const selectedCategoryPreset = findWritingCategoryPreset(selectedCategoryObj);
 
     const getButtonStyle = () => {
         const fallback = {
             className: 'bg-sky-100 text-sky-600 hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-400 dark:hover:bg-sky-900/50',
         };
 
-        if (!selectedCategoryObj) return fallback;
-
-        const preset = findWritingCategoryPreset(selectedCategoryObj);
-        if (!preset) return fallback;
+        if (!selectedCategoryPreset) return fallback;
 
         return {
-            className: `${preset.buttonClass} ${preset.darkButtonClass}`,
+            className: `${selectedCategoryPreset.buttonClass} ${selectedCategoryPreset.darkButtonClass}`,
         };
     };
 
     const buttonStyle = getButtonStyle();
+    const toolTone = getWritingCategoryToolTone(selectedCategoryPreset);
 
     const compactCategoryRows = useMemo(() => {
         const limited = categories.slice(0, 10);
@@ -77,7 +76,7 @@ const WritingWorkspaceHeader = ({
                     >
                         <button
                             onClick={() => setIsSearchOpen(true)}
-                            className="group inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/60 bg-white/85 text-sky-500 transition-all hover:border-sky-300 hover:bg-white dark:border-slate-700/50 dark:bg-slate-800/85 dark:text-sky-400 dark:hover:border-slate-600 dark:hover:bg-slate-800"
+                            className={`group inline-flex h-10 w-10 items-center justify-center rounded-xl border transition-all ${toolTone.iconButtonClass}`}
                             title={t('inspiration.search')}
                         >
                             <Search size={18} className="transition-transform group-hover:scale-110" />
@@ -95,10 +94,7 @@ const WritingWorkspaceHeader = ({
 
                         <button
                             onClick={() => onViewModeChange?.(isTrashView ? 'active' : 'trash')}
-                            className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border transition ${isTrashView
-                                ? 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300'
-                                : 'border-slate-200/70 bg-white/85 text-slate-500 hover:border-sky-300 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400'
-                                }`}
+                            className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border transition ${isTrashView ? toolTone.iconButtonActiveClass : toolTone.iconButtonClass}`}
                             title={isTrashView ? t('writing.system.all', '全部') : `${t('writing.system.trash', '废纸篓')} (${trashCount})`}
                         >
                             <ArchiveRestore size={16} />
@@ -107,7 +103,7 @@ const WritingWorkspaceHeader = ({
                         <button
                             onClick={() => setCategoryManagerOpen(true)}
                             disabled={isTrashView}
-                            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/70 bg-white/85 text-slate-500 transition hover:border-sky-300 hover:text-sky-600 disabled:opacity-45 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400"
+                            className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border transition disabled:opacity-45 ${toolTone.iconButtonClass}`}
                             title={t('writing.manageCategories', '管理分类')}
                         >
                             <Settings2 size={16} />
@@ -122,14 +118,14 @@ const WritingWorkspaceHeader = ({
                         className="grid grid-cols-[1fr_auto_auto] items-center gap-2"
                     >
                         <div className="relative min-w-0">
-                            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400" />
+                            <Search className={`absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 ${toolTone.searchIconClass}`} />
                             <input
                                 autoFocus
                                 type="text"
                                 value={searchQuery}
                                 onChange={(event) => onSearchQueryChange(event.target.value)}
                                 placeholder={t('inspiration.search')}
-                                className="h-10 w-full rounded-xl border border-slate-200/70 bg-white/85 px-10 text-sm text-slate-700 outline-none transition focus:border-sky-400 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-200 dark:focus:border-sky-600"
+                                className={`h-10 w-full rounded-xl border border-slate-200/70 bg-white/85 px-10 text-sm text-slate-700 outline-none transition dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-200 ${toolTone.searchInputFocusClass}`}
                             />
                             <button
                                 onClick={() => {
@@ -144,10 +140,7 @@ const WritingWorkspaceHeader = ({
 
                         <button
                             onClick={() => onViewModeChange?.(isTrashView ? 'active' : 'trash')}
-                            className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border transition ${isTrashView
-                                ? 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300'
-                                : 'border-slate-200/70 bg-white/85 text-slate-500 hover:border-sky-300 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400'
-                                }`}
+                            className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border transition ${isTrashView ? toolTone.iconButtonActiveClass : toolTone.iconButtonClass}`}
                             title={isTrashView ? t('writing.system.all', '全部') : `${t('writing.system.trash', '废纸篓')} (${trashCount})`}
                         >
                             <ArchiveRestore size={16} />
@@ -156,7 +149,7 @@ const WritingWorkspaceHeader = ({
                         <button
                             onClick={() => setCategoryManagerOpen(true)}
                             disabled={isTrashView}
-                            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/70 bg-white/85 text-slate-500 transition hover:border-sky-300 hover:text-sky-600 disabled:opacity-45 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400"
+                            className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border transition disabled:opacity-45 ${toolTone.iconButtonClass}`}
                             title={t('writing.manageCategories', '管理分类')}
                         >
                             <Settings2 size={16} />
