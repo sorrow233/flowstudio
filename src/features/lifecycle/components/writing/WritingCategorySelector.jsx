@@ -1,6 +1,6 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Settings2 } from 'lucide-react';
+import { ArchiveRestore, Settings2 } from 'lucide-react';
 import { resolveWritingCategoryLabel } from './writingCategoryUtils';
 
 const WritingCategorySelector = ({
@@ -8,11 +8,16 @@ const WritingCategorySelector = ({
     selectedCategory,
     onSelectCategory,
     onOpenManager,
+    viewMode = 'active',
+    onViewModeChange,
+    trashCount = 0,
     categoryDocCountMap = {},
     disabled = false,
     isMobile = false,
     t,
 }) => {
+    const isTrashView = viewMode === 'trash';
+    const shouldDimSelector = disabled && !isTrashView;
     const selectedCategoryInfo = categories.find((category) => category.id === selectedCategory) || categories[0];
     const selectedCategoryCount = selectedCategoryInfo ? Number(categoryDocCountMap[selectedCategoryInfo.id] || 0) : 0;
     const managerTitle = t('writing.manageCategories', '管理分类');
@@ -23,7 +28,7 @@ const WritingCategorySelector = ({
 
     return (
         <div className={`relative z-20 flex items-center gap-2 ${isMobile ? 'w-full' : ''}`}>
-            <div className={`flex min-w-0 flex-1 items-center border border-slate-200/60 bg-white/60 shadow-sm backdrop-blur-md transition-all dark:border-slate-800/50 dark:bg-slate-900/60 ${disabled
+            <div className={`flex min-w-0 flex-1 items-center border border-slate-200/60 bg-white/60 shadow-sm backdrop-blur-md transition-all dark:border-slate-800/50 dark:bg-slate-900/60 ${shouldDimSelector
                 ? 'cursor-not-allowed opacity-55'
                 : 'hover:bg-white/80 dark:hover:bg-slate-900/80'
                 } ${isMobile ? 'rounded-2xl px-1.5 py-1.5' : 'rounded-full p-1'}`}>
@@ -72,15 +77,32 @@ const WritingCategorySelector = ({
                 </div>
 
                 {/* 设置/管理按钮 */}
-                <button
-                    onClick={onOpenManager}
-                    disabled={disabled}
-                    className={`ml-1 inline-flex shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100/50 hover:text-slate-600 dark:hover:bg-slate-800/50 dark:hover:text-slate-300 ${isMobile ? 'h-8 w-8' : 'h-7 w-7'}`}
-                    title={managerTitle}
-                >
-                    <Settings2 size={13} />
-                </button>
+                <div className={`ml-1 inline-flex shrink-0 items-center ${isMobile ? 'gap-0.5' : 'gap-0.5'}`}>
+                    <button
+                        onClick={() => onViewModeChange?.(isTrashView ? 'active' : 'trash')}
+                        className={`inline-flex shrink-0 items-center justify-center rounded-full border transition ${isMobile ? 'h-8 w-8' : 'h-7 w-7'} ${isTrashView
+                            ? 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300'
+                            : 'border-transparent bg-transparent text-slate-400 hover:border-slate-200/70 hover:bg-white/70 hover:text-slate-600 dark:text-slate-500 dark:hover:border-slate-700/60 dark:hover:bg-slate-800/70 dark:hover:text-slate-300'
+                            }`}
+                        title={isTrashView ? t('writing.system.all', '全部') : `${t('writing.system.trash', '废纸篓')} (${trashCount})`}
+                    >
+                        <ArchiveRestore size={12} />
+                    </button>
+
+                    <button
+                        onClick={onOpenManager}
+                        disabled={disabled}
+                        className={`inline-flex shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100/50 hover:text-slate-600 dark:hover:bg-slate-800/50 dark:hover:text-slate-300 disabled:opacity-50 ${isMobile ? 'h-8 w-8' : 'h-7 w-7'}`}
+                        title={managerTitle}
+                    >
+                        <Settings2 size={13} />
+                    </button>
+                </div>
             </div>
+
+            {!isTrashView && trashCount > 0 && (
+                <span className="text-[10px] text-slate-400 dark:text-slate-500">{trashCount}</span>
+            )}
         </div>
     );
 };
