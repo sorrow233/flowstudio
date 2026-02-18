@@ -100,7 +100,7 @@ const WritingWorkspaceHeader = ({
     const shouldUseTwoRowCompactDots = compactCategories.length > 5;
     const compactDotColumns = compactCategories.length > 0
         ? (shouldUseTwoRowCompactDots
-            ? Math.ceil(compactCategories.length / 2)
+            ? 5
             : compactCategories.length)
         : 1;
 
