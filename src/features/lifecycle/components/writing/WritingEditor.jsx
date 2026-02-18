@@ -741,7 +741,7 @@ const WritingEditor = ({
                             className={`w-full border-none bg-transparent font-semibold tracking-tight text-slate-800 outline-none placeholder:text-slate-300 dark:text-slate-100 dark:placeholder:text-slate-600 ${isMobile ? 'text-2xl' : 'text-3xl leading-tight'}`}
                             placeholder={t('inspiration.untitled')}
                             style={{
-                                fontFamily: '"Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif',
+                                fontFamily: '"LXGW WenKai", "LXGW WenKai GB", "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif',
                             }}
                         />
 
@@ -798,7 +798,7 @@ const WritingEditor = ({
                                     normalizeEditorMarkdownView();
                                 }}
                                 spellCheck
-                                className="writing-editor-content min-h-[55vh] w-full text-lg text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"
+                                className="writing-editor-content min-h-[55vh] w-full text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"
                                 placeholder={t('inspiration.placeholder')}
                             />
 
