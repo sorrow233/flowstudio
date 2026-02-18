@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSync } from '../../../sync/SyncContext';
 import { useSyncedProjects } from '../../../sync/useSyncStore';
 import { useSyncedCategories } from '../../../sync/hooks/useSyncedCategories';
@@ -32,10 +33,26 @@ const detectCompactLayout = () => {
     return width < 1024 || ((isCoarsePointer || hasTouchPoints || isIOS) && width < 1366);
 };
 
+const encodeRoutePart = (value) => encodeURIComponent(String(value || '').trim());
+const decodeRoutePart = (value) => {
+    if (!value) return null;
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        return value;
+    }
+};
+
 const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDelete, syncStatus, isMobile: externalIsMobile }) => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { categoryId: routeCategoryParam, docId: routeDocParam } = useParams();
     const isMobile = externalIsMobile !== undefined ? externalIsMobile : detectCompactLayout();
     const { doc, immediateSync, status } = useSync();
     const { t } = useTranslation();
+    const isRouteTrash = location.pathname.startsWith('/writing/trash');
+    const routeCategoryId = decodeRoutePart(routeCategoryParam);
+    const routeDocId = decodeRoutePart(routeDocParam);
     const {
         projects: allProjects,
         addProject,
@@ -131,17 +148,39 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     });
 
 
-    const [selectedDocId, setSelectedDocId] = useState(null);
-    const [viewMode, setViewMode] = useState('active');
+    const [selectedDocId, setSelectedDocId] = useState(() => routeDocId || null);
+    const [viewMode, setViewMode] = useState(() => (isRouteTrash ? 'trash' : 'active'));
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => !isMobile && activeDocuments.length > 0);
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState(() => categories[0]?.id || null);
+    const [selectedCategory, setSelectedCategory] = useState(() => routeCategoryId || categories[0]?.id || null);
     const [searchInput, setSearchInput] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const hasAutoOpenedSidebarRef = useRef(activeDocuments.length > 0);
 
     const isTrashView = viewMode === 'trash';
     const docsForView = isTrashView ? trashDocuments : activeDocuments;
+    const buildWritingPath = useCallback((nextViewMode, nextCategoryId, nextDocId) => {
+        if (nextViewMode === 'trash') {
+            return nextDocId
+                ? `/writing/trash/${encodeRoutePart(nextDocId)}`
+                : '/writing/trash';
+        }
+
+        const safeCategory = nextCategoryId ? encodeRoutePart(nextCategoryId) : '';
+        if (!safeCategory) return '/writing';
+        return nextDocId
+            ? `/writing/c/${safeCategory}/${encodeRoutePart(nextDocId)}`
+            : `/writing/c/${safeCategory}`;
+    }, []);
+
+    useEffect(() => {
+        setViewMode(isRouteTrash ? 'trash' : 'active');
+        setSelectedDocId(routeDocId || null);
+
+        if (!isRouteTrash && routeCategoryId) {
+            setSelectedCategory(routeCategoryId);
+        }
+    }, [isRouteTrash, routeCategoryId, routeDocId]);
 
     useEffect(() => {
         if (isMobile) return;
@@ -175,6 +214,13 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             setSelectedCategory(categories[0].id);
         }
     }, [categories, selectedCategory]);
+
+    useEffect(() => {
+        const targetPath = buildWritingPath(viewMode, selectedCategory, selectedDocId);
+        if (targetPath !== location.pathname) {
+            navigate(targetPath, { replace: true });
+        }
+    }, [buildWritingPath, location.pathname, navigate, selectedCategory, selectedDocId, viewMode]);
 
     const defaultCategoryId = categories[0]?.id || 'draft';
     const documentSearchIndex = useMemo(() =>
@@ -246,6 +292,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                     lastModified: Date.now(),
                 });
                 setViewMode('active');
+                setSelectedCategory(existingDoc.category || selectedCategory || defaultCategoryId);
                 setSelectedDocId(existingDoc.id);
                 if (isMobile) setIsSidebarOpen(false);
                 return;
@@ -260,6 +307,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             };
             createHandler(restoredDoc);
             setViewMode('active');
+            setSelectedCategory(restoredDoc.category || selectedCategory || defaultCategoryId);
             setSelectedDocId(restoredDoc.id);
 
             if (isMobile) setIsSidebarOpen(false);
@@ -268,7 +316,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
 
         const newDoc = {
             id: uuidv4(),
-            title: t('inspiration.untitled'),
+            title: '',
             content: '',
             stage: 'writing',
             category: input || selectedCategory || defaultCategoryId,
@@ -279,6 +327,8 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         };
 
         createHandler(newDoc);
+        setViewMode('active');
+        setSelectedCategory(newDoc.category || selectedCategory || defaultCategoryId);
         setSelectedDocId(newDoc.id);
         setSearchInput('');
         setSearchQuery('');
@@ -304,7 +354,10 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             deletedAt: null,
             lastModified: Date.now(),
         });
+        const restoredDoc = allDocuments.find((docItem) => docItem.id === id);
         setViewMode('active');
+        setSelectedCategory(restoredDoc?.category || selectedCategory || defaultCategoryId);
+        setSelectedDocId(id);
     };
 
     const handleDelete = (id) => {
@@ -368,10 +421,16 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                 <WritingWorkspaceHeader
                     categories={categories}
                     selectedCategory={selectedCategory}
-                    onSelectCategory={setSelectedCategory}
+                    onSelectCategory={(categoryId) => {
+                        setSelectedCategory(categoryId);
+                        setSelectedDocId(null);
+                    }}
                     onCreate={handleCreate}
                     viewMode={viewMode}
-                    onViewModeChange={setViewMode}
+                    onViewModeChange={(nextMode) => {
+                        setViewMode(nextMode);
+                        setSelectedDocId(null);
+                    }}
                     trashCount={trashDocuments.length}
                     searchQuery={searchInput}
                     onSearchQueryChange={setSearchInput}

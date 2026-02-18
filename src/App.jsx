@@ -23,6 +23,7 @@ import { useIOSStandalone } from './hooks/useIOSStandalone';
 function App() {
     const location = useLocation();
     const { isIOSStandalone } = useIOSStandalone();
+    const routeSectionKey = location.pathname.split('/')[1] || 'root';
 
     // 拦截浏览器默认快捷键 (Cmd+S, Cmd+P 等)
     useBrowserIntercept();
@@ -36,12 +37,16 @@ function App() {
                         <Navbar />
 
                         <main className="flex-1 overflow-y-auto w-full no-scrollbar">
-                            <div className={`max-w-7xl mx-auto h-full px-4 md:px-6 ${location.pathname === '/writing' ? 'pb-0' : 'pb-20'}`}>
+                            <div className={`max-w-7xl mx-auto h-full px-4 md:px-6 ${location.pathname.startsWith('/writing') ? 'pb-0' : 'pb-20'}`}>
                                 <ErrorBoundary>
-                                    <Routes location={location} key={location.pathname}>
+                                    <Routes location={location} key={routeSectionKey}>
                                         <Route path="/" element={<Navigate to="/inspiration" replace />} />
                                         <Route path="/inspiration" element={<InspirationModule />} />
                                         <Route path="/writing" element={<WritingModule />} />
+                                        <Route path="/writing/c/:categoryId" element={<WritingModule />} />
+                                        <Route path="/writing/c/:categoryId/:docId" element={<WritingModule />} />
+                                        <Route path="/writing/trash" element={<WritingModule />} />
+                                        <Route path="/writing/trash/:docId" element={<WritingModule />} />
                                         <Route path="/inspiration/archive" element={<InspirationArchiveModule />} />
                                         <Route path="/sprout" element={<PendingModule />} />
                                         <Route path="/flow" element={<PrimaryDevModule />} />
