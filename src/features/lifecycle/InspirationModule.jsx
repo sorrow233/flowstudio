@@ -487,6 +487,13 @@ const InspirationModule = () => {
         editorRef.current?.focus();
     };
 
+    const handleImageUploadComplete = useCallback((imageUrl) => {
+        setInput((prev) => {
+            const trimmed = prev.trim();
+            return trimmed ? `${trimmed} ${imageUrl}` : imageUrl;
+        });
+    }, []);
+
 
     // --- Autocomplete Logic ---
     const handleInputChange = (e) => {
@@ -1385,13 +1392,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                         {/* Image Upload Button */}
                                         <ImageUploader
                                             ref={imageUploaderRef}
-                                            onUploadComplete={(imageUrl) => {
-                                                // 将图片 URL 添加到输入内容
-                                                setInput(prev => {
-                                                    const trimmed = prev.trim();
-                                                    return trimmed ? `${trimmed} ${imageUrl}` : imageUrl;
-                                                });
-                                            }}
+                                            onUploadComplete={handleImageUploadComplete}
                                         />
 
                                         {/* Project Tags Bar */}

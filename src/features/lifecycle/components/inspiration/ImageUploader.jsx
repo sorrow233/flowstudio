@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useImperativeHandle, forwardRef, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useImperativeHandle, forwardRef, useEffect, memo } from 'react';
 import { Image, X, Loader2, AlertCircle, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../auth/AuthContext';
@@ -15,7 +15,7 @@ import { useAuth } from '../../../auth/AuthContext';
  * - 成功/失败反馈
  * - 白名单权限检查（服务端验证）
  */
-const ImageUploader = forwardRef(({ onUploadComplete, disabled = false }, ref) => {
+const ImageUploaderInner = forwardRef(({ onUploadComplete, disabled = false }, ref) => {
     const { user } = useAuth();
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState(null);
@@ -255,10 +255,10 @@ const ImageUploader = forwardRef(({ onUploadComplete, disabled = false }, ref) =
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 disabled={disabled || isUploading}
-                whileHover={{ scale: disabled || isUploading ? 1 : 1.05 }}
-                whileTap={{ scale: disabled || isUploading ? 1 : 0.95 }}
+                whileHover={{ scale: disabled || isUploading ? 1 : 1.03 }}
+                whileTap={{ scale: disabled || isUploading ? 1 : 0.97 }}
                 className={`
-                    relative p-2.5 rounded-xl transition-all duration-300
+                    relative p-2 rounded-xl transition-all duration-300
                     ${getButtonStyle()}
                     ${disabled || isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                     border border-gray-100/50 dark:border-gray-700/50
@@ -268,45 +268,22 @@ const ImageUploader = forwardRef(({ onUploadComplete, disabled = false }, ref) =
                 `}
                 title="上传图片 (支持粘贴 Cmd+V)"
             >
-                <AnimatePresence mode="wait">
-                    {isUploading ? (
-                        <motion.div
-                            key="loading"
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                        >
-                            <Loader2 size={18} className="text-pink-500 animate-spin" />
-                        </motion.div>
-                    ) : success ? (
-                        <motion.div
-                            key="success"
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                        >
-                            <Check size={18} className="text-green-500" />
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="default"
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                        >
-                            <Image
-                                size={18}
-                                className={`
-                                    transition-colors
-                                    ${isDragOver
-                                        ? 'text-pink-500'
-                                        : 'text-gray-400 group-hover:text-pink-500'
-                                    }
-                                `}
-                            />
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                {isUploading ? (
+                    <Loader2 size={14} className="text-pink-500 animate-spin" />
+                ) : success ? (
+                    <Check size={14} className="text-green-500" />
+                ) : (
+                    <Image
+                        size={14}
+                        className={`
+                            transition-colors
+                            ${isDragOver
+                                ? 'text-pink-500'
+                                : 'text-gray-400 group-hover:text-pink-500'
+                            }
+                        `}
+                    />
+                )}
             </motion.button>
 
             {/* 错误提示 */}
@@ -337,8 +314,10 @@ const ImageUploader = forwardRef(({ onUploadComplete, disabled = false }, ref) =
     );
 });
 
+ImageUploaderInner.displayName = 'ImageUploader';
+
+const ImageUploader = memo(ImageUploaderInner);
 ImageUploader.displayName = 'ImageUploader';
 
 export default ImageUploader;
-
 
