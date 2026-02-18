@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { FileText, RotateCcw, Trash2, X } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, Reorder } from 'framer-motion';
 import { toast } from 'sonner';
 import { useTranslation } from '../../../i18n';
 import { stripMarkup } from './editorUtils';
@@ -28,6 +28,7 @@ const WritingSidebarItem = ({
     onEnterImmersive,
     isTrashView,
     isMobile,
+    allowLongPressDelete = true,
     isSelectionMode = false,
     isSelected = false,
     onToggleSelect,
@@ -113,6 +114,7 @@ const WritingSidebarItem = ({
     }, [clearLongPressTimer, doc.id, onRestore]);
 
     const handlePointerDown = (event) => {
+        if (!allowLongPressDelete) return;
         if (isTrashView) return;
         if (isSelectionMode) return;
         if (!isMobile || isRenaming) return;
@@ -254,6 +256,8 @@ const WritingSidebar = ({
     categories = [],
     selectedCategory = null,
     onBulkMoveCategory,
+    onReorderDocuments,
+    canReorder = false,
     isSelectionMode = false,
     onSelectionModeChange,
 }) => {
@@ -261,24 +265,13 @@ const WritingSidebar = ({
     const isTrashView = viewMode === 'trash';
     const [selectedDocIds, setSelectedDocIds] = useState([]);
     const [moveTargetCategory, setMoveTargetCategory] = useState('');
+    const [orderedDocIds, setOrderedDocIds] = useState([]);
+    const [hasPendingReorder, setHasPendingReorder] = useState(false);
 
-    const groupedDocs = useMemo(() => {
-        const groups = { today: [], yesterday: [], week: [], older: [] };
-        const now = new Date();
-        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-        const yesterdayStart = todayStart - 86400000;
-        const weekStart = todayStart - 86400000 * 6;
-
-        documents.forEach((doc) => {
-            const timestamp = doc.lastModified || doc.timestamp || Date.now();
-            if (timestamp >= todayStart) groups.today.push(doc);
-            else if (timestamp >= yesterdayStart) groups.yesterday.push(doc);
-            else if (timestamp >= weekStart) groups.week.push(doc);
-            else groups.older.push(doc);
-        });
-
-        return groups;
-    }, [documents]);
+    const documentsById = useMemo(
+        () => new Map(documents.map((docItem) => [docItem.id, docItem])),
+        [documents]
+    );
     const selectableCategories = useMemo(
         () => categories.filter((category) => category?.id && category.id !== selectedCategory),
         [categories, selectedCategory]
@@ -286,6 +279,23 @@ const WritingSidebar = ({
     const selectedCount = selectedDocIds.length;
     const allSelected = documents.length > 0 && selectedCount === documents.length;
     const canBulkMove = isSelectionMode && selectedCount > 0 && Boolean(moveTargetCategory) && !isTrashView;
+    const isReorderEnabled = canReorder && !isTrashView && !isSelectionMode && documents.length > 1;
+    const orderedDocuments = useMemo(() => {
+        if (orderedDocIds.length === 0) return documents;
+
+        const reordered = orderedDocIds
+            .map((id) => documentsById.get(id))
+            .filter(Boolean);
+        if (reordered.length === documents.length) return reordered;
+
+        const missingItems = documents.filter((docItem) => !orderedDocIds.includes(docItem.id));
+        return [...reordered, ...missingItems];
+    }, [documents, documentsById, orderedDocIds]);
+
+    useEffect(() => {
+        setOrderedDocIds(documents.map((docItem) => docItem.id));
+        setHasPendingReorder(false);
+    }, [documents]);
 
     useEffect(() => {
         if (isTrashView && isSelectionMode) {
@@ -314,6 +324,11 @@ const WritingSidebar = ({
         }
     }, [isSelectionMode, isTrashView, moveTargetCategory, selectableCategories]);
 
+    useEffect(() => {
+        if (isReorderEnabled) return;
+        setHasPendingReorder(false);
+    }, [isReorderEnabled]);
+
     const toggleDocSelection = useCallback((docId) => {
         setSelectedDocIds((prev) => (
             prev.includes(docId)
@@ -340,38 +355,42 @@ const WritingSidebar = ({
         setSelectedDocIds([]);
     };
 
-    const renderGroup = (titleKey, docsInGroup) => {
-        if (docsInGroup.length === 0) return null;
-
-        return (
-            <section className="mb-6">
-                <h3 className="mb-2 px-1 text-[10px] font-medium uppercase tracking-[0.18em] text-sky-500/60">
-                    {t(`inspiration.timeGroup.${titleKey}`)}
-                </h3>
-
-                <div className="space-y-2.5">
-                    {docsInGroup.map((doc) => (
-                        <WritingSidebarItem
-                            key={doc.id}
-                            doc={doc}
-                            isActive={activeDocId === doc.id}
-                            onSelect={onSelectDoc}
-                            onEnterImmersive={onEnterImmersive}
-                            onUpdate={onUpdate}
-                            onDelete={handleDelete}
-                            onRestore={onRestore}
-                            isTrashView={isTrashView}
-                            isMobile={isMobile}
-                            isSelectionMode={isSelectionMode}
-                            isSelected={selectedDocIds.includes(doc.id)}
-                            onToggleSelect={toggleDocSelection}
-                            t={t}
-                        />
-                    ))}
-                </div>
-            </section>
-        );
+    const handleReorder = (nextOrder) => {
+        setOrderedDocIds(nextOrder.map((docItem) => docItem.id));
+        setHasPendingReorder(true);
     };
+
+    const persistReorder = useCallback(() => {
+        if (!hasPendingReorder || !isReorderEnabled || !onReorderDocuments) return;
+
+        const reorderedDocs = orderedDocIds
+            .map((id) => documentsById.get(id))
+            .filter(Boolean);
+        if (reorderedDocs.length === 0) return;
+
+        onReorderDocuments(reorderedDocs);
+        setHasPendingReorder(false);
+    }, [documentsById, hasPendingReorder, isReorderEnabled, onReorderDocuments, orderedDocIds]);
+
+    const renderSidebarItem = (doc) => (
+        <WritingSidebarItem
+            key={doc.id}
+            doc={doc}
+            isActive={activeDocId === doc.id}
+            onSelect={onSelectDoc}
+            onEnterImmersive={onEnterImmersive}
+            onUpdate={onUpdate}
+            onDelete={handleDelete}
+            onRestore={onRestore}
+            isTrashView={isTrashView}
+            isMobile={isMobile}
+            allowLongPressDelete={!isReorderEnabled}
+            isSelectionMode={isSelectionMode}
+            isSelected={selectedDocIds.includes(doc.id)}
+            onToggleSelect={toggleDocSelection}
+            t={t}
+        />
+    );
 
     const handleDelete = (doc) => {
         onDelete?.(doc.id);
@@ -460,12 +479,32 @@ const WritingSidebar = ({
                         </p>
                     </div>
                 ) : (
-                    <AnimatePresence mode="popLayout" initial={false}>
-                        {renderGroup('today', groupedDocs.today)}
-                        {renderGroup('yesterday', groupedDocs.yesterday)}
-                        {renderGroup('week', groupedDocs.week)}
-                        {renderGroup('older', groupedDocs.older)}
-                    </AnimatePresence>
+                    isReorderEnabled ? (
+                        <Reorder.Group
+                            axis="y"
+                            values={orderedDocuments}
+                            onReorder={handleReorder}
+                            className="space-y-2.5"
+                        >
+                            {orderedDocuments.map((doc) => (
+                                <Reorder.Item
+                                    key={doc.id}
+                                    value={doc}
+                                    className="list-none"
+                                    onDragEnd={persistReorder}
+                                    whileDrag={{ scale: 1.01 }}
+                                >
+                                    {renderSidebarItem(doc)}
+                                </Reorder.Item>
+                            ))}
+                        </Reorder.Group>
+                    ) : (
+                        <AnimatePresence mode="popLayout" initial={false}>
+                            <div className="space-y-2.5">
+                                {orderedDocuments.map((doc) => renderSidebarItem(doc))}
+                            </div>
+                        </AnimatePresence>
+                    )
                 )}
             </div>
         </div>

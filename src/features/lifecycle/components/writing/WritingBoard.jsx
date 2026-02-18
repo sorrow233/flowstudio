@@ -43,6 +43,29 @@ const decodeRoutePart = (value) => {
     }
 };
 
+const resolveCreatedTimestamp = (docItem) => Number(docItem?.timestamp || 0);
+const normalizeManualOrder = (value) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+};
+
+const sortWritingDocuments = (documents = [], options = {}) => {
+    const { categoryId = null, useManualOrder = false } = options;
+
+    return [...documents].sort((leftDoc, rightDoc) => {
+        if (useManualOrder && categoryId) {
+            const leftOrder = leftDoc?.manualOrderCategory === categoryId ? normalizeManualOrder(leftDoc?.manualOrder) : null;
+            const rightOrder = rightDoc?.manualOrderCategory === categoryId ? normalizeManualOrder(rightDoc?.manualOrder) : null;
+
+            if (leftOrder !== null && rightOrder !== null) return leftOrder - rightOrder;
+            if (leftOrder !== null) return -1;
+            if (rightOrder !== null) return 1;
+        }
+
+        return resolveCreatedTimestamp(rightDoc) - resolveCreatedTimestamp(leftDoc);
+    });
+};
+
 const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDelete, syncStatus, isMobile: externalIsMobile }) => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -99,24 +122,14 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         return Array.from(map.values());
     }, [syncedCategories]);
 
-    const internalDocuments = useMemo(() =>
-        allProjects
-            .filter((project) => project.stage === 'writing')
-            .sort((a, b) => {
-                const left = b.lastModified || b.timestamp || 0;
-                const right = a.lastModified || a.timestamp || 0;
-                return left - right;
-            }),
+    const internalDocuments = useMemo(
+        () => allProjects.filter((project) => project.stage === 'writing'),
         [allProjects]
     );
 
     const rawDocuments = externalDocuments ?? internalDocuments;
     const allDocuments = useMemo(() =>
-        [...rawDocuments].sort((a, b) => {
-            const left = b.lastModified || b.timestamp || 0;
-            const right = a.lastModified || a.timestamp || 0;
-            return left - right;
-        }),
+        sortWritingDocuments(rawDocuments),
         [rawDocuments]
     );
 
@@ -254,7 +267,11 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             );
         }
 
-        return list.map((docItem) => docItem.doc);
+        const resolved = list.map((docItem) => docItem.doc);
+        return sortWritingDocuments(resolved, {
+            categoryId: isTrashView ? null : selectedCategory,
+            useManualOrder: !isTrashView,
+        });
     }, [documentSearchIndex, isTrashView, searchQuery, selectedCategory]);
 
     const categoryDocCountMap = useMemo(() => {
@@ -396,10 +413,36 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
 
             updateHandler(docId, {
                 category: targetCategoryId,
+                manualOrder: null,
+                manualOrderCategory: null,
                 lastModified: now,
             });
         });
     };
+
+    const handleReorderDocuments = useCallback((orderedDocs = []) => {
+        if (isTrashView) return;
+        if (!selectedCategory || !Array.isArray(orderedDocs) || orderedDocs.length === 0) return;
+
+        let hasChanges = false;
+        orderedDocs.forEach((docItem, index) => {
+            if (!docItem?.id) return;
+            if ((docItem.category || defaultCategoryId) !== selectedCategory) return;
+
+            const nextOrder = index + 1;
+            const currentOrder = normalizeManualOrder(docItem.manualOrder);
+            const currentCategory = docItem.manualOrderCategory || null;
+            if (currentOrder === nextOrder && currentCategory === selectedCategory) return;
+
+            updateProject(docItem.id, {
+                manualOrder: nextOrder,
+                manualOrderCategory: selectedCategory,
+            });
+            hasChanges = true;
+        });
+
+        if (hasChanges) immediateSync?.();
+    }, [defaultCategoryId, immediateSync, isTrashView, selectedCategory, updateProject]);
 
     useEffect(() => {
         if (trashDocuments.length === 0) return;
@@ -428,7 +471,12 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         allDocuments
             .filter((docItem) => (docItem.category || defaultCategoryId) === id)
             .forEach((docItem) => {
-                updateProject(docItem.id, { category: fallback.id, lastModified: now });
+                updateProject(docItem.id, {
+                    category: fallback.id,
+                    manualOrder: null,
+                    manualOrderCategory: null,
+                    lastModified: now
+                });
             });
 
         removeCategoryBase(id);
@@ -532,6 +580,8 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                                 categories={categories}
                                                 selectedCategory={selectedCategory}
                                                 onBulkMoveCategory={handleBulkMoveCategory}
+                                                onReorderDocuments={handleReorderDocuments}
+                                                canReorder={!isTrashView && !searchQuery.trim()}
                                                 isSelectionMode={isSelectionMode}
                                                 onSelectionModeChange={setIsSelectionMode}
                                             />
