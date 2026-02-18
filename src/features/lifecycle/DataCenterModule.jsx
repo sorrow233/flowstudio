@@ -1,12 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import * as Y from 'yjs';
-import { motion, AnimatePresence } from 'framer-motion';
-import { format, isSameDay, isSameWeek, isSameMonth, subDays, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval } from 'date-fns';
+import { motion } from 'framer-motion';
 import {
     BarChart3,
     Lightbulb,
     Terminal,
-    Hash,
     Sparkles,
     Box,
     PenTool
