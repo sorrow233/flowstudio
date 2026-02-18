@@ -68,19 +68,28 @@ const WritingWorkspaceHeader = ({
     const selectedCategoryTextClass = selectedCategoryObj?.dotColor
         ? selectedCategoryObj.dotColor.replace('bg-', 'text-')
         : 'text-slate-500';
+    const shouldUseTwoRowCompactDots = compactCategories.length > 5;
+    const compactDotColumns = compactCategories.length > 0
+        ? (shouldUseTwoRowCompactDots
+            ? Math.ceil(compactCategories.length / 2)
+            : compactCategories.length)
+        : 1;
 
     const renderCompactCategoryBar = () => (
         <div className="flex items-center gap-1.5">
             <div className={`min-w-0 flex-1 ${isTrashView ? 'pointer-events-none opacity-55' : ''}`}>
-                <div className="flex h-10 items-center rounded-full border border-slate-200/70 bg-white/72 px-1 backdrop-blur-sm dark:border-slate-700/65 dark:bg-slate-800/65">
-                    <div className="flex shrink-0 items-center gap-1.5 px-1.5">
+                <div className={`flex rounded-full border border-slate-200/70 bg-white/72 px-1 backdrop-blur-sm dark:border-slate-700/65 dark:bg-slate-800/65 ${shouldUseTwoRowCompactDots ? 'min-h-[58px] items-stretch py-1' : 'h-10 items-center'}`}>
+                    <div className={`flex shrink-0 items-center gap-1.5 px-1.5 ${shouldUseTwoRowCompactDots ? 'self-stretch' : ''}`}>
                         <span className={`max-w-[4.6rem] truncate text-[12px] font-semibold ${selectedCategoryTextClass}`}>
                             {selectedCategoryLabel}
                         </span>
-                        <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+                        <span className={`w-px bg-slate-200 dark:bg-slate-700 ${shouldUseTwoRowCompactDots ? 'my-1 self-stretch' : 'h-4'}`} />
                     </div>
-                    <div className="min-w-0 flex-1 overflow-x-auto">
-                        <div className="flex min-w-max items-center gap-1 pr-1">
+                    <div className={`min-w-0 flex-1 pr-1 ${shouldUseTwoRowCompactDots ? 'py-0.5' : ''}`}>
+                        <div
+                            className={`grid justify-items-center gap-1 ${shouldUseTwoRowCompactDots ? 'grid-rows-2' : 'grid-rows-1'}`}
+                            style={{ gridTemplateColumns: `repeat(${compactDotColumns}, minmax(0, 1fr))` }}
+                        >
                             {compactCategories.map((category) => {
                                 const label = resolveWritingCategoryLabel(category, t, t('common.noData'));
                                 const isActive = selectedCategory === category.id;
