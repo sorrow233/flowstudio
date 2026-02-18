@@ -374,6 +374,26 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         }
     };
 
+    const handleBulkMoveCategory = (docIds = [], targetCategoryId) => {
+        if (isTrashView) return;
+        if (!targetCategoryId || !Array.isArray(docIds) || docIds.length === 0) return;
+
+        const now = Date.now();
+        const uniqueDocIds = Array.from(new Set(docIds));
+        uniqueDocIds.forEach((docId) => {
+            const docItem = allDocuments.find((item) => item.id === docId);
+            if (!docItem || isInWritingTrash(docItem)) return;
+
+            const currentCategory = docItem.category || defaultCategoryId;
+            if (currentCategory === targetCategoryId) return;
+
+            updateHandler(docId, {
+                category: targetCategoryId,
+                lastModified: now,
+            });
+        });
+    };
+
     useEffect(() => {
         if (trashDocuments.length === 0) return;
         const now = Date.now();
@@ -494,6 +514,9 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                                     if (!targetId) return;
                                                     handleRestoreFromTrash(targetId);
                                                 }}
+                                                categories={categories}
+                                                selectedCategory={selectedCategory}
+                                                onBulkMoveCategory={handleBulkMoveCategory}
                                             />
                                         </div>
                                     </div>

@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
-import { FileText, RotateCcw, Trash2 } from 'lucide-react';
+import { Check, FileText, RotateCcw, Trash2, X } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useTranslation } from '../../../i18n';
@@ -18,7 +18,21 @@ const formatDocTime = (timestamp) => {
 
 const LONG_PRESS_DELETE_MS = 650;
 
-const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRestore, onEnterImmersive, isTrashView, isMobile, t }) => {
+const WritingSidebarItem = ({
+    doc,
+    isActive,
+    onSelect,
+    onUpdate,
+    onDelete,
+    onRestore,
+    onEnterImmersive,
+    isTrashView,
+    isMobile,
+    isSelectionMode = false,
+    isSelected = false,
+    onToggleSelect,
+    t
+}) => {
     const [isRenaming, setIsRenaming] = useState(false);
     const [editTitle, setEditTitle] = useState(doc.title || '');
     const inputRef = useRef(null);
@@ -64,11 +78,15 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
     };
 
     const handleSelect = () => {
+        if (isSelectionMode) {
+            onToggleSelect?.(doc.id);
+            return;
+        }
         if (!isRenaming) onSelect(doc.id);
     };
 
     const handleEnterImmersive = () => {
-        if (isRenaming || isTrashView) return;
+        if (isRenaming || isTrashView || isSelectionMode) return;
         onSelect(doc.id);
         onEnterImmersive?.(doc.id);
     };
@@ -96,6 +114,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
 
     const handlePointerDown = (event) => {
         if (isTrashView) return;
+        if (isSelectionMode) return;
         if (!isMobile || isRenaming) return;
         if (event.pointerType && event.pointerType !== 'touch') return;
         clearLongPressTimer();
@@ -126,7 +145,9 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
                 }}
                 className={[
                     `cursor-pointer rounded-2xl border px-4 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70 ${isUntitledDoc ? 'min-h-[126px]' : 'min-h-[106px]'}`,
-                    isActive
+                    isSelectionMode && isSelected
+                        ? 'border-sky-300 bg-sky-50 shadow-[0_12px_24px_-20px_rgba(59,130,246,0.65)] dark:border-sky-700 dark:bg-slate-800/90'
+                        : isActive
                         ? 'border-sky-200 bg-sky-50 shadow-[0_14px_34px_-24px_rgba(59,130,246,0.6)] dark:border-sky-800 dark:bg-slate-900 dark:shadow-none'
                         : 'border-sky-100/80 bg-white/86 hover:border-sky-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/40 dark:hover:border-slate-700 dark:hover:bg-slate-900/80'
                 ].join(' ')}
@@ -147,7 +168,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
                         ) : (
                             <span
                                 onDoubleClick={(event) => {
-                                    if (isTrashView) return;
+                                    if (isTrashView || isSelectionMode) return;
                                     event.stopPropagation();
                                     setIsRenaming(true);
                                 }}
@@ -164,12 +185,28 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
                         )}
                     </div>
                     <div className="ml-2 flex shrink-0 items-center gap-1.5">
-                        {isActive && (
+                        {isSelectionMode ? (
+                            <button
+                                type="button"
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    onToggleSelect?.(doc.id);
+                                }}
+                                className={`inline-flex h-6 w-6 items-center justify-center rounded-md border transition ${isSelected
+                                    ? 'border-sky-400 bg-sky-500 text-white'
+                                    : 'border-slate-300 bg-white text-transparent dark:border-slate-600 dark:bg-slate-900'
+                                    }`}
+                                aria-label={isSelected ? t('common.selected', '已选中') : t('common.select', '选择')}
+                            >
+                                <Check size={13} strokeWidth={2.8} />
+                            </button>
+                        ) : null}
+                        {isActive && !isSelectionMode && (
                             <span className="text-[10px] font-medium tracking-wide text-sky-500/80 dark:text-sky-400/80">
                                 {formatDocTime(doc.lastModified || doc.timestamp)}
                             </span>
                         )}
-                        {isTrashView && (
+                        {!isSelectionMode && isTrashView && (
                             <button
                                 type="button"
                                 onPointerDown={(event) => event.stopPropagation()}
@@ -182,17 +219,19 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
                                 <RotateCcw size={13} />
                             </button>
                         )}
-                        <button
-                            type="button"
-                            onPointerDown={(event) => event.stopPropagation()}
-                            onDoubleClick={(event) => event.stopPropagation()}
-                            onClick={handleDelete}
-                            className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition hover:bg-rose-50 hover:text-rose-500 dark:text-slate-500 dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
-                            title={isTrashView ? t('writing.deletePermanent', '永久删除') : t('common.delete', '删除')}
-                            aria-label={isTrashView ? t('writing.deletePermanent', '永久删除') : t('common.delete', '删除')}
-                        >
-                            <Trash2 size={13} />
-                        </button>
+                        {!isSelectionMode && (
+                            <button
+                                type="button"
+                                onPointerDown={(event) => event.stopPropagation()}
+                                onDoubleClick={(event) => event.stopPropagation()}
+                                onClick={handleDelete}
+                                className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition hover:bg-rose-50 hover:text-rose-500 dark:text-slate-500 dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
+                                title={isTrashView ? t('writing.deletePermanent', '永久删除') : t('common.delete', '删除')}
+                                aria-label={isTrashView ? t('writing.deletePermanent', '永久删除') : t('common.delete', '删除')}
+                            >
+                                <Trash2 size={13} />
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -220,10 +259,16 @@ const WritingSidebar = ({
     onRestore,
     allDocumentsCount = 0,
     viewMode = 'active',
-    isMobile = false
+    isMobile = false,
+    categories = [],
+    selectedCategory = null,
+    onBulkMoveCategory,
 }) => {
     const { t } = useTranslation();
     const isTrashView = viewMode === 'trash';
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedDocIds, setSelectedDocIds] = useState([]);
+    const [moveTargetCategory, setMoveTargetCategory] = useState('');
 
     const groupedDocs = useMemo(() => {
         const groups = { today: [], yesterday: [], week: [], older: [] };
@@ -242,6 +287,60 @@ const WritingSidebar = ({
 
         return groups;
     }, [documents]);
+    const selectableCategories = useMemo(
+        () => categories.filter((category) => category?.id && category.id !== selectedCategory),
+        [categories, selectedCategory]
+    );
+    const selectedCount = selectedDocIds.length;
+    const allSelected = documents.length > 0 && selectedCount === documents.length;
+    const canBulkMove = isSelectionMode && selectedCount > 0 && Boolean(moveTargetCategory) && !isTrashView;
+
+    useEffect(() => {
+        if (!isSelectionMode) {
+            setSelectedDocIds([]);
+            return;
+        }
+
+        const visibleSet = new Set(documents.map((docItem) => docItem.id));
+        setSelectedDocIds((prev) => prev.filter((id) => visibleSet.has(id)));
+    }, [documents, isSelectionMode]);
+
+    useEffect(() => {
+        if (!isSelectionMode || isTrashView) {
+            setMoveTargetCategory('');
+            return;
+        }
+
+        if (!selectableCategories.some((item) => item.id === moveTargetCategory)) {
+            setMoveTargetCategory(selectableCategories[0]?.id || '');
+        }
+    }, [isSelectionMode, isTrashView, moveTargetCategory, selectableCategories]);
+
+    const toggleDocSelection = useCallback((docId) => {
+        setSelectedDocIds((prev) => (
+            prev.includes(docId)
+                ? prev.filter((item) => item !== docId)
+                : [...prev, docId]
+        ));
+    }, []);
+
+    const toggleSelectAll = () => {
+        if (allSelected) {
+            setSelectedDocIds([]);
+            return;
+        }
+        setSelectedDocIds(documents.map((docItem) => docItem.id));
+    };
+
+    const handleBulkMove = () => {
+        if (!canBulkMove) return;
+
+        onBulkMoveCategory?.(selectedDocIds, moveTargetCategory);
+        const targetLabel = categories.find((category) => category.id === moveTargetCategory)?.label
+            || t('writing.category', '分类');
+        toast.success(`${t('writing.bulkMoveComplete', '已转移')} ${selectedCount} ${t('writing.documents', '文档')} · ${targetLabel}`);
+        setSelectedDocIds([]);
+    };
 
     const renderGroup = (titleKey, docsInGroup) => {
         if (docsInGroup.length === 0) return null;
@@ -265,6 +364,9 @@ const WritingSidebar = ({
                             onRestore={onRestore}
                             isTrashView={isTrashView}
                             isMobile={isMobile}
+                            isSelectionMode={isSelectionMode}
+                            isSelected={selectedDocIds.includes(doc.id)}
+                            onToggleSelect={toggleDocSelection}
                             t={t}
                         />
                     ))}
@@ -301,6 +403,63 @@ const WritingSidebar = ({
 
     return (
         <div className="flex h-full flex-col bg-white dark:bg-slate-900">
+            {!isTrashView && documents.length > 0 && (
+                <div className="border-b border-sky-100/80 px-3 py-2 dark:border-slate-800">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        {!isSelectionMode ? (
+                            <button
+                                type="button"
+                                onClick={() => setIsSelectionMode(true)}
+                                className="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-600 transition hover:border-sky-300 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
+                            >
+                                {t('writing.multiSelect', '多选')}
+                            </button>
+                        ) : (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={toggleSelectAll}
+                                    className="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-600 transition hover:border-sky-300 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
+                                >
+                                    {allSelected ? t('common.unselectAll', '取消全选') : t('common.selectAll', '全选')}
+                                </button>
+                                <select
+                                    value={moveTargetCategory}
+                                    onChange={(event) => setMoveTargetCategory(event.target.value)}
+                                    className="h-8 min-w-[108px] rounded-lg border border-slate-200 bg-white px-2 text-xs text-slate-700 outline-none transition focus:border-sky-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-sky-600"
+                                >
+                                    {selectableCategories.map((category) => (
+                                        <option key={category.id} value={category.id}>
+                                            {category.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <button
+                                    type="button"
+                                    onClick={handleBulkMove}
+                                    disabled={!canBulkMove}
+                                    className="inline-flex h-8 items-center rounded-lg bg-sky-500 px-2.5 text-xs font-medium text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sky-600 dark:hover:bg-sky-500"
+                                >
+                                    {t('writing.moveToCategory', '转移分区')}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsSelectionMode(false)}
+                                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-slate-100"
+                                    aria-label={t('common.cancel', '取消')}
+                                >
+                                    <X size={14} />
+                                </button>
+                            </>
+                        )}
+                    </div>
+                    {isSelectionMode && (
+                        <p className="mt-1.5 text-[11px] font-medium text-sky-600/90 dark:text-sky-400/90">
+                            {`${t('common.selected', '已选择')} ${selectedCount} ${t('writing.documents', '文档')}`}
+                        </p>
+                    )}
+                </div>
+            )}
             <div
                 className="custom-scrollbar touch-scroll flex-1 overflow-y-auto px-3 py-4"
                 style={isMobile ? { paddingBottom: 'max(16px, env(safe-area-inset-bottom, 0px))' } : undefined}
