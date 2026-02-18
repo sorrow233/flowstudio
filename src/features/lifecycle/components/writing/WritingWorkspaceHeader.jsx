@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArchiveRestore, ListChecks, Plus, Search, Settings2, X } from 'lucide-react';
+import { ArchiveRestore, ListChecks, MoreHorizontal, Plus, Search, Settings2, X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import WritingCategorySelector from './WritingCategorySelector';
 import WritingCategoryManager from './WritingCategoryManager';
@@ -185,7 +185,7 @@ const WritingWorkspaceHeader = ({
                         }`}
                     title={t('writing.managePanel', '管理面板')}
                 >
-                    <Settings2 size={16} />
+                    <MoreHorizontal size={16} />
                 </button>
             </motion.div>
 
