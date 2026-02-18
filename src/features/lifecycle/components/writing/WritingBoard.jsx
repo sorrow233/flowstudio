@@ -12,6 +12,7 @@ import WritingEditor from './WritingEditor';
 import WritingDashboard from './WritingDashboard';
 import WritingWorkspaceHeader from './WritingWorkspaceHeader';
 import { stripAllMarkdown as stripMarkup } from './markdownParser';
+import { normalizeManualOrder, sortWritingDocuments } from './writingSortUtils';
 import {
     TRASH_RETENTION_DAYS,
     isInWritingTrash,
@@ -41,29 +42,6 @@ const decodeRoutePart = (value) => {
     } catch {
         return value;
     }
-};
-
-const resolveCreatedTimestamp = (docItem) => Number(docItem?.timestamp || 0);
-const normalizeManualOrder = (value) => {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-};
-
-const sortWritingDocuments = (documents = [], options = {}) => {
-    const { categoryId = null, useManualOrder = false } = options;
-
-    return [...documents].sort((leftDoc, rightDoc) => {
-        if (useManualOrder && categoryId) {
-            const leftOrder = leftDoc?.manualOrderCategory === categoryId ? normalizeManualOrder(leftDoc?.manualOrder) : null;
-            const rightOrder = rightDoc?.manualOrderCategory === categoryId ? normalizeManualOrder(rightDoc?.manualOrder) : null;
-
-            if (leftOrder !== null && rightOrder !== null) return leftOrder - rightOrder;
-            if (leftOrder !== null) return -1;
-            if (rightOrder !== null) return 1;
-        }
-
-        return resolveCreatedTimestamp(rightDoc) - resolveCreatedTimestamp(leftDoc);
-    });
 };
 
 const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDelete, syncStatus, isMobile: externalIsMobile }) => {
@@ -444,6 +422,27 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         if (hasChanges) immediateSync?.();
     }, [defaultCategoryId, immediateSync, isTrashView, selectedCategory, updateProject]);
 
+    const handleResetManualOrder = useCallback(() => {
+        if (isTrashView) return;
+        if (!selectedCategory) return;
+
+        let hasChanges = false;
+        activeDocuments.forEach((docItem) => {
+            const categoryId = docItem.category || defaultCategoryId;
+            if (categoryId !== selectedCategory) return;
+            if (docItem.manualOrderCategory !== selectedCategory) return;
+            if (normalizeManualOrder(docItem.manualOrder) === null) return;
+
+            updateProject(docItem.id, {
+                manualOrder: null,
+                manualOrderCategory: null,
+            });
+            hasChanges = true;
+        });
+
+        if (hasChanges) immediateSync?.();
+    }, [activeDocuments, defaultCategoryId, immediateSync, isTrashView, selectedCategory, updateProject]);
+
     useEffect(() => {
         if (trashDocuments.length === 0) return;
         const now = Date.now();
@@ -581,6 +580,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                                 selectedCategory={selectedCategory}
                                                 onBulkMoveCategory={handleBulkMoveCategory}
                                                 onReorderDocuments={handleReorderDocuments}
+                                                onResetManualOrder={handleResetManualOrder}
                                                 canReorder={!isTrashView && !searchQuery.trim()}
                                                 isSelectionMode={isSelectionMode}
                                                 onSelectionModeChange={setIsSelectionMode}
