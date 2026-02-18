@@ -92,7 +92,7 @@ const WritingWorkspaceHeader = ({
 
     const buttonStyle = getButtonStyle();
 
-    const compactCategories = useMemo(() => categories.slice(0, 10), [categories]);
+    const compactCategories = useMemo(() => categories, [categories]);
     const selectedCategoryLabel = resolveWritingCategoryLabel(selectedCategoryObj, t, t('common.noData'));
     const selectedCategoryTextClass = selectedCategoryObj?.dotColor
         ? selectedCategoryObj.dotColor.replace('bg-', 'text-')
@@ -126,17 +126,21 @@ const WritingWorkspaceHeader = ({
                                 <button
                                     key={category.id}
                                     onClick={() => onSelectCategory(category.id)}
-                                    className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${isActive
-                                        ? 'border-slate-200 bg-white shadow-[0_6px_14px_-10px_rgba(15,23,42,0.6)] dark:border-slate-600 dark:bg-slate-700'
-                                        : 'border-transparent hover:border-slate-200/80 hover:bg-slate-50/80 dark:hover:border-slate-600 dark:hover:bg-slate-700/70'
-                                        }`}
-                                    title={label}
-                                    aria-label={label}
-                                >
-                                    <span className={`rounded-full transition-all duration-300 ${category.dotColor} ${isActive ? 'h-3 w-3' : 'h-2.5 w-2.5 opacity-75'}`} />
-                                </button>
-                            );
-                        })}
+                                        className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${isActive
+                                            ? 'border-transparent bg-transparent'
+                                            : 'border-transparent hover:border-slate-200/80 hover:bg-slate-50/80 dark:hover:border-slate-600 dark:hover:bg-slate-700/70'
+                                            }`}
+                                        title={label}
+                                        aria-label={label}
+                                    >
+                                        <span className={`rounded-full transition-all duration-300 ${category.dotColor} ${isActive
+                                            ? 'h-3 w-3 opacity-100 shadow-[0_0_0_2px_rgba(255,255,255,0.92)] dark:shadow-[0_0_0_2px_rgba(51,65,85,0.92)]'
+                                            : 'h-2.5 w-2.5 opacity-75'
+                                            }`}
+                                        />
+                                    </button>
+                                );
+                            })}
                     </div>
                 </div>
             </div>

@@ -155,7 +155,7 @@ const WritingSidebarItem = ({
                 className={[
                     `cursor-pointer rounded-2xl border px-4 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70 ${isUntitledDoc ? 'min-h-[126px]' : 'min-h-[106px]'}`,
                     isSelectionMode && isSelected
-                        ? 'border-sky-300/85 bg-sky-50/80 ring-1 ring-sky-200/70 shadow-[0_12px_24px_-20px_rgba(59,130,246,0.65)] dark:border-sky-700/90 dark:bg-slate-800/92 dark:ring-sky-700/45'
+                        ? 'border-sky-200/75 bg-sky-50/65 dark:border-sky-700/70 dark:bg-slate-800/82'
                         : isActive
                         ? 'border-sky-200 bg-sky-50 shadow-[0_14px_34px_-24px_rgba(59,130,246,0.6)] dark:border-sky-800 dark:bg-slate-900 dark:shadow-none'
                         : 'border-sky-100/80 bg-white/86 hover:border-sky-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/40 dark:hover:border-slate-700 dark:hover:bg-slate-900/80'

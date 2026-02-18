@@ -8,7 +8,6 @@ const normalizeMarkupText = (input = '') =>
         .replace(/[\t\f\v]+/g, ' ')
         .replace(/[ ]+\n/g, '\n')
         .replace(/\n[ ]+/g, '\n')
-        .replace(/\n{3,}/g, '\n\n')
         .trim();
 
 export const clipboardToMarkup = (clipboardData) => {

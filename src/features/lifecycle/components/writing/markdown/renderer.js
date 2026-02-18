@@ -258,6 +258,6 @@ const markdownRenderer = createMarkdownRenderer();
 export const markupToHtmlFull = (text) => {
     if (!text) return '';
     const rendered = markdownRenderer.render(text);
-    const emptyLineParagraphPattern = new RegExp(`<p>${escapeRegExp(EMPTY_LINE_TOKEN)}<\\/p>`, 'g');
+    const emptyLineParagraphPattern = new RegExp(`<p(?:\\s+[^>]*)?>\\s*${escapeRegExp(EMPTY_LINE_TOKEN)}\\s*<\\/p>`, 'g');
     return rendered.replace(emptyLineParagraphPattern, '<div class="md-empty-line"><br /></div>');
 };

@@ -7,7 +7,6 @@ const normalizeOutput = (value = '') =>
         .replace(/\r\n?/g, '\n')
         .replace(/\u00A0/g, ' ')
         .replace(/[ \t]+\n/g, '\n')
-        .replace(/\n{3,}/g, '\n\n')
         .trim();
 
 const normalizeInlineText = (value = '') =>
@@ -258,6 +257,7 @@ function serializeNode(node, context = {}) {
 
         const content = serializeChildren(node, context);
         if (context.inListItem) return `${content}\n`;
+        if (isEmptyBlockContent(content)) return `${EMPTY_LINE_TOKEN}\n\n`;
         return `${content}\n`;
     }
 

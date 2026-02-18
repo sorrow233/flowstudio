@@ -251,7 +251,7 @@ const InspirationItem = ({
             }}
             exit={exitAnimation}
             layout
-            className={`relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 touch-none select-none ${isCharging ? 'ring-2 ring-pink-400/60 shadow-lg shadow-pink-200/50 dark:shadow-pink-900/30' : ''} ${isSelected ? 'scale-[1.02]' : ''}`}
+            className={`relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 touch-none select-none ${isCharging ? 'ring-2 ring-pink-400/60 shadow-lg shadow-pink-200/50 dark:shadow-pink-900/30' : ''} ${isSelected ? 'scale-[1.005]' : ''}`}
         >
             {/* Main Card Component */}
             <div
@@ -263,7 +263,7 @@ const InspirationItem = ({
                         ? 'border-cyan-300 dark:border-cyan-600 ring-1 ring-cyan-200/50 dark:ring-cyan-700/30'
                         : 'border-gray-100 dark:border-gray-800'}
                     ${isDragging ? '' : `hover:shadow-[0_0_20px_rgba(244,114,182,0.2)] hover:border-pink-200 dark:hover:border-pink-800/50`}
-                    ${isSelected ? `ring-2 ${categoryConfig.textColor.replace('text-', 'ring-')} shadow-lg shadow-gray-200 dark:shadow-gray-950 border-transparent` : ''}
+                    ${isSelected ? 'border-sky-200 bg-sky-50/45 shadow-[0_8px_22px_-18px_rgba(56,189,248,0.55)] dark:border-sky-700/65 dark:bg-slate-800/72' : ''}
                     ${isCompleted ? 'opacity-50' : ''}
                     z-10
                     group/card

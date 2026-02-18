@@ -21,6 +21,8 @@ const WritingCategorySelector = ({
     const selectedCategoryInfo = categories.find((category) => category.id === selectedCategory) || categories[0];
     const selectedCategoryCount = selectedCategoryInfo ? Number(categoryDocCountMap[selectedCategoryInfo.id] || 0) : 0;
     const managerTitle = t('writing.manageCategories', '管理分类');
+    const shouldUseTwoRowDots = categories.length > 5;
+    const dotColumns = shouldUseTwoRowDots ? Math.ceil(categories.length / 2) : categories.length;
 
     if (categories.length === 0) {
         return null;
@@ -31,9 +33,13 @@ const WritingCategorySelector = ({
             <div className={`flex min-w-0 flex-1 items-center border border-slate-200/60 bg-white/60 shadow-sm backdrop-blur-md transition-all dark:border-slate-800/50 dark:bg-slate-900/60 ${shouldDimSelector
                 ? 'cursor-not-allowed opacity-55'
                 : 'hover:bg-white/80 dark:hover:bg-slate-900/80'
-                } ${isMobile ? 'rounded-2xl px-1.5 py-1.5' : 'rounded-full p-1'}`}>
+                } ${isMobile ? 'rounded-2xl px-1.5 py-1.5' : shouldUseTwoRowDots ? 'rounded-[22px] px-1 py-1.5' : 'rounded-full p-1'}`}>
                 {/* 类别名称显示 - 移动端也保留 */}
-                <div className={`relative flex shrink-0 items-center justify-center overflow-hidden border-r border-slate-200/50 dark:border-slate-700/50 ${isMobile ? 'h-8 min-w-[70px] max-w-[110px] px-3.5' : 'h-7 min-w-[60px] max-w-[100px] px-3'}`}>
+                <div className={`relative flex shrink-0 items-center justify-center overflow-hidden border-r border-slate-200/50 dark:border-slate-700/50 ${isMobile
+                    ? 'h-8 min-w-[70px] max-w-[110px] px-3.5'
+                    : shouldUseTwoRowDots
+                        ? 'min-h-[36px] min-w-[60px] max-w-[100px] self-stretch px-3'
+                        : 'h-7 min-w-[60px] max-w-[100px] px-3'}`}>
                     <AnimatePresence mode="wait" initial={false}>
                         <motion.span
                             key={selectedCategory || 'none'}
@@ -48,32 +54,30 @@ const WritingCategorySelector = ({
                     </AnimatePresence>
                 </div>
 
-                {/* 滑动圆点容器 */}
-                <div className={`no-scrollbar flex min-w-0 items-center gap-1 overflow-x-auto ${isMobile ? 'flex-1 px-1.5' : 'flex-1 pl-1 pr-1'}`}>
-                    {categories.map((category) => (
-                        <button
-                            key={category.id}
-                            onClick={() => onSelectCategory(category.id)}
-                            disabled={disabled}
-                            className={`group/dot relative flex flex-shrink-0 items-center justify-center rounded-full transition-all duration-300 ${isMobile ? 'h-8 w-8' : 'h-7 w-7'}`}
-                            title={`${resolveWritingCategoryLabel(category, t, t('common.noData'))} (${Number(categoryDocCountMap[category.id] || 0)})`}
-                            aria-label={`${resolveWritingCategoryLabel(category, t, t('common.noData'))} ${Number(categoryDocCountMap[category.id] || 0)}`}
-                        >
-                            {selectedCategory === category.id && (
-                                <motion.div
-                                    layoutId="writingActiveCategory"
-                                    className="absolute inset-0 rounded-full border border-slate-200 bg-white shadow-sm dark:border-slate-600 dark:bg-slate-700"
-                                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                {/* 两行圆点容器 */}
+                <div className={`min-w-0 flex-1 ${isMobile ? 'px-1.5' : 'px-1'} ${shouldUseTwoRowDots ? 'py-0.5' : ''}`}>
+                    <div
+                        className={`grid justify-items-center gap-1 ${shouldUseTwoRowDots ? 'grid-rows-2' : 'grid-rows-1'}`}
+                        style={{ gridTemplateColumns: `repeat(${Math.max(dotColumns, 1)}, minmax(0, 1fr))` }}
+                    >
+                        {categories.map((category) => (
+                            <button
+                                key={category.id}
+                                onClick={() => onSelectCategory(category.id)}
+                                disabled={disabled}
+                                className={`group/dot relative flex flex-shrink-0 items-center justify-center rounded-full transition-all duration-300 ${isMobile ? 'h-8 w-8' : 'h-7 w-7'}`}
+                                title={`${resolveWritingCategoryLabel(category, t, t('common.noData'))} (${Number(categoryDocCountMap[category.id] || 0)})`}
+                                aria-label={`${resolveWritingCategoryLabel(category, t, t('common.noData'))} ${Number(categoryDocCountMap[category.id] || 0)}`}
+                            >
+                                <div
+                                    className={`h-3 w-3 rounded-full transition-all duration-300 ${category.dotColor} ${selectedCategory === category.id
+                                        ? 'scale-110 opacity-100 shadow-[0_0_0_2px_rgba(255,255,255,0.92)] dark:shadow-[0_0_0_2px_rgba(51,65,85,0.92)]'
+                                        : 'opacity-45 group-hover/dot:scale-110 group-hover/dot:opacity-100'
+                                        }`}
                                 />
-                            )}
-                            <div
-                                className={`relative z-10 h-3 w-3 rounded-full transition-all duration-300 ${category.dotColor} ${selectedCategory === category.id
-                                    ? 'scale-110'
-                                    : 'opacity-40 group-hover/dot:scale-110 group-hover/dot:opacity-100'
-                                    }`}
-                            />
-                        </button>
-                    ))}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 {/* 设置/管理按钮 */}
