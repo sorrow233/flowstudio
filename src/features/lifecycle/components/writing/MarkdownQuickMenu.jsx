@@ -13,6 +13,7 @@ const MarkdownQuickMenu = ({
     onInsert,
     onClose,
     onPrepareInsert,
+    isMobile,
     t,
 }) => {
     const menuRef = useRef(null);
@@ -53,7 +54,7 @@ const MarkdownQuickMenu = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, scale: 0.96 }}
             transition={{ type: 'spring', damping: 28, stiffness: 400 }}
-            className="absolute right-11 z-40 mt-2 w-[18.5rem] overflow-hidden rounded-2xl border border-sky-100 bg-white shadow-[0_18px_40px_-16px_rgba(37,99,235,0.35)] dark:border-slate-800 dark:bg-slate-900 dark:shadow-none"
+            className={`absolute right-0 z-40 mt-2 w-[18.5rem] max-w-[calc(100vw-1.25rem)] overflow-hidden rounded-2xl border border-sky-100 bg-white shadow-[0_18px_40px_-16px_rgba(37,99,235,0.35)] dark:border-slate-800 dark:bg-slate-900 dark:shadow-none ${isMobile ? 'translate-x-0' : ''}`}
             role="menu"
             aria-label={t?.('writing.markdownQuickMenu', 'Markdown 快捷菜单') || 'Markdown 快捷菜单'}
         >

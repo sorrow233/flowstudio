@@ -69,54 +69,59 @@ const EditorToolbar = ({
         </div>
 
         <div className="flex items-center">
-            <div className="relative flex items-center gap-1">
-                <IconBtn
-                    onMouseDown={(event) => {
-                        event.preventDefault();
-                        onPrepareMarkdownInsert?.();
-                    }}
-                    onClick={onToggleMarkdownMenu}
-                    active={showMarkdownMenu}
-                    title={t('writing.markdownQuickMenu', 'Markdown 快捷')}
-                >
-                    <FileCode2 size={15} />
-                </IconBtn>
-                <IconBtn onClick={onToggleActions} title={t('common.details', '详情')}>
-                    <MoreHorizontal size={16} />
-                </IconBtn>
-                <AnimatePresence>
-                    {showMarkdownMenu && (
-                        <MarkdownQuickMenu
-                            show={showMarkdownMenu}
-                            onInsert={onInsertMarkdown}
-                            onClose={onCloseMarkdownMenu}
-                            onPrepareInsert={onPrepareMarkdownInsert}
-                            isMobile={isMobile}
-                            t={t}
-                        />
-                    )}
-                </AnimatePresence>
-                <AnimatePresence>
-                    {showActions && (
-                        <ExportMenu
-                            show={showActions}
-                            canUndo={canUndo}
-                            canRedo={canRedo}
-                            canManualSnapshot={canManualSnapshot}
-                            canCopy={canCopy}
-                            copiedAt={copiedAt}
-                            onUndo={onUndo}
-                            onRedo={onRedo}
-                            onManualSnapshot={onManualSnapshot}
-                            onShowHistory={onShowHistory}
-                            onCopy={onCopy}
-                            onExport={onExport}
-                            onClose={onCloseActions}
-                            isMobile={isMobile}
-                            t={t}
-                        />
-                    )}
-                </AnimatePresence>
+            <div className="flex items-center gap-1">
+                <div className="relative">
+                    <IconBtn
+                        onMouseDown={(event) => {
+                            event.preventDefault();
+                            onPrepareMarkdownInsert?.();
+                        }}
+                        onClick={onToggleMarkdownMenu}
+                        active={showMarkdownMenu}
+                        title={t('writing.markdownQuickMenu', 'Markdown 快捷')}
+                    >
+                        <FileCode2 size={15} />
+                    </IconBtn>
+                    <AnimatePresence>
+                        {showMarkdownMenu && (
+                            <MarkdownQuickMenu
+                                show={showMarkdownMenu}
+                                onInsert={onInsertMarkdown}
+                                onClose={onCloseMarkdownMenu}
+                                onPrepareInsert={onPrepareMarkdownInsert}
+                                isMobile={isMobile}
+                                t={t}
+                            />
+                        )}
+                    </AnimatePresence>
+                </div>
+
+                <div className="relative">
+                    <IconBtn onClick={onToggleActions} title={t('common.details', '详情')}>
+                        <MoreHorizontal size={16} />
+                    </IconBtn>
+                    <AnimatePresence>
+                        {showActions && (
+                            <ExportMenu
+                                show={showActions}
+                                canUndo={canUndo}
+                                canRedo={canRedo}
+                                canManualSnapshot={canManualSnapshot}
+                                canCopy={canCopy}
+                                copiedAt={copiedAt}
+                                onUndo={onUndo}
+                                onRedo={onRedo}
+                                onManualSnapshot={onManualSnapshot}
+                                onShowHistory={onShowHistory}
+                                onCopy={onCopy}
+                                onExport={onExport}
+                                onClose={onCloseActions}
+                                isMobile={isMobile}
+                                t={t}
+                            />
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
         </div>
     </div>
