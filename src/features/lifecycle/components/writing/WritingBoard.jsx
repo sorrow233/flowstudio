@@ -69,7 +69,10 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         addCategory: addCategoryBase,
         updateCategory: updateCategoryBase,
         removeCategory: removeCategoryBase,
-    } = useSyncedCategories(doc, 'writing_categories', WRITING_CATEGORIES);
+    } = useSyncedCategories(doc, 'writing_categories', WRITING_CATEGORIES, {
+        initializeDefaults: status === 'synced',
+        cleanupDuplicates: true,
+    });
 
     const categories = useMemo(() => {
         const base = syncedCategories.length > 0 ? syncedCategories : WRITING_CATEGORIES;

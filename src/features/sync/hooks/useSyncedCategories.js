@@ -3,30 +3,103 @@ import * as Y from 'yjs';
 import { v4 as uuidv4 } from 'uuid';
 import { INSPIRATION_CATEGORIES } from '../../../utils/constants';
 
-export const useSyncedCategories = (doc, arrayName = 'inspiration_categories', defaultCategories = INSPIRATION_CATEGORIES) => {
+const normalizeLabel = (value) => String(value || '').trim().toLowerCase();
+
+export const useSyncedCategories = (
+    doc,
+    arrayName = 'inspiration_categories',
+    defaultCategories = INSPIRATION_CATEGORIES,
+    options = {}
+) => {
+    const {
+        initializeDefaults = true,
+        cleanupDuplicates = true,
+    } = options;
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
         if (!doc) return;
 
         const yArray = doc.getArray(arrayName);
+        const defaultLabelMap = new Map((defaultCategories || []).map((cat) => [cat.id, cat.label]));
 
-        const handleChange = () => {
-            setCategories(yArray.toJSON());
+        const isPreferred = (candidate, current) => {
+            const id = candidate.id || current.id;
+            const defaultLabel = normalizeLabel(defaultLabelMap.get(id));
+            const candidateLabel = normalizeLabel(candidate.label);
+            const currentLabel = normalizeLabel(current.label);
+
+            const candidateIsCustom = candidateLabel && candidateLabel !== defaultLabel;
+            const currentIsCustom = currentLabel && currentLabel !== defaultLabel;
+
+            if (candidateIsCustom !== currentIsCustom) {
+                return candidateIsCustom;
+            }
+
+            // 两者同级时优先保留后写入的项，降低旧脏数据覆盖概率。
+            return true;
         };
 
-        // Initialize Defaults if Empty
-        if (yArray.length === 0) {
-            doc.transact(() => {
-                if (yArray.length === 0) {
-                    defaultCategories.forEach(cat => {
-                        const yMap = new Y.Map();
-                        Object.entries(cat).forEach(([key, value]) => yMap.set(key, value));
-                        yArray.push([yMap]);
-                    });
+        const dedupeCategories = () => {
+            if (!cleanupDuplicates) return false;
+
+            const arr = yArray.toArray();
+            const keepById = new Map();
+            const removeIndices = [];
+
+            arr.forEach((item, index) => {
+                const value = item instanceof Y.Map ? item.toJSON() : item;
+                const id = value?.id;
+                if (!id) return;
+
+                const existing = keepById.get(id);
+                if (!existing) {
+                    keepById.set(id, { index, value });
+                    return;
+                }
+
+                if (isPreferred(value, existing.value)) {
+                    removeIndices.push(existing.index);
+                    keepById.set(id, { index, value });
+                } else {
+                    removeIndices.push(index);
                 }
             });
-        }
+
+            if (removeIndices.length === 0) return false;
+
+            doc.transact(() => {
+                [...new Set(removeIndices)]
+                    .sort((a, b) => b - a)
+                    .forEach((index) => {
+                        yArray.delete(index, 1);
+                    });
+            });
+
+            return true;
+        };
+
+        const seedDefaultsIfNeeded = () => {
+            if (!initializeDefaults) return false;
+            if (yArray.length > 0) return false;
+
+            doc.transact(() => {
+                if (yArray.length > 0) return;
+                (defaultCategories || []).forEach((cat) => {
+                    const yMap = new Y.Map();
+                    Object.entries(cat).forEach(([key, value]) => yMap.set(key, value));
+                    yArray.push([yMap]);
+                });
+            });
+            return true;
+        };
+
+        const handleChange = () => {
+            const seeded = seedDefaultsIfNeeded();
+            const deduped = dedupeCategories();
+            if (seeded || deduped) return;
+            setCategories(yArray.toJSON());
+        };
 
         handleChange();
         yArray.observeDeep(handleChange);
@@ -34,7 +107,7 @@ export const useSyncedCategories = (doc, arrayName = 'inspiration_categories', d
         return () => {
             yArray.unobserveDeep(handleChange);
         };
-    }, [doc, arrayName, defaultCategories]);
+    }, [cleanupDuplicates, doc, initializeDefaults, arrayName, defaultCategories]);
 
     const addCategory = useCallback((category) => {
         if (!doc) return;

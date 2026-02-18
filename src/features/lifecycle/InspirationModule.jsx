@@ -68,7 +68,15 @@ const InspirationModule = () => {
     const isReady = status === 'synced';
 
     // Custom Categories
-    const { categories: syncedCategories, addCategory, updateCategory, removeCategory } = useSyncedCategories(doc);
+    const { categories: syncedCategories, addCategory, updateCategory, removeCategory } = useSyncedCategories(
+        doc,
+        'inspiration_categories',
+        INSPIRATION_CATEGORIES,
+        {
+            initializeDefaults: status === 'synced',
+            cleanupDuplicates: true,
+        }
+    );
 
     // Merge synced categories with defaults to ensure colors exist (fixes missing colors in old data)
     // Also deduplicate by ID to handle potential sync data corruption
