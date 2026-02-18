@@ -21,11 +21,3 @@ export const sortWritingDocuments = (documents = [], options = {}) => {
         return resolveCreatedTimestamp(rightDoc) - resolveCreatedTimestamp(leftDoc);
     });
 };
-
-export const hasCategoryManualOrder = (documents = [], categoryId = null) => {
-    if (!categoryId) return false;
-    return documents.some((docItem) =>
-        docItem?.manualOrderCategory === categoryId
-        && normalizeManualOrder(docItem?.manualOrder) !== null
-    );
-};

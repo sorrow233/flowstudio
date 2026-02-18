@@ -4,7 +4,6 @@ import { AnimatePresence, Reorder } from 'framer-motion';
 import { toast } from 'sonner';
 import { useTranslation } from '../../../i18n';
 import { stripMarkup } from './editorUtils';
-import { hasCategoryManualOrder } from './writingSortUtils';
 import { getTrashRemainingDays, TRASH_RETENTION_DAYS } from './writingTrashUtils';
 
 const formatDocTime = (timestamp) => {
@@ -258,7 +257,6 @@ const WritingSidebar = ({
     selectedCategory = null,
     onBulkMoveCategory,
     onReorderDocuments,
-    onResetManualOrder,
     canReorder = false,
     isSelectionMode = false,
     onSelectionModeChange,
@@ -278,10 +276,6 @@ const WritingSidebar = ({
     const selectableCategories = useMemo(
         () => categories.filter((category) => category?.id && category.id !== selectedCategory),
         [categories, selectedCategory]
-    );
-    const hasManualOrder = useMemo(
-        () => hasCategoryManualOrder(documents, selectedCategory),
-        [documents, selectedCategory]
     );
     const selectedCount = selectedDocIds.length;
     const allSelected = documents.length > 0 && selectedCount === documents.length;
@@ -385,13 +379,6 @@ const WritingSidebar = ({
         setHasPendingReorder(false);
     }, [documentsById, hasPendingReorder, isReorderEnabled, onReorderDocuments, orderedDocIds]);
 
-    const handleResetOrder = () => {
-        onResetManualOrder?.();
-        pendingOrderedDocIdsRef.current = [];
-        setHasPendingReorder(false);
-        toast.success(t('writing.resetOrderDone', '已恢复默认排序（新到旧）'));
-    };
-
     const renderSidebarItem = (doc) => (
         <WritingSidebarItem
             key={doc.id}
@@ -489,25 +476,6 @@ const WritingSidebar = ({
                 className="custom-scrollbar touch-scroll flex-1 overflow-y-auto px-3 py-4"
                 style={isMobile ? { paddingBottom: 'max(16px, env(safe-area-inset-bottom, 0px))' } : undefined}
             >
-                {!isTrashView && !isSelectionMode && (
-                    <div className="mb-3 flex items-center justify-between rounded-xl border border-sky-100/80 bg-sky-50/70 px-3 py-2 text-[11px] text-sky-600/90 dark:border-slate-700/70 dark:bg-slate-800/65 dark:text-sky-300/90">
-                        <span>
-                            {isReorderEnabled
-                                ? t('writing.reorderHint', '拖拽顺序优先，未拖拽项目按新到旧')
-                                : t('writing.defaultOrderHint', '默认按新到旧排序')}
-                        </span>
-                        {hasManualOrder && (
-                            <button
-                                type="button"
-                                onClick={handleResetOrder}
-                                className="rounded-lg border border-sky-200/80 bg-white px-2 py-1 text-[11px] font-medium text-sky-600 transition hover:bg-sky-50 dark:border-slate-600 dark:bg-slate-800 dark:text-sky-300 dark:hover:bg-slate-700"
-                            >
-                                {t('writing.resetOrder', '恢复默认')}
-                            </button>
-                        )}
-                    </div>
-                )}
-
                 {documents.length === 0 ? (
                     <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-sky-300">
                         <FileText size={34} strokeWidth={1.4} />
