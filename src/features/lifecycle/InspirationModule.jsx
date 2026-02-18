@@ -200,22 +200,22 @@ const InspirationModule = () => {
         return `/inspiration/c/${encodeRoutePart(categoryId)}`;
     }, []);
 
-    // Sync route category to local state (route is source of truth when present)
+    // Sync route category to local state (route is source of truth when present).
+    // Important: do NOT depend on selectedCategory here, otherwise manual category click
+    // can be reverted by stale route value before URL sync effect runs.
     useEffect(() => {
         if (categories.length === 0 || !routeCategoryId) return;
 
         if (categories.some((cat) => cat.id === routeCategoryId)) {
-            if (routeCategoryId !== selectedCategory) {
-                setSelectedCategory(routeCategoryId);
-            }
+            setSelectedCategory((prev) => (prev === routeCategoryId ? prev : routeCategoryId));
             return;
         }
 
         const fallback = categories.find((cat) => cat.id === 'note') || categories[0];
-        if (fallback && fallback.id !== selectedCategory) {
-            setSelectedCategory(fallback.id);
+        if (fallback) {
+            setSelectedCategory((prev) => (prev === fallback.id ? prev : fallback.id));
         }
-    }, [categories, routeCategoryId, selectedCategory]);
+    }, [categories, routeCategoryId]);
 
     // Ensure selected category remains valid even after category removal
     useEffect(() => {
