@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { ArrowRight, Lightbulb, Hash, X, Calendar, ListChecks, Sparkles, Copy, Settings2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSync } from '../sync/SyncContext';
@@ -30,6 +30,16 @@ const getNextAutoColorIndex = (totalCount) => {
     return groupIndex % COLOR_CONFIG.length;
 };
 
+const encodeRoutePart = (value) => encodeURIComponent(String(value || '').trim());
+const decodeRoutePart = (value) => {
+    if (!value) return null;
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        return value;
+    }
+};
+
 const TODO_AI_HINT_SEEN_KEY = 'flowstudio_todo_ai_hint_seen';
 const TODO_AI_CLASS_UNCLASSIFIED = 'unclassified';
 
@@ -49,6 +59,9 @@ const TODO_AI_FILTER_OPTIONS = [
 
 const InspirationModule = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { categoryId: routeCategoryParam } = useParams();
+    const routeCategoryId = decodeRoutePart(routeCategoryParam);
     const { user } = useAuth();
     // Sync - 使用 immediateSync 实现即时同步
     const { doc, immediateSync, status } = useSync();
@@ -138,7 +151,7 @@ const InspirationModule = () => {
     const [showWeekSelector, setShowWeekSelector] = useState(false);
     const [deletedIdeas, setDeletedIdeas] = useState([]);
     const [archiveShake, setArchiveShake] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState('note'); // 分类状态
+    const [selectedCategory, setSelectedCategory] = useState(() => routeCategoryId || 'note'); // 分类状态
     const [isSelectionMode, setIsSelectionMode] = useState(false); // 多选模式
     const [selectedIdeaIds, setSelectedIdeaIds] = useState([]); // 已选中的 ID
     const [todoAiFilter, setTodoAiFilter] = useState('all');
@@ -174,13 +187,51 @@ const InspirationModule = () => {
     const textareaRef = useRef(null); // Define textareaRef even if not used widely now
     const imageUploaderRef = useRef(null); // 图片上传组件引用
 
-    // Validate selectedCategory (Correctly placed AFTER selectedCategory declaration)
+    const buildInspirationPath = useCallback((categoryId) => {
+        if (!categoryId) return '/inspiration';
+        return `/inspiration/c/${encodeRoutePart(categoryId)}`;
+    }, []);
+
+    // Sync route category to local state (route is source of truth when present)
     useEffect(() => {
-        if (categories.length > 0 && !categories.find(c => c.id === selectedCategory)) {
-            const defaultCat = categories.find(c => c.id === 'note') || categories[0];
-            if (defaultCat) setSelectedCategory(defaultCat.id);
+        if (categories.length === 0 || !routeCategoryId) return;
+
+        if (categories.some((cat) => cat.id === routeCategoryId)) {
+            if (routeCategoryId !== selectedCategory) {
+                setSelectedCategory(routeCategoryId);
+            }
+            return;
+        }
+
+        const fallback = categories.find((cat) => cat.id === 'note') || categories[0];
+        if (fallback && fallback.id !== selectedCategory) {
+            setSelectedCategory(fallback.id);
+        }
+    }, [categories, routeCategoryId, selectedCategory]);
+
+    // Ensure selected category remains valid even after category removal
+    useEffect(() => {
+        if (categories.length === 0) return;
+        if (categories.some((cat) => cat.id === selectedCategory)) return;
+
+        const fallback = categories.find((cat) => cat.id === 'note') || categories[0];
+        if (fallback) {
+            setSelectedCategory(fallback.id);
         }
     }, [categories, selectedCategory]);
+
+    // Sync local selected category back to URL
+    useEffect(() => {
+        if (!selectedCategory) return;
+
+        const targetPath = buildInspirationPath(selectedCategory);
+        const currentPathWithSearch = `${location.pathname}${location.search || ''}`;
+        const targetPathWithSearch = `${targetPath}${location.search || ''}`;
+
+        if (currentPathWithSearch !== targetPathWithSearch) {
+            navigate(targetPathWithSearch, { replace: true });
+        }
+    }, [buildInspirationPath, location.pathname, location.search, navigate, selectedCategory]);
 
     useEffect(() => {
         if (categories.length === 0) return;

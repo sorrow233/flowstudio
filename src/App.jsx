@@ -42,6 +42,7 @@ function App() {
                                     <Routes location={location} key={routeSectionKey}>
                                         <Route path="/" element={<Navigate to="/inspiration" replace />} />
                                         <Route path="/inspiration" element={<InspirationModule />} />
+                                        <Route path="/inspiration/c/:categoryId" element={<InspirationModule />} />
                                         <Route path="/writing" element={<WritingModule />} />
                                         <Route path="/writing/c/:categoryId" element={<WritingModule />} />
                                         <Route path="/writing/c/:categoryId/:docId" element={<WritingModule />} />
