@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Eraser } from 'lucide-react';
-import { COLOR_CONFIG } from '../inspiration/InspirationUtils';
+import { WRITING_HIGHLIGHT_COLORS } from './writingHighlightColors';
 
 const FloatingColorPicker = ({ position, onApplyColor, onClearColor, isMobile, t }) => {
     if (!position) return null;
@@ -26,7 +26,7 @@ const FloatingColorPicker = ({ position, onApplyColor, onClearColor, isMobile, t
             >
                 <Eraser size={isMobile ? 13 : 11} />
             </button>
-            {COLOR_CONFIG.map((config) => (
+            {WRITING_HIGHLIGHT_COLORS.map((config) => (
                 <button
                     key={config.id}
                     onMouseDown={(event) => {

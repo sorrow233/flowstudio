@@ -1,6 +1,6 @@
 import MarkdownIt from 'markdown-it';
 import markdownItMark from 'markdown-it-mark';
-import { COLOR_CONFIG } from '../../inspiration/InspirationUtils';
+import { WRITING_HIGHLIGHT_COLORS } from '../writingHighlightColors';
 import { EMPTY_LINE_TOKEN } from './constants';
 
 const COLOR_MARKUP_RE = /^#!([^:\n#]+):([^\n#]+)#/;
@@ -43,7 +43,7 @@ const applyColorMarkupPlugin = (md) => {
         const colorId = meta.colorId || '';
         const content = md.utils.escapeHtml(meta.content || '');
 
-        const colorConfig = COLOR_CONFIG.find((item) => item.id === colorId);
+        const colorConfig = WRITING_HIGHLIGHT_COLORS.find((item) => item.id === colorId);
         const highlightColor = colorConfig?.highlight || 'rgba(167, 139, 250, 0.5)';
         const style = `background: radial-gradient(ellipse 100% 40% at center 80%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%); padding: 0 0.15em;`;
 

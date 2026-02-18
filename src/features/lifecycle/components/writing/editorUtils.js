@@ -1,4 +1,3 @@
-import { COLOR_CONFIG } from '../inspiration/InspirationUtils';
 import {
     markupToHtmlFull,
     htmlToMarkupFull,

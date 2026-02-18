@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
-import { COLOR_CONFIG } from '../inspiration/InspirationUtils';
+import { findWritingHighlightColor } from './writingHighlightColors';
 import {
     computeWordCount,
     computeCharCount,
@@ -482,7 +482,7 @@ const WritingEditor = ({
     }, [handleInput, markupToHtml, handleImageUpload]);
 
     const createHighlightElement = useCallback((colorId) => {
-        const colorConfig = COLOR_CONFIG.find((color) => color.id === colorId);
+        const colorConfig = findWritingHighlightColor(colorId);
         const highlightColor = colorConfig?.highlight || 'rgba(125, 211, 252, 0.55)';
         const span = document.createElement('span');
         span.style.background = `radial-gradient(ellipse 100% 40% at center 80%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%)`;
@@ -511,6 +511,34 @@ const WritingEditor = ({
         return true;
     }, [unwrapColoredSpan]);
 
+    const resolveColoredSpan = useCallback((node) => {
+        if (!node || !editorRef.current) return null;
+        const element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
+        const span = element?.closest?.('span.colored-text');
+        if (!span || !editorRef.current.contains(span)) return null;
+        return span;
+    }, []);
+
+    const collectIntersectingColoredSpans = useCallback((range) => {
+        if (!range || !editorRef.current) return [];
+        const spans = new Set();
+        const startSpan = resolveColoredSpan(range.startContainer);
+        const endSpan = resolveColoredSpan(range.endContainer);
+        if (startSpan) spans.add(startSpan);
+        if (endSpan) spans.add(endSpan);
+
+        const coloredSpans = Array.from(editorRef.current.querySelectorAll('span.colored-text'));
+        coloredSpans.forEach((span) => {
+            try {
+                if (range.intersectsNode(span)) spans.add(span);
+            } catch (_error) {
+                // ignore invalid intersection checks
+            }
+        });
+
+        return Array.from(spans);
+    }, [resolveColoredSpan]);
+
     const clearColor = useCallback(() => {
         if (typeof window === 'undefined' || !window.getSelection || !editorRef.current) return;
         const selection = window.getSelection();
@@ -532,6 +560,15 @@ const WritingEditor = ({
             return;
         }
 
+        const intersectingSpans = collectIntersectingColoredSpans(range);
+        if (intersectingSpans.length > 0) {
+            intersectingSpans.forEach((span) => unwrapColoredSpan(span));
+            selection.removeAllRanges();
+            handleInput();
+            setToolbarPosition(null);
+            return;
+        }
+
         const fragment = range.extractContents();
         const removed = stripColoredSpansInFragment(fragment);
         range.insertNode(fragment);
@@ -540,7 +577,7 @@ const WritingEditor = ({
         selection.removeAllRanges();
         handleInput();
         setToolbarPosition(null);
-    }, [handleInput, setToolbarPosition, stripColoredSpansInFragment, unwrapColoredSpan]);
+    }, [collectIntersectingColoredSpans, handleInput, setToolbarPosition, stripColoredSpansInFragment, unwrapColoredSpan]);
 
     const applyColor = useCallback((colorId) => {
         if (typeof window === 'undefined' || !window.getSelection) return;
@@ -551,22 +588,48 @@ const WritingEditor = ({
         if (range.collapsed) return;
         if (!editorRef.current?.contains(range.commonAncestorContainer)) return;
 
-        const fragment = range.extractContents();
+        const startSpan = resolveColoredSpan(range.startContainer);
+        const endSpan = resolveColoredSpan(range.endContainer);
+        if (startSpan && startSpan === endSpan && startSpan.dataset?.colorId === colorId) {
+            clearColor();
+            return;
+        }
+
+        const intersectingSpans = collectIntersectingColoredSpans(range);
+        if (intersectingSpans.length > 0) {
+            intersectingSpans.forEach((span) => unwrapColoredSpan(span));
+        }
+
+        if (!selection.rangeCount) return;
+        const normalizedRange = selection.getRangeAt(0);
+        if (normalizedRange.collapsed) return;
+        if (!editorRef.current?.contains(normalizedRange.commonAncestorContainer)) return;
+
+        const fragment = normalizedRange.extractContents();
         stripColoredSpansInFragment(fragment);
 
         const hasVisibleText = (fragment.textContent || '').trim().length > 0;
         if (!hasVisibleText) {
-            range.insertNode(fragment);
+            normalizedRange.insertNode(fragment);
             return;
         }
 
         const span = createHighlightElement(colorId);
         span.appendChild(fragment);
-        range.insertNode(span);
+        normalizedRange.insertNode(span);
         selection.removeAllRanges();
         setToolbarPosition(null);
         handleInput();
-    }, [createHighlightElement, handleInput, setToolbarPosition, stripColoredSpansInFragment]);
+    }, [
+        clearColor,
+        collectIntersectingColoredSpans,
+        createHighlightElement,
+        handleInput,
+        resolveColoredSpan,
+        setToolbarPosition,
+        stripColoredSpansInFragment,
+        unwrapColoredSpan,
+    ]);
 
     const restoreSnapshot = (snapshot) => {
         if (!writingDoc || !snapshot) return;
