@@ -54,14 +54,11 @@ const WritingWorkspaceHeader = ({
     const buttonStyle = getButtonStyle();
     const toolTone = getWritingCategoryToolTone(selectedCategoryPreset);
 
-    const compactCategoryRows = useMemo(() => {
-        const limited = categories.slice(0, 10);
-        if (limited.length === 0) return [];
-
-        const firstRow = limited.slice(0, 5);
-        const secondRow = limited.slice(5, 10);
-        return secondRow.length > 0 ? [firstRow, secondRow] : [firstRow];
-    }, [categories]);
+    const compactCategories = useMemo(() => categories.slice(0, 10), [categories]);
+    const selectedCategoryLabel = resolveWritingCategoryLabel(selectedCategoryObj, t, t('common.noData'));
+    const selectedCategoryTextClass = selectedCategoryObj?.dotColor
+        ? selectedCategoryObj.dotColor.replace('bg-', 'text-')
+        : 'text-slate-500';
 
     const renderCompactHeader = () => (
         <>
@@ -158,30 +155,38 @@ const WritingWorkspaceHeader = ({
                 )}
             </AnimatePresence>
 
-            <div className={`flex flex-col gap-1.5 ${isTrashView ? 'pointer-events-none opacity-55' : ''}`}>
-                {compactCategoryRows.map((row, rowIndex) => (
-                    <div key={`row-${rowIndex}`} className="grid grid-cols-5 gap-2">
-                        {row.map((category) => {
-                            const label = resolveWritingCategoryLabel(category, t, t('common.noData'));
-                            const isActive = selectedCategory === category.id;
-
-                            return (
-                                <button
-                                    key={category.id}
-                                    onClick={() => onSelectCategory(category.id)}
-                                    className={`flex h-10 min-w-0 items-center justify-center gap-1.5 rounded-2xl border px-2.5 text-[12px] font-semibold tracking-tight transition ${isActive
-                                        ? 'border-sky-400/70 bg-white text-slate-700 shadow-[0_10px_20px_-14px_rgba(59,130,246,0.65)] dark:border-sky-500/60 dark:bg-slate-800 dark:text-slate-100 dark:shadow-none'
-                                        : 'border-slate-300/75 bg-slate-50/80 text-slate-600 hover:border-slate-400/80 hover:bg-white dark:border-slate-700/65 dark:bg-slate-800/85 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800'
-                                        }`}
-                                    title={label}
-                                >
-                                    <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${category.dotColor}`} />
-                                    <span className="truncate">{label}</span>
-                                </button>
-                            );
-                        })}
+            <div className={`${isTrashView ? 'pointer-events-none opacity-55' : ''}`}>
+                <div className="flex h-12 items-center rounded-3xl border border-slate-200/80 bg-white/88 px-1.5 shadow-[0_10px_26px_-24px_rgba(15,23,42,0.85)] dark:border-slate-700/70 dark:bg-slate-800/85">
+                    <div className="flex shrink-0 items-center gap-2 px-2">
+                        <span className={`max-w-[5.5rem] truncate text-[13px] font-semibold ${selectedCategoryTextClass}`}>
+                            {selectedCategoryLabel}
+                        </span>
+                        <span className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
                     </div>
-                ))}
+                    <div className="min-w-0 flex-1 overflow-x-auto">
+                        <div className="flex min-w-max items-center gap-1.5 pr-1">
+                            {compactCategories.map((category) => {
+                                const label = resolveWritingCategoryLabel(category, t, t('common.noData'));
+                                const isActive = selectedCategory === category.id;
+
+                                return (
+                                    <button
+                                        key={category.id}
+                                        onClick={() => onSelectCategory(category.id)}
+                                        className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition ${isActive
+                                            ? 'border-slate-200 bg-white shadow-[0_4px_10px_-8px_rgba(15,23,42,0.65)] dark:border-slate-600 dark:bg-slate-700'
+                                            : 'border-transparent hover:border-slate-200/80 hover:bg-slate-50 dark:hover:border-slate-600 dark:hover:bg-slate-700/70'
+                                            }`}
+                                        title={label}
+                                        aria-label={label}
+                                    >
+                                        <span className={`rounded-full ${category.dotColor} ${isActive ? 'h-4 w-4' : 'h-3.5 w-3.5'}`} />
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
             </div>
         </>
     );
