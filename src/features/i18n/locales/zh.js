@@ -135,6 +135,11 @@ export default {
             words: '词',
             chars: '字',
         },
+        typography: {
+            panel: '排版设置',
+            font: '字体',
+            reset: '重置',
+        },
         actions: {
             newDoc: '新建文档',
             newFolder: '新建文件夹',
