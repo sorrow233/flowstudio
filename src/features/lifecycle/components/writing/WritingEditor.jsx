@@ -23,12 +23,10 @@ import EditorStatusBar from './EditorStatusBar';
 import FloatingColorPicker from './FloatingColorPicker';
 import ConflictBanner from './ConflictBanner';
 import VersionHistoryModal from './VersionHistoryModal';
-import WritingTypographyPanel from './WritingTypographyPanel';
 import { useEditorAutoSave } from './hooks/useEditorAutoSave';
 import { useFloatingToolbar } from './hooks/useFloatingToolbar';
 import { useEditorSync } from './hooks/useEditorSync';
 import { useImageUpload } from './hooks/useImageUpload';
-import { useWritingTypography } from './hooks/useWritingTypography';
 import './writingEditorTypography.css';
 
 const WritingEditor = ({
@@ -56,7 +54,6 @@ const WritingEditor = ({
     const [showHistory, setShowHistory] = useState(false);
     const [showActions, setShowActions] = useState(false);
     const [showMarkdownMenu, setShowMarkdownMenu] = useState(false);
-    const [showTypographyPanel, setShowTypographyPanel] = useState(false);
     const [safeTop, setSafeTop] = useState(0);
     const [copiedAt, setCopiedAt] = useState(null);
     const [isEditorFocused, setIsEditorFocused] = useState(false);
@@ -68,15 +65,6 @@ const WritingEditor = ({
     const inactivityTimeoutRef = useRef(null);
     const selectionRangeRef = useRef(null);
     const { uploadImage } = useImageUpload();
-    const {
-        typography,
-        fontOptions,
-        fieldLimits,
-        editorStyleVars,
-        fontStack,
-        setTypographyField,
-        resetTypography,
-    } = useWritingTypography();
 
     const updateStatsFromText = useCallback((text) => {
         const words = computeWordCount(text);
@@ -164,11 +152,11 @@ const WritingEditor = ({
         if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
 
         inactivityTimeoutRef.current = setTimeout(() => {
-            if (!showActions && !showHistory && !showMarkdownMenu && !showTypographyPanel) {
+            if (!showActions && !showHistory && !showMarkdownMenu) {
                 setIsToolbarVisible(false);
             }
         }, 2000);
-    }, [isMobile, showActions, showHistory, showMarkdownMenu, showTypographyPanel]);
+    }, [isMobile, showActions, showHistory, showMarkdownMenu]);
 
     useEffect(() => {
         if (!isMobile) {
@@ -195,13 +183,13 @@ const WritingEditor = ({
             return;
         }
 
-        if (showActions || showHistory || showMarkdownMenu || showTypographyPanel) {
+        if (showActions || showHistory || showMarkdownMenu) {
             setIsToolbarVisible(true);
             if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
         } else {
             resetInactivityTimer();
         }
-    }, [isMobile, showActions, showHistory, showMarkdownMenu, showTypographyPanel, resetInactivityTimer]);
+    }, [isMobile, showActions, showHistory, showMarkdownMenu, resetInactivityTimer]);
 
     useEffect(() => {
         const update = () => {
@@ -241,7 +229,6 @@ const WritingEditor = ({
                 setShowActions(false);
                 setShowHistory(false);
                 setShowMarkdownMenu(false);
-                setShowTypographyPanel(false);
             }
         };
 
@@ -669,7 +656,7 @@ const WritingEditor = ({
                 style={{ paddingTop: conflictState ? safeTop + 82 : safeTop + 16 }}
                 onClick={(event) => {
                     if (event.target === editorRef.current) return;
-                    if (event.target instanceof Element && event.target.closest('button, input, select, [role="menu"]')) return;
+                    if (event.target instanceof Element && event.target.closest('button, input, [role="menu"]')) return;
                     editorRef.current?.focus();
                 }}
             >
@@ -697,21 +684,14 @@ const WritingEditor = ({
                             canCopy={canCopy}
                             copiedAt={copiedAt}
                             showMarkdownMenu={showMarkdownMenu}
-                            showTypographyPanel={showTypographyPanel}
                             showActions={showActions}
                             onToggleMarkdownMenu={() => {
                                 setShowActions(false);
-                                setShowTypographyPanel(false);
                                 setShowMarkdownMenu((value) => !value);
                             }}
                             onInsertMarkdown={handleInsertMarkdown}
                             onCloseMarkdownMenu={() => setShowMarkdownMenu(false)}
                             onPrepareMarkdownInsert={cacheEditorSelection}
-                            onToggleTypography={() => {
-                                setShowActions(false);
-                                setShowMarkdownMenu(false);
-                                setShowTypographyPanel((value) => !value);
-                            }}
                             onUndo={() => {
                                 if (!canUndo) return;
                                 requestForceRemoteApply();
@@ -725,13 +705,11 @@ const WritingEditor = ({
                             onManualSnapshot={handleManualSnapshot}
                             onShowHistory={() => {
                                 setShowMarkdownMenu(false);
-                                setShowTypographyPanel(false);
                                 setShowHistory(true);
                             }}
                             onCopy={handleCopy}
                             onToggleActions={() => {
                                 setShowMarkdownMenu(false);
-                                setShowTypographyPanel(false);
                                 setShowActions((value) => !value);
                             }}
                             onExport={exportDoc}
@@ -741,29 +719,11 @@ const WritingEditor = ({
                         />
                     </motion.div>
 
-                    <AnimatePresence>
-                        {showTypographyPanel && (
-                            <WritingTypographyPanel
-                                typography={typography}
-                                fontOptions={fontOptions}
-                                fieldLimits={fieldLimits}
-                                onValueChange={setTypographyField}
-                                onReset={resetTypography}
-                                onClose={() => setShowTypographyPanel(false)}
-                                isMobile={isMobile}
-                                t={t}
-                            />
-                        )}
-                    </AnimatePresence>
-
                     <div
-                        className={`writing-typography-root rounded-3xl bg-white p-6 transition-all md:p-10 dark:bg-slate-900 ${isEditorFocused
+                        className={`rounded-3xl bg-white p-6 transition-all md:p-10 dark:bg-slate-900 ${isEditorFocused
                             ? 'shadow-[0_14px_30px_-24px_rgba(14,116,255,0.28)] dark:shadow-none'
                             : 'shadow-none'}`}
-                        style={{
-                            marginTop: isMobile ? 32 : 44,
-                            ...editorStyleVars,
-                        }}
+                        style={{ marginTop: isMobile ? 32 : 44 }}
                     >
                         <input
                             type="text"
@@ -781,7 +741,7 @@ const WritingEditor = ({
                             className={`w-full border-none bg-transparent font-semibold tracking-tight text-slate-800 outline-none placeholder:text-slate-300 dark:text-slate-100 dark:placeholder:text-slate-600 ${isMobile ? 'text-2xl' : 'text-3xl leading-tight'}`}
                             placeholder={t('inspiration.untitled')}
                             style={{
-                                fontFamily: fontStack,
+                                fontFamily: '"Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif',
                             }}
                         />
 
@@ -838,7 +798,7 @@ const WritingEditor = ({
                                     normalizeEditorMarkdownView();
                                 }}
                                 spellCheck
-                                className="writing-editor-content min-h-[55vh] w-full text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"
+                                className="writing-editor-content min-h-[55vh] w-full text-lg text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"
                                 placeholder={t('inspiration.placeholder')}
                             />
 

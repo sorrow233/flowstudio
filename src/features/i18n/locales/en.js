@@ -131,11 +131,6 @@ export default {
             words: 'words',
             chars: 'chars',
         },
-        typography: {
-            panel: 'Typography',
-            font: 'Font',
-            reset: 'Reset',
-        },
         actions: {
             newDoc: 'New doc',
             newFolder: 'New folder',

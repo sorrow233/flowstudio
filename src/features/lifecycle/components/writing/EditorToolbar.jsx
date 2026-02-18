@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
     FileCode2,
     MoreHorizontal,
-    Type,
 } from 'lucide-react';
 import ExportMenu from './ExportMenu';
 import MarkdownQuickMenu from './MarkdownQuickMenu';
@@ -36,7 +35,6 @@ const EditorToolbar = ({
     canCopy,
     copiedAt,
     showMarkdownMenu,
-    showTypographyPanel,
     showActions,
     onUndo,
     onRedo,
@@ -47,7 +45,6 @@ const EditorToolbar = ({
     onInsertMarkdown,
     onCloseMarkdownMenu,
     onPrepareMarkdownInsert,
-    onToggleTypography,
     onToggleActions,
     onExport,
     onCloseActions,
@@ -83,13 +80,6 @@ const EditorToolbar = ({
                     title={t('writing.markdownQuickMenu', 'Markdown 快捷')}
                 >
                     <FileCode2 size={15} />
-                </IconBtn>
-                <IconBtn
-                    onClick={onToggleTypography}
-                    active={showTypographyPanel}
-                    title={t('writing.typography.panel', '排版设置')}
-                >
-                    <Type size={15} />
                 </IconBtn>
                 <IconBtn onClick={onToggleActions} title={t('common.details', '详情')}>
                     <MoreHorizontal size={16} />

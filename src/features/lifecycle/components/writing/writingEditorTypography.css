@@ -1,26 +1,10 @@
-.writing-typography-root {
-    --writing-font-family: "LXGW WenKai", "LXGW WenKai GB", "Source Han Serif SC", "Noto Serif SC", serif;
-    --writing-line-height: 1.6;
-    --writing-paragraph-gap: 0em;
-    --writing-line-width: 64;
-    --writing-first-indent: 0em;
-    --writing-h1-size: 22px;
-    --writing-h2-size: 21px;
-    --writing-h3-size: 20px;
-    --writing-body-size: 20px;
-    --writing-table-size: 20px;
-}
-
 .writing-editor-content {
     white-space: pre-wrap;
     word-break: break-word;
-    line-height: var(--writing-line-height, 1.6);
+    line-height: 1.86;
     letter-spacing: 0.012em;
     text-rendering: optimizeLegibility;
-    font-family: var(--writing-font-family, "Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif);
-    font-size: var(--writing-body-size, 20px);
-    max-width: calc(var(--writing-line-width, 64) * 1ch);
-    margin-inline: auto;
+    font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, serif;
 }
 
 .writing-editor-content > div,
@@ -31,7 +15,7 @@
 .writing-editor-content > blockquote,
 .writing-editor-content > table,
 .writing-editor-content > hr {
-    margin: 0 0 calc(0.9em + var(--writing-paragraph-gap, 0em));
+    margin: 0 0 1.05em;
 }
 
 .writing-editor-content > div:last-child,
@@ -47,11 +31,7 @@
 
 .writing-editor-content > .md-empty-line {
     min-height: 0.96em;
-    margin-bottom: calc(0.96em + var(--writing-paragraph-gap, 0em));
-}
-
-.writing-editor-content > .md-paragraph {
-    text-indent: var(--writing-first-indent, 0em);
+    margin-bottom: 0.96em;
 }
 
 .writing-editor-content .md-heading {
@@ -61,32 +41,32 @@
 }
 
 .writing-editor-content .md-h1 {
-    font-size: var(--writing-h1-size, 22px);
+    font-size: 2rem;
     margin: 1.45em 0 0.7em;
 }
 
 .writing-editor-content .md-h2 {
-    font-size: var(--writing-h2-size, 21px);
+    font-size: 1.72rem;
     margin: 1.25em 0 0.62em;
 }
 
 .writing-editor-content .md-h3 {
-    font-size: var(--writing-h3-size, 20px);
+    font-size: 1.42rem;
     margin: 1.1em 0 0.56em;
 }
 
 .writing-editor-content .md-h4 {
-    font-size: calc(var(--writing-h3-size, 20px) * 0.92);
+    font-size: 1.26rem;
     margin: 1em 0 0.5em;
 }
 
 .writing-editor-content .md-h5 {
-    font-size: calc(var(--writing-h3-size, 20px) * 0.84);
+    font-size: 1.1rem;
     margin: 0.95em 0 0.46em;
 }
 
 .writing-editor-content .md-h6 {
-    font-size: calc(var(--writing-body-size, 20px) * 0.9);
+    font-size: 1rem;
     margin: 0.9em 0 0.42em;
     color: #64748b;
 }
@@ -207,7 +187,6 @@
     display: block;
     overflow-x: auto;
     margin: 1.2em 0;
-    font-size: var(--writing-table-size, 20px);
 }
 
 .writing-editor-content .md-th,
@@ -275,6 +254,7 @@
 
 @media (max-width: 767px) {
     .writing-editor-content {
+        line-height: 1.8;
         letter-spacing: 0.008em;
     }
 
@@ -287,6 +267,18 @@
     .writing-editor-content > table,
     .writing-editor-content > hr {
         margin-bottom: 0.95em;
+    }
+
+    .writing-editor-content .md-h1 {
+        font-size: 1.75rem;
+    }
+
+    .writing-editor-content .md-h2 {
+        font-size: 1.5rem;
+    }
+
+    .writing-editor-content .md-h3 {
+        font-size: 1.3rem;
     }
 
     .writing-editor-content .md-th,
