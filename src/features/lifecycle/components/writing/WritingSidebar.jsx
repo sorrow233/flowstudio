@@ -23,6 +23,10 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
     const [editTitle, setEditTitle] = useState(doc.title || '');
     const inputRef = useRef(null);
     const longPressTimerRef = useRef(null);
+    const untitledLabel = t('inspiration.untitled');
+    const trimmedTitle = (doc.title || '').trim();
+    const isUntitledDoc = !trimmedTitle || trimmedTitle === untitledLabel;
+    const displayTitle = isUntitledDoc ? untitledLabel : trimmedTitle;
 
     useEffect(() => {
         if (isRenaming && inputRef.current) {
@@ -42,8 +46,10 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
             setIsRenaming(false);
             return;
         }
-        if (editTitle.trim() !== (doc.title || '')) {
-            onUpdate?.(doc.id, { title: editTitle.trim() || t('inspiration.untitled') });
+        const nextTitle = editTitle.trim();
+        const currentTitle = (doc.title || '').trim();
+        if (nextTitle !== currentTitle) {
+            onUpdate?.(doc.id, { title: nextTitle });
         }
         setIsRenaming(false);
     };
@@ -118,7 +124,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
                         : 'border-sky-100/80 bg-white/86 hover:border-sky-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/40 dark:hover:border-slate-700 dark:hover:bg-slate-900/80'
                 ].join(' ')}
             >
-                <div className="mb-2 flex items-center justify-between gap-2">
+                <div className={`${isUntitledDoc ? 'mb-1.5' : 'mb-2'} flex items-center justify-between gap-2`}>
                     <div className="min-w-0 flex-1">
                         {isRenaming && !isTrashView ? (
                             <input
@@ -138,10 +144,15 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
                                     event.stopPropagation();
                                     setIsRenaming(true);
                                 }}
-                                className="line-clamp-1 select-none text-sm font-medium text-slate-800 dark:text-slate-200"
+                                className={[
+                                    'line-clamp-1 select-none transition-colors',
+                                    isUntitledDoc
+                                        ? 'text-[11px] font-normal italic text-slate-400 dark:text-slate-500'
+                                        : 'text-sm font-medium text-slate-800 dark:text-slate-200'
+                                ].join(' ')}
                                 title={t('common.doubleClickToRename', 'Double click to rename')}
                             >
-                                {doc.title || t('inspiration.untitled')}
+                                {displayTitle}
                             </span>
                         )}
                     </div>
@@ -176,7 +187,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
                     </div>
                 </div>
 
-                <p className="line-clamp-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                <p className={`${isUntitledDoc ? 'line-clamp-3' : 'line-clamp-2'} text-xs leading-relaxed text-slate-500 dark:text-slate-400`}>
                     {stripMarkup(doc.content || '') || t('inspiration.placeholder')}
                 </p>
                 {isTrashView && (
