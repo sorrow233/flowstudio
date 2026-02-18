@@ -482,6 +482,10 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                                     setSelectedDocId(id);
                                                     if (isMobile) setIsSidebarOpen(false);
                                                 }}
+                                                onEnterImmersive={(id) => {
+                                                    setSelectedDocId(id);
+                                                    setIsSidebarOpen(false);
+                                                }}
                                                 onCreate={handleCreate}
                                                 onUpdate={handleUpdate}
                                                 onDelete={handleDelete}

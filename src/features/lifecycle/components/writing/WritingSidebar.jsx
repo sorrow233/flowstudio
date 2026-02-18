@@ -18,7 +18,7 @@ const formatDocTime = (timestamp) => {
 
 const LONG_PRESS_DELETE_MS = 650;
 
-const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRestore, isTrashView, isMobile, t }) => {
+const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRestore, onEnterImmersive, isTrashView, isMobile, t }) => {
     const [isRenaming, setIsRenaming] = useState(false);
     const [editTitle, setEditTitle] = useState(doc.title || '');
     const inputRef = useRef(null);
@@ -67,6 +67,12 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
         if (!isRenaming) onSelect(doc.id);
     };
 
+    const handleEnterImmersive = () => {
+        if (isRenaming || isTrashView) return;
+        onSelect(doc.id);
+        onEnterImmersive?.(doc.id);
+    };
+
     const clearLongPressTimer = useCallback(() => {
         if (longPressTimerRef.current) {
             clearTimeout(longPressTimerRef.current);
@@ -107,6 +113,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
                 role="button"
                 tabIndex={0}
                 onClick={handleSelect}
+                onDoubleClick={handleEnterImmersive}
                 onPointerDown={handlePointerDown}
                 onPointerUp={clearLongPressTimer}
                 onPointerLeave={clearLongPressTimer}
@@ -118,7 +125,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
                     }
                 }}
                 className={[
-                    'cursor-pointer rounded-2xl border px-4 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70',
+                    `cursor-pointer rounded-2xl border px-4 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70 ${isUntitledDoc ? 'min-h-[126px]' : 'min-h-[106px]'}`,
                     isActive
                         ? 'border-sky-200 bg-sky-50 shadow-[0_14px_34px_-24px_rgba(59,130,246,0.6)] dark:border-sky-800 dark:bg-slate-900 dark:shadow-none'
                         : 'border-sky-100/80 bg-white/86 hover:border-sky-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/40 dark:hover:border-slate-700 dark:hover:bg-slate-900/80'
@@ -166,6 +173,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
                             <button
                                 type="button"
                                 onPointerDown={(event) => event.stopPropagation()}
+                                onDoubleClick={(event) => event.stopPropagation()}
                                 onClick={handleRestore}
                                 className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition hover:bg-emerald-50 hover:text-emerald-600 dark:text-slate-500 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400"
                                 title={t('writing.actions.restore', '恢复')}
@@ -177,6 +185,7 @@ const WritingSidebarItem = ({ doc, isActive, onSelect, onUpdate, onDelete, onRes
                         <button
                             type="button"
                             onPointerDown={(event) => event.stopPropagation()}
+                            onDoubleClick={(event) => event.stopPropagation()}
                             onClick={handleDelete}
                             className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition hover:bg-rose-50 hover:text-rose-500 dark:text-slate-500 dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
                             title={isTrashView ? t('writing.deletePermanent', '永久删除') : t('common.delete', '删除')}
@@ -204,6 +213,7 @@ const WritingSidebar = ({
     documents = [],
     activeDocId,
     onSelectDoc,
+    onEnterImmersive,
     onCreate,
     onUpdate,
     onDelete,
@@ -249,6 +259,7 @@ const WritingSidebar = ({
                             doc={doc}
                             isActive={activeDocId === doc.id}
                             onSelect={onSelectDoc}
+                            onEnterImmersive={onEnterImmersive}
                             onUpdate={onUpdate}
                             onDelete={handleDelete}
                             onRestore={onRestore}
