@@ -7,6 +7,7 @@ import WritingCategoryManager from './WritingCategoryManager';
 import { findWritingCategoryPreset } from './writingCategoryUtils';
 
 const WritingWorkspaceHeader = ({
+    compact = false,
     categories = [],
     selectedCategory,
     onSelectCategory,
@@ -27,6 +28,7 @@ const WritingWorkspaceHeader = ({
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isCategoryManagerOpen, setCategoryManagerOpen] = useState(false);
     const isTrashView = viewMode === 'trash';
+    const collapsed = !compact && isCollapsed;
 
     useEffect(() => {
         if (searchQuery && !isSearchOpen) {
@@ -56,26 +58,28 @@ const WritingWorkspaceHeader = ({
 
     return (
         <motion.header
-            className={`relative z-20 border-b border-sky-100/50 bg-white dark:border-slate-800/60 dark:bg-slate-900 overflow-hidden ${isMobile ? 'px-4' : 'px-6'}`}
+            className={`relative z-20 border-b border-sky-100/50 bg-white dark:border-slate-800/60 dark:bg-slate-900 overflow-hidden ${isMobile ? 'px-3' : compact ? 'px-3.5' : 'px-6'}`}
             initial={false}
             animate={{
-                height: isCollapsed ? 0 : 'auto',
-                paddingTop: isCollapsed ? 0 : (isMobile ? 16 : 24),
-                paddingBottom: isCollapsed ? 0 : 16,
-                borderBottomWidth: isCollapsed ? 0 : 1,
-                opacity: isCollapsed ? 0 : 1,
+                height: collapsed ? 0 : 'auto',
+                paddingTop: collapsed ? 0 : (compact ? 10 : (isMobile ? 16 : 24)),
+                paddingBottom: collapsed ? 0 : (compact ? 10 : 16),
+                borderBottomWidth: collapsed ? 0 : 1,
+                opacity: collapsed ? 0 : 1,
             }}
             transition={{ duration: 0.5, ease: [0.32, 0.725, 0.25, 1] }}
         >
-            <div className={`flex flex-col ${isMobile ? 'gap-4' : 'gap-5'}`}>
-                <div className="min-w-0">
-                    <h2 className={`line-clamp-1 font-bold tracking-tight text-slate-800 dark:text-slate-100 ${isMobile ? 'text-[2rem]' : 'text-[2.15rem]'}`}>
-                        {t('inspiration.writing')}
-                    </h2>
-                    <p className={`mt-1 line-clamp-1 font-medium text-slate-400 dark:text-slate-500 ${isMobile ? 'text-[14px]' : 'text-sm'}`}>
-                        {t('inspiration.writingSubtitle')}
-                    </p>
-                </div>
+            <div className={`flex flex-col ${compact ? 'gap-2.5' : isMobile ? 'gap-4' : 'gap-5'}`}>
+                {!compact && (
+                    <div className="min-w-0">
+                        <h2 className={`line-clamp-1 font-bold tracking-tight text-slate-800 dark:text-slate-100 ${isMobile ? 'text-[2rem]' : 'text-[2.15rem]'}`}>
+                            {t('inspiration.writing')}
+                        </h2>
+                        <p className={`mt-1 line-clamp-1 font-medium text-slate-400 dark:text-slate-500 ${isMobile ? 'text-[14px]' : 'text-sm'}`}>
+                            {t('inspiration.writingSubtitle')}
+                        </p>
+                    </div>
+                )}
 
                 <AnimatePresence mode="wait">
                     {!isSearchOpen ? (
@@ -84,7 +88,7 @@ const WritingWorkspaceHeader = ({
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 8 }}
-                            className="flex items-center gap-2"
+                            className={`flex items-center gap-2 ${compact ? 'w-full' : ''}`}
                         >
                             <button
                                 onClick={() => setIsSearchOpen(true)}
@@ -96,11 +100,11 @@ const WritingWorkspaceHeader = ({
                             <button
                                 onClick={() => onCreate(selectedCategory)}
                                 disabled={!selectedCategory || isTrashView}
-                                className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl font-bold transition-all active:scale-[0.97] disabled:opacity-50 ${isMobile ? 'w-10 px-0' : 'px-5'} ${buttonStyle.className}`}
+                                className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl font-bold transition-all active:scale-[0.97] disabled:opacity-50 ${(isMobile || compact) ? 'w-10 px-0' : 'px-5'} ${buttonStyle.className}`}
                                 title={t('inspiration.newDoc')}
                             >
                                 <Plus size={22} strokeWidth={2.5} />
-                                {!isMobile && <span className="text-[13.5px] tracking-tight">{t('inspiration.newDoc')}</span>}
+                                {!isMobile && !compact && <span className="text-[13.5px] tracking-tight">{t('inspiration.newDoc')}</span>}
                             </button>
                             <div className="min-w-0 flex-1">
                                 <WritingCategorySelector

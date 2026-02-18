@@ -723,7 +723,7 @@ const WritingEditor = ({
                         className={`rounded-3xl bg-white p-6 transition-all md:p-10 dark:bg-slate-900 ${isEditorFocused
                             ? 'shadow-[0_14px_30px_-24px_rgba(14,116,255,0.28)] dark:shadow-none'
                             : 'shadow-none'}`}
-                        style={{ marginTop: isMobile ? 32 : 44 }}
+                        style={{ marginTop: isMobile ? 12 : 18 }}
                     >
                         <input
                             type="text"

@@ -151,7 +151,6 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     const [selectedDocId, setSelectedDocId] = useState(() => routeDocId || null);
     const [viewMode, setViewMode] = useState(() => (isRouteTrash ? 'trash' : 'active'));
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => !isMobile && activeDocuments.length > 0);
-    const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(() => routeCategoryId || categories[0]?.id || null);
     const [searchInput, setSearchInput] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -417,32 +416,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                 <div className={`absolute right-12 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl dark:bg-blue-900/20 ${isMobile ? '-bottom-32' : '-bottom-24'}`} />
             </div>
 
-            <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col">
-                <WritingWorkspaceHeader
-                    categories={categories}
-                    selectedCategory={selectedCategory}
-                    onSelectCategory={(categoryId) => {
-                        setSelectedCategory(categoryId);
-                        setSelectedDocId(null);
-                    }}
-                    onCreate={handleCreate}
-                    viewMode={viewMode}
-                    onViewModeChange={(nextMode) => {
-                        setViewMode(nextMode);
-                        setSelectedDocId(null);
-                    }}
-                    trashCount={trashDocuments.length}
-                    searchQuery={searchInput}
-                    onSearchQueryChange={setSearchInput}
-                    onAddCategory={handleAddCategory}
-                    onUpdateCategory={handleUpdateCategory}
-                    onRemoveCategory={handleRemoveCategory}
-                    categoryDocCountMap={categoryDocCountMap}
-                    isMobile={isMobile}
-                    isCollapsed={isHeaderCollapsed}
-                />
-
-                <div className="relative flex min-h-0 flex-1">
+            <div className="relative z-10 flex min-h-0 min-w-0 flex-1">
                     <AnimatePresence mode="wait">
                         {isSidebarOpen && (
                             <>
@@ -473,26 +447,51 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                             : 'overflow-hidden'
                                     ].join(' ')}
                                 >
-                                    <div className="h-full w-full lg:w-[320px]">
-                                        <WritingSidebar
-                                            documents={visibleDocuments}
-                                            allDocumentsCount={docsForView.length}
-                                            isMobile={isMobile}
-                                            viewMode={viewMode}
-                                            activeDocId={selectedDocId}
-                                            onSelectDoc={(id) => {
-                                                setSelectedDocId(id);
-                                                if (isMobile) setIsSidebarOpen(false);
+                                    <div className="flex h-full w-full flex-col lg:w-[320px]">
+                                        <WritingWorkspaceHeader
+                                            compact
+                                            categories={categories}
+                                            selectedCategory={selectedCategory}
+                                            onSelectCategory={(categoryId) => {
+                                                setSelectedCategory(categoryId);
+                                                setSelectedDocId(null);
                                             }}
                                             onCreate={handleCreate}
-                                            onUpdate={handleUpdate}
-                                            onDelete={handleDelete}
-                                            onRestore={(docToRestore) => {
-                                                const targetId = docToRestore?.id || docToRestore;
-                                                if (!targetId) return;
-                                                handleRestoreFromTrash(targetId);
+                                            viewMode={viewMode}
+                                            onViewModeChange={(nextMode) => {
+                                                setViewMode(nextMode);
+                                                setSelectedDocId(null);
                                             }}
+                                            trashCount={trashDocuments.length}
+                                            searchQuery={searchInput}
+                                            onSearchQueryChange={setSearchInput}
+                                            onAddCategory={handleAddCategory}
+                                            onUpdateCategory={handleUpdateCategory}
+                                            onRemoveCategory={handleRemoveCategory}
+                                            categoryDocCountMap={categoryDocCountMap}
+                                            isMobile={isMobile}
                                         />
+                                        <div className="min-h-0 flex-1">
+                                            <WritingSidebar
+                                                documents={visibleDocuments}
+                                                allDocumentsCount={docsForView.length}
+                                                isMobile={isMobile}
+                                                viewMode={viewMode}
+                                                activeDocId={selectedDocId}
+                                                onSelectDoc={(id) => {
+                                                    setSelectedDocId(id);
+                                                    if (isMobile) setIsSidebarOpen(false);
+                                                }}
+                                                onCreate={handleCreate}
+                                                onUpdate={handleUpdate}
+                                                onDelete={handleDelete}
+                                                onRestore={(docToRestore) => {
+                                                    const targetId = docToRestore?.id || docToRestore;
+                                                    if (!targetId) return;
+                                                    handleRestoreFromTrash(targetId);
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 </motion.aside>
                             </>
@@ -508,7 +507,6 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                 isSidebarOpen={isSidebarOpen}
                                 onToggleSidebar={() => {
                                     setIsSidebarOpen((open) => !open);
-                                    setIsHeaderCollapsed((c) => !c);
                                 }}
                                 onCloseSidebar={() => setIsSidebarOpen(false)}
                                 isMobile={isMobile}
@@ -533,7 +531,6 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                 categories={categories}
                                 onToggleSidebar={() => {
                                     setIsSidebarOpen((open) => !open);
-                                    setIsHeaderCollapsed((c) => !c);
                                 }}
                                 isSidebarOpen={isSidebarOpen}
                                 isMobile={isMobile}
@@ -541,7 +538,6 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                             />
                         )}
                     </section>
-                </div>
             </div>
         </div>
     );
