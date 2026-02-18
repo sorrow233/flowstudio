@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArchiveRestore, ListChecks, Plus, Search, Settings2, X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
@@ -30,6 +30,8 @@ const WritingWorkspaceHeader = ({
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isCategoryManagerOpen, setCategoryManagerOpen] = useState(false);
     const [isCompactPanelOpen, setIsCompactPanelOpen] = useState(false);
+    const compactPanelRef = useRef(null);
+    const compactPanelToggleRef = useRef(null);
     const isTrashView = viewMode === 'trash';
     const collapsed = !compact && isCollapsed;
 
@@ -45,6 +47,33 @@ const WritingWorkspaceHeader = ({
             setIsCompactPanelOpen(true);
         }
     }, [compact, isCompactPanelOpen, searchQuery]);
+
+    useEffect(() => {
+        if (!compact || !isCompactPanelOpen) return undefined;
+
+        const handlePointerDown = (event) => {
+            if (!compactPanelRef.current) return;
+            if (compactPanelRef.current.contains(event.target)) return;
+            if (compactPanelToggleRef.current?.contains(event.target)) return;
+            setIsCompactPanelOpen(false);
+        };
+
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                setIsCompactPanelOpen(false);
+            }
+        };
+
+        window.addEventListener('mousedown', handlePointerDown);
+        window.addEventListener('touchstart', handlePointerDown);
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('mousedown', handlePointerDown);
+            window.removeEventListener('touchstart', handlePointerDown);
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [compact, isCompactPanelOpen]);
 
     const selectedCategoryObj = categories.find((item) => item.id === selectedCategory);
     const selectedCategoryPreset = findWritingCategoryPreset(selectedCategoryObj);
@@ -76,63 +105,41 @@ const WritingWorkspaceHeader = ({
         : 1;
 
     const renderCompactCategoryBar = () => (
-        <div className="flex items-center gap-1.5">
-            <div className={`min-w-0 flex-1 ${isTrashView ? 'pointer-events-none opacity-55' : ''}`}>
-                <div className={`flex rounded-full border border-slate-200/70 bg-white/72 px-1 backdrop-blur-sm dark:border-slate-700/65 dark:bg-slate-800/65 ${shouldUseTwoRowCompactDots ? 'min-h-[58px] items-stretch py-1' : 'h-10 items-center'}`}>
-                    <div className={`flex shrink-0 items-center gap-1.5 px-1.5 ${shouldUseTwoRowCompactDots ? 'self-stretch' : ''}`}>
-                        <span className={`max-w-[4.6rem] truncate text-[12px] font-semibold ${selectedCategoryTextClass}`}>
-                            {selectedCategoryLabel}
-                        </span>
-                        <span className={`w-px bg-slate-200 dark:bg-slate-700 ${shouldUseTwoRowCompactDots ? 'my-1 self-stretch' : 'h-4'}`} />
-                    </div>
-                    <div className={`min-w-0 flex-1 pr-1 ${shouldUseTwoRowCompactDots ? 'py-0.5' : ''}`}>
-                        <div
-                            className={`grid justify-items-center gap-1 ${shouldUseTwoRowCompactDots ? 'grid-rows-2' : 'grid-rows-1'}`}
-                            style={{ gridTemplateColumns: `repeat(${compactDotColumns}, minmax(0, 1fr))` }}
-                        >
-                            {compactCategories.map((category) => {
-                                const label = resolveWritingCategoryLabel(category, t, t('common.noData'));
-                                const isActive = selectedCategory === category.id;
+        <div className={`${isTrashView ? 'pointer-events-none opacity-55' : ''}`}>
+            <div className={`flex rounded-full border border-slate-200/70 bg-white/72 px-1 backdrop-blur-sm dark:border-slate-700/65 dark:bg-slate-800/65 ${shouldUseTwoRowCompactDots ? 'min-h-[58px] items-stretch py-1' : 'h-10 items-center'}`}>
+                <div className={`flex shrink-0 items-center gap-1.5 px-1.5 ${shouldUseTwoRowCompactDots ? 'self-stretch' : ''}`}>
+                    <span className={`max-w-[4.6rem] truncate text-[12px] font-semibold ${selectedCategoryTextClass}`}>
+                        {selectedCategoryLabel}
+                    </span>
+                    <span className={`w-px bg-slate-200 dark:bg-slate-700 ${shouldUseTwoRowCompactDots ? 'my-1 self-stretch' : 'h-4'}`} />
+                </div>
+                <div className={`min-w-0 flex-1 pr-1 ${shouldUseTwoRowCompactDots ? 'py-0.5' : ''}`}>
+                    <div
+                        className={`grid justify-items-center gap-1 ${shouldUseTwoRowCompactDots ? 'grid-rows-2' : 'grid-rows-1'}`}
+                        style={{ gridTemplateColumns: `repeat(${compactDotColumns}, minmax(0, 1fr))` }}
+                    >
+                        {compactCategories.map((category) => {
+                            const label = resolveWritingCategoryLabel(category, t, t('common.noData'));
+                            const isActive = selectedCategory === category.id;
 
-                                return (
-                                    <button
-                                        key={category.id}
-                                        onClick={() => onSelectCategory(category.id)}
-                                        className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${isActive
-                                            ? 'border-slate-200 bg-white shadow-[0_6px_14px_-10px_rgba(15,23,42,0.6)] dark:border-slate-600 dark:bg-slate-700'
-                                            : 'border-transparent hover:border-slate-200/80 hover:bg-slate-50/80 dark:hover:border-slate-600 dark:hover:bg-slate-700/70'
-                                            }`}
-                                        title={label}
-                                        aria-label={label}
-                                    >
-                                        <span className={`rounded-full transition-all duration-300 ${category.dotColor} ${isActive ? 'h-3 w-3' : 'h-2.5 w-2.5 opacity-75'}`} />
-                                    </button>
-                                );
-                            })}
-                        </div>
+                            return (
+                                <button
+                                    key={category.id}
+                                    onClick={() => onSelectCategory(category.id)}
+                                    className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${isActive
+                                        ? 'border-slate-200 bg-white shadow-[0_6px_14px_-10px_rgba(15,23,42,0.6)] dark:border-slate-600 dark:bg-slate-700'
+                                        : 'border-transparent hover:border-slate-200/80 hover:bg-slate-50/80 dark:hover:border-slate-600 dark:hover:bg-slate-700/70'
+                                        }`}
+                                    title={label}
+                                    aria-label={label}
+                                >
+                                    <span className={`rounded-full transition-all duration-300 ${category.dotColor} ${isActive ? 'h-3 w-3' : 'h-2.5 w-2.5 opacity-75'}`} />
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
-
-            <button
-                onClick={() => onViewModeChange?.(isTrashView ? 'active' : 'trash')}
-                className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${isTrashView
-                    ? 'border-amber-200/90 bg-amber-100/75 text-amber-700 shadow-[0_8px_18px_-14px_rgba(245,158,11,0.6)] dark:border-amber-700/60 dark:bg-amber-900/30 dark:text-amber-300'
-                    : 'border-slate-200/65 bg-white/55 text-slate-500 hover:-translate-y-0.5 hover:border-sky-300/70 hover:bg-white/82 hover:text-sky-600 hover:shadow-[0_8px_18px_-14px_rgba(15,23,42,0.5)] dark:border-slate-700/60 dark:bg-slate-800/45 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/75 dark:hover:text-sky-400'
-                    }`}
-                title={isTrashView ? t('writing.system.all', '全部') : `${t('writing.system.trash', '废纸篓')} (${trashCount})`}
-            >
-                <ArchiveRestore size={14} />
-            </button>
-
-            <button
-                onClick={() => setCategoryManagerOpen(true)}
-                disabled={isTrashView}
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200/65 bg-white/55 text-slate-500 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-300/70 hover:bg-white/82 hover:text-sky-600 hover:shadow-[0_8px_18px_-14px_rgba(15,23,42,0.5)] disabled:opacity-45 dark:border-slate-700/60 dark:bg-slate-800/45 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/75 dark:hover:text-sky-400"
-                title={t('writing.manageCategories', '管理分类')}
-            >
-                <Settings2 size={14} />
-            </button>
         </div>
     );
 
@@ -166,45 +173,66 @@ const WritingWorkspaceHeader = ({
                 </button>
 
                 <button
+                    ref={compactPanelToggleRef}
                     onClick={() => setIsCompactPanelOpen((open) => !open)}
                     className={`inline-flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 ${(isCompactPanelOpen || Boolean(searchQuery))
                         ? 'border-sky-300/80 bg-sky-500/20 text-sky-600 shadow-[0_8px_20px_-14px_rgba(14,165,233,0.55)] dark:border-sky-700/70 dark:bg-sky-900/35 dark:text-sky-300'
                         : 'border-slate-200/60 bg-white/45 text-slate-500 hover:-translate-y-0.5 hover:border-sky-300/70 hover:bg-white/75 hover:text-sky-600 hover:shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)] dark:border-slate-700/60 dark:bg-slate-800/45 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/72 dark:hover:text-sky-400'
                         }`}
-                    title={t('inspiration.search')}
+                    title={t('writing.managePanel', '管理面板')}
                 >
-                    <Search size={16} />
+                    <Settings2 size={16} />
                 </button>
             </motion.div>
-
-            {renderCompactCategoryBar()}
 
             <AnimatePresence>
                 {isCompactPanelOpen && (
                     <motion.div
+                        ref={compactPanelRef}
                         initial={{ opacity: 0, y: -6 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -6 }}
                         className="rounded-[22px] border border-slate-200/60 bg-white/60 p-2 backdrop-blur-md shadow-[0_14px_30px_-20px_rgba(15,23,42,0.65)] dark:border-slate-700/60 dark:bg-slate-900/62"
                     >
-                        <div className="relative min-w-0">
-                            <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-sky-400" />
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(event) => onSearchQueryChange(event.target.value)}
-                                placeholder={t('inspiration.search')}
-                                className="h-8 w-full rounded-full border border-slate-200/70 bg-white/70 px-8 text-xs text-slate-700 outline-none backdrop-blur-sm transition-all duration-300 focus:border-sky-400 focus:bg-white/92 focus:shadow-[0_6px_16px_-12px_rgba(15,23,42,0.55)] dark:border-slate-700/60 dark:bg-slate-800/52 dark:text-slate-200 dark:focus:border-sky-600 dark:focus:bg-slate-800/82"
-                            />
-                            {!!searchQuery && (
-                                <button
-                                    onClick={() => onSearchQueryChange('')}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                                >
-                                    <X size={13} />
-                                </button>
-                            )}
+                        <div className="mb-2 grid grid-cols-[auto_1fr_auto] items-center gap-1.5">
+                            <button
+                                onClick={() => onViewModeChange?.(isTrashView ? 'active' : 'trash')}
+                                className={`inline-flex h-8 w-8 items-center justify-center rounded-full border backdrop-blur-sm transition-all duration-300 ${isTrashView
+                                    ? 'border-amber-200/90 bg-amber-100/75 text-amber-700 shadow-[0_8px_18px_-14px_rgba(245,158,11,0.6)] dark:border-amber-700/60 dark:bg-amber-900/30 dark:text-amber-300'
+                                    : 'border-slate-200/65 bg-white/55 text-slate-500 hover:-translate-y-0.5 hover:border-sky-300/70 hover:bg-white/82 hover:text-sky-600 hover:shadow-[0_8px_18px_-14px_rgba(15,23,42,0.5)] dark:border-slate-700/60 dark:bg-slate-800/45 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/75 dark:hover:text-sky-400'
+                                    }`}
+                                title={isTrashView ? t('writing.system.all', '全部') : `${t('writing.system.trash', '废纸篓')} (${trashCount})`}
+                            >
+                                <ArchiveRestore size={14} />
+                            </button>
+                            <div className="relative min-w-0">
+                                <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-sky-400" />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(event) => onSearchQueryChange(event.target.value)}
+                                    placeholder={t('inspiration.search')}
+                                    className="h-8 w-full rounded-full border border-slate-200/70 bg-white/70 px-8 text-xs text-slate-700 outline-none backdrop-blur-sm transition-all duration-300 focus:border-sky-400 focus:bg-white/92 focus:shadow-[0_6px_16px_-12px_rgba(15,23,42,0.55)] dark:border-slate-700/60 dark:bg-slate-800/52 dark:text-slate-200 dark:focus:border-sky-600 dark:focus:bg-slate-800/82"
+                                />
+                                {!!searchQuery && (
+                                    <button
+                                        onClick={() => onSearchQueryChange('')}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                    >
+                                        <X size={13} />
+                                    </button>
+                                )}
+                            </div>
+                            <button
+                                onClick={() => setCategoryManagerOpen(true)}
+                                disabled={isTrashView}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/65 bg-white/55 text-slate-500 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-300/70 hover:bg-white/82 hover:text-sky-600 hover:shadow-[0_8px_18px_-14px_rgba(15,23,42,0.5)] disabled:opacity-45 dark:border-slate-700/60 dark:bg-slate-800/45 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/75 dark:hover:text-sky-400"
+                                title={t('writing.manageCategories', '管理分类')}
+                            >
+                                <Settings2 size={14} />
+                            </button>
                         </div>
+                        {renderCompactCategoryBar()}
                     </motion.div>
                 )}
             </AnimatePresence>

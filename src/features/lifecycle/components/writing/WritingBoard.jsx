@@ -44,6 +44,8 @@ const decodeRoutePart = (value) => {
     }
 };
 
+const normalizeCategoryLabel = (value) => String(value || '').trim().toLowerCase();
+
 const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDelete, syncStatus, isMobile: externalIsMobile }) => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -78,27 +80,47 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         const base = syncedCategories.length > 0 ? syncedCategories : WRITING_CATEGORIES;
         const map = new Map();
 
-        // Create a lookup map for default categories from constants
         const defaultCategoryMap = new Map(WRITING_CATEGORIES.map(c => [c.id, c]));
 
-        base.forEach((category) => {
-            if (!category?.id || map.has(category.id)) return;
-
-            // If this is a default category, merge ONLY style properties from constants
-            // We MUST preserve the 'label' from the synced data so renaming works!
+        const mergeWithDefaultStyle = (category) => {
             const defaultCategory = defaultCategoryMap.get(category.id);
-            let mergedCategory = category;
+            if (!defaultCategory) return category;
 
-            if (defaultCategory) {
-                mergedCategory = {
-                    ...category,
-                    color: defaultCategory.color,
-                    dotColor: defaultCategory.dotColor,
-                    textColor: defaultCategory.textColor,
-                };
+            return {
+                ...category,
+                color: defaultCategory.color,
+                dotColor: defaultCategory.dotColor,
+                textColor: defaultCategory.textColor,
+            };
+        };
+
+        const shouldUseCandidate = (currentCategory, candidateCategory) => {
+            const defaultLabel = normalizeCategoryLabel(defaultCategoryMap.get(candidateCategory.id)?.label);
+            const currentLabel = normalizeCategoryLabel(currentCategory?.label);
+            const candidateLabel = normalizeCategoryLabel(candidateCategory?.label);
+
+            const currentIsCustom = currentLabel && currentLabel !== defaultLabel;
+            const candidateIsCustom = candidateLabel && candidateLabel !== defaultLabel;
+            if (currentIsCustom !== candidateIsCustom) {
+                return candidateIsCustom;
             }
 
-            map.set(category.id, mergedCategory);
+            // 同优先级时优先用后到达的数据，降低旧缓存覆盖新名称的概率。
+            return true;
+        };
+
+        base.forEach((category) => {
+            if (!category?.id) return;
+            const mergedCategory = mergeWithDefaultStyle(category);
+            const existing = map.get(category.id);
+            if (!existing) {
+                map.set(category.id, mergedCategory);
+                return;
+            }
+
+            if (shouldUseCandidate(existing, mergedCategory)) {
+                map.set(category.id, mergedCategory);
+            }
         });
         return Array.from(map.values());
     }, [syncedCategories]);
@@ -385,6 +407,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
 
         const now = Date.now();
         const uniqueDocIds = Array.from(new Set(docIds));
+        let hasChanges = false;
         uniqueDocIds.forEach((docId) => {
             const docItem = allDocuments.find((item) => item.id === docId);
             if (!docItem || isInWritingTrash(docItem)) return;
@@ -392,13 +415,18 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             const currentCategory = docItem.category || defaultCategoryId;
             if (currentCategory === targetCategoryId) return;
 
-            updateHandler(docId, {
+            updateProject(docId, {
                 category: targetCategoryId,
                 manualOrder: null,
                 manualOrderCategory: null,
                 lastModified: now,
             });
+            hasChanges = true;
         });
+
+        if (hasChanges) {
+            immediateSync?.();
+        }
     };
 
     const handleReorderDocuments = useCallback((orderedDocs = []) => {

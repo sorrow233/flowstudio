@@ -277,9 +277,10 @@ const WritingSidebar = ({
         () => categories.filter((category) => category?.id && category.id !== selectedCategory),
         [categories, selectedCategory]
     );
+    const hasMoveTarget = selectableCategories.length > 0;
     const selectedCount = selectedDocIds.length;
     const allSelected = documents.length > 0 && selectedCount === documents.length;
-    const canBulkMove = isSelectionMode && selectedCount > 0 && Boolean(moveTargetCategory) && !isTrashView;
+    const canBulkMove = isSelectionMode && selectedCount > 0 && hasMoveTarget && Boolean(moveTargetCategory) && !isTrashView;
     const isReorderEnabled = canReorder && !isTrashView && !isSelectionMode && documents.length > 1;
     const orderedDocuments = useMemo(() => {
         if (orderedDocIds.length === 0) return documents;
@@ -321,10 +322,15 @@ const WritingSidebar = ({
             return;
         }
 
+        if (!hasMoveTarget) {
+            setMoveTargetCategory('');
+            return;
+        }
+
         if (!selectableCategories.some((item) => item.id === moveTargetCategory)) {
             setMoveTargetCategory(selectableCategories[0]?.id || '');
         }
-    }, [isSelectionMode, isTrashView, moveTargetCategory, selectableCategories]);
+    }, [hasMoveTarget, isSelectionMode, isTrashView, moveTargetCategory, selectableCategories]);
 
     useEffect(() => {
         if (isReorderEnabled) return;
@@ -428,38 +434,46 @@ const WritingSidebar = ({
     return (
         <div className="flex h-full flex-col bg-white dark:bg-slate-900">
             {!isTrashView && isSelectionMode && documents.length > 0 && (
-                <div className="border-b border-sky-100/80 px-3 py-2 dark:border-slate-800">
+                <div className="border-b border-sky-100/70 px-3 py-2.5 dark:border-slate-800/80">
+                    <div className="mb-2 rounded-2xl border border-slate-200/65 bg-white/62 px-2.5 py-2 backdrop-blur-md shadow-[0_12px_24px_-20px_rgba(15,23,42,0.55)] dark:border-slate-700/60 dark:bg-slate-800/45">
+                        <p className="text-[11px] font-semibold tracking-wide text-sky-600/85 dark:text-sky-400/85">
+                            {t('writing.batchActions', '批量操作')}
+                        </p>
+                    </div>
                     <div className="flex flex-wrap items-center gap-1.5">
                         <button
                             type="button"
                             onClick={toggleSelectAll}
-                            className="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-600 transition hover:border-sky-300 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
+                            className="inline-flex h-8 items-center rounded-full border border-slate-200/70 bg-white/72 px-2.5 text-xs font-medium text-slate-600 backdrop-blur-sm transition hover:border-sky-300/70 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800/52 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400"
                         >
                             {allSelected ? t('common.unselectAll', '取消全选') : t('common.selectAll', '全选')}
                         </button>
                         <select
                             value={moveTargetCategory}
                             onChange={(event) => setMoveTargetCategory(event.target.value)}
-                            className="h-8 min-w-[108px] rounded-lg border border-slate-200 bg-white px-2 text-xs text-slate-700 outline-none transition focus:border-sky-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-sky-600"
+                            disabled={!hasMoveTarget}
+                            className="h-8 min-w-[120px] rounded-full border border-slate-200/70 bg-white/72 px-2.5 text-xs text-slate-700 outline-none backdrop-blur-sm transition focus:border-sky-400 disabled:cursor-not-allowed disabled:opacity-45 dark:border-slate-700/60 dark:bg-slate-800/52 dark:text-slate-200 dark:focus:border-sky-600"
                         >
-                            {selectableCategories.map((category) => (
+                            {hasMoveTarget ? selectableCategories.map((category) => (
                                 <option key={category.id} value={category.id}>
                                     {category.label}
                                 </option>
-                            ))}
+                            )) : (
+                                <option value="">{t('writing.noTargetCategory', '无可转移分区')}</option>
+                            )}
                         </select>
                         <button
                             type="button"
                             onClick={handleBulkMove}
                             disabled={!canBulkMove}
-                            className="inline-flex h-8 items-center rounded-lg bg-sky-500 px-2.5 text-xs font-medium text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sky-600 dark:hover:bg-sky-500"
+                            className="inline-flex h-8 items-center rounded-full bg-sky-500 px-2.5 text-xs font-medium text-white transition hover:-translate-y-0.5 hover:bg-sky-600 hover:shadow-[0_10px_20px_-16px_rgba(14,165,233,0.7)] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sky-600 dark:hover:bg-sky-500"
                         >
                             {t('writing.moveToCategory', '转移分区')}
                         </button>
                         <button
                             type="button"
                             onClick={() => onSelectionModeChange?.(false)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-slate-100"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/70 bg-white/72 text-slate-500 backdrop-blur-sm transition hover:border-slate-300 hover:text-slate-700 dark:border-slate-700/60 dark:bg-slate-800/52 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-slate-100"
                             aria-label={t('common.cancel', '取消')}
                         >
                             <X size={14} />
