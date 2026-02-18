@@ -79,19 +79,19 @@ const WritingWorkspaceHeader = ({
                 <button
                     onClick={() => onToggleSelectionMode?.()}
                     disabled={isTrashView}
-                    className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border transition ${isSelectionMode
-                        ? 'border-sky-300 bg-sky-100 text-sky-600 dark:border-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
-                        : 'border-slate-200/70 bg-white/85 text-slate-500 hover:border-sky-300 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400'
+                    className={`inline-flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 ${isSelectionMode
+                        ? 'border-sky-300/80 bg-sky-500/20 text-sky-600 shadow-[0_8px_20px_-14px_rgba(14,165,233,0.55)] dark:border-sky-700/70 dark:bg-sky-900/35 dark:text-sky-300'
+                        : 'border-slate-200/60 bg-white/45 text-slate-500 hover:-translate-y-0.5 hover:border-sky-300/70 hover:bg-white/75 hover:text-sky-600 hover:shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)] dark:border-slate-700/60 dark:bg-slate-800/45 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/72 dark:hover:text-sky-400'
                         } disabled:opacity-45`}
                     title={isSelectionMode ? t('writing.exitMultiSelect', '退出多选') : t('writing.multiSelect', '多选')}
                 >
-                    <ListChecks size={16} />
+                    {isSelectionMode ? <X size={16} /> : <ListChecks size={16} />}
                 </button>
 
                 <button
                     onClick={() => onCreate(selectedCategory)}
                     disabled={!selectedCategory || isTrashView}
-                    className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-xl px-3 text-[12px] font-bold transition-all active:scale-[0.97] disabled:opacity-50 ${buttonStyle.className}`}
+                    className={`inline-flex h-10 items-center justify-center gap-1.5 rounded-full border border-white/35 px-3.5 text-[12px] font-bold backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-16px_rgba(15,23,42,0.5)] active:scale-[0.97] disabled:opacity-50 ${buttonStyle.className}`}
                     title={t('inspiration.newDoc')}
                 >
                     <Plus size={16} strokeWidth={2.5} />
@@ -100,9 +100,9 @@ const WritingWorkspaceHeader = ({
 
                 <button
                     onClick={() => setIsCompactPanelOpen((open) => !open)}
-                    className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border transition ${isCompactPanelOpen
-                        ? 'border-sky-300 bg-sky-100 text-sky-600 dark:border-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
-                        : 'border-slate-200/70 bg-white/85 text-slate-500 hover:border-sky-300 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400'
+                    className={`inline-flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 ${isCompactPanelOpen
+                        ? 'border-sky-300/80 bg-sky-500/20 text-sky-600 shadow-[0_8px_20px_-14px_rgba(14,165,233,0.55)] dark:border-sky-700/70 dark:bg-sky-900/35 dark:text-sky-300'
+                        : 'border-slate-200/60 bg-white/45 text-slate-500 hover:-translate-y-0.5 hover:border-sky-300/70 hover:bg-white/75 hover:text-sky-600 hover:shadow-[0_10px_22px_-14px_rgba(15,23,42,0.5)] dark:border-slate-700/60 dark:bg-slate-800/45 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/72 dark:hover:text-sky-400'
                         }`}
                     title={t('writing.managePanel', '管理面板')}
                 >
@@ -116,14 +116,14 @@ const WritingWorkspaceHeader = ({
                         initial={{ opacity: 0, y: -6 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -6 }}
-                        className="rounded-2xl border border-slate-200/80 bg-white/90 p-2 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.7)] dark:border-slate-700/70 dark:bg-slate-800/90"
+                        className="rounded-[22px] border border-slate-200/60 bg-white/60 p-2 backdrop-blur-md shadow-[0_14px_30px_-20px_rgba(15,23,42,0.65)] dark:border-slate-700/60 dark:bg-slate-900/62"
                     >
                         <div className="mb-2 flex items-center gap-1.5">
                             <button
                                 onClick={() => onViewModeChange?.(isTrashView ? 'active' : 'trash')}
-                                className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition ${isTrashView
-                                    ? 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300'
-                                    : 'border-slate-200/70 bg-white text-slate-500 hover:border-sky-300 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400'
+                                className={`inline-flex h-8 w-8 items-center justify-center rounded-full border backdrop-blur-sm transition-all duration-300 ${isTrashView
+                                    ? 'border-amber-200/90 bg-amber-100/75 text-amber-700 shadow-[0_8px_18px_-14px_rgba(245,158,11,0.6)] dark:border-amber-700/60 dark:bg-amber-900/30 dark:text-amber-300'
+                                    : 'border-slate-200/65 bg-white/55 text-slate-500 hover:-translate-y-0.5 hover:border-sky-300/70 hover:bg-white/82 hover:text-sky-600 hover:shadow-[0_8px_18px_-14px_rgba(15,23,42,0.5)] dark:border-slate-700/60 dark:bg-slate-800/45 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/75 dark:hover:text-sky-400'
                                     }`}
                                 title={isTrashView ? t('writing.system.all', '全部') : `${t('writing.system.trash', '废纸篓')} (${trashCount})`}
                             >
@@ -136,7 +136,7 @@ const WritingWorkspaceHeader = ({
                                     value={searchQuery}
                                     onChange={(event) => onSearchQueryChange(event.target.value)}
                                     placeholder={t('inspiration.search')}
-                                    className="h-8 w-full rounded-lg border border-slate-200/80 bg-white px-8 text-xs text-slate-700 outline-none transition focus:border-sky-400 dark:border-slate-700/60 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-sky-600"
+                                    className="h-8 w-full rounded-full border border-slate-200/70 bg-white/70 px-8 text-xs text-slate-700 outline-none backdrop-blur-sm transition-all duration-300 focus:border-sky-400 focus:bg-white/92 focus:shadow-[0_6px_16px_-12px_rgba(15,23,42,0.55)] dark:border-slate-700/60 dark:bg-slate-800/52 dark:text-slate-200 dark:focus:border-sky-600 dark:focus:bg-slate-800/82"
                                 />
                                 {!!searchQuery && (
                                     <button
@@ -150,7 +150,7 @@ const WritingWorkspaceHeader = ({
                             <button
                                 onClick={() => setCategoryManagerOpen(true)}
                                 disabled={isTrashView}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200/70 bg-white text-slate-500 transition hover:border-sky-300 hover:text-sky-600 disabled:opacity-45 dark:border-slate-700/60 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/65 bg-white/55 text-slate-500 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-300/70 hover:bg-white/82 hover:text-sky-600 hover:shadow-[0_8px_18px_-14px_rgba(15,23,42,0.5)] disabled:opacity-45 dark:border-slate-700/60 dark:bg-slate-800/45 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/75 dark:hover:text-sky-400"
                                 title={t('writing.manageCategories', '管理分类')}
                             >
                                 <Settings2 size={14} />
@@ -158,7 +158,7 @@ const WritingWorkspaceHeader = ({
                         </div>
 
                         <div className={`${isTrashView ? 'pointer-events-none opacity-55' : ''}`}>
-                            <div className="flex h-10 items-center rounded-2xl border border-slate-200/80 bg-white px-1 dark:border-slate-700/70 dark:bg-slate-800/90">
+                            <div className="flex h-10 items-center rounded-full border border-slate-200/70 bg-white/72 px-1 backdrop-blur-sm dark:border-slate-700/65 dark:bg-slate-800/65">
                                 <div className="flex shrink-0 items-center gap-1.5 px-1.5">
                                     <span className={`max-w-[4.6rem] truncate text-[12px] font-semibold ${selectedCategoryTextClass}`}>
                                         {selectedCategoryLabel}
@@ -175,14 +175,14 @@ const WritingWorkspaceHeader = ({
                                                 <button
                                                     key={category.id}
                                                     onClick={() => onSelectCategory(category.id)}
-                                                    className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition ${isActive
-                                                        ? 'border-slate-200 bg-white shadow-[0_4px_10px_-8px_rgba(15,23,42,0.65)] dark:border-slate-600 dark:bg-slate-700'
-                                                        : 'border-transparent hover:border-slate-200/80 hover:bg-slate-50 dark:hover:border-slate-600 dark:hover:bg-slate-700/70'
+                                                    className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${isActive
+                                                        ? 'border-slate-200 bg-white shadow-[0_6px_14px_-10px_rgba(15,23,42,0.6)] dark:border-slate-600 dark:bg-slate-700'
+                                                        : 'border-transparent hover:border-slate-200/80 hover:bg-slate-50/80 dark:hover:border-slate-600 dark:hover:bg-slate-700/70'
                                                         }`}
                                                     title={label}
                                                     aria-label={label}
                                                 >
-                                                    <span className={`rounded-full ${category.dotColor} ${isActive ? 'h-3.5 w-3.5' : 'h-3 w-3'}`} />
+                                                    <span className={`rounded-full transition-all duration-300 ${category.dotColor} ${isActive ? 'h-3 w-3' : 'h-2.5 w-2.5 opacity-75'}`} />
                                                 </button>
                                             );
                                         })}
