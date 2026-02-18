@@ -205,15 +205,17 @@ const InspirationItem = ({
     return (
         <motion.div
             style={{ x }}
-            drag="x"
-            dragDirectionLock
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={{ right: 0.2, left: 0.2 }}
+            drag={isSelectionMode ? false : 'x'}
+            dragDirectionLock={!isSelectionMode}
+            dragConstraints={isSelectionMode ? undefined : { left: 0, right: 0 }}
+            dragElastic={isSelectionMode ? 0 : { right: 0.2, left: 0.2 }}
             onDragStart={() => {
+                if (isSelectionMode) return;
                 setIsDragging(true);
                 cancelLongPress(); // Cancel long press when drag starts
             }}
             onDragEnd={(e, info) => {
+                if (isSelectionMode) return;
                 setIsDragging(false);
                 // Right swipe: Archive (or Restore in archive view)
                 if (info.offset.x > 150 || (info.velocity.x > 400 && info.offset.x > 50)) {
@@ -233,7 +235,10 @@ const InspirationItem = ({
                     onRemove(idea.id);
                 }
             }}
-            onPointerDown={handlePointerDown}
+            onPointerDown={(e) => {
+                if (isSelectionMode) return;
+                handlePointerDown(e);
+            }}
             onPointerUp={cancelLongPress}
             onPointerCancel={cancelLongPress}
             onPointerLeave={cancelLongPress}
@@ -251,7 +256,7 @@ const InspirationItem = ({
             }}
             exit={exitAnimation}
             layout
-            className={`relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 touch-none select-none ${isCharging ? 'ring-2 ring-pink-400/60 shadow-lg shadow-pink-200/50 dark:shadow-pink-900/30' : ''} ${isSelected ? 'scale-[1.005]' : ''}`}
+            className={`relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 ${isSelectionMode ? 'touch-pan-y' : 'touch-none'} select-none ${isCharging ? 'ring-2 ring-pink-400/60 shadow-lg shadow-pink-200/50 dark:shadow-pink-900/30' : ''} ${isSelected ? 'scale-[1.005]' : ''}`}
         >
             {/* Main Card Component */}
             <div
@@ -278,8 +283,29 @@ const InspirationItem = ({
                         onCopy(idea.content, idea.id);
                     }
                 }}
-                onDoubleClick={handleDoubleClick}
+                onDoubleClick={(e) => {
+                    if (isSelectionMode) return;
+                    handleDoubleClick(e);
+                }}
             >
+                {isSelectionMode && (
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onSelect?.(idea.id);
+                        }}
+                        className={`absolute top-3 right-3 z-20 h-6 w-6 rounded-full border transition-all flex items-center justify-center ${
+                            isSelected
+                                ? 'bg-sky-500 border-sky-500 text-white shadow-[0_0_0_3px_rgba(14,165,233,0.15)]'
+                                : 'bg-white/95 dark:bg-gray-900/95 border-gray-300 dark:border-gray-600 text-transparent'
+                        }`}
+                        aria-label={isSelected ? '取消选择' : '选择此项'}
+                    >
+                        <Check size={12} strokeWidth={3} />
+                    </button>
+                )}
+
                 {/* Swipe Background (Delete Action - Left) */}
                 <motion.div
                     style={{ backgroundColor: deleteBackgroundColor }}
