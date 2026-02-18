@@ -154,6 +154,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     const [selectedCategory, setSelectedCategory] = useState(() => routeCategoryId || categories[0]?.id || null);
     const [searchInput, setSearchInput] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
     const hasAutoOpenedSidebarRef = useRef(activeDocuments.length > 0);
 
     const isTrashView = viewMode === 'trash';
@@ -180,6 +181,12 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             setSelectedCategory(routeCategoryId);
         }
     }, [isRouteTrash, routeCategoryId, routeDocId]);
+
+    useEffect(() => {
+        if (viewMode === 'trash' && isSelectionMode) {
+            setIsSelectionMode(false);
+        }
+    }, [isSelectionMode, viewMode]);
 
     useEffect(() => {
         if (isMobile) return;
@@ -481,6 +488,9 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                             onViewModeChange={(nextMode) => {
                                                 setViewMode(nextMode);
                                                 setSelectedDocId(null);
+                                                if (nextMode === 'trash') {
+                                                    setIsSelectionMode(false);
+                                                }
                                             }}
                                             trashCount={trashDocuments.length}
                                             searchQuery={searchInput}
@@ -490,6 +500,11 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                             onRemoveCategory={handleRemoveCategory}
                                             categoryDocCountMap={categoryDocCountMap}
                                             isMobile={isMobile}
+                                            isSelectionMode={isSelectionMode}
+                                            onToggleSelectionMode={() => {
+                                                if (viewMode === 'trash') return;
+                                                setIsSelectionMode((prev) => !prev);
+                                            }}
                                         />
                                         <div className="min-h-0 flex-1">
                                             <WritingSidebar
@@ -517,6 +532,8 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                                                 categories={categories}
                                                 selectedCategory={selectedCategory}
                                                 onBulkMoveCategory={handleBulkMoveCategory}
+                                                isSelectionMode={isSelectionMode}
+                                                onSelectionModeChange={setIsSelectionMode}
                                             />
                                         </div>
                                     </div>

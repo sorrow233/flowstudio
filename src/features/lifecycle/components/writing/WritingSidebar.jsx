@@ -263,10 +263,11 @@ const WritingSidebar = ({
     categories = [],
     selectedCategory = null,
     onBulkMoveCategory,
+    isSelectionMode = false,
+    onSelectionModeChange,
 }) => {
     const { t } = useTranslation();
     const isTrashView = viewMode === 'trash';
-    const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedDocIds, setSelectedDocIds] = useState([]);
     const [moveTargetCategory, setMoveTargetCategory] = useState('');
 
@@ -294,6 +295,12 @@ const WritingSidebar = ({
     const selectedCount = selectedDocIds.length;
     const allSelected = documents.length > 0 && selectedCount === documents.length;
     const canBulkMove = isSelectionMode && selectedCount > 0 && Boolean(moveTargetCategory) && !isTrashView;
+
+    useEffect(() => {
+        if (isTrashView && isSelectionMode) {
+            onSelectionModeChange?.(false);
+        }
+    }, [isSelectionMode, isTrashView, onSelectionModeChange]);
 
     useEffect(() => {
         if (!isSelectionMode) {
@@ -403,55 +410,43 @@ const WritingSidebar = ({
 
     return (
         <div className="flex h-full flex-col bg-white dark:bg-slate-900">
-            {!isTrashView && documents.length > 0 && (
+            {!isTrashView && isSelectionMode && documents.length > 0 && (
                 <div className="border-b border-sky-100/80 px-3 py-2 dark:border-slate-800">
                     <div className="flex flex-wrap items-center gap-1.5">
-                        {!isSelectionMode ? (
-                            <button
-                                type="button"
-                                onClick={() => setIsSelectionMode(true)}
-                                className="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-600 transition hover:border-sky-300 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
-                            >
-                                {t('writing.multiSelect', '多选')}
-                            </button>
-                        ) : (
-                            <>
-                                <button
-                                    type="button"
-                                    onClick={toggleSelectAll}
-                                    className="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-600 transition hover:border-sky-300 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
-                                >
-                                    {allSelected ? t('common.unselectAll', '取消全选') : t('common.selectAll', '全选')}
-                                </button>
-                                <select
-                                    value={moveTargetCategory}
-                                    onChange={(event) => setMoveTargetCategory(event.target.value)}
-                                    className="h-8 min-w-[108px] rounded-lg border border-slate-200 bg-white px-2 text-xs text-slate-700 outline-none transition focus:border-sky-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-sky-600"
-                                >
-                                    {selectableCategories.map((category) => (
-                                        <option key={category.id} value={category.id}>
-                                            {category.label}
-                                        </option>
-                                    ))}
-                                </select>
-                                <button
-                                    type="button"
-                                    onClick={handleBulkMove}
-                                    disabled={!canBulkMove}
-                                    className="inline-flex h-8 items-center rounded-lg bg-sky-500 px-2.5 text-xs font-medium text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sky-600 dark:hover:bg-sky-500"
-                                >
-                                    {t('writing.moveToCategory', '转移分区')}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsSelectionMode(false)}
-                                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-slate-100"
-                                    aria-label={t('common.cancel', '取消')}
-                                >
-                                    <X size={14} />
-                                </button>
-                            </>
-                        )}
+                        <button
+                            type="button"
+                            onClick={toggleSelectAll}
+                            className="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-600 transition hover:border-sky-300 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
+                        >
+                            {allSelected ? t('common.unselectAll', '取消全选') : t('common.selectAll', '全选')}
+                        </button>
+                        <select
+                            value={moveTargetCategory}
+                            onChange={(event) => setMoveTargetCategory(event.target.value)}
+                            className="h-8 min-w-[108px] rounded-lg border border-slate-200 bg-white px-2 text-xs text-slate-700 outline-none transition focus:border-sky-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-sky-600"
+                        >
+                            {selectableCategories.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                    {category.label}
+                                </option>
+                            ))}
+                        </select>
+                        <button
+                            type="button"
+                            onClick={handleBulkMove}
+                            disabled={!canBulkMove}
+                            className="inline-flex h-8 items-center rounded-lg bg-sky-500 px-2.5 text-xs font-medium text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sky-600 dark:hover:bg-sky-500"
+                        >
+                            {t('writing.moveToCategory', '转移分区')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => onSelectionModeChange?.(false)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-slate-100"
+                            aria-label={t('common.cancel', '取消')}
+                        >
+                            <X size={14} />
+                        </button>
                     </div>
                     {isSelectionMode && (
                         <p className="mt-1.5 text-[11px] font-medium text-sky-600/90 dark:text-sky-400/90">

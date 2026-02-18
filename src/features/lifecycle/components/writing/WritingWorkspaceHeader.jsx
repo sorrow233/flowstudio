@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArchiveRestore, Plus, Search, Settings2, X } from 'lucide-react';
+import { ArchiveRestore, ListChecks, Plus, Search, Settings2, X } from 'lucide-react';
 import { useTranslation } from '../../../i18n';
 import WritingCategorySelector from './WritingCategorySelector';
 import WritingCategoryManager from './WritingCategoryManager';
@@ -23,10 +23,13 @@ const WritingWorkspaceHeader = ({
     categoryDocCountMap = {},
     isMobile = false,
     isCollapsed = false,
+    isSelectionMode = false,
+    onToggleSelectionMode,
 }) => {
     const { t } = useTranslation();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isCategoryManagerOpen, setCategoryManagerOpen] = useState(false);
+    const [isCompactPanelOpen, setIsCompactPanelOpen] = useState(false);
     const isTrashView = viewMode === 'trash';
     const collapsed = !compact && isCollapsed;
 
@@ -35,6 +38,13 @@ const WritingWorkspaceHeader = ({
             setIsSearchOpen(true);
         }
     }, [searchQuery, isSearchOpen]);
+
+    useEffect(() => {
+        if (!compact) return;
+        if (searchQuery && !isCompactPanelOpen) {
+            setIsCompactPanelOpen(true);
+        }
+    }, [compact, isCompactPanelOpen, searchQuery]);
 
     const selectedCategoryObj = categories.find((item) => item.id === selectedCategory);
     const selectedCategoryPreset = findWritingCategoryPreset(selectedCategoryObj);
@@ -61,138 +71,128 @@ const WritingWorkspaceHeader = ({
 
     const renderCompactHeader = () => (
         <>
-            <AnimatePresence mode="wait">
-                {!isSearchOpen ? (
+            <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="grid grid-cols-[auto_1fr_auto] items-center gap-2"
+            >
+                <button
+                    onClick={() => onToggleSelectionMode?.()}
+                    disabled={isTrashView}
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border transition ${isSelectionMode
+                        ? 'border-sky-300 bg-sky-100 text-sky-600 dark:border-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
+                        : 'border-slate-200/70 bg-white/85 text-slate-500 hover:border-sky-300 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400'
+                        } disabled:opacity-45`}
+                    title={isSelectionMode ? t('writing.exitMultiSelect', '退出多选') : t('writing.multiSelect', '多选')}
+                >
+                    <ListChecks size={16} />
+                </button>
+
+                <button
+                    onClick={() => onCreate(selectedCategory)}
+                    disabled={!selectedCategory || isTrashView}
+                    className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-xl px-3 text-[12px] font-bold transition-all active:scale-[0.97] disabled:opacity-50 ${buttonStyle.className}`}
+                    title={t('inspiration.newDoc')}
+                >
+                    <Plus size={16} strokeWidth={2.5} />
+                    {!isMobile && <span className="truncate tracking-tight">{t('inspiration.newDoc')}</span>}
+                </button>
+
+                <button
+                    onClick={() => setIsCompactPanelOpen((open) => !open)}
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border transition ${isCompactPanelOpen
+                        ? 'border-sky-300 bg-sky-100 text-sky-600 dark:border-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
+                        : 'border-slate-200/70 bg-white/85 text-slate-500 hover:border-sky-300 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400'
+                        }`}
+                    title={t('writing.managePanel', '管理面板')}
+                >
+                    <Settings2 size={16} />
+                </button>
+            </motion.div>
+
+            <AnimatePresence>
+                {isCompactPanelOpen && (
                     <motion.div
-                        key="compact-tools"
-                        initial={{ opacity: 0, y: 6 }}
+                        initial={{ opacity: 0, y: -6 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 6 }}
-                        className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-2"
+                        exit={{ opacity: 0, y: -6 }}
+                        className="rounded-2xl border border-slate-200/80 bg-white/90 p-2 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.7)] dark:border-slate-700/70 dark:bg-slate-800/90"
                     >
-                        <button
-                            onClick={() => setIsSearchOpen(true)}
-                            className="group inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/60 bg-white/85 text-sky-500 transition-all hover:border-sky-300 hover:bg-white dark:border-slate-700/50 dark:bg-slate-800/85 dark:text-sky-400 dark:hover:border-slate-600 dark:hover:bg-slate-800"
-                            title={t('inspiration.search')}
-                        >
-                            <Search size={18} className="transition-transform group-hover:scale-110" />
-                        </button>
-
-                        <button
-                            onClick={() => onCreate(selectedCategory)}
-                            disabled={!selectedCategory || isTrashView}
-                            className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl px-3 font-bold transition-all active:scale-[0.97] disabled:opacity-50 ${buttonStyle.className}`}
-                            title={t('inspiration.newDoc')}
-                        >
-                            <Plus size={18} strokeWidth={2.5} />
-                            {!isMobile && <span className="truncate text-[13px] tracking-tight">{t('inspiration.newDoc')}</span>}
-                        </button>
-
-                        <button
-                            onClick={() => onViewModeChange?.(isTrashView ? 'active' : 'trash')}
-                            className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border transition ${isTrashView
-                                ? 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300'
-                                : 'border-slate-200/70 bg-white/85 text-slate-500 hover:border-sky-300 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400'
-                                }`}
-                            title={isTrashView ? t('writing.system.all', '全部') : `${t('writing.system.trash', '废纸篓')} (${trashCount})`}
-                        >
-                            <ArchiveRestore size={16} />
-                        </button>
-
-                        <button
-                            onClick={() => setCategoryManagerOpen(true)}
-                            disabled={isTrashView}
-                            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/70 bg-white/85 text-slate-500 transition hover:border-sky-300 hover:text-sky-600 disabled:opacity-45 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400"
-                            title={t('writing.manageCategories', '管理分类')}
-                        >
-                            <Settings2 size={16} />
-                        </button>
-                    </motion.div>
-                ) : (
-                    <motion.div
-                        key="compact-search"
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 6 }}
-                        className="grid grid-cols-[1fr_auto_auto] items-center gap-2"
-                    >
-                        <div className="relative min-w-0">
-                            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400" />
-                            <input
-                                autoFocus
-                                type="text"
-                                value={searchQuery}
-                                onChange={(event) => onSearchQueryChange(event.target.value)}
-                                placeholder={t('inspiration.search')}
-                                className="h-10 w-full rounded-xl border border-slate-200/70 bg-white/85 px-10 text-sm text-slate-700 outline-none transition focus:border-sky-400 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-200 dark:focus:border-sky-600"
-                            />
+                        <div className="mb-2 flex items-center gap-1.5">
                             <button
-                                onClick={() => {
-                                    onSearchQueryChange('');
-                                    setIsSearchOpen(false);
-                                }}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                onClick={() => onViewModeChange?.(isTrashView ? 'active' : 'trash')}
+                                className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition ${isTrashView
+                                    ? 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300'
+                                    : 'border-slate-200/70 bg-white text-slate-500 hover:border-sky-300 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400'
+                                    }`}
+                                title={isTrashView ? t('writing.system.all', '全部') : `${t('writing.system.trash', '废纸篓')} (${trashCount})`}
                             >
-                                <X size={16} />
+                                <ArchiveRestore size={14} />
+                            </button>
+                            <div className="relative min-w-0 flex-1">
+                                <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-sky-400" />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(event) => onSearchQueryChange(event.target.value)}
+                                    placeholder={t('inspiration.search')}
+                                    className="h-8 w-full rounded-lg border border-slate-200/80 bg-white px-8 text-xs text-slate-700 outline-none transition focus:border-sky-400 dark:border-slate-700/60 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-sky-600"
+                                />
+                                {!!searchQuery && (
+                                    <button
+                                        onClick={() => onSearchQueryChange('')}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                    >
+                                        <X size={13} />
+                                    </button>
+                                )}
+                            </div>
+                            <button
+                                onClick={() => setCategoryManagerOpen(true)}
+                                disabled={isTrashView}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200/70 bg-white text-slate-500 transition hover:border-sky-300 hover:text-sky-600 disabled:opacity-45 dark:border-slate-700/60 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400"
+                                title={t('writing.manageCategories', '管理分类')}
+                            >
+                                <Settings2 size={14} />
                             </button>
                         </div>
 
-                        <button
-                            onClick={() => onViewModeChange?.(isTrashView ? 'active' : 'trash')}
-                            className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border transition ${isTrashView
-                                ? 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300'
-                                : 'border-slate-200/70 bg-white/85 text-slate-500 hover:border-sky-300 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400'
-                                }`}
-                            title={isTrashView ? t('writing.system.all', '全部') : `${t('writing.system.trash', '废纸篓')} (${trashCount})`}
-                        >
-                            <ArchiveRestore size={16} />
-                        </button>
+                        <div className={`${isTrashView ? 'pointer-events-none opacity-55' : ''}`}>
+                            <div className="flex h-10 items-center rounded-2xl border border-slate-200/80 bg-white px-1 dark:border-slate-700/70 dark:bg-slate-800/90">
+                                <div className="flex shrink-0 items-center gap-1.5 px-1.5">
+                                    <span className={`max-w-[4.6rem] truncate text-[12px] font-semibold ${selectedCategoryTextClass}`}>
+                                        {selectedCategoryLabel}
+                                    </span>
+                                    <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+                                </div>
+                                <div className="min-w-0 flex-1 overflow-x-auto">
+                                    <div className="flex min-w-max items-center gap-1 pr-1">
+                                        {compactCategories.map((category) => {
+                                            const label = resolveWritingCategoryLabel(category, t, t('common.noData'));
+                                            const isActive = selectedCategory === category.id;
 
-                        <button
-                            onClick={() => setCategoryManagerOpen(true)}
-                            disabled={isTrashView}
-                            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/70 bg-white/85 text-slate-500 transition hover:border-sky-300 hover:text-sky-600 disabled:opacity-45 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400"
-                            title={t('writing.manageCategories', '管理分类')}
-                        >
-                            <Settings2 size={16} />
-                        </button>
+                                            return (
+                                                <button
+                                                    key={category.id}
+                                                    onClick={() => onSelectCategory(category.id)}
+                                                    className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition ${isActive
+                                                        ? 'border-slate-200 bg-white shadow-[0_4px_10px_-8px_rgba(15,23,42,0.65)] dark:border-slate-600 dark:bg-slate-700'
+                                                        : 'border-transparent hover:border-slate-200/80 hover:bg-slate-50 dark:hover:border-slate-600 dark:hover:bg-slate-700/70'
+                                                        }`}
+                                                    title={label}
+                                                    aria-label={label}
+                                                >
+                                                    <span className={`rounded-full ${category.dotColor} ${isActive ? 'h-3.5 w-3.5' : 'h-3 w-3'}`} />
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
-
-            <div className={`${isTrashView ? 'pointer-events-none opacity-55' : ''}`}>
-                <div className="flex h-12 items-center rounded-3xl border border-slate-200/80 bg-white/88 px-1.5 shadow-[0_10px_26px_-24px_rgba(15,23,42,0.85)] dark:border-slate-700/70 dark:bg-slate-800/85">
-                    <div className="flex shrink-0 items-center gap-2 px-2">
-                        <span className={`max-w-[5.5rem] truncate text-[13px] font-semibold ${selectedCategoryTextClass}`}>
-                            {selectedCategoryLabel}
-                        </span>
-                        <span className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
-                    </div>
-                    <div className="min-w-0 flex-1 overflow-x-auto">
-                        <div className="flex min-w-max items-center gap-1.5 pr-1">
-                            {compactCategories.map((category) => {
-                                const label = resolveWritingCategoryLabel(category, t, t('common.noData'));
-                                const isActive = selectedCategory === category.id;
-
-                                return (
-                                    <button
-                                        key={category.id}
-                                        onClick={() => onSelectCategory(category.id)}
-                                        className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition ${isActive
-                                            ? 'border-slate-200 bg-white shadow-[0_4px_10px_-8px_rgba(15,23,42,0.65)] dark:border-slate-600 dark:bg-slate-700'
-                                            : 'border-transparent hover:border-slate-200/80 hover:bg-slate-50 dark:hover:border-slate-600 dark:hover:bg-slate-700/70'
-                                            }`}
-                                        title={label}
-                                        aria-label={label}
-                                    >
-                                        <span className={`rounded-full ${category.dotColor} ${isActive ? 'h-4 w-4' : 'h-3.5 w-3.5'}`} />
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            </div>
         </>
     );
 
