@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Trash2, Check, Edit2, Sparkles } from 'lucide-react';
+import { MAX_INSPIRATION_CATEGORIES } from './categoryManagerConstants';
 
 const COLOR_PRESETS = [
     { id: 'pink', color: 'bg-pink-400', dotColor: 'bg-pink-400', textColor: 'text-pink-400' },
@@ -30,7 +31,7 @@ const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemov
     const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
     // Maximum categories limit
-    const MAX_CATEGORIES = 7;
+    const MAX_CATEGORIES = MAX_INSPIRATION_CATEGORIES;
 
     // Get colors already in use (excluding the one being edited)
     const usedColors = categories
