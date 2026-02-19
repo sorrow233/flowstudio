@@ -99,11 +99,18 @@ export class SyncEngine {
 
         // Track local changes
         this.doc.on('update', (update, origin) => {
-            if (origin !== 'remote' && this.isReady) {
-                this.isDirty = true;
-                this.setStatus('syncing');
-                this.schedulePush();
+            if (origin === 'remote') return;
+
+            this.isDirty = true;
+            if (!this.userId || this.hasPermissionError) {
+                this.setStatus('offline');
+                return;
             }
+
+            if (!this.isReady) return;
+
+            this.setStatus('syncing');
+            this.schedulePush();
         });
     }
 
@@ -115,6 +122,12 @@ export class SyncEngine {
         // 防止重复监听：先取消所有旧监听器
         this.unsubscribes.forEach(fn => fn());
         this.unsubscribes = [];
+
+        // 重新连接云端时，重置 ready/server 标记，确保等待远端快照后再进入 synced。
+        this.isServerLoaded = false;
+        this.isReady = false;
+        this.hasPermissionError = false;
+        this.retryCount = 0;
 
         this.setStatus('syncing');
 
@@ -163,6 +176,7 @@ export class SyncEngine {
                 console.info("[SyncEngine] Permission restored, resuming sync.");
                 this.hasPermissionError = false;
                 this.retryCount = 0;
+                this.tryReady();
                 // 如果有待推送的数据，立即调度推送
                 if (this.isDirty) {
                     this.schedulePush();
@@ -196,13 +210,24 @@ export class SyncEngine {
     }
 
     tryReady() {
-        if (this.isReady) return;
         if (!this.isServerLoaded || !this.isIndexedDBLoaded) return;
 
         this.isReady = true;
         this.localVersion = this.remoteVersion;
 
         console.info("[SyncEngine] Ready!");
+
+        if (!this.userId || this.hasPermissionError || !navigator.onLine) {
+            this.setStatus('offline');
+            return;
+        }
+
+        if (this.isDirty) {
+            this.setStatus('syncing');
+            this.schedulePush();
+            return;
+        }
+
         this.setStatus('synced');
     }
 
@@ -256,7 +281,11 @@ export class SyncEngine {
      */
     async tryPush() {
         if (this.isPushing || !navigator.onLine || !this.isDirty || !this.userId) {
-            if (!this.isDirty) this.setStatus('synced');
+            if (!this.userId || !navigator.onLine || this.hasPermissionError) {
+                this.setStatus('offline');
+            } else if (!this.isDirty) {
+                this.setStatus('synced');
+            }
             return;
         }
 
@@ -389,7 +418,10 @@ export class SyncEngine {
         // 使用 requestAnimationFrame 确保 DOM 和 Y.js 更新都已完成
         requestAnimationFrame(() => {
             // 强制设置为脏状态并推送
-            if (!this.userId || !navigator.onLine) return;
+            if (!this.userId || !navigator.onLine || this.hasPermissionError) {
+                this.setStatus('offline');
+                return;
+            }
 
             // 取消已调度的防抖推送
             clearTimeout(this.pushTimeout);

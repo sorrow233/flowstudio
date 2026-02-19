@@ -14,6 +14,7 @@ export const useSyncedCategories = (
     const {
         initializeDefaults = true,
         cleanupDuplicates = true,
+        ensureDefaultsPresent = false,
     } = options;
     const [categories, setCategories] = useState([]);
 
@@ -94,10 +95,35 @@ export const useSyncedCategories = (
             return true;
         };
 
+        const ensureMissingDefaults = () => {
+            if (!initializeDefaults || !ensureDefaultsPresent) return false;
+            if (!Array.isArray(defaultCategories) || defaultCategories.length === 0) return false;
+
+            const existingIds = new Set(
+                yArray.toArray()
+                    .map((item) => (item instanceof Y.Map ? item.get('id') : item?.id))
+                    .filter(Boolean)
+            );
+
+            const missing = defaultCategories.filter((category) => category?.id && !existingIds.has(category.id));
+            if (missing.length === 0) return false;
+
+            doc.transact(() => {
+                missing.forEach((category) => {
+                    const yMap = new Y.Map();
+                    Object.entries(category).forEach(([key, value]) => yMap.set(key, value));
+                    yArray.push([yMap]);
+                });
+            });
+
+            return true;
+        };
+
         const handleChange = () => {
             const seeded = seedDefaultsIfNeeded();
+            const ensured = ensureMissingDefaults();
             const deduped = dedupeCategories();
-            if (seeded || deduped) return;
+            if (seeded || ensured || deduped) return;
             setCategories(yArray.toJSON());
         };
 
@@ -107,7 +133,7 @@ export const useSyncedCategories = (
         return () => {
             yArray.unobserveDeep(handleChange);
         };
-    }, [cleanupDuplicates, doc, initializeDefaults, arrayName, defaultCategories]);
+    }, [arrayName, cleanupDuplicates, defaultCategories, doc, ensureDefaultsPresent, initializeDefaults]);
 
     const addCategory = useCallback((category) => {
         if (!doc) return;
