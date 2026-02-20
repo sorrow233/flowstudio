@@ -60,7 +60,10 @@ const normalizeCategoryLabel = (label, fallbackId, fallbackIndex) => {
 export const useWritingDataMigration = (doc, status = 'disconnected') => {
     useEffect(() => {
         if (!doc) return;
-        if (status === 'disconnected') return;
+        if (status !== 'synced') return; // 必须等待远端数据被合并后再跑迁移，防止竞态
+
+        const metadataMap = doc.getMap('metadata');
+        if (metadataMap.get('writing_data_migrated_v2')) return; // 已经迁移过了，避免重复处理
 
         const migrateWritingData = () => {
             doc.transact(() => {
@@ -213,6 +216,9 @@ export const useWritingDataMigration = (doc, status = 'disconnected') => {
                     yAllProjects.push([createYMap(normalizedProject)]);
                     existingProjectIds.add(id);
                 });
+
+                // 记录迁移已完成状态，防止复活幽灵分类
+                metadataMap.set('writing_data_migrated_v2', true);
             });
         };
 

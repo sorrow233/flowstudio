@@ -1,7 +1,7 @@
 {
     "name": "flow-studio",
     "private": true,
-    "version": "2.7.40",
+    "version": "2.7.41",
     "type": "module",
     "scripts": {
         "dev": "vite",

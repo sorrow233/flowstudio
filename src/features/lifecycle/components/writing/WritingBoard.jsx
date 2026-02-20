@@ -73,7 +73,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         removeCategory: removeCategoryBase,
     } = useSyncedCategories(doc, 'writing_categories', WRITING_CATEGORIES, {
         initializeDefaults: true,
-        ensureDefaultsPresent: true,
+        ensureDefaultsPresent: false, // 允许用户删除全部默认分类
         cleanupDuplicates: true,
     });
 
@@ -102,11 +102,12 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
 
             const currentIsCustom = currentLabel && currentLabel !== defaultLabel;
             const candidateIsCustom = candidateLabel && candidateLabel !== defaultLabel;
-            if (currentIsCustom !== candidateIsCustom) {
-                return candidateIsCustom;
-            }
 
-            // 同优先级时优先用后到达的数据，降低旧缓存覆盖新名称的概率。
+            // 如果两个有冲突，且一个是自定义名称，另一个如果是默认名称，直接优先保留自定义名称
+            if (currentIsCustom && !candidateIsCustom) return false;
+            if (!currentIsCustom && candidateIsCustom) return true;
+
+            // 如果两者都是自定义名称或者都是默认名称，优先使用后到达的数据作为基准
             return true;
         };
 
@@ -502,146 +503,146 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             </div>
 
             <div className="relative z-10 flex min-h-0 min-w-0 flex-1">
-                    <AnimatePresence mode="wait">
-                        {isSidebarOpen && (
-                            <>
-                                {isMobile && (
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        onClick={() => setIsSidebarOpen(false)}
-                                        className="absolute inset-0 z-40 bg-slate-900/35 lg:hidden"
-                                    />
-                                )}
+                <AnimatePresence mode="wait">
+                    {isSidebarOpen && (
+                        <>
+                            {isMobile && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setIsSidebarOpen(false)}
+                                    className="absolute inset-0 z-40 bg-slate-900/35 lg:hidden"
+                                />
+                            )}
 
-                                <motion.aside
-                                    initial={isMobile ? { x: '-100%' } : { width: 0, opacity: 0 }}
-                                    animate={isMobile ? { x: 0 } : { width: 320, opacity: 1 }}
-                                    exit={isMobile ? { x: '-100%' } : { width: 0, opacity: 0 }}
-                                    transition={{
-                                        type: 'spring',
-                                        stiffness: 400,
-                                        damping: 40,
-                                        mass: 1
-                                    }}
-                                    className={[
-                                        'relative z-[70] h-full flex-shrink-0 border-r border-sky-100 bg-white pointer-events-auto dark:border-slate-800 dark:bg-slate-900',
-                                        isMobile
-                                            ? 'absolute inset-y-0 left-0 w-[84vw] max-w-[360px]'
-                                            : 'overflow-hidden'
-                                    ].join(' ')}
-                                >
-                                    <div className="flex h-full w-full flex-col lg:w-[320px]">
-                                        <WritingWorkspaceHeader
-                                            compact
-                                            categories={categories}
-                                            selectedCategory={selectedCategory}
-                                            onSelectCategory={(categoryId) => {
-                                                setSelectedCategory(categoryId);
-                                                setSelectedDocId(null);
+                            <motion.aside
+                                initial={isMobile ? { x: '-100%' } : { width: 0, opacity: 0 }}
+                                animate={isMobile ? { x: 0 } : { width: 320, opacity: 1 }}
+                                exit={isMobile ? { x: '-100%' } : { width: 0, opacity: 0 }}
+                                transition={{
+                                    type: 'spring',
+                                    stiffness: 400,
+                                    damping: 40,
+                                    mass: 1
+                                }}
+                                className={[
+                                    'relative z-[70] h-full flex-shrink-0 border-r border-sky-100 bg-white pointer-events-auto dark:border-slate-800 dark:bg-slate-900',
+                                    isMobile
+                                        ? 'absolute inset-y-0 left-0 w-[84vw] max-w-[360px]'
+                                        : 'overflow-hidden'
+                                ].join(' ')}
+                            >
+                                <div className="flex h-full w-full flex-col lg:w-[320px]">
+                                    <WritingWorkspaceHeader
+                                        compact
+                                        categories={categories}
+                                        selectedCategory={selectedCategory}
+                                        onSelectCategory={(categoryId) => {
+                                            setSelectedCategory(categoryId);
+                                            setSelectedDocId(null);
+                                        }}
+                                        onCreate={handleCreate}
+                                        viewMode={viewMode}
+                                        onViewModeChange={(nextMode) => {
+                                            setViewMode(nextMode);
+                                            setSelectedDocId(null);
+                                            if (nextMode === 'trash') {
+                                                setIsSelectionMode(false);
+                                            }
+                                        }}
+                                        trashCount={trashDocuments.length}
+                                        searchQuery={searchInput}
+                                        onSearchQueryChange={setSearchInput}
+                                        onAddCategory={handleAddCategory}
+                                        onUpdateCategory={handleUpdateCategory}
+                                        onRemoveCategory={handleRemoveCategory}
+                                        categoryDocCountMap={categoryDocCountMap}
+                                        isMobile={isMobile}
+                                        isSelectionMode={isSelectionMode}
+                                        onToggleSelectionMode={() => {
+                                            if (viewMode === 'trash') return;
+                                            setIsSelectionMode((prev) => !prev);
+                                        }}
+                                    />
+                                    <div className="min-h-0 flex-1">
+                                        <WritingSidebar
+                                            documents={visibleDocuments}
+                                            allDocumentsCount={docsForView.length}
+                                            isMobile={isMobile}
+                                            viewMode={viewMode}
+                                            activeDocId={selectedDocId}
+                                            onSelectDoc={(id) => {
+                                                setSelectedDocId(id);
+                                                if (isMobile) setIsSidebarOpen(false);
+                                            }}
+                                            onEnterImmersive={(id) => {
+                                                setSelectedDocId(id);
+                                                setIsSidebarOpen(false);
                                             }}
                                             onCreate={handleCreate}
-                                            viewMode={viewMode}
-                                            onViewModeChange={(nextMode) => {
-                                                setViewMode(nextMode);
-                                                setSelectedDocId(null);
-                                                if (nextMode === 'trash') {
-                                                    setIsSelectionMode(false);
-                                                }
+                                            onUpdate={handleUpdate}
+                                            onDelete={handleDelete}
+                                            onRestore={(docToRestore) => {
+                                                const targetId = docToRestore?.id || docToRestore;
+                                                if (!targetId) return;
+                                                handleRestoreFromTrash(targetId);
                                             }}
-                                            trashCount={trashDocuments.length}
-                                            searchQuery={searchInput}
-                                            onSearchQueryChange={setSearchInput}
-                                            onAddCategory={handleAddCategory}
-                                            onUpdateCategory={handleUpdateCategory}
-                                            onRemoveCategory={handleRemoveCategory}
-                                            categoryDocCountMap={categoryDocCountMap}
-                                            isMobile={isMobile}
+                                            categories={categories}
+                                            selectedCategory={selectedCategory}
+                                            onBulkMoveCategory={handleBulkMoveCategory}
+                                            onReorderDocuments={handleReorderDocuments}
+                                            canReorder={!isTrashView && !searchQuery.trim()}
                                             isSelectionMode={isSelectionMode}
-                                            onToggleSelectionMode={() => {
-                                                if (viewMode === 'trash') return;
-                                                setIsSelectionMode((prev) => !prev);
-                                            }}
+                                            onSelectionModeChange={setIsSelectionMode}
                                         />
-                                        <div className="min-h-0 flex-1">
-                                            <WritingSidebar
-                                                documents={visibleDocuments}
-                                                allDocumentsCount={docsForView.length}
-                                                isMobile={isMobile}
-                                                viewMode={viewMode}
-                                                activeDocId={selectedDocId}
-                                                onSelectDoc={(id) => {
-                                                    setSelectedDocId(id);
-                                                    if (isMobile) setIsSidebarOpen(false);
-                                                }}
-                                                onEnterImmersive={(id) => {
-                                                    setSelectedDocId(id);
-                                                    setIsSidebarOpen(false);
-                                                }}
-                                                onCreate={handleCreate}
-                                                onUpdate={handleUpdate}
-                                                onDelete={handleDelete}
-                                                onRestore={(docToRestore) => {
-                                                    const targetId = docToRestore?.id || docToRestore;
-                                                    if (!targetId) return;
-                                                    handleRestoreFromTrash(targetId);
-                                                }}
-                                                categories={categories}
-                                                selectedCategory={selectedCategory}
-                                                onBulkMoveCategory={handleBulkMoveCategory}
-                                                onReorderDocuments={handleReorderDocuments}
-                                                canReorder={!isTrashView && !searchQuery.trim()}
-                                                isSelectionMode={isSelectionMode}
-                                                onSelectionModeChange={setIsSelectionMode}
-                                            />
-                                        </div>
                                     </div>
-                                </motion.aside>
-                            </>
-                        )}
-                    </AnimatePresence>
+                                </div>
+                            </motion.aside>
+                        </>
+                    )}
+                </AnimatePresence>
 
-                    <section className="relative z-0 flex min-w-0 flex-1 flex-col">
-                        {activeDoc ? (
-                            <WritingEditor
-                                key={activeDoc.id}
-                                doc={activeDoc}
-                                onUpdate={handleUpdate}
-                                isSidebarOpen={isSidebarOpen}
-                                onToggleSidebar={() => {
-                                    setIsSidebarOpen((open) => !open);
-                                }}
-                                onCloseSidebar={() => setIsSidebarOpen(false)}
-                                isMobile={isMobile}
-                                onUndo={undo}
-                                onRedo={redo}
-                                canUndo={canUndo}
-                                canRedo={canRedo}
-                                syncStatus={resolvedSyncStatus}
-                            />
-                        ) : hasNoFilteredResults ? (
-                            <div className="flex h-full items-center justify-center bg-white/70 text-slate-400 dark:bg-slate-900/70 dark:text-slate-500">
-                                <p className="text-sm">{t('common.noData')}</p>
-                            </div>
-                        ) : isTrashView ? (
-                            <div className="flex h-full items-center justify-center bg-white/70 text-slate-400 dark:bg-slate-900/70 dark:text-slate-500">
-                                <p className="text-sm">{t('writing.emptyTrash', '回收站为空')}</p>
-                            </div>
-                        ) : (
-                            <WritingDashboard
-                                onCreate={handleCreate}
-                                documents={activeDocuments}
-                                categories={categories}
-                                onToggleSidebar={() => {
-                                    setIsSidebarOpen((open) => !open);
-                                }}
-                                isSidebarOpen={isSidebarOpen}
-                                isMobile={isMobile}
-                                t={t}
-                            />
-                        )}
-                    </section>
+                <section className="relative z-0 flex min-w-0 flex-1 flex-col">
+                    {activeDoc ? (
+                        <WritingEditor
+                            key={activeDoc.id}
+                            doc={activeDoc}
+                            onUpdate={handleUpdate}
+                            isSidebarOpen={isSidebarOpen}
+                            onToggleSidebar={() => {
+                                setIsSidebarOpen((open) => !open);
+                            }}
+                            onCloseSidebar={() => setIsSidebarOpen(false)}
+                            isMobile={isMobile}
+                            onUndo={undo}
+                            onRedo={redo}
+                            canUndo={canUndo}
+                            canRedo={canRedo}
+                            syncStatus={resolvedSyncStatus}
+                        />
+                    ) : hasNoFilteredResults ? (
+                        <div className="flex h-full items-center justify-center bg-white/70 text-slate-400 dark:bg-slate-900/70 dark:text-slate-500">
+                            <p className="text-sm">{t('common.noData')}</p>
+                        </div>
+                    ) : isTrashView ? (
+                        <div className="flex h-full items-center justify-center bg-white/70 text-slate-400 dark:bg-slate-900/70 dark:text-slate-500">
+                            <p className="text-sm">{t('writing.emptyTrash', '回收站为空')}</p>
+                        </div>
+                    ) : (
+                        <WritingDashboard
+                            onCreate={handleCreate}
+                            documents={activeDocuments}
+                            categories={categories}
+                            onToggleSidebar={() => {
+                                setIsSidebarOpen((open) => !open);
+                            }}
+                            isSidebarOpen={isSidebarOpen}
+                            isMobile={isMobile}
+                            t={t}
+                        />
+                    )}
+                </section>
             </div>
         </div>
     );
