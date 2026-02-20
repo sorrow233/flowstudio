@@ -72,7 +72,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         updateCategory: updateCategoryBase,
         removeCategory: removeCategoryBase,
     } = useSyncedCategories(doc, 'writing_categories', WRITING_CATEGORIES, {
-        initializeDefaults: true,
+        initializeDefaults: status === 'synced',
         ensureDefaultsPresent: false, // 允许用户删除全部默认分类
         cleanupDuplicates: true,
     });
