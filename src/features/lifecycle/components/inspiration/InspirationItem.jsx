@@ -295,11 +295,10 @@ const InspirationItem = ({
                             e.stopPropagation();
                             onSelect?.(idea.id);
                         }}
-                        className={`absolute top-3 right-3 z-20 h-6 w-6 rounded-full border transition-all flex items-center justify-center ${
-                            isSelected
-                                ? 'bg-sky-500 border-sky-500 text-white shadow-[0_0_0_3px_rgba(14,165,233,0.15)]'
-                                : 'bg-white/95 dark:bg-gray-900/95 border-gray-300 dark:border-gray-600 text-transparent'
-                        }`}
+                        className={`absolute top-3 right-3 z-20 h-6 w-6 rounded-full border transition-all flex items-center justify-center ${isSelected
+                            ? 'bg-sky-500 border-sky-500 text-white shadow-[0_0_0_3px_rgba(14,165,233,0.15)]'
+                            : 'bg-white/95 dark:bg-gray-900/95 border-gray-300 dark:border-gray-600 text-transparent'
+                            }`}
                         aria-label={isSelected ? '取消选择' : '选择此项'}
                     >
                         <Check size={12} strokeWidth={3} />
@@ -389,10 +388,9 @@ const InspirationItem = ({
                         ) : (
                             /* View Mode: Parsed Rich Text */
                             <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
-                                {parsedContent}
+                                {parseRichText(idea.content, allProjects)}
                             </div>
                         )}
-
                         {isTodoView && showAiAssistControls && aiAssistOptions.length > 0 && (
                             <div
                                 className="mt-3 flex flex-wrap gap-1.5"
@@ -481,14 +479,16 @@ const InspirationItem = ({
             </div>
 
             {/* Note Display - Outside the Card */}
-            {idea.note && (
-                <div className="w-full md:w-[140px] pt-1 md:pt-4 pl-4 md:pl-0 flex-shrink-0 animate-in fade-in slide-in-from-left-4 duration-500">
-                    <p className={`text-[12px] font-medium ${categoryConfig.textColor} opacity-80 dark:opacity-70 leading-relaxed italic break-words select-text`}>
-                        {idea.note}
-                    </p>
-                </div>
-            )}
-        </motion.div>
+            {
+                idea.note && (
+                    <div className="w-full md:w-[140px] pt-1 md:pt-4 pl-4 md:pl-0 flex-shrink-0 animate-in fade-in slide-in-from-left-4 duration-500">
+                        <p className={`text-[12px] font-medium ${categoryConfig.textColor} opacity-80 dark:opacity-70 leading-relaxed italic break-words select-text`}>
+                            {idea.note}
+                        </p>
+                    </div>
+                )
+            }
+        </motion.div >
     );
 };
 

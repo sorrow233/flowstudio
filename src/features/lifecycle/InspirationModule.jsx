@@ -1580,6 +1580,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                             <InspirationItem
                                                                 key={idea.id}
                                                                 idea={idea}
+                                                                allProjects={allProjects}
                                                                 onRemove={handleRemove}
                                                                 onArchive={handleArchive}
                                                                 onCopy={handleCopy}
@@ -1611,6 +1612,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                         <InspirationItem
                                                             key={idea.id}
                                                             idea={idea}
+                                                            allProjects={allProjects}
                                                             onRemove={handleRemove}
                                                             onArchive={handleArchive}
                                                             onCopy={handleCopy}
@@ -1673,6 +1675,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                                 <InspirationItem
                                                                     key={idea.id}
                                                                     idea={idea}
+                                                                    allProjects={allProjects}
                                                                     onRemove={handleRemove}
                                                                     onArchive={handleArchive}
                                                                     onCopy={handleCopy}

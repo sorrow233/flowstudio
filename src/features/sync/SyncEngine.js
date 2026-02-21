@@ -374,11 +374,19 @@ export class SyncEngine {
         } catch (error) {
             const isPermissionError = error.code === 'permission-denied' ||
                 error.message?.includes('permission');
+            const isSizeLimitError = error.code === 'invalid-argument' ||
+                error.message?.includes('longer than') ||
+                error.message?.includes('exceeds the maximum');
 
             if (isPermissionError) {
                 console.warn("[SyncEngine] Push permission denied - waiting for auth.");
                 this.hasPermissionError = true;
                 this.setStatus('offline');
+            } else if (isSizeLimitError) {
+                console.error("[SyncEngine] Push failed due to Firebase payload size limit (1MB):", error);
+                this.hasPermissionError = true; // prevent retry logic loosely
+                this.setStatus('error');
+                // Do not increment retryCount and do not schedulePush to prevent infinite loop
             } else {
                 console.error("[SyncEngine] Push failed:", error);
                 this.retryCount++;
