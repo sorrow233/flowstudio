@@ -23,6 +23,7 @@ import {
     normalizeIdeaTextForExport,
     parseCategoryTransferOutput,
 } from './components/inspiration/categoryTransferUtils';
+import { hexToRgba, resolveCategoryAccentHex } from './components/inspiration/categoryThemeUtils';
 
 // Auto color logic: Every 3 items, switch to next color
 const getNextAutoColorIndex = (totalCount) => {
@@ -195,6 +196,21 @@ const InspirationModule = () => {
     const editorRef = useRef(null);
     const textareaRef = useRef(null); // Define textareaRef even if not used widely now
     const imageUploaderRef = useRef(null); // 图片上传组件引用
+    const selectedCategoryConfig = useMemo(() => {
+        return categories.find((cat) => cat.id === selectedCategory)
+            || categories[0]
+            || INSPIRATION_CATEGORIES[0];
+    }, [categories, selectedCategory]);
+    const selectedCategoryAccentHex = useMemo(
+        () => resolveCategoryAccentHex(selectedCategoryConfig),
+        [selectedCategoryConfig]
+    );
+    const selectedCategoryDividerLineStyle = useMemo(() => ({
+        backgroundImage: `linear-gradient(to right, transparent, ${hexToRgba(selectedCategoryAccentHex, 0.55)}, transparent)`,
+    }), [selectedCategoryAccentHex]);
+    const selectedCategoryDividerTextStyle = useMemo(() => ({
+        color: selectedCategoryAccentHex,
+    }), [selectedCategoryAccentHex]);
 
     const buildInspirationPath = useCallback((categoryId) => {
         if (!categoryId) return '/inspiration';
@@ -1567,13 +1583,22 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                     <div className="space-y-4">
                                         {todosByDay.map((day, dayIndex) => (
                                             <div key={day.dateKey}>
-                                                {/* 日期分隔线 - 蓝色主题 */}
+                                                {/* 日期分隔线 - 跟随当前分类主题色 */}
                                                 <div className="flex items-center gap-3 mb-4 mt-6">
-                                                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-blue-200 dark:via-blue-800 to-transparent" />
-                                                    <span className="text-xs font-medium text-blue-400 dark:text-blue-500 tracking-wide whitespace-nowrap">
+                                                    <div
+                                                        className="h-px flex-1"
+                                                        style={selectedCategoryDividerLineStyle}
+                                                    />
+                                                    <span
+                                                        className="text-xs font-medium tracking-wide whitespace-nowrap"
+                                                        style={selectedCategoryDividerTextStyle}
+                                                    >
                                                         {formatDayLabel(day.date)}
                                                     </span>
-                                                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-blue-200 dark:via-blue-800 to-transparent" />
+                                                    <div
+                                                        className="h-px flex-1"
+                                                        style={selectedCategoryDividerLineStyle}
+                                                    />
                                                 </div>
                                                 <div className="space-y-4">
                                                     <AnimatePresence mode="popLayout" initial={false}>
@@ -1664,13 +1689,22 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                             return sortedWeeks.map(week => (
                                                 <div key={week.start.getTime()}>
                                                     <div className="flex items-center gap-3 mb-4 mt-8 cursor-pointer group">
-                                                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
-                                                        <span className="text-xs font-medium text-pink-300 dark:text-pink-600 tracking-wide whitespace-nowrap group-hover:text-pink-400 transition-colors">
+                                                        <div
+                                                            className="h-px flex-1 transition-opacity group-hover:opacity-90"
+                                                            style={selectedCategoryDividerLineStyle}
+                                                        />
+                                                        <span
+                                                            className="text-xs font-medium tracking-wide whitespace-nowrap transition-opacity group-hover:opacity-90"
+                                                            style={selectedCategoryDividerTextStyle}
+                                                        >
                                                             {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                                             {' - '}
                                                             {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                                         </span>
-                                                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-pink-200 dark:via-pink-800 to-transparent group-hover:via-pink-300 transition-colors" />
+                                                        <div
+                                                            className="h-px flex-1 transition-opacity group-hover:opacity-90"
+                                                            style={selectedCategoryDividerLineStyle}
+                                                        />
                                                     </div>
                                                     <div className="space-y-6">
                                                         <AnimatePresence mode="popLayout" initial={false}>
