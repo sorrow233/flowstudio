@@ -51,7 +51,7 @@ const MAX_RETRY_DELAY_MS = 120000; // 2分钟
  *   updatedAt: timestamp,
  *   sessionId: string
  * }
- * users/{userId}/rooms/{docId}/state_chunks/{chunk_xxxx} -> { value: base64Chunk, index, version, updatedAt }
+ * users/{userId}/rooms/__chunk__{docId}__{index} -> { value: base64Chunk, index, version, updatedAt }
  */
 export class SyncEngine {
     constructor(docId, userId, initialData = {}) {
@@ -137,7 +137,7 @@ export class SyncEngine {
     }
 
     getStateChunkDocRef(index) {
-        return doc(db, `users/${this.userId}/rooms/${this.docId}/state_chunks`, getStateChunkDocId(index));
+        return doc(db, `users/${this.userId}/rooms`, getStateChunkDocId(this.docId, index));
     }
 
     markServerLoaded() {

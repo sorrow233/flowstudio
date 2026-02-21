@@ -6,9 +6,12 @@ export const STATE_CHUNK_LENGTH = 700000;
 export const STATE_ENCODING_INLINE = 'inline-base64';
 export const STATE_ENCODING_CHUNKED = 'chunked-base64';
 
-const CHUNK_DOC_PREFIX = 'chunk_';
+const CHUNK_DOC_PREFIX = '__chunk__';
 
-export const getStateChunkDocId = (index) => `${CHUNK_DOC_PREFIX}${String(index).padStart(4, '0')}`;
+export const getStateChunkDocId = (roomId, index) => {
+    const safeRoomId = String(roomId || 'default').replace(/[^a-zA-Z0-9_-]/g, '_');
+    return `${CHUNK_DOC_PREFIX}${safeRoomId}__${String(index).padStart(4, '0')}`;
+};
 
 export const uint8ArrayToBase64 = (bytes) => {
     if (!(bytes instanceof Uint8Array) || bytes.byteLength === 0) {
