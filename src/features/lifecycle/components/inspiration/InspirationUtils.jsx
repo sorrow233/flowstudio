@@ -51,9 +51,16 @@ export const COLOR_CONFIG = [
 export const getColorConfig = (index) => COLOR_CONFIG[index % COLOR_CONFIG.length];
 
 // 根据分类获取颜色配置
-export const getCategoryConfig = (category) => {
-    const cat = INSPIRATION_CATEGORIES.find(c => c.id === category);
-    return cat || INSPIRATION_CATEGORIES[0]; // 默认返回「随记」
+export const getCategoryConfig = (category, categories = INSPIRATION_CATEGORIES) => {
+    const source = Array.isArray(categories) && categories.length > 0
+        ? categories
+        : INSPIRATION_CATEGORIES;
+
+    const cat = source.find(c => c.id === category);
+    if (cat) return cat;
+
+    const fallbackNote = source.find(c => c.id === 'note');
+    return fallbackNote || source[0] || INSPIRATION_CATEGORIES[0];
 };
 
 // 图片 URL 正则匹配（导出供外部使用）

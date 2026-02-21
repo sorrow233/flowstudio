@@ -104,6 +104,7 @@ const InspirationModule = () => {
             return cat;
         });
     }, [syncedCategories]);
+    const categoryConfigList = useMemo(() => categories, [categories]);
 
     const [isCategoryManagerOpen, setCategoryManagerOpen] = useState(false);
 
@@ -1581,6 +1582,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                                 key={idea.id}
                                                                 idea={idea}
                                                                 allProjects={allProjects}
+                                                                categories={categoryConfigList}
                                                                 onRemove={handleRemove}
                                                                 onArchive={handleArchive}
                                                                 onCopy={handleCopy}
@@ -1613,6 +1615,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                             key={idea.id}
                                                             idea={idea}
                                                             allProjects={allProjects}
+                                                            categories={categoryConfigList}
                                                             onRemove={handleRemove}
                                                             onArchive={handleArchive}
                                                             onCopy={handleCopy}
@@ -1676,6 +1679,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                                     key={idea.id}
                                                                     idea={idea}
                                                                     allProjects={allProjects}
+                                                                    categories={categoryConfigList}
                                                                     onRemove={handleRemove}
                                                                     onArchive={handleArchive}
                                                                     onCopy={handleCopy}

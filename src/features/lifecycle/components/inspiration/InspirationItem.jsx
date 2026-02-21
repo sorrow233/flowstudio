@@ -3,13 +3,14 @@ import { Trash2, Check, Pencil, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
 import RichTextInput from './RichTextInput';
-import { COLOR_CONFIG, getColorConfig, parseRichText, getCategoryConfig } from './InspirationUtils';
+import { parseRichText, getCategoryConfig } from './InspirationUtils';
 
-// COLOR_CONFIG, getColorConfig, and parseRichText are now imported from InspirationUtils.js
+// parseRichText/getCategoryConfig are imported from InspirationUtils.js
 
 const InspirationItem = ({
     idea,
     allProjects = [],
+    categories = [],
     onRemove,
     onArchive,
     onCopy,
@@ -41,8 +42,10 @@ const InspirationItem = ({
     const noteInputRef = React.useRef(null);
     const { t } = useTranslation();
 
-    const config = getColorConfig(idea.colorIndex || 0);
-    const categoryConfig = getCategoryConfig(idea.category); // 获取分类颜色配置
+    const categoryConfig = useMemo(
+        () => getCategoryConfig(idea.category, categories),
+        [idea.category, categories]
+    );
     const isCompleted = idea.completed || false;
     const shouldHighlightExternalSource = Boolean(idea.source && !['user', 'ai-import'].includes(idea.source));
 

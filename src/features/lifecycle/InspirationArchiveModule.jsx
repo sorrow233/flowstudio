@@ -4,15 +4,43 @@ import { ArrowLeft, Archive } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '../i18n';
 import { useSync } from '../sync/SyncContext';
-import { useSyncedProjects } from '../sync/useSyncStore';
+import { useSyncedCategories, useSyncedProjects } from '../sync/useSyncStore';
 import InspirationItem from './components/inspiration/InspirationItem';
+import { INSPIRATION_CATEGORIES } from '../../utils/constants';
 
 const InspirationArchiveModule = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { doc, immediateSync } = useSync();
     const { projects: allProjects, updateProject, removeProject } = useSyncedProjects(doc, 'all_projects');
+    const { categories: syncedCategories } = useSyncedCategories(
+        doc,
+        'inspiration_categories',
+        INSPIRATION_CATEGORIES,
+        { initializeDefaults: false, cleanupDuplicates: true }
+    );
     const [copiedId, setCopiedId] = React.useState(null);
+    const categories = useMemo(() => {
+        const baseCategories = syncedCategories.length > 0 ? syncedCategories : INSPIRATION_CATEGORIES;
+        const uniqueMap = new Map();
+
+        baseCategories.forEach((cat) => {
+            if (!cat?.id || uniqueMap.has(cat.id)) return;
+            uniqueMap.set(cat.id, cat);
+        });
+
+        return Array.from(uniqueMap.values()).map((cat) => {
+            const defaultCat = INSPIRATION_CATEGORIES.find((item) => item.id === cat.id);
+            if (!defaultCat) return cat;
+            return {
+                ...defaultCat,
+                ...cat,
+                textColor: cat.textColor || defaultCat.textColor,
+                dotColor: cat.dotColor || defaultCat.dotColor,
+                color: cat.color || defaultCat.color,
+            };
+        });
+    }, [syncedCategories]);
 
     const archivedIdeas = useMemo(() =>
         allProjects
@@ -76,6 +104,7 @@ const InspirationArchiveModule = () => {
                             <InspirationItem
                                 key={idea.id}
                                 idea={idea}
+                                categories={categories}
                                 onRemove={handleDelete}
                                 onArchive={handleRestore} // Right swipe restores in archive view
                                 onCopy={handleCopy}
