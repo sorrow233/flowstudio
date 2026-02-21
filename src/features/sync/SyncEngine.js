@@ -2,13 +2,22 @@ import * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import {
     doc,
-    setDoc,
     getDoc,
     onSnapshot,
     serverTimestamp,
     runTransaction
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import {
+    INLINE_STATE_MAX_LENGTH,
+    STATE_ENCODING_CHUNKED,
+    STATE_ENCODING_INLINE,
+    getStateChunkDocId,
+    normalizeStateMeta,
+    splitStateIntoChunks,
+    uint8ArrayToBase64,
+    base64ToUint8Array
+} from './syncStateCodec';
 
 const SESSION_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 
@@ -34,7 +43,15 @@ const MAX_RETRY_DELAY_MS = 120000; // 2分钟
  * 5. 智能重试机制：指数退避 + 最大重试次数限制
  * 
  * 数据结构：
- * users/{userId}/rooms/{docId} -> { state: base64, version: number, updatedAt: timestamp, sessionId: string }
+ * users/{userId}/rooms/{docId} -> {
+ *   state?: base64(小体积),
+ *   stateEncoding: inline-base64 | chunked-base64,
+ *   stateChunkCount: number,
+ *   version: number,
+ *   updatedAt: timestamp,
+ *   sessionId: string
+ * }
+ * users/{userId}/rooms/{docId}/state_chunks/{chunk_xxxx} -> { value: base64Chunk, index, version, updatedAt }
  */
 export class SyncEngine {
     constructor(docId, userId, initialData = {}) {
@@ -60,6 +77,7 @@ export class SyncEngine {
         // 版本控制
         this.localVersion = 0;
         this.remoteVersion = 0;
+        this.lastAppliedRemoteVersion = 0;
 
         // 推送节流
         this.lastPushTime = 0;
@@ -114,6 +132,124 @@ export class SyncEngine {
         });
     }
 
+    getStateDocRef() {
+        return doc(db, `users/${this.userId}/rooms`, this.docId);
+    }
+
+    getStateChunkDocRef(index) {
+        return doc(db, `users/${this.userId}/rooms/${this.docId}/state_chunks`, getStateChunkDocId(index));
+    }
+
+    markServerLoaded() {
+        if (!this.isServerLoaded) {
+            this.isServerLoaded = true;
+            console.info("[SyncEngine] Server loaded.");
+            this.tryReady();
+        }
+    }
+
+    async loadStateBase64(data, getChunkByIndex) {
+        const { encoding, chunkCount } = normalizeStateMeta(data);
+
+        if (encoding !== STATE_ENCODING_CHUNKED) {
+            return typeof data.state === 'string' ? data.state : '';
+        }
+
+        if (chunkCount <= 0) {
+            return '';
+        }
+
+        const chunkSnapshots = await Promise.all(
+            Array.from({ length: chunkCount }, (_, index) => getChunkByIndex(index))
+        );
+
+        return chunkSnapshots.map((chunkSnapshot, index) => {
+            if (!chunkSnapshot.exists()) {
+                throw new Error(`Missing sync state chunk ${index + 1}/${chunkCount}`);
+            }
+
+            const value = chunkSnapshot.data()?.value;
+            if (typeof value !== 'string') {
+                throw new Error(`Invalid sync state chunk payload at ${index + 1}/${chunkCount}`);
+            }
+
+            return value;
+        }).join('');
+    }
+
+    applyRemoteBase64State(base64State, version) {
+        if (!base64State || typeof base64State !== 'string') {
+            return;
+        }
+
+        const remoteState = base64ToUint8Array(base64State);
+        if (remoteState.byteLength === 0) {
+            return;
+        }
+
+        Y.applyUpdate(this.doc, remoteState, 'remote');
+        this.lastAppliedRemoteVersion = Math.max(this.lastAppliedRemoteVersion, version || 0);
+        console.info(`[SyncEngine] Applied remote state, version: ${version || 0}`);
+    }
+
+    async handleRemoteSnapshot(snapshot) {
+        if (!snapshot.exists()) {
+            console.info("[SyncEngine] No remote state, starting fresh.");
+            this.markServerLoaded();
+            return;
+        }
+
+        const data = snapshot.data();
+        const incomingVersion = Number.isInteger(data.version) ? data.version : 0;
+
+        if (incomingVersion > this.remoteVersion) {
+            this.remoteVersion = incomingVersion;
+        }
+
+        // 跳过自己刚刚推送的更新
+        if (data.sessionId === this.sessionId && incomingVersion === this.localVersion) {
+            console.info("[SyncEngine] Skipping own update.");
+            this.markServerLoaded();
+            return;
+        }
+
+        // 过滤掉已应用过的旧快照
+        if (incomingVersion <= this.lastAppliedRemoteVersion && this.isServerLoaded) {
+            return;
+        }
+
+        try {
+            const base64State = await this.loadStateBase64(
+                data,
+                (index) => getDoc(this.getStateChunkDocRef(index))
+            );
+
+            // 等待期间若已有更新版本进入，忽略旧快照
+            if (incomingVersion < this.remoteVersion) {
+                this.markServerLoaded();
+                return;
+            }
+
+            this.applyRemoteBase64State(base64State, incomingVersion);
+        } catch (error) {
+            console.error("[SyncEngine] Failed to apply remote state:", error);
+        }
+
+        // 成功接收数据，清除权限错误状态
+        if (this.hasPermissionError) {
+            console.info("[SyncEngine] Permission restored, resuming sync.");
+            this.hasPermissionError = false;
+            this.retryCount = 0;
+            this.tryReady();
+            // 如果有待推送的数据，立即调度推送
+            if (this.isDirty) {
+                this.schedulePush();
+            }
+        }
+
+        this.markServerLoaded();
+    }
+
     /**
      * 连接 Firestore - 监听单个文档而非集合
      * 注意：重复调用时会先取消旧监听，防止监听器累积
@@ -132,63 +268,10 @@ export class SyncEngine {
         this.setStatus('syncing');
 
         // 单个文档路径，不再使用 updates 子集合
-        const stateDocRef = doc(db, `users/${this.userId}/rooms`, this.docId);
+        const stateDocRef = this.getStateDocRef();
 
         const unsub = onSnapshot(stateDocRef, (snapshot) => {
-            if (!snapshot.exists()) {
-                // 文档不存在，首次同步
-                console.info("[SyncEngine] No remote state, starting fresh.");
-                if (!this.isServerLoaded) {
-                    this.isServerLoaded = true;
-                    this.tryReady();
-                }
-                return;
-            }
-
-            const data = snapshot.data();
-
-            // 跳过自己刚刚推送的更新
-            if (data.sessionId === this.sessionId && data.version === this.localVersion) {
-                console.info("[SyncEngine] Skipping own update.");
-                if (!this.isServerLoaded) {
-                    this.isServerLoaded = true;
-                    this.tryReady();
-                }
-                return;
-            }
-
-            // 更新远程版本号
-            this.remoteVersion = data.version || 0;
-
-            // 应用远程状态
-            if (data.state) {
-                try {
-                    const remoteState = Uint8Array.from(atob(data.state), c => c.charCodeAt(0));
-                    Y.applyUpdate(this.doc, remoteState, 'remote');
-                    console.info(`[SyncEngine] Applied remote state, version: ${this.remoteVersion}`);
-                } catch (e) {
-                    console.error("[SyncEngine] Failed to apply remote state:", e);
-                }
-            }
-
-            // 成功接收数据，清除权限错误状态
-            if (this.hasPermissionError) {
-                console.info("[SyncEngine] Permission restored, resuming sync.");
-                this.hasPermissionError = false;
-                this.retryCount = 0;
-                this.tryReady();
-                // 如果有待推送的数据，立即调度推送
-                if (this.isDirty) {
-                    this.schedulePush();
-                }
-            }
-
-            if (!this.isServerLoaded) {
-                this.isServerLoaded = true;
-                console.info("[SyncEngine] Server loaded.");
-                this.tryReady();
-            }
-
+            void this.handleRemoteSnapshot(snapshot);
         }, (error) => {
             const isPermissionError = error.code === 'permission-denied';
 
@@ -290,29 +373,29 @@ export class SyncEngine {
         }
 
         this.isPushing = true;
-        const stateDocRef = doc(db, `users/${this.userId}/rooms`, this.docId);
+        const stateDocRef = this.getStateDocRef();
 
         try {
-            await runTransaction(db, async (transaction) => {
+            const committedVersion = await runTransaction(db, async (transaction) => {
                 // 1. 读取远程最新状态
                 const sfDoc = await transaction.get(stateDocRef);
+                const previousMeta = sfDoc.exists() ? normalizeStateMeta(sfDoc.data()) : { encoding: STATE_ENCODING_INLINE, chunkCount: 0 };
 
                 // 2. 如果远程有更新，先合并
                 if (sfDoc.exists()) {
                     const data = sfDoc.data();
-                    // 这里必须检查 remoteVersion，因为它可能在我们 debounce 期间被别人更新了
-                    // 只有当远程版本大于我们已知的 remoteVersion 时才需要合并
-                    // 或者，更安全的方式是：总是尝试合并远程状态到本地 doc (Yjs 处理幂等性)
+                    const remoteVersion = Number.isInteger(data.version) ? data.version : 0;
 
-                    if (data.version > this.localVersion) {
-                        console.info(`[SyncEngine] Found newer remote version ${data.version} during push.`);
-                        // 更新我们的远程版本基准
-                        this.remoteVersion = data.version;
+                    if (remoteVersion > this.localVersion) {
+                        console.info(`[SyncEngine] Found newer remote version ${remoteVersion} during push.`);
+                        this.remoteVersion = remoteVersion;
 
-                        if (data.state) {
-                            const remoteState = Uint8Array.from(atob(data.state), c => c.charCodeAt(0));
-                            Y.applyUpdate(this.doc, remoteState, 'remote');
-                        }
+                        const remoteBase64State = await this.loadStateBase64(
+                            data,
+                            (index) => transaction.get(this.getStateChunkDocRef(index))
+                        );
+
+                        this.applyRemoteBase64State(remoteBase64State, remoteVersion);
                     }
                 }
 
@@ -321,24 +404,47 @@ export class SyncEngine {
 
                 if (fullState.byteLength === 0) {
                     // 理论上不太可能，除非 reset
-                    return;
+                    return this.remoteVersion;
                 }
 
                 // 4. 计算新版本号 (基于最新的 remoteVersion)
                 const newVersion = this.remoteVersion + 1;
 
-                // Safe binary to base64 conversion (prevents stack overflow on large docs)
-                const binaryString = Array.from(fullState)
-                    .map(byte => String.fromCharCode(byte))
-                    .join('');
+                const base64State = uint8ArrayToBase64(fullState);
+                const chunks = splitStateIntoChunks(base64State);
+                const useChunkedState = base64State.length > INLINE_STATE_MAX_LENGTH || chunks.length > 1;
+                const chunkCount = useChunkedState ? chunks.length : 0;
 
                 transaction.set(stateDocRef, {
-                    state: btoa(binaryString),
+                    ...(useChunkedState ? {} : { state: base64State }),
+                    stateEncoding: useChunkedState ? STATE_ENCODING_CHUNKED : STATE_ENCODING_INLINE,
+                    stateChunkCount: chunkCount,
                     version: newVersion,
                     updatedAt: serverTimestamp(),
                     userId: this.userId,
                     sessionId: this.sessionId
                 });
+
+                if (useChunkedState) {
+                    chunks.forEach((chunk, index) => {
+                        transaction.set(this.getStateChunkDocRef(index), {
+                            value: chunk,
+                            index,
+                            version: newVersion,
+                            updatedAt: serverTimestamp()
+                        });
+                    });
+                }
+
+                const previousChunkCount = previousMeta.encoding === STATE_ENCODING_CHUNKED
+                    ? previousMeta.chunkCount
+                    : 0;
+
+                if (previousChunkCount > chunkCount) {
+                    for (let index = chunkCount; index < previousChunkCount; index++) {
+                        transaction.delete(this.getStateChunkDocRef(index));
+                    }
+                }
 
                 // 更新事务内的临时状态，等事务成功后再应用到实例
                 return newVersion;
@@ -346,37 +452,21 @@ export class SyncEngine {
 
             console.info("[SyncEngine] Transaction Push success!");
 
-            // 事务成功后，更新本地状态
-            // 注意：onSnapshot 也会收到这次更新，我们需要确保不重复处理
-            // 但由于我们已经更新了 sessionId，onSnapshot 会忽略它
-
-            // 乐观更新本地版本，防止 onSnapshot 还没回来时我们又发起推送
-            // 但其实事务里返回了 newVersion
-            // 我们还不知道具体的 newVersion，除非在 runTransaction 返回它
-            // 我修改了上面的 return newVersion
-
-            // 重新获取一下 doc 的状态来确认版本 (或者直接信任事务结果)
-            // 由于事务是原子的，我们可以认为成功了
-
-            // 下一次期望的 remoteVersion 应该是刚才推上去的 verify
-            // 但这里我们简单点，等待 snapshot 回调来更新 remoteVersion
-            // 重点是 isDirty = false
-
+            this.localVersion = committedVersion;
+            this.remoteVersion = Math.max(this.remoteVersion, committedVersion);
+            this.lastAppliedRemoteVersion = Math.max(this.lastAppliedRemoteVersion, committedVersion);
             this.isDirty = false;
             this.setStatus('synced');
             this.retryCount = 0;
             this.lastPushTime = Date.now();
 
-            // 事务成功意味着我们刚才推的数据是最新的，
-            // 我们可以本地更新 version 以避免 snapshot 回来时 confuse (虽然有 sessionId check)
-            // this.localVersion = newVersion; // 可以在 runTransaction 返回值里拿
-
         } catch (error) {
             const isPermissionError = error.code === 'permission-denied' ||
                 error.message?.includes('permission');
-            const isSizeLimitError = error.code === 'invalid-argument' ||
-                error.message?.includes('longer than') ||
-                error.message?.includes('exceeds the maximum');
+            const isSizeLimitError = error.code === 'invalid-argument' &&
+                (error.message?.includes('longer than') ||
+                    error.message?.includes('1048487') ||
+                    error.message?.includes('exceeds the maximum'));
 
             if (isPermissionError) {
                 console.warn("[SyncEngine] Push permission denied - waiting for auth.");
@@ -384,9 +474,8 @@ export class SyncEngine {
                 this.setStatus('offline');
             } else if (isSizeLimitError) {
                 console.error("[SyncEngine] Push failed due to Firebase payload size limit (1MB):", error);
-                this.hasPermissionError = true; // prevent retry logic loosely
                 this.setStatus('error');
-                // Do not increment retryCount and do not schedulePush to prevent infinite loop
+                // Do not schedule retries on deterministic payload-limit errors.
             } else {
                 console.error("[SyncEngine] Push failed:", error);
                 this.retryCount++;
