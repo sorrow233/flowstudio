@@ -9,6 +9,7 @@ import { COLOR_CONFIG, getColorConfig, parseRichText, getCategoryConfig } from '
 
 const InspirationItem = ({
     idea,
+    allProjects = [],
     onRemove,
     onArchive,
     onCopy,
@@ -46,7 +47,7 @@ const InspirationItem = ({
     const shouldHighlightExternalSource = Boolean(idea.source && !['user', 'ai-import'].includes(idea.source));
 
     // 缓存 parseRichText 计算结果，避免每次渲染都重新执行正则匹配
-    const parsedContent = useMemo(() => parseRichText(idea.content), [idea.content]);
+    const parsedContent = useMemo(() => parseRichText(idea.content, allProjects), [idea.content, allProjects]);
 
     const getAiAssistButtonClass = useCallback((value, isActive) => {
         if (!isActive) {
@@ -388,7 +389,7 @@ const InspirationItem = ({
                         ) : (
                             /* View Mode: Parsed Rich Text */
                             <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
-                                {parseRichText(idea.content, allProjects)}
+                                {parsedContent}
                             </div>
                         )}
                         {isTodoView && showAiAssistControls && aiAssistOptions.length > 0 && (
