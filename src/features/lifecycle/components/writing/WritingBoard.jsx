@@ -230,12 +230,16 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
 
     useEffect(() => {
         if (categories.length === 0) {
-            setSelectedCategory(null);
             return;
         }
 
-        if (!categories.some((category) => category.id === selectedCategory)) {
-            setSelectedCategory(categories[0].id);
+        if (!selectedCategory || !categories.some((category) => category.id === selectedCategory)) {
+            // Only fallback if there was no category selected, or the selected one was deleted.
+            // When data is loading, `categories` might just have defaults, but we still shouldn't wipe a custom route ID
+            // unless we are sure it doesn't exist. Actually, let's just do it if selectedCategory is empty.
+            if (!selectedCategory) {
+                setSelectedCategory(categories[0].id);
+            }
         }
     }, [categories, selectedCategory]);
 
@@ -289,15 +293,14 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     }, [activeDocuments, defaultCategoryId]);
 
     useEffect(() => {
+        // If there are no documents yet (could be loading), don't wipe out the selectedDocId
         if (visibleDocuments.length === 0) {
-            if (selectedDocId !== null) {
-                setSelectedDocId(null);
-            }
             return;
         }
 
-        const hasSelected = selectedDocId && visibleDocuments.some((docItem) => docItem.id === selectedDocId);
-        if (!hasSelected) {
+        // Only auto-select a document if none is currently selected 
+        // We shouldn't force-select if a docid is in the URL but maybe hasn't flowed into visibleDocuments yet
+        if (!selectedDocId) {
             setSelectedDocId(visibleDocuments[0].id);
         }
     }, [visibleDocuments, selectedDocId]);
