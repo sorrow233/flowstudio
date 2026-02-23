@@ -299,13 +299,13 @@ const InspirationItem = ({
                             e.stopPropagation();
                             onSelect?.(idea.id);
                         }}
-                        className={`absolute top-3 right-3 z-20 h-6 w-6 rounded-full border transition-all flex items-center justify-center ${isSelected
-                            ? 'bg-sky-500 border-sky-500 text-white shadow-[0_0_0_3px_rgba(14,165,233,0.15)]'
+                        className={`absolute top-2.5 right-2.5 z-20 h-5 w-5 rounded-full border transition-all flex items-center justify-center ${isSelected
+                            ? 'bg-sky-500 border-sky-500 text-white shadow-[0_0_0_2px_rgba(14,165,233,0.15)]'
                             : 'bg-white/95 dark:bg-gray-900/95 border-gray-300 dark:border-gray-600 text-transparent'
                             }`}
                         aria-label={isSelected ? '取消选择' : '选择此项'}
                     >
-                        <Check size={12} strokeWidth={3} />
+                        <Check size={10} strokeWidth={3} />
                     </button>
                 )}
 
