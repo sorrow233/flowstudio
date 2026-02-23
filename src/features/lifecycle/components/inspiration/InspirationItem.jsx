@@ -28,6 +28,7 @@ const InspirationItem = ({
     aiAssistOptions = [],
     onSetAiAssistClass,
     showAiAssistControls = false,
+    disableDelete = false,
 }) => {
     const [isDragging, setIsDragging] = React.useState(false);
     const [isEditingContent, setIsEditingContent] = React.useState(false);
@@ -47,6 +48,7 @@ const InspirationItem = ({
         [idea.category, categories]
     );
     const isCompleted = idea.completed || false;
+    const isTopPriority = Boolean(idea.aiTopPriority) && !isArchiveView;
     const shouldHighlightExternalSource = Boolean(idea.source && !['user', 'ai-import'].includes(idea.source));
 
     // 缓存 parseRichText 计算结果，避免每次渲染都重新执行正则匹配
@@ -234,7 +236,7 @@ const InspirationItem = ({
                     return;
                 }
                 // Left swipe: Delete
-                if (info.offset.x < -200 || (info.velocity.x < -400 && info.offset.x < -50)) {
+                if (!disableDelete && (info.offset.x < -200 || (info.velocity.x < -400 && info.offset.x < -50))) {
                     setExitDirection('left');
                     onRemove(idea.id);
                 }
@@ -271,6 +273,7 @@ const InspirationItem = ({
                     ${shouldHighlightExternalSource
                         ? 'border-cyan-300 dark:border-cyan-600 ring-1 ring-cyan-200/50 dark:ring-cyan-700/30'
                         : 'border-gray-100 dark:border-gray-800'}
+                    ${isTopPriority ? 'ring-2 ring-amber-300/90 dark:ring-amber-500/70 border-amber-300 dark:border-amber-500/80 shadow-[0_0_24px_-14px_rgba(250,204,21,0.95)]' : ''}
                     ${isDragging ? '' : `hover:shadow-[0_0_20px_rgba(244,114,182,0.2)] hover:border-pink-200 dark:hover:border-pink-800/50`}
                     ${isSelected ? 'border-sky-200 bg-sky-50/45 shadow-[0_8px_22px_-18px_rgba(56,189,248,0.55)] dark:border-sky-700/65 dark:bg-slate-800/72' : ''}
                     ${isCompleted ? 'opacity-50' : ''}
@@ -391,9 +394,16 @@ const InspirationItem = ({
                             </div>
                         ) : (
                             /* View Mode: Parsed Rich Text */
-                            <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
-                                {parsedContent}
-                            </div>
+                            <>
+                                {isTopPriority && (
+                                    <div className="mb-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700">
+                                        AI 最高优先级
+                                    </div>
+                                )}
+                                <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
+                                    {parsedContent}
+                                </div>
+                            </>
                         )}
                         {isTodoView && showAiAssistControls && aiAssistOptions.length > 0 && (
                             <div

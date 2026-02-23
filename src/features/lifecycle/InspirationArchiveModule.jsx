@@ -125,6 +125,7 @@ const InspirationArchiveModule = () => {
                                     immediateSync?.();
                                 }}
                                 isArchiveView={true}
+                                disableDelete={Boolean(idea.aiSuggestedArchive)}
                                 copiedId={copiedId}
                             />
                         ))
