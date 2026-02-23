@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { ArrowRight, Lightbulb, Hash, X, Calendar, ListChecks, Sparkles, Copy, Settings2, Trash2, Archive } from 'lucide-react';
+import { ArrowRight, Lightbulb, Hash, X, Calendar, ListChecks, Sparkles, Copy, Settings2, Trash2 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -41,28 +41,9 @@ const decodeRoutePart = (value) => {
     }
 };
 
-const TODO_AI_NOTE_TAG_ARCHIVE = 'AI建议归档';
-const TODO_AI_NOTE_TAG_PRIORITY = 'AI最高优先级';
-
-const removeAiReasonTagFromNote = (note, tag) => {
-    return String(note || '')
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .filter((line) => !line.startsWith(`【${tag}】`))
-        .join('\n');
-};
-
-const upsertAiReasonToNote = (note, tag, reason) => {
-    const base = removeAiReasonTagFromNote(note, tag);
-    const tagged = reason ? `【${tag}】${reason}` : '';
-    return [base, tagged].filter(Boolean).join('\n');
-};
-
 const TODO_AI_HINT_SEEN_KEY = 'flowstudio_todo_ai_hint_seen';
 const TODO_AI_CLASS_UNCLASSIFIED = 'unclassified';
 const TODO_AI_FILTER_PENDING = 'pending';
-const TODO_AI_FILTER_ARCHIVE_SUGGESTED = 'ai_archive_suggested';
 
 const TODO_AI_CLASS_OPTIONS = [
     { value: 'ai_done', label: 'AI 完成' },
@@ -76,7 +57,6 @@ const TODO_AI_FILTER_OPTIONS = [
     { value: TODO_AI_FILTER_PENDING, label: '所有未完成' },
     { value: TODO_AI_CLASS_UNCLASSIFIED, label: '未分类' },
     ...TODO_AI_CLASS_OPTIONS,
-    { value: TODO_AI_FILTER_ARCHIVE_SUGGESTED, label: 'AI建议归档' },
 ];
 
 
@@ -161,15 +141,6 @@ const InspirationModule = () => {
         immediateSync?.();
     }, [updateProjectBase, immediateSync]);
 
-    const updateIdeasBatch = useCallback((updatesList) => {
-        if (!Array.isArray(updatesList) || updatesList.length === 0) return;
-        updatesList.forEach((item) => {
-            if (!item?.id || !item?.updates) return;
-            updateProjectBase(item.id, item.updates);
-        });
-        immediateSync?.();
-    }, [updateProjectBase, immediateSync]);
-
     // Filter for ideas (stage: 'inspiration')
     const ideas = useMemo(() =>
         allProjects.filter(p => (p.stage || 'inspiration') === 'inspiration'),
@@ -203,12 +174,7 @@ const InspirationModule = () => {
     const [aiClassifyText, setAiClassifyText] = useState('');
     const [aiClassifyError, setAiClassifyError] = useState('');
     const [aiClassifySuccessCount, setAiClassifySuccessCount] = useState(0);
-    const [aiArchiveText, setAiArchiveText] = useState('');
-    const [aiArchiveError, setAiArchiveError] = useState('');
-    const [aiArchiveSuccessCount, setAiArchiveSuccessCount] = useState(0);
-    const [aiPrioritySuccessCount, setAiPrioritySuccessCount] = useState(0);
     const [isClassifyPromptCopied, setIsClassifyPromptCopied] = useState(false);
-    const [isArchivePromptCopied, setIsArchivePromptCopied] = useState(false);
     const [isPromptCopied, setIsPromptCopied] = useState(false);
     const [isTodoCopied, setIsTodoCopied] = useState(false);
     const [isBatchCopied, setIsBatchCopied] = useState(false);
@@ -538,35 +504,12 @@ const InspirationModule = () => {
         const idea = ideas.find(i => i.id === id);
         if (idea) {
             setDeletedIdeas(prev => [...prev, { ...idea, wasArchived: true }]);
-            updateIdea(id, {
-                stage: 'archive',
-                archiveTimestamp: Date.now(),
-                aiTopPriority: false,
-                aiTopPriorityReason: null,
-            });
+            updateIdea(id, { stage: 'archive', archiveTimestamp: Date.now() });
             // Trigger header shake
             setArchiveShake(true);
             setTimeout(() => setArchiveShake(false), 500);
         }
     }, [ideas, updateIdea]);
-
-    const handleRestoreAiArchivedTodo = useCallback((id) => {
-        const archivedTodo = allProjects.find((item) => item.id === id);
-        if (!archivedTodo) return;
-
-        const noteWithoutArchiveTag = removeAiReasonTagFromNote(archivedTodo.note, TODO_AI_NOTE_TAG_ARCHIVE);
-        updateIdea(id, {
-            stage: 'inspiration',
-            completed: false,
-            aiSuggestedArchive: false,
-            aiSuggestedArchiveReason: null,
-            aiTopPriority: false,
-            aiTopPriorityReason: null,
-            note: noteWithoutArchiveTag || undefined,
-        });
-    }, [allProjects, updateIdea]);
-
-    const handleNoopRemove = useCallback(() => {}, []);
 
     const handleUndo = () => {
         if (deletedIdeas.length > 0) {
@@ -752,27 +695,6 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
 `;
     }, [unclassifiedTodoNumberedText]);
 
-    const aiArchivePriorityPromptTemplate = useMemo(() => {
-        return `这是待办清单。请只判断两类：
-1) 没有意义、可以清理归档
-2) AI 任务最高优先级（最应该马上推进）
-
-输出规则（必须严格遵守）：
-1. 只输出命中条目，不要输出任何额外解释。
-2. 每行格式固定：编号. 标签｜理由
-3. 标签只能是“归档”或“最高优先级”。
-4. 每条理由至少 10 个字（去掉空格后计算）。
-5. 如果都不命中，只输出：无
-
-示例：
-2. 归档｜目标已失效且投入产出极低，继续推进意义不大
-7. 最高优先级｜本周必须交付且阻塞后续多项任务，优先处理
-
-待办清单：
-${pendingTodoNumberedText || '暂无未办清单'}
-`;
-    }, [pendingTodoNumberedText]);
-
     const copyTextToClipboard = useCallback(async (text) => {
         if (!text || !text.trim()) return false;
 
@@ -939,211 +861,6 @@ ${pendingTodoNumberedText || '暂无未办清单'}
         }
     }, [copyTextToClipboard, aiClassifyPromptTemplate, unclassifiedTodoNumberedText]);
 
-    const handleCopyArchivePrompt = useCallback(async () => {
-        setAiAssistTab('archive');
-        setAiArchiveSuccessCount(0);
-        setAiPrioritySuccessCount(0);
-        if (!pendingTodoNumberedText) {
-            setAiArchiveError('当前没有未办清单可用于 AI 归档判断。');
-            return;
-        }
-
-        const success = await copyTextToClipboard(aiArchivePriorityPromptTemplate);
-        if (success) {
-            setIsArchivePromptCopied(true);
-            setTimeout(() => setIsArchivePromptCopied(false), 1500);
-            setAiArchiveError('');
-        } else {
-            setAiArchiveError('归档提示词复制失败，请手动复制。');
-        }
-    }, [copyTextToClipboard, aiArchivePriorityPromptTemplate, pendingTodoNumberedText]);
-
-    const parseAiArchivePriorityOutput = useCallback((rawText, total) => {
-        const archiveReasons = new Map();
-        const priorityReasons = new Map();
-        const invalidReasonIndexes = new Set();
-        let invalidFormatLines = 0;
-
-        const normalized = String(rawText || '')
-            .replace(/\r\n?/g, '\n')
-            .replace(/```[\w-]*\n?/g, '')
-            .replace(/```/g, '')
-            .replace(/^>\s?/gm, '')
-            .trim();
-
-        if (!normalized || total <= 0) {
-            return {
-                archiveReasons,
-                priorityReasons,
-                invalidReasonIndexes: [],
-                invalidFormatLines,
-            };
-        }
-
-        const parseLine = (line) => {
-            const cleanedLine = String(line || '')
-                .replace(/^\s*[-*•·]\s*/, '')
-                .trim();
-            if (!cleanedLine) return;
-
-            const noContentToken = cleanedLine.replace(/[。.!！?？\s]/g, '').toLowerCase();
-            if (noContentToken === '无' || noContentToken === 'none' || noContentToken === 'no') return;
-
-            const matched = cleanedLine.match(/^(\d+)\s*[.)、:：-]\s*(归档|清理归档|最高优先级|高优先级|优先级最高|top)\s*(?:[|｜:：-]\s*(.+))?$/i)
-                || cleanedLine.match(/^(\d+)\s+(归档|清理归档|最高优先级|高优先级|优先级最高|top)\s*(?:[|｜:：-]\s*(.+))?$/i);
-            if (!matched) {
-                invalidFormatLines += 1;
-                return;
-            }
-
-            const index = Number(matched[1]) - 1;
-            if (!Number.isInteger(index) || index < 0 || index >= total) return;
-
-            const label = String(matched[2] || '').toLowerCase();
-            const reason = String(matched[3] || '').trim();
-            const reasonLength = Array.from(reason.replace(/\s+/g, '')).length;
-            if (reasonLength < 10) {
-                invalidReasonIndexes.add(index + 1);
-                return;
-            }
-
-            const isArchive = /归档/.test(label);
-            if (isArchive) {
-                archiveReasons.set(index, reason);
-                priorityReasons.delete(index);
-                return;
-            }
-
-            if (archiveReasons.has(index)) return;
-            priorityReasons.set(index, reason);
-        };
-
-        normalized
-            .split('\n')
-            .map((line) => line.trim())
-            .filter(Boolean)
-            .forEach(parseLine);
-
-        return {
-            archiveReasons,
-            priorityReasons,
-            invalidReasonIndexes: Array.from(invalidReasonIndexes).sort((a, b) => a - b),
-            invalidFormatLines,
-        };
-    }, []);
-
-    const handleApplyAiArchiveSuggestion = useCallback(() => {
-        if (!aiArchiveText.trim()) {
-            setAiArchiveError('请先粘贴 AI 归档与优先级结果。');
-            setAiArchiveSuccessCount(0);
-            setAiPrioritySuccessCount(0);
-            return;
-        }
-
-        if (pendingTodoIdeas.length === 0) {
-            setAiArchiveError('当前没有可处理的未办清单。');
-            setAiArchiveSuccessCount(0);
-            setAiPrioritySuccessCount(0);
-            return;
-        }
-
-        const parsed = parseAiArchivePriorityOutput(aiArchiveText, pendingTodoIdeas.length);
-        const { archiveReasons, priorityReasons, invalidReasonIndexes, invalidFormatLines } = parsed;
-        const archiveCount = archiveReasons.size;
-        const priorityCount = priorityReasons.size;
-
-        if (archiveCount === 0 && priorityCount === 0) {
-            const formatHint = invalidFormatLines > 0 ? '请使用“编号. 归档｜理由”或“编号. 最高优先级｜理由”格式。' : '请确认 AI 输出不是“无”。';
-            const reasonHint = invalidReasonIndexes.length > 0
-                ? `以下编号理由少于10字：${invalidReasonIndexes.join('、')}。`
-                : '';
-            setAiArchiveError([formatHint, reasonHint].filter(Boolean).join(' '));
-            setAiArchiveSuccessCount(0);
-            setAiPrioritySuccessCount(0);
-            return;
-        }
-
-        const now = Date.now();
-        let archiveSerial = 0;
-        const updatesList = [];
-        pendingTodoIdeas.forEach((idea, index) => {
-            const archiveReason = archiveReasons.get(index);
-            const priorityReason = priorityReasons.get(index);
-
-            if (archiveReason) {
-                const nextNoteWithArchiveReason = upsertAiReasonToNote(idea.note, TODO_AI_NOTE_TAG_ARCHIVE, archiveReason);
-                const nextNote = removeAiReasonTagFromNote(nextNoteWithArchiveReason, TODO_AI_NOTE_TAG_PRIORITY);
-                const archivedAt = now + archiveSerial;
-                updatesList.push({
-                    id: idea.id,
-                    updates: {
-                        stage: 'archive',
-                        archiveTimestamp: archivedAt,
-                        aiSuggestedArchive: true,
-                        aiSuggestedArchiveTimestamp: archivedAt,
-                        aiSuggestedArchiveReason: archiveReason,
-                        aiTopPriority: false,
-                        aiTopPriorityReason: null,
-                        completed: true,
-                        note: nextNote || undefined,
-                    },
-                });
-                archiveSerial += 1;
-                return;
-            }
-
-            const shouldPriority = Boolean(priorityReason);
-            let nextNote = removeAiReasonTagFromNote(idea.note, TODO_AI_NOTE_TAG_ARCHIVE);
-            nextNote = shouldPriority
-                ? upsertAiReasonToNote(nextNote, TODO_AI_NOTE_TAG_PRIORITY, priorityReason)
-                : removeAiReasonTagFromNote(nextNote, TODO_AI_NOTE_TAG_PRIORITY);
-
-            const normalizedCurrentNote = String(idea.note || '')
-                .split('\n')
-                .map((line) => line.trim())
-                .filter(Boolean)
-                .join('\n');
-
-            const updates = {};
-            if ((idea.aiTopPriority || false) !== shouldPriority) {
-                updates.aiTopPriority = shouldPriority;
-            }
-            if (shouldPriority && (idea.aiTopPriorityReason || '') !== priorityReason) {
-                updates.aiTopPriorityReason = priorityReason;
-            }
-            if (!shouldPriority && idea.aiTopPriorityReason) {
-                updates.aiTopPriorityReason = null;
-            }
-            if (idea.aiSuggestedArchive) {
-                updates.aiSuggestedArchive = false;
-            }
-            if (idea.aiSuggestedArchiveReason) {
-                updates.aiSuggestedArchiveReason = null;
-            }
-            if (normalizedCurrentNote !== nextNote) {
-                updates.note = nextNote || undefined;
-            }
-
-            if (Object.keys(updates).length > 0) {
-                updatesList.push({ id: idea.id, updates });
-            }
-        });
-
-        updateIdeasBatch(updatesList);
-
-        if (invalidReasonIndexes.length > 0) {
-            setAiArchiveError(`以下编号理由少于10字，已跳过：${invalidReasonIndexes.join('、')}。`);
-        } else {
-            setAiArchiveError('');
-        }
-        setAiArchiveSuccessCount(archiveCount);
-        setAiPrioritySuccessCount(priorityCount);
-        setAiArchiveText('');
-        if (archiveCount > 0) {
-            setTodoAiFilter(TODO_AI_FILTER_ARCHIVE_SUGGESTED);
-        }
-    }, [aiArchiveText, pendingTodoIdeas, parseAiArchivePriorityOutput, updateIdeasBatch]);
-
     const handleApplyAiClassification = useCallback(() => {
         if (!aiClassifyText.trim()) {
             setAiClassifyError('请先粘贴 AI 分类结果。');
@@ -1204,22 +921,18 @@ ${pendingTodoNumberedText || '暂无未办清单'}
             return;
         }
 
-        const updatesList = [];
+        let updated = 0;
         latestByIndex.forEach((aiAssistClass, index) => {
             const targetIdea = unclassifiedTodoIdeas[index];
             if (!targetIdea) return;
-            updatesList.push({
-                id: targetIdea.id,
-                updates: { aiAssistClass },
-            });
+            updateIdea(targetIdea.id, { aiAssistClass });
+            updated += 1;
         });
 
-        updateIdeasBatch(updatesList);
-
         setAiClassifyError('');
-        setAiClassifySuccessCount(updatesList.length);
+        setAiClassifySuccessCount(updated);
         setAiClassifyText('');
-    }, [aiClassifyText, unclassifiedTodoIdeas, updateIdeasBatch]);
+    }, [aiClassifyText, unclassifiedTodoIdeas, updateIdea]);
 
     const handleCopySelectedIdeas = useCallback(async () => {
         if (selectedIdeaIds.length === 0) return;
@@ -1396,11 +1109,6 @@ ${pendingTodoNumberedText || '暂无未办清单'}
         setAiImportSuccessCount(0);
         setAiClassifyError('');
         setAiClassifySuccessCount(0);
-        setAiClassifyText('');
-        setAiArchiveError('');
-        setAiArchiveSuccessCount(0);
-        setAiPrioritySuccessCount(0);
-        setAiArchiveText('');
         setAiAssistTab('prompt');
         markTodoAiHintSeen();
         await handleCopyPrompt();
@@ -1460,21 +1168,10 @@ ${pendingTodoNumberedText || '暂无未办清单'}
             .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     }, [ideas]);
 
-    const aiSuggestedArchivedTodoIdeas = useMemo(() => {
-        return [...allProjects]
-            .filter((idea) =>
-                (idea.category || 'note') === 'todo'
-                && idea.stage === 'archive'
-                && idea.aiSuggestedArchive
-            )
-            .sort((a, b) => (b.archiveTimestamp || b.timestamp || 0) - (a.archiveTimestamp || a.timestamp || 0));
-    }, [allProjects]);
-
     const todoAiFilterCounts = useMemo(() => {
         const counts = {
             all: todoIdeas.length,
             [TODO_AI_FILTER_PENDING]: 0,
-            [TODO_AI_FILTER_ARCHIVE_SUGGESTED]: aiSuggestedArchivedTodoIdeas.length,
             [TODO_AI_CLASS_UNCLASSIFIED]: 0,
             ai_done: 0,
             ai_high: 0,
@@ -1494,15 +1191,12 @@ ${pendingTodoNumberedText || '暂无未办清单'}
         });
 
         return counts;
-    }, [todoIdeas, aiSuggestedArchivedTodoIdeas, getTodoAiAssistClass]);
+    }, [todoIdeas, getTodoAiAssistClass]);
 
     const filteredTodoIdeas = useMemo(() => {
         if (todoAiFilter === 'all') return todoIdeas;
         if (todoAiFilter === TODO_AI_FILTER_PENDING) {
             return todoIdeas.filter(idea => !idea.completed);
-        }
-        if (todoAiFilter === TODO_AI_FILTER_ARCHIVE_SUGGESTED) {
-            return aiSuggestedArchivedTodoIdeas;
         }
 
         if (todoAiFilter === TODO_AI_CLASS_UNCLASSIFIED) {
@@ -1514,7 +1208,7 @@ ${pendingTodoNumberedText || '暂无未办清单'}
         return todoIdeas.filter(idea =>
             !idea.completed && getTodoAiAssistClass(idea) === todoAiFilter
         );
-    }, [todoIdeas, aiSuggestedArchivedTodoIdeas, todoAiFilter, getTodoAiAssistClass]);
+    }, [todoIdeas, todoAiFilter, getTodoAiAssistClass]);
 
     // Sort ideas by timestamp (memoized) and filter by category
     const sortedIdeas = useMemo(() => {
@@ -1546,25 +1240,13 @@ ${pendingTodoNumberedText || '暂无未办清单'}
         return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
     }, []);
 
-    const isAiArchiveFilterActive = selectedCategory === 'todo' && todoAiFilter === TODO_AI_FILTER_ARCHIVE_SUGGESTED;
-
-    useEffect(() => {
-        if (!isAiArchiveFilterActive) return;
-        if (!isSelectionMode) return;
-        setIsSelectionMode(false);
-        setSelectedIdeaIds([]);
-    }, [isAiArchiveFilterActive, isSelectionMode]);
-
     // 代办分类按天分组数据
     const todosByDay = useMemo(() => {
         if (selectedCategory !== 'todo') return null;
 
         const groups = {};
         filteredTodoIdeas.forEach(idea => {
-            const sourceTimestamp = isAiArchiveFilterActive
-                ? (idea.aiSuggestedArchiveTimestamp || idea.archiveTimestamp || idea.timestamp || Date.now())
-                : (idea.timestamp || Date.now());
-            const date = new Date(sourceTimestamp);
+            const date = new Date(idea.timestamp || Date.now());
             const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
             if (!groups[dateKey]) {
@@ -1578,7 +1260,7 @@ ${pendingTodoNumberedText || '暂无未办清单'}
         });
 
         return Object.values(groups).sort((a, b) => b.date - a.date);
-    }, [filteredTodoIdeas, isAiArchiveFilterActive, selectedCategory]);
+    }, [filteredTodoIdeas, selectedCategory]);
 
     const visibleIdeaCount = useMemo(() => {
         if (selectedCategory === 'todo') return filteredTodoIdeas.length;
@@ -1974,16 +1656,14 @@ ${pendingTodoNumberedText || '暂无未办清单'}
                                                                 idea={idea}
                                                                 allProjects={allProjects}
                                                                 categories={categoryConfigList}
-                                                                onRemove={isAiArchiveFilterActive ? handleNoopRemove : handleRemove}
-                                                                onArchive={isAiArchiveFilterActive ? handleRestoreAiArchivedTodo : handleArchive}
+                                                                onRemove={handleRemove}
+                                                                onArchive={handleArchive}
                                                                 onCopy={handleCopy}
                                                                 onUpdateColor={handleUpdateColor}
                                                                 onUpdateNote={handleUpdateNote}
                                                                 onUpdateContent={handleUpdateContent}
                                                                 onToggleComplete={handleToggleComplete}
                                                                 copiedId={copiedId}
-                                                                isArchiveView={isAiArchiveFilterActive}
-                                                                disableDelete={isAiArchiveFilterActive}
                                                                 isSelectionMode={isSelectionMode}
                                                                 isSelected={selectedIdeaIds.includes(idea.id)}
                                                                 onSelect={handleToggleSelect}
@@ -2178,7 +1858,7 @@ ${pendingTodoNumberedText || '暂无未办清单'}
                                         </div>
                                         <h3 className="text-[30px] leading-tight font-light text-gray-900 dark:text-white tracking-tight">AI 批量导入代办</h3>
                                         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 font-light">
-                                            保持当前交互不变，双击代办色点即可打开。支持同一批导入 AI 归档建议与最高优先级高亮，理由会自动写入注释。
+                                            保持当前交互不变，双击代办色点即可打开。复制提示词给你常用的 AI，再把结果粘贴回来一键导入。
                                         </p>
                                     </div>
                                     <button
@@ -2192,7 +1872,7 @@ ${pendingTodoNumberedText || '暂无未办清单'}
                             </div>
 
                             <div className="p-6 space-y-5 max-h-[72vh] overflow-y-auto">
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                     <button
                                         onClick={handleCopyPrompt}
                                         className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-pink-400 text-white hover:bg-pink-500 transition-colors text-sm font-medium shadow-lg shadow-pink-100 dark:shadow-pink-900/30"
@@ -2213,13 +1893,6 @@ ${pendingTodoNumberedText || '暂无未办清单'}
                                     >
                                         <Copy size={14} />
                                         {isClassifyPromptCopied ? '分类提示词已复制' : '复制 AI 分类提示词'}
-                                    </button>
-                                    <button
-                                        onClick={handleCopyArchivePrompt}
-                                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-gray-800 text-pink-500 dark:text-pink-300 border border-pink-100 dark:border-pink-800 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors text-sm font-medium"
-                                    >
-                                        <Archive size={14} />
-                                        {isArchivePromptCopied ? '归档提示词已复制' : '复制 AI 归档+优先级提示词'}
                                     </button>
                                 </div>
 
@@ -2253,16 +1926,6 @@ ${pendingTodoNumberedText || '暂无未办清单'}
                                             }`}
                                     >
                                         导入分类
-                                    </button>
-                                    <button
-                                        type="button"
-                                        disabled
-                                        className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${aiAssistTab === 'archive'
-                                            ? 'bg-white dark:bg-gray-800 text-pink-500 dark:text-pink-300 shadow-sm'
-                                            : 'text-gray-500 dark:text-gray-400'
-                                            }`}
-                                    >
-                                        导入归档/优先级
                                     </button>
                                 </div>
 
@@ -2321,20 +1984,9 @@ ${pendingTodoNumberedText || '暂无未办清单'}
                                             </p>
                                         </>
                                     )}
-
-                                    {aiAssistTab === 'archive' && (
-                                        <>
-                                            <div className="text-[11px] font-semibold tracking-wide uppercase text-pink-500 dark:text-pink-300">
-                                                导入 AI 建议归档与最高优先级（同一批）
-                                            </div>
-                                            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                格式：编号. 归档｜理由（至少10字） 或 编号. 最高优先级｜理由（至少10字）
-                                            </p>
-                                        </>
-                                    )}
                                 </div>
 
-                                {(aiAssistTab === 'prompt' || aiAssistTab === 'todo') && (
+                                {aiAssistTab !== 'classify' && (
                                     <>
                                         <div>
                                             <p className="mb-3 text-xs text-gray-400 dark:text-gray-500">
@@ -2429,54 +2081,6 @@ ${pendingTodoNumberedText || '暂无未办清单'}
                                             >
                                                 <ArrowRight size={14} />
                                                 导入分类
-                                            </button>
-                                        </div>
-                                    </>
-                                )}
-
-                                {aiAssistTab === 'archive' && (
-                                    <>
-                                        <div>
-                                            <label className="block text-xs font-semibold tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">
-                                                粘贴 AI 归档与优先级输出（同一批导入）
-                                            </label>
-                                            <textarea
-                                                value={aiArchiveText}
-                                                onChange={(e) => {
-                                                    setAiArchiveText(e.target.value);
-                                                    if (aiArchiveError) setAiArchiveError('');
-                                                }}
-                                                placeholder={'示例：\n2. 归档｜目标已失效且投入产出极低，继续推进意义不大\n7. 最高优先级｜本周必须交付且阻塞后续多项任务，优先处理'}
-                                                className="w-full min-h-[220px] rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-200 p-4 outline-none focus:ring-2 focus:ring-pink-300/50 dark:focus:ring-pink-700/50 focus:border-pink-300 dark:focus:border-pink-700 transition-all"
-                                            />
-                                        </div>
-
-                                        {aiArchiveError && (
-                                            <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/50 rounded-xl px-3 py-2">
-                                                {aiArchiveError}
-                                            </div>
-                                        )}
-
-                                        {(aiArchiveSuccessCount > 0 || aiPrioritySuccessCount > 0) && (
-                                            <div className="text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 rounded-xl px-3 py-2">
-                                                已归档 {aiArchiveSuccessCount} 条，已标记最高优先级 {aiPrioritySuccessCount} 条。
-                                            </div>
-                                        )}
-
-                                        <div className="flex items-center justify-end gap-2 pt-1">
-                                            <button
-                                                onClick={() => setIsAiImportOpen(false)}
-                                                className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                                            >
-                                                关闭
-                                            </button>
-                                            <button
-                                                onClick={handleApplyAiArchiveSuggestion}
-                                                disabled={!aiArchiveText.trim()}
-                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-pink-400 text-white text-sm font-medium hover:bg-pink-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-lg shadow-pink-100 dark:shadow-pink-900/30"
-                                            >
-                                                <ArrowRight size={14} />
-                                                导入归档/优先级
                                             </button>
                                         </div>
                                     </>
