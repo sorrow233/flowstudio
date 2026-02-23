@@ -48,8 +48,6 @@ const UserIdentityPage = () => {
     const { user } = useAuth();
     const [copyStatus, setCopyStatus] = useState('');
     const [copiedKey, setCopiedKey] = useState('');
-    const [tokenLoading, setTokenLoading] = useState(false);
-    const [tokenError, setTokenError] = useState('');
     const [idToken, setIdToken] = useState('');
     const [refreshToken, setRefreshToken] = useState('');
     const [tokenPayload, setTokenPayload] = useState(null);
@@ -73,7 +71,7 @@ const UserIdentityPage = () => {
     const tokenExpiresAt = formatTimestamp(tokenPayload?.exp);
 
     const curlCommand = useMemo(() => {
-        if (!refreshToken) return '请先点击“刷新 Token”获取后再复制';
+        if (!refreshToken) return '请先登录并等待 Refresh Token 注入后再调用。';
         return `curl -s \"https://flowstudio.catzz.work/api/todo?docId=flowstudio_v1&mode=unclassified&cursor=0&limit=50\" -H \"X-Firebase-Refresh-Token: ${refreshToken}\"`;
     }, [refreshToken]);
 
@@ -81,24 +79,45 @@ const UserIdentityPage = () => {
         return `const refreshToken = auth.currentUser?.stsTokenManager?.refreshToken;\nconst res = await fetch('https://flowstudio.catzz.work/api/todo?docId=flowstudio_v1&mode=unclassified&cursor=0&limit=50', {\n  headers: { 'X-Firebase-Refresh-Token': refreshToken },\n});\nconst data = await res.json();\nconsole.log(data.numberedText);`;
     }, []);
 
-    const requiredApiItems = useMemo(() => {
+    const apiBundleText = useMemo(() => {
         return [
-            { key: 'apiUrl', label: 'API 地址', value: 'https://flowstudio.catzz.work/api/todo' },
-            { key: 'method', label: '请求方法', value: 'GET' },
-            { key: 'authHeaderLong', label: '长期认证头', value: 'X-Firebase-Refresh-Token: <Firebase Refresh Token>' },
-            { key: 'authHeaderShort', label: '短期认证头', value: 'Authorization: Bearer <Firebase ID Token>' },
-            { key: 'docId', label: 'docId（默认）', value: 'flowstudio_v1' },
-            { key: 'mode', label: 'mode 可选值', value: 'unclassified | all | ai_done | ai_high | ai_mid | self' },
-            { key: 'pagination', label: '分页参数', value: 'cursor=0, limit=1（逐条）；limit=50（批量）' },
-            { key: 'uidRequired', label: '当前 Firebase UID', value: user?.uid || '未知', tone: 'uid' },
-            { key: 'tokenPreview', label: '当前 ID Token（预览）', value: tokenPreview },
-            { key: 'refreshTokenPreview', label: '当前 Refresh Token（预览）', value: refreshTokenPreview },
-            { key: 'tokenUserId', label: 'Token 内 user_id', value: tokenUserId },
-            { key: 'tokenAudience', label: 'Token audience', value: tokenAudience },
-            { key: 'tokenIssuedAt', label: 'Token 签发时间', value: tokenIssuedAt },
-            { key: 'tokenExpiresAt', label: 'Token 过期时间', value: tokenExpiresAt },
-        ];
-    }, [refreshTokenPreview, tokenAudience, tokenExpiresAt, tokenIssuedAt, tokenPreview, tokenUserId, user?.uid]);
+            'API 必备数据',
+            'API 地址: https://flowstudio.catzz.work/api/todo',
+            '请求方法: GET',
+            '长期认证头: X-Firebase-Refresh-Token: <Firebase Refresh Token>',
+            '短期认证头: Authorization: Bearer <Firebase ID Token>',
+            'docId（默认）: flowstudio_v1',
+            'mode 可选值: unclassified | all | ai_done | ai_high | ai_mid | self',
+            '分页参数: cursor=0, limit=1（逐条）；limit=50（批量）',
+            `当前 Firebase UID: ${user?.uid || '未知'}`,
+            `当前 ID Token（预览）: ${tokenPreview}`,
+            `当前 Refresh Token（预览）: ${refreshTokenPreview}`,
+            `Token 内 user_id: ${tokenUserId}`,
+            `Token audience: ${tokenAudience}`,
+            `Token 签发时间: ${tokenIssuedAt}`,
+            `Token 过期时间: ${tokenExpiresAt}`,
+            `当前完整 ID Token: ${idToken || '未获取'}`,
+            `当前完整 Refresh Token: ${refreshToken || '未获取'}`,
+            '',
+            'cURL（长期调用）:',
+            curlCommand,
+            '',
+            'Fetch 模板:',
+            fetchTemplate
+        ].join('\n');
+    }, [
+        curlCommand,
+        fetchTemplate,
+        idToken,
+        refreshToken,
+        refreshTokenPreview,
+        tokenAudience,
+        tokenExpiresAt,
+        tokenIssuedAt,
+        tokenPreview,
+        tokenUserId,
+        user?.uid
+    ]);
 
     useEffect(() => {
         return () => {
@@ -110,8 +129,6 @@ const UserIdentityPage = () => {
 
     const loadIdToken = useCallback(async (forceRefresh = false) => {
         if (!user) return;
-        setTokenLoading(true);
-        setTokenError('');
 
         try {
             const token = await user.getIdToken(forceRefresh);
@@ -121,12 +138,9 @@ const UserIdentityPage = () => {
             setTokenPayload(parseFirebaseTokenPayload(token));
         } catch (error) {
             console.error('[UserIdentityPage] Failed to load Firebase token:', error);
-            setTokenError('ID Token 获取失败，请确认当前登录状态后重试。');
             setIdToken('');
             setRefreshToken('');
             setTokenPayload(null);
-        } finally {
-            setTokenLoading(false);
         }
     }, [user]);
 
@@ -288,15 +302,7 @@ const UserIdentityPage = () => {
                     </div>
 
                     <ApiRequiredDataPanel
-                        requiredItems={requiredApiItems}
-                        tokenLoading={tokenLoading}
-                        tokenError={tokenError}
-                        onCopyItem={handleCopy}
-                        onRefreshToken={() => loadIdToken(true)}
-                        onCopyToken={() => handleCopy(idToken || '', 'fullIdToken')}
-                        onCopyRefreshToken={() => handleCopy(refreshToken || '', 'fullRefreshToken')}
-                        onCopyCurl={() => handleCopy(curlCommand, 'curlCommand')}
-                        onCopyFetch={() => handleCopy(fetchTemplate, 'fetchTemplate')}
+                        onCopyBundle={() => handleCopy(apiBundleText, 'apiBundle')}
                         copyStatus={copyStatus}
                         copiedKey={copiedKey}
                     />
