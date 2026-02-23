@@ -828,7 +828,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
     const handleCopyPendingTodos = useCallback(async () => {
         setAiAssistTab('todo');
         if (!pendingTodoNumberedText) {
-            setAiImportError('当前没有未完成代办可复制。');
+            setAiImportError('当前没有未办清单可复制。');
             return;
         }
 
@@ -838,7 +838,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             setTimeout(() => setIsTodoCopied(false), 1500);
             setAiImportError('');
         } else {
-            setAiImportError('未完成代办复制失败，请手动复制。');
+            setAiImportError('未办清单复制失败，请手动复制。');
         }
     }, [copyTextToClipboard, pendingTodoNumberedText]);
 
@@ -1938,7 +1938,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                         <>
                                             <div className="flex items-center justify-between gap-2">
                                                 <div className="text-[11px] font-semibold tracking-wide uppercase text-pink-500 dark:text-pink-300">
-                                                    未完成清单（全部）
+                                                    所有未办清单
                                                 </div>
                                                 <span className="text-[11px] text-gray-400 dark:text-gray-500">
                                                     {pendingTodoIdeas.length} 项
@@ -1946,7 +1946,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                             </div>
                                             {pendingTodoIdeas.length === 0 && (
                                                 <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                    当前没有未完成代办。
+                                                    当前没有未办清单。
                                                 </p>
                                             )}
                                             {pendingTodoIdeas.length > 0 && (
