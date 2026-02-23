@@ -54,9 +54,3 @@ Flow Studio 是一款追求**极致视觉**与**心流体验**的全流程工作
 - **Frontend**: React, Vite, TailwindCSS
 - **State**: Yjs (CRDTs), IndexedDB, Zustand
 - **Backend**: Cloudflare Functions, Firebase
-
----
-
-### Automation
-
-- 本地 Python 每日拉取待办清单（含 launchd 自动执行）：`docs/todo-python-daily.md`
