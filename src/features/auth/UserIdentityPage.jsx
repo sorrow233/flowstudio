@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, CheckCircle2, AlertCircle, UserRound, Fingerprint, Sparkles, ShieldCheck } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import IdentityFieldCard from './components/IdentityFieldCard';
+import ApiRequiredDataPanel from './components/ApiRequiredDataPanel';
 
 const fallbackCopy = (text) => {
     const textarea = document.createElement('textarea');
@@ -17,10 +18,40 @@ const fallbackCopy = (text) => {
     return copied;
 };
 
+const parseFirebaseTokenPayload = (token) => {
+    if (!token || typeof token !== 'string') return null;
+    const parts = token.split('.');
+    if (parts.length < 2) return null;
+
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+
+    try {
+        return JSON.parse(atob(padded));
+    } catch {
+        return null;
+    }
+};
+
+const formatTimestamp = (unixSeconds) => {
+    if (!Number.isInteger(unixSeconds) || unixSeconds <= 0) return '未知';
+    return new Date(unixSeconds * 1000).toLocaleString('zh-CN', { hour12: false });
+};
+
+const buildTokenPreview = (token) => {
+    if (!token) return '未获取';
+    if (token.length <= 40) return token;
+    return `${token.slice(0, 26)}...${token.slice(-18)}`;
+};
+
 const UserIdentityPage = () => {
     const { user } = useAuth();
     const [copyStatus, setCopyStatus] = useState('');
     const [copiedKey, setCopiedKey] = useState('');
+    const [tokenLoading, setTokenLoading] = useState(false);
+    const [tokenError, setTokenError] = useState('');
+    const [idToken, setIdToken] = useState('');
+    const [tokenPayload, setTokenPayload] = useState(null);
     const resetTimerRef = useRef(null);
 
     const identityItems = useMemo(() => {
@@ -33,6 +64,38 @@ const UserIdentityPage = () => {
         ];
     }, [user]);
 
+    const tokenPreview = useMemo(() => buildTokenPreview(idToken), [idToken]);
+    const tokenUserId = tokenPayload?.user_id || tokenPayload?.sub || '未知';
+    const tokenAudience = tokenPayload?.aud || '未知';
+    const tokenIssuedAt = formatTimestamp(tokenPayload?.iat);
+    const tokenExpiresAt = formatTimestamp(tokenPayload?.exp);
+
+    const curlCommand = useMemo(() => {
+        if (!idToken) return '请先点击“刷新 Token”获取后再复制';
+        return `curl -s \"https://flowstudio.catzz.work/api/todo?docId=flowstudio_v1&mode=unclassified&cursor=0&limit=50\" -H \"Authorization: Bearer ${idToken}\"`;
+    }, [idToken]);
+
+    const fetchTemplate = useMemo(() => {
+        return `const token = await auth.currentUser.getIdToken(true);\nconst res = await fetch('https://flowstudio.catzz.work/api/todo?docId=flowstudio_v1&mode=unclassified&cursor=0&limit=50', {\n  headers: { Authorization: \`Bearer \${token}\` },\n});\nconst data = await res.json();\nconsole.log(data.numberedText);`;
+    }, []);
+
+    const requiredApiItems = useMemo(() => {
+        return [
+            { key: 'apiUrl', label: 'API 地址', value: 'https://flowstudio.catzz.work/api/todo' },
+            { key: 'method', label: '请求方法', value: 'GET' },
+            { key: 'authHeader', label: 'Authorization 格式', value: 'Bearer <Firebase ID Token>' },
+            { key: 'docId', label: 'docId（默认）', value: 'flowstudio_v1' },
+            { key: 'mode', label: 'mode 可选值', value: 'unclassified | all | ai_done | ai_high | ai_mid | self' },
+            { key: 'pagination', label: '分页参数', value: 'cursor=0, limit=1（逐条）；limit=50（批量）' },
+            { key: 'uidRequired', label: '当前 Firebase UID', value: user?.uid || '未知', tone: 'uid' },
+            { key: 'tokenPreview', label: '当前 ID Token（预览）', value: tokenPreview },
+            { key: 'tokenUserId', label: 'Token 内 user_id', value: tokenUserId },
+            { key: 'tokenAudience', label: 'Token audience', value: tokenAudience },
+            { key: 'tokenIssuedAt', label: 'Token 签发时间', value: tokenIssuedAt },
+            { key: 'tokenExpiresAt', label: 'Token 过期时间', value: tokenExpiresAt },
+        ];
+    }, [tokenAudience, tokenExpiresAt, tokenIssuedAt, tokenPreview, tokenUserId, user?.uid]);
+
     useEffect(() => {
         return () => {
             if (resetTimerRef.current) {
@@ -40,6 +103,30 @@ const UserIdentityPage = () => {
             }
         };
     }, []);
+
+    const loadIdToken = useCallback(async (forceRefresh = false) => {
+        if (!user) return;
+        setTokenLoading(true);
+        setTokenError('');
+
+        try {
+            const token = await user.getIdToken(forceRefresh);
+            setIdToken(token || '');
+            setTokenPayload(parseFirebaseTokenPayload(token));
+        } catch (error) {
+            console.error('[UserIdentityPage] Failed to load Firebase token:', error);
+            setTokenError('ID Token 获取失败，请确认当前登录状态后重试。');
+            setIdToken('');
+            setTokenPayload(null);
+        } finally {
+            setTokenLoading(false);
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (!user) return;
+        void loadIdToken(false);
+    }, [loadIdToken, user]);
 
     const resetCopyHint = () => {
         if (resetTimerRef.current) {
@@ -190,6 +277,19 @@ const UserIdentityPage = () => {
                                 />
                             ))}
                     </div>
+
+                    <ApiRequiredDataPanel
+                        requiredItems={requiredApiItems}
+                        tokenLoading={tokenLoading}
+                        tokenError={tokenError}
+                        onCopyItem={handleCopy}
+                        onRefreshToken={() => loadIdToken(true)}
+                        onCopyToken={() => handleCopy(idToken || '', 'fullIdToken')}
+                        onCopyCurl={() => handleCopy(curlCommand, 'curlCommand')}
+                        onCopyFetch={() => handleCopy(fetchTemplate, 'fetchTemplate')}
+                        copyStatus={copyStatus}
+                        copiedKey={copiedKey}
+                    />
 
                     <div className="mt-6 flex flex-wrap items-center gap-3">
                         <button
