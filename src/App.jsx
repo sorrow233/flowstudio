@@ -39,7 +39,7 @@ function App() {
                         {!isIdentityRoute && <Navbar />}
 
                         <main className="flex-1 overflow-y-auto w-full no-scrollbar">
-                            <div className={`${isIdentityRoute ? 'max-w-4xl mx-auto h-full px-4 py-8 md:px-6 md:py-12' : `max-w-7xl mx-auto h-full px-4 md:px-6 ${location.pathname.startsWith('/writing') ? 'pb-0' : 'pb-20'}`}`}>
+                            <div className={`${isIdentityRoute ? 'max-w-5xl mx-auto h-full px-4 py-8 md:px-6 md:py-12' : `max-w-7xl mx-auto h-full px-4 md:px-6 ${location.pathname.startsWith('/writing') ? 'pb-0' : 'pb-20'}`}`}>
                                 <ErrorBoundary>
                                     <Routes location={location} key={routeSectionKey}>
                                         <Route path="/" element={<Navigate to="/inspiration" replace />} />
