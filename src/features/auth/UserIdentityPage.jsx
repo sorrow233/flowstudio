@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, CheckCircle2, AlertCircle, UserRound, Fingerprint, Sparkles, ShieldCheck } from 'lucide-react';
+import { Copy, CheckCircle2, AlertCircle, UserRound, ShieldCheck } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import IdentityFieldCard from './components/IdentityFieldCard';
 
@@ -73,99 +73,58 @@ const UserIdentityPage = () => {
 
     if (!user) {
         return (
-            <div className="relative min-h-[72vh] w-full overflow-hidden rounded-[32px]">
-                <div className="absolute inset-0 bg-gradient-to-br from-rose-50 via-violet-50 to-sky-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900" />
-                <motion.div
-                    aria-hidden
-                    className="absolute -top-24 -left-12 h-72 w-72 rounded-full bg-pink-300/40 dark:bg-pink-500/20 blur-3xl"
-                    animate={{ x: [0, 20, -8, 0], y: [0, -10, 14, 0] }}
-                    transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-                />
-                <motion.div
-                    aria-hidden
-                    className="absolute -bottom-20 -right-10 h-80 w-80 rounded-full bg-sky-300/40 dark:bg-sky-500/20 blur-3xl"
-                    animate={{ x: [0, -18, 10, 0], y: [0, 16, -8, 0] }}
-                    transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-                />
-
-                <div className="relative z-10 h-full min-h-[72vh] flex items-center justify-center px-3">
-                    <motion.div
-                        initial={{ opacity: 0, y: 18 }}
+            <div className="relative min-h-[70vh] w-full overflow-hidden rounded-[24px] bg-gradient-to-b from-slate-50/70 to-slate-100/80 dark:from-slate-950/70 dark:to-slate-900/80">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#e2e8f033,transparent_58%)] dark:bg-[radial-gradient(circle_at_top,#47556944,transparent_62%)]" />
+                <div className="relative z-10 min-h-[70vh] flex items-center justify-center p-4">
+                    <motion.section
+                        initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="w-full max-w-xl rounded-[30px] border border-white/60 dark:border-gray-700/70 bg-white/75 dark:bg-gray-900/70 backdrop-blur-xl shadow-[0_30px_90px_-35px_rgba(15,23,42,0.35)] p-7 md:p-9"
+                        className="w-full max-w-xl rounded-2xl border border-gray-200/80 dark:border-gray-700/80 bg-white/90 dark:bg-gray-900/70 shadow-[0_18px_60px_-28px_rgba(15,23,42,0.45)] p-5 md:p-6"
                     >
-                        <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-4">
-                            <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                        <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-3">
+                            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                         </div>
-                        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-3">FlowStudio 账号信息</h1>
-                        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                            当前未登录，无法显示账号 UID。请先在 FlowStudio 中登录账号，再访问本页面。
+                        <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">FlowStudio 账号信息</h1>
+                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                            当前未登录，无法显示账号 UID。请先登录，再访问本页面。
                         </p>
-                        <div className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100/90 dark:bg-gray-800/90 text-xs text-gray-600 dark:text-gray-300 font-mono">
-                            路由：/__flowstudio/whoami
+                        <div className="mt-4 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-100/90 dark:bg-slate-800/80 text-[11px] text-slate-600 dark:text-slate-300 font-mono">
+                            /__flowstudio/whoami
                         </div>
-                    </motion.div>
+                    </motion.section>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="relative min-h-[72vh] w-full overflow-hidden rounded-[32px]">
-            <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-indigo-50 to-sky-100 dark:from-gray-950 dark:via-slate-900 dark:to-gray-900" />
-
-            <motion.div
-                aria-hidden
-                className="absolute -top-24 -left-14 h-72 w-72 rounded-full bg-fuchsia-300/40 dark:bg-fuchsia-500/20 blur-3xl"
-                animate={{ x: [0, 26, -10, 0], y: [0, -14, 10, 0] }}
-                transition={{ duration: 9.5, repeat: Infinity, ease: 'easeInOut' }}
-            />
-            <motion.div
-                aria-hidden
-                className="absolute -bottom-24 right-[-30px] h-80 w-80 rounded-full bg-sky-300/40 dark:bg-sky-500/25 blur-3xl"
-                animate={{ x: [0, -22, 12, 0], y: [0, 16, -8, 0] }}
-                transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
-            />
-            <motion.div
-                aria-hidden
-                className="absolute top-[36%] left-[46%] h-52 w-52 rounded-full bg-indigo-300/25 dark:bg-indigo-400/15 blur-3xl"
-                animate={{ scale: [1, 1.08, 0.96, 1] }}
-                transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-            />
-
-            <div className="relative z-10 h-full min-h-[72vh] flex items-center justify-center px-3 py-6 md:px-4">
+        <div className="relative min-h-[70vh] w-full overflow-hidden rounded-[24px] bg-gradient-to-b from-slate-50/65 to-slate-100/85 dark:from-slate-950/75 dark:to-slate-900/80">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#cbd5e133,transparent_56%)] dark:bg-[radial-gradient(circle_at_top,#33415544,transparent_62%)]" />
+            <div className="relative z-10 min-h-[70vh] flex items-center justify-center p-3 md:p-5">
                 <motion.section
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.35, ease: 'easeOut' }}
-                    className="w-full max-w-3xl rounded-[30px] border border-white/70 dark:border-gray-700/70 bg-white/72 dark:bg-gray-900/70 backdrop-blur-xl shadow-[0_28px_100px_-34px_rgba(15,23,42,0.4)] p-5 md:p-8"
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                    className="w-full max-w-2xl rounded-2xl border border-gray-200/80 dark:border-gray-700/80 bg-white/88 dark:bg-gray-900/72 backdrop-blur-xl shadow-[0_22px_70px_-34px_rgba(15,23,42,0.45)] p-4 md:p-5"
                 >
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-3">
-                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-pink-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                                <UserRound className="w-6 h-6" />
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 flex items-center justify-center shrink-0">
+                                <UserRound className="w-5 h-5" />
                             </div>
-                            <div>
-                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700 text-[11px] tracking-wide uppercase text-gray-500 dark:text-gray-300">
-                                    <ShieldCheck className="w-3.5 h-3.5" />
-                                    私密路由
-                                </div>
-                                <h1 className="mt-2 text-[1.7rem] leading-tight font-semibold text-gray-900 dark:text-gray-100">
-                                    FlowStudio 账号信息
-                                </h1>
-                                <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                                    显示当前登录用户标识，用于绑定外部流程
-                                </p>
+                            <div className="min-w-0">
+                                <h1 className="text-[1.05rem] md:text-[1.12rem] font-semibold text-gray-900 dark:text-gray-100 truncate">FlowStudio 账号信息</h1>
+                                <p className="text-[12px] md:text-[12.5px] text-gray-600 dark:text-gray-300 truncate">当前登录账号的 UID 与绑定信息</p>
                             </div>
                         </div>
 
-                        <div className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-300">
-                            <Sparkles className="w-3.5 h-3.5 text-pink-500" />
-                            仅你可见
+                        <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border border-gray-200/85 dark:border-gray-700/80 bg-slate-50/85 dark:bg-slate-800/65 text-[11px] text-slate-600 dark:text-slate-300 shrink-0">
+                            <ShieldCheck className="w-3.5 h-3.5" />
+                            私密
                         </div>
                     </div>
 
-                    <div className="mt-6">
+                    <div className="mt-4">
                         <IdentityFieldCard
                             label="Firebase UID"
                             value={user.uid || '暂无 UID'}
@@ -176,7 +135,7 @@ const UserIdentityPage = () => {
                         />
                     </div>
 
-                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2.5">
                         {identityItems
                             .filter((item) => item.key !== 'uid')
                             .map((item) => (
@@ -191,18 +150,17 @@ const UserIdentityPage = () => {
                             ))}
                     </div>
 
-                    <div className="mt-6 flex flex-wrap items-center gap-3">
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
                         <button
                             onClick={() => handleCopy(user.uid || '', 'uid')}
-                            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:opacity-90 transition-opacity"
+                            className="inline-flex items-center gap-2 rounded-lg px-3.5 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:opacity-90 transition-opacity text-sm"
                         >
-                            <Copy className="w-4 h-4" />
+                            <Copy className="w-[14px] h-[14px]" />
                             复制 UID
                         </button>
 
-                        <div className="inline-flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300">
-                            <Fingerprint className="w-4 h-4" />
-                            可点击右侧图标复制任意字段
+                        <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100/90 dark:bg-slate-800/70 text-xs text-slate-600 dark:text-slate-300 font-mono">
+                            /__flowstudio/whoami
                         </div>
                     </div>
 
@@ -213,9 +171,9 @@ const UserIdentityPage = () => {
                                 initial={{ opacity: 0, y: 6 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -6 }}
-                                className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30"
+                                className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30"
                             >
-                                <CheckCircle2 className="w-4 h-4" />
+                                <CheckCircle2 className="w-3.5 h-3.5" />
                                 已复制到剪贴板
                             </motion.div>
                         )}
@@ -226,19 +184,13 @@ const UserIdentityPage = () => {
                                 initial={{ opacity: 0, y: 6 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -6 }}
-                                className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm bg-red-50 text-red-700 border border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/30"
+                                className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-red-50 text-red-700 border border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/30"
                             >
-                                <AlertCircle className="w-4 h-4" />
+                                <AlertCircle className="w-3.5 h-3.5" />
                                 复制失败，请手动选择文本复制
                             </motion.div>
                         )}
                     </AnimatePresence>
-
-                    <div className="mt-6 pt-4 border-t border-gray-200/80 dark:border-gray-700/70">
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 dark:bg-gray-800/70 border border-gray-200/80 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-300 font-mono">
-                            /__flowstudio/whoami
-                        </div>
-                    </div>
                 </motion.section>
             </div>
         </div>
