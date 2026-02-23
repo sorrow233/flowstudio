@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
-import { Copy, CheckCircle2, AlertCircle, UserRound } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Copy, CheckCircle2, AlertCircle, UserRound, Fingerprint, Sparkles, ShieldCheck } from 'lucide-react';
 import { useAuth } from './AuthContext';
+import IdentityFieldCard from './components/IdentityFieldCard';
 
 const fallbackCopy = (text) => {
     const textarea = document.createElement('textarea');
@@ -18,105 +20,226 @@ const fallbackCopy = (text) => {
 const UserIdentityPage = () => {
     const { user } = useAuth();
     const [copyStatus, setCopyStatus] = useState('');
+    const [copiedKey, setCopiedKey] = useState('');
+    const resetTimerRef = useRef(null);
 
     const identityItems = useMemo(() => {
         if (!user) return [];
         return [
-            { label: 'Firebase UID', value: user.uid || '' },
+            { key: 'uid', label: 'Firebase UID', value: user.uid || '' },
             { label: '邮箱', value: user.email || '未绑定邮箱' },
             { label: '显示名称', value: user.displayName || '未设置' },
             { label: '手机号', value: user.phoneNumber || '未绑定手机号' },
         ];
     }, [user]);
 
-    const handleCopyUid = async () => {
-        if (!user?.uid) return;
+    useEffect(() => {
+        return () => {
+            if (resetTimerRef.current) {
+                window.clearTimeout(resetTimerRef.current);
+            }
+        };
+    }, []);
+
+    const resetCopyHint = () => {
+        if (resetTimerRef.current) {
+            window.clearTimeout(resetTimerRef.current);
+        }
+        resetTimerRef.current = window.setTimeout(() => {
+            setCopyStatus('');
+            setCopiedKey('');
+        }, 1800);
+    };
+
+    const handleCopy = async (value, key = 'uid') => {
+        if (!value) return;
         try {
             if (navigator.clipboard?.writeText) {
-                await navigator.clipboard.writeText(user.uid);
+                await navigator.clipboard.writeText(value);
             } else {
-                const copied = fallbackCopy(user.uid);
+                const copied = fallbackCopy(value);
                 if (!copied) throw new Error('fallback copy failed');
             }
             setCopyStatus('success');
+            setCopiedKey(key);
         } catch (error) {
             console.error('[UserIdentityPage] Copy UID failed:', error);
             setCopyStatus('error');
+            setCopiedKey(key);
         } finally {
-            window.setTimeout(() => setCopyStatus(''), 1800);
+            resetCopyHint();
         }
     };
 
     if (!user) {
         return (
-            <div className="h-full min-h-[70vh] flex items-center justify-center">
-                <div className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-lg p-8">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-4">
-                        <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-3">FlowStudio 账号信息</h1>
-                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                        当前未登录，无法显示账号 UID。请先在 FlowStudio 中登录账号，然后重新打开此页面。
-                    </p>
-                    <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                        路由地址：<span className="font-mono">/__flowstudio/whoami</span>
-                    </p>
+            <div className="relative min-h-[72vh] w-full overflow-hidden rounded-[32px]">
+                <div className="absolute inset-0 bg-gradient-to-br from-rose-50 via-violet-50 to-sky-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900" />
+                <motion.div
+                    aria-hidden
+                    className="absolute -top-24 -left-12 h-72 w-72 rounded-full bg-pink-300/40 dark:bg-pink-500/20 blur-3xl"
+                    animate={{ x: [0, 20, -8, 0], y: [0, -10, 14, 0] }}
+                    transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+                />
+                <motion.div
+                    aria-hidden
+                    className="absolute -bottom-20 -right-10 h-80 w-80 rounded-full bg-sky-300/40 dark:bg-sky-500/20 blur-3xl"
+                    animate={{ x: [0, -18, 10, 0], y: [0, 16, -8, 0] }}
+                    transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+                />
+
+                <div className="relative z-10 h-full min-h-[72vh] flex items-center justify-center px-3">
+                    <motion.div
+                        initial={{ opacity: 0, y: 18 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="w-full max-w-xl rounded-[30px] border border-white/60 dark:border-gray-700/70 bg-white/75 dark:bg-gray-900/70 backdrop-blur-xl shadow-[0_30px_90px_-35px_rgba(15,23,42,0.35)] p-7 md:p-9"
+                    >
+                        <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-4">
+                            <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-3">FlowStudio 账号信息</h1>
+                        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                            当前未登录，无法显示账号 UID。请先在 FlowStudio 中登录账号，再访问本页面。
+                        </p>
+                        <div className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100/90 dark:bg-gray-800/90 text-xs text-gray-600 dark:text-gray-300 font-mono">
+                            路由：/__flowstudio/whoami
+                        </div>
+                    </motion.div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="h-full min-h-[70vh] flex items-center justify-center">
-            <div className="w-full max-w-2xl bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-lg p-8 md:p-10">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
-                        <UserRound className="w-6 h-6 text-indigo-600 dark:text-indigo-300" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">FlowStudio 账号信息</h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">仅显示当前登录用户自己的账号标识信息</p>
-                    </div>
-                </div>
+        <div className="relative min-h-[72vh] w-full overflow-hidden rounded-[32px]">
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-indigo-50 to-sky-100 dark:from-gray-950 dark:via-slate-900 dark:to-gray-900" />
 
-                <div className="space-y-4">
-                    {identityItems.map((item) => (
-                        <div key={item.label} className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-4 py-3">
-                            <div className="text-xs tracking-wide text-gray-500 dark:text-gray-400 uppercase">{item.label}</div>
-                            <div className="mt-1 font-mono text-sm md:text-base text-gray-900 dark:text-gray-100 break-all select-text">
-                                {item.value}
+            <motion.div
+                aria-hidden
+                className="absolute -top-24 -left-14 h-72 w-72 rounded-full bg-fuchsia-300/40 dark:bg-fuchsia-500/20 blur-3xl"
+                animate={{ x: [0, 26, -10, 0], y: [0, -14, 10, 0] }}
+                transition={{ duration: 9.5, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.div
+                aria-hidden
+                className="absolute -bottom-24 right-[-30px] h-80 w-80 rounded-full bg-sky-300/40 dark:bg-sky-500/25 blur-3xl"
+                animate={{ x: [0, -22, 12, 0], y: [0, 16, -8, 0] }}
+                transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.div
+                aria-hidden
+                className="absolute top-[36%] left-[46%] h-52 w-52 rounded-full bg-indigo-300/25 dark:bg-indigo-400/15 blur-3xl"
+                animate={{ scale: [1, 1.08, 0.96, 1] }}
+                transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+            />
+
+            <div className="relative z-10 h-full min-h-[72vh] flex items-center justify-center px-3 py-6 md:px-4">
+                <motion.section
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35, ease: 'easeOut' }}
+                    className="w-full max-w-3xl rounded-[30px] border border-white/70 dark:border-gray-700/70 bg-white/72 dark:bg-gray-900/70 backdrop-blur-xl shadow-[0_28px_100px_-34px_rgba(15,23,42,0.4)] p-5 md:p-8"
+                >
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-pink-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                                <UserRound className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700 text-[11px] tracking-wide uppercase text-gray-500 dark:text-gray-300">
+                                    <ShieldCheck className="w-3.5 h-3.5" />
+                                    私密路由
+                                </div>
+                                <h1 className="mt-2 text-[1.7rem] leading-tight font-semibold text-gray-900 dark:text-gray-100">
+                                    FlowStudio 账号信息
+                                </h1>
+                                <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                                    显示当前登录用户标识，用于绑定外部流程
+                                </p>
                             </div>
                         </div>
-                    ))}
-                </div>
 
-                <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <button
-                        onClick={handleCopyUid}
-                        className="inline-flex items-center gap-2 rounded-xl px-4 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:opacity-90 transition-opacity"
-                    >
-                        <Copy className="w-4 h-4" />
-                        复制 UID
-                    </button>
+                        <div className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-300">
+                            <Sparkles className="w-3.5 h-3.5 text-pink-500" />
+                            仅你可见
+                        </div>
+                    </div>
 
-                    {copyStatus === 'success' && (
-                        <span className="inline-flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-                            <CheckCircle2 className="w-4 h-4" />
-                            UID 已复制
-                        </span>
-                    )}
+                    <div className="mt-6">
+                        <IdentityFieldCard
+                            label="Firebase UID"
+                            value={user.uid || '暂无 UID'}
+                            tone="uid"
+                            copyable
+                            isCopied={copyStatus === 'success' && copiedKey === 'uid'}
+                            onCopy={() => handleCopy(user.uid || '', 'uid')}
+                        />
+                    </div>
 
-                    {copyStatus === 'error' && (
-                        <span className="inline-flex items-center gap-1 text-sm text-red-600 dark:text-red-400">
-                            <AlertCircle className="w-4 h-4" />
-                            复制失败，请手动选择复制
-                        </span>
-                    )}
-                </div>
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {identityItems
+                            .filter((item) => item.key !== 'uid')
+                            .map((item) => (
+                                <IdentityFieldCard
+                                    key={item.label}
+                                    label={item.label}
+                                    value={item.value}
+                                    copyable
+                                    isCopied={copyStatus === 'success' && copiedKey === item.label}
+                                    onCopy={() => handleCopy(item.value, item.label)}
+                                />
+                            ))}
+                    </div>
 
-                <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">
-                    路由地址：<span className="font-mono">/__flowstudio/whoami</span>
-                </p>
+                    <div className="mt-6 flex flex-wrap items-center gap-3">
+                        <button
+                            onClick={() => handleCopy(user.uid || '', 'uid')}
+                            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:opacity-90 transition-opacity"
+                        >
+                            <Copy className="w-4 h-4" />
+                            复制 UID
+                        </button>
+
+                        <div className="inline-flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300">
+                            <Fingerprint className="w-4 h-4" />
+                            可点击右侧图标复制任意字段
+                        </div>
+                    </div>
+
+                    <AnimatePresence mode="wait">
+                        {copyStatus === 'success' && (
+                            <motion.div
+                                key="copy-success"
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -6 }}
+                                className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30"
+                            >
+                                <CheckCircle2 className="w-4 h-4" />
+                                已复制到剪贴板
+                            </motion.div>
+                        )}
+
+                        {copyStatus === 'error' && (
+                            <motion.div
+                                key="copy-error"
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -6 }}
+                                className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm bg-red-50 text-red-700 border border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/30"
+                            >
+                                <AlertCircle className="w-4 h-4" />
+                                复制失败，请手动选择文本复制
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    <div className="mt-6 pt-4 border-t border-gray-200/80 dark:border-gray-700/70">
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 dark:bg-gray-800/70 border border-gray-200/80 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-300 font-mono">
+                            /__flowstudio/whoami
+                        </div>
+                    </div>
+                </motion.section>
             </div>
         </div>
     );
