@@ -13,6 +13,7 @@ import CommandCenterModule from './features/blueprint/CommandCenterModule';
 import DataCenterModule from './features/lifecycle/DataCenterModule';
 import ShareViewPage from './features/share/components/ShareViewPage';
 import ShareReceiver from './features/share/ShareReceiver';
+import UserIdentityPage from './features/auth/UserIdentityPage';
 
 import { Toaster } from 'sonner';
 import { KeymapProvider, ShortcutHelpModal, useBrowserIntercept } from './features/shortcuts';
@@ -24,6 +25,7 @@ function App() {
     const location = useLocation();
     const { isIOSStandalone } = useIOSStandalone();
     const routeSectionKey = location.pathname.split('/')[1] || 'root';
+    const isIdentityRoute = location.pathname === '/__flowstudio/whoami';
 
     // 拦截浏览器默认快捷键 (Cmd+S, Cmd+P 等)
     useBrowserIntercept();
@@ -34,10 +36,10 @@ function App() {
                 <KeymapProvider>
                     <div className={`flex flex-col h-screen min-h-dvh h-dvh overflow-hidden bg-gray-50/50 dark:bg-gray-950 ${isIOSStandalone ? 'ios-standalone' : ''}`}>
                         <Toaster position="top-right" richColors />
-                        <Navbar />
+                        {!isIdentityRoute && <Navbar />}
 
                         <main className="flex-1 overflow-y-auto w-full no-scrollbar">
-                            <div className={`max-w-7xl mx-auto h-full px-4 md:px-6 ${location.pathname.startsWith('/writing') ? 'pb-0' : 'pb-20'}`}>
+                            <div className={`${isIdentityRoute ? 'max-w-3xl mx-auto h-full px-4 py-8 md:px-6 md:py-12' : `max-w-7xl mx-auto h-full px-4 md:px-6 ${location.pathname.startsWith('/writing') ? 'pb-0' : 'pb-20'}`}`}>
                                 <ErrorBoundary>
                                     <Routes location={location} key={routeSectionKey}>
                                         <Route path="/" element={<Navigate to="/inspiration" replace />} />
@@ -56,6 +58,7 @@ function App() {
                                         <Route path="/data" element={<DataCenterModule />} />
                                         <Route path="/share/:id" element={<ShareViewPage />} />
                                         <Route path="/share-receiver" element={<ShareReceiver />} />
+                                        <Route path="/__flowstudio/whoami" element={<UserIdentityPage />} />
                                         <Route path="*" element={<Navigate to="/" replace />} />
                                     </Routes>
                                 </ErrorBoundary>
