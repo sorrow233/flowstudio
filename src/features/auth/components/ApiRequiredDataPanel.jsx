@@ -9,6 +9,7 @@ const ApiRequiredDataPanel = ({
     onCopyItem,
     onRefreshToken,
     onCopyToken,
+    onCopyRefreshToken,
     onCopyCurl,
     onCopyFetch,
     copyStatus,
@@ -52,6 +53,7 @@ const ApiRequiredDataPanel = ({
                         key={item.key}
                         label={item.label}
                         value={item.value}
+                        hideValue
                         tone={item.tone || 'default'}
                         copyable
                         isCopied={copyStatus === 'success' && copiedKey === item.key}
@@ -68,6 +70,15 @@ const ApiRequiredDataPanel = ({
                 >
                     <KeyRound className="w-4 h-4" />
                     复制完整 ID Token
+                </button>
+
+                <button
+                    type="button"
+                    onClick={onCopyRefreshToken}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm hover:opacity-90 transition-opacity"
+                >
+                    <KeyRound className="w-4 h-4" />
+                    复制长期 Refresh Token
                 </button>
 
                 <button

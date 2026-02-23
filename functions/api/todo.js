@@ -3,6 +3,7 @@ import { base64ToUint8Array, getStateChunkDocId } from '../../src/features/sync/
 import { normalizeIdeaTextForExport } from '../../src/features/lifecycle/components/inspiration/categoryTransferUtils.js';
 
 const FIREBASE_PROJECT_ID = 'flow-7ffad';
+const FIREBASE_WEB_API_KEY = 'AIzaSyA20FrNmdIPE2Sb9r97s7cj2w6MLYgcB_M';
 const DEFAULT_DOC_ID = 'flowstudio_v1';
 
 const TODO_MODES = new Set(['all', 'unclassified', 'ai_done', 'ai_high', 'ai_mid', 'self']);
@@ -10,7 +11,7 @@ const TODO_MODES = new Set(['all', 'unclassified', 'ai_done', 'ai_high', 'ai_mid
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Firebase-Refresh-Token',
 };
 
 function sleep(ms) {
@@ -55,6 +56,31 @@ function getBearerToken(request) {
     return match ? match[1].trim() : '';
 }
 
+function getRefreshTokenFromHeader(request) {
+    const headerValue = request.headers.get('X-Firebase-Refresh-Token') || '';
+    return headerValue.trim();
+}
+
+function resolveAuthInput(request) {
+    const idToken = getBearerToken(request);
+    if (idToken) {
+        return {
+            authMode: 'id_token',
+            token: idToken,
+        };
+    }
+
+    const refreshToken = getRefreshTokenFromHeader(request);
+    if (refreshToken) {
+        return {
+            authMode: 'refresh_token',
+            token: refreshToken,
+        };
+    }
+
+    return null;
+}
+
 function decodeBase64Url(value = '') {
     const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
     const padding = '='.repeat((4 - (normalized.length % 4)) % 4);
@@ -73,6 +99,37 @@ function getUidFromFirebaseIdToken(idToken) {
     } catch {
         return null;
     }
+}
+
+async function exchangeRefreshTokenForIdToken(refreshToken, apiKey) {
+    const tokenApiUrl = `https://securetoken.googleapis.com/v1/token?key=${encodeURIComponent(apiKey)}`;
+    const response = await fetchWithRetry(tokenApiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken,
+        }).toString(),
+    }, {
+        retries: 3,
+        baseDelayMs: 350,
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload?.id_token) {
+        const reason = payload?.error?.message || payload?.error?.errors?.[0]?.message || 'Refresh token exchange failed';
+        const error = new Error(reason);
+        error.status = response.status === 400 ? 401 : response.status;
+        throw error;
+    }
+
+    return {
+        idToken: payload.id_token,
+        userId: payload.user_id || null,
+        expiresIn: Number(payload.expires_in) || null,
+    };
 }
 
 function parseInteger(rawValue, fallback, min, max) {
@@ -229,16 +286,35 @@ function buildJsonResponse(body, status = 200) {
     });
 }
 
-export async function onRequestGet({ request }) {
+export async function onRequestGet({ request, env }) {
     try {
-        const token = getBearerToken(request);
-        if (!token) {
-            return buildJsonResponse({ error: 'Missing Bearer token.' }, 401);
+        const authInput = resolveAuthInput(request);
+        if (!authInput) {
+            return buildJsonResponse({
+                error: 'Missing auth credential. Provide Authorization: Bearer <ID Token> or X-Firebase-Refresh-Token.',
+            }, 401);
         }
 
-        const userId = getUidFromFirebaseIdToken(token);
+        let token = authInput.token;
+        let userId = null;
+
+        if (authInput.authMode === 'refresh_token') {
+            const apiKey = (env?.FIREBASE_WEB_API_KEY || FIREBASE_WEB_API_KEY || '').trim();
+            if (!apiKey) {
+                return buildJsonResponse({ error: 'Missing Firebase Web API key for refresh token flow.' }, 500);
+            }
+
+            const exchanged = await exchangeRefreshTokenForIdToken(authInput.token, apiKey);
+            token = exchanged.idToken;
+            userId = exchanged.userId;
+        }
+
         if (!userId) {
-            return buildJsonResponse({ error: 'Invalid Firebase ID token.' }, 401);
+            userId = getUidFromFirebaseIdToken(token);
+        }
+
+        if (!userId) {
+            return buildJsonResponse({ error: 'Invalid Firebase auth token.' }, 401);
         }
 
         const url = new URL(request.url);
@@ -292,6 +368,7 @@ export async function onRequestGet({ request }) {
         return buildJsonResponse({
             success: true,
             userId,
+            authMode: authInput.authMode,
             docId,
             mode,
             cursor,

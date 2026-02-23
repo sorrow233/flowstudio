@@ -11,6 +11,7 @@ const IdentityFieldCard = ({
     label,
     value,
     tone = 'default',
+    hideValue = false,
     copyable = false,
     isCopied = false,
     onCopy
@@ -23,14 +24,16 @@ const IdentityFieldCard = ({
             className={`rounded-2xl p-[1px] ${toneClassMap[tone] || toneClassMap.default}`}
         >
             <div className="rounded-2xl bg-white/85 dark:bg-gray-900/80 backdrop-blur-md border border-white/60 dark:border-gray-700/60 px-4 py-3.5">
-                <div className="flex items-start gap-3">
+                <div className={`flex gap-3 ${hideValue ? 'items-center' : 'items-start'}`}>
                     <div className="min-w-0 flex-1">
                         <div className="text-[11px] tracking-[0.12em] text-gray-500 dark:text-gray-400 uppercase">
                             {label}
                         </div>
-                        <div className="mt-1.5 font-mono text-sm md:text-[0.96rem] text-gray-900 dark:text-gray-100 break-all select-text leading-relaxed">
-                            {value}
-                        </div>
+                        {!hideValue && (
+                            <div className="mt-1.5 font-mono text-sm md:text-[0.96rem] text-gray-900 dark:text-gray-100 break-all select-text leading-relaxed">
+                                {value}
+                            </div>
+                        )}
                     </div>
 
                     {copyable && (
