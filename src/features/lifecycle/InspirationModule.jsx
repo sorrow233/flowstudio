@@ -43,6 +43,7 @@ const decodeRoutePart = (value) => {
 
 const TODO_AI_HINT_SEEN_KEY = 'flowstudio_todo_ai_hint_seen';
 const TODO_AI_CLASS_UNCLASSIFIED = 'unclassified';
+const TODO_AI_FILTER_PENDING = 'pending';
 
 const TODO_AI_CLASS_OPTIONS = [
     { value: 'ai_done', label: 'AI 完成' },
@@ -53,6 +54,7 @@ const TODO_AI_CLASS_OPTIONS = [
 
 const TODO_AI_FILTER_OPTIONS = [
     { value: 'all', label: '全部' },
+    { value: TODO_AI_FILTER_PENDING, label: '所有未完成' },
     { value: TODO_AI_CLASS_UNCLASSIFIED, label: '未分类' },
     ...TODO_AI_CLASS_OPTIONS,
 ];
@@ -1169,6 +1171,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
     const todoAiFilterCounts = useMemo(() => {
         const counts = {
             all: todoIdeas.length,
+            [TODO_AI_FILTER_PENDING]: 0,
             [TODO_AI_CLASS_UNCLASSIFIED]: 0,
             ai_done: 0,
             ai_high: 0,
@@ -1178,6 +1181,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
 
         todoIdeas.forEach((idea) => {
             if (idea.completed) return;
+            counts[TODO_AI_FILTER_PENDING] += 1;
             const aiClass = getTodoAiAssistClass(idea);
             if (Object.hasOwn(counts, aiClass)) {
                 counts[aiClass] += 1;
@@ -1191,6 +1195,9 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
 
     const filteredTodoIdeas = useMemo(() => {
         if (todoAiFilter === 'all') return todoIdeas;
+        if (todoAiFilter === TODO_AI_FILTER_PENDING) {
+            return todoIdeas.filter(idea => !idea.completed);
+        }
 
         if (todoAiFilter === TODO_AI_CLASS_UNCLASSIFIED) {
             return todoIdeas.filter(idea =>
