@@ -625,6 +625,15 @@ const InspirationModule = () => {
         }
     };
 
+    const pendingTodoIdeas = useMemo(() => {
+        return ideas
+            .filter(idea =>
+                (idea.category || 'note') === 'todo'
+                && !idea.completed
+            )
+            .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+    }, [ideas]);
+
     const unclassifiedTodoIdeas = useMemo(() => {
         return ideas
             .filter(idea =>
@@ -634,6 +643,13 @@ const InspirationModule = () => {
             )
             .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
     }, [ideas]);
+
+    const pendingTodoNumberedText = useMemo(() => {
+        return pendingTodoIdeas
+            .map((idea, index) => `${index + 1}. ${normalizeIdeaTextForExport(idea.content)}`)
+            .filter(Boolean)
+            .join('\n');
+    }, [pendingTodoIdeas]);
 
     const unclassifiedTodoNumberedText = useMemo(() => {
         return unclassifiedTodoIdeas
@@ -809,22 +825,22 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         }
     }, [aiPromptTemplate, copyTextToClipboard]);
 
-    const handleCopyUnclassifiedTodos = useCallback(async () => {
+    const handleCopyPendingTodos = useCallback(async () => {
         setAiAssistTab('todo');
-        if (!unclassifiedTodoNumberedText) {
-            setAiImportError('当前没有未分类代办可复制。');
+        if (!pendingTodoNumberedText) {
+            setAiImportError('当前没有未完成代办可复制。');
             return;
         }
 
-        const success = await copyTextToClipboard(unclassifiedTodoNumberedText);
+        const success = await copyTextToClipboard(pendingTodoNumberedText);
         if (success) {
             setIsTodoCopied(true);
             setTimeout(() => setIsTodoCopied(false), 1500);
             setAiImportError('');
         } else {
-            setAiImportError('未分类代办复制失败，请手动复制。');
+            setAiImportError('未完成代办复制失败，请手动复制。');
         }
-    }, [copyTextToClipboard, unclassifiedTodoNumberedText]);
+    }, [copyTextToClipboard, pendingTodoNumberedText]);
 
     const handleCopyClassifyPrompt = useCallback(async () => {
         setAiAssistTab('classify');
@@ -1858,11 +1874,11 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                         {isPromptCopied ? '提示词已复制' : '复制 AI 提示词'}
                                     </button>
                                     <button
-                                        onClick={handleCopyUnclassifiedTodos}
+                                        onClick={handleCopyPendingTodos}
                                         className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-gray-800 text-pink-500 dark:text-pink-300 border border-pink-100 dark:border-pink-800 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors text-sm font-medium"
                                     >
                                         <ListChecks size={14} />
-                                        {isTodoCopied ? '未分类代办已复制' : `复制未分类代办（${unclassifiedTodoIdeas.length}）`}
+                                        {isTodoCopied ? '所有未办清单已复制' : `复制所有未办清单（${pendingTodoIdeas.length}）`}
                                     </button>
                                     <button
                                         onClick={handleCopyClassifyPrompt}
@@ -1892,7 +1908,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                             : 'text-gray-500 dark:text-gray-400'
                                             }`}
                                     >
-                                        未分类清单
+                                        未办清单
                                     </button>
                                     <button
                                         type="button"
@@ -1922,20 +1938,20 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                         <>
                                             <div className="flex items-center justify-between gap-2">
                                                 <div className="text-[11px] font-semibold tracking-wide uppercase text-pink-500 dark:text-pink-300">
-                                                    待分类清单（未分类）
+                                                    未完成清单（全部）
                                                 </div>
                                                 <span className="text-[11px] text-gray-400 dark:text-gray-500">
-                                                    {unclassifiedTodoIdeas.length} 项
+                                                    {pendingTodoIdeas.length} 项
                                                 </span>
                                             </div>
-                                            {unclassifiedTodoIdeas.length === 0 && (
+                                            {pendingTodoIdeas.length === 0 && (
                                                 <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                    当前没有未分类代办。
+                                                    当前没有未完成代办。
                                                 </p>
                                             )}
-                                            {unclassifiedTodoIdeas.length > 0 && (
+                                            {pendingTodoIdeas.length > 0 && (
                                                 <div className="mt-2 max-h-36 overflow-y-auto space-y-1.5 pr-1">
-                                                    {unclassifiedTodoIdeas.map((idea, index) => (
+                                                    {pendingTodoIdeas.map((idea, index) => (
                                                         <div
                                                             key={idea.id}
                                                             className="flex items-start gap-2 px-2 py-1.5 rounded-lg bg-white/70 dark:bg-gray-800/70 border border-pink-100/80 dark:border-pink-900/40"
