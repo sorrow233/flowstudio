@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { ArrowRight, Lightbulb, Hash, X, Calendar, ListChecks, Sparkles, Copy, Settings2 } from 'lucide-react';
+import { ArrowRight, Lightbulb, Hash, X, Calendar, ListChecks, Sparkles, Copy, Settings2, Trash2 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -291,17 +291,42 @@ const InspirationModule = () => {
         );
     }, []);
 
-    const handleBatchMove = (category) => {
+    const handleBatchMove = useCallback((category) => {
         if (selectedIdeaIds.length === 0) return;
 
         selectedIdeaIds.forEach(id => {
-            updateIdea(id, { category });
+            updateProjectBase(id, { category });
         });
+        immediateSync?.();
 
         // 成功后退出多选模式
         setIsSelectionMode(false);
         setSelectedIdeaIds([]);
-    };
+    }, [selectedIdeaIds, updateProjectBase, immediateSync]);
+
+    const handleBatchDelete = useCallback(() => {
+        if (selectedIdeaIds.length === 0) return;
+
+        const selectedIdSet = new Set(selectedIdeaIds);
+        const selectedIdeas = ideas.filter((idea) => selectedIdSet.has(idea.id));
+        if (selectedIdeas.length === 0) return;
+
+        const confirmed = window.confirm(`确认删除已选 ${selectedIdeas.length} 项吗？可在 5 秒内撤销。`);
+        if (!confirmed) return;
+
+        setDeletedIdeas((prev) => [
+            ...prev,
+            ...selectedIdeas.map((idea) => ({ ...idea, wasArchived: false })),
+        ]);
+
+        selectedIdeas.forEach((idea) => {
+            removeProjectBase(idea.id);
+        });
+        immediateSync?.();
+
+        setIsSelectionMode(false);
+        setSelectedIdeaIds([]);
+    }, [selectedIdeaIds, ideas, removeProjectBase, immediateSync]);
 
     // Combine and sort projects for tags (Memoized)
     const allProjectTags = useMemo(() => {
@@ -2355,6 +2380,14 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                 className="px-3 py-2 bg-pink-50 dark:bg-pink-900/30 hover:bg-pink-100 dark:hover:bg-pink-900/50 text-pink-600 dark:text-pink-300 rounded-xl text-xs font-medium transition-colors active:scale-95 flex-shrink-0"
                             >
                                 {isBatchCopied ? '已复制选中' : '复制选中'}
+                            </button>
+
+                            <button
+                                onClick={handleBatchDelete}
+                                className="px-3 py-2 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-300 rounded-xl text-xs font-medium transition-colors active:scale-95 flex-shrink-0 inline-flex items-center gap-1.5"
+                            >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                删除选中
                             </button>
 
                             <div className="grid grid-cols-4 gap-2 flex-1 min-w-0 md:flex md:items-center md:gap-2 md:overflow-x-auto md:no-scrollbar md:justify-start">
