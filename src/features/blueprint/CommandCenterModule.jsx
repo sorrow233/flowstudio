@@ -17,6 +17,7 @@ import { useSyncedProjects } from '../sync/useSyncStore';
 
 import { useTranslation } from '../i18n';
 import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
+import { useAppShortcut } from '../shortcuts';
 
 
 
@@ -76,6 +77,13 @@ const CommandCenterModule = () => {
     const [sharingCommand, setSharingCommand] = useState(null);
     const [renamingCategory, setRenamingCategory] = useState(null);
     const [renameValue, setRenameValue] = useState('');
+
+    // Blueprint 撤销快捷键：Cmd/Ctrl + Z
+    useAppShortcut('UNDO', () => {
+        undo();
+    }, {
+        enabled: canUndo
+    });
 
 
     // Category rename handler
@@ -394,7 +402,7 @@ const CommandCenterModule = () => {
                                 {/* Search & Undo/Redo Container */}
                                 <div className="flex items-center gap-2">
                                     {/* Undo/Redo Buttons (Moved here) */}
-                                    <div className="hidden md:flex items-center gap-1">
+                                    <div className="flex md:hidden items-center gap-1">
                                         <button
                                             onClick={undo}
                                             disabled={!canUndo}
