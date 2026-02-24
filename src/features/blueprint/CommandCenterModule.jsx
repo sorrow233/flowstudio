@@ -10,6 +10,7 @@ import CommandForm from './components/CommandForm';
 import CategoryRenameModal from './components/CategoryRenameModal';
 import { SharePublishModal, ShareBrowserModal } from '../share';
 import LibraryImportModal from './components/LibraryImportModal';
+import { resolveTagsForSubmit } from './utils/commandTagDraft';
 
 import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
@@ -95,6 +96,15 @@ const CommandCenterModule = () => {
         if (newCmd.type === 'link' && !newCmd.url.trim()) return;
         if (newCmd.type !== 'link' && !newCmd.content.trim()) return;
 
+        const tagsForSubmit = resolveTagsForSubmit({
+            commandType: newCmd.type,
+            tags: newCmd.tags || [],
+            draftTag: newTag,
+            editingTagId,
+            fallbackContent: newCmd.content.trim(),
+            createId: uuidv4
+        });
+
         if (newCmd.id) {
             // Update existing
             updateCommand(newCmd.id, {
@@ -102,7 +112,7 @@ const CommandCenterModule = () => {
                 content: newCmd.content.trim(),
                 url: newCmd.url.trim(),
                 type: newCmd.type,
-                tags: newCmd.tags || [],
+                tags: tagsForSubmit,
                 category: newCmd.category || 'general'
             });
         } else {
@@ -112,7 +122,7 @@ const CommandCenterModule = () => {
                 content: newCmd.content.trim(),
                 url: newCmd.url.trim(),
                 type: newCmd.type,
-                tags: newCmd.tags || [],
+                tags: tagsForSubmit,
                 category: newCmd.category || 'general',
                 stageIds: [activeStage],
                 createdAt: Date.now()
@@ -120,6 +130,8 @@ const CommandCenterModule = () => {
         }
 
         setNewCmd({ title: '', content: '', type: 'utility', url: '', tags: [], category: selectedCategory });
+        setNewTag({ label: '', value: '' });
+        setEditingTagId(null);
         setIsAdding(false);
     };
 
