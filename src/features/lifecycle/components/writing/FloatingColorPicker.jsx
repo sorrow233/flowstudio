@@ -3,6 +3,12 @@ import { motion } from 'framer-motion';
 import { Bold, Code2, Eraser, Italic, Link2 } from 'lucide-react';
 import { WRITING_HIGHLIGHT_COLORS } from './writingHighlightColors';
 
+const HEADING_ACTIONS = [
+    { id: 'h1', label: 'H1', labelKey: 'writing.h1', fallback: 'H1' },
+    { id: 'h2', label: 'H2', labelKey: 'writing.h2', fallback: 'H2' },
+    { id: 'h3', label: 'H3', labelKey: 'writing.h3', fallback: 'H3' },
+];
+
 const INLINE_MARKDOWN_ACTIONS = [
     { id: 'bold', icon: Bold, labelKey: 'writing.bold', fallback: '粗体' },
     { id: 'italic', icon: Italic, labelKey: 'writing.italic', fallback: '斜体' },
@@ -30,6 +36,29 @@ const FloatingColorPicker = ({
             style={{ top: position.top, left: position.left }}
             className={`fixed z-50 -translate-x-1/2 rounded-full border border-sky-100 bg-white shadow-[0_14px_32px_-16px_rgba(37,99,235,0.55)] dark:border-slate-700 dark:bg-slate-800 dark:shadow-none ${isMobile ? 'flex max-w-[calc(100vw-1rem)] items-center gap-2.5 px-3 py-2.5' : 'flex items-center gap-2 px-3 py-2'}`}
         >
+            <div className="flex items-center gap-1">
+                {HEADING_ACTIONS.map((action) => {
+                    const title = t?.(action.labelKey, action.fallback) || action.fallback;
+                    return (
+                        <button
+                            key={action.id}
+                            onMouseDown={(event) => {
+                                event.preventDefault();
+                                onPrepareMarkdownInsert?.();
+                                onInsertMarkdown?.(action.id);
+                            }}
+                            className={`${isMobile ? 'h-7 px-2.5 text-[11px]' : 'h-6 px-2 text-[10px]'} inline-flex items-center justify-center rounded-full border border-sky-200 bg-white font-semibold tracking-wide text-sky-600 shadow-sm transition-transform hover:scale-[1.06] hover:border-sky-300 hover:text-sky-700 active:scale-95 dark:border-slate-600 dark:bg-slate-700 dark:text-sky-400 dark:hover:border-slate-500 dark:hover:text-sky-300`}
+                            title={title}
+                            aria-label={title}
+                        >
+                            {action.label}
+                        </button>
+                    );
+                })}
+            </div>
+
+            <div className={`${isMobile ? 'h-6' : 'h-5'} w-px bg-sky-100 dark:bg-slate-600`} />
+
             <div className="flex items-center gap-1.5">
                 {INLINE_MARKDOWN_ACTIONS.map((action) => {
                     const Icon = action.icon;

@@ -1,6 +1,7 @@
 export const MARKDOWN_QUICK_ACTIONS = [
     { id: 'h1', label: 'H1', preview: '# 标题', group: 'block' },
     { id: 'h2', label: 'H2', preview: '## 小节', group: 'block' },
+    { id: 'h3', label: 'H3', preview: '### 三级标题', group: 'block' },
     { id: 'quote', label: '引用', preview: '> 引用内容', group: 'block' },
     { id: 'task', label: '任务', preview: '- [ ] 待办', group: 'block' },
     { id: 'code', label: '代码', preview: '```lang', group: 'block' },
@@ -48,6 +49,8 @@ export const buildMarkdownSnippet = (actionId, selectedText = '') => {
         return wrapBlock(`# ${inlineText || '标题'}`);
     case 'h2':
         return wrapBlock(`## ${inlineText || '小节标题'}`);
+    case 'h3':
+        return wrapBlock(`### ${inlineText || '三级标题'}`);
     case 'quote': {
         const source = hasSelection ? lines : ['引用内容'];
         return wrapBlock(source.map((line) => `> ${line}`).join('\n'));

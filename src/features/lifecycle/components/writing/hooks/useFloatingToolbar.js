@@ -37,8 +37,8 @@ export const useFloatingToolbar = ({ editorRef, isMobile, safeTop }) => {
 
             const offset = isMobile ? 86 : 64;
             const toolbarWidth = isMobile
-                ? Math.min(window.innerWidth - 16, 350)
-                : 420;
+                ? Math.min(window.innerWidth - 16, 430)
+                : 520;
             const toolbarHeight = isMobile ? 62 : 48;
             const padding = 12;
 
