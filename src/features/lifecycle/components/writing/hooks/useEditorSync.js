@@ -61,13 +61,18 @@ export const useEditorSync = ({
         const remoteChanged = remoteContent !== prevRemoteContent;
         const remoteMatchesLocal = remoteContent === liveLocalMarkup;
         const localDirtySinceLastRemote = liveLocalMarkup !== prevRemoteContent;
+        const hasLocalUnsyncedChanges = isDirty || localDirtySinceLastRemote;
 
         if (editorRef.current && remoteHtml !== editorRef.current.innerHTML) {
             const isFocused = typeof document !== 'undefined' && document.activeElement === editorRef.current;
             const shouldForceApply = forceRemoteApplyRef.current;
             if (shouldForceApply) forceRemoteApplyRef.current = false;
 
-            const shouldApplyImmediately = shouldForceApply || !isFocused || (remoteChanged && !localDirtySinceLastRemote);
+            // 本地有未同步改动时，禁止远端直接覆盖编辑区内容。
+            // 这是“刚写完被覆盖”的根因保护：只有在本地干净或强制操作时才允许套用远端。
+            const shouldAllowRemoteOverride = shouldForceApply || !hasLocalUnsyncedChanges;
+            const shouldApplyImmediately = shouldAllowRemoteOverride
+                && (shouldForceApply || !isFocused || (remoteChanged && !localDirtySinceLastRemote));
             if (shouldApplyImmediately) {
                 editorRef.current.innerHTML = remoteHtml;
                 updateStatsFromEditor();
@@ -89,7 +94,7 @@ export const useEditorSync = ({
 
         const isFocused = typeof document !== 'undefined' && document.activeElement === editorRef.current;
         if (remoteContent !== localStateMarkup) {
-            if (!isFocused) setContentMarkup(remoteContentRaw);
+            if (!isFocused && !hasLocalUnsyncedChanges) setContentMarkup(remoteContentRaw);
             else if (remoteMatchesLocal) setContentMarkup(liveLocalMarkupRaw);
         }
 
@@ -120,14 +125,14 @@ export const useEditorSync = ({
     }, [editorRef, pendingRemoteHtml, setContentMarkup, updateStatsFromEditor, writingDoc]);
 
     const handleApplyPendingRemoteOnBlur = useCallback(() => {
-        if (!pendingRemoteHtml || !writingDoc || conflictState) return;
+        if (!pendingRemoteHtml || !writingDoc || conflictState || isDirty) return;
         if (editorRef.current) editorRef.current.innerHTML = pendingRemoteHtml;
         setContentMarkup(writingDoc.content || '');
         updateStatsFromEditor();
         setPendingRemoteHtml(null);
         setConflictState(null);
         lastSeenRemoteContentRef.current = writingDoc.content || '';
-    }, [conflictState, editorRef, pendingRemoteHtml, setContentMarkup, updateStatsFromEditor, writingDoc]);
+    }, [conflictState, editorRef, isDirty, pendingRemoteHtml, setContentMarkup, updateStatsFromEditor, writingDoc]);
 
     const handleKeepPendingLocal = useCallback(() => {
         setPendingRemoteHtml(null);
