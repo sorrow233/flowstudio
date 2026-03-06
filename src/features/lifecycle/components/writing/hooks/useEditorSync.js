@@ -5,6 +5,7 @@ import {
     markupToHtmlFull as markupToHtml,
     stripAllMarkdown as markupToPlain,
 } from '../markdownParser';
+import { buildWritingDocUpdatePayload, resolveWritingDocHtml } from '../contentModel';
 
 const normalizeMarkupForSync = (value = '') =>
     (value || '')
@@ -54,8 +55,7 @@ export const useEditorSync = ({
 
         const remoteContentRaw = writingDoc.content || '';
         const remoteContent = normalizeMarkupForSync(remoteContentRaw);
-        const remoteHtmlRaw = typeof writingDoc.contentHtml === 'string' ? writingDoc.contentHtml : '';
-        const remoteHtml = remoteHtmlRaw || markupToHtml(remoteContentRaw);
+        const remoteHtml = resolveWritingDocHtml(writingDoc);
         const liveLocalMarkupRaw = editorRef.current ? htmlToMarkup(editorRef.current) : contentMarkup;
         const liveLocalMarkup = normalizeMarkupForSync(liveLocalMarkupRaw);
         const localStateMarkup = normalizeMarkupForSync(contentMarkup);
@@ -91,7 +91,12 @@ export const useEditorSync = ({
                 setPendingRemoteHtml(null);
                 setConflictState(null);
             } else if (localDirtySinceLastRemote && !remoteMatchesLocal) {
-                setConflictState({ remoteContent, remoteTitle: writingDoc.title || '', timestamp: Date.now() });
+                setConflictState({
+                    remoteContent,
+                    remoteHtml,
+                    remoteTitle: writingDoc.title || '',
+                    timestamp: Date.now(),
+                });
                 setPendingRemoteHtml(null);
             } else if (!remoteMatchesLocal) {
                 setPendingRemoteHtml(remoteHtml);
@@ -158,14 +163,15 @@ export const useEditorSync = ({
             timestamp: Date.now(),
             title: conflictState.remoteTitle || '',
             content: conflictState.remoteContent || '',
+            contentHtml: conflictState.remoteHtml || '',
             wordCount: computeWordCount(markupToPlain(conflictState.remoteContent || '')),
         });
 
-        onUpdate(writingDoc.id, {
+        onUpdate(writingDoc.id, buildWritingDocUpdatePayload({
             title: title || '',
             content: contentMarkup || '',
-            contentHtml: editorRef.current?.innerHTML || '',
-        });
+            editorElement: editorRef.current,
+        }));
         setConflictState(null);
         setPendingRemoteHtml(null);
         lastSeenRemoteContentRef.current = conflictState.remoteContent || '';
@@ -175,10 +181,11 @@ export const useEditorSync = ({
         if (!conflictState) return;
 
         const remote = conflictState.remoteContent || '';
+        const remoteHtml = conflictState.remoteHtml || markupToHtml(remote);
         const remoteTitle = conflictState.remoteTitle || '';
         setTitle(remoteTitle);
         setContentMarkup(remote);
-        if (editorRef.current) editorRef.current.innerHTML = markupToHtml(remote);
+        if (editorRef.current) editorRef.current.innerHTML = remoteHtml;
         updateStatsFromEditor();
         setConflictState(null);
         setPendingRemoteHtml(null);

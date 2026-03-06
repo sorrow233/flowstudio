@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import * as Y from 'yjs';
 import { WRITING_CATEGORIES } from '../../../utils/constants';
+import { markupToHtmlFull as markupToHtml } from '../../lifecycle/components/writing/markdown/renderer';
 
 const toPlainObject = (item) => {
     if (item instanceof Y.Map) return item.toJSON();
@@ -224,5 +225,29 @@ export const useWritingDataMigration = (doc, status = 'disconnected') => {
 
         migrateWritingData();
     }, [doc, status]);
-};
 
+    useEffect(() => {
+        if (!doc) return;
+        if (status !== 'synced') return;
+
+        const metadataMap = doc.getMap('metadata');
+        if (metadataMap.get('writing_content_html_migrated_v1')) return;
+
+        doc.transact(() => {
+            const yAllProjects = doc.getArray('all_projects');
+
+            yAllProjects.toArray().forEach((item) => {
+                if (!(item instanceof Y.Map)) return;
+                if (item.get('stage') !== 'writing') return;
+
+                const html = item.get('contentHtml');
+                if (typeof html === 'string' && html.trim().length > 0) return;
+
+                const content = typeof item.get('content') === 'string' ? item.get('content') : '';
+                item.set('contentHtml', markupToHtml(content));
+            });
+
+            metadataMap.set('writing_content_html_migrated_v1', true);
+        });
+    }, [doc, status]);
+};

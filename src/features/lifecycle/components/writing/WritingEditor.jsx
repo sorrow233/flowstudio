@@ -28,6 +28,7 @@ import { useFloatingToolbar } from './hooks/useFloatingToolbar';
 import { useEditorSync } from './hooks/useEditorSync';
 import { useImageUpload } from './hooks/useImageUpload';
 import { useEditorKeyboardShortcuts } from './hooks/useEditorKeyboardShortcuts';
+import { buildWritingDocUpdatePayload, resolveMarkupFromHtmlString } from './contentModel';
 import './writingEditorTypography.css';
 
 const WritingEditor = ({
@@ -610,15 +611,18 @@ const WritingEditor = ({
 
     const restoreSnapshot = (snapshot) => {
         if (!writingDoc || !snapshot) return;
+        const snapshotHtml = snapshot.contentHtml || markupToHtml(snapshot.content || '');
+        const snapshotMarkup = snapshot.content || resolveMarkupFromHtmlString(snapshotHtml);
+
         setTitle(snapshot.title || '');
-        setContentMarkup(snapshot.content || '');
-        if (editorRef.current) editorRef.current.innerHTML = markupToHtml(snapshot.content || '');
+        setContentMarkup(snapshotMarkup);
+        if (editorRef.current) editorRef.current.innerHTML = snapshotHtml;
         updateStatsFromEditor();
-        onUpdate(writingDoc.id, {
+        onUpdate(writingDoc.id, buildWritingDocUpdatePayload({
             title: snapshot.title || '',
-            content: snapshot.content || '',
-            contentHtml: editorRef.current?.innerHTML || '',
-        });
+            content: snapshotMarkup || '',
+            editorElement: editorRef.current,
+        }));
         setShowHistory(false);
     };
 

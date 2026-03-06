@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { computeWordCount } from '../editorUtils';
+import { buildWritingDocUpdatePayload } from '../contentModel';
 
 const SNAPSHOT_INTERVAL_MS = 5 * 60 * 1000;
 const SNAPSHOT_MIN_CHANGE = 200;
@@ -50,6 +51,7 @@ export const useEditorAutoSave = ({
                 timestamp: now,
                 title: title || '',
                 content: markup || '',
+                contentHtml: editorRef.current?.innerHTML || '',
                 wordCount: computeWordCount(editorRef.current?.innerText || ''),
             };
 
@@ -68,6 +70,7 @@ export const useEditorAutoSave = ({
             timestamp: now,
             title: title || '',
             content: contentMarkup || '',
+            contentHtml: editorRef.current?.innerHTML || '',
             wordCount,
         };
         addSnapshot(snapshot);
@@ -103,11 +106,11 @@ export const useEditorAutoSave = ({
             if (!editorRef.current || !writingDoc || !isDirty) return;
 
             setIsSaving(true);
-            onUpdate(writingDoc.id, {
+            onUpdate(writingDoc.id, buildWritingDocUpdatePayload({
                 title,
                 content: contentMarkup,
-                contentHtml: editorRef.current.innerHTML || '',
-            });
+                editorElement: editorRef.current,
+            }));
             setIsDirty(false);
             setLastSavedAt(Date.now());
             maybeSnapshot(contentMarkup);

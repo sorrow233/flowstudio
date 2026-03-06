@@ -350,6 +350,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             id: uuidv4(),
             title: '',
             content: '',
+            contentHtml: '',
             stage: 'writing',
             category: input || selectedCategory || defaultCategoryId,
             timestamp: Date.now(),
