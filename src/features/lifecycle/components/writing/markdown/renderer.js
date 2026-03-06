@@ -259,5 +259,10 @@ export const markupToHtmlFull = (text) => {
     if (!text) return '';
     const rendered = markdownRenderer.render(text);
     const emptyLineParagraphPattern = new RegExp(`<p(?:\\s+[^>]*)?>\\s*${escapeRegExp(EMPTY_LINE_TOKEN)}\\s*<\\/p>`, 'g');
-    return rendered.replace(emptyLineParagraphPattern, '<div class="md-empty-line"><br /></div>');
+    const leftoverEmptyTokenPattern = new RegExp(escapeRegExp(EMPTY_LINE_TOKEN), 'g');
+
+    return rendered
+        .replace(emptyLineParagraphPattern, '<div class="md-empty-line"><br /></div>')
+        // 防御性兜底：历史/异常内容中的 token 不应暴露给用户
+        .replace(leftoverEmptyTokenPattern, '');
 };
