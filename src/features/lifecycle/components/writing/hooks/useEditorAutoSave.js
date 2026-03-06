@@ -103,7 +103,11 @@ export const useEditorAutoSave = ({
             if (!editorRef.current || !writingDoc || !isDirty) return;
 
             setIsSaving(true);
-            onUpdate(writingDoc.id, { title, content: contentMarkup });
+            onUpdate(writingDoc.id, {
+                title,
+                content: contentMarkup,
+                contentHtml: editorRef.current.innerHTML || '',
+            });
             setIsDirty(false);
             setLastSavedAt(Date.now());
             maybeSnapshot(contentMarkup);

@@ -12,6 +12,14 @@ export const MARKDOWN_QUICK_ACTIONS = [
     { id: 'mark', label: '标记', preview: '==文本==', group: 'inline' },
 ];
 
+export const MARKDOWN_QUICK_ACTION_MAP = MARKDOWN_QUICK_ACTIONS.reduce((accumulator, action) => {
+    accumulator[action.id] = action;
+    return accumulator;
+}, {});
+
+export const isInlineMarkdownAction = (actionId) =>
+    MARKDOWN_QUICK_ACTION_MAP[actionId]?.group === 'inline';
+
 const normalizeInline = (value = '') =>
     value
         .replace(/\r\n?/g, '\n')

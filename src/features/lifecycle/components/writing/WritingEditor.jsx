@@ -15,7 +15,7 @@ import {
     stripAllMarkdown as markupToPlain,
     markupToMarkdownFull as markupToMarkdown,
 } from './markdownParser';
-import { buildMarkdownSnippet } from './markdown/quickActions';
+import { buildMarkdownSnippet, isInlineMarkdownAction } from './markdown/quickActions';
 import WritingImageOverlay from './WritingImageOverlay';
 import { clipboardToMarkup, insertMarkupAtCaret } from './pasteUtils';
 import EditorToolbar from './EditorToolbar';
@@ -288,20 +288,6 @@ const WritingEditor = ({
         updateStatsFromEditor();
     }, [updateStatsFromEditor]);
 
-    const normalizeEditorMarkdownView = useCallback(() => {
-        if (!editorRef.current) return;
-
-        const latestMarkup = htmlToMarkup(editorRef.current);
-        const normalizedHtml = markupToHtml(latestMarkup);
-
-        if (editorRef.current.innerHTML !== normalizedHtml) {
-            editorRef.current.innerHTML = normalizedHtml;
-        }
-
-        setContentMarkup(latestMarkup);
-        updateStatsFromEditor();
-    }, [updateStatsFromEditor]);
-
     const handleInsertMarkdown = useCallback((actionId) => {
         if (!editorRef.current) return;
 
@@ -316,6 +302,7 @@ const WritingEditor = ({
             editorElement: editorRef.current,
             markup: snippet,
             markupToHtml,
+            unwrapSingleParagraph: isInlineMarkdownAction(actionId),
         });
 
         if (!inserted) return;
@@ -627,7 +614,11 @@ const WritingEditor = ({
         setContentMarkup(snapshot.content || '');
         if (editorRef.current) editorRef.current.innerHTML = markupToHtml(snapshot.content || '');
         updateStatsFromEditor();
-        onUpdate(writingDoc.id, { title: snapshot.title || '', content: snapshot.content || '' });
+        onUpdate(writingDoc.id, {
+            title: snapshot.title || '',
+            content: snapshot.content || '',
+            contentHtml: editorRef.current?.innerHTML || '',
+        });
         setShowHistory(false);
     };
 
@@ -850,7 +841,6 @@ const WritingEditor = ({
                                 onBlur={() => {
                                     setIsEditorFocused(false);
                                     handleApplyPendingRemoteOnBlur();
-                                    normalizeEditorMarkdownView();
                                 }}
                                 spellCheck
                                 className="writing-editor-content min-h-[55vh] w-full text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"

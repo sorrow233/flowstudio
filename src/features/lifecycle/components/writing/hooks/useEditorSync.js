@@ -54,7 +54,8 @@ export const useEditorSync = ({
 
         const remoteContentRaw = writingDoc.content || '';
         const remoteContent = normalizeMarkupForSync(remoteContentRaw);
-        const remoteHtml = markupToHtml(remoteContentRaw);
+        const remoteHtmlRaw = typeof writingDoc.contentHtml === 'string' ? writingDoc.contentHtml : '';
+        const remoteHtml = remoteHtmlRaw || markupToHtml(remoteContentRaw);
         const liveLocalMarkupRaw = editorRef.current ? htmlToMarkup(editorRef.current) : contentMarkup;
         const liveLocalMarkup = normalizeMarkupForSync(liveLocalMarkupRaw);
         const localStateMarkup = normalizeMarkupForSync(contentMarkup);
@@ -160,11 +161,15 @@ export const useEditorSync = ({
             wordCount: computeWordCount(markupToPlain(conflictState.remoteContent || '')),
         });
 
-        onUpdate(writingDoc.id, { title: title || '', content: contentMarkup || '' });
+        onUpdate(writingDoc.id, {
+            title: title || '',
+            content: contentMarkup || '',
+            contentHtml: editorRef.current?.innerHTML || '',
+        });
         setConflictState(null);
         setPendingRemoteHtml(null);
         lastSeenRemoteContentRef.current = conflictState.remoteContent || '';
-    }, [addSnapshot, conflictState, contentMarkup, onUpdate, title, writingDoc]);
+    }, [addSnapshot, conflictState, contentMarkup, editorRef, onUpdate, title, writingDoc]);
 
     const handleConflictUseRemote = useCallback(() => {
         if (!conflictState) return;

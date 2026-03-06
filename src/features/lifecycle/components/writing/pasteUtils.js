@@ -38,7 +38,36 @@ const moveCaretAfter = (node) => {
     selection.addRange(range);
 };
 
-export const insertMarkupAtCaret = ({ editorElement, markup, markupToHtml }) => {
+const isMeaningfulNode = (node) => {
+    if (!node) return false;
+    if (node.nodeType === Node.TEXT_NODE) return Boolean((node.textContent || '').trim());
+    if (node.nodeType !== Node.ELEMENT_NODE) return false;
+    return true;
+};
+
+const unwrapSingleParagraphIfNeeded = (container, unwrapSingleParagraph) => {
+    if (!unwrapSingleParagraph || !container) return container;
+
+    const meaningfulChildren = Array.from(container.childNodes).filter(isMeaningfulNode);
+    if (meaningfulChildren.length !== 1) return container;
+
+    const onlyNode = meaningfulChildren[0];
+    if (!(onlyNode instanceof HTMLElement)) return container;
+    if (onlyNode.tagName !== 'P') return container;
+
+    const unwrappedContainer = document.createElement('div');
+    while (onlyNode.firstChild) {
+        unwrappedContainer.appendChild(onlyNode.firstChild);
+    }
+    return unwrappedContainer;
+};
+
+export const insertMarkupAtCaret = ({
+    editorElement,
+    markup,
+    markupToHtml,
+    unwrapSingleParagraph = false,
+}) => {
     if (!editorElement || !markup) return false;
 
     editorElement.focus();
@@ -57,11 +86,12 @@ export const insertMarkupAtCaret = ({ editorElement, markup, markupToHtml }) => 
     const html = markupToHtml(markup);
     const container = document.createElement('div');
     container.innerHTML = html;
+    const sourceContainer = unwrapSingleParagraphIfNeeded(container, unwrapSingleParagraph);
 
     const fragment = document.createDocumentFragment();
     let lastNode = null;
-    while (container.firstChild) {
-        lastNode = fragment.appendChild(container.firstChild);
+    while (sourceContainer.firstChild) {
+        lastNode = fragment.appendChild(sourceContainer.firstChild);
     }
 
     range.deleteContents();
