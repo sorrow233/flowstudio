@@ -5,7 +5,11 @@ import {
     markupToHtmlFull as markupToHtml,
     stripAllMarkdown as markupToPlain,
 } from '../markdownParser';
-import { buildWritingDocUpdatePayload, resolveWritingDocHtml } from '../contentModel';
+import {
+    buildWritingDocUpdatePayload,
+    resolveWritingDocHtml,
+    resolveWritingDocMarkup,
+} from '../contentModel';
 
 const normalizeMarkupForSync = (value = '') =>
     (value || '')
@@ -53,7 +57,7 @@ export const useEditorSync = ({
             if (remoteTitle !== title && !isDirty) setTitle(remoteTitle);
         }
 
-        const remoteContentRaw = writingDoc.content || '';
+        const remoteContentRaw = resolveWritingDocMarkup(writingDoc);
         const remoteContent = normalizeMarkupForSync(remoteContentRaw);
         const remoteHtml = resolveWritingDocHtml(writingDoc);
         const liveLocalMarkupRaw = editorRef.current ? htmlToMarkup(editorRef.current) : contentMarkup;
@@ -132,28 +136,30 @@ export const useEditorSync = ({
 
     const handleApplyPendingRemote = useCallback(() => {
         if (!pendingRemoteHtml || !writingDoc) return;
+        const remoteMarkup = resolveWritingDocMarkup(writingDoc);
         if (editorRef.current) editorRef.current.innerHTML = pendingRemoteHtml;
-        setContentMarkup(writingDoc.content || '');
+        setContentMarkup(remoteMarkup);
         updateStatsFromEditor();
         setPendingRemoteHtml(null);
         setConflictState(null);
-        lastSeenRemoteContentRef.current = writingDoc.content || '';
+        lastSeenRemoteContentRef.current = remoteMarkup;
     }, [editorRef, pendingRemoteHtml, setContentMarkup, updateStatsFromEditor, writingDoc]);
 
     const handleApplyPendingRemoteOnBlur = useCallback(() => {
         if (!pendingRemoteHtml || !writingDoc || conflictState || isDirty) return;
+        const remoteMarkup = resolveWritingDocMarkup(writingDoc);
         if (editorRef.current) editorRef.current.innerHTML = pendingRemoteHtml;
-        setContentMarkup(writingDoc.content || '');
+        setContentMarkup(remoteMarkup);
         updateStatsFromEditor();
         setPendingRemoteHtml(null);
         setConflictState(null);
-        lastSeenRemoteContentRef.current = writingDoc.content || '';
+        lastSeenRemoteContentRef.current = remoteMarkup;
     }, [conflictState, editorRef, isDirty, pendingRemoteHtml, setContentMarkup, updateStatsFromEditor, writingDoc]);
 
     const handleKeepPendingLocal = useCallback(() => {
         setPendingRemoteHtml(null);
-        if (writingDoc?.content) lastSeenRemoteContentRef.current = writingDoc.content;
-    }, [writingDoc?.content]);
+        if (writingDoc) lastSeenRemoteContentRef.current = resolveWritingDocMarkup(writingDoc);
+    }, [writingDoc]);
 
     const handleConflictKeepLocal = useCallback(() => {
         if (!conflictState || !writingDoc) return;

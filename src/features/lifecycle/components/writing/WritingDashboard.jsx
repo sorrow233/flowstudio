@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { WRITING_CATEGORIES } from '../../../../utils/constants';
 import { computeWordCount } from './editorUtils';
-import { stripAllMarkdown as stripMarkup } from './markdownParser';
+import { getWritingDocPlainText } from './contentModel';
 import { resolveWritingCategoryLabel } from './writingCategoryUtils';
 
 const WritingDashboard = ({
@@ -65,7 +65,7 @@ const WritingDashboard = ({
         let latestModified = 0;
 
         documents.forEach((doc) => {
-            const text = stripMarkup(doc.content || '');
+            const text = getWritingDocPlainText(doc);
             totalWords += computeWordCount(text);
             const timestamp = doc.lastModified || doc.timestamp || 0;
             if (timestamp > latestModified) latestModified = timestamp;
@@ -218,7 +218,7 @@ const WritingDashboard = ({
                                             </span>
                                         </div>
                                         <p className="line-clamp-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                                            {stripMarkup(doc.content || '') || t('inspiration.placeholder')}
+                                            {getWritingDocPlainText(doc) || t('inspiration.placeholder')}
                                         </p>
                                         <p className="mt-2 text-[10px] text-slate-400 dark:text-slate-500">
                                             {resolveWritingCategoryLabel(category, t, '')}

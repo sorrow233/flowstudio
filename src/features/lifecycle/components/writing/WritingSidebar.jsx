@@ -3,7 +3,7 @@ import { FileText, RotateCcw, Trash2, X } from 'lucide-react';
 import { AnimatePresence, Reorder } from 'framer-motion';
 import { toast } from 'sonner';
 import { useTranslation } from '../../../i18n';
-import { stripMarkup } from './editorUtils';
+import { getWritingDocPlainText } from './contentModel';
 import { getTrashRemainingDays, TRASH_RETENTION_DAYS } from './writingTrashUtils';
 
 const formatDocTime = (timestamp) => {
@@ -229,7 +229,7 @@ const WritingSidebarItem = ({
                 </div>
 
                 <p className={`${isUntitledDoc ? 'line-clamp-3' : 'line-clamp-2'} text-xs leading-relaxed text-slate-500 dark:text-slate-400`}>
-                    {stripMarkup(doc.content || '') || t('inspiration.placeholder')}
+                    {getWritingDocPlainText(doc) || t('inspiration.placeholder')}
                 </p>
                 {isTrashView && (
                     <p className="mt-2 text-[11px] font-medium text-amber-500/90 dark:text-amber-400/90">

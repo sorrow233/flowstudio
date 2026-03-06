@@ -11,7 +11,7 @@ import WritingSidebar from './WritingSidebar';
 import WritingEditor from './WritingEditor';
 import WritingDashboard from './WritingDashboard';
 import WritingWorkspaceHeader from './WritingWorkspaceHeader';
-import { stripAllMarkdown as stripMarkup } from './markdownParser';
+import { getWritingDocPlainText } from './contentModel';
 import { normalizeManualOrder, sortWritingDocuments } from './writingSortUtils';
 import {
     TRASH_RETENTION_DAYS,
@@ -257,7 +257,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             doc: docItem,
             category: docItem.category || defaultCategoryId,
             title: (docItem.title || '').toLowerCase(),
-            content: stripMarkup(docItem.content || '').toLowerCase(),
+            content: getWritingDocPlainText(docItem).toLowerCase(),
         })),
         [docsForView, defaultCategoryId]
     );
