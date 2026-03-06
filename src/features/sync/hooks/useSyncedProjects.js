@@ -8,6 +8,7 @@ export const useSyncedProjects = (doc, arrayName) => {
     const [canUndo, setCanUndo] = useState(false);
     const [canRedo, setCanRedo] = useState(false);
     const [lastChangeOrigin, setLastChangeOrigin] = useState(null);
+    const [lastChangeMeta, setLastChangeMeta] = useState(null);
     const undoManagerRef = useRef(null);
 
     useEffect(() => {
@@ -22,9 +23,54 @@ export const useSyncedProjects = (doc, arrayName) => {
         });
         undoManagerRef.current = undoManager;
 
-        const handleChange = (origin = null) => {
+        const resolveChangedIds = (events = []) => {
+            const ids = new Set();
+
+            events.forEach((event) => {
+                const target = event?.target;
+                if (!target) return;
+
+                if (target instanceof Y.Map) {
+                    const directId = target.get('id');
+                    if (directId) ids.add(directId);
+                }
+
+                const path = Array.isArray(event?.path) ? event.path : [];
+                const pathMap = path.find((entry) => entry instanceof Y.Map);
+                if (pathMap) {
+                    const pathId = pathMap.get('id');
+                    if (pathId) ids.add(pathId);
+                }
+
+                if (target instanceof Y.Array && event?.changes?.delta) {
+                    event.changes.delta.forEach((deltaItem) => {
+                        if (!Array.isArray(deltaItem.insert)) return;
+                        deltaItem.insert.forEach((inserted) => {
+                            if (inserted instanceof Y.Map) {
+                                const insertedId = inserted.get('id');
+                                if (insertedId) ids.add(insertedId);
+                                return;
+                            }
+                            if (inserted && typeof inserted === 'object' && inserted.id) {
+                                ids.add(inserted.id);
+                            }
+                        });
+                    });
+                }
+            });
+
+            return Array.from(ids);
+        };
+
+        const handleChange = (origin = null, changedIds = []) => {
             setProjects(yArray.toJSON());
             setLastChangeOrigin(origin);
+            setLastChangeMeta({
+                origin,
+                changedIds,
+                at: Date.now(),
+                arrayName,
+            });
         };
 
         const handleStackChange = () => {
@@ -32,9 +78,9 @@ export const useSyncedProjects = (doc, arrayName) => {
             setCanRedo(undoManager.redoStack.length > 0);
         };
 
-        handleChange('init');
+        handleChange('init', []);
         const observer = (_events, transaction) => {
-            handleChange(transaction?.origin ?? null);
+            handleChange(transaction?.origin ?? null, resolveChangedIds(_events));
         };
         yArray.observeDeep(observer);
         undoManager.on('stack-item-added', handleStackChange);
@@ -117,7 +163,18 @@ export const useSyncedProjects = (doc, arrayName) => {
         undoManagerRef.current?.redo();
     }, []);
 
-    return { projects, addProject, removeProject, updateProject, undo, redo, canUndo, canRedo, lastChangeOrigin };
+    return {
+        projects,
+        addProject,
+        removeProject,
+        updateProject,
+        undo,
+        redo,
+        canUndo,
+        canRedo,
+        lastChangeOrigin,
+        lastChangeMeta,
+    };
 };
 
 /**

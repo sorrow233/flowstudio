@@ -42,7 +42,7 @@ const WritingEditor = ({
     canUndo,
     canRedo,
     syncStatus = 'synced',
-    docChangeOrigin = null,
+    docChangeMeta = null,
 }) => {
     const { t } = useTranslation();
     const editorRef = useRef(null);
@@ -135,7 +135,7 @@ const WritingEditor = ({
         updateStatsFromEditor,
         onUpdate,
         addSnapshot,
-        docChangeOrigin,
+        docChangeMeta,
     });
 
     const { toolbarPosition, setToolbarPosition } = useFloatingToolbar({

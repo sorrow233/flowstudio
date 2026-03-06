@@ -91,6 +91,12 @@ export const KEYMAP = {
         label: '插入链接',
         labelEn: 'Insert Link',
     },
+    FORMAT_INLINE_CODE: {
+        keys: ['mod+e'],
+        scope: SCOPES.EDITOR,
+        label: '行内代码',
+        labelEn: 'Inline Code',
+    },
 };
 
 // 需要拦截的浏览器默认快捷键

@@ -24,7 +24,7 @@ export const useEditorSync = ({
     updateStatsFromEditor,
     onUpdate,
     addSnapshot,
-    docChangeOrigin,
+    docChangeMeta,
 }) => {
     const [pendingRemoteHtml, setPendingRemoteHtml] = useState(null);
     const [conflictState, setConflictState] = useState(null);
@@ -63,7 +63,10 @@ export const useEditorSync = ({
         const remoteMatchesLocal = remoteContent === liveLocalMarkup;
         const localDirtySinceLastRemote = liveLocalMarkup !== prevRemoteContent;
         const hasLocalUnsyncedChanges = isDirty || localDirtySinceLastRemote;
-        const isRemoteChange = docChangeOrigin === 'remote';
+        const changedIds = Array.isArray(docChangeMeta?.changedIds) ? docChangeMeta.changedIds : [];
+        const isRemoteOrigin = docChangeMeta?.origin === 'remote';
+        const isActiveDocAffected = !writingDoc?.id || changedIds.length === 0 || changedIds.includes(writingDoc.id);
+        const isRemoteChange = isRemoteOrigin && isActiveDocAffected;
 
         if (editorRef.current && remoteHtml !== editorRef.current.innerHTML) {
             const isFocused = typeof document !== 'undefined' && document.activeElement === editorRef.current;
@@ -114,7 +117,7 @@ export const useEditorSync = ({
         title,
         updateStatsFromEditor,
         writingDoc,
-        docChangeOrigin,
+        docChangeMeta,
     ]);
 
     const requestForceRemoteApply = useCallback(() => {

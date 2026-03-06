@@ -7,7 +7,7 @@ const INLINE_MARKDOWN_ACTIONS = [
     { id: 'bold', icon: Bold, labelKey: 'writing.bold', fallback: '粗体' },
     { id: 'italic', icon: Italic, labelKey: 'writing.italic', fallback: '斜体' },
     { id: 'link', icon: Link2, labelKey: 'writing.link', fallback: '链接' },
-    { id: 'code', icon: Code2, labelKey: 'writing.code', fallback: '代码' },
+    { id: 'inlineCode', icon: Code2, labelKey: 'writing.inlineCode', fallback: '行内代码' },
 ];
 
 const FloatingColorPicker = ({

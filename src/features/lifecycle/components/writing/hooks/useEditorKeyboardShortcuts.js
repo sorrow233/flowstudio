@@ -51,6 +51,12 @@ export const useEditorKeyboardShortcuts = ({
             if (key === 'k') {
                 event.preventDefault();
                 onMarkdownShortcut?.('link');
+                return;
+            }
+
+            if (key === 'e') {
+                event.preventDefault();
+                onMarkdownShortcut?.('inlineCode');
             }
         };
 
