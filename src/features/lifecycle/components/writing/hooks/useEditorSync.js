@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { computeWordCount } from '../editorUtils';
+import { computeCharCount, computeWordCount, detectWordCountLabel } from '../editorUtils';
 import {
     htmlToMarkupFull as htmlToMarkup,
     markupToHtmlFull as markupToHtml,
@@ -171,6 +171,8 @@ export const useEditorSync = ({
             content: conflictState.remoteContent || '',
             contentHtml: conflictState.remoteHtml || '',
             wordCount: computeWordCount(markupToPlain(conflictState.remoteContent || '')),
+            charCount: computeCharCount(markupToPlain(conflictState.remoteContent || '')),
+            countLabelKey: detectWordCountLabel(markupToPlain(conflictState.remoteContent || '')),
         });
 
         onUpdate(writingDoc.id, buildWritingDocUpdatePayload({

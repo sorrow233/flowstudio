@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { computeWordCount } from '../editorUtils';
+import { computeCharCount, computeWordCount, detectWordCountLabel } from '../editorUtils';
 import { buildWritingDocUpdatePayload } from '../contentModel';
 
 const SNAPSHOT_INTERVAL_MS = 5 * 60 * 1000;
@@ -12,6 +12,8 @@ export const useEditorAutoSave = ({
     contentMarkup,
     editorRef,
     wordCount,
+    charCount,
+    wordCountLabelKey,
     onUpdate,
     isDirty,
     setIsDirty,
@@ -53,6 +55,8 @@ export const useEditorAutoSave = ({
                 content: markup || '',
                 contentHtml: editorRef.current?.innerHTML || '',
                 wordCount: computeWordCount(editorRef.current?.innerText || ''),
+                charCount: computeCharCount(editorRef.current?.innerText || ''),
+                countLabelKey: detectWordCountLabel(editorRef.current?.innerText || ''),
             };
 
             addSnapshot(snapshot);
@@ -72,11 +76,13 @@ export const useEditorAutoSave = ({
             content: contentMarkup || '',
             contentHtml: editorRef.current?.innerHTML || '',
             wordCount,
+            charCount,
+            countLabelKey: wordCountLabelKey || 'inspiration.words',
         };
         addSnapshot(snapshot);
         lastSnapshotAtRef.current = now;
         lastSnapshotContentRef.current = contentMarkup || '';
-    }, [addSnapshot, contentMarkup, title, wordCount, writingDoc]);
+    }, [addSnapshot, charCount, contentMarkup, title, wordCount, wordCountLabelKey, writingDoc]);
 
     const canManualSnapshot = Boolean(writingDoc) && contentMarkup !== (lastSnapshotContentRef.current || '');
 

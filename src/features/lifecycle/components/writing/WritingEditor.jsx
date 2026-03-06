@@ -109,6 +109,8 @@ const WritingEditor = ({
         contentMarkup,
         editorRef,
         wordCount,
+        charCount,
+        wordCountLabelKey,
         onUpdate,
         isDirty,
         setIsDirty,

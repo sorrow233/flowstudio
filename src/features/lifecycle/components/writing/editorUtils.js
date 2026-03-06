@@ -28,11 +28,17 @@ export const stripMarkup = (text = '') => stripAllMarkdown(text);
 export const computeWordCount = (text) => {
     const normalized = (text || '').trim();
     if (!normalized) return 0;
-    const hasCjk = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(normalized);
-    const hasSpace = /\s/.test(normalized);
-    if (hasCjk && !hasSpace) {
-        return (normalized.match(/[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/g) || []).length;
+
+    const compact = normalized.replace(/\s/g, '');
+    const cjkChars = (compact.match(/[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/g) || []).length;
+    const hasCjk = cjkChars > 0;
+    const cjkRatio = hasCjk ? cjkChars / Math.max(1, compact.length) : 0;
+
+    // CJK 主导内容统一按“字符”统计，即使用户插入了空格分段也不切换为“词”。
+    if (hasCjk && cjkRatio >= 0.35) {
+        return compact.length;
     }
+
     return (normalized.match(/\S+/g) || []).length;
 };
 
@@ -48,9 +54,15 @@ export const computeReadMinutes = (words, chars) => {
 };
 
 export const detectWordCountLabel = (text) => {
-    const hasCjk = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(text || '');
-    const hasSpace = /\s/.test(text || '');
-    return hasCjk && !hasSpace ? 'inspiration.characters' : 'inspiration.words';
+    const normalized = (text || '').trim();
+    if (!normalized) return 'inspiration.words';
+
+    const compact = normalized.replace(/\s/g, '');
+    const cjkChars = (compact.match(/[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/g) || []).length;
+    const hasCjk = cjkChars > 0;
+    const cjkRatio = hasCjk ? cjkChars / Math.max(1, compact.length) : 0;
+
+    return hasCjk && cjkRatio >= 0.35 ? 'inspiration.characters' : 'inspiration.words';
 };
 
 // ---------- Time formatting ----------

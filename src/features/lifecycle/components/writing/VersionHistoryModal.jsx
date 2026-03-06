@@ -1,7 +1,33 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { History, X, RotateCcw } from 'lucide-react';
-import { formatTimestamp } from './editorUtils';
+import {
+    computeCharCount,
+    computeWordCount,
+    detectWordCountLabel,
+    formatTimestamp,
+} from './editorUtils';
+import { stripAllMarkdown as markupToPlain } from './markdownParser';
+
+const resolveSnapshotCountMeta = (version) => {
+    const rawContent = typeof version?.content === 'string' ? version.content : '';
+    const plainText = markupToPlain(rawContent);
+
+    const labelKey = version?.countLabelKey || detectWordCountLabel(plainText);
+    const isCharMode = labelKey === 'inspiration.characters';
+
+    if (isCharMode) {
+        const value = Number.isFinite(version?.charCount)
+            ? version.charCount
+            : computeCharCount(plainText);
+        return { value, labelKey };
+    }
+
+    const value = Number.isFinite(version?.wordCount)
+        ? version.wordCount
+        : computeWordCount(plainText);
+    return { value, labelKey };
+};
 
 const VersionHistoryModal = ({ versions, onRestore, onClose, t }) => (
     <motion.div
@@ -48,30 +74,33 @@ const VersionHistoryModal = ({ versions, onRestore, onClose, t }) => (
                     </div>
                 ) : (
                     <div className="divide-y divide-sky-100/80 dark:divide-slate-800/80">
-                        {versions.map((version) => (
-                            <div
-                                key={version.id}
-                                className="group flex items-center justify-between gap-4 py-3.5"
-                            >
-                                <div className="min-w-0 flex-1">
-                                    <p className="truncate text-[13px] font-medium text-slate-800 dark:text-slate-200">
-                                        {version.title || t('inspiration.untitled')}
-                                    </p>
-                                    <p className="mt-1 flex items-center gap-2 text-[11px] text-slate-400">
-                                        <span>{formatTimestamp(version.timestamp)}</span>
-                                        <span className="text-sky-300">·</span>
-                                        <span>{version.wordCount || 0} {t('inspiration.words')}</span>
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={() => onRestore(version)}
-                                    className="flex items-center gap-1.5 rounded-xl border border-sky-100 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-600 opacity-0 transition group-hover:opacity-100 hover:border-sky-200 hover:text-sky-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-sky-700 dark:hover:text-sky-400"
+                        {versions.map((version) => {
+                            const countMeta = resolveSnapshotCountMeta(version);
+                            return (
+                                <div
+                                    key={version.id}
+                                    className="group flex items-center justify-between gap-4 py-3.5"
                                 >
-                                    <RotateCcw size={12} />
-                                    {t('inspiration.restore')}
-                                </button>
-                            </div>
-                        ))}
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate text-[13px] font-medium text-slate-800 dark:text-slate-200">
+                                            {version.title || t('inspiration.untitled')}
+                                        </p>
+                                        <p className="mt-1 flex items-center gap-2 text-[11px] text-slate-400">
+                                            <span>{formatTimestamp(version.timestamp)}</span>
+                                            <span className="text-sky-300">·</span>
+                                            <span>{countMeta.value || 0} {t(countMeta.labelKey)}</span>
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => onRestore(version)}
+                                        className="flex items-center gap-1.5 rounded-xl border border-sky-100 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-600 opacity-0 transition group-hover:opacity-100 hover:border-sky-200 hover:text-sky-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-sky-700 dark:hover:text-sky-400"
+                                    >
+                                        <RotateCcw size={12} />
+                                        {t('inspiration.restore')}
+                                    </button>
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
             </div>
