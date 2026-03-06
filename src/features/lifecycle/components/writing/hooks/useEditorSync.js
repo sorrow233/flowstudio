@@ -24,6 +24,7 @@ export const useEditorSync = ({
     updateStatsFromEditor,
     onUpdate,
     addSnapshot,
+    docChangeOrigin,
 }) => {
     const [pendingRemoteHtml, setPendingRemoteHtml] = useState(null);
     const [conflictState, setConflictState] = useState(null);
@@ -62,6 +63,7 @@ export const useEditorSync = ({
         const remoteMatchesLocal = remoteContent === liveLocalMarkup;
         const localDirtySinceLastRemote = liveLocalMarkup !== prevRemoteContent;
         const hasLocalUnsyncedChanges = isDirty || localDirtySinceLastRemote;
+        const isRemoteChange = docChangeOrigin === 'remote';
 
         if (editorRef.current && remoteHtml !== editorRef.current.innerHTML) {
             const isFocused = typeof document !== 'undefined' && document.activeElement === editorRef.current;
@@ -80,6 +82,10 @@ export const useEditorSync = ({
                 setConflictState(null);
             } else if (!remoteChanged) {
                 // 聚焦编辑期间的 DOM 结构差异（如 <div>/<br>）不应触发远端提示
+            } else if (!isRemoteChange && hasLocalUnsyncedChanges) {
+                // 本地回写（同设备）不应被误判为冲突，直接忽略提示。
+                setPendingRemoteHtml(null);
+                setConflictState(null);
             } else if (localDirtySinceLastRemote && !remoteMatchesLocal) {
                 setConflictState({ remoteContent, remoteTitle: writingDoc.title || '', timestamp: Date.now() });
                 setPendingRemoteHtml(null);
@@ -108,6 +114,7 @@ export const useEditorSync = ({
         title,
         updateStatsFromEditor,
         writingDoc,
+        docChangeOrigin,
     ]);
 
     const requestForceRemoteApply = useCallback(() => {

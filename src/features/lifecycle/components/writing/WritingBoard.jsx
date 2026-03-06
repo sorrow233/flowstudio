@@ -64,7 +64,8 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         undo,
         redo,
         canUndo,
-        canRedo
+        canRedo,
+        lastChangeOrigin: projectChangeOrigin
     } = useSyncedProjects(doc, 'all_projects');
     const {
         categories: syncedCategories,
@@ -623,6 +624,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                             canUndo={canUndo}
                             canRedo={canRedo}
                             syncStatus={resolvedSyncStatus}
+                            docChangeOrigin={projectChangeOrigin}
                         />
                     ) : hasNoFilteredResults ? (
                         <div className="flex h-full items-center justify-center bg-white/70 text-slate-400 dark:bg-slate-900/70 dark:text-slate-500">

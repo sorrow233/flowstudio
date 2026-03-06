@@ -7,6 +7,7 @@ export const useSyncedProjects = (doc, arrayName) => {
     const [projects, setProjects] = useState([]);
     const [canUndo, setCanUndo] = useState(false);
     const [canRedo, setCanRedo] = useState(false);
+    const [lastChangeOrigin, setLastChangeOrigin] = useState(null);
     const undoManagerRef = useRef(null);
 
     useEffect(() => {
@@ -21,8 +22,9 @@ export const useSyncedProjects = (doc, arrayName) => {
         });
         undoManagerRef.current = undoManager;
 
-        const handleChange = () => {
+        const handleChange = (origin = null) => {
             setProjects(yArray.toJSON());
+            setLastChangeOrigin(origin);
         };
 
         const handleStackChange = () => {
@@ -30,13 +32,16 @@ export const useSyncedProjects = (doc, arrayName) => {
             setCanRedo(undoManager.redoStack.length > 0);
         };
 
-        handleChange();
-        yArray.observeDeep(handleChange);
+        handleChange('init');
+        const observer = (_events, transaction) => {
+            handleChange(transaction?.origin ?? null);
+        };
+        yArray.observeDeep(observer);
         undoManager.on('stack-item-added', handleStackChange);
         undoManager.on('stack-item-popped', handleStackChange);
 
         return () => {
-            yArray.unobserveDeep(handleChange);
+            yArray.unobserveDeep(observer);
             undoManager.off('stack-item-added', handleStackChange);
             undoManager.off('stack-item-popped', handleStackChange);
             undoManager.destroy();
@@ -112,7 +117,7 @@ export const useSyncedProjects = (doc, arrayName) => {
         undoManagerRef.current?.redo();
     }, []);
 
-    return { projects, addProject, removeProject, updateProject, undo, redo, canUndo, canRedo };
+    return { projects, addProject, removeProject, updateProject, undo, redo, canUndo, canRedo, lastChangeOrigin };
 };
 
 /**
