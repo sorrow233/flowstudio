@@ -73,6 +73,24 @@ export const KEYMAP = {
         label: '剪切',
         labelEn: 'Cut',
     },
+    FORMAT_BOLD: {
+        keys: ['mod+b'],
+        scope: SCOPES.EDITOR,
+        label: '加粗',
+        labelEn: 'Bold',
+    },
+    FORMAT_ITALIC: {
+        keys: ['mod+i'],
+        scope: SCOPES.EDITOR,
+        label: '斜体',
+        labelEn: 'Italic',
+    },
+    FORMAT_LINK: {
+        keys: ['mod+k'],
+        scope: SCOPES.EDITOR,
+        label: '插入链接',
+        labelEn: 'Insert Link',
+    },
 };
 
 // 需要拦截的浏览器默认快捷键

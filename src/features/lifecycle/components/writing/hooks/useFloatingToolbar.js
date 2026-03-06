@@ -4,6 +4,12 @@ export const useFloatingToolbar = ({ editorRef, isMobile, safeTop }) => {
     const [toolbarPosition, setToolbarPosition] = useState(null);
 
     useEffect(() => {
+        const isNodeInsideEditor = (node) => {
+            if (!node || !editorRef.current) return false;
+            if (editorRef.current === node) return true;
+            return editorRef.current.contains(node);
+        };
+
         const handleSelection = () => {
             if (typeof window === 'undefined') return;
             const selection = window.getSelection();
@@ -13,15 +19,27 @@ export const useFloatingToolbar = ({ editorRef, isMobile, safeTop }) => {
             }
 
             const range = selection.getRangeAt(0);
-            const rect = range.getBoundingClientRect();
-            if (!editorRef.current || !editorRef.current.contains(selection.anchorNode)) {
+            const selectionText = selection.toString();
+            if (!selectionText.trim()) {
                 setToolbarPosition(null);
                 return;
             }
 
-            const offset = isMobile ? 80 : 60;
-            const toolbarWidth = isMobile ? 220 : 170;
-            const toolbarHeight = isMobile ? 56 : 46;
+            const rect = range.getBoundingClientRect();
+            const insideEditor = isNodeInsideEditor(range.commonAncestorContainer)
+                || isNodeInsideEditor(selection.anchorNode)
+                || isNodeInsideEditor(selection.focusNode);
+
+            if (!editorRef.current || !insideEditor || !rect) {
+                setToolbarPosition(null);
+                return;
+            }
+
+            const offset = isMobile ? 86 : 64;
+            const toolbarWidth = isMobile
+                ? Math.min(window.innerWidth - 16, 350)
+                : 420;
+            const toolbarHeight = isMobile ? 62 : 48;
             const padding = 12;
 
             const maxLeft = window.innerWidth - toolbarWidth / 2 - padding;

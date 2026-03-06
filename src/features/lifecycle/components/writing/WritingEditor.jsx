@@ -27,6 +27,7 @@ import { useEditorAutoSave } from './hooks/useEditorAutoSave';
 import { useFloatingToolbar } from './hooks/useFloatingToolbar';
 import { useEditorSync } from './hooks/useEditorSync';
 import { useImageUpload } from './hooks/useImageUpload';
+import { useEditorKeyboardShortcuts } from './hooks/useEditorKeyboardShortcuts';
 import './writingEditorTypography.css';
 
 const WritingEditor = ({
@@ -236,40 +237,6 @@ const WritingEditor = ({
         return () => document.removeEventListener('keydown', handleEscape);
     }, []);
 
-    useEffect(() => {
-        const handleKeyDown = (event) => {
-            if (!editorRef.current || document.activeElement !== editorRef.current) return;
-
-            const isMod = event.metaKey || event.ctrlKey;
-            if (!isMod) return;
-
-            const key = event.key.toLowerCase();
-            if (key === 's') {
-                event.preventDefault();
-                handleManualSnapshot();
-                return;
-            }
-            if (key === 'z' && !event.shiftKey) {
-                event.preventDefault();
-                if (canUndo) {
-                    requestForceRemoteApply();
-                    onUndo?.();
-                }
-                return;
-            }
-            if ((key === 'z' && event.shiftKey) || key === 'y') {
-                event.preventDefault();
-                if (canRedo) {
-                    requestForceRemoteApply();
-                    onRedo?.();
-                }
-            }
-        };
-
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [canRedo, canUndo, handleManualSnapshot, onRedo, onUndo, requestForceRemoteApply]);
-
     const statusLabel = useMemo(() => {
         if (syncStatus === 'offline' || syncStatus === 'disconnected') return t('inspiration.offline');
         if (isSaving || isDirty) return t('inspiration.saving');
@@ -354,6 +321,27 @@ const WritingEditor = ({
         cacheEditorSelection();
         setShowMarkdownMenu(false);
     }, [cacheEditorSelection, getEditorSelectedText, handleInput, markupToHtml, restoreCachedSelection]);
+
+    const handleMarkdownShortcut = useCallback((actionId) => {
+        cacheEditorSelection();
+        handleInsertMarkdown(actionId);
+    }, [cacheEditorSelection, handleInsertMarkdown]);
+
+    useEditorKeyboardShortcuts({
+        editorRef,
+        canUndo,
+        canRedo,
+        onSave: handleManualSnapshot,
+        onUndo: () => {
+            requestForceRemoteApply();
+            onUndo?.();
+        },
+        onRedo: () => {
+            requestForceRemoteApply();
+            onRedo?.();
+        },
+        onMarkdownShortcut: handleMarkdownShortcut,
+    });
 
     // ---------- Image selection / deletion ----------
     const handleEditorClick = useCallback((event) => {
@@ -706,6 +694,8 @@ const WritingEditor = ({
                 {toolbarPosition && (
                     <FloatingColorPicker
                         position={toolbarPosition}
+                        onInsertMarkdown={handleInsertMarkdown}
+                        onPrepareMarkdownInsert={cacheEditorSelection}
                         onApplyColor={applyColor}
                         onClearColor={clearColor}
                         isMobile={isMobile}
