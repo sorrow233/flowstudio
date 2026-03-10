@@ -52,13 +52,16 @@ const InspirationCategorySelector = ({
     return (
         <div
             ref={selectorRef}
-            className="flex items-center p-1 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-full border border-gray-100/50 dark:border-gray-800/50 shadow-sm transition-all duration-300 hover:bg-white/80 dark:hover:bg-gray-900/80 hover:shadow-md hover:border-pink-100/30 dark:hover:border-pink-900/30 group/selector"
+            className="relative z-20 flex items-center p-1 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-full border border-gray-100/50 dark:border-gray-800/50 shadow-sm transition-all duration-300 hover:bg-white/80 dark:hover:bg-gray-900/80 hover:shadow-md hover:border-pink-100/30 dark:hover:border-pink-900/30 group/selector"
         >
             <div className="relative">
                 <button
                     type="button"
                     onClick={() => setIsMenuOpen((prev) => !prev)}
-                    className="flex items-center gap-1.5 px-3 border-r border-gray-200/50 dark:border-gray-700/50 mr-1 min-w-[76px] justify-center relative overflow-hidden h-7 rounded-l-full transition-colors hover:bg-white/60 dark:hover:bg-gray-800/60"
+                    className={`flex items-center gap-1.5 px-3 border-r border-gray-200/50 dark:border-gray-700/50 mr-1 min-w-[76px] justify-center relative overflow-hidden h-7 rounded-l-full transition-all duration-200 ${isMenuOpen
+                        ? 'bg-white/70 dark:bg-gray-800/70 shadow-sm'
+                        : 'hover:bg-white/60 dark:hover:bg-gray-800/60'
+                        }`}
                     title="打开分类列表"
                     aria-haspopup="menu"
                     aria-expanded={isMenuOpen}
@@ -77,7 +80,10 @@ const InspirationCategorySelector = ({
                     </AnimatePresence>
                     <ChevronDown
                         size={12}
-                        className={`shrink-0 text-gray-400 transition-transform duration-200 ${isMenuOpen ? 'rotate-180' : ''}`}
+                        className={`shrink-0 transition-transform duration-200 ${isMenuOpen
+                            ? `${selectedCategoryInfo.textColor || 'text-pink-400'} rotate-180`
+                            : 'text-gray-400'
+                            }`}
                     />
                 </button>
 
@@ -88,7 +94,7 @@ const InspirationCategorySelector = ({
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 6, scale: 0.98 }}
                             transition={{ duration: 0.16, ease: 'easeOut' }}
-                            className="absolute left-0 top-[calc(100%+8px)] z-40 min-w-[168px] rounded-2xl border border-pink-100/70 bg-white/95 p-2 shadow-[0_18px_40px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-gray-700/70 dark:bg-gray-900/95"
+                            className="absolute left-0 top-[calc(100%+8px)] z-40 w-[188px] rounded-[22px] border border-gray-100/80 bg-white/90 p-2 shadow-[0_20px_44px_rgba(15,23,42,0.14)] backdrop-blur-2xl dark:border-gray-800/80 dark:bg-gray-900/92"
                         >
                             <div className="flex flex-col gap-1">
                                 {categories.map((category) => {
@@ -102,13 +108,13 @@ const InspirationCategorySelector = ({
                                                 onSelectCategory?.(category.id);
                                                 setIsMenuOpen(false);
                                             }}
-                                            className={`flex items-center gap-2 rounded-xl px-3 py-2 text-left transition-colors ${isActive
-                                                ? 'bg-pink-50 text-gray-900 dark:bg-gray-800/90 dark:text-white'
-                                                : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800/70'
+                                            className={`flex items-center gap-2 rounded-2xl border px-3 py-2 text-left transition-all duration-200 ${isActive
+                                                ? 'border-gray-100/90 bg-white/88 text-gray-900 shadow-sm dark:border-gray-700/70 dark:bg-gray-800/88 dark:text-white'
+                                                : 'border-transparent text-gray-600 hover:bg-white/65 dark:text-gray-300 dark:hover:bg-gray-800/72'
                                                 }`}
                                         >
                                             <span className={`h-2.5 w-2.5 rounded-full ${category.dotColor}`} />
-                                            <span className={`flex-1 truncate text-sm font-medium ${category.textColor || ''}`}>
+                                            <span className={`flex-1 truncate text-sm font-medium ${isActive ? category.textColor || '' : ''}`}>
                                                 {category.label}
                                             </span>
                                             {isActive && <Check size={14} className="text-pink-400 dark:text-pink-300" />}
