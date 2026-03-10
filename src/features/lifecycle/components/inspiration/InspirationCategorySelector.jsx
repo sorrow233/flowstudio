@@ -114,7 +114,7 @@ const InspirationCategorySelector = ({
                                                 }`}
                                         >
                                             <span className={`h-2.5 w-2.5 rounded-full ${category.dotColor}`} />
-                                            <span className={`flex-1 truncate text-sm font-medium ${isActive ? category.textColor || '' : ''}`}>
+                                            <span className={`flex-1 truncate text-xs font-medium ${isActive ? category.textColor || '' : ''}`}>
                                                 {category.label}
                                             </span>
                                             {isActive && <Check size={14} className="text-pink-400 dark:text-pink-300" />}
