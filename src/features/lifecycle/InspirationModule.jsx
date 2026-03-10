@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { ArrowRight, Lightbulb, Hash, X, Calendar, ListChecks, Sparkles, Copy, Settings2, Trash2 } from 'lucide-react';
+import { ArrowRight, Lightbulb, Hash, X, Calendar, ListChecks, Sparkles, Copy, Settings2 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +17,7 @@ import { useSyncedCategories } from '../sync/useSyncStore';
 import CategoryManager from './components/inspiration/CategoryManager';
 import ImageUploader from './components/inspiration/ImageUploader';
 import InspirationCategorySelector from './components/inspiration/InspirationCategorySelector';
+import InspirationSelectionToolbar from './components/inspiration/InspirationSelectionToolbar';
 import { deleteImagesInContent } from './services/imageService';
 import {
     buildCategoryExportText,
@@ -25,6 +26,7 @@ import {
     parseCategoryTransferOutput,
 } from './components/inspiration/categoryTransferUtils';
 import { hexToRgba, resolveCategoryAccentHex } from './components/inspiration/categoryThemeUtils';
+import { useIOSStandalone } from '../../hooks/useIOSStandalone';
 
 // Auto color logic: Every 3 items, switch to next color
 const getNextAutoColorIndex = (totalCount) => {
@@ -67,6 +69,7 @@ const InspirationModule = () => {
     const { categoryId: routeCategoryParam } = useParams();
     const routeCategoryId = decodeRoutePart(routeCategoryParam);
     const { user } = useAuth();
+    const { isIOS } = useIOSStandalone();
     // Sync - 使用 immediateSync 实现即时同步
     const { doc, immediateSync, status } = useSync();
     const isReady = status === 'synced';
@@ -214,6 +217,8 @@ const InspirationModule = () => {
     const selectedCategoryDividerTextStyle = useMemo(() => ({
         color: selectedCategoryAccentHex,
     }), [selectedCategoryAccentHex]);
+    const selectedIdeaIdSet = useMemo(() => new Set(selectedIdeaIds), [selectedIdeaIds]);
+    const hasActiveSelectionToolbar = isSelectionMode && selectedIdeaIds.length > 0;
 
     const buildInspirationPath = useCallback((categoryId) => {
         if (!categoryId) return '/inspiration';
@@ -1505,9 +1510,11 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                 setIsSelectionMode(!isSelectionMode);
                                 if (isSelectionMode) setSelectedIdeaIds([]); // 退出时清空选中
                             }}
-                            className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-full transition-all duration-300 backdrop-blur-md border ${isSelectionMode
-                                ? 'bg-blue-500/20 border-blue-400 text-blue-500 shadow-sm'
-                                : 'bg-white/40 dark:bg-gray-800/40 border-gray-100/50 dark:border-gray-800/50 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
+                            className={`flex items-center justify-center gap-1.5 rounded-full transition-all duration-300 backdrop-blur-md border ${isIOS ? 'px-4 py-2.5 shadow-[0_16px_32px_-26px_rgba(15,23,42,0.72)]' : 'px-3 py-2'} ${isSelectionMode
+                                ? 'bg-blue-500/20 border-blue-300/80 dark:border-blue-500/60 text-blue-600 dark:text-blue-200 shadow-sm'
+                                : isIOS
+                                    ? 'bg-white/78 dark:bg-slate-900/78 border-slate-200/70 dark:border-slate-700/70 text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white'
+                                    : 'bg-white/40 dark:bg-gray-800/40 border-gray-100/50 dark:border-gray-800/50 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
                                 }`}
                             title={isSelectionMode ? "退出多选" : "开启多选"}
                         >
@@ -1560,7 +1567,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                     )}
 
                     {/* List Section - Improved overall transition */}
-                    <div className="relative min-h-[400px]">
+                    <div className={`relative min-h-[400px] ${hasActiveSelectionToolbar ? (isIOS ? 'pb-[240px] md:pb-32' : 'pb-32 md:pb-32') : ''}`}>
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={selectedCategory === 'todo' ? `${selectedCategory}-${todoAiFilter}` : selectedCategory}
@@ -1612,8 +1619,9 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                                 onToggleComplete={handleToggleComplete}
                                                                 copiedId={copiedId}
                                                                 isSelectionMode={isSelectionMode}
-                                                                isSelected={selectedIdeaIds.includes(idea.id)}
+                                                                isSelected={selectedIdeaIdSet.has(idea.id)}
                                                                 onSelect={handleToggleSelect}
+                                                                isIOSSelectionUi={isIOS}
                                                             />
                                                         ))}
                                                     </AnimatePresence>
@@ -1645,8 +1653,9 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                             onToggleComplete={handleToggleComplete}
                                                             copiedId={copiedId}
                                                             isSelectionMode={isSelectionMode}
-                                                            isSelected={selectedIdeaIds.includes(idea.id)}
+                                                            isSelected={selectedIdeaIdSet.has(idea.id)}
                                                             onSelect={handleToggleSelect}
+                                                            isIOSSelectionUi={isIOS}
                                                         />
                                                     ))}
                                             </AnimatePresence>
@@ -1718,8 +1727,9 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                                     onToggleComplete={handleToggleComplete}
                                                                     copiedId={copiedId}
                                                                     isSelectionMode={isSelectionMode}
-                                                                    isSelected={selectedIdeaIds.includes(idea.id)}
+                                                                    isSelected={selectedIdeaIdSet.has(idea.id)}
                                                                     onSelect={handleToggleSelect}
+                                                                    isIOSSelectionUi={isIOS}
                                                                 />
                                                             ))}
                                                         </AnimatePresence>
@@ -2329,64 +2339,20 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                 )}
             </AnimatePresence >
 
-            {/* Batch Action Bar */}
-            < AnimatePresence >
-                {isSelectionMode && selectedIdeaIds.length > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 100 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 100 }}
-                        className="fixed bottom-0 left-0 right-0 md:bottom-10 md:left-1/2 md:-translate-x-1/2 z-[110] md:w-auto"
-                    >
-                        <div className="bg-white/90 dark:bg-gray-950/90 md:bg-white/80 md:dark:bg-gray-950/80 backdrop-blur-2xl border-t md:border border-gray-100 dark:border-gray-800 md:rounded-2xl shadow-[0_-8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.2)] md:shadow-2xl px-4 py-3 md:p-3 pb-[max(12px,env(safe-area-inset-bottom))] md:pb-3 flex items-center justify-between md:justify-start gap-4 md:gap-3 w-full md:w-auto transition-all duration-300">
-
-                            {/* 已选项 */}
-                            <div className="px-3 py-2 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex-shrink-0">
-                                <span className="text-xs font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">{selectedIdeaIds.length} 项</span>
-                            </div>
-
-                            <button
-                                onClick={handleCopySelectedIdeas}
-                                className="px-3 py-2 bg-pink-50 dark:bg-pink-900/30 hover:bg-pink-100 dark:hover:bg-pink-900/50 text-pink-600 dark:text-pink-300 rounded-xl text-xs font-medium transition-colors active:scale-95 flex-shrink-0"
-                            >
-                                {isBatchCopied ? '已复制选中' : '复制选中'}
-                            </button>
-
-                            <button
-                                onClick={handleBatchDelete}
-                                className="px-3 py-2 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-300 rounded-xl text-xs font-medium transition-colors active:scale-95 flex-shrink-0 inline-flex items-center gap-1.5"
-                            >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                删除选中
-                            </button>
-
-                            <div className="grid grid-cols-4 gap-2 flex-1 min-w-0 md:flex md:items-center md:gap-2 md:overflow-x-auto md:no-scrollbar md:justify-start">
-                                {categories.map(cat => (
-                                    <button
-                                        key={cat.id}
-                                        onClick={() => handleBatchMove(cat.id)}
-                                        className={`px-3 py-2 rounded-xl text-xs font-medium transition-all duration-300 flex items-center justify-center md:justify-start gap-1.5 border min-w-0 w-full md:w-auto md:flex-shrink-0 ${cat.textColor} ${cat.color.replace('bg-', 'bg-opacity-10 dark:bg-opacity-20 ')} border-transparent hover:border-current shadow-sm active:scale-95`}
-                                    >
-                                        <div className={`w-2 h-2 rounded-full ${cat.dotColor}`} />
-                                        <span className="truncate max-w-full whitespace-nowrap">{cat.label}</span>
-                                    </button>
-                                ))}
-                            </div>
-
-                            {/* 取消按钮 - 固定在右侧 */}
-                            <button
-                                onClick={() => {
-                                    setIsSelectionMode(false);
-                                    setSelectedIdeaIds([]);
-                                }}
-                                className="px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-medium transition-colors active:scale-95 flex-shrink-0"
-                            >
-                                取消
-                            </button>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence >
+            <InspirationSelectionToolbar
+                isVisible={hasActiveSelectionToolbar}
+                selectedCount={selectedIdeaIds.length}
+                isBatchCopied={isBatchCopied}
+                categories={categories}
+                isIOS={isIOS}
+                onCopy={handleCopySelectedIdeas}
+                onDelete={handleBatchDelete}
+                onMove={handleBatchMove}
+                onCancel={() => {
+                    setIsSelectionMode(false);
+                    setSelectedIdeaIds([]);
+                }}
+            />
 
             <CategoryManager
                 isOpen={isCategoryManagerOpen}

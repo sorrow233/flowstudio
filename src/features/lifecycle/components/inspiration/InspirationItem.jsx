@@ -28,6 +28,7 @@ const InspirationItem = ({
     aiAssistOptions = [],
     onSetAiAssistClass,
     showAiAssistControls = false,
+    isIOSSelectionUi = false,
 }) => {
     const [isDragging, setIsDragging] = React.useState(false);
     const [isEditingContent, setIsEditingContent] = React.useState(false);
@@ -272,7 +273,11 @@ const InspirationItem = ({
                         ? 'border-cyan-300 dark:border-cyan-600 ring-1 ring-cyan-200/50 dark:ring-cyan-700/30'
                         : 'border-gray-100 dark:border-gray-800'}
                     ${isDragging ? '' : `hover:shadow-[0_0_20px_rgba(244,114,182,0.2)] hover:border-pink-200 dark:hover:border-pink-800/50`}
-                    ${isSelected ? 'border-sky-200 bg-sky-50/45 shadow-[0_8px_22px_-18px_rgba(56,189,248,0.55)] dark:border-sky-700/65 dark:bg-slate-800/72' : ''}
+                    ${isSelected
+                        ? isIOSSelectionUi
+                            ? 'border-sky-300 bg-sky-50/72 ring-1 ring-sky-200/80 shadow-[0_18px_36px_-28px_rgba(14,165,233,0.75)] dark:border-sky-500/75 dark:bg-slate-800/84 dark:ring-sky-500/28'
+                            : 'border-sky-200 bg-sky-50/45 shadow-[0_8px_22px_-18px_rgba(56,189,248,0.55)] dark:border-sky-700/65 dark:bg-slate-800/72'
+                        : ''}
                     ${isCompleted ? 'opacity-50' : ''}
                     z-10
                     group/card
@@ -299,13 +304,24 @@ const InspirationItem = ({
                             e.stopPropagation();
                             onSelect?.(idea.id);
                         }}
-                        className={`absolute top-2.5 right-2.5 z-20 h-5 w-5 rounded-full border transition-all flex items-center justify-center ${isSelected
-                            ? 'bg-sky-500 border-sky-500 text-white shadow-[0_0_0_2px_rgba(14,165,233,0.15)]'
-                            : 'bg-white/95 dark:bg-gray-900/95 border-gray-300 dark:border-gray-600 text-transparent'
-                            }`}
+                        className={`absolute z-20 rounded-full border transition-all flex items-center justify-center ${isIOSSelectionUi
+                            ? 'top-3 right-3 h-8 w-8 backdrop-blur-sm shadow-sm'
+                            : 'top-2.5 right-2.5 h-5 w-5'
+                            } ${isSelected
+                                ? isIOSSelectionUi
+                                    ? 'bg-sky-500 border-sky-300 text-white shadow-[0_14px_28px_-22px_rgba(14,165,233,0.95)]'
+                                    : 'bg-sky-500 border-sky-500 text-white shadow-[0_0_0_2px_rgba(14,165,233,0.15)]'
+                                : isIOSSelectionUi
+                                    ? 'bg-white/94 dark:bg-slate-900/94 border-slate-300/80 dark:border-slate-600/80 text-slate-400 dark:text-slate-500'
+                                    : 'bg-white/95 dark:bg-gray-900/95 border-gray-300 dark:border-gray-600 text-transparent'
+                                }`}
                         aria-label={isSelected ? '取消选择' : '选择此项'}
                     >
-                        <Check size={10} strokeWidth={3} />
+                        <Check
+                            size={isIOSSelectionUi ? 14 : 10}
+                            strokeWidth={3}
+                            className={!isSelected && isIOSSelectionUi ? 'opacity-0' : ''}
+                        />
                     </button>
                 )}
 
