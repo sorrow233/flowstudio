@@ -16,6 +16,7 @@ import { INSPIRATION_CATEGORIES } from '../../utils/constants';
 import { useSyncedCategories } from '../sync/useSyncStore';
 import CategoryManager from './components/inspiration/CategoryManager';
 import ImageUploader from './components/inspiration/ImageUploader';
+import InspirationCategorySelector from './components/inspiration/InspirationCategorySelector';
 import { deleteImagesInContent } from './services/imageService';
 import {
     buildCategoryExportText,
@@ -1516,67 +1517,13 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                             </span>
                         </button>
 
-                        <div className="flex items-center p-1 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-full border border-gray-100/50 dark:border-gray-800/50 shadow-sm transition-all duration-300 hover:bg-white/80 dark:hover:bg-gray-900/80 hover:shadow-md hover:border-pink-100/30 dark:hover:border-pink-900/30 group/selector">
-
-                            {/* Label Section - Animated */}
-                            <div className="flex items-center px-3 border-r border-gray-200/50 dark:border-gray-700/50 mr-1 min-w-[60px] justify-center relative overflow-hidden h-7">
-                                <AnimatePresence mode="wait" initial={false}>
-                                    <motion.span
-                                        key={selectedCategory}
-                                        initial={{ y: 20, opacity: 0 }}
-                                        animate={{ y: 0, opacity: 1 }}
-                                        exit={{ y: -20, opacity: 0 }}
-                                        transition={{ duration: 0.2, ease: "easeOut" }}
-                                        className={`text-xs font-medium ${categories.find(c => c.id === selectedCategory)?.textColor || 'text-gray-700 dark:text-gray-300'}`}
-                                    >
-                                        {categories.find(c => c.id === selectedCategory)?.label || 'Inspiration'}
-                                    </motion.span>
-                                </AnimatePresence>
-                            </div>
-
-                            {/* Dots Section */}
-                            <div className="flex items-center gap-1">
-                                <div className="flex items-center gap-1 w-[140px] md:w-auto overflow-x-auto md:overflow-visible no-scrollbar">
-                                    {categories.map(cat => (
-                                        <button
-                                            key={cat.id}
-                                            onClick={() => setSelectedCategory(cat.id)}
-                                            onDoubleClick={() => {
-                                                if (cat.id === 'todo' && selectedCategory === cat.id) {
-                                                    handleOpenAiImport();
-                                                }
-                                            }}
-                                            className="relative w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 group/dot flex-shrink-0"
-                                            title={cat.id === 'todo'
-                                                ? `${cat.label} · 双击打开 AI 批量导入`
-                                                : cat.label}
-                                        >
-                                            {selectedCategory === cat.id && (
-                                                <motion.div
-                                                    layoutId="activeCategory"
-                                                    className="absolute inset-0 bg-white dark:bg-gray-700 rounded-full shadow-sm border border-gray-100 dark:border-gray-600"
-                                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                                />
-                                            )}
-                                            <div className={`
-                                                    relative z-10 w-2.5 h-2.5 rounded-full transition-all duration-300
-                                                    ${cat.dotColor}
-                                                    ${selectedCategory === cat.id ? 'scale-110' : 'opacity-40 group-hover/dot:opacity-100 group-hover/dot:scale-110'}
-                                                `} />
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* Settings Button */}
-                                <button
-                                    onClick={() => setCategoryManagerOpen(true)}
-                                    className="relative w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 group/settings hover:bg-gray-100 dark:hover:bg-gray-800 ml-1 flex-shrink-0"
-                                    title="管理分类"
-                                >
-                                    <Settings2 size={14} className="text-gray-400 group-hover/settings:text-gray-600 dark:group-hover/settings:text-gray-300 transition-colors" />
-                                </button>
-                            </div>
-                        </div>
+                        <InspirationCategorySelector
+                            categories={categories}
+                            selectedCategory={selectedCategory}
+                            onSelectCategory={setSelectedCategory}
+                            onOpenManager={() => setCategoryManagerOpen(true)}
+                            onTodoDoubleClick={handleOpenAiImport}
+                        />
 
                         {selectedCategory === 'todo' && showTodoAiHint && (
                             <div className="hidden md:flex items-center gap-1.5 text-[11px] text-blue-400 dark:text-blue-500 px-2">
