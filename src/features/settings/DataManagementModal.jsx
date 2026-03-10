@@ -5,6 +5,7 @@ import { X, Download, Upload, FileJson, AlertCircle, CheckCircle2, Loader2, Zap,
 import { useSync } from '../sync/SyncContext';
 import { exportAllData, importData, validateImportData, downloadAsJson, readJsonFile } from './dataUtils';
 import { getLocalBackups } from '../sync/LocalBackupService';
+import { countActiveWritingDocs } from '../lifecycle/utils/writingDocAggregation.js';
 import Spotlight from '../../components/shared/Spotlight';
 
 const DataManagementModal = ({ isOpen, onClose }) => {
@@ -170,12 +171,14 @@ const DataManagementModal = ({ isOpen, onClose }) => {
             newPrimary = allProjects.filter(p => !['pending', 'inspiration'].includes(p.stage)).length;
         }
 
+        const writingCount = countActiveWritingDocs(allProjects, writingDocs);
+
         return {
             pending: (pendingProjects?.length || 0) + newPending,
             primary: (primaryProjects?.length || 0) + newPrimary,
             commands: (commands?.length || 0) + (allCommands?.length || 0),
             categories: (customCategories?.length || 0) + (commandCategories?.length || 0),
-            writing: writingDocs?.length || 0,
+            writing: writingCount,
         };
     }, [previewData]);
 

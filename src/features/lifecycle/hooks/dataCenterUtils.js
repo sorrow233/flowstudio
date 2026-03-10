@@ -1,4 +1,5 @@
 import { isSameDay, isSameMonth, isSameWeek } from 'date-fns';
+import { getActiveWritingDocs, isWritingProject } from '../utils/writingDocAggregation.js';
 
 const WEEK_OPTIONS = { weekStartsOn: 1 };
 
@@ -67,37 +68,19 @@ export const resolveTimestamp = (item, candidateKeys) => {
 
 export const getTextLength = (value) => (typeof value === 'string' ? value.length : 0);
 
-export const isWritingProject = (project) => project?.stage === 'writing';
+export { isWritingProject };
 
 export const buildWritingEntries = (allProjects = [], writingDocs = [], writingContent = {}) => {
-    const entries = new Map();
+    return getActiveWritingDocs(allProjects, writingDocs).map((doc) => {
+        const directContentLength = getTextLength(doc.content);
+        const fallbackLength = getTextLength(writingContent?.[doc.id]);
 
-    allProjects
-        .filter(isWritingProject)
-        .forEach((project) => {
-            if (!project?.id) return;
-
-            const projectContentLength = getTextLength(project.content);
-            const fallbackLength = getTextLength(writingContent?.[project.id]);
-
-            entries.set(project.id, {
-                id: project.id,
-                chars: projectContentLength > 0 ? projectContentLength : fallbackLength,
-                timestamp: resolveTimestamp(project, ['lastModified', 'timestamp', 'updatedAt', 'createdAt'])
-            });
-        });
-
-    writingDocs?.forEach((meta) => {
-        if (!meta?.id || entries.has(meta.id)) return;
-
-        entries.set(meta.id, {
-            id: meta.id,
-            chars: getTextLength(writingContent?.[meta.id]),
-            timestamp: resolveTimestamp(meta, ['lastModified', 'updatedAt', 'timestamp', 'createdAt'])
-        });
+        return {
+            id: doc.id,
+            chars: directContentLength > 0 ? directContentLength : fallbackLength,
+            timestamp: resolveTimestamp(doc, ['lastModified', 'timestamp', 'updatedAt', 'createdAt'])
+        };
     });
-
-    return Array.from(entries.values());
 };
 
 export const isTimestampInInterval = (timestamp, intervalStart, type) => {
