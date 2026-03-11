@@ -58,7 +58,7 @@ const InspirationCategorySelector = ({
         <div
             ref={selectorRef}
             className={`relative z-20 flex items-center p-1 rounded-full border transition-all duration-300 group/selector ${shouldUseIOSLightMenu
-                ? 'bg-white/88 border-slate-200/80 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.32)] hover:bg-white hover:border-pink-100/60'
+                ? 'bg-white/96 border-slate-200/88 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.26)] hover:bg-white hover:border-pink-100/70'
                 : 'bg-white/60 dark:bg-gray-900/60 backdrop-blur-md border-gray-100/50 dark:border-gray-800/50 shadow-sm hover:bg-white/80 dark:hover:bg-gray-900/80 hover:shadow-md hover:border-pink-100/30 dark:hover:border-pink-900/30'
                 }`}
         >
@@ -68,10 +68,10 @@ const InspirationCategorySelector = ({
                     onClick={() => setIsMenuOpen((prev) => !prev)}
                     className={`flex items-center gap-1.5 px-3 mr-1 min-w-[76px] justify-center relative overflow-hidden h-7 rounded-l-full transition-all duration-200 ${shouldUseIOSLightMenu ? 'border-r border-slate-200/80' : 'border-r border-gray-200/50 dark:border-gray-700/50'} ${isMenuOpen
                         ? shouldUseIOSLightMenu
-                            ? 'bg-white shadow-[0_10px_24px_-18px_rgba(15,23,42,0.3)]'
+                            ? 'bg-white shadow-[0_10px_24px_-18px_rgba(15,23,42,0.24)]'
                             : 'bg-white/70 dark:bg-gray-800/70 shadow-sm'
                         : shouldUseIOSLightMenu
-                            ? 'hover:bg-white/92'
+                            ? 'hover:bg-white'
                             : 'hover:bg-white/60 dark:hover:bg-gray-800/60'
                         }`}
                     title="打开分类列表"
@@ -107,7 +107,7 @@ const InspirationCategorySelector = ({
                             exit={{ opacity: 0, y: 6, scale: 0.98 }}
                             transition={{ duration: 0.16, ease: 'easeOut' }}
                             className={`absolute left-0 top-[calc(100%+10px)] z-40 w-[196px] overflow-hidden rounded-[22px] border p-1.5 transform-gpu ${shouldUseIOSLightMenu
-                                ? 'border-slate-200/85 bg-white/98 shadow-[0_26px_60px_-28px_rgba(15,23,42,0.32)]'
+                                ? 'border-slate-200/92 bg-white shadow-[0_26px_60px_-28px_rgba(15,23,42,0.24)]'
                                 : 'border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.94),rgba(8,15,31,0.96))] shadow-[0_22px_56px_rgba(2,6,23,0.42)] backdrop-blur-2xl'
                                 }`}
                         >

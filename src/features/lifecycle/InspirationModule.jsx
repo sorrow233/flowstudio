@@ -1513,7 +1513,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                             className={`flex items-center justify-center gap-1.5 rounded-full transition-all duration-300 backdrop-blur-md border ${isIOS ? 'px-4 py-2.5 shadow-[0_16px_32px_-26px_rgba(15,23,42,0.72)]' : 'px-3 py-2'} ${isSelectionMode
                                 ? 'bg-blue-500/20 border-blue-300/80 dark:border-blue-500/60 text-blue-600 dark:text-blue-200 shadow-sm'
                                 : isIOS
-                                    ? 'bg-white/78 dark:bg-slate-900/78 border-slate-200/70 dark:border-slate-700/70 text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white'
+                                    ? 'bg-white/92 dark:bg-slate-900/86 border-slate-200/82 dark:border-slate-700/80 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white'
                                     : 'bg-white/40 dark:bg-gray-800/40 border-gray-100/50 dark:border-gray-800/50 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
                                 }`}
                             title={isSelectionMode ? "退出多选" : "开启多选"}
