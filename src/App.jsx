@@ -1,25 +1,24 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ErrorBoundary from './components/ErrorBoundary';
-import InspirationModule from './features/lifecycle/InspirationModule';
-import WritingModule from './features/lifecycle/WritingModule';
-import InspirationArchiveModule from './features/lifecycle/InspirationArchiveModule';
-import PendingModule from './features/lifecycle/PendingModule';
-import PrimaryDevModule from './features/lifecycle/PrimaryDevModule';
-import AdvancedDevModule from './features/lifecycle/AdvancedDevModule';
-import CommandCenterModule from './features/blueprint/CommandCenterModule';
-import DataCenterModule from './features/lifecycle/DataCenterModule';
-import ShareViewPage from './features/share/components/ShareViewPage';
-import ShareReceiver from './features/share/ShareReceiver';
-import UserIdentityPage from './features/auth/UserIdentityPage';
-
 import { Toaster } from 'sonner';
 import { KeymapProvider, ShortcutHelpModal, useBrowserIntercept } from './features/shortcuts';
 import { LanguageProvider } from './features/i18n';
-import { ThemeProvider } from './hooks/ThemeContext';
 import { useIOSStandalone } from './hooks/useIOSStandalone';
+import RouteLoadingScreen from './components/shared/RouteLoadingScreen';
+
+const InspirationModule = lazy(() => import('./features/lifecycle/InspirationModule'));
+const WritingModule = lazy(() => import('./features/lifecycle/WritingModule'));
+const InspirationArchiveModule = lazy(() => import('./features/lifecycle/InspirationArchiveModule'));
+const PendingModule = lazy(() => import('./features/lifecycle/PendingModule'));
+const PrimaryDevModule = lazy(() => import('./features/lifecycle/PrimaryDevModule'));
+const AdvancedDevModule = lazy(() => import('./features/lifecycle/AdvancedDevModule'));
+const CommandCenterModule = lazy(() => import('./features/blueprint/CommandCenterModule'));
+const DataCenterModule = lazy(() => import('./features/lifecycle/DataCenterModule'));
+const ShareViewPage = lazy(() => import('./features/share/components/ShareViewPage'));
+const ShareReceiver = lazy(() => import('./features/share/ShareReceiver'));
+const UserIdentityPage = lazy(() => import('./features/auth/UserIdentityPage'));
 
 function App() {
     const location = useLocation();
@@ -31,16 +30,16 @@ function App() {
     useBrowserIntercept();
 
     return (
-        <ThemeProvider>
-            <LanguageProvider>
-                <KeymapProvider>
-                    <div className={`flex flex-col h-screen min-h-dvh h-dvh overflow-hidden bg-gray-50/50 dark:bg-gray-950 ${isIOSStandalone ? 'ios-standalone' : ''}`}>
-                        <Toaster position="top-right" richColors />
-                        {!isIdentityRoute && <Navbar />}
+        <LanguageProvider>
+            <KeymapProvider>
+                <div className={`flex flex-col h-screen min-h-dvh h-dvh overflow-hidden bg-gray-50/50 dark:bg-gray-950 ${isIOSStandalone ? 'ios-standalone' : ''}`}>
+                    <Toaster position="top-right" richColors />
+                    {!isIdentityRoute && <Navbar />}
 
-                        <main className="flex-1 overflow-y-auto w-full no-scrollbar">
-                            <div className={`${isIdentityRoute ? 'max-w-5xl mx-auto h-full px-4 py-8 md:px-6 md:py-12' : `max-w-7xl mx-auto h-full px-4 md:px-6 ${location.pathname.startsWith('/writing') ? 'pb-0' : 'pb-20'}`}`}>
-                                <ErrorBoundary>
+                    <main className="flex-1 overflow-y-auto w-full no-scrollbar">
+                        <div className={`${isIdentityRoute ? 'max-w-5xl mx-auto h-full px-4 py-8 md:px-6 md:py-12' : `max-w-7xl mx-auto h-full px-4 md:px-6 ${location.pathname.startsWith('/writing') ? 'pb-0' : 'pb-20'}`}`}>
+                            <ErrorBoundary>
+                                <Suspense fallback={<RouteLoadingScreen />}>
                                     <Routes location={location} key={routeSectionKey}>
                                         <Route path="/" element={<Navigate to="/inspiration" replace />} />
                                         <Route path="/inspiration" element={<InspirationModule />} />
@@ -61,16 +60,16 @@ function App() {
                                         <Route path="/__flowstudio/whoami" element={<UserIdentityPage />} />
                                         <Route path="*" element={<Navigate to="/" replace />} />
                                     </Routes>
-                                </ErrorBoundary>
-                            </div>
-                        </main>
+                                </Suspense>
+                            </ErrorBoundary>
+                        </div>
+                    </main>
 
-                        {/* 全局快捷键帮助面板 - Shift + ? 触发 */}
-                        <ShortcutHelpModal />
-                    </div>
-                </KeymapProvider>
-            </LanguageProvider>
-        </ThemeProvider>
+                    {/* 全局快捷键帮助面板 - Shift + ? 触发 */}
+                    <ShortcutHelpModal />
+                </div>
+            </KeymapProvider>
+        </LanguageProvider>
     );
 }
 

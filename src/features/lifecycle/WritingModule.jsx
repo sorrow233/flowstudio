@@ -9,7 +9,12 @@ const WritingModule = () => {
         projects: allProjects,
         addProject: addProjectBase,
         removeProject: removeProjectBase,
-        updateProject: updateProjectBase
+        updateProject: updateProjectBase,
+        undo,
+        redo,
+        canUndo,
+        canRedo,
+        lastChangeMeta: projectChangeMeta,
     } = useSyncedProjects(doc, 'all_projects');
 
     const writingDocs = useMemo(() =>
@@ -53,6 +58,11 @@ const WritingModule = () => {
                     }}
                     onUpdate={updateDoc}
                     onDelete={removeDoc}
+                    onUndo={undo}
+                    onRedo={redo}
+                    canUndo={canUndo}
+                    canRedo={canRedo}
+                    projectChangeMeta={projectChangeMeta}
                     syncStatus={status}
                 />
             </div>

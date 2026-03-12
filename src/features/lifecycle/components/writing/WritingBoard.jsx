@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSync } from '../../../sync/SyncContext';
-import { useSyncedProjects } from '../../../sync/useSyncStore';
 import { useSyncedCategories } from '../../../sync/hooks/useSyncedCategories';
 import { useTranslation } from '../../../i18n';
 import { WRITING_CATEGORIES } from '../../../../utils/constants';
@@ -46,7 +45,19 @@ const decodeRoutePart = (value) => {
 
 const normalizeCategoryLabel = (value) => String(value || '').trim().toLowerCase();
 
-const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDelete, syncStatus, isMobile: externalIsMobile }) => {
+const WritingBoard = ({
+    documents,
+    onCreate,
+    onUpdate,
+    onDelete,
+    onUndo,
+    onRedo,
+    canUndo,
+    canRedo,
+    projectChangeMeta = null,
+    syncStatus,
+    isMobile: externalIsMobile,
+}) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { categoryId: routeCategoryParam, docId: routeDocParam } = useParams();
@@ -56,17 +67,6 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
     const isRouteTrash = location.pathname.startsWith('/writing/trash');
     const routeCategoryId = decodeRoutePart(routeCategoryParam);
     const routeDocId = decodeRoutePart(routeDocParam);
-    const {
-        projects: allProjects,
-        addProject,
-        updateProject,
-        removeProject,
-        undo,
-        redo,
-        canUndo,
-        canRedo,
-        lastChangeMeta: projectChangeMeta
-    } = useSyncedProjects(doc, 'all_projects');
     const {
         categories: syncedCategories,
         addCategory: addCategoryBase,
@@ -128,15 +128,9 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         return Array.from(map.values());
     }, [syncedCategories]);
 
-    const internalDocuments = useMemo(
-        () => allProjects.filter((project) => project.stage === 'writing'),
-        [allProjects]
-    );
-
-    const rawDocuments = externalDocuments ?? internalDocuments;
     const allDocuments = useMemo(() =>
-        sortWritingDocuments(rawDocuments),
-        [rawDocuments]
+        sortWritingDocuments(documents || []),
+        [documents]
     );
 
     const activeDocuments = useMemo(
@@ -151,20 +145,9 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
 
     const resolvedSyncStatus = syncStatus ?? status;
 
-    const createHandler = onCreate ?? ((docToCreate) => {
-        addProject(docToCreate);
-        immediateSync?.();
-    });
-
-    const updateHandler = onUpdate ?? ((id, updates) => {
-        updateProject(id, { ...updates, lastModified: Date.now() });
-        immediateSync?.();
-    });
-
-    const hardDeleteHandler = onDelete ?? ((id) => {
-        removeProject(id);
-        immediateSync?.();
-    });
+    const createHandler = onCreate;
+    const updateHandler = onUpdate;
+    const hardDeleteHandler = onDelete;
 
 
     const [selectedDocId, setSelectedDocId] = useState(() => routeDocId || null);
@@ -422,7 +405,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             const currentCategory = docItem.category || defaultCategoryId;
             if (currentCategory === targetCategoryId) return;
 
-            updateProject(docId, {
+            updateHandler(docId, {
                 category: targetCategoryId,
                 manualOrder: null,
                 manualOrderCategory: null,
@@ -450,7 +433,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
             const currentCategory = docItem.manualOrderCategory || null;
             if (currentOrder === nextOrder && currentCategory === selectedCategory) return;
 
-            updateProject(docItem.id, {
+            updateHandler(docItem.id, {
                 manualOrder: nextOrder,
                 manualOrderCategory: selectedCategory,
             });
@@ -458,7 +441,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         });
 
         if (hasChanges) immediateSync?.();
-    }, [defaultCategoryId, immediateSync, isTrashView, selectedCategory, updateProject]);
+    }, [defaultCategoryId, immediateSync, isTrashView, selectedCategory, updateHandler]);
 
     useEffect(() => {
         if (trashDocuments.length === 0) return;
@@ -487,7 +470,7 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
         allDocuments
             .filter((docItem) => (docItem.category || defaultCategoryId) === id)
             .forEach((docItem) => {
-                updateProject(docItem.id, {
+                updateHandler(docItem.id, {
                     category: fallback.id,
                     manualOrder: null,
                     manualOrderCategory: null,
@@ -620,8 +603,8 @@ const WritingBoard = ({ documents: externalDocuments, onCreate, onUpdate, onDele
                             }}
                             onCloseSidebar={() => setIsSidebarOpen(false)}
                             isMobile={isMobile}
-                            onUndo={undo}
-                            onRedo={redo}
+                            onUndo={onUndo}
+                            onRedo={onRedo}
                             canUndo={canUndo}
                             canRedo={canRedo}
                             syncStatus={resolvedSyncStatus}
