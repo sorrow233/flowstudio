@@ -292,14 +292,15 @@ const InspirationModule = () => {
     useEffect(() => {
         if (!selectedCategory) return;
 
+        if (routeCategoryId === selectedCategory) {
+            return;
+        }
+
         const targetPath = buildInspirationPath(selectedCategory);
-        const currentPathWithSearch = `${location.pathname}${location.search || ''}`;
         const targetPathWithSearch = `${targetPath}${location.search || ''}`;
 
-        if (currentPathWithSearch !== targetPathWithSearch) {
-            navigate(targetPathWithSearch, { replace: true });
-        }
-    }, [buildInspirationPath, location.pathname, location.search, navigate, selectedCategory]);
+        navigate(targetPathWithSearch, { replace: true });
+    }, [buildInspirationPath, location.search, navigate, routeCategoryId, selectedCategory]);
 
     useEffect(() => {
         if (categories.length === 0) return;
