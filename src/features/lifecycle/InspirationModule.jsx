@@ -47,6 +47,7 @@ const decodeRoutePart = (value) => {
 };
 
 const TODO_AI_HINT_SEEN_KEY = 'flowstudio_todo_ai_hint_seen';
+const CATEGORY_COPY_HINT_SEEN_KEY = 'flowstudio_category_copy_hint_seen';
 const TODO_AI_CLASS_UNCLASSIFIED = 'unclassified';
 const TODO_AI_FILTER_PENDING = 'pending';
 
@@ -222,6 +223,13 @@ const InspirationModule = () => {
     const [showTodoAiHint, setShowTodoAiHint] = useState(() => {
         try {
             return localStorage.getItem(TODO_AI_HINT_SEEN_KEY) !== '1';
+        } catch {
+            return true;
+        }
+    });
+    const [showCategoryCopyHint, setShowCategoryCopyHint] = useState(() => {
+        try {
+            return localStorage.getItem(CATEGORY_COPY_HINT_SEEN_KEY) !== '1';
         } catch {
             return true;
         }
@@ -773,6 +781,12 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
 
         const success = await copyTextToClipboard(snapshotText);
         if (success) {
+            setShowCategoryCopyHint(false);
+            try {
+                localStorage.setItem(CATEGORY_COPY_HINT_SEEN_KEY, '1');
+            } catch {
+                // ignore storage errors
+            }
             toast.success(`已复制“${categoryLabel}”分类（${targetIdeas.length} 条）`, {
                 duration: 1400,
                 position: 'bottom-center',
@@ -1195,6 +1209,21 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         return () => clearTimeout(timer);
     }, [selectedCategory, showTodoAiHint]);
 
+    useEffect(() => {
+        if (selectedCategory === 'todo' || !showCategoryCopyHint) return;
+
+        try {
+            localStorage.setItem(CATEGORY_COPY_HINT_SEEN_KEY, '1');
+        } catch {
+            // ignore storage errors
+        }
+
+        const timer = setTimeout(() => {
+            setShowCategoryCopyHint(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+    }, [selectedCategory, showCategoryCopyHint]);
+
     const handleBatchImportFromAi = useCallback(() => {
         const tasks = parseAiTodoOutput(aiImportText);
 
@@ -1601,10 +1630,12 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                 </div>
                             )
                         ) : (
+                            showCategoryCopyHint && (
                             <div className="hidden md:flex items-center gap-1.5 text-[11px] text-gray-400 dark:text-gray-500 px-1">
                                 <Copy size={12} />
                                 <span>双击分类圆点可复制当前分类快照</span>
                             </div>
+                            )
                         )}
                     </div>
 
