@@ -1607,16 +1607,14 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                 setIsSelectionMode(!isSelectionMode);
                                 if (isSelectionMode) setSelectedIdeaIds([]); // 退出时清空选中
                             }}
-                            className={`flex items-center justify-center gap-1.5 rounded-full transition-all duration-300 backdrop-blur-md border ${isIOS ? 'px-4 py-2.5 shadow-[0_16px_32px_-26px_rgba(15,23,42,0.72)]' : 'px-3 py-2'} ${isSelectionMode
-                                ? 'bg-blue-500/20 border-blue-300/80 dark:border-blue-500/60 text-blue-600 dark:text-blue-200 shadow-sm'
-                                : isIOS
-                                    ? 'bg-white/92 dark:bg-slate-900/86 border-slate-200/82 dark:border-slate-700/80 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white'
-                                    : 'bg-white/40 dark:bg-gray-800/40 border-gray-100/50 dark:border-gray-800/50 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
+                            className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border transition-all duration-300 backdrop-blur-md md:h-auto md:w-auto md:gap-1.5 md:px-3 md:py-2 ${isSelectionMode
+                                ? 'bg-blue-500/16 border-blue-300 text-blue-500 shadow-sm'
+                                : 'bg-white/60 dark:bg-gray-800/40 border-gray-100/70 dark:border-gray-800/60 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
                                 }`}
                             title={isSelectionMode ? "退出多选" : "开启多选"}
                         >
                             {isSelectionMode ? <X size={18} /> : <ListChecks size={18} />}
-                            <span className="text-xs font-medium md:hidden">
+                            <span className="hidden text-xs font-medium whitespace-nowrap md:inline">
                                 {isSelectionMode ? '退出' : '多选'}
                             </span>
                         </button>
