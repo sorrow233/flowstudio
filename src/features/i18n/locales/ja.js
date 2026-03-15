@@ -108,6 +108,10 @@ export default {
         restore: '復元',
     },
 
+    blueprint: {
+        title: '青写真',
+    },
+
     writing: {
         library: 'ライブラリ',
         documents: 'ドキュメント',

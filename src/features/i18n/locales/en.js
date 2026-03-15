@@ -109,6 +109,10 @@ export default {
         restore: 'Restore',
     },
 
+    blueprint: {
+        title: 'Blueprint',
+    },
+
     writing: {
         library: 'Library',
         documents: 'Documents',

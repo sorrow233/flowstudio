@@ -113,6 +113,10 @@ export default {
         restore: '恢复',
     },
 
+    blueprint: {
+        title: '蓝图',
+    },
+
     writing: {
         library: '资料库',
         documents: '文档',

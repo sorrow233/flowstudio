@@ -108,6 +108,10 @@ export default {
         restore: '복원',
     },
 
+    blueprint: {
+        title: '청사진',
+    },
+
     writing: {
         library: '라이브러리',
         documents: '문서',
