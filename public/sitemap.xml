@@ -123,6 +123,46 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://flowstudio.catzz.work/writing</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/writing"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/writing"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/writing"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/writing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/writing"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://flowstudio.catzz.work/en/writing</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/writing"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/writing"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/writing"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/writing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/writing"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://flowstudio.catzz.work/ja/writing</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/writing"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/writing"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/writing"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/writing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/writing"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://flowstudio.catzz.work/ko/writing</loc>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/writing"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/writing"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://flowstudio.catzz.work/ja/writing"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://flowstudio.catzz.work/ko/writing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://flowstudio.catzz.work/writing"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://flowstudio.catzz.work/sprout</loc>
     <xhtml:link rel="alternate" hreflang="zh" href="https://flowstudio.catzz.work/sprout"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://flowstudio.catzz.work/en/sprout"/>
