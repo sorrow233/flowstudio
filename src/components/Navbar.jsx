@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { startTransition, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Spotlight from './shared/Spotlight';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -15,7 +15,6 @@ import {
     BarChart3,
     PenTool
 } from 'lucide-react';
-import { useState } from 'react';
 import { useAuth } from '../features/auth/AuthContext';
 import AuthModal from '../features/auth/AuthModal';
 import { useSync } from '../features/sync/SyncContext';
@@ -24,6 +23,7 @@ import { DataManagementModal } from '../features/settings';
 import { useTheme } from '../hooks/ThemeContext';
 import { useSettings } from '../hooks/SettingsContext';
 import { useTranslation } from '../features/i18n';
+import { preloadNavbarRoute } from '../routes/routeModules';
 
 const tabIcons = {
     inspiration: Lightbulb,
@@ -58,6 +58,21 @@ const Navbar = () => {
     const advancedTab = { id: 'advanced', label: t('navbar.advanced'), icon: tabIcons.advanced, path: '/advanced' };
 
     const { status } = useSync();
+
+    const handleTabPreload = (path) => {
+        void preloadNavbarRoute(path);
+    };
+
+    const handleTabNavigate = (path) => {
+        if (location.pathname === path || location.pathname.startsWith(`${path}/`)) {
+            return;
+        }
+
+        handleTabPreload(path);
+        startTransition(() => {
+            navigate(path);
+        });
+    };
 
     // Dynamic Theme Config based on active tab
     const getActiveTheme = () => {
@@ -166,7 +181,12 @@ const Navbar = () => {
                             return (
                                 <button
                                     key={tab.id}
-                                    onClick={() => navigate(tab.path)}
+                                    type="button"
+                                    onClick={() => handleTabNavigate(tab.path)}
+                                    onMouseEnter={() => handleTabPreload(tab.path)}
+                                    onFocus={() => handleTabPreload(tab.path)}
+                                    onTouchStart={() => handleTabPreload(tab.path)}
+                                    onPointerDown={() => handleTabPreload(tab.path)}
                                     className={`
                                         relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-50 shrink-0
                                         hover:scale-105 active:scale-95
@@ -211,7 +231,12 @@ const Navbar = () => {
                             return (
                                 <button
                                     key={advancedTab.id}
-                                    onClick={() => navigate(advancedTab.path)}
+                                    type="button"
+                                    onClick={() => handleTabNavigate(advancedTab.path)}
+                                    onMouseEnter={() => handleTabPreload(advancedTab.path)}
+                                    onFocus={() => handleTabPreload(advancedTab.path)}
+                                    onTouchStart={() => handleTabPreload(advancedTab.path)}
+                                    onPointerDown={() => handleTabPreload(advancedTab.path)}
                                     className={`
                                         relative flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-all duration-300 whitespace-nowrap z-50 shrink-0
                                         ${isActive

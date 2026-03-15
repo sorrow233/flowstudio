@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -8,59 +8,35 @@ import { LanguageProvider } from './features/i18n';
 import { useIOSStandalone } from './hooks/useIOSStandalone';
 import RouteLoadingScreen from './components/shared/RouteLoadingScreen';
 import EmailLinkCompletionModal from './features/auth/EmailLinkCompletionModal';
-import { lazyWithRetry } from './utils/chunkLoadRecovery';
-import { version } from '../package.json';
 import { IOSHomeScreenPrompt } from './features/pwa';
+import {
+    AdvancedDevRoute,
+    CommandCenterRoute,
+    DataCenterRoute,
+    idleRoutePreloaders,
+    InspirationArchiveRoute,
+    InspirationRoute,
+    PendingRoute,
+    PrimaryDevRoute,
+    ShareReceiverRoute,
+    ShareViewRoute,
+    UserIdentityRoute,
+    WritingRoute,
+} from './routes/routeModules';
 
-const createRouteModule = (importer, contextName) => lazyWithRetry(importer, {
-    buildId: version,
-    contextName,
-});
+const IDLE_PRELOAD_DELAY_MS = 120;
 
-const InspirationModule = createRouteModule(
-    () => import('./features/lifecycle/InspirationModule'),
-    'route-inspiration'
-);
-const WritingModule = createRouteModule(
-    () => import('./features/lifecycle/WritingModule'),
-    'route-writing'
-);
-const InspirationArchiveModule = createRouteModule(
-    () => import('./features/lifecycle/InspirationArchiveModule'),
-    'route-inspiration-archive'
-);
-const PendingModule = createRouteModule(
-    () => import('./features/lifecycle/PendingModule'),
-    'route-pending'
-);
-const PrimaryDevModule = createRouteModule(
-    () => import('./features/lifecycle/PrimaryDevModule'),
-    'route-primary-dev'
-);
-const AdvancedDevModule = createRouteModule(
-    () => import('./features/lifecycle/AdvancedDevModule'),
-    'route-advanced-dev'
-);
-const CommandCenterModule = createRouteModule(
-    () => import('./features/blueprint/CommandCenterModule'),
-    'route-command-center'
-);
-const DataCenterModule = createRouteModule(
-    () => import('./features/lifecycle/DataCenterModule'),
-    'route-data-center'
-);
-const ShareViewPage = createRouteModule(
-    () => import('./features/share/components/ShareViewPage'),
-    'route-share-view'
-);
-const ShareReceiver = createRouteModule(
-    () => import('./features/share/ShareReceiver'),
-    'route-share-receiver'
-);
-const UserIdentityPage = createRouteModule(
-    () => import('./features/auth/UserIdentityPage'),
-    'route-user-identity'
-);
+function scheduleWhenIdle(callback) {
+    if (typeof window === 'undefined') return () => {};
+
+    if ('requestIdleCallback' in window) {
+        const idleId = window.requestIdleCallback(callback, { timeout: 1200 });
+        return () => window.cancelIdleCallback(idleId);
+    }
+
+    const timeoutId = window.setTimeout(callback, 250);
+    return () => window.clearTimeout(timeoutId);
+}
 
 function App() {
     const location = useLocation();
@@ -70,6 +46,49 @@ function App() {
     const isShareRoute = location.pathname.startsWith('/share');
 
     useBrowserIntercept();
+
+    useEffect(() => {
+        if (typeof window === 'undefined' || idleRoutePreloaders.length === 0) {
+            return undefined;
+        }
+
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        if (connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || '')) {
+            return undefined;
+        }
+
+        let cancelled = false;
+        let timeoutId = null;
+
+        const queueWarmup = async () => {
+            for (const preload of idleRoutePreloaders) {
+                if (cancelled) return;
+
+                try {
+                    await preload?.();
+                } catch {
+                    // 懒加载预热失败时保留正常点击兜底，不中断用户流程。
+                }
+
+                await new Promise((resolve) => {
+                    timeoutId = window.setTimeout(resolve, IDLE_PRELOAD_DELAY_MS);
+                });
+            }
+        };
+
+        const cancelIdleSchedule = scheduleWhenIdle(() => {
+            void queueWarmup();
+        });
+
+        return () => {
+            cancelled = true;
+            cancelIdleSchedule();
+
+            if (timeoutId !== null) {
+                window.clearTimeout(timeoutId);
+            }
+        };
+    }, []);
 
     return (
         <LanguageProvider>
@@ -85,22 +104,22 @@ function App() {
                                 <Suspense fallback={<RouteLoadingScreen />}>
                                     <Routes location={location} key={routeSectionKey}>
                                         <Route path="/" element={<Navigate to="/inspiration" replace />} />
-                                        <Route path="/inspiration" element={<InspirationModule />} />
-                                        <Route path="/inspiration/c/:categoryId" element={<InspirationModule />} />
-                                        <Route path="/writing" element={<WritingModule />} />
-                                        <Route path="/writing/c/:categoryId" element={<WritingModule />} />
-                                        <Route path="/writing/c/:categoryId/:docId" element={<WritingModule />} />
-                                        <Route path="/writing/trash" element={<WritingModule />} />
-                                        <Route path="/writing/trash/:docId" element={<WritingModule />} />
-                                        <Route path="/inspiration/archive" element={<InspirationArchiveModule />} />
-                                        <Route path="/sprout" element={<PendingModule />} />
-                                        <Route path="/flow" element={<PrimaryDevModule />} />
-                                        <Route path="/advanced" element={<AdvancedDevModule />} />
-                                        <Route path="/blueprint" element={<CommandCenterModule />} />
-                                        <Route path="/data" element={<DataCenterModule />} />
-                                        <Route path="/share/:id" element={<ShareViewPage />} />
-                                        <Route path="/share-receiver" element={<ShareReceiver />} />
-                                        <Route path="/__flowstudio/whoami" element={<UserIdentityPage />} />
+                                        <Route path="/inspiration" element={<InspirationRoute />} />
+                                        <Route path="/inspiration/c/:categoryId" element={<InspirationRoute />} />
+                                        <Route path="/writing" element={<WritingRoute />} />
+                                        <Route path="/writing/c/:categoryId" element={<WritingRoute />} />
+                                        <Route path="/writing/c/:categoryId/:docId" element={<WritingRoute />} />
+                                        <Route path="/writing/trash" element={<WritingRoute />} />
+                                        <Route path="/writing/trash/:docId" element={<WritingRoute />} />
+                                        <Route path="/inspiration/archive" element={<InspirationArchiveRoute />} />
+                                        <Route path="/sprout" element={<PendingRoute />} />
+                                        <Route path="/flow" element={<PrimaryDevRoute />} />
+                                        <Route path="/advanced" element={<AdvancedDevRoute />} />
+                                        <Route path="/blueprint" element={<CommandCenterRoute />} />
+                                        <Route path="/data" element={<DataCenterRoute />} />
+                                        <Route path="/share/:id" element={<ShareViewRoute />} />
+                                        <Route path="/share-receiver" element={<ShareReceiverRoute />} />
+                                        <Route path="/__flowstudio/whoami" element={<UserIdentityRoute />} />
                                         <Route path="*" element={<Navigate to="/" replace />} />
                                     </Routes>
                                 </Suspense>

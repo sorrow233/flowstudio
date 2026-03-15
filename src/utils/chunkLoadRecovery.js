@@ -67,18 +67,38 @@ export function installChunkLoadRecovery(buildId) {
 }
 
 export function lazyWithRetry(importer, options = {}) {
-    return lazy(() => (
-        importer().catch((error) => {
-            const handled = recoverFromChunkLoadError(error, {
-                buildId: options.buildId,
-                contextName: options.contextName || 'lazy-import',
+    return lazy(createRetryableImporter(importer, options));
+}
+
+function createRetryableImporter(importer, options = {}) {
+    let importPromise = null;
+
+    return () => {
+        if (!importPromise) {
+            importPromise = importer().catch((error) => {
+                importPromise = null;
+
+                const handled = recoverFromChunkLoadError(error, {
+                    buildId: options.buildId,
+                    contextName: options.contextName || 'lazy-import',
+                });
+
+                if (handled) {
+                    return new Promise(() => {});
+                }
+
+                throw error;
             });
+        }
 
-            if (handled) {
-                return new Promise(() => {});
-            }
+        return importPromise;
+    };
+}
 
-            throw error;
-        })
-    ));
+export function lazyWithPreload(importer, options = {}) {
+    const load = createRetryableImporter(importer, options);
+    const LazyComponent = lazy(load);
+
+    LazyComponent.preload = load;
+    return LazyComponent;
 }
