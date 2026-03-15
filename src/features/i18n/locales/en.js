@@ -57,6 +57,32 @@ export default {
         doubleClickToRename: 'Double click to rename',
     },
 
+    iosInstallPrompt: {
+        title: 'Add to your home screen',
+        badgeSafari: 'Ready in Safari',
+        badgeOtherBrowser: 'Open in Safari',
+        descriptionSafari: 'iPhone and iPad users can pin Flow Studio to the home screen and launch it like an app.',
+        descriptionOtherBrowser: 'This browser cannot finish home screen install. Open the page in Safari first.',
+        helperSafari: 'After the native share sheet opens, tap "Add to Home Screen".',
+        helperOtherBrowser: 'On iOS, "Add to Home Screen" only works through Safari.',
+        guideEyebrow: 'Home Screen Guide',
+        guideTitleSafari: 'Add Flow Studio to your home screen in two steps',
+        guideTitleOtherBrowser: 'Switch to Safari, then add it to your home screen',
+        actions: {
+            openShare: 'Open share sheet',
+            showSteps: 'Show steps',
+            remindLater: 'Remind me later',
+        },
+        steps: {
+            safariOne: 'Tap "Open share sheet" below, or use Safari\'s native share button.',
+            safariTwo: 'Choose "Add to Home Screen" in the system menu.',
+            safariThree: 'Confirm the name and tap "Add" to place it on your home screen.',
+            otherOne: 'Open this page in Safari first.',
+            otherTwo: 'Tap Safari\'s share button from the top or bottom toolbar.',
+            otherThree: 'Choose "Add to Home Screen", then tap "Add".',
+        },
+    },
+
     // Inspiration Module
     inspiration: {
         title: 'Inspiration',

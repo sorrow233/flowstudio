@@ -56,6 +56,32 @@ export default {
         doubleClickToRename: 'ダブルクリックで名前を変更',
     },
 
+    iosInstallPrompt: {
+        title: 'ホーム画面に追加して、アプリのように使う',
+        badgeSafari: 'Safari ですぐ追加',
+        badgeOtherBrowser: 'Safari で開く',
+        descriptionSafari: 'iPhone / iPad では Flow Studio をホーム画面に追加して、次回からすぐ起動できます。',
+        descriptionOtherBrowser: 'このブラウザではホーム画面追加を完了できません。Safari で開いてください。',
+        helperSafari: '共有シートが開いたら「ホーム画面に追加」を選べば完了です。',
+        helperOtherBrowser: 'iOS では「ホーム画面に追加」は Safari からのみ利用できます。',
+        guideEyebrow: 'ホーム画面追加ガイド',
+        guideTitleSafari: '2ステップで Flow Studio をホーム画面へ',
+        guideTitleOtherBrowser: 'Safari に切り替えてからホーム画面へ追加',
+        actions: {
+            openShare: '共有シートを開く',
+            showSteps: '手順を見る',
+            remindLater: '後で通知',
+        },
+        steps: {
+            safariOne: '下の「共有シートを開く」を押すか、Safari の共有ボタンをタップします。',
+            safariTwo: 'システムメニューで「ホーム画面に追加」を選びます。',
+            safariThree: '名前を確認して「追加」を押すと、ホーム画面に配置されます。',
+            otherOne: 'まずこのページを Safari で開きます。',
+            otherTwo: 'Safari の上部または下部ツールバーにある共有ボタンを押します。',
+            otherThree: '「ホーム画面に追加」を選んでから「追加」を押します。',
+        },
+    },
+
     // Inspiration Module
     inspiration: {
         title: 'インスピレーション',

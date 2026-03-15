@@ -56,6 +56,32 @@ export default {
         doubleClickToRename: '더블클릭하여 이름 변경',
     },
 
+    iosInstallPrompt: {
+        title: '홈 화면에 추가하고 앱처럼 사용하기',
+        badgeSafari: 'Safari에서 바로 추가',
+        badgeOtherBrowser: 'Safari로 열기',
+        descriptionSafari: 'iPhone / iPad 사용자는 Flow Studio를 홈 화면에 추가하고 다음부터 바로 열 수 있습니다.',
+        descriptionOtherBrowser: '현재 브라우저에서는 홈 화면 추가를 완료할 수 없습니다. Safari에서 열어 주세요.',
+        helperSafari: '공유 시트가 열리면 "홈 화면에 추가"를 누르면 됩니다.',
+        helperOtherBrowser: 'iOS에서 "홈 화면에 추가"는 Safari를 통해서만 사용할 수 있습니다.',
+        guideEyebrow: '홈 화면 추가 안내',
+        guideTitleSafari: '두 단계로 Flow Studio를 홈 화면에 추가',
+        guideTitleOtherBrowser: 'Safari로 연 다음 홈 화면에 추가',
+        actions: {
+            openShare: '공유 시트 열기',
+            showSteps: '방법 보기',
+            remindLater: '나중에 알림',
+        },
+        steps: {
+            safariOne: '아래의 "공유 시트 열기"를 누르거나 Safari 공유 버튼을 탭합니다.',
+            safariTwo: '시스템 메뉴에서 "홈 화면에 추가"를 선택합니다.',
+            safariThree: '이름을 확인한 뒤 "추가"를 누르면 홈 화면에 배치됩니다.',
+            otherOne: '먼저 이 페이지를 Safari에서 엽니다.',
+            otherTwo: 'Safari 상단 또는 하단 도구막대의 공유 버튼을 누릅니다.',
+            otherThree: '"홈 화면에 추가"를 선택한 뒤 "추가"를 누릅니다.',
+        },
+    },
+
     // Inspiration Module
     inspiration: {
         title: '인스피레이션',

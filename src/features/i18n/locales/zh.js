@@ -57,6 +57,32 @@ export default {
         doubleClickToRename: '双击重命名',
     },
 
+    iosInstallPrompt: {
+        title: '添加到桌面，更像原生 App',
+        badgeSafari: 'Safari 可直接操作',
+        badgeOtherBrowser: '请切到 Safari',
+        descriptionSafari: 'iPhone 或 iPad 用户可以把 Flow Studio 放到主屏幕，下次一键打开。',
+        descriptionOtherBrowser: '当前不是 Safari，先看下步骤，切到 Safari 后就能添加到桌面。',
+        helperSafari: '点开系统分享面板后，选择“添加到主屏幕”即可。',
+        helperOtherBrowser: 'iOS 只能通过 Safari 完成“添加到主屏幕”，先看两步引导就行。',
+        guideEyebrow: '主屏安装指引',
+        guideTitleSafari: '两步把 Flow Studio 放到桌面',
+        guideTitleOtherBrowser: '先切到 Safari，再添加到桌面',
+        actions: {
+            openShare: '打开分享面板',
+            showSteps: '查看步骤',
+            remindLater: '稍后提醒',
+        },
+        steps: {
+            safariOne: '点击下方“打开分享面板”，或直接点 Safari 的分享按钮。',
+            safariTwo: '在系统菜单里找到“添加到主屏幕”。',
+            safariThree: '确认名称后点“添加”，下次就能从桌面直接进入。',
+            otherOne: '先在 Safari 中打开当前页面。',
+            otherTwo: '点击 Safari 底部或顶部的分享按钮。',
+            otherThree: '选择“添加到主屏幕”，再点“添加”。',
+        },
+    },
+
     // 灵感模块
     inspiration: {
         title: '灵感',

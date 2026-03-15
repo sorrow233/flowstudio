@@ -10,6 +10,7 @@ import RouteLoadingScreen from './components/shared/RouteLoadingScreen';
 import EmailLinkCompletionModal from './features/auth/EmailLinkCompletionModal';
 import { lazyWithRetry } from './utils/chunkLoadRecovery';
 import { version } from '../package.json';
+import { IOSHomeScreenPrompt } from './features/pwa';
 
 const createRouteModule = (importer, contextName) => lazyWithRetry(importer, {
     buildId: version,
@@ -66,6 +67,7 @@ function App() {
     const { isIOSStandalone } = useIOSStandalone();
     const routeSectionKey = location.pathname.split('/')[1] || 'root';
     const isIdentityRoute = location.pathname === '/__flowstudio/whoami';
+    const isShareRoute = location.pathname.startsWith('/share');
 
     useBrowserIntercept();
 
@@ -78,6 +80,7 @@ function App() {
 
                     <main className="flex-1 overflow-y-auto w-full no-scrollbar">
                         <div className={`${isIdentityRoute ? 'max-w-5xl mx-auto h-full px-4 py-8 md:px-6 md:py-12' : `max-w-7xl mx-auto h-full px-4 md:px-6 ${location.pathname.startsWith('/writing') ? 'pb-0' : 'pb-20'}`}`}>
+                            {!isIdentityRoute && !isShareRoute && <IOSHomeScreenPrompt />}
                             <ErrorBoundary>
                                 <Suspense fallback={<RouteLoadingScreen />}>
                                     <Routes location={location} key={routeSectionKey}>

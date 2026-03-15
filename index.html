@@ -20,14 +20,13 @@
     <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
 
     <script>
-        // 临时开关：强制 iOS 以浏览器模式运行，保留所有 standalone 相关代码，后续可一键恢复
-        window.__FLOW_STUDIO_FORCE_BROWSER_MODE__ = true;
+        // iOS 主屏模式默认开启，保留调试开关便于紧急回退
+        window.__FLOW_STUDIO_FORCE_BROWSER_MODE__ = false;
     </script>
 
     <!-- iOS PWA Configuration -->
-    <!-- 临时设为 no：屏蔽 iOS 独立应用壳，避免从主屏图标进入 standalone -->
-    <meta name="apple-mobile-web-app-capable" content="no" />
-    <meta name="mobile-web-app-capable" content="no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Flow Studio" />
 
@@ -84,7 +83,7 @@
         rel="stylesheet">
 
     <style>
-        <style>@media (display-mode: standalone) {
+        @media (display-mode: standalone) {
             /* 移除强制背景色，交给 React 应用控制 */
         }
     </style>

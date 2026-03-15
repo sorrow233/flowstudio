@@ -27,8 +27,8 @@
         }
     ],
     "start_url": "/",
-    "display": "browser",
-    "x-temp-display-backup": "standalone",
+    "display": "standalone",
+    "scope": "/",
     "background_color": "#fdf2f8",
     "theme_color": "#fdf2f8",
     "share_target": {

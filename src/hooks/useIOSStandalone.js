@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react';
  * 临时浏览器模式开关（由 index.html 注入）
  * 开启后强制视为非 standalone，避免触发 iOS 独立应用分支样式和行为
  */
-const detectForceBrowserMode = () => {
+export const detectForceBrowserMode = () => {
     if (typeof window === 'undefined') return false;
     return window.__FLOW_STUDIO_FORCE_BROWSER_MODE__ === true;
 };
@@ -19,16 +19,29 @@ const detectForceBrowserMode = () => {
 /**
  * 检测是否为 iOS 设备
  */
-const detectIsIOS = () => {
+export const detectIsIOS = () => {
     if (typeof navigator === 'undefined') return false;
     return /iPhone|iPad|iPod/.test(navigator.userAgent) ||
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 };
 
 /**
+ * 检测当前是否为 iOS Safari（排除 Chrome / Firefox / Edge / Opera 等壳浏览器）
+ */
+export const detectIsIOSSafari = () => {
+    if (!detectIsIOS() || typeof navigator === 'undefined') return false;
+
+    const userAgent = navigator.userAgent;
+    const isSafari = /Safari/i.test(userAgent);
+    const isOtherShellBrowser = /CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo|YaBrowser|Puffin/i.test(userAgent);
+
+    return isSafari && !isOtherShellBrowser;
+};
+
+/**
  * 检测是否以 standalone 模式运行（PWA 从主屏幕打开）
  */
-const detectIsStandalone = () => {
+export const detectIsStandalone = () => {
     if (typeof window === 'undefined') return false;
     if (detectForceBrowserMode()) return false;
     return window.matchMedia('(display-mode: standalone)').matches ||
