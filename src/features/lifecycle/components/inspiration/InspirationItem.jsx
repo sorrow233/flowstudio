@@ -389,7 +389,7 @@ const InspirationItem = ({
                                     initial={{ opacity: 0, scale: 0.92, y: -4 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.92, y: -4 }}
-                                    className="absolute top-8 left-0 z-[90] w-[280px] max-w-[calc(100vw-3rem)] rounded-xl border border-pink-200 bg-white p-3 shadow-2xl shadow-pink-200/40 dark:border-pink-800 dark:bg-gray-900 dark:shadow-pink-950/30"
+                                    className="absolute top-8 left-0 z-[90] w-[320px] max-w-[calc(100vw-3rem)] rounded-xl border border-pink-200 bg-white p-3 shadow-2xl shadow-pink-200/40 dark:border-pink-800 dark:bg-gray-900 dark:shadow-pink-950/30"
                                     onClick={(e) => e.stopPropagation()}
                                     onPointerDown={(e) => e.stopPropagation()}
                                 >
@@ -399,8 +399,8 @@ const InspirationItem = ({
                                         onChange={(e) => setNoteDraft(e.target.value)}
                                         onKeyDown={handleNoteKeyDown}
                                         placeholder={t('inspiration.notePlaceholder', '添加随记...')}
-                                        rows={3}
-                                        className="w-full resize-none rounded-lg border border-transparent bg-pink-50/90 px-3 py-2.5 text-sm leading-relaxed text-gray-700 outline-none placeholder:text-gray-400 min-h-[96px] dark:bg-pink-900/30 dark:text-gray-200"
+                                        rows={4}
+                                        className="w-full resize-none rounded-lg border border-transparent bg-pink-50/90 px-3 py-2.5 text-sm leading-relaxed text-gray-700 outline-none placeholder:text-gray-400 min-h-[112px] dark:bg-pink-900/30 dark:text-gray-200"
                                     />
                                     <div className="mt-2 flex items-center justify-between gap-3">
                                         <div className="flex items-center gap-2 text-[9px] text-gray-400">
@@ -551,7 +551,7 @@ const InspirationItem = ({
                         type="button"
                         onClick={handleOpenNoteEditor}
                         onPointerDown={(e) => e.stopPropagation()}
-                        className="w-full md:w-[140px] pt-1 md:pt-4 pl-4 md:pl-0 flex-shrink-0 animate-in fade-in slide-in-from-left-4 duration-500 text-left"
+                        className="w-full md:w-[160px] pt-1 md:pt-4 pl-4 md:pl-0 flex-shrink-0 animate-in fade-in slide-in-from-left-4 duration-500 text-left"
                     >
                         <p className={`text-[12px] font-medium ${categoryConfig.textColor} opacity-80 dark:opacity-70 leading-relaxed italic break-words select-text hover:opacity-100 transition-opacity`}>
                             {idea.note}
