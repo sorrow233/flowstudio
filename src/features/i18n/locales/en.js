@@ -71,7 +71,7 @@ export default {
         actions: {
             openShare: 'Open share sheet',
             showSteps: 'Show steps',
-            remindLater: 'Remind me later',
+            dismiss: "Don't show again",
         },
         steps: {
             safariOne: 'Tap "Open share sheet" below, or use Safari\'s native share button.',

@@ -71,7 +71,7 @@ export default {
         actions: {
             openShare: '打开分享面板',
             showSteps: '查看步骤',
-            remindLater: '稍后提醒',
+            dismiss: '不再提示',
         },
         steps: {
             safariOne: '点击下方“打开分享面板”，或直接点 Safari 的分享按钮。',

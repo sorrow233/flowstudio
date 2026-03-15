@@ -70,7 +70,7 @@ export default {
         actions: {
             openShare: '공유 시트 열기',
             showSteps: '방법 보기',
-            remindLater: '나중에 알림',
+            dismiss: '다시 보지 않기',
         },
         steps: {
             safariOne: '아래의 "공유 시트 열기"를 누르거나 Safari 공유 버튼을 탭합니다.',

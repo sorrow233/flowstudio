@@ -25,7 +25,7 @@ const IOSHomeScreenPrompt = () => {
         openGuide,
         closeGuide,
         openShareSheet,
-        snoozePrompt,
+        dismissPrompt,
     } = useIOSHomeScreenPrompt();
 
     if (!isReady || !isIOS || !shouldShow) {
@@ -105,11 +105,11 @@ const IOSHomeScreenPrompt = () => {
                         </button>
                         <button
                             type="button"
-                            onClick={() => snoozePrompt()}
+                            onClick={dismissPrompt}
                             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:border-white/20 dark:hover:text-white"
                         >
                             <X size={15} strokeWidth={1.9} />
-                            <span>{t('iosInstallPrompt.actions.remindLater', '稍后提醒')}</span>
+                            <span>{t('iosInstallPrompt.actions.dismiss', '不再提示')}</span>
                         </button>
                     </div>
                 </div>
@@ -182,10 +182,10 @@ const IOSHomeScreenPrompt = () => {
                                 )}
                                 <button
                                     type="button"
-                                    onClick={() => snoozePrompt()}
+                                    onClick={dismissPrompt}
                                     className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-white/10 dark:text-slate-300 dark:hover:border-white/20 dark:hover:text-white"
                                 >
-                                    <span>{t('iosInstallPrompt.actions.remindLater', '稍后提醒')}</span>
+                                    <span>{t('iosInstallPrompt.actions.dismiss', '不再提示')}</span>
                                 </button>
                             </div>
                         </motion.div>

@@ -70,7 +70,7 @@ export default {
         actions: {
             openShare: '共有シートを開く',
             showSteps: '手順を見る',
-            remindLater: '後で通知',
+            dismiss: '今後は表示しない',
         },
         steps: {
             safariOne: '下の「共有シートを開く」を押すか、Safari の共有ボタンをタップします。',

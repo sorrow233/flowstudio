@@ -6,20 +6,35 @@ import {
 } from '../../hooks/useIOSStandalone';
 
 const STORAGE_KEY = 'flowstudio_ios_home_screen_prompt_until';
-const DEFAULT_SNOOZE_MS = 1000 * 60 * 60 * 24 * 3;
+const PERMANENT_DISMISS_VALUE = 'never';
 
-const getDismissedUntil = () => {
-    if (typeof window === 'undefined') return 0;
+const getDismissState = () => {
+    if (typeof window === 'undefined') {
+        return {
+            dismissedUntil: 0,
+            permanentlyDismissed: false,
+        };
+    }
 
     const rawValue = window.localStorage.getItem(STORAGE_KEY);
+    if (rawValue === PERMANENT_DISMISS_VALUE) {
+        return {
+            dismissedUntil: Number.POSITIVE_INFINITY,
+            permanentlyDismissed: true,
+        };
+    }
+
     const parsedValue = Number(rawValue);
 
-    return Number.isFinite(parsedValue) ? parsedValue : 0;
+    return {
+        dismissedUntil: Number.isFinite(parsedValue) ? parsedValue : 0,
+        permanentlyDismissed: false,
+    };
 };
 
-const setDismissedUntil = (timestamp) => {
+const setDismissValue = (value) => {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(STORAGE_KEY, String(timestamp));
+    window.localStorage.setItem(STORAGE_KEY, String(value));
 };
 
 export function useIOSHomeScreenPrompt() {
@@ -38,8 +53,8 @@ export function useIOSHomeScreenPrompt() {
         const isStandalone = detectIsStandalone();
         const isSafari = detectIsIOSSafari();
         const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
-        const dismissedUntil = getDismissedUntil();
-        const shouldShow = isIOS && !isStandalone && Date.now() >= dismissedUntil;
+        const { dismissedUntil, permanentlyDismissed } = getDismissState();
+        const shouldShow = isIOS && !isStandalone && !permanentlyDismissed && Date.now() >= dismissedUntil;
 
         setState({
             isReady: true,
@@ -60,9 +75,8 @@ export function useIOSHomeScreenPrompt() {
         setState((current) => ({ ...current, isGuideOpen: false }));
     };
 
-    const snoozePrompt = (durationMs = DEFAULT_SNOOZE_MS) => {
-        const dismissedUntil = Date.now() + durationMs;
-        setDismissedUntil(dismissedUntil);
+    const dismissPrompt = () => {
+        setDismissValue(PERMANENT_DISMISS_VALUE);
         setState((current) => ({
             ...current,
             shouldShow: false,
@@ -99,7 +113,7 @@ export function useIOSHomeScreenPrompt() {
         openGuide,
         closeGuide,
         openShareSheet,
-        snoozePrompt,
+        dismissPrompt,
     };
 }
 
