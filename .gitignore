@@ -134,3 +134,4 @@ dist-ssr
 *.sw?
 flowstudio-backup-*.json
 .wrangler
+.codex-secrets/
