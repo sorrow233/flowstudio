@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -7,18 +7,59 @@ import { KeymapProvider, ShortcutHelpModal, useBrowserIntercept } from './featur
 import { LanguageProvider } from './features/i18n';
 import { useIOSStandalone } from './hooks/useIOSStandalone';
 import RouteLoadingScreen from './components/shared/RouteLoadingScreen';
+import EmailLinkCompletionModal from './features/auth/EmailLinkCompletionModal';
+import { lazyWithRetry } from './utils/chunkLoadRecovery';
+import { version } from '../package.json';
 
-const InspirationModule = lazy(() => import('./features/lifecycle/InspirationModule'));
-const WritingModule = lazy(() => import('./features/lifecycle/WritingModule'));
-const InspirationArchiveModule = lazy(() => import('./features/lifecycle/InspirationArchiveModule'));
-const PendingModule = lazy(() => import('./features/lifecycle/PendingModule'));
-const PrimaryDevModule = lazy(() => import('./features/lifecycle/PrimaryDevModule'));
-const AdvancedDevModule = lazy(() => import('./features/lifecycle/AdvancedDevModule'));
-const CommandCenterModule = lazy(() => import('./features/blueprint/CommandCenterModule'));
-const DataCenterModule = lazy(() => import('./features/lifecycle/DataCenterModule'));
-const ShareViewPage = lazy(() => import('./features/share/components/ShareViewPage'));
-const ShareReceiver = lazy(() => import('./features/share/ShareReceiver'));
-const UserIdentityPage = lazy(() => import('./features/auth/UserIdentityPage'));
+const createRouteModule = (importer, contextName) => lazyWithRetry(importer, {
+    buildId: version,
+    contextName,
+});
+
+const InspirationModule = createRouteModule(
+    () => import('./features/lifecycle/InspirationModule'),
+    'route-inspiration'
+);
+const WritingModule = createRouteModule(
+    () => import('./features/lifecycle/WritingModule'),
+    'route-writing'
+);
+const InspirationArchiveModule = createRouteModule(
+    () => import('./features/lifecycle/InspirationArchiveModule'),
+    'route-inspiration-archive'
+);
+const PendingModule = createRouteModule(
+    () => import('./features/lifecycle/PendingModule'),
+    'route-pending'
+);
+const PrimaryDevModule = createRouteModule(
+    () => import('./features/lifecycle/PrimaryDevModule'),
+    'route-primary-dev'
+);
+const AdvancedDevModule = createRouteModule(
+    () => import('./features/lifecycle/AdvancedDevModule'),
+    'route-advanced-dev'
+);
+const CommandCenterModule = createRouteModule(
+    () => import('./features/blueprint/CommandCenterModule'),
+    'route-command-center'
+);
+const DataCenterModule = createRouteModule(
+    () => import('./features/lifecycle/DataCenterModule'),
+    'route-data-center'
+);
+const ShareViewPage = createRouteModule(
+    () => import('./features/share/components/ShareViewPage'),
+    'route-share-view'
+);
+const ShareReceiver = createRouteModule(
+    () => import('./features/share/ShareReceiver'),
+    'route-share-receiver'
+);
+const UserIdentityPage = createRouteModule(
+    () => import('./features/auth/UserIdentityPage'),
+    'route-user-identity'
+);
 
 function App() {
     const location = useLocation();
@@ -26,7 +67,6 @@ function App() {
     const routeSectionKey = location.pathname.split('/')[1] || 'root';
     const isIdentityRoute = location.pathname === '/__flowstudio/whoami';
 
-    // 拦截浏览器默认快捷键 (Cmd+S, Cmd+P 等)
     useBrowserIntercept();
 
     return (
@@ -64,9 +104,8 @@ function App() {
                             </ErrorBoundary>
                         </div>
                     </main>
-
-                    {/* 全局快捷键帮助面板 - Shift + ? 触发 */}
                     <ShortcutHelpModal />
+                    <EmailLinkCompletionModal />
                 </div>
             </KeymapProvider>
         </LanguageProvider>
