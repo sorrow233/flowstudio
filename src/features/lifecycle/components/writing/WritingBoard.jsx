@@ -5,6 +5,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSync } from '../../../sync/SyncContext';
 import { useSyncedCategories } from '../../../sync/hooks/useSyncedCategories';
 import { useTranslation } from '../../../i18n';
+import { usePageTitle } from '../../../../hooks/usePageTitle';
 import { WRITING_CATEGORIES } from '../../../../utils/constants';
 import WritingSidebar from './WritingSidebar';
 import WritingEditor from './WritingEditor';
@@ -161,6 +162,17 @@ const WritingBoard = ({
 
     const isTrashView = viewMode === 'trash';
     const docsForView = isTrashView ? trashDocuments : activeDocuments;
+    const selectedCategoryTitle = useMemo(() => {
+        if (isTrashView) {
+            return t('writing.system.trash');
+        }
+
+        const matchedCategory = categories.find((category) => category.id === selectedCategory);
+        return matchedCategory?.label || t('navbar.writing');
+    }, [categories, isTrashView, selectedCategory, t]);
+
+    usePageTitle(selectedCategoryTitle);
+
     const buildWritingPath = useCallback((nextViewMode, nextCategoryId, nextDocId) => {
         if (nextViewMode === 'trash') {
             return nextDocId

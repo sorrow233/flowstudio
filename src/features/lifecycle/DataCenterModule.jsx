@@ -14,12 +14,14 @@ import { useSyncedProjects } from '../sync/useSyncStore';
 import { useTranslation } from '../i18n';
 import Spotlight from '../../components/shared/Spotlight';
 import DataChartModal from './components/DataChartModal';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 import { useDataCenterStats, useChartData } from './hooks/useDataCenterData';
 
 const DataCenterModule = () => {
     const { doc } = useSync();
     const { t } = useTranslation();
+    usePageTitle(t('navbar.data'));
     const [showChart, setShowChart] = useState(false);
     const [writingContentVersion, setWritingContentVersion] = useState(0);
 

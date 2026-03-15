@@ -15,6 +15,7 @@ import confetti from 'canvas-confetti';
 
 import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { useTranslation } from '../i18n';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 import Spotlight from '../../components/shared/Spotlight';
 
@@ -313,6 +314,7 @@ const PrimaryDevModule = () => {
     }, [selectedProject?.tasks]);
 
     const { t } = useTranslation();
+    usePageTitle(t('primary.title'));
 
     return (
         <div className="max-w-7xl mx-auto pt-10 px-6 pb-20">

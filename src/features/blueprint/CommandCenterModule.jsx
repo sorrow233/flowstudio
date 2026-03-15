@@ -18,6 +18,7 @@ import { useSyncedProjects } from '../sync/useSyncStore';
 import { useTranslation } from '../i18n';
 import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { useAppShortcut } from '../shortcuts';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 
 
@@ -26,6 +27,7 @@ const CommandCenterModule = () => {
     const { doc } = useSync();
 
     const { t } = useTranslation();
+    usePageTitle(t('blueprint.title'));
     const { openConfirm, ConfirmDialogComponent } = useConfirmDialog();
 
     // Sync: Commands

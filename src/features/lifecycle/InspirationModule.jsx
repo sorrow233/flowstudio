@@ -20,6 +20,7 @@ import ImageUploader from './components/inspiration/ImageUploader';
 import InspirationCategorySelector from './components/inspiration/InspirationCategorySelector';
 import InspirationSelectionToolbar from './components/inspiration/InspirationSelectionToolbar';
 import { deleteImagesInContent } from './services/imageService';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import {
     buildCategoryExportText,
     buildCategoryTransferPrompt,
@@ -252,8 +253,14 @@ const InspirationModule = () => {
     const selectedCategoryDividerTextStyle = useMemo(() => ({
         color: selectedCategoryAccentHex,
     }), [selectedCategoryAccentHex]);
+    const selectedCategoryTitle = useMemo(() => {
+        const matchedCategory = categories.find((cat) => cat.id === selectedCategory);
+        return matchedCategory?.label || t('inspiration.title');
+    }, [categories, selectedCategory, t]);
     const selectedIdeaIdSet = useMemo(() => new Set(selectedIdeaIds), [selectedIdeaIds]);
     const hasActiveSelectionToolbar = isSelectionMode && selectedIdeaIds.length > 0;
+
+    usePageTitle(selectedCategoryTitle);
 
     const buildInspirationPath = useCallback((categoryId) => {
         if (!categoryId) return '/inspiration';

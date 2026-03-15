@@ -110,6 +110,25 @@ const seoConfig = {
             },
         },
 
+        '/writing': {
+            zh: {
+                title: '写作 | Flow Studio',
+                description: '在 Flow Studio 中沉浸式写作，按分类整理文稿并持续同步。',
+            },
+            en: {
+                title: 'Writing | Flow Studio',
+                description: 'Write immersively in Flow Studio, organize drafts by category, and keep everything synced.',
+            },
+            ja: {
+                title: 'ライティング | Flow Studio',
+                description: 'Flow Studio で没入して執筆し、カテゴリーごとに原稿を整理して同期を保ちます。',
+            },
+            ko: {
+                title: '글쓰기 | Flow Studio',
+                description: 'Flow Studio에서 몰입해 글을 쓰고, 카테고리별로 문서를 정리하며 동기화 상태를 유지하세요.',
+            },
+        },
+
         '/sprout': {
             zh: {
                 title: '待定项目 | Flow Studio',
@@ -225,14 +244,34 @@ const seoConfig = {
             normalizedPath = normalizedPath.slice(0, -1);
         }
 
-        const pageConfig = this.pages[normalizedPath];
-
-        if (!pageConfig) {
-            // 尝试查找最接近的匹配项 (例如 /share/123 -> /share/:id 如果有通配符逻辑，目前没有)
-            return this.site[lang] || this.site[this.defaultLang];
+        if (normalizedPath.startsWith('/inspiration/c/')) {
+            normalizedPath = '/inspiration';
         }
 
-        return pageConfig[lang] || pageConfig[this.defaultLang];
+        if (normalizedPath === '/writing/trash' || normalizedPath.startsWith('/writing/trash/')) {
+            normalizedPath = '/writing';
+        }
+
+        if (normalizedPath.startsWith('/writing/c/')) {
+            normalizedPath = '/writing';
+        }
+
+        const pageConfig = this.pages[normalizedPath];
+        const siteConfig = this.site[lang] || this.site[this.defaultLang];
+
+        if (!pageConfig) {
+            return {
+                title: siteConfig?.defaultTitle || 'Flow Studio',
+                description: siteConfig?.defaultDescription || '',
+            };
+        }
+
+        return pageConfig[lang]
+            || pageConfig[this.defaultLang]
+            || {
+                title: siteConfig?.defaultTitle || 'Flow Studio',
+                description: siteConfig?.defaultDescription || '',
+            };
     },
 
     // 获取规范 URL

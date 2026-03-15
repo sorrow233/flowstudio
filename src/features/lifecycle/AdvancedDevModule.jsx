@@ -7,6 +7,7 @@ import AdvancedProjectWorkspace from './components/advanced/AdvancedProjectWorks
 import { useNavigate } from 'react-router-dom';
 import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { useTranslation } from '../i18n';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 const AdvancedDevModule = () => {
     const navigate = useNavigate();
@@ -23,6 +24,7 @@ const AdvancedDevModule = () => {
     const projects = allProjects;
 
     const { t } = useTranslation();
+    usePageTitle(t('final.title'));
     const { openConfirm, ConfirmDialogComponent } = useConfirmDialog(); // Fix: Import ConfirmDialog hook
 
     // --- State ---

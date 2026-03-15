@@ -7,6 +7,7 @@ import { useSync } from '../sync/SyncContext';
 import { useSyncedProjects } from '../sync/useSyncStore';
 import { useConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { useTranslation } from '../i18n';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 
 import Spotlight from '../../components/shared/Spotlight';
@@ -26,6 +27,7 @@ const VISUAL_VIBES = [
 
 const PendingModule = () => {
     const { t } = useTranslation();
+    usePageTitle(t('pending.title'));
     const { doc } = useSync();
 
     const {
