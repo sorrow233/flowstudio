@@ -10,7 +10,7 @@ import { useImportQueue } from '../sync/hooks/useImportQueue';
 import { useAuth } from '../auth/AuthContext';
 import { useTranslation } from '../i18n';
 import InspirationItem from './components/inspiration/InspirationItem';
-import { COLOR_CONFIG, copyImageToClipboard, IMAGE_URL_REGEX, R2_IMAGE_REGEX } from './components/inspiration/InspirationUtils';
+import { COLOR_CONFIG, copyImageToClipboard } from './components/inspiration/InspirationUtils';
 import RichTextInput from './components/inspiration/RichTextInput';
 import Spotlight from '../../components/shared/Spotlight';
 import { INSPIRATION_CATEGORIES } from '../../utils/constants';
@@ -19,7 +19,6 @@ import CategoryManager from './components/inspiration/CategoryManager';
 import ImageUploader from './components/inspiration/ImageUploader';
 import InspirationCategorySelector from './components/inspiration/InspirationCategorySelector';
 import InspirationSelectionToolbar from './components/inspiration/InspirationSelectionToolbar';
-import { deleteImagesInContent } from './services/imageService';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import {
     buildCategoryExportText,
@@ -28,6 +27,10 @@ import {
     parseCategoryTransferOutput,
 } from './components/inspiration/categoryTransferUtils';
 import { buildCategoryClipboardText } from './components/inspiration/categoryClipboardUtils';
+import {
+    buildIdeaCopyPayload,
+    buildNumberedIdeaClipboardText,
+} from './components/inspiration/ideaClipboardUtils';
 import { hexToRgba, resolveCategoryAccentHex } from './components/inspiration/categoryThemeUtils';
 import { useIOSStandalone } from '../../hooks/useIOSStandalone';
 
@@ -195,7 +198,6 @@ const InspirationModule = () => {
     const [copiedId, setCopiedId] = useState(null);
     const [showWeekSelector, setShowWeekSelector] = useState(false);
     const [deletedIdeas, setDeletedIdeas] = useState([]);
-    const [archiveShake, setArchiveShake] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(() => routeCategoryId || 'note'); // 分类状态
     const [isSelectionMode, setIsSelectionMode] = useState(false); // 多选模式
     const [selectedIdeaIds, setSelectedIdeaIds] = useState([]); // 已选中的 ID
@@ -365,10 +367,7 @@ const InspirationModule = () => {
         const confirmed = window.confirm(`确认删除已选 ${selectedIdeas.length} 项吗？可在 5 秒内撤销。`);
         if (!confirmed) return;
 
-        setDeletedIdeas((prev) => [
-            ...prev,
-            ...selectedIdeas.map((idea) => ({ ...idea, wasArchived: false })),
-        ]);
+        setDeletedIdeas((prev) => [...prev, ...selectedIdeas]);
 
         selectedIdeas.forEach((idea) => {
             removeProjectBase(idea.id);
@@ -502,31 +501,27 @@ const InspirationModule = () => {
         updateIdea(id, { content });
     }, [updateIdea]);
 
-    const handleCopy = useCallback(async (content, id) => {
+    const handleCopy = useCallback(async (idea) => {
         try {
-            // 检测内容中是否包含图片 URL
-            const imgMatches1 = content.match(new RegExp(IMAGE_URL_REGEX.source, 'gi')) || [];
-            const imgMatches2 = content.match(new RegExp(R2_IMAGE_REGEX.source, 'gi')) || [];
-            const imageUrls = [...new Set([...imgMatches1, ...imgMatches2])];
+            const { imageUrls, text, textWithoutImages } = buildIdeaCopyPayload(idea);
+            const targetId = idea?.id;
+
+            if (!text) return;
 
             if (imageUrls.length > 0) {
-                // 有图片：提取纯文字部分
-                let textPart = content;
-                imageUrls.forEach(url => { textPart = textPart.replace(url, ''); });
-                textPart = textPart.trim();
-
                 // 复制第一张图片 + 文字到剪贴板
-                const result = await copyImageToClipboard(imageUrls[0], textPart);
+                const result = await copyImageToClipboard(imageUrls[0], textWithoutImages);
                 if (result) {
-                    setCopiedId(id);
+                    setCopiedId(targetId);
                     setTimeout(() => setCopiedId(null), 2000);
                     return;
                 }
             }
 
             // 无图片或图片复制失败：降级为纯文本复制
-            await navigator.clipboard.writeText(content);
-            setCopiedId(id);
+            const fallbackText = imageUrls.length > 0 ? (textWithoutImages || text) : text;
+            await navigator.clipboard.writeText(fallbackText);
+            setCopiedId(targetId);
             setTimeout(() => setCopiedId(null), 2000);
         } catch (err) {
             console.error('Failed to copy:', err);
@@ -536,40 +531,15 @@ const InspirationModule = () => {
     const handleRemove = useCallback((id) => {
         const idea = ideas.find(i => i.id === id);
         if (idea) {
-            setDeletedIdeas(prev => [...prev, { ...idea, wasArchived: false }]);
+            setDeletedIdeas(prev => [...prev, idea]);
             removeIdea(id);
-
-            // 自动删除 R2 图片功能已关闭（避免误删）
-            // 如需启用，取消下面的注释
-            // if (user?.uid && idea.content) {
-            //     deleteImagesInContent(idea.content, user.uid).catch(err => {
-            //         console.warn('Failed to delete images:', err);
-            //     });
-            // }
         }
     }, [ideas, removeIdea]);
-
-    const handleArchive = useCallback((id) => {
-        const idea = ideas.find(i => i.id === id);
-        if (idea) {
-            setDeletedIdeas(prev => [...prev, { ...idea, wasArchived: true }]);
-            updateIdea(id, { stage: 'archive', archiveTimestamp: Date.now() });
-            // Trigger header shake
-            setArchiveShake(true);
-            setTimeout(() => setArchiveShake(false), 500);
-        }
-    }, [ideas, updateIdea]);
 
     const handleUndo = () => {
         if (deletedIdeas.length > 0) {
             const lastDeleted = deletedIdeas[deletedIdeas.length - 1];
-            if (lastDeleted.wasArchived) {
-                // Restore from archive
-                updateIdea(lastDeleted.id, { stage: 'inspiration' });
-            } else {
-                // Restore deleted
-                addIdea(lastDeleted);
-            }
+            addIdea(lastDeleted);
             setDeletedIdeas(prev => prev.slice(0, -1));
         }
     };
@@ -1029,10 +999,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             .filter(idea => selectedIdeaIds.includes(idea.id))
             .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
-        const numberedText = selectedIdeas
-            .map((idea, index) => `${index + 1}. ${normalizeIdeaTextForExport(idea.content)}`)
-            .filter(Boolean)
-            .join('\n');
+        const numberedText = buildNumberedIdeaClipboardText(selectedIdeas);
 
         if (!numberedText) return;
 
@@ -1442,19 +1409,9 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             <div className="mb-14 text-center md:text-left">
                 <motion.div
                     className="inline-flex items-center justify-center md:justify-start gap-2 mb-3"
-                    animate={archiveShake ? {
-                        x: [0, -4, 4, -4, 4, 0],
-                        scale: [1, 1.05, 1],
-                    } : {}}
-                    transition={{ duration: 0.4 }}
                 >
                     <motion.div
                         className="p-2 bg-pink-50 dark:bg-pink-900/20 rounded-xl"
-                        animate={archiveShake ? {
-                            backgroundColor: ['rgba(251, 207, 232, 0.2)', 'rgba(244, 114, 182, 0.6)', 'rgba(251, 207, 232, 0.2)'],
-                            scale: [1, 1.2, 1],
-                        } : {}}
-                        transition={{ duration: 0.4 }}
                     >
                         <Lightbulb className="w-5 h-5 text-pink-400" />
                     </motion.div>
@@ -1715,8 +1672,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                                 idea={idea}
                                                                 allProjects={allProjects}
                                                                 categories={categoryConfigList}
-                                                                onRemove={handleRemove}
-                                                                onArchive={handleArchive}
+                                                                onDelete={handleRemove}
                                                                 onCopy={handleCopy}
                                                                 onUpdateColor={handleUpdateColor}
                                                                 onUpdateNote={handleUpdateNote}
@@ -1749,8 +1705,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                             idea={idea}
                                                             allProjects={allProjects}
                                                             categories={categoryConfigList}
-                                                            onRemove={handleRemove}
-                                                            onArchive={handleArchive}
+                                                            onDelete={handleRemove}
                                                             onCopy={handleCopy}
                                                             onUpdateColor={handleUpdateColor}
                                                             onUpdateNote={handleUpdateNote}
@@ -1823,8 +1778,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                                     idea={idea}
                                                                     allProjects={allProjects}
                                                                     categories={categoryConfigList}
-                                                                    onRemove={handleRemove}
-                                                                    onArchive={handleArchive}
+                                                                    onDelete={handleRemove}
                                                                     onCopy={handleCopy}
                                                                     onUpdateColor={handleUpdateColor}
                                                                     onUpdateNote={handleUpdateNote}
@@ -1876,9 +1830,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                             className="fixed bottom-24 left-6 right-6 md:bottom-10 md:left-auto md:right-10 md:w-auto bg-pink-50 dark:bg-pink-900 text-pink-900 dark:text-pink-50 px-6 py-3 rounded-xl shadow-2xl shadow-pink-100 dark:shadow-pink-900/20 border border-pink-100 dark:border-pink-800 flex items-center justify-between md:justify-start gap-4 z-50"
                         >
                             <span className="text-sm font-medium">
-                                {deletedIdeas[deletedIdeas.length - 1]?.wasArchived
-                                    ? t('inspiration.ideaArchived', '已归档')
-                                    : t('inspiration.ideaDeleted')}
+                                {t('inspiration.ideaDeleted')}
                                 {deletedIdeas.length > 1 && <span className="ml-1 opacity-70">({deletedIdeas.length})</span>}
                             </span>
                             <button

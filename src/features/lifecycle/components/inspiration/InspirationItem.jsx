@@ -1,9 +1,16 @@
 import React, { useCallback, useMemo } from 'react';
-import { Trash2, Check, Pencil, RotateCcw } from 'lucide-react';
+import { Check, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
 import RichTextInput from './RichTextInput';
 import { parseRichText, getCategoryConfig } from './InspirationUtils';
+import { buildIdeaCopyPayload } from './ideaClipboardUtils';
+import { hexToRgba, resolveCategoryAccentHex } from './categoryThemeUtils';
+import {
+    getInspirationSwipeActions,
+    shouldTriggerSwipeAction,
+    SWIPE_ACTION_IDS,
+} from './swipeActionConfig';
 
 // parseRichText/getCategoryConfig are imported from InspirationUtils.js
 
@@ -11,8 +18,8 @@ const InspirationItem = ({
     idea,
     allProjects = [],
     categories = [],
-    onRemove,
-    onArchive,
+    onDelete,
+    onRestore,
     onCopy,
     onUpdateColor,
     onUpdateNote,
@@ -33,12 +40,11 @@ const InspirationItem = ({
     const [isDragging, setIsDragging] = React.useState(false);
     const [isEditingContent, setIsEditingContent] = React.useState(false);
     const [isEditingNote, setIsEditingNote] = React.useState(false);
-    const [exitDirection, setExitDirection] = React.useState(null); // 'right' for archive, 'left' for delete
+    const [exitDirection, setExitDirection] = React.useState(null);
     const [contentDraft, setContentDraft] = React.useState(idea.content || '');
     const [noteDraft, setNoteDraft] = React.useState(idea.note || '');
     const [isCharging, setIsCharging] = React.useState(false); // Visual feedback for long press
     const longPressTimer = React.useRef(null);
-    const inputRef = React.useRef(null);
     const contentTextareaRef = React.useRef(null);
     const noteInputRef = React.useRef(null);
     const skipNoteBlurSaveRef = React.useRef(false);
@@ -48,11 +54,27 @@ const InspirationItem = ({
         () => getCategoryConfig(idea.category, categories),
         [idea.category, categories]
     );
+    const categoryAccentHex = useMemo(
+        () => resolveCategoryAccentHex(categoryConfig),
+        [categoryConfig]
+    );
     const isCompleted = idea.completed || false;
     const shouldHighlightExternalSource = Boolean(idea.source && !['user', 'ai-import'].includes(idea.source));
+    const swipeActions = useMemo(
+        () => getInspirationSwipeActions({ isArchiveView }),
+        [isArchiveView]
+    );
+
+    const ideaCopyPayload = useMemo(
+        () => buildIdeaCopyPayload(idea),
+        [idea.content, idea.note]
+    );
 
     // 缓存 parseRichText 计算结果，避免每次渲染都重新执行正则匹配
-    const parsedContent = useMemo(() => parseRichText(idea.content, allProjects), [idea.content, allProjects]);
+    const parsedContent = useMemo(
+        () => parseRichText(idea.content, allProjects, ideaCopyPayload.textWithoutImages),
+        [idea.content, allProjects, ideaCopyPayload.textWithoutImages]
+    );
 
     const getAiAssistButtonClass = useCallback((value, isActive) => {
         if (!isActive) {
@@ -187,25 +209,53 @@ const InspirationItem = ({
     };
 
     const x = useMotionValue(0);
-    // Left swipe (delete) visual feedback
-    const deleteBackgroundColor = useTransform(
+    const leftSwipeBackgroundColor = useTransform(
         x,
-        [0, -80, -200],
-        ['rgba(252, 231, 243, 0)', 'rgba(252, 231, 243, 0.8)', 'rgba(239, 68, 68, 1)']
+        swipeActions.left.motionRange,
+        swipeActions.left.backgroundColors
     );
-    const deleteIconOpacity = useTransform(x, [0, -80, -150], [0, 0, 1]);
-    const deleteIconScale = useTransform(x, [0, -80, -200], [0.5, 0.5, 1.2]);
-
-    // Right swipe (archive/restore) visual feedback
-    const archiveBackgroundColor = useTransform(
+    const leftSwipeIconOpacity = useTransform(x, swipeActions.left.iconOpacityRange, [0, 0, 1]);
+    const leftSwipeIconScale = useTransform(x, swipeActions.left.iconScaleRange, [0.5, 0.5, 1.2]);
+    const rightSwipeBackgroundColor = useTransform(
         x,
-        [0, 80, 150],
-        ['rgba(252, 231, 243, 0)', 'rgba(252, 231, 243, 0.6)', 'rgba(252, 231, 243, 1)']
+        swipeActions.right.motionRange,
+        swipeActions.right.backgroundColors
     );
-    const archiveIconOpacity = useTransform(x, [0, 80, 120], [0, 0, 1]);
-    const archiveIconScale = useTransform(x, [0, 80, 150], [0.5, 0.5, 1.2]);
+    const rightSwipeIconOpacity = useTransform(x, swipeActions.right.iconOpacityRange, [0, 0, 1]);
+    const rightSwipeIconScale = useTransform(x, swipeActions.right.iconScaleRange, [0.5, 0.5, 1.2]);
+    const LeftSwipeIcon = swipeActions.left.icon;
+    const RightSwipeIcon = swipeActions.right.icon;
+    const noteEditorStyle = useMemo(() => ({
+        borderColor: hexToRgba(categoryAccentHex, 0.45),
+        backgroundColor: hexToRgba(categoryAccentHex, 0.1),
+        boxShadow: `0 12px 28px -22px ${hexToRgba(categoryAccentHex, 0.85)}`,
+        '--note-placeholder-color': hexToRgba(categoryAccentHex, 0.55),
+        '--note-text-color': categoryAccentHex,
+        '--note-hint-color': hexToRgba(categoryAccentHex, 0.78),
+    }), [categoryAccentHex]);
 
-    const y = useMotionValue(0);
+    const handleSwipeAction = useCallback((action) => {
+        if (!action) return false;
+
+        if (action.id === SWIPE_ACTION_IDS.openNote) {
+            if (isArchiveView) return false;
+            setIsEditingNote(true);
+            return false;
+        }
+
+        if (action.id === SWIPE_ACTION_IDS.delete) {
+            if (!onDelete) return false;
+            return onDelete(idea.id) !== false;
+        }
+
+        if (action.id === SWIPE_ACTION_IDS.restore) {
+            if (!onRestore) return false;
+            return onRestore(idea.id) !== false;
+        }
+
+        return false;
+    }, [idea.id, isArchiveView, onDelete, onRestore]);
+
     const exitAnimation = useMemo(() => {
         if (exitDirection === 'right') {
             return { opacity: 0, x: 500, rotate: 12, scale: 0.9, transition: { duration: 0.2, ease: "easeOut" } };
@@ -232,22 +282,20 @@ const InspirationItem = ({
             onDragEnd={(e, info) => {
                 if (isSelectionMode) return;
                 setIsDragging(false);
-                // Right swipe: Archive (or Restore in archive view)
-                if (info.offset.x > 150 || (info.velocity.x > 400 && info.offset.x > 50)) {
-                    if (isArchiveView) {
-                        // In Archive View, Right Swipe triggers Editing
-                        setIsEditingContent(true);
-                    } else {
-                        // In Normal View, Right Swipe triggers Archive
-                        setExitDirection('right');
-                        onArchive?.(idea.id);
+
+                if (shouldTriggerSwipeAction(swipeActions.right, info)) {
+                    const shouldExit = handleSwipeAction(swipeActions.right);
+                    if (shouldExit && swipeActions.right.exitDirection) {
+                        setExitDirection(swipeActions.right.exitDirection);
                     }
                     return;
                 }
-                // Left swipe: Delete
-                if (info.offset.x < -200 || (info.velocity.x < -400 && info.offset.x < -50)) {
-                    setExitDirection('left');
-                    onRemove(idea.id);
+
+                if (shouldTriggerSwipeAction(swipeActions.left, info)) {
+                    const shouldExit = handleSwipeAction(swipeActions.left);
+                    if (shouldExit && swipeActions.left.exitDirection) {
+                        setExitDirection(swipeActions.left.exitDirection);
+                    }
                 }
             }}
             onPointerDown={(e) => {
@@ -299,7 +347,7 @@ const InspirationItem = ({
                         return;
                     }
                     if (!window.getSelection().toString()) {
-                        onCopy(idea.content, idea.id);
+                        onCopy(idea);
                     }
                 }}
                 onDoubleClick={(e) => {
@@ -335,27 +383,23 @@ const InspirationItem = ({
                     </button>
                 )}
 
-                {/* Swipe Background (Delete Action - Left) */}
+                {/* Left Swipe Background */}
                 <motion.div
-                    style={{ backgroundColor: deleteBackgroundColor }}
-                    className={`absolute inset-0 rounded-xl flex items-center justify-end pr-6 -z-10`}
+                    style={{ backgroundColor: leftSwipeBackgroundColor }}
+                    className={swipeActions.left.containerClassName}
                 >
-                    <motion.div style={{ opacity: deleteIconOpacity, scale: deleteIconScale }}>
-                        <Trash2 className="text-white" size={20} />
+                    <motion.div style={{ opacity: leftSwipeIconOpacity, scale: leftSwipeIconScale }}>
+                        <LeftSwipeIcon className={swipeActions.left.iconClassName} size={20} />
                     </motion.div>
                 </motion.div>
 
-                {/* Right Swipe (Archive/Restore/Edit) Background */}
+                {/* Right Swipe Background */}
                 <motion.div
-                    style={{ backgroundColor: archiveBackgroundColor }}
-                    className="absolute inset-0 rounded-xl flex items-center justify-start pl-6 -z-10"
+                    style={{ backgroundColor: rightSwipeBackgroundColor }}
+                    className={swipeActions.right.containerClassName}
                 >
-                    <motion.div style={{ opacity: archiveIconOpacity, scale: archiveIconScale }}>
-                        {isArchiveView ? (
-                            <Pencil className="text-blue-500" size={20} />
-                        ) : (
-                            <Check className="text-pink-600" size={20} />
-                        )}
+                    <motion.div style={{ opacity: rightSwipeIconOpacity, scale: rightSwipeIconScale }}>
+                        <RightSwipeIcon className={swipeActions.right.iconClassName} size={20} />
                     </motion.div>
                 </motion.div>
 
@@ -367,33 +411,6 @@ const InspirationItem = ({
                             className={`w-2.5 h-2.5 rounded-full ${categoryConfig.dotColor} shadow-sm cursor-pointer transition-all duration-200 hover:scale-125 hover:ring-1 hover:ring-offset-1 hover:ring-pink-300/60 dark:hover:ring-pink-500/40 hover:ring-offset-white dark:hover:ring-offset-gray-900 ${isCompleted ? 'opacity-50' : ''}`}
                             title={t('inspiration.addNote', '添加随记')}
                         />
-                        <AnimatePresence>
-                            {isEditingNote && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.9, y: -5 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.9, y: -5 }}
-                                    className="absolute top-6 left-0 z-50 w-48 bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-pink-200 dark:border-pink-800 p-2"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <input
-                                        ref={noteInputRef}
-                                        type="text"
-                                        value={noteDraft}
-                                        onChange={(e) => setNoteDraft(e.target.value)}
-                                        onKeyDown={handleNoteKeyDown}
-                                        onBlur={handleNoteInputBlur}
-                                        placeholder={t('inspiration.notePlaceholder', '添加随记...')}
-                                        className="w-full px-2 py-1.5 text-sm bg-pink-50 dark:bg-pink-900/30 rounded border-none outline-none text-gray-700 dark:text-gray-200 placeholder:text-gray-400"
-                                    />
-                                    <div className="mt-1.5 text-[9px] text-gray-400 flex items-center gap-2">
-                                        <span>Enter {t('common.save', '保存')}</span>
-                                        <span>·</span>
-                                        <span>Esc {t('common.cancel', '取消')}</span>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -478,7 +495,7 @@ const InspirationItem = ({
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onArchive?.(idea.id);
+                                        onRestore?.(idea.id);
                                     }}
                                     className="p-1.5 -mr-2 text-gray-300 hover:text-pink-500 hover:bg-pink-50 dark:text-gray-600 dark:hover:text-pink-400 dark:hover:bg-pink-900/20 rounded-lg transition-all opacity-0 group-hover/card:opacity-100"
                                     title={t('common.restore', 'Restore')}
@@ -507,16 +524,47 @@ const InspirationItem = ({
                 </AnimatePresence>
             </div>
 
-            {/* Note Display - Outside the Card */}
-            {
-                idea.note && (
-                    <div className="w-full md:w-[140px] pt-1 md:pt-4 pl-4 md:pl-0 flex-shrink-0 animate-in fade-in slide-in-from-left-4 duration-500">
-                        <p className={`text-[12px] font-medium ${categoryConfig.textColor} opacity-80 dark:opacity-70 leading-relaxed italic break-words select-text`}>
-                            {idea.note}
-                        </p>
-                    </div>
-                )
-            }
+            {/* Note Display / Inline Editor */}
+            {(isEditingNote || idea.note) && (
+                <AnimatePresence initial={false}>
+                    <motion.div
+                        initial={{ opacity: 0, x: 12 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 12 }}
+                        className="w-full md:w-[180px] pt-1 md:pt-4 pl-4 md:pl-0 flex-shrink-0"
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {isEditingNote && !isArchiveView ? (
+                            <div
+                                className="rounded-xl border p-3 shadow-sm"
+                                style={noteEditorStyle}
+                            >
+                                <input
+                                    ref={noteInputRef}
+                                    type="text"
+                                    value={noteDraft}
+                                    onChange={(e) => setNoteDraft(e.target.value)}
+                                    onKeyDown={handleNoteKeyDown}
+                                    onBlur={handleNoteInputBlur}
+                                    placeholder={t('inspiration.notePlaceholder', '添加随记...')}
+                                    className="w-full bg-transparent text-[13px] font-medium leading-relaxed text-[var(--note-text-color)] outline-none placeholder:text-[var(--note-placeholder-color)]"
+                                    style={{ caretColor: categoryAccentHex }}
+                                />
+                                <div className="mt-2 flex items-center gap-2 text-[9px] text-[var(--note-hint-color)]">
+                                    <span>Enter {t('common.save', '保存')}</span>
+                                    <span>·</span>
+                                    <span>Esc {t('common.cancel', '取消')}</span>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className={`text-[12px] font-medium ${categoryConfig.textColor} opacity-80 dark:opacity-70 leading-relaxed italic break-words select-text`}>
+                                {idea.note}
+                            </p>
+                        )}
+                    </motion.div>
+                </AnimatePresence>
+            )}
         </motion.div >
     );
 };
