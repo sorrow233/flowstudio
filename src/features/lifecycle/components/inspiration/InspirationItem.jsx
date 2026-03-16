@@ -41,6 +41,7 @@ const InspirationItem = ({
     const inputRef = React.useRef(null);
     const contentTextareaRef = React.useRef(null);
     const noteInputRef = React.useRef(null);
+    const skipNoteBlurSaveRef = React.useRef(false);
     const { t } = useTranslation();
 
     const categoryConfig = useMemo(
@@ -163,9 +164,18 @@ const InspirationItem = ({
             handleNoteSave();
         }
         if (e.key === 'Escape') {
+            skipNoteBlurSaveRef.current = true;
             setIsEditingNote(false);
             setNoteDraft(idea.note || '');
         }
+    };
+
+    const handleNoteInputBlur = () => {
+        if (skipNoteBlurSaveRef.current) {
+            skipNoteBlurSaveRef.current = false;
+            return;
+        }
+        handleNoteSave();
     };
 
     // Handle dot click to edit note
@@ -372,7 +382,7 @@ const InspirationItem = ({
                                         value={noteDraft}
                                         onChange={(e) => setNoteDraft(e.target.value)}
                                         onKeyDown={handleNoteKeyDown}
-                                        onBlur={handleNoteSave}
+                                        onBlur={handleNoteInputBlur}
                                         placeholder={t('inspiration.notePlaceholder', '添加随记...')}
                                         className="w-full px-2 py-1.5 text-sm bg-pink-50 dark:bg-pink-900/30 rounded border-none outline-none text-gray-700 dark:text-gray-200 placeholder:text-gray-400"
                                     />
