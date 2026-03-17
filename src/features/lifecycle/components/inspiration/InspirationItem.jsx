@@ -1,11 +1,12 @@
 import React, { useCallback, useMemo } from 'react';
-import { Check, RotateCcw } from 'lucide-react';
+import { Check, Copy, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
 import RichTextInput from './RichTextInput';
 import { parseRichText, getCategoryConfig } from './InspirationUtils';
 import { buildIdeaCopyPayload } from './ideaClipboardUtils';
 import { hexToRgba, resolveCategoryAccentHex } from './categoryThemeUtils';
+import { getTodoAiAssistMeta } from './todoAiAssistUtils';
 import {
     getInspirationSwipeActions,
     shouldTriggerSwipeAction,
@@ -34,6 +35,7 @@ const InspirationItem = ({
     aiAssistClass = 'unclassified',
     aiAssistOptions = [],
     onSetAiAssistClass,
+    onCopyAiAssistList,
     showAiAssistControls = false,
     isIOSSelectionUi = false,
 }) => {
@@ -74,6 +76,10 @@ const InspirationItem = ({
     const parsedContent = useMemo(
         () => parseRichText(idea.content, allProjects, ideaCopyPayload.textWithoutImages),
         [idea.content, allProjects, ideaCopyPayload.textWithoutImages]
+    );
+    const todoAiAssistMeta = useMemo(
+        () => getTodoAiAssistMeta(aiAssistClass),
+        [aiAssistClass]
     );
 
     const getAiAssistButtonClass = useCallback((value, isActive) => {
@@ -442,6 +448,26 @@ const InspirationItem = ({
                             /* View Mode: Parsed Rich Text */
                             <div className={`text-gray-700 dark:text-gray-200 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans transition-all duration-200 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
                                 {parsedContent}
+                            </div>
+                        )}
+                        {isTodoView && !showAiAssistControls && (
+                            <div
+                                className="mt-3 flex items-center gap-2"
+                                onPointerDown={(e) => e.stopPropagation()}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onCopyAiAssistList?.(aiAssistClass);
+                                    }}
+                                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold transition-colors ${todoAiAssistMeta.badgeClassName} ${isCompleted ? 'opacity-60' : ''}`}
+                                    title={`点击复制“${todoAiAssistMeta.label}”未完成清单`}
+                                >
+                                    <Copy size={10} />
+                                    <span>{todoAiAssistMeta.label}</span>
+                                </button>
                             </div>
                         )}
                         {isTodoView && showAiAssistControls && aiAssistOptions.length > 0 && (

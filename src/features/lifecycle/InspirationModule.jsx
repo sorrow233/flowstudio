@@ -33,6 +33,14 @@ import {
 } from './components/inspiration/ideaClipboardUtils';
 import { hexToRgba, resolveCategoryAccentHex } from './components/inspiration/categoryThemeUtils';
 import { useIOSStandalone } from '../../hooks/useIOSStandalone';
+import {
+    buildTodoAiClassClipboardText,
+    getTodoAiAssistClass,
+    getTodoAiAssistMeta,
+    TODO_AI_CLASS_UNCLASSIFIED,
+    TODO_AI_FILTER_OPTIONS,
+    TODO_AI_FILTER_PENDING,
+} from './components/inspiration/todoAiAssistUtils';
 
 // Auto color logic: Every 3 items, switch to next color
 const getNextAutoColorIndex = (totalCount) => {
@@ -52,22 +60,6 @@ const decodeRoutePart = (value) => {
 
 const TODO_AI_HINT_SEEN_KEY = 'flowstudio_todo_ai_hint_seen';
 const CATEGORY_COPY_HINT_SEEN_KEY = 'flowstudio_category_copy_hint_seen';
-const TODO_AI_CLASS_UNCLASSIFIED = 'unclassified';
-const TODO_AI_FILTER_PENDING = 'pending';
-
-const TODO_AI_CLASS_OPTIONS = [
-    { value: 'ai_done', label: 'AI 完成' },
-    { value: 'ai_high', label: 'AI 高度辅助' },
-    { value: 'ai_mid', label: 'AI 中度辅助' },
-    { value: 'self', label: '必须自己去完成' },
-];
-
-const TODO_AI_FILTER_OPTIONS = [
-    { value: 'all', label: '全部' },
-    { value: TODO_AI_FILTER_PENDING, label: '所有未完成' },
-    { value: TODO_AI_CLASS_UNCLASSIFIED, label: '未分类' },
-    ...TODO_AI_CLASS_OPTIONS,
-];
 
 
 const InspirationModule = () => {
@@ -1228,10 +1220,6 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         setAiImportSuccessCount(newIdeas.length);
     }, [aiImportText, parseAiTodoOutput, ideas.length, addIdeasBatch]);
 
-    const getTodoAiAssistClass = useCallback((idea) => {
-        return idea.aiAssistClass || TODO_AI_CLASS_UNCLASSIFIED;
-    }, []);
-
     const todoIdeas = useMemo(() => {
         return [...ideas]
             .filter(idea => (idea.category || 'note') === 'todo')
@@ -1261,7 +1249,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         });
 
         return counts;
-    }, [todoIdeas, getTodoAiAssistClass]);
+    }, [todoIdeas]);
 
     const filteredTodoIdeas = useMemo(() => {
         if (todoAiFilter === 'all') return todoIdeas;
@@ -1278,7 +1266,38 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         return todoIdeas.filter(idea =>
             !idea.completed && getTodoAiAssistClass(idea) === todoAiFilter
         );
-    }, [todoIdeas, todoAiFilter, getTodoAiAssistClass]);
+    }, [todoIdeas, todoAiFilter]);
+
+    const handleCopyTodoAiClassList = useCallback(async (aiClass) => {
+        const targetClass = aiClass || TODO_AI_CLASS_UNCLASSIFIED;
+        const meta = getTodoAiAssistMeta(targetClass);
+        const clipboardText = buildTodoAiClassClipboardText(todoIdeas, targetClass);
+
+        if (!clipboardText) {
+            toast.info(`“${meta.label}”暂无未完成待办可复制`, {
+                duration: 1400,
+                position: 'bottom-center',
+            });
+            return;
+        }
+
+        const success = await copyTextToClipboard(clipboardText);
+        if (success) {
+            const targetCount = todoIdeas.filter((idea) => (
+                !idea.completed && getTodoAiAssistClass(idea) === targetClass
+            )).length;
+            toast.success(`已复制“${meta.label}”未完成清单（${targetCount} 条）`, {
+                duration: 1400,
+                position: 'bottom-center',
+            });
+            return;
+        }
+
+        toast.error(`“${meta.label}”清单复制失败，请重试`, {
+            duration: 1600,
+            position: 'bottom-center',
+        });
+    }, [copyTextToClipboard, todoIdeas]);
 
     // Sort ideas by timestamp (memoized) and filter by category
     const sortedIdeas = useMemo(() => {
@@ -1682,6 +1701,9 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                                 isSelectionMode={isSelectionMode}
                                                                 isSelected={selectedIdeaIdSet.has(idea.id)}
                                                                 onSelect={handleToggleSelect}
+                                                                isTodoView
+                                                                aiAssistClass={getTodoAiAssistClass(idea)}
+                                                                onCopyAiAssistList={handleCopyTodoAiClassList}
                                                                 isIOSSelectionUi={isIOS}
                                                             />
                                                         ))}
