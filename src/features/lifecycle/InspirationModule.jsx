@@ -1299,17 +1299,77 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         });
     }, [copyTextToClipboard, todoIdeas]);
 
+    const handleCopyTodoFilterList = useCallback(async (filterValue) => {
+        if (filterValue === 'all') {
+            const allTodoText = buildNumberedIdeaClipboardText(
+                [...todoIdeas].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
+            );
+
+            if (!allTodoText) {
+                toast.info('当前没有待办可复制', {
+                    duration: 1400,
+                    position: 'bottom-center',
+                });
+                return;
+            }
+
+            const success = await copyTextToClipboard(allTodoText);
+            if (success) {
+                toast.success(`已复制全部待办（${todoIdeas.length} 条）`, {
+                    duration: 1400,
+                    position: 'bottom-center',
+                });
+                return;
+            }
+
+            toast.error('全部待办复制失败，请重试', {
+                duration: 1600,
+                position: 'bottom-center',
+            });
+            return;
+        }
+
+        if (filterValue === TODO_AI_FILTER_PENDING) {
+            if (!pendingTodoNumberedText) {
+                toast.info('当前没有未完成待办可复制', {
+                    duration: 1400,
+                    position: 'bottom-center',
+                });
+                return;
+            }
+
+            const success = await copyTextToClipboard(pendingTodoNumberedText);
+            if (success) {
+                toast.success(`已复制所有未完成清单（${pendingTodoIdeas.length} 条）`, {
+                    duration: 1400,
+                    position: 'bottom-center',
+                });
+                return;
+            }
+
+            toast.error('所有未完成清单复制失败，请重试', {
+                duration: 1600,
+                position: 'bottom-center',
+            });
+            return;
+        }
+
+        await handleCopyTodoAiClassList(filterValue);
+    }, [
+        copyTextToClipboard,
+        handleCopyTodoAiClassList,
+        pendingTodoIdeas.length,
+        pendingTodoNumberedText,
+        todoIdeas,
+    ]);
+
     const handleTodoAiFilterClick = useCallback((filterValue) => {
         setTodoAiFilter(filterValue);
     }, []);
 
     const handleTodoAiFilterDoubleClick = useCallback((filterValue) => {
-        if (filterValue === 'all' || filterValue === TODO_AI_FILTER_PENDING) {
-            return;
-        }
-
-        void handleCopyTodoAiClassList(filterValue);
-    }, [handleCopyTodoAiClassList]);
+        void handleCopyTodoFilterList(filterValue);
+    }, [handleCopyTodoFilterList]);
 
     // Sort ideas by timestamp (memoized) and filter by category
     const sortedIdeas = useMemo(() => {
