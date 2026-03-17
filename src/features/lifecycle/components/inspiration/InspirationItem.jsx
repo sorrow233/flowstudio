@@ -109,6 +109,13 @@ const InspirationItem = ({
         }
     }, [isEditingNote]);
 
+    React.useEffect(() => {
+        if (!isEditingNote || !noteInputRef.current) return;
+
+        noteInputRef.current.style.height = 'auto';
+        noteInputRef.current.style.height = `${noteInputRef.current.scrollHeight}px`;
+    }, [isEditingNote, noteDraft]);
+
     // Sync contentDraft when idea.content changes externally
     React.useEffect(() => {
         if (!isEditingContent) {
@@ -181,7 +188,7 @@ const InspirationItem = ({
     };
 
     const handleNoteKeyDown = (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
             e.preventDefault();
             handleNoteSave();
         }
@@ -540,25 +547,25 @@ const InspirationItem = ({
                                 className="rounded-xl border p-3 shadow-sm"
                                 style={noteEditorStyle}
                             >
-                                <input
+                                <textarea
                                     ref={noteInputRef}
-                                    type="text"
                                     value={noteDraft}
                                     onChange={(e) => setNoteDraft(e.target.value)}
                                     onKeyDown={handleNoteKeyDown}
                                     onBlur={handleNoteInputBlur}
                                     placeholder={t('inspiration.notePlaceholder', '添加随记...')}
-                                    className="w-full bg-transparent text-[13px] font-medium leading-relaxed text-[var(--note-text-color)] outline-none placeholder:text-[var(--note-placeholder-color)]"
+                                    rows={3}
+                                    className="w-full resize-none overflow-hidden bg-transparent text-[13px] font-medium leading-relaxed whitespace-pre-wrap text-[var(--note-text-color)] outline-none placeholder:text-[var(--note-placeholder-color)]"
                                     style={{ caretColor: categoryAccentHex }}
                                 />
                                 <div className="mt-2 flex items-center gap-2 text-[9px] text-[var(--note-hint-color)]">
-                                    <span>Enter {t('common.save', '保存')}</span>
+                                    <span>⌘/Ctrl+Enter {t('common.save', '保存')}</span>
                                     <span>·</span>
                                     <span>Esc {t('common.cancel', '取消')}</span>
                                 </div>
                             </div>
                         ) : (
-                            <p className={`text-[12px] font-medium ${categoryConfig.textColor} opacity-80 dark:opacity-70 leading-relaxed italic break-words select-text`}>
+                            <p className={`text-[12px] font-medium ${categoryConfig.textColor} opacity-80 dark:opacity-70 leading-relaxed italic break-words whitespace-pre-wrap select-text`}>
                                 {idea.note}
                             </p>
                         )}
