@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Check, Copy, RotateCcw } from 'lucide-react';
+import { Check, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
 import RichTextInput from './RichTextInput';
@@ -35,7 +35,6 @@ const InspirationItem = ({
     aiAssistClass = 'unclassified',
     aiAssistOptions = [],
     onSetAiAssistClass,
-    onCopyAiAssistList,
     showAiAssistControls = false,
     isIOSSelectionUi = false,
 }) => {
@@ -450,26 +449,6 @@ const InspirationItem = ({
                                 {parsedContent}
                             </div>
                         )}
-                        {isTodoView && !showAiAssistControls && (
-                            <div
-                                className="mt-3 flex items-center gap-2"
-                                onPointerDown={(e) => e.stopPropagation()}
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <button
-                                    type="button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onCopyAiAssistList?.(aiAssistClass);
-                                    }}
-                                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold transition-colors ${todoAiAssistMeta.badgeClassName} ${isCompleted ? 'opacity-60' : ''}`}
-                                    title={`点击复制“${todoAiAssistMeta.label}”未完成清单`}
-                                >
-                                    <Copy size={10} />
-                                    <span>{todoAiAssistMeta.label}</span>
-                                </button>
-                            </div>
-                        )}
                         {isTodoView && showAiAssistControls && aiAssistOptions.length > 0 && (
                             <div
                                 className="mt-3 flex flex-wrap gap-1.5"
@@ -496,8 +475,8 @@ const InspirationItem = ({
                         )}
 
                         {/* Date/Time + Restore Button (Archive View) */}
-                        <div className="mt-2 flex items-center justify-between">
-                            <div className={`text-[11px] font-medium transition-colors ${categoryConfig.textColor} opacity-30 group-hover/card:opacity-80`}>
+                        <div className="mt-2 flex items-start justify-between gap-3">
+                            <div className={`min-w-0 flex-1 flex flex-wrap items-center text-[11px] font-medium transition-colors ${categoryConfig.textColor} opacity-30 group-hover/card:opacity-80`}>
                                 {new Date(idea.timestamp || Date.now()).toLocaleDateString(undefined, {
                                     year: 'numeric',
                                     month: 'short',
@@ -508,6 +487,15 @@ const InspirationItem = ({
                                     hour: '2-digit',
                                     minute: '2-digit'
                                 })}
+                                {isTodoView && !showAiAssistControls && (
+                                    <>
+                                        <span className="mx-1.5 opacity-20">·</span>
+                                        <span className={`inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-medium ${isCompleted ? 'opacity-60' : ''}`}>
+                                            <span className={`h-1.5 w-1.5 rounded-full ${todoAiAssistMeta.dotClassName}`} />
+                                            <span>{todoAiAssistMeta.shortLabel}</span>
+                                        </span>
+                                    </>
+                                )}
                                 {/* 来源标签 */}
                                 {idea.tags && idea.tags.length > 0 && (
                                     <>

@@ -20,23 +20,28 @@ export const TODO_AI_FILTER_OPTIONS = [
 const TODO_AI_ASSIST_META = {
     [TODO_AI_CLASS_UNCLASSIFIED]: {
         label: '未分类',
-        badgeClassName: 'bg-slate-50 dark:bg-slate-900/40 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800/70',
+        shortLabel: '未分类',
+        dotClassName: 'bg-slate-300 dark:bg-slate-500',
     },
     ai_done: {
         label: 'AI 完成',
-        badgeClassName: 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/55',
+        shortLabel: 'AI完成',
+        dotClassName: 'bg-emerald-300 dark:bg-emerald-400',
     },
     ai_high: {
         label: 'AI 高度辅助',
-        badgeClassName: 'bg-sky-50 dark:bg-sky-900/40 text-sky-600 dark:text-sky-300 border-sky-200 dark:border-sky-800 hover:bg-sky-100 dark:hover:bg-sky-900/55',
+        shortLabel: 'AI高辅',
+        dotClassName: 'bg-sky-300 dark:bg-sky-400',
     },
     ai_mid: {
         label: 'AI 中度辅助',
-        badgeClassName: 'bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/55',
+        shortLabel: 'AI中辅',
+        dotClassName: 'bg-indigo-300 dark:bg-indigo-400',
     },
     self: {
         label: '必须自己去完成',
-        badgeClassName: 'bg-amber-50 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/55',
+        shortLabel: '自己完成',
+        dotClassName: 'bg-amber-300 dark:bg-amber-400',
     },
 };
 

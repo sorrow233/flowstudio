@@ -1299,6 +1299,16 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         });
     }, [copyTextToClipboard, todoIdeas]);
 
+    const handleTodoAiFilterClick = useCallback((filterValue) => {
+        setTodoAiFilter(filterValue);
+
+        if (filterValue === 'all' || filterValue === TODO_AI_FILTER_PENDING) {
+            return;
+        }
+
+        void handleCopyTodoAiClassList(filterValue);
+    }, [handleCopyTodoAiClassList]);
+
     // Sort ideas by timestamp (memoized) and filter by category
     const sortedIdeas = useMemo(() => {
         if (selectedCategory === 'todo') {
@@ -1630,11 +1640,14 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                     return (
                                         <button
                                             key={option.value}
-                                            onClick={() => setTodoAiFilter(option.value)}
+                                            onClick={() => handleTodoAiFilterClick(option.value)}
                                             className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${isActive
                                                 ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
                                                 : 'bg-white/70 dark:bg-gray-900/60 text-blue-500 dark:text-blue-300 border-blue-100 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20'
                                                 }`}
+                                            title={option.value === 'all' || option.value === TODO_AI_FILTER_PENDING
+                                                ? `切换到${option.label}`
+                                                : `切换到${option.label}并复制该分类未完成清单`}
                                         >
                                             {option.label}
                                             <span className={`ml-1.5 ${isActive ? 'text-white/85' : 'text-blue-400 dark:text-blue-400'}`}>
@@ -1703,7 +1716,6 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                                 onSelect={handleToggleSelect}
                                                                 isTodoView
                                                                 aiAssistClass={getTodoAiAssistClass(idea)}
-                                                                onCopyAiAssistList={handleCopyTodoAiClassList}
                                                                 isIOSSelectionUi={isIOS}
                                                             />
                                                         ))}
