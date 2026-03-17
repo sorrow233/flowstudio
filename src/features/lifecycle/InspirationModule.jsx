@@ -1708,9 +1708,11 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                 ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
                                                 : 'bg-white/70 dark:bg-gray-900/60 text-blue-500 dark:text-blue-300 border-blue-100 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20'
                                                 }`}
-                                            title={option.value === 'all' || option.value === TODO_AI_FILTER_PENDING
-                                                ? `切换到${option.label}`
-                                                : `单击切换到${option.label}，双击复制该分类未完成清单`}
+                                            title={option.value === 'all'
+                                                ? '单击切换到全部，双击复制全部待办清单'
+                                                : option.value === TODO_AI_FILTER_PENDING
+                                                    ? '单击切换到所有未完成，双击复制所有未完成清单'
+                                                    : `单击切换到${option.label}，双击复制该分类未完成清单`}
                                         >
                                             {option.label}
                                             <span className={`ml-1.5 ${isActive ? 'text-white/85' : 'text-blue-400 dark:text-blue-400'}`}>
