@@ -130,6 +130,7 @@ export class SyncEngine {
         }
 
         if (previousAuthenticatedUserId && previousAuthenticatedUserId !== normalizedUserId) {
+            this.clearLocalStateForAccountSwitch(previousAuthenticatedUserId, normalizedUserId);
             this.remoteVersion = 0;
             this.localVersion = 0;
             this.lastAppliedRemoteVersion = 0;
@@ -139,6 +140,42 @@ export class SyncEngine {
         this.lastAuthenticatedUserId = normalizedUserId;
         this.connectFirestore();
         return true;
+    }
+
+    clearLocalStateForAccountSwitch(fromUserId, toUserId) {
+        let clearedRootTypeCount = 0;
+
+        this.doc.transact(() => {
+            this.doc.share.forEach((sharedType) => {
+                if (sharedType instanceof Y.Array) {
+                    if (sharedType.length > 0) {
+                        sharedType.delete(0, sharedType.length);
+                        clearedRootTypeCount++;
+                    }
+                    return;
+                }
+
+                if (sharedType instanceof Y.Map) {
+                    const keys = Array.from(sharedType.keys());
+                    if (keys.length > 0) {
+                        keys.forEach((key) => sharedType.delete(key));
+                        clearedRootTypeCount++;
+                    }
+                    return;
+                }
+
+                if (sharedType instanceof Y.Text && sharedType.length > 0) {
+                    sharedType.delete(0, sharedType.length);
+                    clearedRootTypeCount++;
+                }
+            });
+        });
+
+        if (clearedRootTypeCount > 0) {
+            // 清空是账号隔离动作，不应作为“本地改动”推送到下一账号。
+            this.isDirty = false;
+            console.info(`[SyncEngine] Cleared ${clearedRootTypeCount} local root type(s) while switching account ${fromUserId} -> ${toUserId}.`);
+        }
     }
 
     init() {
