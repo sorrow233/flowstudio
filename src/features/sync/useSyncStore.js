@@ -27,10 +27,7 @@ export const useSyncStore = (docId, initialData = {}) => {
             engineMap.set(docId, engine);
         } else {
             // Update user if changed (e.g. login/logout)
-            if (user?.uid && engine.userId !== user.uid) {
-                engine.userId = user.uid;
-                engine.connectFirestore();
-            }
+            engine.setUserId(user?.uid || null);
         }
 
         setSyncedDoc(engine.getDoc());

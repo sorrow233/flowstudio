@@ -14,9 +14,10 @@ export const SyncProvider = ({ children, docId = 'flowstudio_v1' }) => {
     // Determine if user is logged in
     const isLoggedIn = !!user;
 
-    // Run migration only once at the root level
-    // Pass isLoggedIn so seeding is skipped for logged-in users (their data will sync from server)
-    useDataMigration(doc, isLoggedIn);
+    // Run migration only once at the root level.
+    // Pass auth + sync status so guest seeds wait for local data to load and
+    // logged-in users never keep the onboarding cards in their synced state.
+    useDataMigration(doc, isLoggedIn, status);
     useWritingDataMigration(doc, status);
 
     // 启用本地定时备份：每小时同步一次完整数据，保留3天

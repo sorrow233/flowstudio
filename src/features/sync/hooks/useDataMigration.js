@@ -1,16 +1,16 @@
 import { useEffect } from 'react';
 import * as Y from 'yjs';
 import { DEFAULT_TEMPLATE } from '../../../data/defaultTemplate';
+import { removeDefaultTemplateItems } from '../defaultTemplateUtils';
 
 // --- Data Migration Hook ---
 // V3: Strict deduplication, skip seeding for logged-in users
-export const useDataMigration = (doc, isLoggedIn = false) => {
+export const useDataMigration = (doc, isLoggedIn = false, syncStatus = 'disconnected') => {
     useEffect(() => {
-        if (!doc) return;
+        if (!doc || syncStatus === 'disconnected') return;
 
         // V3: Force command migration with strict deduplication
         const MIGRATION_KEY = 'flowstudio_migration_v3_completed';
-        const DEFAULT_TEMPLATE_KEY = 'flowstudio_default_template_seeded_v3';
 
         const migrate = () => {
             // 1. Check if v3 migration already ran
@@ -102,18 +102,14 @@ export const useDataMigration = (doc, isLoggedIn = false) => {
             // Mark migration as completed
             localStorage.setItem(MIGRATION_KEY, 'true');
             console.info("[Migration] v3 Completed.");
-
-            // Check for default template seeding (only for guests)
-            seedDefaultTemplateIfEmpty();
         };
 
         const seedDefaultTemplateIfEmpty = () => {
-            if (localStorage.getItem(DEFAULT_TEMPLATE_KEY)) return;
-
-            // V3: Skip seeding for logged-in users - their data will sync from server
             if (isLoggedIn) {
-                console.info("[DefaultTemplate] Skipping seeding for logged-in user.");
-                localStorage.setItem(DEFAULT_TEMPLATE_KEY, 'true');
+                const removedCount = removeDefaultTemplateItems(doc);
+                if (removedCount > 0) {
+                    console.info(`[DefaultTemplate] Removed ${removedCount} guest seed items for logged-in user.`);
+                }
                 return;
             }
 
@@ -183,11 +179,10 @@ export const useDataMigration = (doc, isLoggedIn = false) => {
                     }
                 });
             }
-
-            localStorage.setItem(DEFAULT_TEMPLATE_KEY, 'true');
         };
 
         migrate();
+        seedDefaultTemplateIfEmpty();
 
-    }, [doc, isLoggedIn]);
+    }, [doc, isLoggedIn, syncStatus]);
 };

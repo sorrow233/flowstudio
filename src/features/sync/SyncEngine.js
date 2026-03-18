@@ -18,6 +18,7 @@ import {
     uint8ArrayToBase64,
     base64ToUint8Array
 } from './syncStateCodec';
+import { removeDefaultTemplateItems } from './defaultTemplateUtils';
 
 const SESSION_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 
@@ -88,8 +89,56 @@ export class SyncEngine {
         // 重试控制
         this.retryCount = 0;
         this.hasPermissionError = false;
+        this.lastAuthenticatedUserId = userId || null;
 
         this.init();
+    }
+
+    setUserId(nextUserId) {
+        const normalizedUserId = nextUserId || null;
+
+        if (this.userId === normalizedUserId) {
+            return false;
+        }
+
+        const previousUserId = this.userId;
+        const previousAuthenticatedUserId = this.lastAuthenticatedUserId;
+
+        clearTimeout(this.pushTimeout);
+        this.pushTimeout = null;
+        this.isPushing = false;
+        this.hasPermissionError = false;
+        this.retryCount = 0;
+
+        // 先断开旧监听，再临时清空 userId，避免清理默认种子时被误判为可同步状态。
+        this.userId = null;
+        this.disconnectFirestore();
+
+        if (!normalizedUserId) {
+            if (previousUserId) {
+                this.lastAuthenticatedUserId = previousUserId;
+            }
+            this.isServerLoaded = true;
+            this.isReady = this.isIndexedDBLoaded;
+            this.setStatus('offline');
+            return true;
+        }
+
+        const removedCount = removeDefaultTemplateItems(this.doc);
+        if (removedCount > 0) {
+            console.info(`[SyncEngine] Removed ${removedCount} guest seed item(s) before syncing for user ${normalizedUserId}.`);
+        }
+
+        if (previousAuthenticatedUserId && previousAuthenticatedUserId !== normalizedUserId) {
+            this.remoteVersion = 0;
+            this.localVersion = 0;
+            this.lastAppliedRemoteVersion = 0;
+        }
+
+        this.userId = normalizedUserId;
+        this.lastAuthenticatedUserId = normalizedUserId;
+        this.connectFirestore();
+        return true;
     }
 
     init() {
@@ -99,6 +148,14 @@ export class SyncEngine {
         this.localProvider.on('synced', () => {
             console.info(`[SyncEngine] IndexedDB synced.`);
             this.isIndexedDBLoaded = true;
+
+            if (this.userId) {
+                const removedCount = removeDefaultTemplateItems(this.doc);
+                if (removedCount > 0) {
+                    console.info(`[SyncEngine] Removed ${removedCount} guest seed item(s) after IndexedDB load for user ${this.userId}.`);
+                }
+            }
+
             this.seedData();
             this.tryReady();
         });
@@ -138,6 +195,18 @@ export class SyncEngine {
 
     getStateChunkDocRef(index) {
         return doc(db, `users/${this.userId}/rooms`, getStateChunkDocId(this.docId, index));
+    }
+
+    disconnectFirestore() {
+        this.unsubscribes.forEach(fn => fn());
+        this.unsubscribes = [];
+        clearTimeout(this.pushTimeout);
+        this.pushTimeout = null;
+        this.isServerLoaded = false;
+        this.isReady = false;
+        this.hasPermissionError = false;
+        this.retryCount = 0;
+        this.isPushing = false;
     }
 
     markServerLoaded() {
@@ -256,14 +325,7 @@ export class SyncEngine {
      */
     connectFirestore() {
         // 防止重复监听：先取消所有旧监听器
-        this.unsubscribes.forEach(fn => fn());
-        this.unsubscribes = [];
-
-        // 重新连接云端时，重置 ready/server 标记，确保等待远端快照后再进入 synced。
-        this.isServerLoaded = false;
-        this.isReady = false;
-        this.hasPermissionError = false;
-        this.retryCount = 0;
+        this.disconnectFirestore();
 
         this.setStatus('syncing');
 
@@ -547,9 +609,8 @@ export class SyncEngine {
     }
 
     destroy() {
-        this.unsubscribes.forEach(fn => fn());
+        this.disconnectFirestore();
         this.localProvider?.destroy();
-        clearTimeout(this.pushTimeout);
         this.listeners.clear();
     }
 }
