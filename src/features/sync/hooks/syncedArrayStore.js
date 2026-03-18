@@ -346,6 +346,25 @@ class SyncedArrayStore {
         this.yArray.insert(0, [yMap]);
     }
 
+    addItems(items = []) {
+        if (!Array.isArray(items) || items.length === 0) {
+            return;
+        }
+
+        this.doc.transact(() => {
+            const yMaps = items.map((item) => {
+                const yMap = new Y.Map();
+                Object.entries(item).forEach(([key, value]) => {
+                    yMap.set(key, value);
+                });
+                return yMap;
+            });
+
+            // Keep the same storage order as repeated insert(0, item) calls.
+            this.yArray.insert(0, yMaps.reverse());
+        });
+    }
+
     removeItem(id) {
         const itemIndex = this.state.idToIndex.get(id);
         if (itemIndex === undefined) {

@@ -118,6 +118,7 @@ const InspirationModule = () => {
     const {
         projects: allProjects,
         addProject: addProjectBase,
+        addProjectsBatch: addProjectsBatchBase,
         removeProject: removeProjectBase,
         updateProject: updateProjectBase
     } = useSyncedProjects(doc, 'all_projects');
@@ -130,9 +131,9 @@ const InspirationModule = () => {
 
     const addIdeasBatch = useCallback((ideasToAdd) => {
         if (!Array.isArray(ideasToAdd) || ideasToAdd.length === 0) return;
-        ideasToAdd.forEach(idea => addProjectBase(idea));
+        addProjectsBatchBase(ideasToAdd);
         immediateSync?.();
-    }, [addProjectBase, immediateSync]);
+    }, [addProjectsBatchBase, immediateSync]);
 
     const removeIdea = useCallback((id) => {
         removeProjectBase(id);
@@ -175,7 +176,7 @@ const InspirationModule = () => {
     }, [categories, ideas]);
 
     // 处理待导入队列（从外部项目发送的内容）
-    useImportQueue(user?.uid, addIdea, ideas.length, getNextAutoColorIndex, isReady);
+    useImportQueue(user?.uid, addIdeasBatch, ideas, getNextAutoColorIndex, isReady);
 
     // Fetch existing projects for tags
     const primaryProjects = useMemo(() =>

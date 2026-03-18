@@ -53,6 +53,20 @@ export const useSyncedProjects = (doc, arrayName) => {
         store?.addItem(projectData);
     }, [store]);
 
+    const addProjectsBatch = useCallback((projects = []) => {
+        if (!Array.isArray(projects) || projects.length === 0) {
+            return;
+        }
+
+        const normalizedProjects = projects.map((project) => ({
+            id: project.id || uuidv4(),
+            createdAt: project.createdAt || Date.now(),
+            ...project
+        }));
+
+        store?.addItems(normalizedProjects);
+    }, [store]);
+
     const removeProject = useCallback((id) => {
         store?.removeItem(id);
     }, [store]);
@@ -72,6 +86,7 @@ export const useSyncedProjects = (doc, arrayName) => {
     return {
         projects: snapshot.items,
         addProject,
+        addProjectsBatch,
         removeProject,
         updateProject,
         undo,
