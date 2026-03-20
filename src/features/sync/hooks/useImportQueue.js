@@ -33,6 +33,7 @@ export const useImportQueue = (userId, addIdeasBatch, ideas, getNextColorIndex, 
     const ideasRef = useRef(ideas);
     const addIdeasBatchRef = useRef(addIdeasBatch);
     const latestSnapshotRef = useRef(null);
+    const listenerEpochRef = useRef(0);
     const processingIdsRef = useRef(new Set());
     const isProcessingRef = useRef(false);
     const pendingReplayRef = useRef(false);
@@ -50,6 +51,7 @@ export const useImportQueue = (userId, addIdeasBatch, ideas, getNextColorIndex, 
 
     useEffect(() => {
         if (!userId || !addIdeasBatch || !isReady) {
+            listenerEpochRef.current += 1;
             latestSnapshotRef.current = null;
             processingIdsRef.current.clear();
             isProcessingRef.current = false;
@@ -58,7 +60,16 @@ export const useImportQueue = (userId, addIdeasBatch, ideas, getNextColorIndex, 
             return undefined;
         }
 
+        listenerEpochRef.current += 1;
+        const currentEpoch = listenerEpochRef.current;
+        let disposed = false;
+        const isStale = () => disposed || listenerEpochRef.current !== currentEpoch;
+
         const processSnapshot = async (snapshot) => {
+            if (isStale()) {
+                return;
+            }
+
             latestSnapshotRef.current = snapshot;
 
             if (isProcessingRef.current) {
@@ -95,16 +106,18 @@ export const useImportQueue = (userId, addIdeasBatch, ideas, getNextColorIndex, 
                     buildImportedIdea(docSnap.id, docSnap.data(), getNextColorIndex(baseCount + index))
                 ));
 
-                if (newIdeas.length > 0) {
+                if (!isStale() && newIdeas.length > 0) {
                     addIdeasBatchRef.current?.(newIdeas);
                     ideasRef.current = [...newIdeas, ...(ideasRef.current || [])];
                     estimatedIdeasCountRef.current = baseCount + newIdeas.length;
                     console.info(`[ImportQueue] Imported ${newIdeas.length} pending item(s).`);
                 }
 
-                await Promise.all(
-                    processingIds.map((id) => deleteDoc(doc(db, `users/${userId}/pending_imports`, id)))
-                );
+                if (!isStale()) {
+                    await Promise.all(
+                        processingIds.map((id) => deleteDoc(doc(db, `users/${userId}/pending_imports`, id)))
+                    );
+                }
 
                 console.info(`[ImportQueue] Cleaned ${processingIds.length} processed import(s).`);
             } catch (error) {
@@ -117,7 +130,7 @@ export const useImportQueue = (userId, addIdeasBatch, ideas, getNextColorIndex, 
                 processingIds.forEach((id) => processingIdsRef.current.delete(id));
                 isProcessingRef.current = false;
 
-                if (pendingReplayRef.current && latestSnapshotRef.current) {
+                if (!isStale() && pendingReplayRef.current && latestSnapshotRef.current) {
                     pendingReplayRef.current = false;
                     void processSnapshot(latestSnapshotRef.current);
                 }
@@ -140,6 +153,8 @@ export const useImportQueue = (userId, addIdeasBatch, ideas, getNextColorIndex, 
         });
 
         return () => {
+            disposed = true;
+            listenerEpochRef.current += 1;
             unsubscribe();
             latestSnapshotRef.current = null;
             processingIdsRef.current.clear();
