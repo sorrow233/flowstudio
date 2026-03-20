@@ -15,7 +15,7 @@ import {
 
 // parseRichText/getCategoryConfig are imported from InspirationUtils.js
 
-const InspirationItem = ({
+const InspirationItem = React.forwardRef(({
     idea,
     allProjects = [],
     categories = [],
@@ -37,7 +37,7 @@ const InspirationItem = ({
     onSetAiAssistClass,
     showAiAssistControls = false,
     isIOSSelectionUi = false,
-}) => {
+}, ref) => {
     const [isDragging, setIsDragging] = React.useState(false);
     const [isEditingContent, setIsEditingContent] = React.useState(false);
     const [isEditingNote, setIsEditingNote] = React.useState(false);
@@ -281,6 +281,7 @@ const InspirationItem = ({
 
     return (
         <motion.div
+            ref={ref}
             style={{ x }}
             drag={isSelectionMode ? false : 'x'}
             dragDirectionLock={!isSelectionMode}
@@ -588,6 +589,8 @@ const InspirationItem = ({
             )}
         </motion.div >
     );
-};
+});
+
+InspirationItem.displayName = 'InspirationItem';
 
 export default React.memo(InspirationItem);

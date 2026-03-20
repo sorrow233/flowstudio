@@ -1404,24 +1404,31 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
 
     // 代办分类按天分组数据
     const todosByDay = useMemo(() => {
-        if (selectedCategory !== 'todo') return null;
+        if (selectedCategory !== 'todo') return [];
 
-        const groups = {};
-        filteredTodoIdeas.forEach(idea => {
+        const groups = filteredTodoIdeas.reduce((map, idea) => {
             const date = new Date(idea.timestamp || Date.now());
             const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-            if (!groups[dateKey]) {
-                groups[dateKey] = {
+            if (!map.has(dateKey)) {
+                map.set(dateKey, {
                     date: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
                     dateKey,
-                    ideas: []
-                };
+                    ideas: [],
+                });
             }
-            groups[dateKey].ideas.push(idea);
-        });
 
-        return Object.values(groups).sort((a, b) => b.date - a.date);
+            map.get(dateKey).ideas.push(idea);
+            return map;
+        }, new Map());
+
+        return Array.from(groups.values())
+            .map((group) => ({
+                ...group,
+                ideas: [...group.ideas].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)),
+            }))
+            .filter((group) => group.ideas.length > 0)
+            .sort((a, b) => b.date.getTime() - a.date.getTime());
     }, [filteredTodoIdeas, selectedCategory]);
 
     const visibleIdeaCount = useMemo(() => {
@@ -1741,55 +1748,61 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                 className="space-y-6"
                             >
                                 {/* 代办分类：按天分组显示 */}
-                                {selectedCategory === 'todo' && todosByDay && (
-                                    <div className="space-y-4">
-                                        {todosByDay.map((day, dayIndex) => (
-                                            <div key={day.dateKey}>
-                                                {/* 日期分隔线 - 跟随当前分类主题色 */}
-                                                <div className="flex items-center gap-3 mb-4 mt-6">
-                                                    <div
-                                                        className="h-px flex-1"
-                                                        style={selectedCategoryDividerLineStyle}
-                                                    />
-                                                    <span
-                                                        className="text-xs font-medium tracking-wide whitespace-nowrap"
-                                                        style={selectedCategoryDividerTextStyle}
-                                                    >
-                                                        {formatDayLabel(day.date)}
-                                                    </span>
-                                                    <div
-                                                        className="h-px flex-1"
-                                                        style={selectedCategoryDividerLineStyle}
-                                                    />
-                                                </div>
-                                                <div className="space-y-4">
-                                                    <AnimatePresence mode="popLayout" initial={false}>
-                                                        {day.ideas.map((idea) => (
-                                                            <InspirationItem
-                                                                key={idea.id}
-                                                                idea={idea}
-                                                                allProjects={allProjects}
-                                                                categories={categoryConfigList}
-                                                                onDelete={handleRemove}
-                                                                onCopy={handleCopy}
-                                                                onUpdateColor={handleUpdateColor}
-                                                                onUpdateNote={handleUpdateNote}
-                                                                onUpdateContent={handleUpdateContent}
-                                                                onToggleComplete={handleToggleComplete}
-                                                                copiedId={copiedId}
-                                                                isSelectionMode={isSelectionMode}
-                                                                isSelected={selectedIdeaIdSet.has(idea.id)}
-                                                                onSelect={handleToggleSelect}
-                                                                isTodoView
-                                                                aiAssistClass={getTodoAiAssistClass(idea)}
-                                                                isIOSSelectionUi={isIOS}
-                                                            />
-                                                        ))}
-                                                    </AnimatePresence>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                                {selectedCategory === 'todo' && todosByDay.length > 0 && (
+                                    <motion.div layout className="space-y-4">
+                                        <AnimatePresence mode="popLayout" initial={false}>
+                                            {todosByDay.map((day) => (
+                                                <motion.section
+                                                    key={day.dateKey}
+                                                    layout
+                                                    className="space-y-4"
+                                                >
+                                                    {/* 日期分隔线 - 跟随当前分类主题色 */}
+                                                    <motion.div layout className="flex items-center gap-3 mb-4 mt-6">
+                                                        <div
+                                                            className="h-px flex-1"
+                                                            style={selectedCategoryDividerLineStyle}
+                                                        />
+                                                        <span
+                                                            className="text-xs font-medium tracking-wide whitespace-nowrap"
+                                                            style={selectedCategoryDividerTextStyle}
+                                                        >
+                                                            {formatDayLabel(day.date)}
+                                                        </span>
+                                                        <div
+                                                            className="h-px flex-1"
+                                                            style={selectedCategoryDividerLineStyle}
+                                                        />
+                                                    </motion.div>
+                                                    <motion.div layout className="space-y-4">
+                                                        <AnimatePresence mode="popLayout" initial={false}>
+                                                            {day.ideas.map((idea) => (
+                                                                <InspirationItem
+                                                                    key={idea.id}
+                                                                    idea={idea}
+                                                                    allProjects={allProjects}
+                                                                    categories={categoryConfigList}
+                                                                    onDelete={handleRemove}
+                                                                    onCopy={handleCopy}
+                                                                    onUpdateColor={handleUpdateColor}
+                                                                    onUpdateNote={handleUpdateNote}
+                                                                    onUpdateContent={handleUpdateContent}
+                                                                    onToggleComplete={handleToggleComplete}
+                                                                    copiedId={copiedId}
+                                                                    isSelectionMode={isSelectionMode}
+                                                                    isSelected={selectedIdeaIdSet.has(idea.id)}
+                                                                    onSelect={handleToggleSelect}
+                                                                    isTodoView
+                                                                    aiAssistClass={getTodoAiAssistClass(idea)}
+                                                                    isIOSSelectionUi={isIOS}
+                                                                />
+                                                            ))}
+                                                        </AnimatePresence>
+                                                    </motion.div>
+                                                </motion.section>
+                                            ))}
+                                        </AnimatePresence>
+                                    </motion.div>
                                 )}
 
                                 {/* 其他分类：原有逻辑（最近7天平铺 + 更早按周分组） */}
