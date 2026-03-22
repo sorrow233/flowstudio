@@ -127,10 +127,14 @@ export const useImportQueue = (userId, addIdeasBatch, ideas, getNextColorIndex, 
                     console.error('[ImportQueue] Error processing queue:', error);
                 }
             } finally {
+                if (isStale()) {
+                    return;
+                }
+
                 processingIds.forEach((id) => processingIdsRef.current.delete(id));
                 isProcessingRef.current = false;
 
-                if (!isStale() && pendingReplayRef.current && latestSnapshotRef.current) {
+                if (pendingReplayRef.current && latestSnapshotRef.current) {
                     pendingReplayRef.current = false;
                     void processSnapshot(latestSnapshotRef.current);
                 }
