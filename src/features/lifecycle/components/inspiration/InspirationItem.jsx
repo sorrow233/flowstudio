@@ -593,4 +593,26 @@ const InspirationItem = React.forwardRef(({
 
 InspirationItem.displayName = 'InspirationItem';
 
-export default React.memo(InspirationItem);
+const areIdeaViewPropsEqual = (prevProps, nextProps) => {
+    const prevIdea = prevProps.idea;
+    const nextIdea = nextProps.idea;
+    const prevCopied = prevProps.copiedId === prevIdea?.id;
+    const nextCopied = nextProps.copiedId === nextIdea?.id;
+
+    return (
+        prevIdea === nextIdea
+        && prevProps.allProjects === nextProps.allProjects
+        && prevProps.categories === nextProps.categories
+        && prevProps.isArchiveView === nextProps.isArchiveView
+        && prevProps.isSelectionMode === nextProps.isSelectionMode
+        && prevProps.isSelected === nextProps.isSelected
+        && prevProps.isTodoView === nextProps.isTodoView
+        && prevProps.aiAssistClass === nextProps.aiAssistClass
+        && prevProps.aiAssistOptions === nextProps.aiAssistOptions
+        && prevProps.showAiAssistControls === nextProps.showAiAssistControls
+        && prevProps.isIOSSelectionUi === nextProps.isIOSSelectionUi
+        && prevCopied === nextCopied
+    );
+};
+
+export default React.memo(InspirationItem, areIdeaViewPropsEqual);
