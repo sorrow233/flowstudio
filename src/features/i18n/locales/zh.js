@@ -93,6 +93,8 @@ export default {
         totalDocs: '文档',
         placeholder: '记录一闪而过的念头...',
         addNote: '添加随记', // Add missing key
+        codeBlockAction: '将选中文本包成代码块',
+        codeBlockShort: '代码块',
         emptyState: '暂无灵感，记录下第一个想法吧',
         ideaDeleted: '灵感已删除',
         ideaArchived: '已归档',

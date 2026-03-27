@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { COLOR_CONFIG } from './InspirationUtils';
+import { htmlToMarkup, markupToHtml, mergeMarkupWithPlainTextLineBreaks } from './richTextMarkup';
+import { buildCodeBlockTheme } from './codeBlockTheme';
 
 /**
  * 富文本输入框组件 - 使用 contenteditable 实现真正的富文本编辑
@@ -13,9 +15,39 @@ const RichTextInput = forwardRef(({
     placeholder,
     className,
     style,
+    accentHex,
 }, ref) => {
     const editorRef = useRef(null);
     const isComposing = useRef(false);
+    const lastSelectionRef = useRef(null);
+    const codeBlockTheme = buildCodeBlockTheme(accentHex);
+
+    const focusSelectionAfterNode = useCallback((node) => {
+        const selection = window.getSelection();
+        if (!selection) return;
+
+        const range = document.createRange();
+        if (node?.parentNode) {
+            range.setStartAfter(node);
+        } else if (editorRef.current) {
+            range.selectNodeContents(editorRef.current);
+        }
+        range.collapse(true);
+
+        selection.removeAllRanges();
+        selection.addRange(range);
+        lastSelectionRef.current = range.cloneRange();
+    }, []);
+
+    const captureSelection = useCallback(() => {
+        const selection = window.getSelection();
+        if (!selection?.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        if (!editorRef.current?.contains(range.commonAncestorContainer)) return;
+
+        lastSelectionRef.current = range.cloneRange();
+    }, []);
 
     // 暴露方法给父组件
     useImperativeHandle(ref, () => ({
@@ -26,14 +58,29 @@ const RichTextInput = forwardRef(({
             if (sel.rangeCount > 0 && editorRef.current?.contains(sel.anchorNode)) {
                 return sel.getRangeAt(0);
             }
-            return null;
+            return lastSelectionRef.current;
         },
         // 应用颜色到选中文本
         applyColor: (colorId) => {
             const sel = window.getSelection();
-            if (!sel.rangeCount || sel.isCollapsed) return false;
+            let range = null;
 
-            const range = sel.getRangeAt(0);
+            if (sel?.rangeCount) {
+                const liveRange = sel.getRangeAt(0);
+                if (editorRef.current?.contains(liveRange.commonAncestorContainer)) {
+                    range = liveRange;
+                }
+            }
+
+            if (!range && lastSelectionRef.current) {
+                range = lastSelectionRef.current.cloneRange();
+                if (sel) {
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }
+
+            if (!range || range.isCollapsed) return false;
             if (!editorRef.current?.contains(range.commonAncestorContainer)) return false;
 
             const colorConfig = COLOR_CONFIG.find(c => c.id === colorId);
@@ -68,9 +115,13 @@ const RichTextInput = forwardRef(({
             coloredSpan.dataset.colorId = colorId;
             coloredSpan.className = 'colored-text relative inline';
 
-            // 包裹选中内容
+            // 使用 extractContents 比 surroundContents 更稳，跨节点选区也能包裹
             try {
-                range.surroundContents(coloredSpan);
+                const fragment = range.extractContents();
+                if (!fragment.textContent?.trim()) return false;
+
+                coloredSpan.appendChild(fragment);
+                range.insertNode(coloredSpan);
                 sel.removeAllRanges();
 
                 // 将光标移到颜色文字后面
@@ -78,13 +129,68 @@ const RichTextInput = forwardRef(({
                 newRange.setStartAfter(coloredSpan);
                 newRange.collapse(true);
                 sel.addRange(newRange);
+                lastSelectionRef.current = newRange.cloneRange();
 
                 // 触发内容改变
                 handleInput();
                 return true;
             } catch (e) {
-                // surroundContents 在跨节点选择时可能失败
                 console.warn('Color apply failed:', e);
+                return false;
+            }
+        },
+        applyCodeBlock: () => {
+            const sel = window.getSelection();
+            let range = null;
+
+            if (sel?.rangeCount) {
+                const liveRange = sel.getRangeAt(0);
+                if (editorRef.current?.contains(liveRange.commonAncestorContainer)) {
+                    range = liveRange;
+                }
+            }
+
+            if (!range && lastSelectionRef.current) {
+                range = lastSelectionRef.current.cloneRange();
+                if (sel) {
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }
+
+            if (!range || !editorRef.current?.contains(range.commonAncestorContainer)) return false;
+
+            let parentCodeBlock = null;
+            let node = range.commonAncestorContainer;
+            while (node && node !== editorRef.current) {
+                if (node.nodeType === Node.ELEMENT_NODE && node.classList?.contains('code-block-card')) {
+                    parentCodeBlock = node;
+                    break;
+                }
+                node = node.parentNode;
+            }
+
+            if (parentCodeBlock) {
+                return unwrapCodeBlock(parentCodeBlock);
+            }
+
+            if (range.isCollapsed) return false;
+
+            const codeBlock = document.createElement('div');
+            codeBlock.className = 'code-block-card';
+            Object.assign(codeBlock.style, codeBlockTheme.editorBlockStyle);
+
+            try {
+                const fragment = range.extractContents();
+                if (!fragment.textContent?.trim()) return false;
+
+                codeBlock.appendChild(fragment);
+                range.insertNode(codeBlock);
+                focusSelectionAfterNode(codeBlock);
+                handleInput();
+                return true;
+            } catch (e) {
+                console.warn('Code block apply failed:', e);
                 return false;
             }
         },
@@ -99,93 +205,73 @@ const RichTextInput = forwardRef(({
         getElement: () => editorRef.current,
     }));
 
-    // 将 HTML 转换为带标记的纯文本 (用于存储)
-    const htmlToMarkup = useCallback((element) => {
-        if (!element) return '';
-
-        let result = '';
-        element.childNodes.forEach(node => {
-            if (node.nodeType === Node.TEXT_NODE) {
-                result += node.textContent;
-            } else if (node.nodeType === Node.ELEMENT_NODE) {
-                if (node.tagName === 'BR') {
-                    result += '\n';
-                } else if (node.classList?.contains('colored-text')) {
-                    const colorId = node.dataset.colorId;
-                    // 重要：提取纯文本内容，避免嵌套标记
-                    const innerText = node.textContent;
-                    result += `#!${colorId}:${innerText}#`;
-                } else if (node.tagName === 'DIV') {
-                    // DIV 通常表示新行
-                    const inner = htmlToMarkup(node);
-                    if (result && !result.endsWith('\n')) {
-                        result += '\n';
-                    }
-                    result += inner;
-                } else {
-                    result += htmlToMarkup(node);
-                }
-            }
-        });
-        return result;
-    }, []);
-
-    // 将带标记的纯文本转换为 HTML
-    const markupToHtml = useCallback((text) => {
-        if (!text) return '';
-
-        // 处理颜色标记
-        let html = text
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/#!([^:]+):([^#]+)#/g, (match, colorId, content) => {
-                const colorConfig = COLOR_CONFIG.find(c => c.id === colorId);
-                const highlightColor = colorConfig?.highlight || 'rgba(167, 139, 250, 0.5)';
-                const style = `background: radial-gradient(ellipse 100% 40% at center 80%, ${highlightColor} 0%, ${highlightColor} 70%, transparent 100%); padding: 0 0.15em;`;
-                return `<span class="colored-text relative inline" data-color-id="${colorId}" style="${style}">${content}</span>`;
-            })
-            .replace(/\n/g, '<br>');
-
-        return html;
-    }, []);
-
     // 处理输入事件
     const handleInput = useCallback(() => {
         if (!editorRef.current) return;
         const markup = htmlToMarkup(editorRef.current);
         onChange?.(markup);
-    }, [htmlToMarkup, onChange]);
+    }, [onChange]);
+
+    const unwrapCodeBlock = useCallback((codeBlockNode) => {
+        if (!codeBlockNode?.parentNode) return false;
+
+        const fragment = document.createDocumentFragment();
+        const childNodes = Array.from(codeBlockNode.childNodes);
+        childNodes.forEach((node) => fragment.appendChild(node));
+
+        const lastChild = childNodes[childNodes.length - 1] || null;
+        codeBlockNode.parentNode.replaceChild(fragment, codeBlockNode);
+        focusSelectionAfterNode(lastChild);
+        handleInput();
+        return true;
+    }, [focusSelectionAfterNode, handleInput]);
 
     // 同步外部 value 到编辑器
     useEffect(() => {
         if (!editorRef.current) return;
 
-        // 获取当前光标位置
-        const sel = window.getSelection();
-        const currentPosition = sel.rangeCount > 0 ? {
-            node: sel.anchorNode,
-            offset: sel.anchorOffset
-        } : null;
-
         // 比较当前内容与新值
         const currentMarkup = htmlToMarkup(editorRef.current);
-        if (currentMarkup !== value) {
-            editorRef.current.innerHTML = markupToHtml(value || '');
+        const nextHtml = markupToHtml(value || '', { accentHex });
+        if (currentMarkup !== value || editorRef.current.innerHTML !== nextHtml) {
+            editorRef.current.innerHTML = nextHtml;
         }
-    }, [value, htmlToMarkup, markupToHtml]);
+    }, [accentHex, value]);
+
+    useEffect(() => {
+        const handleSelectionChange = () => {
+            captureSelection();
+        };
+
+        document.addEventListener('selectionchange', handleSelectionChange);
+        return () => document.removeEventListener('selectionchange', handleSelectionChange);
+    }, [captureSelection]);
 
     // 处理粘贴 - 将纯文本中的标记转换为 HTML 效果
     const handlePaste = useCallback((e) => {
         e.preventDefault();
+
+        const html = e.clipboardData.getData('text/html');
+        if (html) {
+            const tempContainer = document.createElement('div');
+            tempContainer.innerHTML = html;
+            const markup = htmlToMarkup(tempContainer);
+            const plainText = e.clipboardData.getData('text/plain');
+            const mergedMarkup = mergeMarkupWithPlainTextLineBreaks(markup, plainText);
+            document.execCommand('insertHTML', false, markupToHtml(mergedMarkup, { accentHex }));
+            requestAnimationFrame(handleInput);
+            return;
+        }
+
         const text = e.clipboardData.getData('text/plain');
         // 如果包含标记，则通过 markupToHtml 转换并插入 HTML
-        if (text.includes('#!') || text.includes('\n')) {
-            const html = markupToHtml(text);
-            document.execCommand('insertHTML', false, html);
+        if (text.includes('#!') || text.includes('**') || text.includes('\n')) {
+            document.execCommand('insertHTML', false, markupToHtml(text, { accentHex }));
+            requestAnimationFrame(handleInput);
         } else {
             document.execCommand('insertText', false, text);
         }
-    }, [markupToHtml]);
+    }, [accentHex, handleInput]);
 
     // 处理按键
     const handleKeyDownInternal = useCallback((e) => {
@@ -207,6 +293,9 @@ const RichTextInput = forwardRef(({
             className={className}
             style={style}
             onInput={handleInput}
+            onMouseUp={captureSelection}
+            onKeyUp={captureSelection}
+            onFocus={captureSelection}
             onKeyDown={handleKeyDownInternal}
             onPaste={handlePaste}
             onCompositionStart={handleCompositionStart}

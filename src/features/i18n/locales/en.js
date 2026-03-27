@@ -93,6 +93,8 @@ export default {
         totalDocs: 'Documents',
         placeholder: 'Record a fleeting thought...',
         addNote: 'Add Note',
+        codeBlockAction: 'Wrap selected text in a code block',
+        codeBlockShort: 'Code block',
         emptyState: 'No inspirations yet, record your first idea',
         ideaDeleted: 'Idea deleted',
         cmdEnter: 'CMD + ENTER',

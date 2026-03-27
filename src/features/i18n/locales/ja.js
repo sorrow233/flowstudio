@@ -92,6 +92,8 @@ export default {
         writingSubtitle: '没入型の創作、完全な思考を記録する',
         totalDocs: 'ドキュメント',
         placeholder: 'アイデアを記録...',
+        codeBlockAction: '選択したテキストをコードブロックにする',
+        codeBlockShort: 'コード',
         emptyState: 'インスピレーションはまだありません。最初のアイデアを記録しましょう。',
         ideaDeleted: 'インスピレーションを削除しました',
         cmdEnter: 'CMD + ENTER',

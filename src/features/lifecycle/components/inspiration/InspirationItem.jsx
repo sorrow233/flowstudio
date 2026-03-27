@@ -7,6 +7,7 @@ import { parseRichText, getCategoryConfig } from './InspirationUtils';
 import { buildIdeaCopyPayload } from './ideaClipboardUtils';
 import { hexToRgba, resolveCategoryAccentHex } from './categoryThemeUtils';
 import { getTodoAiAssistMeta } from './todoAiAssistUtils';
+import CodeBlockActionButton from './CodeBlockActionButton';
 import {
     getInspirationSwipeActions,
     shouldTriggerSwipeAction,
@@ -73,8 +74,8 @@ const InspirationItem = React.forwardRef(({
 
     // 缓存 parseRichText 计算结果，避免每次渲染都重新执行正则匹配
     const parsedContent = useMemo(
-        () => parseRichText(idea.content, allProjects, ideaCopyPayload.textWithoutImages),
-        [idea.content, allProjects, ideaCopyPayload.textWithoutImages]
+        () => parseRichText(idea.content, allProjects, ideaCopyPayload.textWithoutImages, { accentHex: categoryAccentHex }),
+        [categoryAccentHex, idea.content, allProjects, ideaCopyPayload.textWithoutImages]
     );
     const todoAiAssistMeta = useMemo(
         () => getTodoAiAssistMeta(aiAssistClass),
@@ -435,10 +436,22 @@ const InspirationItem = React.forwardRef(({
                                     onChange={setContentDraft}
                                     onBlur={handleContentSave}
                                     onKeyDown={handleContentKeyDown}
+                                    accentHex={categoryAccentHex}
                                     className="w-full text-gray-800 dark:text-gray-100 text-[15px] font-normal leading-relaxed whitespace-pre-wrap font-sans bg-pink-50/50 dark:bg-pink-900/20 rounded-lg p-3 outline-none border border-pink-200 dark:border-pink-800 focus:border-pink-400 dark:focus:border-pink-600 resize-none min-h-[80px]"
                                     placeholder={t('inspiration.editPlaceholder', 'Edit your idea...')}
                                 />
                                 <div className="mt-2 flex items-center gap-2 text-[10px] text-gray-400">
+                                    <CodeBlockActionButton
+                                        accentHex={categoryAccentHex}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            contentTextareaRef.current?.applyCodeBlock();
+                                        }}
+                                        title={t('inspiration.codeBlockAction', '将选中文本包成代码块')}
+                                        label={t('inspiration.codeBlockShort', '代码块')}
+                                        className="px-2 py-1 text-[10px]"
+                                    />
+                                    <span>·</span>
                                     <span>⌘+Enter {t('common.save', 'to save')}</span>
                                     <span>·</span>
                                     <span>Esc {t('common.cancel', 'to cancel')}</span>
