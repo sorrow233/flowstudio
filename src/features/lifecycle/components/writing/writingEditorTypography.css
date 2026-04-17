@@ -59,17 +59,21 @@
 
 .writing-heading-outline {
     position: fixed;
-    right: 0.9rem;
-    top: 8.25rem;
+    right: 1.2rem;
+    top: 22vh;
     z-index: 35;
-    width: 18rem;
+    width: 21rem;
     pointer-events: auto;
 }
 
 .writing-heading-outline-rail {
     position: relative;
     width: 100%;
-    transform: translateX(calc(100% - 2.55rem));
+    display: flex;
+    flex-direction: column;
+    gap: 0.72rem;
+    align-items: flex-start;
+    transform: translateX(calc(100% - 3.1rem));
     transition: transform 0.24s cubic-bezier(0.22, 0.8, 0.18, 1);
 }
 
@@ -78,129 +82,94 @@
     transform: translateX(0);
 }
 
-.writing-heading-outline-handle {
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 2.55rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 1rem 0 0 1rem;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    border-right: 0;
-    background: rgba(255, 255, 255, 0.82);
-    box-shadow: 0 16px 36px -32px rgba(15, 23, 42, 0.42);
-    backdrop-filter: blur(18px);
-}
-
-.writing-heading-outline-handle-label {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    color: #52525b;
-}
-
-.dark .writing-heading-outline-handle {
-    border-color: rgba(255, 255, 255, 0.08);
-    background: rgba(20, 24, 35, 0.9);
-    box-shadow: 0 22px 46px -36px rgba(0, 0, 0, 0.72);
-}
-
-.dark .writing-heading-outline-handle-label {
-    color: #d4d4d8;
-}
-
-.writing-heading-outline-card {
-    max-height: calc(100vh - 10rem);
-    margin-left: 2.55rem;
-    overflow-y: auto;
-    border-radius: 1.2rem;
-    border: 1px solid rgba(15, 23, 42, 0.06);
-    background: rgba(255, 255, 255, 0.58);
-    padding: 0.9rem 0.8rem;
-    backdrop-filter: blur(16px);
-}
-
-.dark .writing-heading-outline-card {
-    border-color: rgba(255, 255, 255, 0.06);
-    background: rgba(255, 255, 255, 0.035);
-}
-
-.writing-heading-outline-label {
-    margin-bottom: 0.6rem;
-    padding: 0 0.4rem;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #71717a;
-}
-
-.dark .writing-heading-outline-label {
-    color: #a1a1aa;
-}
-
-.writing-heading-outline-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-}
-
 .writing-heading-outline-item {
     width: 100%;
     border: 0;
     background: transparent;
-    padding: 0.46rem 0.55rem;
-    border-radius: 0.9rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    justify-content: flex-start;
     text-align: left;
-    font-size: 0.92rem;
-    line-height: 1.4;
-    color: #71717a;
-    transition: background-color 0.18s ease, color 0.18s ease;
-}
-
-.writing-heading-outline-item:hover {
-    background: rgba(15, 23, 42, 0.045);
-    color: #27272a;
+    color: #8f8f94;
+    transition: color 0.18s ease, transform 0.18s ease;
 }
 
 .writing-heading-outline-item.level-2 {
-    padding-left: 0.9rem;
+    padding-left: 0.55rem;
 }
 
 .writing-heading-outline-item.level-3,
 .writing-heading-outline-item.level-4,
 .writing-heading-outline-item.level-5,
 .writing-heading-outline-item.level-6 {
-    padding-left: 1.2rem;
-    font-size: 0.88rem;
+    padding-left: 0.95rem;
 }
 
+.writing-heading-outline-marker {
+    display: inline-block;
+    width: 1.9rem;
+    height: 0.42rem;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    background: rgba(113, 113, 122, 0.58);
+    transition: width 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+}
+
+.writing-heading-outline-text {
+    max-width: 15rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.95rem;
+    line-height: 1.35;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    opacity: 0;
+    transform: translateX(0.25rem);
+    transition: opacity 0.16s ease, transform 0.18s ease, color 0.18s ease;
+}
+
+.writing-heading-outline:hover .writing-heading-outline-text,
+.writing-heading-outline:focus-within .writing-heading-outline-text {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.writing-heading-outline-item:hover,
 .writing-heading-outline-item.is-active {
-    background: rgba(59, 130, 246, 0.08);
-    color: #0f172a;
+    color: #d4d4d8;
+}
+
+.writing-heading-outline-item:hover .writing-heading-outline-marker,
+.writing-heading-outline-item.is-active .writing-heading-outline-marker {
+    width: 2.1rem;
+    background: rgba(255, 255, 255, 0.82);
 }
 
 .dark .writing-heading-outline-item {
-    color: #a1a1aa;
+    color: rgba(212, 212, 216, 0.68);
 }
 
-.dark .writing-heading-outline-item:hover {
-    background: rgba(255, 255, 255, 0.05);
+.dark .writing-heading-outline-marker {
+    background: rgba(113, 113, 122, 0.64);
+}
+
+.dark .writing-heading-outline-item:hover,
+.dark .writing-heading-outline-item.is-active {
     color: #f4f4f5;
 }
 
-.dark .writing-heading-outline-item.is-active {
-    background: rgba(96, 165, 250, 0.12);
-    color: #ffffff;
+.dark .writing-heading-outline-item:hover .writing-heading-outline-marker,
+.dark .writing-heading-outline-item.is-active .writing-heading-outline-marker {
+    background: rgba(255, 255, 255, 0.86);
 }
 
-@media (max-width: 1599px) {
+@media (max-width: 1750px) {
     .writing-heading-outline {
-        right: 0.5rem;
-        width: 16.5rem;
+        right: 0.7rem;
+        width: 18rem;
     }
 }
 

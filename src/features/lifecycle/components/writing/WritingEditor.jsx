@@ -945,30 +945,19 @@ const WritingEditor = ({
 
                         {showHeadingOutline && (
                             <aside className="writing-heading-outline hidden xl:block" aria-label={t('writing.tableOfContents', '目录')}>
-                                <div className="writing-heading-outline-rail">
-                                    <div className="writing-heading-outline-handle" aria-hidden="true">
-                                        <span className="writing-heading-outline-handle-label">
-                                            {t('writing.tableOfContents', '目录')}
-                                        </span>
-                                    </div>
-                                    <div className="writing-heading-outline-card">
-                                        <div className="writing-heading-outline-label">
-                                            {t('writing.tableOfContents', '目录')}
-                                        </div>
-                                        <nav className="writing-heading-outline-list" aria-label={t('writing.tableOfContents', '目录')}>
-                                            {headingOutline.map((heading) => (
-                                                <button
-                                                    key={heading.id}
-                                                    type="button"
-                                                    onClick={() => handleJumpToHeading(heading.id)}
-                                                    className={`writing-heading-outline-item level-${heading.level} ${activeHeadingId === heading.id ? 'is-active' : ''}`}
-                                                >
-                                                    <span>{heading.text}</span>
-                                                </button>
-                                            ))}
-                                        </nav>
-                                    </div>
-                                </div>
+                                <nav className="writing-heading-outline-rail" aria-label={t('writing.tableOfContents', '目录')}>
+                                    {headingOutline.map((heading) => (
+                                        <button
+                                            key={heading.id}
+                                            type="button"
+                                            onClick={() => handleJumpToHeading(heading.id)}
+                                            className={`writing-heading-outline-item level-${heading.level} ${activeHeadingId === heading.id ? 'is-active' : ''}`}
+                                        >
+                                            <span className="writing-heading-outline-marker" aria-hidden="true" />
+                                            <span className="writing-heading-outline-text">{heading.text}</span>
+                                        </button>
+                                    ))}
+                                </nav>
                             </aside>
                         )}
                     </div>
