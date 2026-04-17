@@ -792,9 +792,9 @@ const WritingEditor = ({
                     editorRef.current?.focus();
                 }}
             >
-                <div className="mx-auto w-full max-w-4xl px-5 pb-24 md:px-10">
+                <div className="mx-auto w-full max-w-[78rem] px-5 pb-24 md:px-10">
                     <motion.div
-                        className="sticky z-30"
+                        className="writing-editor-main sticky z-30"
                         style={{ top: isMobile ? 6 : 12 }}
                         initial={{ opacity: 1, y: 0 }}
                         animate={{
@@ -852,10 +852,11 @@ const WritingEditor = ({
                     </motion.div>
 
                     <div className="relative mt-3">
-                        <div
-                            className={`writing-editor-shell transition-all ${isEditorFocused ? 'is-focused' : ''}`}
-                            style={{ marginTop: isMobile ? 12 : 18 }}
-                        >
+                        <div className="writing-editor-main">
+                            <div
+                                className={`writing-editor-shell transition-all ${isEditorFocused ? 'is-focused' : ''}`}
+                                style={{ marginTop: isMobile ? 12 : 18 }}
+                            >
                             <input
                                 type="text"
                                 value={title}
@@ -906,59 +907,67 @@ const WritingEditor = ({
                                 </div>
                             )}
 
-                            <div className="relative">
-                                <div
-                                    ref={editorRef}
-                                    contentEditable
-                                    suppressContentEditableWarning
-                                    onInput={handleInput}
-                                    onPaste={handlePaste}
-                                    onClick={handleEditorClick}
-                                    onKeyDown={handleEditorKeyDown}
-                                    onMouseUp={cacheEditorSelection}
-                                    onKeyUp={cacheEditorSelection}
-                                    onFocus={() => {
-                                        setIsEditorFocused(true);
-                                    }}
-                                    onBlur={() => {
-                                        setIsEditorFocused(false);
-                                        handleApplyPendingRemoteOnBlur();
-                                    }}
-                                    spellCheck
-                                    className="writing-editor-content min-h-[55vh] w-full outline-none"
-                                    placeholder={t('inspiration.placeholder')}
-                                />
+                                <div className="relative">
+                                    <div
+                                        ref={editorRef}
+                                        contentEditable
+                                        suppressContentEditableWarning
+                                        onInput={handleInput}
+                                        onPaste={handlePaste}
+                                        onClick={handleEditorClick}
+                                        onKeyDown={handleEditorKeyDown}
+                                        onMouseUp={cacheEditorSelection}
+                                        onKeyUp={cacheEditorSelection}
+                                        onFocus={() => {
+                                            setIsEditorFocused(true);
+                                        }}
+                                        onBlur={() => {
+                                            setIsEditorFocused(false);
+                                            handleApplyPendingRemoteOnBlur();
+                                        }}
+                                        spellCheck
+                                        className="writing-editor-content min-h-[55vh] w-full outline-none"
+                                        placeholder={t('inspiration.placeholder')}
+                                    />
 
-                                <AnimatePresence>
-                                    {selectedImage && (
-                                        <WritingImageOverlay
-                                            selectedImage={selectedImage}
-                                            editorRef={editorRef}
-                                            onDelete={handleDeleteImage}
-                                        />
-                                    )}
-                                </AnimatePresence>
+                                    <AnimatePresence>
+                                        {selectedImage && (
+                                            <WritingImageOverlay
+                                                selectedImage={selectedImage}
+                                                editorRef={editorRef}
+                                                onDelete={handleDeleteImage}
+                                            />
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                             </div>
                         </div>
 
                         {showHeadingOutline && (
-                            <aside className="writing-heading-outline hidden xl:block">
-                                <div className="writing-heading-outline-card">
-                                    <div className="writing-heading-outline-label">
-                                        {t('writing.tableOfContents', '目录')}
+                            <aside className="writing-heading-outline hidden xl:block" aria-label={t('writing.tableOfContents', '目录')}>
+                                <div className="writing-heading-outline-rail">
+                                    <div className="writing-heading-outline-handle" aria-hidden="true">
+                                        <span className="writing-heading-outline-handle-label">
+                                            {t('writing.tableOfContents', '目录')}
+                                        </span>
                                     </div>
-                                    <nav className="writing-heading-outline-list" aria-label={t('writing.tableOfContents', '目录')}>
-                                        {headingOutline.map((heading) => (
-                                            <button
-                                                key={heading.id}
-                                                type="button"
-                                                onClick={() => handleJumpToHeading(heading.id)}
-                                                className={`writing-heading-outline-item level-${heading.level} ${activeHeadingId === heading.id ? 'is-active' : ''}`}
-                                            >
-                                                <span>{heading.text}</span>
-                                            </button>
-                                        ))}
-                                    </nav>
+                                    <div className="writing-heading-outline-card">
+                                        <div className="writing-heading-outline-label">
+                                            {t('writing.tableOfContents', '目录')}
+                                        </div>
+                                        <nav className="writing-heading-outline-list" aria-label={t('writing.tableOfContents', '目录')}>
+                                            {headingOutline.map((heading) => (
+                                                <button
+                                                    key={heading.id}
+                                                    type="button"
+                                                    onClick={() => handleJumpToHeading(heading.id)}
+                                                    className={`writing-heading-outline-item level-${heading.level} ${activeHeadingId === heading.id ? 'is-active' : ''}`}
+                                                >
+                                                    <span>{heading.text}</span>
+                                                </button>
+                                            ))}
+                                        </nav>
+                                    </div>
                                 </div>
                             </aside>
                         )}
