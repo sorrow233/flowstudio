@@ -20,6 +20,7 @@ import WritingImageOverlay from './WritingImageOverlay';
 import { clipboardToMarkup, insertMarkupAtCaret } from './pasteUtils';
 import EditorToolbar from './EditorToolbar';
 import EditorStatusBar from './EditorStatusBar';
+import { syncEditorHeadingOutline } from './headingOutline';
 import FloatingColorPicker from './FloatingColorPicker';
 import ConflictBanner from './ConflictBanner';
 import VersionHistoryModal from './VersionHistoryModal';
@@ -47,6 +48,7 @@ const WritingEditor = ({
 }) => {
     const { t } = useTranslation();
     const editorRef = useRef(null);
+    const scrollContainerRef = useRef(null);
 
     const [title, setTitle] = useState('');
     const [contentMarkup, setContentMarkup] = useState('');
@@ -63,11 +65,24 @@ const WritingEditor = ({
     const [isToolbarVisible, setIsToolbarVisible] = useState(true);
     const [isDirty, setIsDirty] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [headingOutline, setHeadingOutline] = useState([]);
+    const [activeHeadingId, setActiveHeadingId] = useState(null);
 
     const statsTimeoutRef = useRef(null);
     const inactivityTimeoutRef = useRef(null);
     const selectionRangeRef = useRef(null);
     const { uploadImage } = useImageUpload();
+
+    const refreshHeadingOutline = useCallback(() => {
+        const nextOutline = syncEditorHeadingOutline(editorRef.current);
+        setHeadingOutline(nextOutline);
+        setActiveHeadingId((current) => (
+            nextOutline.some((item) => item.id === current)
+                ? current
+                : (nextOutline[0]?.id || null)
+        ));
+        return nextOutline;
+    }, []);
 
     const updateStatsFromText = useCallback((text) => {
         const words = computeWordCount(text);
@@ -228,6 +243,52 @@ const WritingEditor = ({
         const timer = setTimeout(() => setCopiedAt(null), 1800);
         return () => clearTimeout(timer);
     }, [copiedAt]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return undefined;
+        const frameId = window.requestAnimationFrame(() => {
+            refreshHeadingOutline();
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
+    }, [contentMarkup, refreshHeadingOutline, writingDoc?.id]);
+
+    useEffect(() => {
+        const root = scrollContainerRef.current;
+        if (!root || headingOutline.length === 0) {
+            setActiveHeadingId(null);
+            return undefined;
+        }
+
+        let frameId = null;
+
+        const updateActiveHeading = () => {
+            const rootRect = root.getBoundingClientRect();
+            let currentId = headingOutline[0]?.id || null;
+
+            headingOutline.forEach((heading) => {
+                const element = document.getElementById(heading.id);
+                if (!element) return;
+                const distanceFromTop = element.getBoundingClientRect().top - rootRect.top;
+                if (distanceFromTop <= 140) currentId = heading.id;
+            });
+
+            setActiveHeadingId(currentId);
+        };
+
+        const handleScroll = () => {
+            if (frameId) window.cancelAnimationFrame(frameId);
+            frameId = window.requestAnimationFrame(updateActiveHeading);
+        };
+
+        updateActiveHeading();
+        root.addEventListener('scroll', handleScroll, { passive: true });
+
+        return () => {
+            root.removeEventListener('scroll', handleScroll);
+            if (frameId) window.cancelAnimationFrame(frameId);
+        };
+    }, [headingOutline]);
 
     useEffect(() => {
         const handleEscape = (event) => {
@@ -668,6 +729,26 @@ const WritingEditor = ({
         }
     };
 
+    const handleJumpToHeading = useCallback((headingId) => {
+        if (!headingId) return;
+        const root = scrollContainerRef.current;
+        const target = document.getElementById(headingId);
+        if (!root || !target) return;
+
+        const rootRect = root.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+        const nextTop = targetRect.top - rootRect.top + root.scrollTop - 112;
+
+        root.scrollTo({
+            top: Math.max(0, nextTop),
+            behavior: 'smooth',
+        });
+
+        setActiveHeadingId(headingId);
+    }, []);
+
+    const showHeadingOutline = !isMobile && headingOutline.length > 1;
+
     return (
         <div className="relative z-10 flex h-full flex-1 flex-col overflow-hidden">
             <div className="pointer-events-none absolute inset-0">
@@ -702,6 +783,7 @@ const WritingEditor = ({
             </AnimatePresence>
 
             <div
+                ref={scrollContainerRef}
                 className="relative z-10 flex-1 overflow-y-auto custom-scrollbar touch-scroll overscroll-y-contain"
                 style={{ paddingTop: conflictState ? safeTop + 82 : safeTop + 16 }}
                 onClick={(event) => {
@@ -710,7 +792,7 @@ const WritingEditor = ({
                     editorRef.current?.focus();
                 }}
             >
-                <div className="mx-auto w-full max-w-4xl px-5 pb-24 md:px-10">
+                <div className={`mx-auto w-full px-5 pb-24 md:px-10 ${showHeadingOutline ? 'max-w-[88rem]' : 'max-w-4xl'}`}>
                     <motion.div
                         className="sticky z-30"
                         style={{ top: isMobile ? 6 : 12 }}
@@ -769,93 +851,117 @@ const WritingEditor = ({
                         />
                     </motion.div>
 
-                    <div
-                        className={`writing-editor-shell transition-all ${isEditorFocused ? 'is-focused' : ''}`}
-                        style={{ marginTop: isMobile ? 12 : 18 }}
-                    >
-                        <input
-                            type="text"
-                            value={title}
-                            onChange={(event) => {
-                                setTitle(event.target.value);
-                                setIsDirty(true);
-                            }}
-                            onKeyDown={(event) => {
-                                if (event.key === 'Enter') {
-                                    event.preventDefault();
-                                    editorRef.current?.focus();
-                                }
-                            }}
-                            className="writing-editor-title w-full border-none bg-transparent outline-none"
-                            placeholder={t('inspiration.untitled')}
-                        />
-
-                        <div className="writing-editor-meta mb-8 mt-4">
-                            <EditorStatusBar
-                                wordCount={wordCount}
-                                wordCountLabelKey={wordCountLabelKey}
-                                charCount={charCount}
-                                readMinutes={readMinutes}
-                                lastSavedAt={lastSavedAt}
-                                hasPendingRemote={hasPendingRemote}
-                                isMobile={isMobile}
-                                t={t}
+                    <div className={`mt-3 ${showHeadingOutline ? 'lg:grid lg:grid-cols-[minmax(0,46rem)_16rem] lg:justify-center lg:gap-8' : ''}`}>
+                        <div
+                            className={`writing-editor-shell transition-all ${isEditorFocused ? 'is-focused' : ''}`}
+                            style={{ marginTop: isMobile ? 12 : 18 }}
+                        >
+                            <input
+                                type="text"
+                                value={title}
+                                onChange={(event) => {
+                                    setTitle(event.target.value);
+                                    setIsDirty(true);
+                                }}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter') {
+                                        event.preventDefault();
+                                        editorRef.current?.focus();
+                                    }
+                                }}
+                                className="writing-editor-title w-full border-none bg-transparent outline-none"
+                                placeholder={t('inspiration.untitled')}
                             />
-                        </div>
 
-                        {pendingRemoteMarkup && !conflictState && (
-                            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-200/70 bg-sky-50/80 px-4 py-2.5 text-[12px] text-sky-700">
-                                <span>{t('inspiration.pendingRemote')}</span>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={handleApplyPendingRemote}
-                                        className="rounded-full border border-sky-200 bg-white px-3 py-1 text-xs transition hover:bg-sky-50"
-                                    >
-                                        {t('inspiration.applyRemote')}
-                                    </button>
-                                    <button
-                                        onClick={handleKeepPendingLocal}
-                                        className="rounded-full bg-sky-600 px-3 py-1 text-xs text-white transition hover:bg-sky-500 dark:bg-sky-500 dark:hover:bg-sky-400"
-                                    >
-                                        {t('inspiration.keepLocal')}
-                                    </button>
-                                </div>
+                            <div className="writing-editor-meta mb-8 mt-4">
+                                <EditorStatusBar
+                                    wordCount={wordCount}
+                                    wordCountLabelKey={wordCountLabelKey}
+                                    charCount={charCount}
+                                    readMinutes={readMinutes}
+                                    lastSavedAt={lastSavedAt}
+                                    hasPendingRemote={hasPendingRemote}
+                                    isMobile={isMobile}
+                                    t={t}
+                                />
                             </div>
-                        )}
 
-                        <div className="relative">
-                            <div
-                                ref={editorRef}
-                                contentEditable
-                                suppressContentEditableWarning
-                                onInput={handleInput}
-                                onPaste={handlePaste}
-                                onClick={handleEditorClick}
-                                onKeyDown={handleEditorKeyDown}
-                                onMouseUp={cacheEditorSelection}
-                                onKeyUp={cacheEditorSelection}
-                                onFocus={() => {
-                                    setIsEditorFocused(true);
-                                }}
-                                onBlur={() => {
-                                    setIsEditorFocused(false);
-                                    handleApplyPendingRemoteOnBlur();
-                                }}
-                                spellCheck
-                                className="writing-editor-content min-h-[55vh] w-full outline-none"
-                                placeholder={t('inspiration.placeholder')}
-                            />
+                            {pendingRemoteMarkup && !conflictState && (
+                                <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-200/70 bg-sky-50/80 px-4 py-2.5 text-[12px] text-sky-700">
+                                    <span>{t('inspiration.pendingRemote')}</span>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={handleApplyPendingRemote}
+                                            className="rounded-full border border-sky-200 bg-white px-3 py-1 text-xs transition hover:bg-sky-50"
+                                        >
+                                            {t('inspiration.applyRemote')}
+                                        </button>
+                                        <button
+                                            onClick={handleKeepPendingLocal}
+                                            className="rounded-full bg-sky-600 px-3 py-1 text-xs text-white transition hover:bg-sky-500 dark:bg-sky-500 dark:hover:bg-sky-400"
+                                        >
+                                            {t('inspiration.keepLocal')}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
-                            <AnimatePresence>
-                                {selectedImage && (
-                                    <WritingImageOverlay
-                                        selectedImage={selectedImage}
-                                        editorRef={editorRef}
-                                        onDelete={handleDeleteImage}
-                                    />
-                                )}
-                            </AnimatePresence>
+                            <div className="relative">
+                                <div
+                                    ref={editorRef}
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    onInput={handleInput}
+                                    onPaste={handlePaste}
+                                    onClick={handleEditorClick}
+                                    onKeyDown={handleEditorKeyDown}
+                                    onMouseUp={cacheEditorSelection}
+                                    onKeyUp={cacheEditorSelection}
+                                    onFocus={() => {
+                                        setIsEditorFocused(true);
+                                    }}
+                                    onBlur={() => {
+                                        setIsEditorFocused(false);
+                                        handleApplyPendingRemoteOnBlur();
+                                    }}
+                                    spellCheck
+                                    className="writing-editor-content min-h-[55vh] w-full outline-none"
+                                    placeholder={t('inspiration.placeholder')}
+                                />
+
+                                <AnimatePresence>
+                                    {selectedImage && (
+                                        <WritingImageOverlay
+                                            selectedImage={selectedImage}
+                                            editorRef={editorRef}
+                                            onDelete={handleDeleteImage}
+                                        />
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </div>
+
+                        {showHeadingOutline && (
+                            <aside className="writing-heading-outline hidden lg:block">
+                                <div className="writing-heading-outline-card sticky top-28">
+                                    <div className="writing-heading-outline-label">
+                                        {t('writing.tableOfContents', '目录')}
+                                    </div>
+                                    <nav className="writing-heading-outline-list" aria-label={t('writing.tableOfContents', '目录')}>
+                                        {headingOutline.map((heading) => (
+                                            <button
+                                                key={heading.id}
+                                                type="button"
+                                                onClick={() => handleJumpToHeading(heading.id)}
+                                                className={`writing-heading-outline-item level-${heading.level} ${activeHeadingId === heading.id ? 'is-active' : ''}`}
+                                            >
+                                                <span>{heading.text}</span>
+                                            </button>
+                                        ))}
+                                    </nav>
+                                </div>
+                            </aside>
+                        )}
                     </div>
                 </div>
             </div>
