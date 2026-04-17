@@ -671,9 +671,7 @@ const WritingEditor = ({
     return (
         <div className="relative z-10 flex h-full flex-1 flex-col overflow-hidden">
             <div className="pointer-events-none absolute inset-0">
-                <div className="absolute inset-0 bg-white/30 dark:bg-slate-900/30" />
-                <div className="absolute -top-14 right-20 h-56 w-56 rounded-full bg-sky-200/28 blur-[88px] dark:bg-sky-900/10" />
-                <div className="absolute -bottom-16 left-20 h-48 w-48 rounded-full bg-blue-200/22 blur-[82px] dark:bg-blue-900/10" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.08),transparent_46%)] dark:bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.03),transparent_42%)]" />
             </div>
 
             <AnimatePresence>
@@ -772,9 +770,7 @@ const WritingEditor = ({
                     </motion.div>
 
                     <div
-                        className={`rounded-3xl bg-white p-6 transition-all md:p-10 dark:bg-slate-900 ${isEditorFocused
-                            ? 'shadow-[0_14px_30px_-24px_rgba(14,116,255,0.28)] dark:shadow-none'
-                            : 'shadow-none'}`}
+                        className={`writing-editor-shell transition-all ${isEditorFocused ? 'is-focused' : ''}`}
                         style={{ marginTop: isMobile ? 12 : 18 }}
                     >
                         <input
@@ -790,14 +786,11 @@ const WritingEditor = ({
                                     editorRef.current?.focus();
                                 }
                             }}
-                            className={`w-full border-none bg-transparent font-semibold tracking-tight text-slate-800 outline-none placeholder:text-slate-300 dark:text-slate-100 dark:placeholder:text-slate-600 ${isMobile ? 'text-2xl' : 'text-3xl leading-tight'}`}
+                            className="writing-editor-title w-full border-none bg-transparent outline-none"
                             placeholder={t('inspiration.untitled')}
-                            style={{
-                                fontFamily: '"LXGW WenKai", "LXGW WenKai GB", "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif',
-                            }}
                         />
 
-                        <div className="mb-6 mt-3">
+                        <div className="writing-editor-meta mb-8 mt-4">
                             <EditorStatusBar
                                 wordCount={wordCount}
                                 wordCountLabelKey={wordCountLabelKey}
@@ -849,7 +842,7 @@ const WritingEditor = ({
                                     handleApplyPendingRemoteOnBlur();
                                 }}
                                 spellCheck
-                                className="writing-editor-content min-h-[55vh] w-full text-slate-700 outline-none caret-sky-500 selection:bg-sky-100/80 empty:before:text-slate-300 dark:text-slate-300 dark:caret-sky-400 dark:selection:bg-sky-900/40 dark:empty:before:text-slate-600"
+                                className="writing-editor-content min-h-[55vh] w-full outline-none"
                                 placeholder={t('inspiration.placeholder')}
                             />
 
