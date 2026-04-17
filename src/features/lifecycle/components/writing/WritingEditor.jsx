@@ -888,18 +888,18 @@ const WritingEditor = ({
                             </div>
 
                             {pendingRemoteMarkup && !conflictState && (
-                                <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-200/70 bg-sky-50/80 px-4 py-2.5 text-[12px] text-sky-700">
+                                <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/88 px-4 py-2.5 text-[12px] text-[#506a96] dark:border-white/8 dark:bg-[#152135]/72 dark:text-[#9ab5df]">
                                     <span>{t('inspiration.pendingRemote')}</span>
                                     <div className="flex items-center gap-2">
                                         <button
                                             onClick={handleApplyPendingRemote}
-                                            className="rounded-full border border-sky-200 bg-white px-3 py-1 text-xs transition hover:bg-sky-50"
+                                            className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700 transition hover:border-[#b7c7df] hover:text-[#506a96] dark:border-white/8 dark:bg-[#111a2c] dark:text-slate-200 dark:hover:border-white/12 dark:hover:text-[#9ab5df]"
                                         >
                                             {t('inspiration.applyRemote')}
                                         </button>
                                         <button
                                             onClick={handleKeepPendingLocal}
-                                            className="rounded-full bg-sky-600 px-3 py-1 text-xs text-white transition hover:bg-sky-500 dark:bg-sky-500 dark:hover:bg-sky-400"
+                                            className="rounded-full bg-[#5d7cae] px-3 py-1 text-xs text-white transition hover:bg-[#5472a3] dark:bg-[#6a88bc] dark:hover:bg-[#7896c9]"
                                         >
                                             {t('inspiration.keepLocal')}
                                         </button>

@@ -497,9 +497,7 @@ const WritingBoard = ({
     return (
         <div className={`relative flex h-full w-full overflow-hidden ${isMobile ? 'rounded-none' : 'rounded-[26px]'}`}>
             <div className="pointer-events-none absolute inset-0">
-                <div className="absolute inset-0 bg-white dark:bg-slate-900" />
-                <div className={`absolute left-12 h-72 w-72 rounded-full bg-sky-200/35 blur-3xl dark:bg-sky-900/20 ${isMobile ? '-top-32' : '-top-24'}`} />
-                <div className={`absolute right-12 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl dark:bg-blue-900/20 ${isMobile ? '-bottom-32' : '-bottom-24'}`} />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,#f7f9fc_0%,#eef3fb_100%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.08),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.07),transparent_28%),linear-gradient(180deg,#0f1830_0%,#101a2d_100%)]" />
             </div>
 
             <div className="relative z-10 flex min-h-0 min-w-0 flex-1">
@@ -527,7 +525,7 @@ const WritingBoard = ({
                                     mass: 1
                                 }}
                                 className={[
-                                    'relative z-[70] h-full flex-shrink-0 border-r border-sky-100 bg-white pointer-events-auto dark:border-slate-800 dark:bg-slate-900',
+                                    'relative z-[70] h-full flex-shrink-0 border-r border-slate-200/70 bg-[#f8fafd]/88 pointer-events-auto backdrop-blur-xl dark:border-white/6 dark:bg-[#111a2c]/78',
                                     isMobile
                                         ? 'absolute inset-y-0 left-0 w-[84vw] max-w-[360px]'
                                         : 'overflow-hidden'
@@ -623,11 +621,11 @@ const WritingBoard = ({
                             docChangeMeta={projectChangeMeta}
                         />
                     ) : hasNoFilteredResults ? (
-                        <div className="flex h-full items-center justify-center bg-white/70 text-slate-400 dark:bg-slate-900/70 dark:text-slate-500">
+                        <div className="flex h-full items-center justify-center bg-transparent text-slate-500 dark:text-slate-500">
                             <p className="text-sm">{t('common.noData')}</p>
                         </div>
                     ) : isTrashView ? (
-                        <div className="flex h-full items-center justify-center bg-white/70 text-slate-400 dark:bg-slate-900/70 dark:text-slate-500">
+                        <div className="flex h-full items-center justify-center bg-transparent text-slate-500 dark:text-slate-500">
                             <p className="text-sm">{t('writing.emptyTrash', '回收站为空')}</p>
                         </div>
                     ) : (

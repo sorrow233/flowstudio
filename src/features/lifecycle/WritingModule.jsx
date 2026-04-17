@@ -38,11 +38,9 @@ const WritingModule = () => {
     };
 
     return (
-        <div className="relative h-full min-h-0 overflow-hidden rounded-[22px] border border-gray-200 bg-white shadow-[0_24px_55px_-38px_rgba(15,23,42,0.55)] dark:border-gray-800 dark:bg-gray-900 md:rounded-[28px]">
+        <div className="relative h-full min-h-0 overflow-hidden rounded-[22px] border border-slate-200/70 bg-[#f5f7fb] shadow-[0_24px_55px_-38px_rgba(15,23,42,0.35)] dark:border-white/6 dark:bg-[#0d1525] md:rounded-[28px]">
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                <div className="absolute inset-0 bg-white dark:bg-slate-900" />
-                <div className="absolute -top-24 left-10 h-72 w-72 rounded-full bg-rose-200/30 blur-3xl dark:bg-rose-500/10" />
-                <div className="absolute -bottom-24 right-8 h-72 w-72 rounded-full bg-pink-200/20 blur-3xl dark:bg-rose-600/10" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(148,163,184,0.16),transparent_38%),linear-gradient(180deg,#f7f9fc_0%,#eef3fb_100%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.1),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.08),transparent_28%),linear-gradient(180deg,#0d1525_0%,#101a2d_100%)]" />
             </div>
 
             <div className="relative z-10 h-full">

@@ -133,7 +133,7 @@ const WritingSidebarItem = ({
             {isSelectionMode && isSelected && (
                 <span
                     aria-hidden="true"
-                    className="pointer-events-none absolute inset-y-3 left-1 z-10 w-1 rounded-full bg-sky-400/85 dark:bg-sky-500/85"
+                    className="pointer-events-none absolute inset-y-3 left-1 z-10 w-1 rounded-full bg-[#5d83c2]/90 dark:bg-[#79a7f2]/90"
                 />
             )}
             <div
@@ -153,12 +153,12 @@ const WritingSidebarItem = ({
                     }
                 }}
                 className={[
-                    `cursor-pointer rounded-2xl border px-4 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70 ${isUntitledDoc ? 'min-h-[126px]' : 'min-h-[106px]'}`,
+                    `cursor-pointer rounded-2xl border px-4 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8fb4f0]/45 ${isUntitledDoc ? 'min-h-[126px]' : 'min-h-[106px]'}`,
                     isSelectionMode && isSelected
-                        ? 'border-sky-200/75 bg-sky-50/65 dark:border-sky-700/70 dark:bg-slate-800/82'
+                        ? 'border-[#b7c7df]/80 bg-[#eef3fb]/78 dark:border-white/10 dark:bg-[#1a2438]/92'
                         : isActive
-                        ? 'border-sky-200 bg-sky-50 shadow-[0_14px_34px_-24px_rgba(59,130,246,0.6)] dark:border-sky-800 dark:bg-slate-900 dark:shadow-none'
-                        : 'border-sky-100/80 bg-white/86 hover:border-sky-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/40 dark:hover:border-slate-700 dark:hover:bg-slate-900/80'
+                        ? 'border-[#c6d3e5] bg-[#f4f7fc] shadow-[0_16px_34px_-26px_rgba(15,23,42,0.3)] dark:border-white/12 dark:bg-[#182235] dark:shadow-none'
+                        : 'border-slate-200/70 bg-white/72 hover:border-[#cdd8e8] hover:bg-white/86 dark:border-white/6 dark:bg-[#10192b]/46 dark:hover:border-white/10 dark:hover:bg-[#132038]/80'
                 ].join(' ')}
             >
                 <div className={`${isUntitledDoc ? 'mb-1.5' : 'mb-2'} flex items-center justify-between gap-2`}>
@@ -171,7 +171,7 @@ const WritingSidebarItem = ({
                                 onBlur={handleRename}
                                 onKeyDown={handleKeyDown}
                                 onClick={(event) => event.stopPropagation()}
-                                className="w-full border-b border-sky-300 bg-transparent pb-0.5 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 dark:border-sky-600 dark:text-slate-200"
+                                className="w-full border-b border-[#99b1d8] bg-transparent pb-0.5 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 dark:border-[#5b78a8] dark:text-slate-200"
                                 placeholder={t('inspiration.untitled')}
                             />
                         ) : (
@@ -195,7 +195,7 @@ const WritingSidebarItem = ({
                     </div>
                     <div className="ml-2 flex shrink-0 items-center gap-1.5">
                         {isActive && !isSelectionMode && (
-                            <span className="text-[10px] font-medium tracking-wide text-sky-500/80 dark:text-sky-400/80">
+                            <span className="text-[10px] font-medium tracking-wide text-[#5b78a8]/90 dark:text-[#8ea7d4]/90">
                                 {formatDocTime(doc.lastModified || doc.timestamp)}
                             </span>
                         )}
@@ -432,11 +432,11 @@ const WritingSidebar = ({
     };
 
     return (
-        <div className="flex h-full flex-col bg-white dark:bg-slate-900">
+        <div className="flex h-full flex-col bg-transparent">
             {!isTrashView && isSelectionMode && documents.length > 0 && (
-                <div className="border-b border-sky-100/70 px-3 py-2.5 dark:border-slate-800/80">
-                    <div className="mb-2 rounded-2xl border border-slate-200/65 bg-white/62 px-2.5 py-2 backdrop-blur-md shadow-[0_12px_24px_-20px_rgba(15,23,42,0.55)] dark:border-slate-700/60 dark:bg-slate-800/45">
-                        <p className="text-[11px] font-semibold tracking-wide text-sky-600/85 dark:text-sky-400/85">
+                <div className="border-b border-slate-200/70 px-3 py-2.5 dark:border-white/6">
+                    <div className="mb-2 rounded-2xl border border-slate-200/65 bg-white/54 px-2.5 py-2 backdrop-blur-md shadow-[0_12px_24px_-20px_rgba(15,23,42,0.22)] dark:border-white/8 dark:bg-[#152135]/62">
+                        <p className="text-[11px] font-semibold tracking-wide text-[#5a76a4]/90 dark:text-[#97add6]/88">
                             {t('writing.batchActions', '批量操作')}
                         </p>
                     </div>
@@ -444,7 +444,7 @@ const WritingSidebar = ({
                         <button
                             type="button"
                             onClick={toggleSelectAll}
-                            className="inline-flex h-8 items-center rounded-full border border-slate-200/70 bg-white/72 px-2.5 text-xs font-medium text-slate-600 backdrop-blur-sm transition hover:border-sky-300/70 hover:text-sky-600 dark:border-slate-700/60 dark:bg-slate-800/52 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-sky-400"
+                            className="inline-flex h-8 items-center rounded-full border border-slate-200/70 bg-white/68 px-2.5 text-xs font-medium text-slate-600 backdrop-blur-sm transition hover:border-[#b9c8e0]/80 hover:text-[#5a76a4] dark:border-white/8 dark:bg-[#152135]/58 dark:text-slate-300 dark:hover:border-white/12 dark:hover:text-[#9cb5df]"
                         >
                             {allSelected ? t('common.unselectAll', '取消全选') : t('common.selectAll', '全选')}
                         </button>
@@ -452,7 +452,7 @@ const WritingSidebar = ({
                             value={moveTargetCategory}
                             onChange={(event) => setMoveTargetCategory(event.target.value)}
                             disabled={!hasMoveTarget}
-                            className="h-8 min-w-[120px] rounded-full border border-slate-200/70 bg-white/72 px-2.5 text-xs text-slate-700 outline-none backdrop-blur-sm transition focus:border-sky-400 disabled:cursor-not-allowed disabled:opacity-45 dark:border-slate-700/60 dark:bg-slate-800/52 dark:text-slate-200 dark:focus:border-sky-600"
+                            className="h-8 min-w-[120px] rounded-full border border-slate-200/70 bg-white/68 px-2.5 text-xs text-slate-700 outline-none backdrop-blur-sm transition focus:border-[#8da6cf] disabled:cursor-not-allowed disabled:opacity-45 dark:border-white/8 dark:bg-[#152135]/58 dark:text-slate-200 dark:focus:border-[#698cc5]"
                         >
                             {hasMoveTarget ? selectableCategories.map((category) => (
                                 <option key={category.id} value={category.id}>
@@ -466,7 +466,7 @@ const WritingSidebar = ({
                             type="button"
                             onClick={handleBulkMove}
                             disabled={!canBulkMove}
-                            className="inline-flex h-8 items-center rounded-full bg-sky-500 px-2.5 text-xs font-medium text-white transition hover:-translate-y-0.5 hover:bg-sky-600 hover:shadow-[0_10px_20px_-16px_rgba(14,165,233,0.7)] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sky-600 dark:hover:bg-sky-500"
+                            className="inline-flex h-8 items-center rounded-full bg-[#5d7cae] px-2.5 text-xs font-medium text-white transition hover:-translate-y-0.5 hover:bg-[#5472a3] hover:shadow-[0_10px_20px_-16px_rgba(93,124,174,0.72)] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#6a88bc] dark:hover:bg-[#7896c9]"
                         >
                             {t('writing.moveToCategory', '转移分区')}
                         </button>
@@ -480,7 +480,7 @@ const WritingSidebar = ({
                         </button>
                     </div>
                     {isSelectionMode && (
-                        <p className="mt-1.5 text-[11px] font-medium text-sky-600/90 dark:text-sky-400/90">
+                        <p className="mt-1.5 text-[11px] font-medium text-[#5a76a4]/90 dark:text-[#97add6]/90">
                             {`${t('common.selected', '已选择')} ${selectedCount} ${t('writing.documents', '文档')}`}
                         </p>
                     )}
@@ -491,7 +491,7 @@ const WritingSidebar = ({
                 style={isMobile ? { paddingBottom: 'max(16px, env(safe-area-inset-bottom, 0px))' } : undefined}
             >
                 {documents.length === 0 ? (
-                    <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-sky-300">
+                    <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-[#9eb2d1] dark:text-[#60789f]">
                         <FileText size={34} strokeWidth={1.4} />
                         <p className="mt-3 text-xs text-slate-400">
                             {allDocumentsCount === 0

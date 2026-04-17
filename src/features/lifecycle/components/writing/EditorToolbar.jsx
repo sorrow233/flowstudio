@@ -14,10 +14,10 @@ const IconBtn = ({ onClick, onMouseDown, disabled, title, children, active, clas
         disabled={disabled}
         title={title}
         className={`inline-flex h-9 w-9 items-center justify-center rounded-xl transition-all active:scale-95 ${disabled
-            ? 'cursor-not-allowed text-sky-200 dark:text-slate-700'
+            ? 'cursor-not-allowed text-slate-300 dark:text-slate-700'
             : active
-                ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400'
-                : 'text-slate-500 hover:bg-sky-50 hover:text-sky-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-sky-400'
+                ? 'bg-slate-100 text-[#516b97] dark:bg-[#16233a] dark:text-[#9ab6e6]'
+                : 'text-slate-500 hover:bg-slate-100 hover:text-[#516b97] dark:text-slate-400 dark:hover:bg-[#141f32] dark:hover:text-[#9ab6e6]'
             } ${className}`}
     >
         {children}
@@ -55,14 +55,14 @@ const EditorToolbar = ({
         <div className="flex items-center gap-2">
             <button
                 onClick={onToggleSidebar}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-xl transition-all active:scale-95 hover:bg-sky-50 dark:hover:bg-slate-800"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl transition-all active:scale-95 hover:bg-slate-100 dark:hover:bg-[#141f32]"
                 title={`${statusLabel} • ${t('inspiration.toggleSidebar')}`}
                 aria-label={statusLabel}
             >
                 <span
                     className={`h-2.5 w-2.5 rounded-full transition-colors ${statusNeedsAttention
                         ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]'
-                        : 'bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.45)] dark:bg-sky-400 dark:shadow-none'
+                        : 'bg-[#5d7cae] shadow-[0_0_8px_rgba(93,124,174,0.45)] dark:bg-[#89a8da] dark:shadow-none'
                         }`}
                 />
             </button>
