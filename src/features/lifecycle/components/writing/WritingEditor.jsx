@@ -792,7 +792,7 @@ const WritingEditor = ({
                     editorRef.current?.focus();
                 }}
             >
-                <div className={`mx-auto w-full px-5 pb-24 md:px-10 ${showHeadingOutline ? 'max-w-[88rem]' : 'max-w-4xl'}`}>
+                <div className="mx-auto w-full max-w-4xl px-5 pb-24 md:px-10">
                     <motion.div
                         className="sticky z-30"
                         style={{ top: isMobile ? 6 : 12 }}
@@ -851,7 +851,7 @@ const WritingEditor = ({
                         />
                     </motion.div>
 
-                    <div className={`mt-3 ${showHeadingOutline ? 'lg:grid lg:grid-cols-[minmax(0,46rem)_16rem] lg:justify-center lg:gap-8' : ''}`}>
+                    <div className="relative mt-3">
                         <div
                             className={`writing-editor-shell transition-all ${isEditorFocused ? 'is-focused' : ''}`}
                             style={{ marginTop: isMobile ? 12 : 18 }}
@@ -942,8 +942,8 @@ const WritingEditor = ({
                         </div>
 
                         {showHeadingOutline && (
-                            <aside className="writing-heading-outline hidden lg:block">
-                                <div className="writing-heading-outline-card sticky top-28">
+                            <aside className="writing-heading-outline hidden xl:block">
+                                <div className="writing-heading-outline-card">
                                     <div className="writing-heading-outline-label">
                                         {t('writing.tableOfContents', '目录')}
                                     </div>

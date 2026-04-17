@@ -53,11 +53,16 @@
 }
 
 .writing-heading-outline {
+    position: absolute;
+    top: 1.2rem;
+    left: calc(100% + 2rem);
+    width: 16rem;
     min-width: 0;
-    padding-top: 1.2rem;
 }
 
 .writing-heading-outline-card {
+    position: sticky;
+    top: 7rem;
     border-radius: 1.2rem;
     border: 1px solid rgba(15, 23, 42, 0.06);
     background: rgba(255, 255, 255, 0.58);
