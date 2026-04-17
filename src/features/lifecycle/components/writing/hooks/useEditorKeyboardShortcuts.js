@@ -48,6 +48,12 @@ export const useEditorKeyboardShortcuts = ({
                 return;
             }
 
+            if (key === 'x' && event.shiftKey) {
+                event.preventDefault();
+                onMarkdownShortcut?.('strikethrough');
+                return;
+            }
+
             if (key === 'k') {
                 event.preventDefault();
                 onMarkdownShortcut?.('link');

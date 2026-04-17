@@ -8,6 +8,7 @@ export const MARKDOWN_QUICK_ACTIONS = [
     { id: 'table', label: '表格', preview: '| 列1 | 列2 |', group: 'block' },
     { id: 'bold', label: '粗体', preview: '**文本**', group: 'inline' },
     { id: 'italic', label: '斜体', preview: '*文本*', group: 'inline' },
+    { id: 'strikethrough', label: '删除线', preview: '~~文本~~', group: 'inline' },
     { id: 'inlineCode', label: '行内代码', preview: '`文本`', group: 'inline' },
     { id: 'link', label: '链接', preview: '[文本](url)', group: 'inline' },
     { id: 'mark', label: '标记', preview: '==文本==', group: 'inline' },
@@ -70,6 +71,8 @@ export const buildMarkdownSnippet = (actionId, selectedText = '') => {
         return `**${inlineText || '加粗文本'}**`;
     case 'italic':
         return `*${inlineText || '斜体文本'}*`;
+    case 'strikethrough':
+        return `~~${inlineText || '删除线文本'}~~`;
     case 'inlineCode':
         return `\`${inlineText || '代码'}\``;
     case 'link':

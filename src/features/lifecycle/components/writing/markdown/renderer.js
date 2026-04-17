@@ -249,6 +249,8 @@ const createMarkdownRenderer = () => {
 
     md.renderer.rules.mark_open = () => '<mark class="md-mark">';
     md.renderer.rules.mark_close = () => '</mark>';
+    md.renderer.rules.s_open = () => '<s class="md-strikethrough">';
+    md.renderer.rules.s_close = () => '</s>';
 
     return md;
 };

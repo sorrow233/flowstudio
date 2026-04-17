@@ -198,6 +198,15 @@ export default {
         categoryColorInUse: '该颜色已被使用',
         categoryColorSelect: '选择颜色',
         categoryDeleteMoveHint: '删除后，该分类文稿会自动迁移到其他分类。',
+        markdownQuickMenu: 'Markdown 快捷菜单',
+        h1: '一级标题',
+        h2: '二级标题',
+        h3: '三级标题',
+        bold: '粗体',
+        italic: '斜体',
+        strikethrough: '删除线',
+        link: '链接',
+        inlineCode: '行内代码',
     },
 
     // 待定模块 (Renamed to Sprouting/萌芽)

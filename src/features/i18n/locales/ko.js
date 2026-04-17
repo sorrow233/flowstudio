@@ -184,6 +184,15 @@ export default {
         categoryNamePlaceholder: '분류 이름 입력',
         addCategoryLimit10: '분류 추가 (최대 10개)',
         categoryLimitReached: '분류 상한 도달 (10개)',
+        markdownQuickMenu: 'Markdown 빠른 메뉴',
+        h1: '제목 1',
+        h2: '제목 2',
+        h3: '제목 3',
+        bold: '굵게',
+        italic: '기울임꼴',
+        strikethrough: '취소선',
+        link: '링크',
+        inlineCode: '인라인 코드',
     },
 
     // Pending Module

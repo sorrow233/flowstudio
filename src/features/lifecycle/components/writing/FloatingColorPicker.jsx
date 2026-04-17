@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Bold, Code2, Eraser, Italic, Link2 } from 'lucide-react';
+import { Bold, Code2, Eraser, Italic, Link2, Strikethrough } from 'lucide-react';
 import { WRITING_HIGHLIGHT_COLORS } from './writingHighlightColors';
 
 const HEADING_ACTIONS = [
@@ -12,6 +12,7 @@ const HEADING_ACTIONS = [
 const INLINE_MARKDOWN_ACTIONS = [
     { id: 'bold', icon: Bold, labelKey: 'writing.bold', fallback: '粗体' },
     { id: 'italic', icon: Italic, labelKey: 'writing.italic', fallback: '斜体' },
+    { id: 'strikethrough', icon: Strikethrough, labelKey: 'writing.strikethrough', fallback: '删除线' },
     { id: 'link', icon: Link2, labelKey: 'writing.link', fallback: '链接' },
     { id: 'inlineCode', icon: Code2, labelKey: 'writing.inlineCode', fallback: '行内代码' },
 ];

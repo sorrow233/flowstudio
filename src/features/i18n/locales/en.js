@@ -194,6 +194,15 @@ export default {
         categoryColorInUse: 'This color is already in use',
         categoryColorSelect: 'Select color',
         categoryDeleteMoveHint: 'Documents in this category will be moved automatically after deletion.',
+        markdownQuickMenu: 'Markdown quick menu',
+        h1: 'Heading 1',
+        h2: 'Heading 2',
+        h3: 'Heading 3',
+        bold: 'Bold',
+        italic: 'Italic',
+        strikethrough: 'Strikethrough',
+        link: 'Link',
+        inlineCode: 'Inline code',
     },
 
     // Pending Module

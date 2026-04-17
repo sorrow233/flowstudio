@@ -177,6 +177,12 @@
     padding: 0 0.1em;
 }
 
+.writing-editor-content .md-strikethrough {
+    text-decoration: line-through;
+    text-decoration-thickness: 0.08em;
+    text-decoration-color: rgba(100, 116, 139, 0.72);
+}
+
 .writing-editor-content .md-hr {
     border: 0;
     border-top: 1px solid rgba(100, 116, 139, 0.3);
@@ -241,6 +247,10 @@
 
 .dark .writing-editor-content .md-mark {
     background: linear-gradient(180deg, rgba(113, 63, 18, 0.45) 0%, rgba(180, 83, 9, 0.42) 100%);
+}
+
+.dark .writing-editor-content .md-strikethrough {
+    text-decoration-color: rgba(148, 163, 184, 0.82);
 }
 
 .dark .writing-editor-content .md-hr {
