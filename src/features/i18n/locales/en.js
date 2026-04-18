@@ -194,6 +194,7 @@ export default {
         categoryColorInUse: 'This color is already in use',
         categoryColorSelect: 'Select color',
         categoryDeleteMoveHint: 'Documents in this category will be moved automatically after deletion.',
+        tableOfContents: 'Table of contents',
         markdownQuickMenu: 'Markdown quick menu',
         h1: 'Heading 1',
         h2: 'Heading 2',

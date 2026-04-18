@@ -184,6 +184,7 @@ export default {
         categoryNamePlaceholder: '분류 이름 입력',
         addCategoryLimit10: '분류 추가 (최대 10개)',
         categoryLimitReached: '분류 상한 도달 (10개)',
+        tableOfContents: '목차',
         markdownQuickMenu: 'Markdown 빠른 메뉴',
         h1: '제목 1',
         h2: '제목 2',

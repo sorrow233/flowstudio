@@ -198,6 +198,7 @@ export default {
         categoryColorInUse: '该颜色已被使用',
         categoryColorSelect: '选择颜色',
         categoryDeleteMoveHint: '删除后，该分类文稿会自动迁移到其他分类。',
+        tableOfContents: '目录',
         markdownQuickMenu: 'Markdown 快捷菜单',
         h1: '一级标题',
         h2: '二级标题',

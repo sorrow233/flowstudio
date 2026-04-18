@@ -184,6 +184,7 @@ export default {
         categoryNamePlaceholder: 'カテゴリ名を入力',
         addCategoryLimit10: 'カテゴリを追加（最大10件）',
         categoryLimitReached: 'カテゴリ上限に達しました（10）',
+        tableOfContents: '目次',
         markdownQuickMenu: 'Markdown クイックメニュー',
         h1: '見出し 1',
         h2: '見出し 2',
