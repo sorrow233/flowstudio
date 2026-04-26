@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useTransition } from 'react';
 import { ArrowRight, Lightbulb, X, Calendar, ListChecks, Sparkles, Copy } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -9,7 +9,6 @@ import { useSyncedProjects } from '../sync/useSyncStore';
 import { useImportQueue } from '../sync/hooks/useImportQueue';
 import { useAuth } from '../auth/AuthContext';
 import { useTranslation } from '../i18n';
-import InspirationItem from './components/inspiration/InspirationItem';
 import { COLOR_CONFIG, copyImageToClipboard } from './components/inspiration/InspirationUtils';
 import { INSPIRATION_CATEGORIES } from '../../utils/constants';
 import { useSyncedCategories } from '../sync/useSyncStore';
@@ -17,6 +16,7 @@ import CategoryManager from './components/inspiration/CategoryManager';
 import InspirationCategorySelector from './components/inspiration/InspirationCategorySelector';
 import InspirationSelectionToolbar from './components/inspiration/InspirationSelectionToolbar';
 import InspirationComposer from './components/inspiration/InspirationComposer';
+import InspirationIdeaList from './components/inspiration/InspirationIdeaList';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import {
     buildCategoryExportText,
@@ -31,6 +31,10 @@ import {
 } from './components/inspiration/ideaClipboardUtils';
 import { hexToRgba, resolveCategoryAccentHex } from './components/inspiration/categoryThemeUtils';
 import { useIOSStandalone } from '../../hooks/useIOSStandalone';
+import {
+    buildGroupedWeekNavigation,
+    groupTodoIdeasByDay,
+} from './components/inspiration/inspirationListUtils';
 import {
     buildTodoAiClassClipboardText,
     getTodoAiAssistClass,
@@ -191,6 +195,7 @@ const InspirationModule = () => {
     const [isSelectionMode, setIsSelectionMode] = useState(false); // 多选模式
     const [selectedIdeaIds, setSelectedIdeaIds] = useState([]); // 已选中的 ID
     const [todoAiFilter, setTodoAiFilter] = useState('all');
+    const [, startCategoryTransition] = useTransition();
     const [isAiImportOpen, setIsAiImportOpen] = useState(false);
     const [aiImportText, setAiImportText] = useState('');
     const [aiImportError, setAiImportError] = useState('');
@@ -254,6 +259,15 @@ const InspirationModule = () => {
         if (!categoryId) return '/inspiration';
         return `/inspiration/c/${encodeRoutePart(categoryId)}`;
     }, []);
+
+    const handleSelectCategory = useCallback((categoryId) => {
+        if (!categoryId) return;
+
+        startCategoryTransition(() => {
+            setSelectedCategory((prev) => (prev === categoryId ? prev : categoryId));
+            setShowWeekSelector(false);
+        });
+    }, [startCategoryTransition]);
 
     // Sync route category to local state (route is source of truth when present).
     // Important: do NOT depend on selectedCategory here, otherwise manual category click
@@ -1072,11 +1086,11 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         }));
 
         addIdeasBatch(newIdeas);
-        setSelectedCategory('todo');
+        handleSelectCategory('todo');
         setAiImportText('');
         setAiImportError('');
         setAiImportSuccessCount(newIdeas.length);
-    }, [aiImportText, parseAiTodoOutput, ideas.length, addIdeasBatch]);
+    }, [aiImportText, parseAiTodoOutput, ideas.length, addIdeasBatch, handleSelectCategory]);
 
     const todoIdeas = useMemo(() => {
         return [...ideas]
@@ -1235,57 +1249,13 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             return filteredTodoIdeas;
         }
 
-        return [...ideas]
-            .filter(idea => (idea.category || 'note') === selectedCategory)
-            .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    }, [ideas, selectedCategory, filteredTodoIdeas]);
-
-    // 智能日期格式化函数（代办分类专用）
-    const formatDayLabel = useCallback((date) => {
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const targetDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        const diffDays = Math.floor((today - targetDay) / (24 * 60 * 60 * 1000));
-
-        if (diffDays === 0) return '今天';
-        if (diffDays === 1) return '昨天';
-        if (diffDays < 7) {
-            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-            return weekdays[date.getDay()];
-        }
-        if (date.getFullYear() === now.getFullYear()) {
-            return date.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' });
-        }
-        return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
-    }, []);
+        return [...(categoryIdeasMap.get(selectedCategory) || [])].reverse();
+    }, [categoryIdeasMap, selectedCategory, filteredTodoIdeas]);
 
     // 代办分类按天分组数据
     const todosByDay = useMemo(() => {
         if (selectedCategory !== 'todo') return [];
-
-        const groups = filteredTodoIdeas.reduce((map, idea) => {
-            const date = new Date(idea.timestamp || Date.now());
-            const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-
-            if (!map.has(dateKey)) {
-                map.set(dateKey, {
-                    date: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-                    dateKey,
-                    ideas: [],
-                });
-            }
-
-            map.get(dateKey).ideas.push(idea);
-            return map;
-        }, new Map());
-
-        return Array.from(groups.values())
-            .map((group) => ({
-                ...group,
-                ideas: [...group.ideas].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)),
-            }))
-            .filter((group) => group.ideas.length > 0)
-            .sort((a, b) => b.date.getTime() - a.date.getTime());
+        return groupTodoIdeasByDay(filteredTodoIdeas);
     }, [filteredTodoIdeas, selectedCategory]);
 
     const visibleIdeaCount = useMemo(() => {
@@ -1296,60 +1266,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
     // Extract all available weeks for navigation, grouped by Year and Month
     const groupedWeeks = useMemo(() => {
         if (!showWeekSelector) return [];
-        const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 7 * 24 * 60 * 60 * 1000);
-        const groups = {};
-
-        olderIdeas.forEach(idea => {
-            const ideaDate = new Date(idea.timestamp || Date.now());
-
-            // 计算周一
-            const tempDate = new Date(ideaDate.getTime());
-            const day = tempDate.getDay();
-            const diff = tempDate.getDate() - day + (day === 0 ? -6 : 1);
-            tempDate.setDate(diff);
-            tempDate.setHours(0, 0, 0, 0);
-
-            const weekStart = new Date(tempDate);
-            const year = weekStart.getFullYear();
-            const month = weekStart.getMonth() + 1; // 1-12
-
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekEnd.getDate() + 6);
-            weekEnd.setHours(23, 59, 59, 999);
-
-            const weekKey = weekStart.getTime();
-
-            if (!groups[year]) groups[year] = {};
-            if (!groups[year][month]) groups[year][month] = [];
-
-            if (!groups[year][month].some(w => w.key === weekKey)) {
-                // 计算当前月内的周数
-                const monthStart = new Date(weekStart.getFullYear(), weekStart.getMonth(), 1);
-                // 周数：(当前日期 + 月初是周几 - 1) / 7
-                const weekNum = Math.ceil((weekStart.getDate() + monthStart.getDay() - 1) / 7);
-                const weekNames = ['第一周', '第二周', '第三周', '第四周', '第五周', '第六周'];
-
-                groups[year][month].push({
-                    start: weekStart,
-                    end: weekEnd,
-                    key: weekKey,
-                    label: weekNames[weekNum - 1] || `${weekNum}周`
-                });
-            }
-        });
-
-        // 转换为排序后的结构
-        return Object.entries(groups)
-            .sort((a, b) => Number(b[0]) - Number(a[0])) // 年份降序
-            .map(([year, months]) => ({
-                year,
-                months: Object.entries(months)
-                    .sort((a, b) => Number(b[0]) - Number(a[0])) // 月份降序
-                    .map(([month, weeks]) => ({
-                        month,
-                        weeks: weeks.sort((a, b) => b.key - a.key) // 周降序（最新在前）
-                    }))
-            }));
+        return buildGroupedWeekNavigation(sortedIdeas);
     }, [showWeekSelector, sortedIdeas]);
 
     const scrollToWeek = (weekKey) => {
@@ -1426,7 +1343,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                         <InspirationCategorySelector
                             categories={categories}
                             selectedCategory={selectedCategory}
-                            onSelectCategory={setSelectedCategory}
+                            onSelectCategory={handleSelectCategory}
                             onOpenManager={() => setCategoryManagerOpen(true)}
                             onCategoryDoubleClick={handleCopyCategorySnapshot}
                             onTodoDoubleClick={handleOpenAiImport}
@@ -1481,201 +1398,30 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                         </div>
                     )}
 
-                    {/* List Section - Improved overall transition */}
+                    {/* List Section */}
                     <div className={`relative min-h-[400px] ${hasActiveSelectionToolbar ? (isIOS ? 'pb-[240px] md:pb-32' : 'pb-32 md:pb-32') : ''}`}>
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={selectedCategory === 'todo' ? `${selectedCategory}-${todoAiFilter}` : selectedCategory}
-                                initial={{ opacity: 0, y: 15, filter: "blur(8px)" }}
-                                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                                exit={{ opacity: 0, y: -15, filter: "blur(8px)" }}
-                                transition={{
-                                    duration: 0.4,
-                                    ease: [0.23, 1, 0.32, 1] // Apple Style Ease Out
-                                }}
-                                className="space-y-6"
-                            >
-                                {/* 代办分类：按天分组显示 */}
-                                {selectedCategory === 'todo' && todosByDay.length > 0 && (
-                                    <motion.div layout className="space-y-4">
-                                        <AnimatePresence mode="popLayout" initial={false}>
-                                            {todosByDay.map((day) => (
-                                                <motion.section
-                                                    key={day.dateKey}
-                                                    layout
-                                                    className="space-y-4"
-                                                >
-                                                    {/* 日期分隔线 - 跟随当前分类主题色 */}
-                                                    <motion.div layout className="flex items-center gap-3 mb-4 mt-6">
-                                                        <div
-                                                            className="h-px flex-1"
-                                                            style={selectedCategoryDividerLineStyle}
-                                                        />
-                                                        <span
-                                                            className="text-xs font-medium tracking-wide whitespace-nowrap"
-                                                            style={selectedCategoryDividerTextStyle}
-                                                        >
-                                                            {formatDayLabel(day.date)}
-                                                        </span>
-                                                        <div
-                                                            className="h-px flex-1"
-                                                            style={selectedCategoryDividerLineStyle}
-                                                        />
-                                                    </motion.div>
-                                                    <motion.div layout className="space-y-4">
-                                                        <AnimatePresence mode="popLayout" initial={false}>
-                                                            {day.ideas.map((idea) => (
-                                                                <InspirationItem
-                                                                    key={idea.id}
-                                                                    idea={idea}
-                                                                    allProjects={allProjects}
-                                                                    categories={categoryConfigList}
-                                                                    onDelete={handleRemove}
-                                                                    onCopy={handleCopy}
-                                                                    onUpdateColor={handleUpdateColor}
-                                                                    onUpdateNote={handleUpdateNote}
-                                                                    onUpdateContent={handleUpdateContent}
-                                                                    onToggleComplete={handleToggleComplete}
-                                                                    copiedId={copiedId}
-                                                                    isSelectionMode={isSelectionMode}
-                                                                    isSelected={selectedIdeaIdSet.has(idea.id)}
-                                                                    onSelect={handleToggleSelect}
-                                                                    isTodoView
-                                                                    aiAssistClass={getTodoAiAssistClass(idea)}
-                                                                    isIOSSelectionUi={isIOS}
-                                                                />
-                                                            ))}
-                                                        </AnimatePresence>
-                                                    </motion.div>
-                                                </motion.section>
-                                            ))}
-                                        </AnimatePresence>
-                                    </motion.div>
-                                )}
-
-                                {/* 其他分类：原有逻辑（最近7天平铺 + 更早按周分组） */}
-                                {selectedCategory !== 'todo' && (
-                                    <>
-                                        <div className="space-y-6">
-                                            <AnimatePresence mode="popLayout" initial={false}>
-                                                {sortedIdeas
-                                                    .filter(idea => Date.now() - (idea.timestamp || Date.now()) < 7 * 24 * 60 * 60 * 1000)
-                                                    .map((idea) => (
-                                                        <InspirationItem
-                                                            key={idea.id}
-                                                            idea={idea}
-                                                            allProjects={allProjects}
-                                                            categories={categoryConfigList}
-                                                            onDelete={handleRemove}
-                                                            onCopy={handleCopy}
-                                                            onUpdateColor={handleUpdateColor}
-                                                            onUpdateNote={handleUpdateNote}
-                                                            onUpdateContent={handleUpdateContent}
-                                                            onToggleComplete={handleToggleComplete}
-                                                            copiedId={copiedId}
-                                                            isSelectionMode={isSelectionMode}
-                                                            isSelected={selectedIdeaIdSet.has(idea.id)}
-                                                            onSelect={handleToggleSelect}
-                                                            isIOSSelectionUi={isIOS}
-                                                        />
-                                                    ))}
-                                            </AnimatePresence>
-                                        </div>
-
-                                        {/* 更早的项目 - 按周分组 */}
-                                        {(() => {
-                                            const olderIdeas = sortedIdeas.filter(idea => Date.now() - (idea.timestamp || Date.now()) >= 7 * 24 * 60 * 60 * 1000);
-                                            if (olderIdeas.length === 0) return null;
-
-                                            const weekGroups = {};
-                                            olderIdeas.forEach(idea => {
-                                                const date = new Date(idea.timestamp || Date.now());
-                                                const day = date.getDay();
-                                                const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-                                                const weekStart = new Date(date.setDate(diff));
-                                                weekStart.setHours(0, 0, 0, 0);
-                                                const weekEnd = new Date(weekStart);
-                                                weekEnd.setDate(weekEnd.getDate() + 6);
-                                                weekEnd.setHours(23, 59, 59, 999);
-
-                                                const weekKey = weekStart.getTime();
-                                                if (!weekGroups[weekKey]) {
-                                                    weekGroups[weekKey] = {
-                                                        start: weekStart,
-                                                        end: weekEnd,
-                                                        ideas: []
-                                                    };
-                                                }
-                                                weekGroups[weekKey].ideas.push(idea);
-                                            });
-
-                                            const sortedWeeks = Object.values(weekGroups).sort((a, b) => b.start - a.start);
-
-                                            return sortedWeeks.map(week => (
-                                                <div key={week.start.getTime()}>
-                                                    <div className="flex items-center gap-3 mb-4 mt-8 cursor-pointer group">
-                                                        <div
-                                                            className="h-px flex-1 transition-opacity group-hover:opacity-90"
-                                                            style={selectedCategoryDividerLineStyle}
-                                                        />
-                                                        <span
-                                                            className="text-xs font-medium tracking-wide whitespace-nowrap transition-opacity group-hover:opacity-90"
-                                                            style={selectedCategoryDividerTextStyle}
-                                                        >
-                                                            {week.start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                            {' - '}
-                                                            {week.end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                        </span>
-                                                        <div
-                                                            className="h-px flex-1 transition-opacity group-hover:opacity-90"
-                                                            style={selectedCategoryDividerLineStyle}
-                                                        />
-                                                    </div>
-                                                    <div className="space-y-6">
-                                                        <AnimatePresence mode="popLayout" initial={false}>
-                                                            {week.ideas.map((idea) => (
-                                                                <InspirationItem
-                                                                    key={idea.id}
-                                                                    idea={idea}
-                                                                    allProjects={allProjects}
-                                                                    categories={categoryConfigList}
-                                                                    onDelete={handleRemove}
-                                                                    onCopy={handleCopy}
-                                                                    onUpdateColor={handleUpdateColor}
-                                                                    onUpdateNote={handleUpdateNote}
-                                                                    onUpdateContent={handleUpdateContent}
-                                                                    onToggleComplete={handleToggleComplete}
-                                                                    copiedId={copiedId}
-                                                                    isSelectionMode={isSelectionMode}
-                                                                    isSelected={selectedIdeaIdSet.has(idea.id)}
-                                                                    onSelect={handleToggleSelect}
-                                                                    isIOSSelectionUi={isIOS}
-                                                                />
-                                                            ))}
-                                                        </AnimatePresence>
-                                                    </div>
-                                                </div>
-                                            ));
-                                        })()}
-                                    </>
-                                )}
-
-                                {visibleIdeaCount === 0 && (
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        className="py-32 text-center"
-                                    >
-                                        <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <Lightbulb className="text-gray-300 dark:text-gray-600" size={24} />
-                                        </div>
-                                        <p className="text-gray-400 dark:text-gray-500 text-sm font-light tracking-wide">
-                                            {t('inspiration.emptyState')}
-                                        </p>
-                                    </motion.div>
-                                )}
-                            </motion.div>
-                        </AnimatePresence>
+                        <InspirationIdeaList
+                            selectedCategory={selectedCategory}
+                            sortedIdeas={sortedIdeas}
+                            todosByDay={todosByDay}
+                            visibleIdeaCount={visibleIdeaCount}
+                            allProjects={allProjects}
+                            categoryConfigList={categoryConfigList}
+                            selectedCategoryDividerLineStyle={selectedCategoryDividerLineStyle}
+                            selectedCategoryDividerTextStyle={selectedCategoryDividerTextStyle}
+                            copiedId={copiedId}
+                            isSelectionMode={isSelectionMode}
+                            selectedIdeaIdSet={selectedIdeaIdSet}
+                            isIOS={isIOS}
+                            t={t}
+                            onRemove={handleRemove}
+                            onCopy={handleCopy}
+                            onUpdateColor={handleUpdateColor}
+                            onUpdateNote={handleUpdateNote}
+                            onUpdateContent={handleUpdateContent}
+                            onToggleComplete={handleToggleComplete}
+                            onToggleSelect={handleToggleSelect}
+                        />
                     </div>
                 </motion.div>
             </AnimatePresence>
