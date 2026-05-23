@@ -1,7 +1,7 @@
 import React from 'react';
-import { createPortal } from 'react-dom';
 import { INSPIRATION_CATEGORIES } from '../../../../utils/constants';
 import { buildCodeBlockTheme, trimCodeBlockFenceContent } from './codeBlockTheme';
+import InspirationImageGallery from './InspirationImageGallery';
 
 // Refined Color Configuration for "Crayon Highlighter" look
 export const COLOR_CONFIG = [
@@ -69,6 +69,8 @@ export const IMAGE_URL_REGEX = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp)(?:
 export const R2_IMAGE_REGEX = /(https:\/\/pub-[a-z0-9]+\.r2\.dev\/[^\s]+)/gi;
 const URL_REGEX = /(https?:\/\/[^\s]+)/gi;
 
+const removeAllOccurrences = (text, value) => String(text || '').split(value).join('');
+
 const resolveWritingDocTitle = (source, docId) => {
     if (!docId) return null;
 
@@ -97,7 +99,7 @@ export const parseRichText = (text, writingDocTitleSource = [], clipboardText = 
     // 移除图片 URL 后的文本
     let textWithoutImages = text;
     imageMatches.forEach(url => {
-        textWithoutImages = textWithoutImages.replace(url, '');
+        textWithoutImages = removeAllOccurrences(textWithoutImages, url);
     });
     textWithoutImages = textWithoutImages.trim();
 
@@ -242,274 +244,16 @@ export const parseRichText = (text, writingDocTitleSource = [], clipboardText = 
 
     // 如果有图片，添加图片元素
     if (imageMatches.length > 0) {
-        const imageElements = imageMatches.map((url, idx) => (
-            <InspirationImage
-                key={`img-${idx}`}
-                src={url}
-                textContent={clipboardText || textWithoutImages}
-            />
-        ));
-
         return (
             <>
                 {textElements}
-                {imageElements.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                        {imageElements}
-                    </div>
-                )}
+                <InspirationImageGallery
+                    urls={imageMatches}
+                    textContent={clipboardText || textWithoutImages}
+                />
             </>
         );
     }
 
     return textElements;
-};
-
-// 复制图片到剪贴板的工具函数
-export const copyImageToClipboard = async (src, textContent = '') => {
-    try {
-        // 通过 fetch 下载图片
-        const response = await fetch(src);
-        const blob = await response.blob();
-
-        // 转为 PNG blob（Clipboard API 只支持 image/png）
-        let pngBlob = blob;
-        if (blob.type !== 'image/png') {
-            pngBlob = await new Promise((resolve, reject) => {
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    canvas.toBlob(b => b ? resolve(b) : reject(new Error('Canvas toBlob failed')), 'image/png');
-                };
-                img.onerror = () => reject(new Error('Image load failed'));
-                img.src = src;
-            });
-        }
-
-        // 构建 ClipboardItem：图片 + 文字
-        const items = { 'image/png': pngBlob };
-        if (textContent) {
-            items['text/plain'] = new Blob([textContent], { type: 'text/plain' });
-        }
-
-        await navigator.clipboard.write([new ClipboardItem(items)]);
-        return true;
-    } catch (err) {
-        console.error('Failed to copy image via Clipboard API:', err);
-
-        // 降级方案：使用 document.execCommand('copy') 选中 HTML 内容
-        // 这通常能解决跨域图片无法通过 JS 读取数据的问题，交给浏览器处理
-        try {
-            const div = document.createElement('div');
-            div.contentEditable = 'true';
-            div.style.position = 'fixed';
-            div.style.left = '-9999px';
-            div.style.top = '0';
-            div.style.whiteSpace = 'pre-wrap'; // 保持换行
-
-            // 插入图片
-            const img = document.createElement('img');
-            img.src = src;
-            div.appendChild(img);
-
-            // 插入文字
-            if (textContent) {
-                //换行
-                div.appendChild(document.createElement('br'));
-                const textNode = document.createTextNode(textContent);
-                div.appendChild(textNode);
-            }
-
-            document.body.appendChild(div);
-
-            // 选中
-            const range = document.createRange();
-            range.selectNodeContents(div);
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
-
-            // 执行复制
-            const success = document.execCommand('copy');
-
-            // 清理
-            document.body.removeChild(div);
-            selection.removeAllRanges();
-
-            if (success) return 'html-fallback';
-        } catch (e) {
-            console.error('Fallback copy failed:', e);
-        }
-
-        // 最后的回退：尝试只复制文字
-        if (textContent) {
-            try {
-                await navigator.clipboard.writeText(textContent);
-                return 'text-only';
-            } catch { /* ignore */ }
-        }
-        return false;
-    }
-};
-
-// 灵感图片组件（支持点击放大、右键复制、一键复制）
-const InspirationImage = ({ src, textContent = '' }) => {
-    const [isZoomed, setIsZoomed] = React.useState(false);
-    const [isLoaded, setIsLoaded] = React.useState(false);
-    const [hasError, setHasError] = React.useState(false);
-    const [copyStatus, setCopyStatus] = React.useState(null); // null | 'success' | 'text-only' | 'error'
-
-    // ESC 键关闭
-    React.useEffect(() => {
-        if (!isZoomed) return;
-
-        const handleKeyDown = (e) => {
-            if (e.key === 'Escape') {
-                setIsZoomed(false);
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        // 禁止背景滚动
-        document.body.style.overflow = 'hidden';
-
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-            document.body.style.overflow = '';
-        };
-    }, [isZoomed]);
-
-    // 一键复制图片+文字
-    const handleCopyImage = async (e) => {
-        e.stopPropagation();
-        setCopyStatus(null);
-        const result = await copyImageToClipboard(src, textContent);
-        if (result === true || result === 'html-fallback') {
-            setCopyStatus('success');
-        } else if (result === 'text-only') {
-            setCopyStatus('text-only');
-        } else {
-            setCopyStatus('error');
-        }
-        setTimeout(() => setCopyStatus(null), 2000);
-    };
-
-    if (hasError) return null;
-
-    // 复制状态提示文字
-    const getCopyStatusText = () => {
-        switch (copyStatus) {
-            case 'success': return '✓ 已复制图片';
-            case 'text-only': return '✓ 已复制文字（图片跨域受限）';
-            case 'error': return '✗ 复制失败';
-            default: return null;
-        }
-    };
-
-    // Modal 内容 - 使用 Portal 渲染到 body
-    const modal = isZoomed ? createPortal(
-        <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0.95)' }}
-            onClick={() => setIsZoomed(false)}
-        >
-            {/* 图片容器 - 允许右键菜单 */}
-            <div
-                className="relative max-w-[90vw] max-h-[85vh] animate-in zoom-in-95 fade-in duration-200"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <img
-                    src={src}
-                    alt=""
-                    className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg shadow-2xl select-auto"
-                    style={{ margin: 'auto' }}
-                    draggable="false"
-                />
-            </div>
-
-            {/* 关闭按钮 */}
-            <button
-                className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all duration-200 backdrop-blur-sm"
-                onClick={() => setIsZoomed(false)}
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-
-            {/* 底部操作栏 */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3">
-                {/* 复制图片按钮 */}
-                <button
-                    onClick={handleCopyImage}
-                    className="flex items-center gap-2 px-4 py-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm rounded-full text-white text-sm font-medium transition-all duration-200 border border-white/10 hover:border-white/20"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
-                        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
-                    </svg>
-                    {textContent ? '复制图片+文字' : '复制图片'}
-                </button>
-
-                {/* 复制状态提示 */}
-                {copyStatus && (
-                    <span className={`text-sm font-medium px-3 py-1 rounded-full backdrop-blur-sm ${copyStatus === 'error'
-                        ? 'bg-red-500/20 text-red-300'
-                        : 'bg-green-500/20 text-green-300'
-                        }`}>
-                        {getCopyStatusText()}
-                    </span>
-                )}
-
-                {/* 分隔 */}
-                {!copyStatus && (
-                    <span className="text-white/30 text-sm">
-                        右键图片也可复制 · ESC 关闭
-                    </span>
-                )}
-            </div>
-        </div>,
-        document.body
-    ) : null;
-
-    return (
-        <>
-            {/* 缩略图 */}
-            <div
-                className={`
-                    relative rounded-lg overflow-hidden cursor-zoom-in
-                    transition-all duration-300
-                    ${isLoaded ? 'opacity-100' : 'opacity-0'}
-                    hover:ring-2 hover:ring-pink-300 dark:hover:ring-pink-600
-                    hover:shadow-lg hover:scale-[1.02]
-                `}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    setIsZoomed(true);
-                }}
-            >
-                <img
-                    src={src}
-                    alt=""
-                    className="max-h-48 max-w-full object-cover rounded-lg"
-                    onLoad={() => setIsLoaded(true)}
-                    onError={() => setHasError(true)}
-                    loading="lazy"
-                />
-                {!isLoaded && (
-                    <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg w-32 h-32" />
-                )}
-            </div>
-
-            {/* Portal Modal */}
-            {modal}
-        </>
-    );
 };

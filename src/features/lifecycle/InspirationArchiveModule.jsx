@@ -6,7 +6,7 @@ import { useTranslation } from '../i18n';
 import { useSync } from '../sync/SyncContext';
 import { useSyncedCategories, useSyncedProjects } from '../sync/useSyncStore';
 import InspirationItem from './components/inspiration/InspirationItem';
-import { copyImageToClipboard } from './components/inspiration/InspirationUtils';
+import { copyImageToClipboard } from './components/inspiration/imageClipboardUtils';
 import { buildIdeaCopyPayload } from './components/inspiration/ideaClipboardUtils';
 import { INSPIRATION_CATEGORIES } from '../../utils/constants';
 import { usePageTitle } from '../../hooks/usePageTitle';

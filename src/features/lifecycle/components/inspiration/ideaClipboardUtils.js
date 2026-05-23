@@ -6,6 +6,7 @@ const IDEA_IMAGE_URL_PATTERNS = [
 ];
 
 const toTrimmedText = (value = '') => String(value || '').trim();
+const removeAllOccurrences = (text, value) => String(text || '').split(value).join('');
 
 const collectIdeaImageUrls = (content = '') => {
     const safeContent = String(content || '');
@@ -19,7 +20,7 @@ const stripIdeaImageUrls = (content = '', imageUrls = []) => {
     let text = String(content || '');
 
     imageUrls.forEach((url) => {
-        text = text.replace(url, '');
+        text = removeAllOccurrences(text, url);
     });
 
     return text.trim();
