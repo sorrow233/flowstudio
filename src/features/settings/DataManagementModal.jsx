@@ -1,12 +1,13 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useTranslation } from '../i18n';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, Upload, FileJson, AlertCircle, CheckCircle2, Loader2, Zap, Settings as SettingsIcon, Database, History, RotateCcw, Clock, ChevronLeft } from 'lucide-react';
+import { X, Download, Upload, FileJson, AlertCircle, CheckCircle2, Loader2, History, RotateCcw, Clock, ChevronLeft, Image as ImageIcon } from 'lucide-react';
 import { useSync } from '../sync/SyncContext';
 import { exportAllData, importData, validateImportData, downloadAsJson, readJsonFile } from './dataUtils';
 import { getLocalBackups } from '../sync/LocalBackupService';
 import { countActiveWritingDocs } from '../lifecycle/utils/writingDocAggregation.js';
 import Spotlight from '../../components/shared/Spotlight';
+import { useSettings } from '../../hooks/SettingsContext';
 
 const DataManagementModal = ({ isOpen, onClose }) => {
     const { t } = useTranslation();
@@ -18,6 +19,7 @@ const DataManagementModal = ({ isOpen, onClose }) => {
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
     const [backups, setBackups] = useState([]);
+    const { compressImagesToWebp, toggleCompressImagesToWebp } = useSettings();
 
     const fileInputRef = useRef(null);
 
@@ -272,6 +274,31 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                                     <div className="text-left flex-1 min-w-0">
                                         <div className="font-medium text-gray-900 dark:text-white">本地备份</div>
                                         <div className="text-xs text-gray-400 mt-0.5">查看和恢复自动备份</div>
+                                    </div>
+                                </button>
+                            </Spotlight>
+
+                            {/* Image Upload Preference */}
+                            <Spotlight className="rounded-2xl" spotColor="rgba(236, 72, 153, 0.1)">
+                                <button
+                                    type="button"
+                                    onClick={toggleCompressImagesToWebp}
+                                    className="w-full p-5 bg-gray-50/50 dark:bg-gray-800/30 hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-2xl transition-all flex items-center gap-5 group border border-gray-100 dark:border-gray-800"
+                                >
+                                    <div className="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                                        <ImageIcon size={22} className="text-pink-600 dark:text-pink-400" />
+                                    </div>
+                                    <div className="text-left flex-1 min-w-0">
+                                        <div className="font-medium text-gray-900 dark:text-white">图片上传压缩</div>
+                                        <div className="text-xs text-gray-400 mt-0.5">
+                                            {compressImagesToWebp ? '上传前自动转为 WebP' : '保留原图格式上传'}
+                                        </div>
+                                    </div>
+                                    <div
+                                        className={`relative h-6 w-11 flex-shrink-0 rounded-full p-0.5 transition-colors ${compressImagesToWebp ? 'bg-pink-500' : 'bg-gray-300 dark:bg-gray-700'}`}
+                                        aria-hidden="true"
+                                    >
+                                        <div className={`h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${compressImagesToWebp ? 'translate-x-5' : 'translate-x-0'}`} />
                                     </div>
                                 </button>
                             </Spotlight>

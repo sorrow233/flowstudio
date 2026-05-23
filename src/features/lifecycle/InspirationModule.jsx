@@ -14,6 +14,7 @@ import { INSPIRATION_CATEGORIES } from '../../utils/constants';
 import { useSyncedCategories } from '../sync/useSyncStore';
 import CategoryManager from './components/inspiration/CategoryManager';
 import InspirationCategorySelector from './components/inspiration/InspirationCategorySelector';
+import InspirationSubcategoryFilter from './components/inspiration/InspirationSubcategoryFilter';
 import InspirationSelectionToolbar from './components/inspiration/InspirationSelectionToolbar';
 import InspirationComposer from './components/inspiration/InspirationComposer';
 import InspirationIdeaList from './components/inspiration/InspirationIdeaList';
@@ -43,6 +44,13 @@ import {
     TODO_AI_FILTER_OPTIONS,
     TODO_AI_FILTER_PENDING,
 } from './components/inspiration/todoAiAssistUtils';
+import {
+    buildInspirationSubcategoryFilterOptions,
+    getIdeaSubcategoryValue,
+    INSPIRATION_SUBCATEGORY_FILTER_ALL,
+    INSPIRATION_SUBCATEGORY_UNCATEGORIZED,
+    normalizeInspirationSubcategories,
+} from './components/inspiration/inspirationSubcategoryUtils';
 
 // Auto color logic: Every 3 items, switch to next color
 const getNextAutoColorIndex = (totalCount) => {
@@ -192,6 +200,7 @@ const InspirationModule = () => {
     const [showWeekSelector, setShowWeekSelector] = useState(false);
     const [deletedIdeas, setDeletedIdeas] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(() => routeCategoryId || 'note'); // 分类状态
+    const [selectedSubcategory, setSelectedSubcategory] = useState(INSPIRATION_SUBCATEGORY_FILTER_ALL);
     const [isSelectionMode, setIsSelectionMode] = useState(false); // 多选模式
     const [selectedIdeaIds, setSelectedIdeaIds] = useState([]); // 已选中的 ID
     const [todoAiFilter, setTodoAiFilter] = useState('all');
@@ -236,6 +245,37 @@ const InspirationModule = () => {
             || categories[0]
             || INSPIRATION_CATEGORIES[0];
     }, [categories, selectedCategory]);
+    const selectedCategorySubcategories = useMemo(
+        () => normalizeInspirationSubcategories(selectedCategoryConfig?.subcategories),
+        [selectedCategoryConfig?.subcategories]
+    );
+    const selectedCategoryIdeas = useMemo(
+        () => categoryIdeasMap.get(selectedCategory) || [],
+        [categoryIdeasMap, selectedCategory]
+    );
+    const subcategoryFilterOptions = useMemo(
+        () => buildInspirationSubcategoryFilterOptions(selectedCategoryIdeas, selectedCategorySubcategories),
+        [selectedCategoryIdeas, selectedCategorySubcategories]
+    );
+    const itemSubcategoryOptions = useMemo(() => {
+        if (selectedCategorySubcategories.length === 0) return [];
+        return [
+            { value: INSPIRATION_SUBCATEGORY_UNCATEGORIZED, label: '未分类' },
+            ...selectedCategorySubcategories.map((subcategory) => ({
+                value: subcategory.id,
+                label: subcategory.label,
+            })),
+        ];
+    }, [selectedCategorySubcategories]);
+    const filterIdeasBySelectedSubcategory = useCallback((sourceIdeas = []) => {
+        if (selectedSubcategory === INSPIRATION_SUBCATEGORY_FILTER_ALL) {
+            return sourceIdeas;
+        }
+
+        return sourceIdeas.filter((idea) => (
+            getIdeaSubcategoryValue(idea, selectedCategorySubcategories) === selectedSubcategory
+        ));
+    }, [selectedCategorySubcategories, selectedSubcategory]);
     const selectedCategoryAccentHex = useMemo(
         () => resolveCategoryAccentHex(selectedCategoryConfig),
         [selectedCategoryConfig]
@@ -297,6 +337,24 @@ const InspirationModule = () => {
         }
     }, [categories, selectedCategory]);
 
+    useEffect(() => {
+        setSelectedSubcategory(INSPIRATION_SUBCATEGORY_FILTER_ALL);
+    }, [selectedCategory]);
+
+    useEffect(() => {
+        if (
+            selectedSubcategory === INSPIRATION_SUBCATEGORY_FILTER_ALL
+            || selectedSubcategory === INSPIRATION_SUBCATEGORY_UNCATEGORIZED
+        ) {
+            return;
+        }
+
+        const isValid = selectedCategorySubcategories.some((subcategory) => subcategory.id === selectedSubcategory);
+        if (!isValid) {
+            setSelectedSubcategory(INSPIRATION_SUBCATEGORY_FILTER_ALL);
+        }
+    }, [selectedCategorySubcategories, selectedSubcategory]);
+
     // Sync local selected category back to URL
     useEffect(() => {
         if (!selectedCategory) return;
@@ -341,7 +399,7 @@ const InspirationModule = () => {
         if (selectedIdeaIds.length === 0) return;
 
         selectedIdeaIds.forEach(id => {
-            updateProjectBase(id, { category });
+            updateProjectBase(id, { category, subcategory: null });
         });
         immediateSync?.();
 
@@ -433,18 +491,25 @@ const InspirationModule = () => {
     const handleAdd = useCallback(({ content, selectedColorIndex }) => {
         const normalizedContent = String(content || '').trim();
         if (!normalizedContent) return false;
+        const nextSubcategory = (
+            selectedSubcategory !== INSPIRATION_SUBCATEGORY_FILTER_ALL
+            && selectedSubcategory !== INSPIRATION_SUBCATEGORY_UNCATEGORIZED
+        )
+            ? selectedSubcategory
+            : null;
         const newIdea = {
             id: uuidv4(),
             content: normalizedContent,
             timestamp: Date.now(),
             colorIndex: selectedColorIndex !== null ? selectedColorIndex : getNextAutoColorIndex(ideas.length),
             category: selectedCategory, // 添加分类
+            ...(nextSubcategory ? { subcategory: nextSubcategory } : {}),
             ...(selectedCategory === 'todo' ? { aiAssistClass: TODO_AI_CLASS_UNCLASSIFIED } : {}),
             stage: 'inspiration',
         };
         addIdea(newIdea);
         return true;
-    }, [ideas.length, selectedCategory, addIdea]);
+    }, [ideas.length, selectedCategory, selectedSubcategory, addIdea]);
 
     const handleUpdateColor = useCallback((id, newColorIndex) => {
         updateIdea(id, { colorIndex: newColorIndex });
@@ -456,6 +521,11 @@ const InspirationModule = () => {
 
     const handleToggleComplete = useCallback((id, completed) => {
         updateIdea(id, { completed });
+    }, [updateIdea]);
+
+    const handleSetSubcategory = useCallback((id, subcategory) => {
+        const normalizedValue = subcategory === INSPIRATION_SUBCATEGORY_UNCATEGORIZED ? null : subcategory;
+        updateIdea(id, { subcategory: normalizedValue });
     }, [updateIdea]);
 
     const handleUpdateContent = useCallback((id, content) => {
@@ -1073,12 +1143,20 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         }
 
         const now = Date.now();
+        const todoImportSubcategory = (
+            selectedCategory === 'todo'
+            && selectedSubcategory !== INSPIRATION_SUBCATEGORY_FILTER_ALL
+            && selectedSubcategory !== INSPIRATION_SUBCATEGORY_UNCATEGORIZED
+        )
+            ? selectedSubcategory
+            : null;
         const newIdeas = tasks.map((task, index) => ({
             id: uuidv4(),
             content: task,
             timestamp: now + (tasks.length - index),
             colorIndex: getNextAutoColorIndex(ideas.length + index),
             category: 'todo',
+            ...(todoImportSubcategory ? { subcategory: todoImportSubcategory } : {}),
             aiAssistClass: TODO_AI_CLASS_UNCLASSIFIED,
             completed: false,
             stage: 'inspiration',
@@ -1090,7 +1168,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         setAiImportText('');
         setAiImportError('');
         setAiImportSuccessCount(newIdeas.length);
-    }, [aiImportText, parseAiTodoOutput, ideas.length, addIdeasBatch, handleSelectCategory]);
+    }, [aiImportText, parseAiTodoOutput, selectedCategory, selectedSubcategory, ideas.length, addIdeasBatch, handleSelectCategory]);
 
     const todoIdeas = useMemo(() => {
         return [...ideas]
@@ -1098,9 +1176,27 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     }, [ideas]);
 
+    const subcategoryFilteredTodoIdeas = useMemo(
+        () => filterIdeasBySelectedSubcategory(todoIdeas),
+        [filterIdeasBySelectedSubcategory, todoIdeas]
+    );
+
+    const subcategoryPendingTodoIdeas = useMemo(() => {
+        return subcategoryFilteredTodoIdeas
+            .filter(idea => !idea.completed)
+            .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+    }, [subcategoryFilteredTodoIdeas]);
+
+    const subcategoryPendingTodoNumberedText = useMemo(() => {
+        return subcategoryPendingTodoIdeas
+            .map((idea, index) => `${index + 1}. ${normalizeIdeaTextForExport(idea.content)}`)
+            .filter(Boolean)
+            .join('\n');
+    }, [subcategoryPendingTodoIdeas]);
+
     const todoAiFilterCounts = useMemo(() => {
         const counts = {
-            all: todoIdeas.length,
+            all: subcategoryFilteredTodoIdeas.length,
             [TODO_AI_FILTER_PENDING]: 0,
             [TODO_AI_CLASS_UNCLASSIFIED]: 0,
             ai_done: 0,
@@ -1109,7 +1205,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             self: 0,
         };
 
-        todoIdeas.forEach((idea) => {
+        subcategoryFilteredTodoIdeas.forEach((idea) => {
             if (idea.completed) return;
             counts[TODO_AI_FILTER_PENDING] += 1;
             const aiClass = getTodoAiAssistClass(idea);
@@ -1121,29 +1217,29 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         });
 
         return counts;
-    }, [todoIdeas]);
+    }, [subcategoryFilteredTodoIdeas]);
 
     const filteredTodoIdeas = useMemo(() => {
-        if (todoAiFilter === 'all') return todoIdeas;
+        if (todoAiFilter === 'all') return subcategoryFilteredTodoIdeas;
         if (todoAiFilter === TODO_AI_FILTER_PENDING) {
-            return todoIdeas.filter(idea => !idea.completed);
+            return subcategoryFilteredTodoIdeas.filter(idea => !idea.completed);
         }
 
         if (todoAiFilter === TODO_AI_CLASS_UNCLASSIFIED) {
-            return todoIdeas.filter(idea =>
+            return subcategoryFilteredTodoIdeas.filter(idea =>
                 !idea.completed && getTodoAiAssistClass(idea) === TODO_AI_CLASS_UNCLASSIFIED
             );
         }
 
-        return todoIdeas.filter(idea =>
+        return subcategoryFilteredTodoIdeas.filter(idea =>
             !idea.completed && getTodoAiAssistClass(idea) === todoAiFilter
         );
-    }, [todoIdeas, todoAiFilter]);
+    }, [subcategoryFilteredTodoIdeas, todoAiFilter]);
 
     const handleCopyTodoAiClassList = useCallback(async (aiClass) => {
         const targetClass = aiClass || TODO_AI_CLASS_UNCLASSIFIED;
         const meta = getTodoAiAssistMeta(targetClass);
-        const clipboardText = buildTodoAiClassClipboardText(todoIdeas, targetClass);
+        const clipboardText = buildTodoAiClassClipboardText(subcategoryFilteredTodoIdeas, targetClass);
 
         if (!clipboardText) {
             toast.info(`“${meta.label}”暂无未完成待办可复制`, {
@@ -1155,7 +1251,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
 
         const success = await copyTextToClipboard(clipboardText);
         if (success) {
-            const targetCount = todoIdeas.filter((idea) => (
+            const targetCount = subcategoryFilteredTodoIdeas.filter((idea) => (
                 !idea.completed && getTodoAiAssistClass(idea) === targetClass
             )).length;
             toast.success(`已复制“${meta.label}”未完成清单（${targetCount} 条）`, {
@@ -1169,12 +1265,12 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             duration: 1600,
             position: 'bottom-center',
         });
-    }, [copyTextToClipboard, todoIdeas]);
+    }, [copyTextToClipboard, subcategoryFilteredTodoIdeas]);
 
     const handleCopyTodoFilterList = useCallback(async (filterValue) => {
         if (filterValue === 'all') {
             const allTodoText = buildNumberedIdeaClipboardText(
-                [...todoIdeas].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
+                [...subcategoryFilteredTodoIdeas].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
             );
 
             if (!allTodoText) {
@@ -1187,7 +1283,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
 
             const success = await copyTextToClipboard(allTodoText);
             if (success) {
-                toast.success(`已复制全部待办（${todoIdeas.length} 条）`, {
+                toast.success(`已复制全部待办（${subcategoryFilteredTodoIdeas.length} 条）`, {
                     duration: 1400,
                     position: 'bottom-center',
                 });
@@ -1202,7 +1298,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         }
 
         if (filterValue === TODO_AI_FILTER_PENDING) {
-            if (!pendingTodoNumberedText) {
+            if (!subcategoryPendingTodoNumberedText) {
                 toast.info('当前没有未完成待办可复制', {
                     duration: 1400,
                     position: 'bottom-center',
@@ -1210,9 +1306,9 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                 return;
             }
 
-            const success = await copyTextToClipboard(pendingTodoNumberedText);
+            const success = await copyTextToClipboard(subcategoryPendingTodoNumberedText);
             if (success) {
-                toast.success(`已复制所有未完成清单（${pendingTodoIdeas.length} 条）`, {
+                toast.success(`已复制所有未完成清单（${subcategoryPendingTodoIdeas.length} 条）`, {
                     duration: 1400,
                     position: 'bottom-center',
                 });
@@ -1230,9 +1326,9 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
     }, [
         copyTextToClipboard,
         handleCopyTodoAiClassList,
-        pendingTodoIdeas.length,
-        pendingTodoNumberedText,
-        todoIdeas,
+        subcategoryPendingTodoIdeas.length,
+        subcategoryPendingTodoNumberedText,
+        subcategoryFilteredTodoIdeas,
     ]);
 
     const handleTodoAiFilterClick = useCallback((filterValue) => {
@@ -1249,8 +1345,8 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             return filteredTodoIdeas;
         }
 
-        return [...(categoryIdeasMap.get(selectedCategory) || [])].reverse();
-    }, [categoryIdeasMap, selectedCategory, filteredTodoIdeas]);
+        return [...filterIdeasBySelectedSubcategory(selectedCategoryIdeas)].reverse();
+    }, [selectedCategory, filteredTodoIdeas, filterIdeasBySelectedSubcategory, selectedCategoryIdeas]);
 
     // 代办分类按天分组数据
     const todosByDay = useMemo(() => {
@@ -1366,8 +1462,19 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                         )}
                     </div>
 
+                    {selectedCategorySubcategories.length > 0 && (
+                        <div className="mb-4 -mt-2 px-2">
+                            <InspirationSubcategoryFilter
+                                options={subcategoryFilterOptions}
+                                selectedValue={selectedSubcategory}
+                                accentHex={selectedCategoryAccentHex}
+                                onSelect={setSelectedSubcategory}
+                            />
+                        </div>
+                    )}
+
                     {selectedCategory === 'todo' && (
-                        <div className="mb-6 -mt-2 px-2">
+                        <div className={`mb-6 px-2 ${selectedCategorySubcategories.length > 0 ? 'mt-0' : '-mt-2'}`}>
                             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
                                 {TODO_AI_FILTER_OPTIONS.map((option) => {
                                     const count = todoAiFilterCounts[option.value] || 0;
@@ -1412,6 +1519,8 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                             copiedId={copiedId}
                             isSelectionMode={isSelectionMode}
                             selectedIdeaIdSet={selectedIdeaIdSet}
+                            subcategoryOptions={itemSubcategoryOptions}
+                            selectedCategorySubcategories={selectedCategorySubcategories}
                             isIOS={isIOS}
                             t={t}
                             onRemove={handleRemove}
@@ -1421,6 +1530,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                             onUpdateContent={handleUpdateContent}
                             onToggleComplete={handleToggleComplete}
                             onToggleSelect={handleToggleSelect}
+                            onSetSubcategory={handleSetSubcategory}
                         />
                     </div>
                 </motion.div>

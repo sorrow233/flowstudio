@@ -3,6 +3,7 @@ import { useSync } from '../features/sync/SyncContext';
 import { useSyncedMap } from '../features/sync/useSyncStore';
 
 const STORAGE_KEY = 'flow_settings_advanced';
+const IMAGE_WEBP_COMPRESSION_STORAGE_KEY = 'flow_settings_image_webp_compression';
 
 const SettingsContext = createContext();
 
@@ -21,12 +22,25 @@ export const SettingsProvider = ({ children }) => {
 
     // Local state as fallback/optimistic
     const [localShow, setLocalShow] = useState(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        return saved ? JSON.parse(saved) : false;
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            return saved ? JSON.parse(saved) : false;
+        } catch {
+            return false;
+        }
+    });
+    const [localCompressImagesToWebp, setLocalCompressImagesToWebp] = useState(() => {
+        try {
+            const saved = localStorage.getItem(IMAGE_WEBP_COMPRESSION_STORAGE_KEY);
+            return saved ? JSON.parse(saved) : true;
+        } catch {
+            return true;
+        }
     });
 
     // Determine effective value: Sync takes precedence if available
     const showAdvancedFeatures = preferences?.showAdvancedFeatures ?? localShow;
+    const compressImagesToWebp = preferences?.compressImagesToWebp ?? localCompressImagesToWebp;
 
     // Sync from cloud to local
     useEffect(() => {
@@ -35,6 +49,16 @@ export const SettingsProvider = ({ children }) => {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences.showAdvancedFeatures));
         }
     }, [preferences?.showAdvancedFeatures]);
+
+    useEffect(() => {
+        if (preferences?.compressImagesToWebp !== undefined) {
+            setLocalCompressImagesToWebp(preferences.compressImagesToWebp);
+            localStorage.setItem(
+                IMAGE_WEBP_COMPRESSION_STORAGE_KEY,
+                JSON.stringify(preferences.compressImagesToWebp)
+            );
+        }
+    }, [preferences?.compressImagesToWebp]);
 
     const toggleAdvancedFeatures = () => {
         const newValue = !showAdvancedFeatures;
@@ -45,9 +69,20 @@ export const SettingsProvider = ({ children }) => {
         }
     };
 
+    const toggleCompressImagesToWebp = () => {
+        const newValue = !compressImagesToWebp;
+        setLocalCompressImagesToWebp(newValue);
+        localStorage.setItem(IMAGE_WEBP_COMPRESSION_STORAGE_KEY, JSON.stringify(newValue));
+        if (doc) {
+            set('compressImagesToWebp', newValue);
+        }
+    };
+
     const value = {
         showAdvancedFeatures,
         toggleAdvancedFeatures,
+        compressImagesToWebp,
+        toggleCompressImagesToWebp,
     };
 
     return (

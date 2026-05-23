@@ -2,6 +2,8 @@ import React, { useState, useRef, useCallback, useImperativeHandle, forwardRef, 
 import { Image, X, Loader2, AlertCircle, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../auth/AuthContext';
+import { useSettings } from '../../../../hooks/SettingsContext';
+import { prepareImageFileForUpload } from '../../services/imageUploadUtils';
 
 /**
  * 图片上传组件
@@ -10,13 +12,14 @@ import { useAuth } from '../../../auth/AuthContext';
  * - 点击选择图片
  * - 拖拽上传
  * - 粘贴上传（通过 ref.uploadFromClipboard）
- * - 客户端图片压缩（最大 1920px）
+ * - 按设置决定是否在客户端转换为 WebP
  * - 上传进度显示
  * - 成功/失败反馈
  * - 白名单权限检查（服务端验证）
  */
 const ImageUploaderInner = forwardRef(({ onUploadComplete, disabled = false }, ref) => {
     const { user } = useAuth();
+    const { compressImagesToWebp } = useSettings();
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
@@ -52,41 +55,6 @@ const ImageUploaderInner = forwardRef(({ onUploadComplete, disabled = false }, r
     }, []);
 
     /**
-     * 转换图片为 WebP 格式（保持原尺寸）
-     */
-    const compressImage = useCallback((file, quality = 0.86) => {
-        return new Promise((resolve, reject) => {
-            const img = new window.Image();
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            img.onload = () => {
-                // 保持原尺寸
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-
-                // 输出 WebP 格式
-                canvas.toBlob(
-                    (blob) => {
-                        if (blob) {
-                            const fileName = (file.name || 'pasted-image').replace(/\.[^.]+$/, '') + '.webp';
-                            resolve(new File([blob], fileName, { type: 'image/webp' }));
-                        } else {
-                            reject(new Error('图片转换失败'));
-                        }
-                    },
-                    'image/webp',
-                    quality
-                );
-            };
-
-            img.onerror = () => reject(new Error('图片加载失败'));
-            img.src = URL.createObjectURL(file);
-        });
-    }, []);
-
-    /**
      * 上传图片到 R2
      */
     const uploadImage = useCallback(async (file) => {
@@ -95,28 +63,19 @@ const ImageUploaderInner = forwardRef(({ onUploadComplete, disabled = false }, r
             return false;
         }
 
-        if (!file || !file.type.startsWith('image/')) {
-            showError('请上传图片文件');
-            return false;
-        }
-
-        // 检查文件大小（前端预检，限制 15MB 原图）
-        if (file.size > 15 * 1024 * 1024) {
-            showError('图片太大，请选择小于 15MB 的图片');
-            return false;
-        }
-
         setIsUploading(true);
         setError(null);
         setSuccess(false);
 
         try {
-            // 压缩图片
-            const compressedFile = await compressImage(file);
+            const uploadFile = await prepareImageFileForUpload(file, {
+                compressToWebp: compressImagesToWebp,
+                fallbackName: 'pasted-image',
+            });
 
             // 构建 FormData
             const formData = new FormData();
-            formData.append('file', compressedFile);
+            formData.append('file', uploadFile);
 
             // 发送上传请求
             const response = await fetch('/api/upload', {
@@ -154,7 +113,7 @@ const ImageUploaderInner = forwardRef(({ onUploadComplete, disabled = false }, r
         } finally {
             setIsUploading(false);
         }
-    }, [user, compressImage, onUploadComplete, showError, showSuccess]);
+    }, [user, compressImagesToWebp, onUploadComplete, showError, showSuccess]);
 
     /**
      * 从剪贴板数据中提取并上传图片
@@ -320,4 +279,3 @@ const ImageUploader = memo(ImageUploaderInner);
 ImageUploader.displayName = 'ImageUploader';
 
 export default ImageUploader;
-

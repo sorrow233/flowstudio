@@ -4,6 +4,7 @@ import { Lightbulb } from 'lucide-react';
 import InspirationItem from './InspirationItem';
 import { getTodoAiAssistClass } from './todoAiAssistUtils';
 import { formatTodoDayLabel, splitIdeasByRecencyAndWeek } from './inspirationListUtils';
+import { getIdeaSubcategoryValue } from './inspirationSubcategoryUtils';
 
 const InspirationIdeaList = ({
     selectedCategory,
@@ -17,6 +18,8 @@ const InspirationIdeaList = ({
     copiedId,
     isSelectionMode,
     selectedIdeaIdSet,
+    subcategoryOptions = [],
+    selectedCategorySubcategories = [],
     isIOS,
     t,
     onRemove,
@@ -26,6 +29,7 @@ const InspirationIdeaList = ({
     onUpdateContent,
     onToggleComplete,
     onToggleSelect,
+    onSetSubcategory,
 }) => {
     const { recentIdeas, weeklyIdeaGroups } = useMemo(
         () => splitIdeasByRecencyAndWeek(sortedIdeas),
@@ -50,6 +54,10 @@ const InspirationIdeaList = ({
             onSelect={onToggleSelect}
             isTodoView={options.isTodoView}
             aiAssistClass={options.isTodoView ? getTodoAiAssistClass(idea) : undefined}
+            subcategoryOptions={subcategoryOptions}
+            subcategoryValue={getIdeaSubcategoryValue(idea, selectedCategorySubcategories)}
+            showSubcategoryControls={subcategoryOptions.length > 0}
+            onSetSubcategory={onSetSubcategory}
             isIOSSelectionUi={isIOS}
         />
     ), [
@@ -60,12 +68,15 @@ const InspirationIdeaList = ({
         isSelectionMode,
         onCopy,
         onRemove,
+        onSetSubcategory,
         onToggleComplete,
         onToggleSelect,
         onUpdateColor,
         onUpdateContent,
         onUpdateNote,
         selectedIdeaIdSet,
+        selectedCategorySubcategories,
+        subcategoryOptions,
     ]);
 
     return (

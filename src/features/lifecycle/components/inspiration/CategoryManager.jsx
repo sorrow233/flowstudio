@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Trash2, Check, Edit2, Sparkles } from 'lucide-react';
+import { X, Plus, Trash2, Check, Edit2, Sparkles, Layers2 } from 'lucide-react';
 import { MAX_INSPIRATION_CATEGORIES } from './categoryManagerConstants';
+import InspirationSubcategoryEditor from './InspirationSubcategoryEditor';
+import { normalizeInspirationSubcategories } from './inspirationSubcategoryUtils';
 
 const COLOR_PRESETS = [
     { id: 'pink', color: 'bg-pink-400', dotColor: 'bg-pink-400', textColor: 'text-pink-400' },
@@ -26,6 +28,7 @@ const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemov
     const [newLabel, setNewLabel] = useState('');
     // Random default color to avoid repetitive pink
     const [newColor, setNewColor] = useState(() => COLOR_PRESETS[Math.floor(Math.random() * COLOR_PRESETS.length)]);
+    const [expandedCategoryId, setExpandedCategoryId] = useState(null);
 
     // Delete confirmation state
     const [deleteConfirmId, setDeleteConfirmId] = useState(null);
@@ -44,6 +47,7 @@ const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemov
     const startEdit = (cat) => {
         setEditingId(cat.id);
         setEditLabel(cat.label);
+        setExpandedCategoryId(null);
         // Find matching preset based on color class, fallback to first
         const preset = COLOR_PRESETS.find(p => p.color === cat.color) || COLOR_PRESETS[0];
         setEditColor(preset);
@@ -124,82 +128,110 @@ const CategoryManager = ({ isOpen, onClose, categories, onAdd, onUpdate, onRemov
 
                         {/* List */}
                         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                            {categories.map(cat => (
-                                <div key={cat.id} className="group flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all">
-                                    {editingId === cat.id ? (
-                                        // Edit Mode
-                                        <div className="flex-1 flex items-center gap-2">
-                                            <div className="flex-shrink-0 relative">
-                                                <div className={`w-4 h-4 rounded-full ${editColor.dotColor}`} />
-                                                <select
-                                                    value={COLOR_PRESETS.findIndex(p => p.id === editColor.id)}
-                                                    onChange={e => setEditColor(COLOR_PRESETS[e.target.value])}
-                                                    className="absolute inset-0 opacity-0 cursor-pointer"
-                                                >
-                                                    {COLOR_PRESETS.map((p, i) => (
-                                                        <option key={p.id} value={i}>{p.id}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                            <input
-                                                autoFocus
-                                                value={editLabel}
-                                                onChange={e => setEditLabel(e.target.value)}
-                                                className="flex-1 bg-white dark:bg-gray-900 px-2 py-1 rounded border border-blue-400 outline-none text-sm"
-                                            />
-                                            <button onClick={saveEdit} className="p-1 text-green-500 hover:bg-green-50 rounded"><Check size={16} /></button>
-                                            <button onClick={() => setEditingId(null)} className="p-1 text-gray-400 hover:bg-gray-100 rounded"><X size={16} /></button>
-                                        </div>
-                                    ) : (
-                                        // View Mode
-                                        <>
-                                            <div className={`w-3 h-3 rounded-full ${cat.dotColor}`} />
-                                            <span className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300">{cat.label}</span>
+                            {categories.map(cat => {
+                                const subcategoryCount = normalizeInspirationSubcategories(cat.subcategories).length;
+                                const isExpanded = expandedCategoryId === cat.id;
 
-                                            <div className="opacity-100 sm:opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
-                                                {deleteConfirmId === cat.id ? (
-                                                    <div className="flex items-center animate-in fade-in zoom-in duration-200">
-                                                        <span className="text-xs text-red-500 mr-2 font-medium">确定删除?</span>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                onRemove(cat.id);
-                                                                setDeleteConfirmId(null);
-                                                            }}
-                                                            className="p-1 text-red-500 hover:bg-red-50 rounded bg-white shadow-sm border border-red-100 mr-1"
-                                                            title="确认删除"
+                                return (
+                                    <div
+                                        key={cat.id}
+                                        className="group overflow-hidden rounded-xl border border-transparent bg-gray-50 transition-all hover:border-gray-200 dark:bg-gray-800/50 dark:hover:border-gray-700"
+                                    >
+                                        <div className="flex items-center gap-3 p-3">
+                                            {editingId === cat.id ? (
+                                                // Edit Mode
+                                                <div className="flex-1 flex items-center gap-2">
+                                                    <div className="flex-shrink-0 relative">
+                                                        <div className={`w-4 h-4 rounded-full ${editColor.dotColor}`} />
+                                                        <select
+                                                            value={COLOR_PRESETS.findIndex(p => p.id === editColor.id)}
+                                                            onChange={e => setEditColor(COLOR_PRESETS[e.target.value])}
+                                                            className="absolute inset-0 opacity-0 cursor-pointer"
                                                         >
-                                                            <Check size={14} />
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setDeleteConfirmId(null);
-                                                            }}
-                                                            className="p-1 text-gray-400 hover:bg-gray-100 rounded"
-                                                            title="取消"
-                                                        >
-                                                            <X size={14} />
-                                                        </button>
+                                                            {COLOR_PRESETS.map((p, i) => (
+                                                                <option key={p.id} value={i}>{p.id}</option>
+                                                            ))}
+                                                        </select>
                                                     </div>
-                                                ) : (
-                                                    <>
-                                                        <button onClick={() => startEdit(cat)} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
-                                                            <Edit2 size={14} />
-                                                        </button>
-                                                        {/* Prevent removing the last category */}
-                                                        {categories.length > 1 && (
-                                                            <button onClick={() => setDeleteConfirmId(cat.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                                                                <Trash2 size={14} />
-                                                            </button>
+                                                    <input
+                                                        autoFocus
+                                                        value={editLabel}
+                                                        onChange={e => setEditLabel(e.target.value)}
+                                                        className="flex-1 bg-white dark:bg-gray-900 px-2 py-1 rounded border border-blue-400 outline-none text-sm"
+                                                    />
+                                                    <button onClick={saveEdit} className="p-1 text-green-500 hover:bg-green-50 rounded"><Check size={16} /></button>
+                                                    <button onClick={() => setEditingId(null)} className="p-1 text-gray-400 hover:bg-gray-100 rounded"><X size={16} /></button>
+                                                </div>
+                                            ) : (
+                                                // View Mode
+                                                <>
+                                                    <div className={`w-3 h-3 rounded-full ${cat.dotColor}`} />
+                                                    <span className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300">{cat.label}</span>
+
+                                                    <div className="opacity-100 sm:opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
+                                                        {deleteConfirmId === cat.id ? (
+                                                            <div className="flex items-center animate-in fade-in zoom-in duration-200">
+                                                                <span className="text-xs text-red-500 mr-2 font-medium">确定删除?</span>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        onRemove(cat.id);
+                                                                        setDeleteConfirmId(null);
+                                                                        setExpandedCategoryId((prev) => (prev === cat.id ? null : prev));
+                                                                    }}
+                                                                    className="p-1 text-red-500 hover:bg-red-50 rounded bg-white shadow-sm border border-red-100 mr-1"
+                                                                    title="确认删除"
+                                                                >
+                                                                    <Check size={14} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setDeleteConfirmId(null);
+                                                                    }}
+                                                                    className="p-1 text-gray-400 hover:bg-gray-100 rounded"
+                                                                    title="取消"
+                                                                >
+                                                                    <X size={14} />
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => setExpandedCategoryId((prev) => (prev === cat.id ? null : cat.id))}
+                                                                    className={`inline-flex items-center gap-1 rounded-lg px-1.5 py-1.5 text-gray-400 transition-colors hover:bg-sky-50 hover:text-sky-500 dark:hover:bg-sky-900/20 ${isExpanded ? 'bg-sky-50 text-sky-500 dark:bg-sky-900/20 dark:text-sky-300' : ''}`}
+                                                                    title="管理子分类"
+                                                                >
+                                                                    <Layers2 size={14} />
+                                                                    {subcategoryCount > 0 && (
+                                                                        <span className="text-[10px] font-semibold">{subcategoryCount}</span>
+                                                                    )}
+                                                                </button>
+                                                                <button onClick={() => startEdit(cat)} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
+                                                                    <Edit2 size={14} />
+                                                                </button>
+                                                                {/* Prevent removing the last category */}
+                                                                {categories.length > 1 && (
+                                                                    <button onClick={() => setDeleteConfirmId(cat.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                                                        <Trash2 size={14} />
+                                                                    </button>
+                                                                )}
+                                                            </>
                                                         )}
-                                                    </>
-                                                )}
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            ))}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+
+                                        {isExpanded && editingId !== cat.id && (
+                                            <InspirationSubcategoryEditor
+                                                category={cat}
+                                                onUpdate={onUpdate}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
 
                             {/* Add New Section */}
                             {isAdding ? (

@@ -1,47 +1,11 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '../../../../auth/AuthContext';
-
-/**
- * 转换图片为 WebP 格式（保持原尺寸）
- */
-const compressImage = (file, quality = 0.86) => {
-    return new Promise((resolve, reject) => {
-        const img = new window.Image();
-        const url = URL.createObjectURL(file);
-
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-
-            canvas.toBlob(
-                (blob) => {
-                    URL.revokeObjectURL(url);
-                    if (blob) {
-                        const fileName = (file.name || 'image').replace(/\.[^.]+$/, '') + '.webp';
-                        resolve(new File([blob], fileName, { type: 'image/webp' }));
-                    } else {
-                        reject(new Error('图片转换失败'));
-                    }
-                },
-                'image/webp',
-                quality
-            );
-        };
-
-        img.onerror = () => {
-            URL.revokeObjectURL(url);
-            reject(new Error('图片加载失败'));
-        };
-
-        img.src = url;
-    });
-};
+import { useSettings } from '../../../../../hooks/SettingsContext';
+import { prepareImageFileForUpload } from '../../../services/imageUploadUtils';
 
 export const useImageUpload = () => {
     const { user } = useAuth();
+    const { compressImagesToWebp } = useSettings();
     const [isUploading, setIsUploading] = useState(false);
 
     const uploadImage = useCallback(async (file) => {
@@ -49,20 +13,14 @@ export const useImageUpload = () => {
             throw new Error('请先登录');
         }
 
-        if (!file || !file.type.startsWith('image/')) {
-            throw new Error('请上传图片文件');
-        }
-
-        if (file.size > 15 * 1024 * 1024) {
-            throw new Error('图片太大，请选择小于 15MB 的图片');
-        }
-
         setIsUploading(true);
 
         try {
-            const compressedFile = await compressImage(file);
+            const uploadFile = await prepareImageFileForUpload(file, {
+                compressToWebp: compressImagesToWebp,
+            });
             const formData = new FormData();
-            formData.append('file', compressedFile);
+            formData.append('file', uploadFile);
 
             const response = await fetch('/api/upload', {
                 method: 'POST',
@@ -88,7 +46,7 @@ export const useImageUpload = () => {
         } finally {
             setIsUploading(false);
         }
-    }, [user]);
+    }, [compressImagesToWebp, user]);
 
     return {
         uploadImage,

@@ -37,6 +37,10 @@ const InspirationItem = React.forwardRef(({
     aiAssistOptions = [],
     onSetAiAssistClass,
     showAiAssistControls = false,
+    subcategoryOptions = [],
+    subcategoryValue = 'uncategorized',
+    onSetSubcategory,
+    showSubcategoryControls = false,
     isIOSSelectionUi = false,
 }, ref) => {
     const [isDragging, setIsDragging] = React.useState(false);
@@ -510,6 +514,29 @@ const InspirationItem = React.forwardRef(({
                                         </span>
                                     </>
                                 )}
+                                {showSubcategoryControls && subcategoryOptions.length > 0 && !isArchiveView && (
+                                    <>
+                                        <span className="mx-1.5 opacity-20">·</span>
+                                        <select
+                                            value={subcategoryValue}
+                                            onPointerDown={(e) => e.stopPropagation()}
+                                            onClick={(e) => e.stopPropagation()}
+                                            onDoubleClick={(e) => e.stopPropagation()}
+                                            onChange={(event) => {
+                                                event.stopPropagation();
+                                                onSetSubcategory?.(idea.id, event.target.value);
+                                            }}
+                                            className="max-w-[140px] rounded-full border border-gray-200/70 bg-white/80 px-2 py-0.5 text-[10px] font-medium text-gray-500 outline-none transition hover:border-gray-300 focus:border-gray-300 dark:border-gray-700/70 dark:bg-gray-900/70 dark:text-gray-400"
+                                            title="设置子分类"
+                                        >
+                                            {subcategoryOptions.map((option) => (
+                                                <option key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </>
+                                )}
                                 {/* 来源标签 */}
                                 {idea.tags && idea.tags.length > 0 && (
                                     <>
@@ -623,6 +650,9 @@ const areIdeaViewPropsEqual = (prevProps, nextProps) => {
         && prevProps.aiAssistClass === nextProps.aiAssistClass
         && prevProps.aiAssistOptions === nextProps.aiAssistOptions
         && prevProps.showAiAssistControls === nextProps.showAiAssistControls
+        && prevProps.subcategoryOptions === nextProps.subcategoryOptions
+        && prevProps.subcategoryValue === nextProps.subcategoryValue
+        && prevProps.showSubcategoryControls === nextProps.showSubcategoryControls
         && prevProps.isIOSSelectionUi === nextProps.isIOSSelectionUi
         && prevCopied === nextCopied
     );
