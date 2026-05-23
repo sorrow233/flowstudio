@@ -18,6 +18,7 @@ import InspirationSubcategoryFilter from './components/inspiration/InspirationSu
 import InspirationSelectionToolbar from './components/inspiration/InspirationSelectionToolbar';
 import InspirationComposer from './components/inspiration/InspirationComposer';
 import InspirationIdeaList from './components/inspiration/InspirationIdeaList';
+import { useWritingDocTitleMap } from './components/inspiration/useWritingDocTitleMap';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import {
     buildCategoryExportText,
@@ -159,6 +160,7 @@ const InspirationModule = () => {
     const ideas = useMemo(() =>
         allProjects.filter(p => (p.stage || 'inspiration') === 'inspiration'),
         [allProjects]);
+    const writingDocTitleById = useWritingDocTitleMap(allProjects);
 
     const categoryIdeasMap = useMemo(() => {
         const groupedIdeas = new Map();
@@ -1512,7 +1514,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                             sortedIdeas={sortedIdeas}
                             todosByDay={todosByDay}
                             visibleIdeaCount={visibleIdeaCount}
-                            allProjects={allProjects}
+                            writingDocTitleById={writingDocTitleById}
                             categoryConfigList={categoryConfigList}
                             selectedCategoryDividerLineStyle={selectedCategoryDividerLineStyle}
                             selectedCategoryDividerTextStyle={selectedCategoryDividerTextStyle}

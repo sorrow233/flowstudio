@@ -11,7 +11,7 @@ const InspirationIdeaList = ({
     sortedIdeas,
     todosByDay,
     visibleIdeaCount,
-    allProjects,
+    writingDocTitleById,
     categoryConfigList,
     selectedCategoryDividerLineStyle,
     selectedCategoryDividerTextStyle,
@@ -40,7 +40,7 @@ const InspirationIdeaList = ({
         <InspirationItem
             key={idea.id}
             idea={idea}
-            allProjects={allProjects}
+            writingDocTitleById={writingDocTitleById}
             categories={categoryConfigList}
             onDelete={onRemove}
             onCopy={onCopy}
@@ -61,7 +61,6 @@ const InspirationIdeaList = ({
             isIOSSelectionUi={isIOS}
         />
     ), [
-        allProjects,
         categoryConfigList,
         copiedId,
         isIOS,
@@ -77,6 +76,7 @@ const InspirationIdeaList = ({
         selectedIdeaIdSet,
         selectedCategorySubcategories,
         subcategoryOptions,
+        writingDocTitleById,
     ]);
 
     return (
@@ -88,7 +88,7 @@ const InspirationIdeaList = ({
         >
             {selectedCategory === 'todo' && todosByDay.length > 0 && (
                 <div className="space-y-4">
-                    <AnimatePresence mode="popLayout" initial={false}>
+                    <AnimatePresence initial={false}>
                         {todosByDay.map((day) => (
                             <section
                                 key={day.dateKey}
@@ -111,7 +111,7 @@ const InspirationIdeaList = ({
                                     />
                                 </div>
                                 <div className="space-y-4">
-                                    <AnimatePresence mode="popLayout" initial={false}>
+                                    <AnimatePresence initial={false}>
                                         {day.ideas.map((idea) => renderIdeaItem(idea, { isTodoView: true }))}
                                     </AnimatePresence>
                                 </div>
@@ -124,7 +124,7 @@ const InspirationIdeaList = ({
             {selectedCategory !== 'todo' && (
                 <>
                     <div className="space-y-6">
-                        <AnimatePresence mode="popLayout" initial={false}>
+                        <AnimatePresence initial={false}>
                             {recentIdeas.map((idea) => renderIdeaItem(idea))}
                         </AnimatePresence>
                     </div>
@@ -150,7 +150,7 @@ const InspirationIdeaList = ({
                                 />
                             </div>
                             <div className="space-y-6">
-                                <AnimatePresence mode="popLayout" initial={false}>
+                                <AnimatePresence initial={false}>
                                     {week.ideas.map((idea) => renderIdeaItem(idea))}
                                 </AnimatePresence>
                             </div>

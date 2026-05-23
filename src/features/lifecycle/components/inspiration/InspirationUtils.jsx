@@ -69,8 +69,23 @@ export const IMAGE_URL_REGEX = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp)(?:
 export const R2_IMAGE_REGEX = /(https:\/\/pub-[a-z0-9]+\.r2\.dev\/[^\s]+)/gi;
 const URL_REGEX = /(https?:\/\/[^\s]+)/gi;
 
+const resolveWritingDocTitle = (source, docId) => {
+    if (!docId) return null;
+
+    if (source instanceof Map) {
+        return source.get(docId) || null;
+    }
+
+    if (Array.isArray(source)) {
+        const foundProject = source.find(p => p.id === docId);
+        return foundProject?.title || null;
+    }
+
+    return null;
+};
+
 // Helper for parsing rich text (with image support)
-export const parseRichText = (text, allProjects = [], clipboardText = '', options = {}) => {
+export const parseRichText = (text, writingDocTitleSource = [], clipboardText = '', options = {}) => {
     if (!text) return null;
     const codeBlockTheme = buildCodeBlockTheme(options.accentHex);
 
@@ -111,9 +126,9 @@ export const parseRichText = (text, allProjects = [], clipboardText = '', option
                             const pathSegments = parts[1].split('/');
                             if (pathSegments.length >= 2) {
                                 const docId = pathSegments[1].split('?')[0].split('#')[0]; // clean trailing
-                                const foundProject = (allProjects || []).find(p => p.id === docId);
-                                if (foundProject) {
-                                    docTitle = `写作文档: ${foundProject.title || '无标题文档'}`;
+                                const resolvedTitle = resolveWritingDocTitle(writingDocTitleSource, docId);
+                                if (resolvedTitle) {
+                                    docTitle = `写作文档: ${resolvedTitle}`;
                                 }
                             }
                         }

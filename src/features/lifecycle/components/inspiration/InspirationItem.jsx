@@ -18,7 +18,7 @@ import {
 
 const InspirationItem = React.forwardRef(({
     idea,
-    allProjects = [],
+    writingDocTitleById,
     categories = [],
     onDelete,
     onRestore,
@@ -78,8 +78,8 @@ const InspirationItem = React.forwardRef(({
 
     // 缓存 parseRichText 计算结果，避免每次渲染都重新执行正则匹配
     const parsedContent = useMemo(
-        () => parseRichText(idea.content, allProjects, ideaCopyPayload.textWithoutImages, { accentHex: categoryAccentHex }),
-        [categoryAccentHex, idea.content, allProjects, ideaCopyPayload.textWithoutImages]
+        () => parseRichText(idea.content, writingDocTitleById, ideaCopyPayload.textWithoutImages, { accentHex: categoryAccentHex }),
+        [categoryAccentHex, idea.content, ideaCopyPayload.textWithoutImages, writingDocTitleById]
     );
     const todoAiAssistMeta = useMemo(
         () => getTodoAiAssistMeta(aiAssistClass),
@@ -336,7 +336,6 @@ const InspirationItem = React.forwardRef(({
                 scale: { type: "spring", stiffness: 300, damping: 20 }
             }}
             exit={exitAnimation}
-            layout
             className={`relative group flex flex-col md:flex-row items-stretch md:items-start gap-2 md:gap-4 mb-4 ${isSelectionMode ? 'touch-pan-y' : 'touch-none'} select-none ${isCharging ? 'ring-2 ring-pink-400/60 shadow-lg shadow-pink-200/50 dark:shadow-pink-900/30' : ''} ${isSelected ? 'scale-[1.005]' : ''}`}
         >
             {/* Main Card Component */}
@@ -641,7 +640,7 @@ const areIdeaViewPropsEqual = (prevProps, nextProps) => {
 
     return (
         prevIdea === nextIdea
-        && prevProps.allProjects === nextProps.allProjects
+        && prevProps.writingDocTitleById === nextProps.writingDocTitleById
         && prevProps.categories === nextProps.categories
         && prevProps.isArchiveView === nextProps.isArchiveView
         && prevProps.isSelectionMode === nextProps.isSelectionMode
