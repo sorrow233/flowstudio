@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Lightbulb } from 'lucide-react';
 import InspirationItem from './InspirationItem';
 import { getTodoAiAssistClass } from './todoAiAssistUtils';
@@ -88,45 +88,39 @@ const InspirationIdeaList = ({
         >
             {selectedCategory === 'todo' && todosByDay.length > 0 && (
                 <div className="space-y-4">
-                    <AnimatePresence initial={false}>
-                        {todosByDay.map((day) => (
-                            <section
-                                key={day.dateKey}
-                                className="space-y-4"
-                            >
-                                <div className="flex items-center gap-3 mb-4 mt-6">
-                                    <div
-                                        className="h-px flex-1"
-                                        style={selectedCategoryDividerLineStyle}
-                                    />
-                                    <span
-                                        className="text-xs font-medium tracking-wide whitespace-nowrap"
-                                        style={selectedCategoryDividerTextStyle}
-                                    >
-                                        {formatTodoDayLabel(day.date)}
-                                    </span>
-                                    <div
-                                        className="h-px flex-1"
-                                        style={selectedCategoryDividerLineStyle}
-                                    />
-                                </div>
-                                <div className="space-y-4">
-                                    <AnimatePresence initial={false}>
-                                        {day.ideas.map((idea) => renderIdeaItem(idea, { isTodoView: true }))}
-                                    </AnimatePresence>
-                                </div>
-                            </section>
-                        ))}
-                    </AnimatePresence>
+                    {todosByDay.map((day) => (
+                        <section
+                            key={day.dateKey}
+                            className="space-y-4"
+                        >
+                            <div className="flex items-center gap-3 mb-4 mt-6">
+                                <div
+                                    className="h-px flex-1"
+                                    style={selectedCategoryDividerLineStyle}
+                                />
+                                <span
+                                    className="text-xs font-medium tracking-wide whitespace-nowrap"
+                                    style={selectedCategoryDividerTextStyle}
+                                >
+                                    {formatTodoDayLabel(day.date)}
+                                </span>
+                                <div
+                                    className="h-px flex-1"
+                                    style={selectedCategoryDividerLineStyle}
+                                />
+                            </div>
+                            <div className="space-y-4">
+                                {day.ideas.map((idea) => renderIdeaItem(idea, { isTodoView: true }))}
+                            </div>
+                        </section>
+                    ))}
                 </div>
             )}
 
             {selectedCategory !== 'todo' && (
                 <>
                     <div className="space-y-6">
-                        <AnimatePresence initial={false}>
-                            {recentIdeas.map((idea) => renderIdeaItem(idea))}
-                        </AnimatePresence>
+                        {recentIdeas.map((idea) => renderIdeaItem(idea))}
                     </div>
 
                     {weeklyIdeaGroups.map((week) => (
@@ -150,9 +144,7 @@ const InspirationIdeaList = ({
                                 />
                             </div>
                             <div className="space-y-6">
-                                <AnimatePresence initial={false}>
-                                    {week.ideas.map((idea) => renderIdeaItem(idea))}
-                                </AnimatePresence>
+                                {week.ideas.map((idea) => renderIdeaItem(idea))}
                             </div>
                         </div>
                     ))}

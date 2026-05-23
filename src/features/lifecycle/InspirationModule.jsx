@@ -157,10 +157,16 @@ const InspirationModule = () => {
         immediateSync?.();
     }, [updateProjectBase, immediateSync]);
 
+    const [locallyHiddenIdeaIds, setLocallyHiddenIdeaIds] = useState(() => new Set());
+
     // Filter for ideas (stage: 'inspiration')
-    const ideas = useMemo(() =>
+    const rawIdeas = useMemo(() =>
         allProjects.filter(p => (p.stage || 'inspiration') === 'inspiration'),
         [allProjects]);
+    const ideas = useMemo(() => {
+        if (locallyHiddenIdeaIds.size === 0) return rawIdeas;
+        return rawIdeas.filter((idea) => !locallyHiddenIdeaIds.has(idea.id));
+    }, [locallyHiddenIdeaIds, rawIdeas]);
     const writingDocTitleById = useWritingDocTitleMap(allProjects);
 
     const categoryIdeasMap = useMemo(() => {
@@ -243,6 +249,26 @@ const InspirationModule = () => {
             return true;
         }
     });
+
+    useEffect(() => {
+        if (locallyHiddenIdeaIds.size === 0) return;
+
+        const rawIdeaIdSet = new Set(rawIdeas.map((idea) => idea.id));
+        setLocallyHiddenIdeaIds((current) => {
+            let changed = false;
+            const next = new Set();
+
+            current.forEach((id) => {
+                if (rawIdeaIdSet.has(id)) {
+                    next.add(id);
+                    return;
+                }
+                changed = true;
+            });
+
+            return changed ? next : current;
+        });
+    }, [locallyHiddenIdeaIds.size, rawIdeas]);
     const selectedCategoryConfig = useMemo(() => {
         return categories.find((cat) => cat.id === selectedCategory)
             || categories[0]
@@ -422,6 +448,11 @@ const InspirationModule = () => {
         if (!confirmed) return;
 
         setDeletedIdeas((prev) => [...prev, ...selectedIdeas]);
+        setLocallyHiddenIdeaIds((current) => {
+            const next = new Set(current);
+            selectedIdeas.forEach((idea) => next.add(idea.id));
+            return next;
+        });
 
         selectedIdeas.forEach((idea) => {
             removeProjectBase(idea.id);
@@ -481,6 +512,12 @@ const InspirationModule = () => {
                 if (deletedIdeas.length > 0) {
                     e.preventDefault();
                     const lastDeleted = deletedIdeas[deletedIdeas.length - 1];
+                    setLocallyHiddenIdeaIds((current) => {
+                        if (!current.has(lastDeleted.id)) return current;
+                        const next = new Set(current);
+                        next.delete(lastDeleted.id);
+                        return next;
+                    });
                     addIdea(lastDeleted);
                     setDeletedIdeas(prev => prev.slice(0, -1));
                 }
@@ -566,6 +603,12 @@ const InspirationModule = () => {
         const idea = ideas.find(i => i.id === id);
         if (idea) {
             setDeletedIdeas(prev => [...prev, idea]);
+            setLocallyHiddenIdeaIds((current) => {
+                if (current.has(id)) return current;
+                const next = new Set(current);
+                next.add(id);
+                return next;
+            });
             removeIdea(id);
         }
     }, [ideas, removeIdea]);
@@ -573,6 +616,12 @@ const InspirationModule = () => {
     const handleUndo = () => {
         if (deletedIdeas.length > 0) {
             const lastDeleted = deletedIdeas[deletedIdeas.length - 1];
+            setLocallyHiddenIdeaIds((current) => {
+                if (!current.has(lastDeleted.id)) return current;
+                const next = new Set(current);
+                next.delete(lastDeleted.id);
+                return next;
+            });
             addIdea(lastDeleted);
             setDeletedIdeas(prev => prev.slice(0, -1));
         }
