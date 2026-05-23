@@ -123,6 +123,7 @@ const InspirationModule = () => {
         });
     }, [syncedCategories]);
     const categoryConfigList = useMemo(() => categories, [categories]);
+    const hasLoadedSyncedCategories = syncedCategories.length > 0;
 
     const [isCategoryManagerOpen, setCategoryManagerOpen] = useState(false);
 
@@ -349,22 +350,25 @@ const InspirationModule = () => {
             return;
         }
 
+        if (!hasLoadedSyncedCategories) return;
+
         const fallback = categories.find((cat) => cat.id === 'note') || categories[0];
         if (fallback) {
             setSelectedCategory((prev) => (prev === fallback.id ? prev : fallback.id));
         }
-    }, [categories, routeCategoryId]);
+    }, [categories, hasLoadedSyncedCategories, routeCategoryId]);
 
     // Ensure selected category remains valid even after category removal
     useEffect(() => {
         if (categories.length === 0) return;
         if (categories.some((cat) => cat.id === selectedCategory)) return;
+        if (routeCategoryId === selectedCategory && !hasLoadedSyncedCategories) return;
 
         const fallback = categories.find((cat) => cat.id === 'note') || categories[0];
         if (fallback) {
             setSelectedCategory(fallback.id);
         }
-    }, [categories, selectedCategory]);
+    }, [categories, hasLoadedSyncedCategories, routeCategoryId, selectedCategory]);
 
     useEffect(() => {
         setSelectedSubcategory(INSPIRATION_SUBCATEGORY_FILTER_ALL);
@@ -392,11 +396,15 @@ const InspirationModule = () => {
             return;
         }
 
+        if (!categories.some((cat) => cat.id === selectedCategory) && !hasLoadedSyncedCategories) {
+            return;
+        }
+
         const targetPath = buildInspirationPath(selectedCategory);
         const targetPathWithSearch = `${targetPath}${location.search || ''}`;
 
         navigate(targetPathWithSearch, { replace: true });
-    }, [buildInspirationPath, location.search, navigate, routeCategoryId, selectedCategory]);
+    }, [buildInspirationPath, categories, hasLoadedSyncedCategories, location.search, navigate, routeCategoryId, selectedCategory]);
 
     useEffect(() => {
         if (categories.length === 0) return;
