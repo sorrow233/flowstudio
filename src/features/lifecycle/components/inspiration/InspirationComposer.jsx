@@ -1,18 +1,22 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, Hash } from 'lucide-react';
+import { ArrowRight, Hash, UploadCloud } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
 import Spotlight from '../../../../components/shared/Spotlight';
 import RichTextInput from './RichTextInput';
 import ImageUploader from './ImageUploader';
 import { COLOR_CONFIG } from './InspirationUtils';
 import CodeBlockActionButton from './CodeBlockActionButton';
+import { transferMayContainImageFile } from './imageTransferUtils';
 
 const InspirationComposer = ({ allProjectTags = [], onSubmit, accentHex }) => {
     const { t } = useTranslation();
     const [input, setInput] = useState('');
     const [selectedColorIndex, setSelectedColorIndex] = useState(null);
+    const [isImageDragOver, setIsImageDragOver] = useState(false);
     const editorRef = useRef(null);
     const imageUploaderRef = useRef(null);
+    const imageDragDepthRef = useRef(0);
 
     useEffect(() => {
         const handlePaste = async (event) => {
@@ -78,11 +82,74 @@ const InspirationComposer = ({ allProjectTags = [], onSubmit, accentHex }) => {
         }
     }, [handleSubmit]);
 
+    const handleComposerDragEnter = useCallback((event) => {
+        if (!transferMayContainImageFile(event.dataTransfer)) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        imageDragDepthRef.current += 1;
+        event.dataTransfer.dropEffect = 'copy';
+        setIsImageDragOver(true);
+    }, []);
+
+    const handleComposerDragOver = useCallback((event) => {
+        if (!transferMayContainImageFile(event.dataTransfer)) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        event.dataTransfer.dropEffect = 'copy';
+        setIsImageDragOver(true);
+    }, []);
+
+    const handleComposerDragLeave = useCallback((event) => {
+        if (!transferMayContainImageFile(event.dataTransfer)) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        imageDragDepthRef.current = Math.max(0, imageDragDepthRef.current - 1);
+        if (imageDragDepthRef.current === 0) {
+            setIsImageDragOver(false);
+        }
+    }, []);
+
+    const handleComposerDrop = useCallback(async (event) => {
+        if (!transferMayContainImageFile(event.dataTransfer)) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        imageDragDepthRef.current = 0;
+        setIsImageDragOver(false);
+
+        await imageUploaderRef.current?.uploadFromDataTransfer(event.dataTransfer);
+    }, []);
+
     return (
         <div className="relative mb-20 group z-30">
             <Spotlight className="rounded-2xl transition-all duration-300 focus-within:ring-1 focus-within:ring-pink-300 dark:focus-within:ring-pink-500 focus-within:shadow-[0_0_30px_-5px_rgba(244,114,182,0.4)]" spotColor="rgba(244, 114, 182, 0.12)">
                 <div className="absolute -inset-1 bg-gradient-to-r from-gray-100 dark:from-gray-800 via-gray-50 dark:via-gray-900 to-gray-100 dark:to-gray-800 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 overflow-visible transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] group-hover:border-gray-200 dark:group-hover:border-gray-700">
+                <div
+                    onDragEnter={handleComposerDragEnter}
+                    onDragOver={handleComposerDragOver}
+                    onDragLeave={handleComposerDragLeave}
+                    onDrop={handleComposerDrop}
+                    className={`relative bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.3)] border overflow-visible transition-all duration-300 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] dark:group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.4)] ${isImageDragOver ? 'border-pink-300 dark:border-pink-500 ring-2 ring-pink-200/70 dark:ring-pink-500/30' : 'border-gray-100 dark:border-gray-800 group-hover:border-gray-200 dark:group-hover:border-gray-700'}`}
+                >
+                    <AnimatePresence>
+                        {isImageDragOver && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.98 }}
+                                transition={{ duration: 0.15 }}
+                                className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center rounded-2xl bg-white/78 text-pink-500 shadow-inner backdrop-blur-sm dark:bg-gray-950/72 dark:text-pink-300"
+                                aria-hidden="true"
+                            >
+                                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-pink-200/80 bg-pink-50/90 shadow-lg shadow-pink-100/70 dark:border-pink-500/30 dark:bg-pink-500/15 dark:shadow-pink-950/30">
+                                    <UploadCloud size={28} strokeWidth={1.8} />
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                     <RichTextInput
                         ref={editorRef}
                         value={input}

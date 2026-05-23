@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../auth/AuthContext';
 import { useSettings } from '../../../../hooks/SettingsContext';
 import { prepareImageFileForUpload } from '../../services/imageUploadUtils';
+import { getImageFileFromTransfer, transferMayContainImageFile } from './imageTransferUtils';
 
 /**
  * 图片上传组件
@@ -119,25 +120,27 @@ const ImageUploaderInner = forwardRef(({ onUploadComplete, disabled = false }, r
      * 从剪贴板数据中提取并上传图片
      */
     const uploadFromClipboard = useCallback(async (clipboardData) => {
-        if (!clipboardData?.items) return false;
-
-        for (const item of clipboardData.items) {
-            if (item.type.startsWith('image/')) {
-                const file = item.getAsFile();
-                if (file) {
-                    return await uploadImage(file);
-                }
-            }
-        }
-        return false;
+        const file = getImageFileFromTransfer(clipboardData);
+        return file ? await uploadImage(file) : false;
     }, [uploadImage]);
+
+    const uploadFromDataTransfer = useCallback(async (dataTransfer) => {
+        const file = getImageFileFromTransfer(dataTransfer);
+        if (!file) {
+            showError('请拖入图片文件');
+            return false;
+        }
+
+        return await uploadImage(file);
+    }, [showError, uploadImage]);
 
     // 暴露方法给父组件
     useImperativeHandle(ref, () => ({
         uploadImage,
         uploadFromClipboard,
+        uploadFromDataTransfer,
         isUploading
-    }), [uploadImage, uploadFromClipboard, isUploading]);
+    }), [uploadImage, uploadFromClipboard, uploadFromDataTransfer, isUploading]);
 
     /**
      * 处理文件选择
@@ -155,12 +158,15 @@ const ImageUploaderInner = forwardRef(({ onUploadComplete, disabled = false }, r
      * 处理拖拽
      */
     const handleDragOver = useCallback((e) => {
+        if (!transferMayContainImageFile(e.dataTransfer)) return;
         e.preventDefault();
         e.stopPropagation();
+        e.dataTransfer.dropEffect = 'copy';
         setIsDragOver(true);
     }, []);
 
     const handleDragLeave = useCallback((e) => {
+        if (!transferMayContainImageFile(e.dataTransfer)) return;
         e.preventDefault();
         e.stopPropagation();
         setIsDragOver(false);
@@ -171,13 +177,8 @@ const ImageUploaderInner = forwardRef(({ onUploadComplete, disabled = false }, r
         e.stopPropagation();
         setIsDragOver(false);
 
-        const file = e.dataTransfer.files?.[0];
-        if (file && file.type.startsWith('image/')) {
-            uploadImage(file);
-        } else {
-            showError('请上传图片文件');
-        }
-    }, [uploadImage, showError]);
+        void uploadFromDataTransfer(e.dataTransfer);
+    }, [uploadFromDataTransfer]);
 
     /**
      * 点击按钮触发文件选择
@@ -225,7 +226,7 @@ const ImageUploaderInner = forwardRef(({ onUploadComplete, disabled = false }, r
                     shadow-sm hover:shadow-md
                     group
                 `}
-                title="上传图片 (支持粘贴 Cmd+V)"
+                title="上传图片（支持拖拽/粘贴）"
             >
                 {isUploading ? (
                     <Loader2 size={14} className="text-pink-500 animate-spin" />
