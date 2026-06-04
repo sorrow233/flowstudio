@@ -42,6 +42,7 @@ const InspirationItem = React.forwardRef(({
     onSetSubcategory,
     showSubcategoryControls = false,
     isIOSSelectionUi = false,
+    enableEntranceAnimation = true,
 }, ref) => {
     const [isDragging, setIsDragging] = React.useState(false);
     const [isEditingContent, setIsEditingContent] = React.useState(false);
@@ -324,7 +325,7 @@ const InspirationItem = React.forwardRef(({
             onPointerCancel={cancelLongPress}
             onPointerLeave={cancelLongPress}
 
-            initial={{ opacity: 0, y: 20, scale: 0.98 }}
+            initial={enableEntranceAnimation ? { opacity: 0, y: 20, scale: 0.98 } : false}
             animate={{
                 opacity: 1,
                 y: 0,
@@ -653,6 +654,7 @@ const areIdeaViewPropsEqual = (prevProps, nextProps) => {
         && prevProps.subcategoryValue === nextProps.subcategoryValue
         && prevProps.showSubcategoryControls === nextProps.showSubcategoryControls
         && prevProps.isIOSSelectionUi === nextProps.isIOSSelectionUi
+        && prevProps.enableEntranceAnimation === nextProps.enableEntranceAnimation
         && prevCopied === nextCopied
     );
 };

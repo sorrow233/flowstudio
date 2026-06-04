@@ -333,11 +333,19 @@ const InspirationModule = () => {
     const handleSelectCategory = useCallback((categoryId) => {
         if (!categoryId) return;
 
+        const targetPath = buildInspirationPath(categoryId);
+        const targetPathWithSearch = `${targetPath}${location.search || ''}`;
+
         startCategoryTransition(() => {
             setSelectedCategory((prev) => (prev === categoryId ? prev : categoryId));
+            setSelectedSubcategory(INSPIRATION_SUBCATEGORY_FILTER_ALL);
             setShowWeekSelector(false);
         });
-    }, [startCategoryTransition]);
+
+        if (routeCategoryId !== categoryId || location.pathname !== targetPath) {
+            navigate(targetPathWithSearch, { replace: true });
+        }
+    }, [buildInspirationPath, location.pathname, location.search, navigate, routeCategoryId, startCategoryTransition]);
 
     // Sync route category to local state (route is source of truth when present).
     // Important: do NOT depend on selectedCategory here, otherwise manual category click
@@ -346,7 +354,11 @@ const InspirationModule = () => {
         if (categories.length === 0 || !routeCategoryId) return;
 
         if (categories.some((cat) => cat.id === routeCategoryId)) {
-            setSelectedCategory((prev) => (prev === routeCategoryId ? prev : routeCategoryId));
+            startCategoryTransition(() => {
+                setSelectedCategory((prev) => (prev === routeCategoryId ? prev : routeCategoryId));
+                setSelectedSubcategory(INSPIRATION_SUBCATEGORY_FILTER_ALL);
+                setShowWeekSelector(false);
+            });
             return;
         }
 
@@ -354,9 +366,9 @@ const InspirationModule = () => {
 
         const fallback = categories.find((cat) => cat.id === 'note') || categories[0];
         if (fallback) {
-            setSelectedCategory((prev) => (prev === fallback.id ? prev : fallback.id));
+            handleSelectCategory(fallback.id);
         }
-    }, [categories, hasLoadedSyncedCategories, routeCategoryId]);
+    }, [categories, handleSelectCategory, hasLoadedSyncedCategories, routeCategoryId, startCategoryTransition]);
 
     // Ensure selected category remains valid even after category removal
     useEffect(() => {
@@ -366,13 +378,9 @@ const InspirationModule = () => {
 
         const fallback = categories.find((cat) => cat.id === 'note') || categories[0];
         if (fallback) {
-            setSelectedCategory(fallback.id);
+            handleSelectCategory(fallback.id);
         }
-    }, [categories, hasLoadedSyncedCategories, routeCategoryId, selectedCategory]);
-
-    useEffect(() => {
-        setSelectedSubcategory(INSPIRATION_SUBCATEGORY_FILTER_ALL);
-    }, [selectedCategory]);
+    }, [categories, handleSelectCategory, hasLoadedSyncedCategories, routeCategoryId, selectedCategory]);
 
     useEffect(() => {
         if (
@@ -387,24 +395,6 @@ const InspirationModule = () => {
             setSelectedSubcategory(INSPIRATION_SUBCATEGORY_FILTER_ALL);
         }
     }, [selectedCategorySubcategories, selectedSubcategory]);
-
-    // Sync local selected category back to URL
-    useEffect(() => {
-        if (!selectedCategory) return;
-
-        if (routeCategoryId === selectedCategory) {
-            return;
-        }
-
-        if (!categories.some((cat) => cat.id === selectedCategory) && !hasLoadedSyncedCategories) {
-            return;
-        }
-
-        const targetPath = buildInspirationPath(selectedCategory);
-        const targetPathWithSearch = `${targetPath}${location.search || ''}`;
-
-        navigate(targetPathWithSearch, { replace: true });
-    }, [buildInspirationPath, categories, hasLoadedSyncedCategories, location.search, navigate, routeCategoryId, selectedCategory]);
 
     useEffect(() => {
         if (categories.length === 0) return;
@@ -1418,6 +1408,10 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         if (selectedCategory === 'todo') return filteredTodoIdeas.length;
         return sortedIdeas.length;
     }, [selectedCategory, filteredTodoIdeas.length, sortedIdeas.length]);
+    const ideaRenderScopeKey = useMemo(
+        () => `${selectedCategory}:${selectedSubcategory}:${todoAiFilter}`,
+        [selectedCategory, selectedSubcategory, todoAiFilter]
+    );
 
     // Extract all available weeks for navigation, grouped by Year and Month
     const groupedWeeks = useMemo(() => {
@@ -1568,7 +1562,9 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                     {/* List Section */}
                     <div className={`relative min-h-[400px] ${hasActiveSelectionToolbar ? (isIOS ? 'pb-[240px] md:pb-32' : 'pb-32 md:pb-32') : ''}`}>
                         <InspirationIdeaList
+                            key={ideaRenderScopeKey}
                             selectedCategory={selectedCategory}
+                            renderScopeKey={ideaRenderScopeKey}
                             sortedIdeas={sortedIdeas}
                             todosByDay={todosByDay}
                             visibleIdeaCount={visibleIdeaCount}

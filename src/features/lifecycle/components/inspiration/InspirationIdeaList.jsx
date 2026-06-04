@@ -3,11 +3,18 @@ import { motion } from 'framer-motion';
 import { Lightbulb } from 'lucide-react';
 import InspirationItem from './InspirationItem';
 import { getTodoAiAssistClass } from './todoAiAssistUtils';
-import { formatTodoDayLabel, splitIdeasByRecencyAndWeek } from './inspirationListUtils';
+import {
+    formatTodoDayLabel,
+    limitRecentAndWeeklyIdeaGroups,
+    limitTodoDayGroups,
+    splitIdeasByRecencyAndWeek,
+} from './inspirationListUtils';
 import { getIdeaSubcategoryValue } from './inspirationSubcategoryUtils';
+import { useProgressiveIdeaRender } from './useProgressiveIdeaRender';
 
 const InspirationIdeaList = ({
     selectedCategory,
+    renderScopeKey,
     sortedIdeas,
     todosByDay,
     visibleIdeaCount,
@@ -35,6 +42,28 @@ const InspirationIdeaList = ({
         () => splitIdeasByRecencyAndWeek(sortedIdeas),
         [sortedIdeas]
     );
+    const ideaFingerprint = `${visibleIdeaCount}:${sortedIdeas[0]?.id || 'none'}:${sortedIdeas[sortedIdeas.length - 1]?.id || 'none'}`;
+    const progressiveListKey = `${renderScopeKey || selectedCategory}:${ideaFingerprint}`;
+    const {
+        hasMore,
+        renderLimit,
+        sentinelRef,
+    } = useProgressiveIdeaRender({
+        listKey: progressiveListKey,
+        totalCount: visibleIdeaCount,
+    });
+    const visibleTodosByDay = useMemo(
+        () => limitTodoDayGroups(todosByDay, renderLimit),
+        [renderLimit, todosByDay]
+    );
+    const { visibleRecentIdeas, visibleWeeklyIdeaGroups } = useMemo(
+        () => limitRecentAndWeeklyIdeaGroups({
+            recentIdeas,
+            weeklyIdeaGroups,
+            limit: renderLimit,
+        }),
+        [recentIdeas, renderLimit, weeklyIdeaGroups]
+    );
 
     const renderIdeaItem = useCallback((idea, options = {}) => (
         <InspirationItem
@@ -59,6 +88,7 @@ const InspirationIdeaList = ({
             showSubcategoryControls={subcategoryOptions.length > 0}
             onSetSubcategory={onSetSubcategory}
             isIOSSelectionUi={isIOS}
+            enableEntranceAnimation={false}
         />
     ), [
         categoryConfigList,
@@ -86,9 +116,9 @@ const InspirationIdeaList = ({
             transition={{ duration: 0.18, ease: 'easeOut' }}
             className="space-y-6"
         >
-            {selectedCategory === 'todo' && todosByDay.length > 0 && (
+            {selectedCategory === 'todo' && visibleTodosByDay.length > 0 && (
                 <div className="space-y-4">
-                    {todosByDay.map((day) => (
+                    {visibleTodosByDay.map((day) => (
                         <section
                             key={day.dateKey}
                             className="space-y-4"
@@ -120,10 +150,10 @@ const InspirationIdeaList = ({
             {selectedCategory !== 'todo' && (
                 <>
                     <div className="space-y-6">
-                        {recentIdeas.map((idea) => renderIdeaItem(idea))}
+                        {visibleRecentIdeas.map((idea) => renderIdeaItem(idea))}
                     </div>
 
-                    {weeklyIdeaGroups.map((week) => (
+                    {visibleWeeklyIdeaGroups.map((week) => (
                         <div key={week.start.getTime()} id={`week-${week.key}`}>
                             <div className="flex items-center gap-3 mb-4 mt-8 cursor-pointer group">
                                 <div
@@ -164,6 +194,16 @@ const InspirationIdeaList = ({
                         {t('inspiration.emptyState')}
                     </p>
                 </motion.div>
+            )}
+
+            {hasMore && (
+                <div
+                    ref={sentinelRef}
+                    className="flex h-12 items-center justify-center"
+                    aria-hidden="true"
+                >
+                    <span className="h-1 w-10 rounded-full bg-gray-100 dark:bg-gray-800" />
+                </div>
             )}
         </motion.div>
     );

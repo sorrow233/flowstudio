@@ -85,6 +85,55 @@ export const groupTodoIdeasByDay = (ideas = []) => {
         .sort((a, b) => b.date.getTime() - a.date.getTime());
 };
 
+export const limitTodoDayGroups = (dayGroups = [], limit = 0) => {
+    let remaining = Math.max(0, limit);
+    const visibleGroups = [];
+
+    for (const group of dayGroups) {
+        if (remaining <= 0) break;
+
+        const visibleIdeas = group.ideas.slice(0, remaining);
+        if (visibleIdeas.length > 0) {
+            visibleGroups.push({
+                ...group,
+                ideas: visibleIdeas,
+            });
+            remaining -= visibleIdeas.length;
+        }
+    }
+
+    return visibleGroups;
+};
+
+export const limitRecentAndWeeklyIdeaGroups = ({
+    recentIdeas = [],
+    weeklyIdeaGroups = [],
+    limit = 0,
+}) => {
+    let remaining = Math.max(0, limit);
+    const visibleRecentIdeas = recentIdeas.slice(0, remaining);
+    remaining -= visibleRecentIdeas.length;
+
+    const visibleWeeklyIdeaGroups = [];
+    for (const group of weeklyIdeaGroups) {
+        if (remaining <= 0) break;
+
+        const visibleIdeas = group.ideas.slice(0, remaining);
+        if (visibleIdeas.length > 0) {
+            visibleWeeklyIdeaGroups.push({
+                ...group,
+                ideas: visibleIdeas,
+            });
+            remaining -= visibleIdeas.length;
+        }
+    }
+
+    return {
+        visibleRecentIdeas,
+        visibleWeeklyIdeaGroups,
+    };
+};
+
 export const buildGroupedWeekNavigation = (ideas = []) => {
     const weekGroups = splitIdeasByRecencyAndWeek(ideas).weeklyIdeaGroups;
     const groups = {};
