@@ -18,7 +18,6 @@ const InspirationIdeaList = ({
     sortedIdeas,
     todosByDay,
     visibleIdeaCount,
-    writingDocTitleById,
     categoryConfigList,
     selectedCategoryDividerLineStyle,
     selectedCategoryDividerTextStyle,
@@ -69,7 +68,6 @@ const InspirationIdeaList = ({
         <InspirationItem
             key={idea.id}
             idea={idea}
-            writingDocTitleById={writingDocTitleById}
             categories={categoryConfigList}
             onDelete={onRemove}
             onCopy={onCopy}
@@ -106,7 +104,6 @@ const InspirationIdeaList = ({
         selectedIdeaIdSet,
         selectedCategorySubcategories,
         subcategoryOptions,
-        writingDocTitleById,
     ]);
 
     return (

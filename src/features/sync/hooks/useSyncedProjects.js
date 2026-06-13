@@ -127,19 +127,13 @@ export const useProjectMigration = (doc, unifiedArrayName, oldArrayNames) => {
                     let stage = data.stage;
                     if (!stage) {
                         if (oldName === 'inspiration') stage = 'inspiration';
-                        else if (oldName === 'pending_projects') stage = 'pending';
-                        else if (oldName === 'primary_projects') {
-                            // If subStage >= 6, it might be Advanced/Final, but usually 'primary_projects' stores primary.
-                            // If it's already graduated, it should be in final_projects or have higher subStage.
-                            stage = (data.subStage || 1) >= 6 ? 'final' : 'primary';
-                        }
                         else if (oldName === 'final_projects') stage = 'final';
                     }
 
                     const normalized = {
                         ...data,
                         id: data.id || uuidv4(),
-                        stage: stage || 'primary'
+                        stage: stage || 'inspiration'
                     };
 
                     // Check for duplicates in unifiedArray before adding

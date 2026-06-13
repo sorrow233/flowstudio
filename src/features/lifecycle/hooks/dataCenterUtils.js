@@ -1,5 +1,4 @@
 import { isSameDay, isSameMonth, isSameWeek } from 'date-fns';
-import { getActiveWritingDocs, isWritingProject } from '../utils/writingDocAggregation.js';
 
 const WEEK_OPTIONS = { weekStartsOn: 1 };
 
@@ -67,21 +66,6 @@ export const resolveTimestamp = (item, candidateKeys) => {
 };
 
 export const getTextLength = (value) => (typeof value === 'string' ? value.length : 0);
-
-export { isWritingProject };
-
-export const buildWritingEntries = (allProjects = [], writingDocs = [], writingContent = {}) => {
-    return getActiveWritingDocs(allProjects, writingDocs).map((doc) => {
-        const directContentLength = getTextLength(doc.content);
-        const fallbackLength = getTextLength(writingContent?.[doc.id]);
-
-        return {
-            id: doc.id,
-            chars: directContentLength > 0 ? directContentLength : fallbackLength,
-            timestamp: resolveTimestamp(doc, ['lastModified', 'timestamp', 'updatedAt', 'createdAt'])
-        };
-    });
-};
 
 export const isTimestampInInterval = (timestamp, intervalStart, type) => {
     if (!timestamp) return false;

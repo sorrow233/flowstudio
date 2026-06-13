@@ -75,28 +75,6 @@ export const useDataMigration = (doc, isLoggedIn = false, syncStatus = 'disconne
                     console.error("[Migration] Failed category migration:", e);
                 }
 
-                // --- Migrate Legacy Projects ---
-                try {
-                    const localPending = localStorage.getItem('pending_projects');
-                    if (localPending) {
-                        const parsed = JSON.parse(localPending);
-                        const yAllProjects = doc.getArray('all_projects');
-                        const existingIds = new Set(yAllProjects.toJSON().map(p => p.id));
-
-                        const newProjects = parsed.filter(p => p.id && !existingIds.has(p.id))
-                            .map(p => ({ ...p, stage: 'pending' }));
-
-                        if (newProjects.length > 0) {
-                            const yMaps = newProjects.map(p => {
-                                const yMap = new Y.Map();
-                                Object.entries(p).forEach(([k, v]) => yMap.set(k, v));
-                                return yMap;
-                            });
-                            yAllProjects.push(yMaps);
-                        }
-                    }
-                } catch (e) { }
-
             });
 
             // Mark migration as completed
@@ -156,27 +134,6 @@ export const useDataMigration = (doc, isLoggedIn = false, syncStatus = 'disconne
                         yProjs.push(yMaps);
                     }
 
-                    if (DEFAULT_TEMPLATE.pendingProjects?.length > 0) {
-                        const yProjs = doc.getArray('all_projects');
-                        const yMaps = DEFAULT_TEMPLATE.pendingProjects.map(p => {
-                            const yMap = new Y.Map();
-                            const proj = { ...p, stage: 'pending' };
-                            Object.entries(proj).forEach(([k, v]) => yMap.set(k, v));
-                            return yMap;
-                        });
-                        yProjs.push(yMaps);
-                    }
-
-                    if (DEFAULT_TEMPLATE.primaryProjects?.length > 0) {
-                        const yProjs = doc.getArray('all_projects');
-                        const yMaps = DEFAULT_TEMPLATE.primaryProjects.map(p => {
-                            const yMap = new Y.Map();
-                            const proj = { ...p, stage: 'primary' };
-                            Object.entries(proj).forEach(([k, v]) => yMap.set(k, v));
-                            return yMap;
-                        });
-                        yProjs.push(yMaps);
-                    }
                 });
             }
         };

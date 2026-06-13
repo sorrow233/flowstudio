@@ -16,12 +16,9 @@ import {
     idleRoutePreloaders,
     InspirationArchiveRoute,
     InspirationRoute,
-    PendingRoute,
-    PrimaryDevRoute,
     ShareReceiverRoute,
     ShareViewRoute,
     UserIdentityRoute,
-    WritingRoute,
 } from './routes/routeModules';
 
 const IDLE_PRELOAD_DELAY_MS = 120;
@@ -98,7 +95,7 @@ function App() {
                     {!isIdentityRoute && <Navbar />}
 
                     <main className="flex-1 overflow-y-auto w-full no-scrollbar">
-                        <div className={`${isIdentityRoute ? 'max-w-5xl mx-auto h-full px-4 py-8 md:px-6 md:py-12' : `max-w-7xl mx-auto h-full px-4 md:px-6 ${location.pathname.startsWith('/writing') ? 'pb-0' : 'pb-20'}`}`}>
+                        <div className={`${isIdentityRoute ? 'max-w-5xl mx-auto h-full px-4 py-8 md:px-6 md:py-12' : 'max-w-7xl mx-auto h-full px-4 pb-20 md:px-6'}`}>
                             {!isIdentityRoute && !isShareRoute && <IOSHomeScreenPrompt />}
                             <ErrorBoundary>
                                 <Suspense fallback={<RouteLoadingScreen />}>
@@ -106,14 +103,7 @@ function App() {
                                         <Route path="/" element={<Navigate to="/inspiration" replace />} />
                                         <Route path="/inspiration" element={<InspirationRoute />} />
                                         <Route path="/inspiration/c/:categoryId" element={<InspirationRoute />} />
-                                        <Route path="/writing" element={<WritingRoute />} />
-                                        <Route path="/writing/c/:categoryId" element={<WritingRoute />} />
-                                        <Route path="/writing/c/:categoryId/:docId" element={<WritingRoute />} />
-                                        <Route path="/writing/trash" element={<WritingRoute />} />
-                                        <Route path="/writing/trash/:docId" element={<WritingRoute />} />
                                         <Route path="/inspiration/archive" element={<InspirationArchiveRoute />} />
-                                        <Route path="/sprout" element={<PendingRoute />} />
-                                        <Route path="/flow" element={<PrimaryDevRoute />} />
                                         <Route path="/advanced" element={<AdvancedDevRoute />} />
                                         <Route path="/blueprint" element={<CommandCenterRoute />} />
                                         <Route path="/data" element={<DataCenterRoute />} />

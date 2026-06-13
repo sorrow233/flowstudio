@@ -3,9 +3,6 @@ export default {
     // Navigation
     navbar: {
         inspiration: 'Inspiration',
-        writing: 'Writing',
-        pending: 'Sprout',
-        primary: 'Flow',
         advanced: 'Advanced',
         final: 'Modules',
         commercial: 'Commercial',
@@ -27,8 +24,6 @@ export default {
         undo: 'Undo',
         redo: 'Redo',
         copy: 'Copy',
-        copied: 'Copied',
-        search: 'Search...',
         notePlaceholder: 'Add a note...',
         new: 'New',
         profile: 'Profile',
@@ -87,10 +82,7 @@ export default {
     inspiration: {
         title: 'Inspiration',
         subtitle: 'Capture fleeting ideas, fuel your future.',
-        writing: 'Writing',
 
-        writingSubtitle: 'Immersive creation, capturing complete thoughts',
-        totalDocs: 'Documents',
         placeholder: 'Record a fleeting thought...',
         addNote: 'Add Note',
         codeBlockAction: 'Wrap selected text in a code block',
@@ -98,145 +90,10 @@ export default {
         emptyState: 'No inspirations yet, record your first idea',
         ideaDeleted: 'Idea deleted',
         cmdEnter: 'CMD + ENTER',
-        // New Writing Module
-        newDoc: 'New Writing',
-        deleteConfirm: 'Are you sure you want to delete this?',
-        noDocs: 'No documents',
-        search: 'Search...',
-        untitled: 'Untitled',
-        toggleSidebar: 'Toggle Sidebar',
-        timeGroup: {
-            today: 'Today',
-            yesterday: 'Yesterday',
-            week: 'Last 7 Days',
-            older: 'Older'
-        },
-        conflictDetected: 'Remote changes detected while you were editing.',
-        useRemote: 'Use Remote',
-        keepLocal: 'Keep Local',
-        remotePreview: 'Remote preview',
-        saveVersion: 'Save version',
-        versionHistory: 'Version history',
-        export: 'Export',
-        exportMarkdown: 'Export Markdown',
-        exportHtml: 'Export HTML',
-        exportTxt: 'Export text',
-        words: 'words',
-        characters: 'chars',
-        readTime: 'min read',
-        copyText: 'Copy text',
-        copied: 'Copied',
-        syncing: 'Syncing',
-        synced: 'Synced',
-        offline: 'Offline',
-        saving: 'Saving',
-        lastSaved: 'Last saved',
-        applyRemote: 'Apply updates',
-        pendingRemote: 'Remote update available',
-        noVersions: 'No saved versions yet',
-        restore: 'Restore',
     },
 
     blueprint: {
         title: 'Blueprint',
-    },
-
-    writing: {
-        library: 'Library',
-        documents: 'Documents',
-        search: 'Search documents...',
-        untitled: 'Untitled',
-        placeholder: 'Start writing...',
-        emptyDocs: 'No documents in this folder',
-        emptySelection: 'Select a document to start writing',
-        system: {
-            all: 'All',
-            inbox: 'Inbox',
-            trash: 'Trash',
-        },
-        status: {
-            syncing: 'Syncing',
-            synced: 'Synced',
-            offline: 'Offline',
-        },
-        stats: {
-            words: 'words',
-            chars: 'chars',
-        },
-        actions: {
-            newDoc: 'New doc',
-            newFolder: 'New folder',
-            createFolder: 'Create folder',
-            renameFolderPrompt: 'Rename folder',
-            deleteFolderConfirm: 'Delete this folder? Documents will be moved to Inbox.',
-            rename: 'Rename',
-            delete: 'Move to Trash',
-            restore: 'Restore',
-            collapse: 'Collapse',
-            expand: 'Expand',
-            syncNow: 'Sync',
-        },
-        categoryDraft: 'Draft',
-        categoryPlot: 'Plot',
-        categoryCharacter: 'Character',
-        categoryWorld: 'World',
-        categoryFinal: 'Final',
-        manageCategories: 'Manage Writing Categories',
-        categoryNamePlaceholder: 'Enter category name',
-        addCategoryLimit10: 'Add category (up to 10)',
-        categoryLimitReached: 'Category limit reached (10)',
-        categoryCountLabel: 'Categories',
-        categoryNameRequired: 'Please enter a category name',
-        categoryNameDuplicate: 'Category name already exists',
-        categoryNameTooLong: 'Category name can be at most 24 characters',
-        categoryColorFixed: 'Default category colors are fixed',
-        categoryColorChange: 'Change category color',
-        categoryColorInUse: 'This color is already in use',
-        categoryColorSelect: 'Select color',
-        categoryDeleteMoveHint: 'Documents in this category will be moved automatically after deletion.',
-        tableOfContents: 'Table of contents',
-        markdownQuickMenu: 'Markdown quick menu',
-        h1: 'Heading 1',
-        h2: 'Heading 2',
-        h3: 'Heading 3',
-        bold: 'Bold',
-        italic: 'Italic',
-        strikethrough: 'Strikethrough',
-        link: 'Link',
-        inlineCode: 'Inline code',
-    },
-
-    // Pending Module
-    pending: {
-        title: 'Pending Projects',
-        subtitle: 'Project ideas awaiting kickoff',
-        emptyState: 'No pending projects',
-        addProject: 'Add Project',
-        projectName: 'Project Name',
-        projectDescription: 'Project Description',
-    },
-
-    // Pending Module
-    pending: {
-        title: 'Idea Staging',
-        subtitle: 'Validate before you build',
-        removeConfirmTitle: 'Remove this seed?',
-        removeConfirmMessage: 'This action cannot be undone. The seed will return to the void, awaiting the next spark of inspiration.',
-        remove: 'Remove',
-        newSeedDesc: 'Describe this idea in one sentence...',
-        nursery: 'Nursery',
-        growing: 'Growing',
-    },
-
-    // Flow Module
-    primary: {
-        title: 'Flow',
-        subtitle: 'Turn all difficulties and complexities into flow',
-        emptyState: 'No flow projects',
-        tasks: 'Tasks',
-        progress: 'Progress',
-        noTasks: 'No tasks',
-        addTask: 'Add Task',
     },
 
     // Advanced Refinement (formerly Final)
@@ -288,24 +145,7 @@ export default {
         appearance: 'Appearance',
         imageUrlHint: 'Enter a valid image URL for the project background card.',
         preview: 'Background Preview',
-        deleteConfirm: 'Are you sure you want to delete this project? This action cannot be undone.',
         saveChanges: 'Save Changes',
-    },
-
-    // Project Management
-    project: {
-        advancedStage: 'Advanced Stage',
-        nurseryStage: 'Sprout Stage',
-        pruneSeed: 'Prune this Seed',
-        keepGrowing: 'Cancel and keep growing',
-        waitingForSprout: 'Waiting for the first sprout of inspiration...',
-        untitledProject: 'Untitled Project',
-        descriptionPlaceholder: 'Add project description...',
-        addLink: 'Add a link...',
-        myVow: 'My Vow',
-        vowEstablished: 'Established',
-        vowPlaceholder: 'Write down your founding reason...',
-        promoteToAdvanced: 'Promote to Advanced',
     },
 
 
@@ -573,11 +413,7 @@ export default {
 
     // Sync Status
     sync: {
-        synced: 'Synced',
-        syncing: 'Syncing...',
-        offline: 'Offline',
         error: 'Sync Error',
-        pending: 'Pending',
     },
 
     // Auth
@@ -591,10 +427,8 @@ export default {
     data: {
         subtitle: 'Visualize your digital mind footprint',
         totalWords: 'Total Characters',
-        growingCount: 'Growing Projects',
         blueprintCount: 'Blueprint Plans',
         conversion: 'Inspiration Conversion',
-        flowEfficiency: 'Flow output is actively growing',
         emptyState: 'No data yet. Start recording your thoughts.',
         today: 'Today',
         thisWeek: 'This Week',

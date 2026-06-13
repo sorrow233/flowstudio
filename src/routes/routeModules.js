@@ -11,24 +11,9 @@ export const InspirationRoute = createRouteModule(
     'route-inspiration'
 );
 
-export const WritingRoute = createRouteModule(
-    () => import('../features/lifecycle/WritingModule'),
-    'route-writing'
-);
-
 export const InspirationArchiveRoute = createRouteModule(
     () => import('../features/lifecycle/InspirationArchiveModule'),
     'route-inspiration-archive'
-);
-
-export const PendingRoute = createRouteModule(
-    () => import('../features/lifecycle/PendingModule'),
-    'route-pending'
-);
-
-export const PrimaryDevRoute = createRouteModule(
-    () => import('../features/lifecycle/PrimaryDevModule'),
-    'route-primary-dev'
 );
 
 export const AdvancedDevRoute = createRouteModule(
@@ -63,18 +48,12 @@ export const UserIdentityRoute = createRouteModule(
 
 const navbarRoutePreloaders = [
     { path: '/inspiration', preload: InspirationRoute.preload },
-    { path: '/writing', preload: WritingRoute.preload },
-    { path: '/sprout', preload: PendingRoute.preload },
-    { path: '/flow', preload: PrimaryDevRoute.preload },
     { path: '/blueprint', preload: CommandCenterRoute.preload },
     { path: '/data', preload: DataCenterRoute.preload },
     { path: '/advanced', preload: AdvancedDevRoute.preload },
 ];
 
 export const idleRoutePreloaders = [
-    WritingRoute.preload,
-    PendingRoute.preload,
-    PrimaryDevRoute.preload,
     CommandCenterRoute.preload,
     DataCenterRoute.preload,
 ];

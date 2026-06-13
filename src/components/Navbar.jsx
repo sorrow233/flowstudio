@@ -4,16 +4,13 @@ import Spotlight from './shared/Spotlight';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
     Lightbulb,
-    Clock,
-    Code2,
     CheckCircle2,
     Terminal,
     Cloud,
     Settings,
     Sun,
     Moon,
-    BarChart3,
-    PenTool
+    BarChart3
 } from 'lucide-react';
 import { useAuth } from '../features/auth/AuthContext';
 import AuthModal from '../features/auth/AuthModal';
@@ -27,8 +24,6 @@ import { preloadNavbarRoute } from '../routes/routeModules';
 
 const tabIcons = {
     inspiration: Lightbulb,
-    pending: Clock,
-    primary: Code2,
     advanced: CheckCircle2,
     command: Terminal,
     data: BarChart3
@@ -44,12 +39,9 @@ const Navbar = () => {
     const { showAdvancedFeatures } = useSettings();
     const { t } = useTranslation();
 
-    // 主流程：灵感 → 写作 → 萌芽 → 心流 → 蓝图 → 进阶（可选）
+    // 主流程：灵感 → 蓝图 → 数据 → 进阶（可选）
     const mainTabs = [
         { id: 'inspiration', label: t('navbar.inspiration'), icon: tabIcons.inspiration, path: '/inspiration' },
-        { id: 'writing', label: t('navbar.writing', '写作'), icon: PenTool, path: '/writing' },
-        { id: 'pending', label: t('navbar.pending'), icon: tabIcons.pending, path: '/sprout' },
-        { id: 'primary', label: t('navbar.primary'), icon: tabIcons.primary, path: '/flow' },
         { id: 'command', label: t('navbar.command'), icon: tabIcons.command, path: '/blueprint' },
         { id: 'data', label: t('navbar.data'), icon: tabIcons.data, path: '/data' },
     ];
@@ -78,9 +70,6 @@ const Navbar = () => {
     const getActiveTheme = () => {
         const path = location.pathname;
         if (path.startsWith('/inspiration')) return 'pink';
-        if (path.startsWith('/writing')) return 'pink';
-        if (path.startsWith('/sprout')) return 'green';
-        if (path.startsWith('/flow')) return 'purple';
         if (path.startsWith('/advanced')) return 'red';
         if (path.startsWith('/blueprint')) return 'sky';
         if (path.startsWith('/data')) return 'indigo';
@@ -95,18 +84,6 @@ const Navbar = () => {
             iconText: 'text-pink-400 dark:text-pink-300',
             iconHover: 'hover:bg-pink-50 dark:hover:bg-pink-900/20',
             sync: { dot: 'bg-pink-400', shadow: 'shadow-[0_0_8px_rgba(244,114,182,0.4)]', text: 'text-pink-500', bg: 'bg-pink-50/50 dark:bg-pink-900/20' }
-        },
-        green: {
-            spotlight: isDark ? "rgba(16, 185, 129, 0.15)" : "rgba(16, 185, 129, 0.1)",
-            iconText: 'text-green-500 dark:text-green-400',
-            iconHover: 'hover:bg-green-50 dark:hover:bg-green-900/20',
-            sync: { dot: 'bg-emerald-500', shadow: 'shadow-[0_0_8px_rgba(16,185,129,0.4)]', text: 'text-emerald-600', bg: 'bg-emerald-50/50 dark:bg-emerald-900/20' }
-        },
-        purple: {
-            spotlight: isDark ? "rgba(168, 85, 247, 0.15)" : "rgba(168, 85, 247, 0.1)",
-            iconText: 'text-purple-500 dark:text-purple-400',
-            iconHover: 'hover:bg-purple-50 dark:hover:bg-purple-900/20',
-            sync: { dot: 'bg-purple-500', shadow: 'shadow-[0_0_8px_rgba(168,85,247,0.4)]', text: 'text-purple-600', bg: 'bg-purple-50/50 dark:bg-purple-900/20' }
         },
         red: {
             spotlight: isDark ? "rgba(239, 68, 68, 0.15)" : "rgba(239, 68, 68, 0.1)",
@@ -149,9 +126,6 @@ const Navbar = () => {
                             // Define active colors for each tab
                             const activeColors = {
                                 inspiration: '!text-pink-400 dark:!text-pink-300',
-                                writing: 'text-pink-500 dark:text-pink-400',
-                                pending: 'text-green-500 dark:text-green-400',
-                                primary: 'text-purple-500 dark:text-purple-400',
                                 advanced: 'text-red-500 dark:text-red-400',
                                 command: 'text-sky-500 dark:text-sky-400',
                                 data: 'text-indigo-500 dark:text-indigo-400',
@@ -159,21 +133,15 @@ const Navbar = () => {
 
                             const activeColorClass = activeColors[tab.id] || 'text-gray-900 dark:text-white';
                             const tabTheme = themeConfigs[
-                                tab.id === 'pending' ? 'green'
-                                    : tab.id === 'primary' ? 'purple'
-                                        : tab.id === 'inspiration' ? 'pink'
-                                            : tab.id === 'writing' ? 'pink'
-                                                : tab.id === 'command' ? 'sky'
-                                                    : tab.id === 'data' ? 'indigo'
-                                                        : 'default'
+                                tab.id === 'inspiration' ? 'pink'
+                                    : tab.id === 'command' ? 'sky'
+                                        : tab.id === 'data' ? 'indigo'
+                                            : 'default'
                             ];
 
                             // Brush gradient definitions matching module headers
                             const brushGradients = {
                                 inspiration: 'from-pink-200/80 via-pink-300/60 to-transparent dark:from-pink-700/50 dark:via-pink-600/30',
-                                writing: 'from-pink-200/80 via-rose-300/60 to-transparent dark:from-rose-700/50 dark:via-pink-600/30',
-                                pending: 'from-green-200/80 via-green-300/60 to-transparent dark:from-green-700/50 dark:via-green-600/30',
-                                primary: 'from-purple-200/80 via-purple-300/60 to-transparent dark:from-purple-700/50 dark:via-purple-600/30',
                                 command: 'from-sky-200/80 via-sky-300/60 to-transparent dark:from-sky-700/50 dark:via-sky-600/30',
                                 data: 'from-indigo-200/80 via-indigo-300/60 to-transparent dark:from-indigo-700/50 dark:via-indigo-600/30'
                             };

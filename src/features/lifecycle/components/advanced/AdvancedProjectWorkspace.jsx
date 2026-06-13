@@ -5,8 +5,8 @@ import { Activity, X, Settings, ChevronRight, Menu, Plus } from 'lucide-react';
 
 import AdvancedStageNavigation from './AdvancedStageNavigation';
 import ProjectSettingsModal from './ProjectSettingsModal';
-import TaskList from '../flow/TaskList'; // Reusing Flow TaskList
-import ImportCommandModal from '../flow/ImportCommandModal';
+import TaskList from './TaskList';
+import ImportCommandModal from './ImportCommandModal';
 import { useSyncedProjects } from '../../../sync/useSyncStore';
 import { useSync } from '../../../sync/SyncContext';
 import { useTranslation } from '../../../i18n';
@@ -67,7 +67,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
         }
     }, [stages, activeStageId]);
 
-    // --- Task Handlers (Mirrored from PrimaryDevModule) ---
+    // --- Task Handlers ---
 
     const handleAddTask = (projectId) => {
         if (!newTaskInput.trim()) return;
@@ -246,6 +246,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
                             tasks={project.tasks || []}
                             projectId={project.id}
                             activeStage={activeStageId} // Passing string ID
+                            stages={stages}
                             onToggle={handleToggleTask}
                             onDelete={handleDeleteTask}
                             onAddTask={handleAddTask}
@@ -275,6 +276,7 @@ const AdvancedProjectWorkspace = ({ project, onClose, updateProject, onDeletePro
                     onClose={() => setIsImportModalOpen(false)}
                     onImport={handleImportTask}
                     currentStage={activeStageId}
+                    stages={stages}
                     projectCategory={project.category}
                     themeColor={activeStage?.color ? 'custom' : 'purple'}
                 />

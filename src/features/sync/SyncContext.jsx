@@ -1,6 +1,5 @@
 import React, { createContext, useContext } from 'react';
 import { useSyncStore, useDataMigration, useProjectMigration } from './useSyncStore';
-import { useWritingDataMigration } from './hooks/useWritingDataMigration';
 import { useAuth } from '../auth/AuthContext';
 import { useLocalBackup } from './LocalBackupService';
 
@@ -18,7 +17,6 @@ export const SyncProvider = ({ children, docId = 'flowstudio_v1' }) => {
     // Pass auth + sync status so guest seeds wait for local data to load and
     // logged-in users never keep the onboarding cards in their synced state.
     useDataMigration(doc, isLoggedIn, status);
-    useWritingDataMigration(doc, status);
 
     // 启用本地定时备份：每小时同步一次完整数据，保留3天
     useLocalBackup(doc);
@@ -26,8 +24,6 @@ export const SyncProvider = ({ children, docId = 'flowstudio_v1' }) => {
     // Migrate projects to unified storage
     useProjectMigration(doc, 'all_projects', [
         'inspiration',
-        'pending_projects',
-        'primary_projects',
         'final_projects'
     ]);
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Terminal, Tag, LayoutGrid, Monitor, Server, Database, Container, Beaker, ChevronDown, Filter, Sparkles, Flag, Check } from 'lucide-react';
-import { STORAGE_KEYS, COMMAND_CATEGORIES, DEV_STAGES } from '../../../../utils/constants';
+import { COMMAND_CATEGORIES } from '../../../../utils/constants';
 import { useSync } from '../../../sync/SyncContext';
 import { useSyncedProjects } from '../../../sync/useSyncStore';
 import { useTranslation } from '../../../i18n';
@@ -16,8 +16,10 @@ const CATEGORY_ICONS = {
     'Flag': Flag
 };
 
-const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCategory, stages = DEV_STAGES, themeColor = 'emerald' }) => {
+const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCategory, stages = [], themeColor = 'emerald' }) => {
     const { t } = useTranslation();
+    const currentStageInfo = stages.find((stage) => stage.id === currentStage);
+    const currentStageName = currentStageInfo?.name || currentStageInfo?.label || t('common.all');
     const THEME_STYLES = {
         purple: {
             border: 'border-purple-100/50 hover:border-purple-300',
@@ -321,7 +323,7 @@ const ImportCommandModal = ({ isOpen, onClose, onImport, currentStage, projectCa
                                         <div className="p-4 pb-2">
                                             <h4 className={`text-xs font-bold ${themeClasses.recommendedTitle} uppercase tracking-widest flex items-center gap-2`}>
                                                 <Sparkles size={14} className={themeClasses.recommendedIcon} />
-                                                {t('importCommandModal.recommendedFor', { stage: stages.find(s => s.id === currentStage)?.label || t('common.all') })}
+                                                {t('importCommandModal.recommendedFor', '推荐用于{stage}').replace('{stage}', currentStageName)}
                                             </h4>
                                         </div>
 

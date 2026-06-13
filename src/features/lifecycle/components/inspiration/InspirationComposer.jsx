@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, Hash, UploadCloud } from 'lucide-react';
+import { ArrowRight, UploadCloud } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from '../../../i18n';
 import Spotlight from '../../../../components/shared/Spotlight';
@@ -9,7 +9,7 @@ import { COLOR_CONFIG } from './InspirationUtils';
 import CodeBlockActionButton from './CodeBlockActionButton';
 import { transferMayContainImageFile } from './imageTransferUtils';
 
-const InspirationComposer = ({ allProjectTags = [], onSubmit, accentHex }) => {
+const InspirationComposer = ({ onSubmit, accentHex }) => {
     const { t } = useTranslation();
     const [input, setInput] = useState('');
     const [selectedColorIndex, setSelectedColorIndex] = useState(null);
@@ -43,12 +43,6 @@ const InspirationComposer = ({ allProjectTags = [], onSubmit, accentHex }) => {
                 setSelectedColorIndex((prev) => (prev === index ? null : index));
             }
         }
-    }, []);
-
-    const handleTagClick = useCallback((projectTitle) => {
-        const tag = `[${projectTitle}] `;
-        setInput((prev) => prev + tag);
-        editorRef.current?.focus();
     }, []);
 
     const handleImageUploadComplete = useCallback((imageUrl) => {
@@ -200,23 +194,7 @@ const InspirationComposer = ({ allProjectTags = [], onSubmit, accentHex }) => {
                                 onUploadComplete={handleImageUploadComplete}
                             />
 
-                            <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2 mask-linear-fade">
-                                {allProjectTags.length > 0 && (
-                                    <>
-                                        <Hash size={14} className="text-gray-300 dark:text-gray-600 flex-shrink-0" />
-                                        {allProjectTags.map((tag) => (
-                                            <button
-                                                key={tag}
-                                                type="button"
-                                                onClick={() => handleTagClick(tag)}
-                                                className="flex-shrink-0 px-2 py-1 bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-900/40 rounded-md text-[11px] font-medium transition-all duration-300 border border-pink-100 dark:border-pink-800/30 whitespace-nowrap"
-                                            >
-                                                {tag}
-                                            </button>
-                                        ))}
-                                    </>
-                                )}
-                            </div>
+                            <div className="flex-1" />
                         </div>
 
                         <div className="flex items-center gap-3 flex-shrink-0">

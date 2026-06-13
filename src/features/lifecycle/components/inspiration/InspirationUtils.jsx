@@ -71,23 +71,8 @@ const URL_REGEX = /(https?:\/\/[^\s]+)/gi;
 
 const removeAllOccurrences = (text, value) => String(text || '').split(value).join('');
 
-const resolveWritingDocTitle = (source, docId) => {
-    if (!docId) return null;
-
-    if (source instanceof Map) {
-        return source.get(docId) || null;
-    }
-
-    if (Array.isArray(source)) {
-        const foundProject = source.find(p => p.id === docId);
-        return foundProject?.title || null;
-    }
-
-    return null;
-};
-
 // Helper for parsing rich text (with image support)
-export const parseRichText = (text, writingDocTitleSource = [], clipboardText = '', options = {}) => {
+export const parseRichText = (text, clipboardText = '', options = {}) => {
     if (!text) return null;
     const codeBlockTheme = buildCodeBlockTheme(options.accentHex);
 
@@ -115,47 +100,6 @@ export const parseRichText = (text, writingDocTitleSource = [], clipboardText = 
                 const matched = segment.match(/^(https?:\/\/\S*?)([)。，；;!?]+)?$/i);
                 const link = matched?.[1] || segment;
                 const trailing = matched?.[2] || '';
-
-                // Check if it's an internal writing link
-                const isWritingLink = link.includes('/writing/c/') || link.includes('/writing/trash');
-
-                if (isWritingLink) {
-                    let docTitle = '写作文档';
-                    try {
-                        // Extract the docId from the URL structure /writing/c/:category/:docId
-                        const parts = link.split('/writing/c/');
-                        if (parts.length > 1) {
-                            const pathSegments = parts[1].split('/');
-                            if (pathSegments.length >= 2) {
-                                const docId = pathSegments[1].split('?')[0].split('#')[0]; // clean trailing
-                                const resolvedTitle = resolveWritingDocTitle(writingDocTitleSource, docId);
-                                if (resolvedTitle) {
-                                    docTitle = `写作文档: ${resolvedTitle}`;
-                                }
-                            }
-                        }
-                    } catch (err) {
-                        console.warn('Failed to parse writing writing link for title lookup', err);
-                    }
-
-                    return (
-                        <React.Fragment key={`${index}-link-frag-${segIdx}`}>
-                            <a
-                                href={link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 my-0.5 bg-blue-50/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded-full text-[13px] font-medium border border-blue-200/60 dark:border-blue-700/50 hover:bg-blue-100 dark:hover:bg-blue-800/40 hover:shadow-sm transition-all"
-                                onPointerDown={(e) => e.stopPropagation()}
-                                onClick={(e) => e.stopPropagation()}
-                                title={link}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
-                                <span>{docTitle}</span>
-                            </a>
-                            {trailing ? <span>{trailing}</span> : null}
-                        </React.Fragment>
-                    );
-                }
 
                 return (
                     <React.Fragment key={`${index}-link-frag-${segIdx}`}>

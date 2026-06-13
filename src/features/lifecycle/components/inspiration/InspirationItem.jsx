@@ -18,7 +18,6 @@ import {
 
 const InspirationItem = React.forwardRef(({
     idea,
-    writingDocTitleById,
     categories = [],
     onDelete,
     onRestore,
@@ -79,8 +78,8 @@ const InspirationItem = React.forwardRef(({
 
     // 缓存 parseRichText 计算结果，避免每次渲染都重新执行正则匹配
     const parsedContent = useMemo(
-        () => parseRichText(idea.content, writingDocTitleById, ideaCopyPayload.textWithoutImages, { accentHex: categoryAccentHex }),
-        [categoryAccentHex, idea.content, ideaCopyPayload.textWithoutImages, writingDocTitleById]
+        () => parseRichText(idea.content, ideaCopyPayload.textWithoutImages, { accentHex: categoryAccentHex }),
+        [categoryAccentHex, idea.content, ideaCopyPayload.textWithoutImages]
     );
     const todoAiAssistMeta = useMemo(
         () => getTodoAiAssistMeta(aiAssistClass),
@@ -641,7 +640,6 @@ const areIdeaViewPropsEqual = (prevProps, nextProps) => {
 
     return (
         prevIdea === nextIdea
-        && prevProps.writingDocTitleById === nextProps.writingDocTitleById
         && prevProps.categories === nextProps.categories
         && prevProps.isArchiveView === nextProps.isArchiveView
         && prevProps.isSelectionMode === nextProps.isSelectionMode

@@ -18,8 +18,8 @@
 
 ### Overview
 
-Flow Studio 是一款追求**极致视觉**与**心流体验**的全流程工作台。
-集成灵感捕捉、沉浸写作、项目孵化与数据洞察，打造从点子到落地的完整闭环。
+Flow Studio 是一款追求**极致视觉**与**顺滑体验**的创作工作台。
+集成灵感捕捉、蓝图管理与数据洞察，让想法记录和复盘保持轻盈。
 
 ---
 
@@ -28,13 +28,10 @@ Flow Studio 是一款追求**极致视觉**与**心流体验**的全流程工作
 **01 Inspiration / 灵感**
 ![Inspiration](docs/images/灵感.png)
 
-**02 Flow Writing / 写作**
-![Writing](docs/images/写作.png)
-
-**03 Lifecycle / 孵化**
+**02 Blueprint / 蓝图**
 ![Lifecycle](docs/images/蓝图.png)
 
-**04 Data / 洞察**
+**03 Data / 洞察**
 ![Data](docs/images/数据.png)
 
 ---
@@ -42,8 +39,7 @@ Flow Studio 是一款追求**极致视觉**与**心流体验**的全流程工作
 ### Features
 
 - **Inspiration**: 卡片式灵感管理，支持图片联动与拖拽分类。
-- **Flow Writing**: 基于 Prosemirror 的沉浸式编辑器，支持 Markdown、实时统计与版本回溯。
-- **Lifecycle**: 从 `Pending` 到 `Flow` 的项目全生命周期管理，集成里程碑与命令蓝图。
+- **Blueprint**: 管理常用命令和链接，按阶段组织并支持快速复制。
 - **Data Center**: 可视化热力图与趋势分析，回顾创作习惯。
 - **Cloud Sync**: 基于 Yjs + Firebase 的多端实时同步，支持离线优先。
 

@@ -110,63 +110,6 @@ const seoConfig = {
             },
         },
 
-        '/writing': {
-            zh: {
-                title: '写作 | Flow Studio',
-                description: '在 Flow Studio 中沉浸式写作，按分类整理文稿并持续同步。',
-            },
-            en: {
-                title: 'Writing | Flow Studio',
-                description: 'Write immersively in Flow Studio, organize drafts by category, and keep everything synced.',
-            },
-            ja: {
-                title: 'ライティング | Flow Studio',
-                description: 'Flow Studio で没入して執筆し、カテゴリーごとに原稿を整理して同期を保ちます。',
-            },
-            ko: {
-                title: '글쓰기 | Flow Studio',
-                description: 'Flow Studio에서 몰입해 글을 쓰고, 카테고리별로 문서를 정리하며 동기화 상태를 유지하세요.',
-            },
-        },
-
-        '/sprout': {
-            zh: {
-                title: '待定项目 | Flow Studio',
-                description: '管理等待启动的项目构思。使用 Flow Studio 的灵魂四问验证项目可行性。',
-            },
-            en: {
-                title: 'Pending Projects | Flow Studio',
-                description: 'Manage project ideas awaiting kickoff. Validate project viability with Flow Studio Soul Questions.',
-            },
-            ja: {
-                title: '保留プロジェクト | Flow Studio',
-                description: 'キックオフ待ちのプロジェクトアイデアを管理。Flow Studioの魂の4つの質問でプロジェクトの実行可能性を検証。',
-            },
-            ko: {
-                title: '대기 프로젝트 | Flow Studio',
-                description: '시작을 기다리는 프로젝트 아이디어를 관리하세요. Flow Studio 영혼의 질문으로 프로젝트 실행 가능성을 검증.',
-            },
-        },
-
-        '/flow': {
-            zh: {
-                title: '主力开发 | Flow Studio',
-                description: '5 阶段开发流程：骨架 → 功能 → 模块 → 优化 → 完成。任务管理与进度追踪完美结合。',
-            },
-            en: {
-                title: 'Primary Development | Flow Studio',
-                description: '5-stage development flow: Skeleton → Functionality → Modules → Optimization → Completion. Task management meets progress tracking.',
-            },
-            ja: {
-                title: 'メイン開発 | Flow Studio',
-                description: '5段階の開発フロー：スケルトン → 機能 → モジュール → 最適化 → 完成。タスク管理と進捗追跡の完璧な融合。',
-            },
-            ko: {
-                title: '메인 개발 | Flow Studio',
-                description: '5단계 개발 플로우: 스켈레톤 → 기능 → 모듈 → 최적화 → 완료. 작업 관리와 진행 상황 추적의 완벽한 조화.',
-            },
-        },
-
         '/advanced': {
             zh: {
                 title: '进阶开发 | Flow Studio',
@@ -246,14 +189,6 @@ const seoConfig = {
 
         if (normalizedPath.startsWith('/inspiration/c/')) {
             normalizedPath = '/inspiration';
-        }
-
-        if (normalizedPath === '/writing/trash' || normalizedPath.startsWith('/writing/trash/')) {
-            normalizedPath = '/writing';
-        }
-
-        if (normalizedPath.startsWith('/writing/c/')) {
-            normalizedPath = '/writing';
         }
 
         const pageConfig = this.pages[normalizedPath];

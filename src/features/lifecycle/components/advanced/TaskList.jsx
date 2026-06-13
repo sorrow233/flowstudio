@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { LayoutGrid, Monitor, Server, Database, Container, Beaker, CheckSquare, ListChecks, Copy, X, ChevronDown, ChevronRight, CheckCircle2, Trash2, ArrowRight, Terminal } from 'lucide-react';
-import { COMMAND_CATEGORIES, DEV_STAGES } from '../../../../utils/constants';
+import { COMMAND_CATEGORIES } from '../../../../utils/constants';
 import TaskItem from './TaskItem';
 import { useConfirmDialog } from '../../../../components/shared/ConfirmDialog';
 import { useTranslation } from '../../../i18n';
@@ -16,7 +16,7 @@ const CATEGORY_ICONS = {
 };
 
 
-const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, onDelete, onAddTask, onUpdateTask, newTaskInput, setNewTaskInput, newTaskCategory, setNewTaskCategory, onScroll, onReorder, onImportCommand, availableCommands, themeColor = 'purple' }, ref) => {
+const TaskList = React.forwardRef(({ tasks, projectId, activeStage, stages = [], onToggle, onDelete, onAddTask, onUpdateTask, newTaskInput, setNewTaskInput, newTaskCategory, setNewTaskCategory, onScroll, onReorder, onImportCommand, availableCommands, themeColor = 'purple' }, ref) => {
     const { t } = useTranslation();
     const [copiedTaskId, setCopiedTaskId] = useState(null);
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -33,16 +33,21 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
 
     // Completed section collapse state - default collapsed
     const [isCompletedCollapsed, setIsCompletedCollapsed] = useState(true);
+    const fallbackStageId = stages[0]?.id || activeStage;
+    const activeStageInfo = stages.find((stage) => stage.id === activeStage);
+    const activeStageName = activeStageInfo?.name || activeStageInfo?.label || t('advanced.workspace.unknownStage', 'Current stage');
+    const addTaskPlaceholder = t('taskList.addTaskPlaceholder', '添加任务到{stage}...')
+        .replace('{stage}', activeStageName);
 
     useEffect(() => {
-        const filtered = tasks?.filter(t => (t.stage || 1) === activeStage) || [];
+        const filtered = tasks?.filter(t => (t.stage || fallbackStageId) === activeStage) || [];
         // Compare using stringified state to detect property changes (e.g., done status)
         const currentState = JSON.stringify(localTasks.map(t => ({ id: t.id, done: t.done, text: t.text })));
         const newState = JSON.stringify(filtered.map(t => ({ id: t.id, done: t.done, text: t.text })));
         if (currentState !== newState) {
             setLocalTasks(filtered);
         }
-    }, [tasks, activeStage]);
+    }, [tasks, activeStage, fallbackStageId]);
 
     // Reset selection when stage changes
     useEffect(() => {
@@ -172,10 +177,9 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
         setLastSelectedId(null);
     };
 
-    // Get translated empty state for current stage
     const emptyState = {
-        title: t(`stageEmptyStates.${activeStage}.title`),
-        desc: t(`stageEmptyStates.${activeStage}.desc`)
+        title: t('taskList.emptyStageTitle', `${activeStageName} 暂无任务`),
+        desc: t('taskList.emptyStageDesc', '添加任务或从蓝图中导入命令。')
     };
 
     const handleReorder = (newOrder) => {
@@ -184,8 +188,6 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
             onReorder(newOrder, activeStage);
         }
     };
-
-    const stageInfo = DEV_STAGES.find(s => s.id === activeStage);
 
     // Theme Configuration
     const THEME_STYLES = {
@@ -507,23 +509,24 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                     <span className="text-xs text-gray-400 mr-1 flex items-center gap-1">
                                         <ArrowRight size={12} /> Move
                                     </span>
-                                    {DEV_STAGES.filter(s => s.id !== activeStage).map(stage => {
-                                        const stageColors = {
-                                            1: 'hover:bg-emerald-100 hover:text-emerald-700 hover:border-emerald-200',
-                                            2: 'hover:bg-blue-100 hover:text-blue-700 hover:border-blue-200',
-                                            3: 'hover:bg-violet-100 hover:text-violet-700 hover:border-violet-200',
-                                            4: 'hover:bg-amber-100 hover:text-amber-700 hover:border-amber-200',
-                                            5: 'hover:bg-rose-100 hover:text-rose-700 hover:border-rose-200'
-                                        };
+                                    {stages.filter(s => s.id !== activeStage).map((stage, index) => {
+                                        const stageColors = [
+                                            'hover:bg-emerald-100 hover:text-emerald-700 hover:border-emerald-200',
+                                            'hover:bg-blue-100 hover:text-blue-700 hover:border-blue-200',
+                                            'hover:bg-violet-100 hover:text-violet-700 hover:border-violet-200',
+                                            'hover:bg-amber-100 hover:text-amber-700 hover:border-amber-200',
+                                            'hover:bg-rose-100 hover:text-rose-700 hover:border-rose-200'
+                                        ];
+                                        const stageName = stage.name || stage.label || stage.id;
                                         return (
                                             <button
                                                 key={stage.id}
                                                 onClick={() => handleBulkMove(stage.id)}
                                                 disabled={selectedIds.size === 0}
-                                                className={`px-2 py-1 rounded-md text-[10px] font-medium border border-transparent transition-all disabled:opacity-30 disabled:cursor-not-allowed text-gray-500 bg-white/50 ${stageColors[stage.id]}`}
-                                                title={`Move to ${stage.label}`}
+                                                className={`px-2 py-1 rounded-md text-[10px] font-medium border border-transparent transition-all disabled:opacity-30 disabled:cursor-not-allowed text-gray-500 bg-white/50 ${stageColors[index % stageColors.length]}`}
+                                                title={`Move to ${stageName}`}
                                             >
-                                                {stage.label.split(' ')[0]}
+                                                {String(stageName).split(' ')[0]}
                                             </button>
                                         );
                                     })}
@@ -551,7 +554,7 @@ const TaskList = React.forwardRef(({ tasks, projectId, activeStage, onToggle, on
                                 value={newTaskInput}
                                 onChange={(e) => setNewTaskInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && onAddTask(projectId)}
-                                placeholder={t('taskList.addTaskPlaceholder', { stage: stageInfo?.label || 'stage' })}
+                                placeholder={addTaskPlaceholder}
                                 className="flex-1 bg-transparent border-0 rounded-l-2xl py-4 pl-14 pr-4 transition-all outline-none placeholder:text-gray-300 dark:placeholder:text-gray-600 text-lg font-light text-gray-800 dark:text-white"
                             />
 

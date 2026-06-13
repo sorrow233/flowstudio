@@ -10,7 +10,6 @@ import { copyImageToClipboard } from './components/inspiration/imageClipboardUti
 import { buildIdeaCopyPayload } from './components/inspiration/ideaClipboardUtils';
 import { INSPIRATION_CATEGORIES } from '../../utils/constants';
 import { usePageTitle } from '../../hooks/usePageTitle';
-import { useWritingDocTitleMap } from './components/inspiration/useWritingDocTitleMap';
 
 const InspirationArchiveModule = () => {
     const { t } = useTranslation();
@@ -18,7 +17,6 @@ const InspirationArchiveModule = () => {
     const navigate = useNavigate();
     const { doc, immediateSync } = useSync();
     const { projects: allProjects, updateProject, removeProject } = useSyncedProjects(doc, 'all_projects');
-    const writingDocTitleById = useWritingDocTitleMap(allProjects);
     const { categories: syncedCategories } = useSyncedCategories(
         doc,
         'inspiration_categories',
@@ -125,7 +123,6 @@ const InspirationArchiveModule = () => {
                             <InspirationItem
                                 key={idea.id}
                                 idea={idea}
-                                writingDocTitleById={writingDocTitleById}
                                 categories={categories}
                                 onDelete={handleDelete}
                                 onRestore={handleRestore}

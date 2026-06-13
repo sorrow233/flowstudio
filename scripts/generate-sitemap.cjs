@@ -23,12 +23,10 @@ const seoConfig = {
     pages: {
         '/': {},
         '/inspiration': {},
-        '/pending': {},
-        '/primary': {},
+        '/inspiration/archive': {},
         '/advanced': {},
-        '/final': {},
-        '/commercial': {},
-        '/commands': {},
+        '/blueprint': {},
+        '/data': {},
     },
 };
 

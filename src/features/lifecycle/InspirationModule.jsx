@@ -19,7 +19,6 @@ import InspirationSubcategoryFilter from './components/inspiration/InspirationSu
 import InspirationSelectionToolbar from './components/inspiration/InspirationSelectionToolbar';
 import InspirationComposer from './components/inspiration/InspirationComposer';
 import InspirationIdeaList from './components/inspiration/InspirationIdeaList';
-import { useWritingDocTitleMap } from './components/inspiration/useWritingDocTitleMap';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import {
     buildCategoryExportText,
@@ -168,8 +167,6 @@ const InspirationModule = () => {
         if (locallyHiddenIdeaIds.size === 0) return rawIdeas;
         return rawIdeas.filter((idea) => !locallyHiddenIdeaIds.has(idea.id));
     }, [locallyHiddenIdeaIds, rawIdeas]);
-    const writingDocTitleById = useWritingDocTitleMap(allProjects);
-
     const categoryIdeasMap = useMemo(() => {
         const groupedIdeas = new Map();
 
@@ -197,14 +194,6 @@ const InspirationModule = () => {
 
     // 处理待导入队列（从外部项目发送的内容）
     useImportQueue(user?.uid, addIdeasBatch, ideas, getNextAutoColorIndex, isReady);
-
-    // Fetch existing projects for tags
-    const primaryProjects = useMemo(() =>
-        allProjects.filter(p => p.stage === 'primary'),
-        [allProjects]);
-    const pendingProjects = useMemo(() =>
-        allProjects.filter(p => p.stage === 'pending'),
-        [allProjects]);
 
     const [copiedId, setCopiedId] = useState(null);
     const [showWeekSelector, setShowWeekSelector] = useState(false);
@@ -460,14 +449,6 @@ const InspirationModule = () => {
         setIsSelectionMode(false);
         setSelectedIdeaIds([]);
     }, [selectedIdeaIds, ideas, removeProjectBase, immediateSync]);
-
-    // Combine and sort projects for tags (Memoized)
-    const allProjectTags = useMemo(() => {
-        return [...(primaryProjects || []), ...(pendingProjects || [])]
-            .map(p => p.title)
-            .filter(t => t && t.trim().length > 0)
-            .sort();
-    }, [primaryProjects, pendingProjects]);
 
     // Cleanup undo stack after 5s of inactivity
     useEffect(() => {
@@ -1465,7 +1446,6 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                     transition={{ duration: 0.3 }}
                 >
                     <InspirationComposer
-                        allProjectTags={allProjectTags}
                         onSubmit={handleAdd}
                         accentHex={selectedCategoryAccentHex}
                     />
@@ -1568,7 +1548,6 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                             sortedIdeas={sortedIdeas}
                             todosByDay={todosByDay}
                             visibleIdeaCount={visibleIdeaCount}
-                            writingDocTitleById={writingDocTitleById}
                             categoryConfigList={categoryConfigList}
                             selectedCategoryDividerLineStyle={selectedCategoryDividerLineStyle}
                             selectedCategoryDividerTextStyle={selectedCategoryDividerTextStyle}

@@ -5,7 +5,6 @@ import { X, Download, Upload, FileJson, AlertCircle, CheckCircle2, Loader2, Hist
 import { useSync } from '../sync/SyncContext';
 import { exportAllData, importData, validateImportData, downloadAsJson, readJsonFile } from './dataUtils';
 import { getLocalBackups } from '../sync/LocalBackupService';
-import { countActiveWritingDocs } from '../lifecycle/utils/writingDocAggregation.js';
 import Spotlight from '../../components/shared/Spotlight';
 import { useSettings } from '../../hooks/SettingsContext';
 
@@ -160,27 +159,13 @@ const DataManagementModal = ({ isOpen, onClose }) => {
     const getDataSummary = useCallback(() => {
         if (!previewData?.data) return null;
         const {
-            allProjects, allCommands, commandCategories, writingDocs,
-            pendingProjects, primaryProjects, commands, customCategories
+            allProjects, allCommands, commandCategories, commands, customCategories
         } = previewData.data;
 
-        // Calculate counts from unified storage
-        let newPending = 0;
-        let newPrimary = 0;
-
-        if (Array.isArray(allProjects)) {
-            newPending = allProjects.filter(p => p.stage === 'pending').length;
-            newPrimary = allProjects.filter(p => !['pending', 'inspiration'].includes(p.stage)).length;
-        }
-
-        const writingCount = countActiveWritingDocs(allProjects, writingDocs);
-
         return {
-            pending: (pendingProjects?.length || 0) + newPending,
-            primary: (primaryProjects?.length || 0) + newPrimary,
+            projects: allProjects?.length || 0,
             commands: (commands?.length || 0) + (allCommands?.length || 0),
             categories: (customCategories?.length || 0) + (commandCategories?.length || 0),
-            writing: writingCount,
         };
     }, [previewData]);
 
@@ -188,8 +173,8 @@ const DataManagementModal = ({ isOpen, onClose }) => {
     const getBackupSummary = (backupData) => {
         // Fix: backupData already contains { timestamp, data }, but data itself has a nested { version, exportedAt, data }
         const innerData = backupData?.data?.data || {};
-        const { allProjects, allCommands, writingDocs } = innerData;
-        const count = (allProjects?.length || 0) + (allCommands?.length || 0) + (writingDocs?.length || 0);
+        const { allProjects, allCommands } = innerData;
+        const count = (allProjects?.length || 0) + (allCommands?.length || 0);
         return `${count} ${t('advanced.items')}`;
     };
 
@@ -428,12 +413,8 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                                 return (
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="p-4 bg-amber-50/50 dark:bg-amber-900/10 rounded-2xl text-center border border-amber-100/50 dark:border-amber-900/20">
-                                            <div className="text-2xl font-light text-amber-600 dark:text-amber-400">{summary.pending}</div>
-                                            <div className="text-[10px] text-amber-500/80 uppercase tracking-widest font-bold mt-1">待定项目</div>
-                                        </div>
-                                        <div className="p-4 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-2xl text-center border border-emerald-100/50 dark:border-emerald-900/20">
-                                            <div className="text-2xl font-light text-emerald-600 dark:text-emerald-400">{summary.primary}</div>
-                                            <div className="text-[10px] text-emerald-500/80 uppercase tracking-widest font-bold mt-1">主开发项目</div>
+                                            <div className="text-2xl font-light text-amber-600 dark:text-amber-400">{summary.projects}</div>
+                                            <div className="text-[10px] text-amber-500/80 uppercase tracking-widest font-bold mt-1">项目</div>
                                         </div>
                                         <div className="p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl text-center border border-blue-100/50 dark:border-blue-900/20">
                                             <div className="text-2xl font-light text-blue-600 dark:text-blue-400">{summary.commands}</div>
@@ -442,10 +423,6 @@ const DataManagementModal = ({ isOpen, onClose }) => {
                                         <div className="p-4 bg-purple-50/50 dark:bg-purple-900/10 rounded-2xl text-center border border-purple-100/50 dark:border-purple-900/20">
                                             <div className="text-2xl font-light text-purple-600 dark:text-purple-400">{summary.categories}</div>
                                             <div className="text-[10px] text-purple-500/80 uppercase tracking-widest font-bold mt-1">自定义分类</div>
-                                        </div>
-                                        <div className="p-4 bg-sky-50/50 dark:bg-sky-900/10 rounded-2xl text-center border border-sky-100/50 dark:border-sky-900/20">
-                                            <div className="text-2xl font-light text-sky-600 dark:text-sky-400">{summary.writing}</div>
-                                            <div className="text-[10px] text-sky-500/80 uppercase tracking-widest font-bold mt-1">写作文档</div>
                                         </div>
                                     </div>
                                 );
