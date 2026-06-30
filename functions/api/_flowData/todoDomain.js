@@ -3,8 +3,13 @@ import { base64ToUint8Array } from '../../../src/features/sync/syncStateCodec.js
 import { normalizeIdeaTextForExport } from '../../../src/features/lifecycle/components/inspiration/categoryTransferUtils.js';
 import { httpError } from './http.js';
 
-const TODO_AI_CLASSES = new Set(['unclassified', 'ai_done', 'ai_high', 'ai_mid', 'self']);
-const TODO_MODES = new Set(['all', 'pending', 'unclassified', 'ai_done', 'ai_high', 'ai_mid', 'self']);
+const TODO_AI_CLASS_ALIASES = {
+    ai_high: 'ai_involved',
+    ai_mid: 'ai_involved',
+    self: 'user_done',
+};
+const TODO_AI_CLASSES = new Set(['unclassified', 'ai_done', 'ai_involved', 'user_done', 'major_conflict', 'minor_conflict']);
+const TODO_MODES = new Set(['all', 'pending', ...TODO_AI_CLASSES]);
 const MUTATION_LOG_MAP = 'flow_ai_processed_mutations';
 const MAX_MUTATION_LOG_SIZE = 250;
 
@@ -45,6 +50,13 @@ export function isTodoProject(project = {}) {
     );
 }
 
+function normalizeTodoAiAssistClass(value = 'unclassified', fallbackUnknown = true) {
+    const rawValue = String(value || 'unclassified');
+    const aliasedValue = TODO_AI_CLASS_ALIASES[rawValue] || rawValue;
+    if (TODO_AI_CLASSES.has(aliasedValue)) return aliasedValue;
+    return fallbackUnknown ? 'unclassified' : null;
+}
+
 function getTodoArray(yDoc) {
     return yDoc.getArray('all_projects');
 }
@@ -76,7 +88,7 @@ export function listTodosFromDoc(yDoc, mode = 'pending') {
         .filter((project) => {
             if (mode === 'all') return true;
             if (mode === 'pending') return !isCompleted(project);
-            return !isCompleted(project) && (project.aiAssistClass || 'unclassified') === mode;
+            return !isCompleted(project) && normalizeTodoAiAssistClass(project.aiAssistClass) === mode;
         })
         .sort((a, b) => (a?.timestamp || 0) - (b?.timestamp || 0));
 }
@@ -91,7 +103,7 @@ export function formatTodoItem(project, index) {
         normalizedContent,
         timestamp: Number.isFinite(Number(project?.timestamp)) ? Number(project.timestamp) : null,
         createdAt: Number.isFinite(Number(project?.createdAt)) ? Number(project.createdAt) : null,
-        aiAssistClass: project?.aiAssistClass || 'unclassified',
+        aiAssistClass: normalizeTodoAiAssistClass(project?.aiAssistClass),
         category: 'todo',
         stage: 'inspiration',
         completed: isCompleted(project),
@@ -107,9 +119,9 @@ export function validateTodoCreateInput(input = {}) {
         throw httpError('Todo content is required.', 400, 'missing_content');
     }
 
-    const aiAssistClass = input.aiAssistClass === undefined ? 'unclassified' : String(input.aiAssistClass);
-    if (!TODO_AI_CLASSES.has(aiAssistClass)) {
-        throw httpError(`Invalid aiAssistClass: ${aiAssistClass}.`, 400, 'invalid_ai_assist_class');
+    const aiAssistClass = normalizeTodoAiAssistClass(input.aiAssistClass, false);
+    if (!aiAssistClass) {
+        throw httpError(`Invalid aiAssistClass: ${input.aiAssistClass}.`, 400, 'invalid_ai_assist_class');
     }
 
     const colorIndex = input.colorIndex === undefined
@@ -164,9 +176,9 @@ export function validateTodoUpdates(input = {}) {
         }
 
         if (key === 'aiAssistClass') {
-            const aiAssistClass = String(value || 'unclassified');
-            if (!TODO_AI_CLASSES.has(aiAssistClass)) {
-                throw httpError(`Invalid aiAssistClass: ${aiAssistClass}.`, 400, 'invalid_ai_assist_class');
+            const aiAssistClass = normalizeTodoAiAssistClass(value, false);
+            if (!aiAssistClass) {
+                throw httpError(`Invalid aiAssistClass: ${value}.`, 400, 'invalid_ai_assist_class');
             }
             updates.aiAssistClass = aiAssistClass;
             return;

@@ -19,7 +19,7 @@ export async function onRequestGet() {
             batch: 'POST /todos/batch',
             modes: getAllowedTodoModes(),
             writableFields: ['content', 'completed', 'aiAssistClass', 'subcategory', 'note', 'colorIndex'],
-            aiAssistClass: ['unclassified', 'ai_done', 'ai_high', 'ai_mid', 'self'],
+            aiAssistClass: ['unclassified', 'ai_done', 'ai_involved', 'user_done', 'major_conflict', 'minor_conflict'],
         },
         categories: {
             list: 'GET /categories',

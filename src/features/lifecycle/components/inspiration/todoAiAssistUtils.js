@@ -4,10 +4,11 @@ export const TODO_AI_CLASS_UNCLASSIFIED = 'unclassified';
 export const TODO_AI_FILTER_PENDING = 'pending';
 
 export const TODO_AI_CLASS_OPTIONS = [
-    { value: 'ai_done', label: 'AI 完成' },
-    { value: 'ai_high', label: 'AI 高度辅助' },
-    { value: 'ai_mid', label: 'AI 中度辅助' },
-    { value: 'self', label: '必须自己去完成' },
+    { value: 'ai_done', label: 'AI完成' },
+    { value: 'ai_involved', label: 'AI介入' },
+    { value: 'user_done', label: '自己完成' },
+    { value: 'major_conflict', label: '主要矛盾' },
+    { value: 'minor_conflict', label: '次要矛盾' },
 ];
 
 export const TODO_AI_FILTER_OPTIONS = [
@@ -24,33 +25,46 @@ const TODO_AI_ASSIST_META = {
         dotClassName: 'bg-slate-300 dark:bg-slate-500',
     },
     ai_done: {
-        label: 'AI 完成',
+        label: 'AI完成',
         shortLabel: 'AI完成',
         dotClassName: 'bg-emerald-300 dark:bg-emerald-400',
     },
-    ai_high: {
-        label: 'AI 高度辅助',
-        shortLabel: 'AI高辅',
+    ai_involved: {
+        label: 'AI介入',
+        shortLabel: 'AI介入',
         dotClassName: 'bg-sky-300 dark:bg-sky-400',
     },
-    ai_mid: {
-        label: 'AI 中度辅助',
-        shortLabel: 'AI中辅',
-        dotClassName: 'bg-indigo-300 dark:bg-indigo-400',
-    },
-    self: {
-        label: '必须自己去完成',
+    user_done: {
+        label: '自己完成',
         shortLabel: '自己完成',
         dotClassName: 'bg-amber-300 dark:bg-amber-400',
     },
+    major_conflict: {
+        label: '主要矛盾',
+        shortLabel: '主矛盾',
+        dotClassName: 'bg-rose-300 dark:bg-rose-400',
+    },
+    minor_conflict: {
+        label: '次要矛盾',
+        shortLabel: '次矛盾',
+        dotClassName: 'bg-violet-300 dark:bg-violet-400',
+    },
+};
+
+export const normalizeTodoAiAssistClass = (value = TODO_AI_CLASS_UNCLASSIFIED) => {
+    if (value === 'ai_high' || value === 'ai_mid') return 'ai_involved';
+    if (value === 'self') return 'user_done';
+    if (Object.hasOwn(TODO_AI_ASSIST_META, value)) return value;
+    return TODO_AI_CLASS_UNCLASSIFIED;
 };
 
 export const getTodoAiAssistClass = (idea = {}) => {
-    return idea?.aiAssistClass || TODO_AI_CLASS_UNCLASSIFIED;
+    return normalizeTodoAiAssistClass(idea?.aiAssistClass);
 };
 
 export const getTodoAiAssistMeta = (value = TODO_AI_CLASS_UNCLASSIFIED) => {
-    return TODO_AI_ASSIST_META[value] || TODO_AI_ASSIST_META[TODO_AI_CLASS_UNCLASSIFIED];
+    const normalizedValue = normalizeTodoAiAssistClass(value);
+    return TODO_AI_ASSIST_META[normalizedValue] || TODO_AI_ASSIST_META[TODO_AI_CLASS_UNCLASSIFIED];
 };
 
 export const buildTodoAiClassClipboardText = (ideas = [], classValue = TODO_AI_CLASS_UNCLASSIFIED) => {

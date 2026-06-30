@@ -657,16 +657,17 @@ const InspirationModule = () => {
     }, []);
 
     const aiClassifyPromptTemplate = useMemo(() => {
-        return `你是任务分类助手。请将我给你的待办清单按以下四类分类：
-1. AI 完成
-2. AI 高度辅助
-3. AI 中度辅助
-4. 必须自己去完成
+        return `你是任务分类助手。请将我给你的待办清单按以下五类分类：
+1. AI完成
+2. AI介入
+3. 自己完成
+4. 主要矛盾
+5. 次要矛盾
 
 规则：
 1. 不要改写任务内容，不要新增任务，不要删除任务。
-2. 只输出“编号 + 分类”，每行一个，例如：1. AI 高度辅助
-3. 分类名称必须严格使用这四个词中的一个。
+2. 只输出“编号 + 分类”，每行一个，例如：1. AI介入
+3. 分类名称必须严格使用这五个词中的一个。
 4. 不要输出解释、标题、代码块或其他文本。
 
 待分类清单：
@@ -903,9 +904,10 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         const resolveClassFromLine = (line) => {
             const normalized = line.replace(/\s+/g, '');
             if (/AI完成/.test(normalized)) return 'ai_done';
-            if (/AI高度辅助|高度辅助/.test(normalized)) return 'ai_high';
-            if (/AI中度辅助|中度辅助/.test(normalized)) return 'ai_mid';
-            if (/必须自己去完成|必须自己完成|自己去完成|自己完成|人工完成/.test(normalized)) return 'self';
+            if (/AI介入|AI参与|AI辅助|AI高度辅助|高度辅助|AI中度辅助|中度辅助/.test(normalized)) return 'ai_involved';
+            if (/自己完成|必须自己去完成|必须自己完成|自己去完成|人工完成/.test(normalized)) return 'user_done';
+            if (/主要矛盾|主矛盾/.test(normalized)) return 'major_conflict';
+            if (/次要矛盾|次矛盾/.test(normalized)) return 'minor_conflict';
             return null;
         };
 
@@ -1230,11 +1232,13 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             all: subcategoryFilteredTodoIdeas.length,
             [TODO_AI_FILTER_PENDING]: 0,
             [TODO_AI_CLASS_UNCLASSIFIED]: 0,
-            ai_done: 0,
-            ai_high: 0,
-            ai_mid: 0,
-            self: 0,
         };
+
+        TODO_AI_FILTER_OPTIONS.forEach((option) => {
+            if (!Object.hasOwn(counts, option.value)) {
+                counts[option.value] = 0;
+            }
+        });
 
         subcategoryFilteredTodoIdeas.forEach((idea) => {
             if (idea.completed) return;
@@ -1746,7 +1750,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                 导入 AI 分类结果（按编号匹配未分类清单）
                                             </div>
                                             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                示例：1. AI 高度辅助 / 2. 必须自己去完成
+                                                示例：1. AI介入 / 2. 自己完成
                                             </p>
                                         </>
                                     )}
@@ -1816,7 +1820,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                     setAiClassifyText(e.target.value);
                                                     if (aiClassifyError) setAiClassifyError('');
                                                 }}
-                                                placeholder={'示例：\n1. AI 高度辅助\n2. 必须自己去完成\n3. AI 完成'}
+                                                placeholder={'示例：\n1. AI介入\n2. 自己完成\n3. 主要矛盾'}
                                                 className="w-full min-h-[220px] rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-200 p-4 outline-none focus:ring-2 focus:ring-pink-300/50 dark:focus:ring-pink-700/50 focus:border-pink-300 dark:focus:border-pink-700 transition-all"
                                             />
                                         </div>

@@ -6,7 +6,7 @@ import RichTextInput from './RichTextInput';
 import { parseRichText, getCategoryConfig } from './InspirationUtils';
 import { buildIdeaCopyPayload } from './ideaClipboardUtils';
 import { hexToRgba, resolveCategoryAccentHex } from './categoryThemeUtils';
-import { getTodoAiAssistMeta } from './todoAiAssistUtils';
+import { getTodoAiAssistClass, getTodoAiAssistMeta } from './todoAiAssistUtils';
 import CodeBlockActionButton from './CodeBlockActionButton';
 import {
     getInspirationSwipeActions,
@@ -94,10 +94,15 @@ const InspirationItem = React.forwardRef(({
         switch (value) {
             case 'ai_done':
                 return 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
+            case 'ai_involved':
             case 'ai_high':
                 return 'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800';
+            case 'major_conflict':
+                return 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800';
+            case 'minor_conflict':
             case 'ai_mid':
                 return 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800';
+            case 'user_done':
             case 'self':
                 return 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
             default:
@@ -474,7 +479,7 @@ const InspirationItem = React.forwardRef(({
                                 onDoubleClick={(e) => e.stopPropagation()}
                             >
                                 {aiAssistOptions.map((option) => {
-                                    const isActive = aiAssistClass === option.value;
+                                    const isActive = getTodoAiAssistClass({ aiAssistClass }) === option.value;
                                     return (
                                         <button
                                             key={option.value}

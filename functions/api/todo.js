@@ -6,7 +6,12 @@ const FIREBASE_PROJECT_ID = 'flow-7ffad';
 const FIREBASE_WEB_API_KEY = 'AIzaSyA20FrNmdIPE2Sb9r97s7cj2w6MLYgcB_M';
 const DEFAULT_DOC_ID = 'flowstudio_v1';
 
-const TODO_MODES = new Set(['all', 'unclassified', 'ai_done', 'ai_high', 'ai_mid', 'self']);
+const TODO_AI_CLASS_ALIASES = {
+    ai_high: 'ai_involved',
+    ai_mid: 'ai_involved',
+    self: 'user_done',
+};
+const TODO_MODES = new Set(['all', 'unclassified', 'ai_done', 'ai_involved', 'user_done', 'major_conflict', 'minor_conflict']);
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -158,7 +163,7 @@ function isCompleted(project) {
 function shouldIncludeByMode(project, mode) {
     if (mode === 'all') return true;
 
-    const aiAssistClass = project?.aiAssistClass || 'unclassified';
+    const aiAssistClass = TODO_AI_CLASS_ALIASES[project?.aiAssistClass] || project?.aiAssistClass || 'unclassified';
 
     if (mode === 'unclassified') {
         return aiAssistClass === 'unclassified';
@@ -186,7 +191,7 @@ function formatTodoItem(project, index) {
         normalizedContent,
         timestamp: Number.isFinite(Number(project?.timestamp)) ? Number(project.timestamp) : null,
         createdAt: Number.isFinite(Number(project?.createdAt)) ? Number(project.createdAt) : null,
-        aiAssistClass: project?.aiAssistClass || 'unclassified',
+        aiAssistClass: TODO_AI_CLASS_ALIASES[project?.aiAssistClass] || project?.aiAssistClass || 'unclassified',
         category: project?.category || 'note',
         stage: project?.stage || 'inspiration',
         completed: isCompleted(project),
