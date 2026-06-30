@@ -2,9 +2,20 @@ import { handleApiError, jsonResponse, optionsResponse, readJsonBody } from '../
 import { runTodoMutation } from '../../../_flowData/todoService.js';
 import { deleteTodo, updateTodo } from '../../../_flowData/todoDomain.js';
 
+function decodeRouteId(rawValue) {
+    const value = String(rawValue || '').trim();
+    if (!value) return '';
+
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        return value;
+    }
+}
+
 export async function onRequestPatch({ request, env, params }) {
     try {
-        const id = String(params?.id || '').trim();
+        const id = decodeRouteId(params?.id);
         if (!id) {
             return jsonResponse({ success: false, error: 'Missing todo ID.' }, 400);
         }
@@ -32,7 +43,7 @@ export async function onRequestPatch({ request, env, params }) {
 
 export async function onRequestDelete({ request, env, params }) {
     try {
-        const id = String(params?.id || '').trim();
+        const id = decodeRouteId(params?.id);
         if (!id) {
             return jsonResponse({ success: false, error: 'Missing todo ID.' }, 400);
         }
