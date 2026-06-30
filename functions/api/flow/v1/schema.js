@@ -1,4 +1,5 @@
 import { jsonResponse, optionsResponse } from '../../_flowData/http.js';
+import { getAllowedCategoryColorPresets } from '../../_flowData/categoryDomain.js';
 import { getAllowedTodoModes } from '../../_flowData/todoDomain.js';
 
 export async function onRequestGet() {
@@ -19,6 +20,17 @@ export async function onRequestGet() {
             modes: getAllowedTodoModes(),
             writableFields: ['content', 'completed', 'aiAssistClass', 'subcategory', 'note', 'colorIndex'],
             aiAssistClass: ['unclassified', 'ai_done', 'ai_high', 'ai_mid', 'self'],
+        },
+        categories: {
+            list: 'GET /categories',
+            create: 'POST /categories',
+            update: 'PATCH /categories/:id',
+            delete: 'DELETE /categories/:id',
+            transferItems: 'POST /categories/transfer',
+            writableFields: ['label', 'colorPreset', 'color', 'dotColor', 'textColor', 'subcategories'],
+            colorPresets: getAllowedCategoryColorPresets(),
+            deleteRequires: ['moveItemsTo'],
+            protectedCategoryIds: ['todo'],
         },
     });
 }

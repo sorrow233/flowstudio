@@ -82,7 +82,7 @@ const UserIdentityPage = () => {
     }, [refreshToken]);
 
     const fetchTemplate = useMemo(() => {
-        return `const FLOW_AI_KEY = '<复制本页的 Flow AI 密钥>';\nconst apiBase = '${apiBaseUrl}';\n\nconst list = await fetch(\`\${apiBase}/todos?mode=pending&cursor=0&limit=50\`, {\n  headers: { 'X-Flow-AI-Key': FLOW_AI_KEY },\n}).then((res) => res.json());\n\nconst created = await fetch(\`\${apiBase}/todos\`, {\n  method: 'POST',\n  headers: {\n    'Content-Type': 'application/json',\n    'X-Flow-AI-Key': FLOW_AI_KEY,\n  },\n  body: JSON.stringify({\n    mutationId: crypto.randomUUID(),\n    content: '本地 AI 创建的待办',\n    aiAssistClass: 'ai_high',\n  }),\n}).then((res) => res.json());\n\nconsole.log(list.numberedText, created.todo);`;
+        return `const FLOW_AI_KEY = '<复制本页的 Flow AI 密钥>';\nconst apiBase = '${apiBaseUrl}';\nconst headers = { 'X-Flow-AI-Key': FLOW_AI_KEY };\n\nconst list = await fetch(\`\${apiBase}/todos?mode=pending&cursor=0&limit=50\`, {\n  headers,\n}).then((res) => res.json());\n\nconst categories = await fetch(\`\${apiBase}/categories\`, {\n  headers,\n}).then((res) => res.json());\n\nconst created = await fetch(\`\${apiBase}/todos\`, {\n  method: 'POST',\n  headers: {\n    ...headers,\n    'Content-Type': 'application/json',\n  },\n  body: JSON.stringify({\n    mutationId: crypto.randomUUID(),\n    content: '本地 AI 创建的待办',\n    aiAssistClass: 'ai_high',\n  }),\n}).then((res) => res.json());\n\nconsole.log(list.numberedText, categories.categories, created.todo);`;
     }, [apiBaseUrl]);
 
     const apiBundleText = useMemo(() => {
@@ -98,9 +98,17 @@ const UserIdentityPage = () => {
             '更新: PATCH /todos/:id',
             '删除: DELETE /todos/:id',
             '批量: POST /todos/batch',
+            '分类读取: GET /categories',
+            '分类新增: POST /categories',
+            '分类更新: PATCH /categories/:id',
+            '分类删除: DELETE /categories/:id（必须带 moveItemsTo）',
+            '分类迁移: POST /categories/transfer',
             'mode 可选值: pending | all | unclassified | ai_done | ai_high | ai_mid | self',
             '可写字段: content | completed | aiAssistClass | subcategory | note | colorIndex',
             'aiAssistClass 可选值: unclassified | ai_done | ai_high | ai_mid | self',
+            '分类可写字段: label | colorPreset | color | dotColor | textColor | subcategories',
+            '分类颜色预设: pink | blue | violet | emerald | amber | rose | cyan | orange | teal | indigo',
+            '受保护分类: todo 不允许删除',
             '批量请求必须带 mutationId，避免本地 AI 重试时重复写入',
             `当前 Firebase UID: ${user?.uid || '未知'}`,
             `当前 ID Token（预览）: ${tokenPreview}`,

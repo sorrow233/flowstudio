@@ -18,7 +18,7 @@ function isConflictError(error) {
     );
 }
 
-export async function loadTodoDocument(request, env) {
+export async function loadFlowDocument(request, env) {
     const auth = await authenticateFlowDataRequest(request, env);
     const stateDoc = await fetchFirestoreDoc({
         token: auth.firestoreToken,
@@ -48,7 +48,7 @@ export async function loadTodoDocument(request, env) {
     };
 }
 
-export async function runTodoMutation(request, env, options = {}) {
+export async function runFlowMutation(request, env, options = {}) {
     const {
         mutationId = '',
         mutate,
@@ -63,7 +63,7 @@ export async function runTodoMutation(request, env, options = {}) {
 
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
         try {
-            const context = await loadTodoDocument(request, env);
+            const context = await loadFlowDocument(request, env);
             const processed = checkProcessedMutation(context.yDoc, mutationId);
             if (processed) {
                 return {
@@ -115,3 +115,6 @@ export async function runTodoMutation(request, env, options = {}) {
         'concurrent_update_conflict'
     );
 }
+
+export const loadTodoDocument = loadFlowDocument;
+export const runTodoMutation = runFlowMutation;
