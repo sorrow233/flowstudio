@@ -70,28 +70,42 @@ const UserIdentityPage = () => {
     const tokenIssuedAt = formatTimestamp(tokenPayload?.iat);
     const tokenExpiresAt = formatTimestamp(tokenPayload?.exp);
 
+    const apiBaseUrl = 'https://flowstudio.catzz.work/api/flow/v1';
+    const flowAiKeyPreview = refreshTokenPreview;
+
     const curlCommand = useMemo(() => {
         if (!refreshToken) return '请先登录并等待 Refresh Token 注入后再调用。';
-        return `curl -s \"https://flowstudio.catzz.work/api/todo?docId=flowstudio_v1&mode=unclassified&cursor=0&limit=50\" -H \"X-Firebase-Refresh-Token: ${refreshToken}\"`;
+        return [
+            `curl -s "${apiBaseUrl}/todos?mode=pending&cursor=0&limit=50" \\`,
+            `  -H "X-Flow-AI-Key: ${refreshToken}"`
+        ].join('\n');
     }, [refreshToken]);
 
     const fetchTemplate = useMemo(() => {
-        return `const refreshToken = auth.currentUser?.stsTokenManager?.refreshToken;\nconst res = await fetch('https://flowstudio.catzz.work/api/todo?docId=flowstudio_v1&mode=unclassified&cursor=0&limit=50', {\n  headers: { 'X-Firebase-Refresh-Token': refreshToken },\n});\nconst data = await res.json();\nconsole.log(data.numberedText);`;
-    }, []);
+        return `const FLOW_AI_KEY = '<复制本页的 Flow AI 密钥>';\nconst apiBase = '${apiBaseUrl}';\n\nconst list = await fetch(\`\${apiBase}/todos?mode=pending&cursor=0&limit=50\`, {\n  headers: { 'X-Flow-AI-Key': FLOW_AI_KEY },\n}).then((res) => res.json());\n\nconst created = await fetch(\`\${apiBase}/todos\`, {\n  method: 'POST',\n  headers: {\n    'Content-Type': 'application/json',\n    'X-Flow-AI-Key': FLOW_AI_KEY,\n  },\n  body: JSON.stringify({\n    mutationId: crypto.randomUUID(),\n    content: '本地 AI 创建的待办',\n    aiAssistClass: 'ai_high',\n  }),\n}).then((res) => res.json());\n\nconsole.log(list.numberedText, created.todo);`;
+    }, [apiBaseUrl]);
 
     const apiBundleText = useMemo(() => {
         return [
-            'API 必备数据',
-            'API 地址: https://flowstudio.catzz.work/api/todo',
-            '请求方法: GET',
-            '长期认证头: X-Firebase-Refresh-Token: <Firebase Refresh Token>',
-            '短期认证头: Authorization: Bearer <Firebase ID Token>',
+            'Flow AI API 必备数据',
+            `API 网站: ${apiBaseUrl}`,
+            'Schema: https://flowstudio.catzz.work/api/flow/v1/schema',
+            `Flow AI 密钥: ${refreshToken || '未获取'}`,
+            '认证头: X-Flow-AI-Key: <Flow AI 密钥>',
             'docId（默认）: flowstudio_v1',
-            'mode 可选值: unclassified | all | ai_done | ai_high | ai_mid | self',
-            '分页参数: cursor=0, limit=1（逐条）；limit=50（批量）',
+            '读取: GET /todos?mode=pending&cursor=0&limit=50',
+            '新增: POST /todos',
+            '更新: PATCH /todos/:id',
+            '删除: DELETE /todos/:id',
+            '批量: POST /todos/batch',
+            'mode 可选值: pending | all | unclassified | ai_done | ai_high | ai_mid | self',
+            '可写字段: content | completed | aiAssistClass | subcategory | note | colorIndex',
+            'aiAssistClass 可选值: unclassified | ai_done | ai_high | ai_mid | self',
+            '批量请求必须带 mutationId，避免本地 AI 重试时重复写入',
             `当前 Firebase UID: ${user?.uid || '未知'}`,
             `当前 ID Token（预览）: ${tokenPreview}`,
             `当前 Refresh Token（预览）: ${refreshTokenPreview}`,
+            `当前 Flow AI 密钥（预览）: ${flowAiKeyPreview}`,
             `Token 内 user_id: ${tokenUserId}`,
             `Token audience: ${tokenAudience}`,
             `Token 签发时间: ${tokenIssuedAt}`,
@@ -106,8 +120,10 @@ const UserIdentityPage = () => {
             fetchTemplate
         ].join('\n');
     }, [
+        apiBaseUrl,
         curlCommand,
         fetchTemplate,
+        flowAiKeyPreview,
         idToken,
         refreshToken,
         refreshTokenPreview,
@@ -282,6 +298,17 @@ const UserIdentityPage = () => {
                             copyable
                             isCopied={copyStatus === 'success' && copiedKey === 'uid'}
                             onCopy={() => handleCopy(user.uid || '', 'uid')}
+                        />
+                    </div>
+
+                    <div className="mt-4">
+                        <IdentityFieldCard
+                            label="Flow AI 密钥"
+                            value={refreshToken || '等待登录令牌加载'}
+                            hideValue
+                            copyable={!!refreshToken}
+                            isCopied={copyStatus === 'success' && copiedKey === 'flowAiKey'}
+                            onCopy={() => handleCopy(refreshToken, 'flowAiKey')}
                         />
                     </div>
 
