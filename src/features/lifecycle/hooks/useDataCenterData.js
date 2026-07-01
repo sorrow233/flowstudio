@@ -115,8 +115,8 @@ export const useDataCenterStats = (allProjects, allCommands) => {
             const itemChars = getTextLength(cmd.content) + getTextLength(cmd.title);
             totalChars += itemChars;
             const timestamp = resolveTimestamp(cmd, ['timestamp', 'createdAt']);
-            if (now - timestamp < oneDay) todayChars += itemChars;
-            if (now - timestamp < oneWeek) thisWeekChars += itemChars;
+            if (now - timestamp < ONE_DAY) todayChars += itemChars;
+            if (now - timestamp < ONE_WEEK) thisWeekChars += itemChars;
         });
 
         return {
