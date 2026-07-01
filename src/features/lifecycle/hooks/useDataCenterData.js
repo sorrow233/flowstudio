@@ -6,6 +6,91 @@ import {
     resolveTimestamp
 } from './dataCenterUtils';
 
+const ONE_DAY = 24 * 60 * 60 * 1000;
+const ONE_WEEK = 7 * ONE_DAY;
+
+const isTodoProject = (project = {}) => (
+    (project.stage || 'inspiration') === 'inspiration'
+    && (project.category || 'note') === 'todo'
+);
+
+const isCompleted = (project = {}) => {
+    const value = project.completed;
+    return value === true || value === 1 || value === '1' || value === 'true';
+};
+
+const normalizeAiClass = (project = {}) => {
+    const value = project.aiAssistClass || 'unclassified';
+    if (value === 'ai_high' || value === 'ai_mid') return 'ai_involved';
+    if (value === 'self') return 'user_done';
+    if (value === 'ai_done' || value === 'ai_involved' || value === 'user_done') return value;
+    return 'unclassified';
+};
+
+const normalizeConflictClass = (project = {}) => {
+    const value = project.conflictClass || project.aiAssistClass || 'conflict_unclassified';
+    if (value === 'major_conflict' || value === 'minor_conflict') return value;
+    return 'conflict_unclassified';
+};
+
+const ratio = (value, total) => (total > 0 ? (value / total) * 100 : 0);
+
+const buildTodoStats = (allProjects = []) => {
+    const now = Date.now();
+    const todos = allProjects.filter(isTodoProject);
+    const stats = {
+        total: todos.length,
+        pending: 0,
+        completed: 0,
+        todayCreated: 0,
+        thisWeekCreated: 0,
+        completionRate: 0,
+        ai: {
+            aiDone: 0,
+            aiInvolved: 0,
+            userDone: 0,
+            unclassified: 0,
+        },
+        conflict: {
+            major: 0,
+            minor: 0,
+            unclassified: 0,
+            majorRatio: 0,
+            minorRatio: 0,
+        },
+    };
+
+    todos.forEach((todo) => {
+        if (isCompleted(todo)) {
+            stats.completed += 1;
+        } else {
+            stats.pending += 1;
+        }
+
+        const timestamp = resolveTimestamp(todo, ['createdAt', 'timestamp']);
+        if (timestamp > 0 && now - timestamp < ONE_DAY) stats.todayCreated += 1;
+        if (timestamp > 0 && now - timestamp < ONE_WEEK) stats.thisWeekCreated += 1;
+
+        const aiClass = normalizeAiClass(todo);
+        if (aiClass === 'ai_done') stats.ai.aiDone += 1;
+        else if (aiClass === 'ai_involved') stats.ai.aiInvolved += 1;
+        else if (aiClass === 'user_done') stats.ai.userDone += 1;
+        else stats.ai.unclassified += 1;
+
+        const conflictClass = normalizeConflictClass(todo);
+        if (conflictClass === 'major_conflict') stats.conflict.major += 1;
+        else if (conflictClass === 'minor_conflict') stats.conflict.minor += 1;
+        else stats.conflict.unclassified += 1;
+    });
+
+    const conflictTotal = stats.conflict.major + stats.conflict.minor;
+    stats.completionRate = ratio(stats.completed, stats.total);
+    stats.conflict.majorRatio = ratio(stats.conflict.major, conflictTotal);
+    stats.conflict.minorRatio = ratio(stats.conflict.minor, conflictTotal);
+
+    return stats;
+};
+
 export const useDataCenterStats = (allProjects, allCommands) => {
     return useMemo(() => {
         let totalChars = 0;
@@ -15,15 +100,13 @@ export const useDataCenterStats = (allProjects, allCommands) => {
         let thisWeekChars = 0;
 
         const now = Date.now();
-        const oneDay = 24 * 60 * 60 * 1000;
-        const oneWeek = 7 * oneDay;
 
         (allProjects || []).forEach((project) => {
             const itemChars = getTextLength(project.content) + getTextLength(project.note);
             totalChars += itemChars;
             const timestamp = resolveTimestamp(project, ['timestamp', 'createdAt']);
-            if (now - timestamp < oneDay) todayChars += itemChars;
-            if (now - timestamp < oneWeek) thisWeekChars += itemChars;
+            if (now - timestamp < ONE_DAY) todayChars += itemChars;
+            if (now - timestamp < ONE_WEEK) thisWeekChars += itemChars;
 
             if (project.stage === 'inspiration') inspirationCount++;
         });
@@ -42,7 +125,8 @@ export const useDataCenterStats = (allProjects, allCommands) => {
             thisWeekChars,
             inspirationCount,
             instructionCount,
-            blueprintCount: instructionCount
+            blueprintCount: instructionCount,
+            todoStats: buildTodoStats(allProjects || [])
         };
     }, [allProjects, allCommands]);
 };

@@ -11,6 +11,7 @@ import { useSyncedProjects } from '../sync/useSyncStore';
 import { useTranslation } from '../i18n';
 import Spotlight from '../../components/shared/Spotlight';
 import DataChartModal from './components/DataChartModal';
+import TodoDataPanel from './components/TodoDataPanel';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
 import { useDataCenterStats, useChartData } from './hooks/useDataCenterData';
@@ -109,6 +110,8 @@ const DataCenterModule = () => {
                         </div>
                     </Spotlight>
                 </motion.div>
+
+                <TodoDataPanel stats={stats.todoStats} variants={cardVariants} />
 
                 {/* 次要数据 */}
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
