@@ -6,7 +6,11 @@ import RichTextInput from './RichTextInput';
 import { parseRichText, getCategoryConfig } from './InspirationUtils';
 import { buildIdeaCopyPayload } from './ideaClipboardUtils';
 import { hexToRgba, resolveCategoryAccentHex } from './categoryThemeUtils';
-import { getTodoAiAssistClass, getTodoAiAssistMeta } from './todoAiAssistUtils';
+import {
+    getTodoAiAssistClass,
+    getTodoAiAssistMeta,
+    getTodoConflictMeta,
+} from './todoAiAssistUtils';
 import CodeBlockActionButton from './CodeBlockActionButton';
 import {
     getInspirationSwipeActions,
@@ -33,6 +37,7 @@ const InspirationItem = React.forwardRef(({
     onSelect,
     isTodoView = false,
     aiAssistClass = 'unclassified',
+    conflictClass = 'conflict_unclassified',
     aiAssistOptions = [],
     onSetAiAssistClass,
     showAiAssistControls = false,
@@ -85,6 +90,10 @@ const InspirationItem = React.forwardRef(({
         () => getTodoAiAssistMeta(aiAssistClass),
         [aiAssistClass]
     );
+    const todoConflictMeta = useMemo(
+        () => getTodoConflictMeta(conflictClass),
+        [conflictClass]
+    );
 
     const getAiAssistButtonClass = useCallback((value, isActive) => {
         if (!isActive) {
@@ -97,9 +106,6 @@ const InspirationItem = React.forwardRef(({
             case 'ai_involved':
             case 'ai_high':
                 return 'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800';
-            case 'major_conflict':
-                return 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800';
-            case 'minor_conflict':
             case 'ai_mid':
                 return 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800';
             case 'user_done':
@@ -516,6 +522,11 @@ const InspirationItem = React.forwardRef(({
                                             <span className={`h-1.5 w-1.5 rounded-full ${todoAiAssistMeta.dotClassName}`} />
                                             <span>{todoAiAssistMeta.shortLabel}</span>
                                         </span>
+                                        <span className="mx-1.5 opacity-20">·</span>
+                                        <span className={`inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-medium ${isCompleted ? 'opacity-60' : ''}`}>
+                                            <span className={`h-1.5 w-1.5 rounded-full ${todoConflictMeta.dotClassName}`} />
+                                            <span>{todoConflictMeta.shortLabel}</span>
+                                        </span>
                                     </>
                                 )}
                                 {showSubcategoryControls && subcategoryOptions.length > 0 && !isArchiveView && (
@@ -651,6 +662,7 @@ const areIdeaViewPropsEqual = (prevProps, nextProps) => {
         && prevProps.isSelected === nextProps.isSelected
         && prevProps.isTodoView === nextProps.isTodoView
         && prevProps.aiAssistClass === nextProps.aiAssistClass
+        && prevProps.conflictClass === nextProps.conflictClass
         && prevProps.aiAssistOptions === nextProps.aiAssistOptions
         && prevProps.showAiAssistControls === nextProps.showAiAssistControls
         && prevProps.subcategoryOptions === nextProps.subcategoryOptions

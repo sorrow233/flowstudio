@@ -11,7 +11,11 @@ const TODO_AI_CLASS_ALIASES = {
     ai_mid: 'ai_involved',
     self: 'user_done',
 };
-const TODO_MODES = new Set(['all', 'unclassified', 'ai_done', 'ai_involved', 'user_done', 'major_conflict', 'minor_conflict']);
+const TODO_LEGACY_CONFLICT_CLASSES = new Set(['major_conflict', 'minor_conflict']);
+const TODO_AI_CLASSES = new Set(['unclassified', 'ai_done', 'ai_involved', 'user_done']);
+const TODO_CONFLICT_CLASS_UNCLASSIFIED = 'conflict_unclassified';
+const TODO_CONFLICT_CLASSES = new Set([TODO_CONFLICT_CLASS_UNCLASSIFIED, 'major_conflict', 'minor_conflict']);
+const TODO_MODES = new Set(['all', ...TODO_AI_CLASSES, ...TODO_CONFLICT_CLASSES]);
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -163,13 +167,26 @@ function isCompleted(project) {
 function shouldIncludeByMode(project, mode) {
     if (mode === 'all') return true;
 
-    const aiAssistClass = TODO_AI_CLASS_ALIASES[project?.aiAssistClass] || project?.aiAssistClass || 'unclassified';
+    const rawAiAssistClass = project?.aiAssistClass || 'unclassified';
+    const aiAssistClass = TODO_LEGACY_CONFLICT_CLASSES.has(rawAiAssistClass)
+        ? 'unclassified'
+        : (TODO_AI_CLASS_ALIASES[rawAiAssistClass] || rawAiAssistClass || 'unclassified');
+    const conflictClass = getTodoConflictClass(project);
 
-    if (mode === 'unclassified') {
-        return aiAssistClass === 'unclassified';
-    }
+    if (TODO_AI_CLASSES.has(mode)) return aiAssistClass === mode;
 
-    return aiAssistClass === mode;
+    return conflictClass === mode;
+}
+
+function getTodoConflictClass(project) {
+    const directValue = project?.conflictClass || TODO_CONFLICT_CLASS_UNCLASSIFIED;
+    if (directValue === 'unclassified') return TODO_CONFLICT_CLASS_UNCLASSIFIED;
+    if (TODO_CONFLICT_CLASSES.has(directValue)) return directValue;
+
+    const legacyValue = project?.aiAssistClass || '';
+    if (TODO_LEGACY_CONFLICT_CLASSES.has(legacyValue)) return legacyValue;
+
+    return TODO_CONFLICT_CLASS_UNCLASSIFIED;
 }
 
 function extractTodoIdeas(allProjects, mode) {
@@ -191,7 +208,10 @@ function formatTodoItem(project, index) {
         normalizedContent,
         timestamp: Number.isFinite(Number(project?.timestamp)) ? Number(project.timestamp) : null,
         createdAt: Number.isFinite(Number(project?.createdAt)) ? Number(project.createdAt) : null,
-        aiAssistClass: TODO_AI_CLASS_ALIASES[project?.aiAssistClass] || project?.aiAssistClass || 'unclassified',
+        aiAssistClass: TODO_LEGACY_CONFLICT_CLASSES.has(project?.aiAssistClass)
+            ? 'unclassified'
+            : (TODO_AI_CLASS_ALIASES[project?.aiAssistClass] || project?.aiAssistClass || 'unclassified'),
+        conflictClass: getTodoConflictClass(project),
         category: project?.category || 'note',
         stage: project?.stage || 'inspiration',
         completed: isCompleted(project),

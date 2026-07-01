@@ -8,8 +8,11 @@ const TODO_AI_CLASS_ALIASES = {
     ai_mid: 'ai_involved',
     self: 'user_done',
 };
-const TODO_AI_CLASSES = new Set(['unclassified', 'ai_done', 'ai_involved', 'user_done', 'major_conflict', 'minor_conflict']);
-const TODO_MODES = new Set(['all', 'pending', ...TODO_AI_CLASSES]);
+const TODO_LEGACY_CONFLICT_CLASSES = new Set(['major_conflict', 'minor_conflict']);
+const TODO_AI_CLASSES = new Set(['unclassified', 'ai_done', 'ai_involved', 'user_done']);
+const TODO_CONFLICT_CLASS_UNCLASSIFIED = 'conflict_unclassified';
+const TODO_CONFLICT_CLASSES = new Set([TODO_CONFLICT_CLASS_UNCLASSIFIED, 'major_conflict', 'minor_conflict']);
+const TODO_MODES = new Set(['all', 'pending', ...TODO_AI_CLASSES, ...TODO_CONFLICT_CLASSES]);
 const MUTATION_LOG_MAP = 'flow_ai_processed_mutations';
 const MAX_MUTATION_LOG_SIZE = 250;
 
@@ -52,9 +55,27 @@ export function isTodoProject(project = {}) {
 
 function normalizeTodoAiAssistClass(value = 'unclassified', fallbackUnknown = true) {
     const rawValue = String(value || 'unclassified');
+    if (TODO_LEGACY_CONFLICT_CLASSES.has(rawValue)) return fallbackUnknown ? 'unclassified' : null;
     const aliasedValue = TODO_AI_CLASS_ALIASES[rawValue] || rawValue;
     if (TODO_AI_CLASSES.has(aliasedValue)) return aliasedValue;
     return fallbackUnknown ? 'unclassified' : null;
+}
+
+function normalizeTodoConflictClass(value = TODO_CONFLICT_CLASS_UNCLASSIFIED, fallbackUnknown = true) {
+    const rawValue = String(value || TODO_CONFLICT_CLASS_UNCLASSIFIED);
+    const normalizedValue = rawValue === 'unclassified' ? TODO_CONFLICT_CLASS_UNCLASSIFIED : rawValue;
+    if (TODO_CONFLICT_CLASSES.has(normalizedValue)) return normalizedValue;
+    return fallbackUnknown ? TODO_CONFLICT_CLASS_UNCLASSIFIED : null;
+}
+
+function getTodoConflictClass(project = {}) {
+    const directValue = normalizeTodoConflictClass(project?.conflictClass);
+    if (directValue !== TODO_CONFLICT_CLASS_UNCLASSIFIED) return directValue;
+
+    const legacyValue = String(project?.aiAssistClass || '');
+    if (TODO_LEGACY_CONFLICT_CLASSES.has(legacyValue)) return legacyValue;
+
+    return directValue;
 }
 
 function getTodoArray(yDoc) {
@@ -88,7 +109,10 @@ export function listTodosFromDoc(yDoc, mode = 'pending') {
         .filter((project) => {
             if (mode === 'all') return true;
             if (mode === 'pending') return !isCompleted(project);
-            return !isCompleted(project) && normalizeTodoAiAssistClass(project.aiAssistClass) === mode;
+            if (TODO_AI_CLASSES.has(mode)) {
+                return !isCompleted(project) && normalizeTodoAiAssistClass(project.aiAssistClass) === mode;
+            }
+            return !isCompleted(project) && getTodoConflictClass(project) === mode;
         })
         .sort((a, b) => (a?.timestamp || 0) - (b?.timestamp || 0));
 }
@@ -104,6 +128,7 @@ export function formatTodoItem(project, index) {
         timestamp: Number.isFinite(Number(project?.timestamp)) ? Number(project.timestamp) : null,
         createdAt: Number.isFinite(Number(project?.createdAt)) ? Number(project.createdAt) : null,
         aiAssistClass: normalizeTodoAiAssistClass(project?.aiAssistClass),
+        conflictClass: getTodoConflictClass(project),
         category: 'todo',
         stage: 'inspiration',
         completed: isCompleted(project),
@@ -119,9 +144,20 @@ export function validateTodoCreateInput(input = {}) {
         throw httpError('Todo content is required.', 400, 'missing_content');
     }
 
-    const aiAssistClass = normalizeTodoAiAssistClass(input.aiAssistClass, false);
+    const rawAiAssistClass = String(input.aiAssistClass || 'unclassified');
+    const legacyConflictClass = TODO_LEGACY_CONFLICT_CLASSES.has(rawAiAssistClass) ? rawAiAssistClass : null;
+    const aiAssistClass = legacyConflictClass
+        ? 'unclassified'
+        : normalizeTodoAiAssistClass(input.aiAssistClass, false);
     if (!aiAssistClass) {
         throw httpError(`Invalid aiAssistClass: ${input.aiAssistClass}.`, 400, 'invalid_ai_assist_class');
+    }
+
+    const conflictClass = input.conflictClass === undefined
+        ? (legacyConflictClass || TODO_CONFLICT_CLASS_UNCLASSIFIED)
+        : normalizeTodoConflictClass(input.conflictClass, false);
+    if (!conflictClass) {
+        throw httpError(`Invalid conflictClass: ${input.conflictClass}.`, 400, 'invalid_conflict_class');
     }
 
     const colorIndex = input.colorIndex === undefined
@@ -140,6 +176,7 @@ export function validateTodoCreateInput(input = {}) {
         colorIndex: Number.isInteger(colorIndex) ? Math.max(0, colorIndex) : 0,
         completed: input.completed === true || input.completed === 1 || input.completed === 'true',
         aiAssistClass,
+        conflictClass,
     };
 }
 
@@ -152,6 +189,7 @@ export function validateTodoUpdates(input = {}) {
         'content',
         'completed',
         'aiAssistClass',
+        'conflictClass',
         'subcategory',
         'note',
         'colorIndex',
@@ -176,11 +214,26 @@ export function validateTodoUpdates(input = {}) {
         }
 
         if (key === 'aiAssistClass') {
+            const rawAiAssistClass = String(value || 'unclassified');
+            if (TODO_LEGACY_CONFLICT_CLASSES.has(rawAiAssistClass)) {
+                updates.conflictClass = rawAiAssistClass;
+                return;
+            }
+
             const aiAssistClass = normalizeTodoAiAssistClass(value, false);
             if (!aiAssistClass) {
                 throw httpError(`Invalid aiAssistClass: ${value}.`, 400, 'invalid_ai_assist_class');
             }
             updates.aiAssistClass = aiAssistClass;
+            return;
+        }
+
+        if (key === 'conflictClass') {
+            const conflictClass = normalizeTodoConflictClass(value, false);
+            if (!conflictClass) {
+                throw httpError(`Invalid conflictClass: ${value}.`, 400, 'invalid_conflict_class');
+            }
+            updates.conflictClass = conflictClass;
             return;
         }
 

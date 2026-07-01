@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Lightbulb } from 'lucide-react';
 import InspirationItem from './InspirationItem';
-import { getTodoAiAssistClass } from './todoAiAssistUtils';
+import { getTodoAiAssistClass, getTodoConflictClass } from './todoAiAssistUtils';
 import {
     formatTodoDayLabel,
     limitRecentAndWeeklyIdeaGroups,
@@ -81,6 +81,7 @@ const InspirationIdeaList = ({
             onSelect={onToggleSelect}
             isTodoView={options.isTodoView}
             aiAssistClass={options.isTodoView ? getTodoAiAssistClass(idea) : undefined}
+            conflictClass={options.isTodoView ? getTodoConflictClass(idea) : undefined}
             subcategoryOptions={subcategoryOptions}
             subcategoryValue={getIdeaSubcategoryValue(idea, selectedCategorySubcategories)}
             showSubcategoryControls={subcategoryOptions.length > 0}

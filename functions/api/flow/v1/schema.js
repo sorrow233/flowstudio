@@ -18,8 +18,9 @@ export async function onRequestGet() {
             delete: 'DELETE /todos/:id',
             batch: 'POST /todos/batch',
             modes: getAllowedTodoModes(),
-            writableFields: ['content', 'completed', 'aiAssistClass', 'subcategory', 'note', 'colorIndex'],
-            aiAssistClass: ['unclassified', 'ai_done', 'ai_involved', 'user_done', 'major_conflict', 'minor_conflict'],
+            writableFields: ['content', 'completed', 'aiAssistClass', 'conflictClass', 'subcategory', 'note', 'colorIndex'],
+            aiAssistClass: ['unclassified', 'ai_done', 'ai_involved', 'user_done'],
+            conflictClass: ['conflict_unclassified', 'major_conflict', 'minor_conflict'],
         },
         categories: {
             list: 'GET /categories',

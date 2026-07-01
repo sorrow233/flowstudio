@@ -39,11 +39,16 @@ import {
 } from './components/inspiration/inspirationListUtils';
 import {
     buildTodoAiClassClipboardText,
+    buildTodoConflictClassClipboardText,
     getTodoAiAssistClass,
     getTodoAiAssistMeta,
+    getTodoConflictClass,
+    getTodoConflictMeta,
     TODO_AI_CLASS_UNCLASSIFIED,
     TODO_AI_FILTER_OPTIONS,
     TODO_AI_FILTER_PENDING,
+    TODO_CONFLICT_CLASS_UNCLASSIFIED,
+    TODO_CONFLICT_FILTER_OPTIONS,
 } from './components/inspiration/todoAiAssistUtils';
 import {
     buildInspirationSubcategoryFilterOptions,
@@ -203,6 +208,7 @@ const InspirationModule = () => {
     const [isSelectionMode, setIsSelectionMode] = useState(false); // 多选模式
     const [selectedIdeaIds, setSelectedIdeaIds] = useState([]); // 已选中的 ID
     const [todoAiFilter, setTodoAiFilter] = useState('all');
+    const [todoConflictFilter, setTodoConflictFilter] = useState('all');
     const [, startCategoryTransition] = useTransition();
     const [isAiImportOpen, setIsAiImportOpen] = useState(false);
     const [aiImportText, setAiImportText] = useState('');
@@ -523,7 +529,10 @@ const InspirationModule = () => {
             colorIndex: selectedColorIndex !== null ? selectedColorIndex : getNextAutoColorIndex(ideas.length),
             category: selectedCategory, // 添加分类
             ...(nextSubcategory ? { subcategory: nextSubcategory } : {}),
-            ...(selectedCategory === 'todo' ? { aiAssistClass: TODO_AI_CLASS_UNCLASSIFIED } : {}),
+            ...(selectedCategory === 'todo' ? {
+                aiAssistClass: TODO_AI_CLASS_UNCLASSIFIED,
+                conflictClass: TODO_CONFLICT_CLASS_UNCLASSIFIED,
+            } : {}),
             stage: 'inspiration',
         };
         addIdea(newIdea);
@@ -620,7 +629,10 @@ const InspirationModule = () => {
             .filter(idea =>
                 (idea.category || 'note') === 'todo'
                 && !idea.completed
-                && (idea.aiAssistClass || TODO_AI_CLASS_UNCLASSIFIED) === TODO_AI_CLASS_UNCLASSIFIED
+                && (
+                    getTodoAiAssistClass(idea) === TODO_AI_CLASS_UNCLASSIFIED
+                    || getTodoConflictClass(idea) === TODO_CONFLICT_CLASS_UNCLASSIFIED
+                )
             )
             .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
     }, [ideas]);
@@ -657,18 +669,23 @@ const InspirationModule = () => {
     }, []);
 
     const aiClassifyPromptTemplate = useMemo(() => {
-        return `你是任务分类助手。请将我给你的待办清单按以下五类分类：
+        return `你是任务分类助手。请将我给你的待办清单同时按两个维度分类：
+
+维度一：AI 介入程度
 1. AI完成
 2. AI介入
 3. 自己完成
-4. 主要矛盾
-5. 次要矛盾
+
+维度二：主次要矛盾
+1. 主要矛盾
+2. 次要矛盾
 
 规则：
 1. 不要改写任务内容，不要新增任务，不要删除任务。
-2. 只输出“编号 + 分类”，每行一个，例如：1. AI介入
-3. 分类名称必须严格使用这五个词中的一个。
-4. 不要输出解释、标题、代码块或其他文本。
+2. 只输出“编号 + AI分类 + 矛盾分类”，每行一个，例如：1. AI介入 / 主要矛盾
+3. AI 分类必须严格使用 AI完成、AI介入、自己完成中的一个。
+4. 矛盾分类必须严格使用主要矛盾、次要矛盾中的一个。
+5. 不要输出解释、标题、代码块或其他文本。
 
 待分类清单：
 ${unclassifiedTodoNumberedText || '暂无未分类待办'}
@@ -901,22 +918,33 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             .map(line => line.trim())
             .filter(Boolean);
 
-        const resolveClassFromLine = (line) => {
+        const resolveClassesFromLine = (line) => {
             const normalized = line.replace(/\s+/g, '');
-            if (/AI完成/.test(normalized)) return 'ai_done';
-            if (/AI介入|AI参与|AI辅助|AI高度辅助|高度辅助|AI中度辅助|中度辅助/.test(normalized)) return 'ai_involved';
-            if (/自己完成|必须自己去完成|必须自己完成|自己去完成|人工完成/.test(normalized)) return 'user_done';
-            if (/主要矛盾|主矛盾/.test(normalized)) return 'major_conflict';
-            if (/次要矛盾|次矛盾/.test(normalized)) return 'minor_conflict';
-            return null;
+            const result = {};
+
+            if (/AI完成/.test(normalized)) {
+                result.aiAssistClass = 'ai_done';
+            } else if (/AI介入|AI参与|AI辅助|AI高度辅助|高度辅助|AI中度辅助|中度辅助/.test(normalized)) {
+                result.aiAssistClass = 'ai_involved';
+            } else if (/自己完成|必须自己去完成|必须自己完成|自己去完成|人工完成/.test(normalized)) {
+                result.aiAssistClass = 'user_done';
+            }
+
+            if (/主要矛盾|主矛盾/.test(normalized)) {
+                result.conflictClass = 'major_conflict';
+            } else if (/次要矛盾|次矛盾/.test(normalized)) {
+                result.conflictClass = 'minor_conflict';
+            }
+
+            return Object.keys(result).length > 0 ? result : null;
         };
 
         const assignments = [];
         let sequentialIndex = 0;
 
         lines.forEach((line) => {
-            const matchedClass = resolveClassFromLine(line);
-            if (!matchedClass) return;
+            const matchedClasses = resolveClassesFromLine(line);
+            if (!matchedClasses) return;
 
             const numMatch = line.match(/^\s*(\d+)\s*[.)、:：-]/);
             let targetIndex = sequentialIndex;
@@ -929,23 +957,30 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             }
 
             if (targetIndex < 0 || targetIndex >= unclassifiedTodoIdeas.length) return;
-            assignments.push({ index: targetIndex, aiAssistClass: matchedClass });
+            assignments.push({ index: targetIndex, ...matchedClasses });
         });
 
         const latestByIndex = new Map();
-        assignments.forEach(item => latestByIndex.set(item.index, item.aiAssistClass));
+        assignments.forEach((item) => {
+            const current = latestByIndex.get(item.index) || {};
+            latestByIndex.set(item.index, {
+                ...current,
+                ...(item.aiAssistClass ? { aiAssistClass: item.aiAssistClass } : {}),
+                ...(item.conflictClass ? { conflictClass: item.conflictClass } : {}),
+            });
+        });
 
         if (latestByIndex.size === 0) {
-            setAiClassifyError('没有识别到有效分类，请确保每行包含四个分类之一。');
+            setAiClassifyError('没有识别到有效分类，请确保每行包含 AI 分类和矛盾分类。');
             setAiClassifySuccessCount(0);
             return;
         }
 
         let updated = 0;
-        latestByIndex.forEach((aiAssistClass, index) => {
+        latestByIndex.forEach((updates, index) => {
             const targetIdea = unclassifiedTodoIdeas[index];
             if (!targetIdea) return;
-            updateIdea(targetIdea.id, { aiAssistClass });
+            updateIdea(targetIdea.id, updates);
             updated += 1;
         });
 
@@ -1191,6 +1226,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
             category: 'todo',
             ...(todoImportSubcategory ? { subcategory: todoImportSubcategory } : {}),
             aiAssistClass: TODO_AI_CLASS_UNCLASSIFIED,
+            conflictClass: TODO_CONFLICT_CLASS_UNCLASSIFIED,
             completed: false,
             stage: 'inspiration',
             source: 'ai-import',
@@ -1254,22 +1290,54 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         return counts;
     }, [subcategoryFilteredTodoIdeas]);
 
+    const todoConflictFilterCounts = useMemo(() => {
+        const counts = {
+            all: subcategoryFilteredTodoIdeas.length,
+            [TODO_CONFLICT_CLASS_UNCLASSIFIED]: 0,
+        };
+
+        TODO_CONFLICT_FILTER_OPTIONS.forEach((option) => {
+            if (!Object.hasOwn(counts, option.value)) {
+                counts[option.value] = 0;
+            }
+        });
+
+        subcategoryFilteredTodoIdeas.forEach((idea) => {
+            if (idea.completed) return;
+            const conflictClass = getTodoConflictClass(idea);
+            if (Object.hasOwn(counts, conflictClass)) {
+                counts[conflictClass] += 1;
+            } else {
+                counts[TODO_CONFLICT_CLASS_UNCLASSIFIED] += 1;
+            }
+        });
+
+        return counts;
+    }, [subcategoryFilteredTodoIdeas]);
+
     const filteredTodoIdeas = useMemo(() => {
-        if (todoAiFilter === 'all') return subcategoryFilteredTodoIdeas;
-        if (todoAiFilter === TODO_AI_FILTER_PENDING) {
-            return subcategoryFilteredTodoIdeas.filter(idea => !idea.completed);
-        }
+        return subcategoryFilteredTodoIdeas.filter((idea) => {
+            const shouldIncludeCompleted = todoAiFilter === 'all' && todoConflictFilter === 'all';
+            if (!shouldIncludeCompleted && idea.completed) return false;
 
-        if (todoAiFilter === TODO_AI_CLASS_UNCLASSIFIED) {
-            return subcategoryFilteredTodoIdeas.filter(idea =>
-                !idea.completed && getTodoAiAssistClass(idea) === TODO_AI_CLASS_UNCLASSIFIED
-            );
-        }
+            if (todoAiFilter !== 'all' && todoAiFilter !== TODO_AI_FILTER_PENDING) {
+                if (todoAiFilter === TODO_AI_CLASS_UNCLASSIFIED) {
+                    if (getTodoAiAssistClass(idea) !== TODO_AI_CLASS_UNCLASSIFIED) return false;
+                } else if (getTodoAiAssistClass(idea) !== todoAiFilter) {
+                    return false;
+                }
+            }
 
-        return subcategoryFilteredTodoIdeas.filter(idea =>
-            !idea.completed && getTodoAiAssistClass(idea) === todoAiFilter
-        );
-    }, [subcategoryFilteredTodoIdeas, todoAiFilter]);
+            if (todoConflictFilter !== 'all') {
+                if (todoConflictFilter === TODO_CONFLICT_CLASS_UNCLASSIFIED) {
+                    return getTodoConflictClass(idea) === TODO_CONFLICT_CLASS_UNCLASSIFIED;
+                }
+                return getTodoConflictClass(idea) === todoConflictFilter;
+            }
+
+            return true;
+        });
+    }, [subcategoryFilteredTodoIdeas, todoAiFilter, todoConflictFilter]);
 
     const handleCopyTodoAiClassList = useCallback(async (aiClass) => {
         const targetClass = aiClass || TODO_AI_CLASS_UNCLASSIFIED;
@@ -1288,6 +1356,37 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         if (success) {
             const targetCount = subcategoryFilteredTodoIdeas.filter((idea) => (
                 !idea.completed && getTodoAiAssistClass(idea) === targetClass
+            )).length;
+            toast.success(`已复制“${meta.label}”未完成清单（${targetCount} 条）`, {
+                duration: 1400,
+                position: 'bottom-center',
+            });
+            return;
+        }
+
+        toast.error(`“${meta.label}”清单复制失败，请重试`, {
+            duration: 1600,
+            position: 'bottom-center',
+        });
+    }, [copyTextToClipboard, subcategoryFilteredTodoIdeas]);
+
+    const handleCopyTodoConflictClassList = useCallback(async (conflictClass) => {
+        const targetClass = conflictClass || TODO_CONFLICT_CLASS_UNCLASSIFIED;
+        const meta = getTodoConflictMeta(targetClass);
+        const clipboardText = buildTodoConflictClassClipboardText(subcategoryFilteredTodoIdeas, targetClass);
+
+        if (!clipboardText) {
+            toast.info(`“${meta.label}”暂无未完成待办可复制`, {
+                duration: 1400,
+                position: 'bottom-center',
+            });
+            return;
+        }
+
+        const success = await copyTextToClipboard(clipboardText);
+        if (success) {
+            const targetCount = subcategoryFilteredTodoIdeas.filter((idea) => (
+                !idea.completed && getTodoConflictClass(idea) === targetClass
             )).length;
             toast.success(`已复制“${meta.label}”未完成清单（${targetCount} 条）`, {
                 duration: 1400,
@@ -1366,6 +1465,46 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         subcategoryFilteredTodoIdeas,
     ]);
 
+    const handleCopyTodoConflictFilterList = useCallback(async (filterValue) => {
+        if (filterValue === 'all') {
+            const conflictTodoText = buildNumberedIdeaClipboardText(
+                [...subcategoryFilteredTodoIdeas]
+                    .filter((idea) => !idea.completed)
+                    .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
+            );
+
+            if (!conflictTodoText) {
+                toast.info('当前没有未完成待办可复制', {
+                    duration: 1400,
+                    position: 'bottom-center',
+                });
+                return;
+            }
+
+            const success = await copyTextToClipboard(conflictTodoText);
+            if (success) {
+                toast.success(`已复制矛盾维度未完成清单（${subcategoryPendingTodoIdeas.length} 条）`, {
+                    duration: 1400,
+                    position: 'bottom-center',
+                });
+                return;
+            }
+
+            toast.error('矛盾维度清单复制失败，请重试', {
+                duration: 1600,
+                position: 'bottom-center',
+            });
+            return;
+        }
+
+        await handleCopyTodoConflictClassList(filterValue);
+    }, [
+        copyTextToClipboard,
+        handleCopyTodoConflictClassList,
+        subcategoryFilteredTodoIdeas,
+        subcategoryPendingTodoIdeas.length,
+    ]);
+
     const handleTodoAiFilterClick = useCallback((filterValue) => {
         setTodoAiFilter(filterValue);
     }, []);
@@ -1373,6 +1512,14 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
     const handleTodoAiFilterDoubleClick = useCallback((filterValue) => {
         void handleCopyTodoFilterList(filterValue);
     }, [handleCopyTodoFilterList]);
+
+    const handleTodoConflictFilterClick = useCallback((filterValue) => {
+        setTodoConflictFilter(filterValue);
+    }, []);
+
+    const handleTodoConflictFilterDoubleClick = useCallback((filterValue) => {
+        void handleCopyTodoConflictFilterList(filterValue);
+    }, [handleCopyTodoConflictFilterList]);
 
     // Sort ideas by timestamp (memoized) and filter by category
     const sortedIdeas = useMemo(() => {
@@ -1394,8 +1541,8 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
         return sortedIdeas.length;
     }, [selectedCategory, filteredTodoIdeas.length, sortedIdeas.length]);
     const ideaRenderScopeKey = useMemo(
-        () => `${selectedCategory}:${selectedSubcategory}:${todoAiFilter}`,
-        [selectedCategory, selectedSubcategory, todoAiFilter]
+        () => `${selectedCategory}:${selectedSubcategory}:${todoAiFilter}:${todoConflictFilter}`,
+        [selectedCategory, selectedSubcategory, todoAiFilter, todoConflictFilter]
     );
 
     // Extract all available weeks for navigation, grouped by Year and Month
@@ -1512,7 +1659,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                     )}
 
                     {selectedCategory === 'todo' && (
-                        <div className={`mb-6 px-2 ${selectedCategorySubcategories.length > 0 ? 'mt-0' : '-mt-2'}`}>
+                        <div className={`mb-6 px-2 space-y-2 ${selectedCategorySubcategories.length > 0 ? 'mt-0' : '-mt-2'}`}>
                             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
                                 {TODO_AI_FILTER_OPTIONS.map((option) => {
                                     const count = todoAiFilterCounts[option.value] || 0;
@@ -1534,6 +1681,31 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                         >
                                             {option.label}
                                             <span className={`ml-1.5 ${isActive ? 'text-white/85' : 'text-blue-400 dark:text-blue-400'}`}>
+                                                {count}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                                {TODO_CONFLICT_FILTER_OPTIONS.map((option) => {
+                                    const count = todoConflictFilterCounts[option.value] || 0;
+                                    const isActive = todoConflictFilter === option.value;
+                                    return (
+                                        <button
+                                            key={option.value}
+                                            onClick={() => handleTodoConflictFilterClick(option.value)}
+                                            onDoubleClick={() => handleTodoConflictFilterDoubleClick(option.value)}
+                                            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${isActive
+                                                ? 'bg-rose-500 text-white border-rose-500 shadow-sm'
+                                                : 'bg-white/70 dark:bg-gray-900/60 text-rose-500 dark:text-rose-300 border-rose-100 dark:border-rose-800 hover:bg-rose-50 dark:hover:bg-rose-900/20'
+                                                }`}
+                                            title={option.value === 'all'
+                                                ? '单击清除矛盾筛选，双击复制未完成待办清单'
+                                                : `单击切换到${option.label}，双击复制该分类未完成清单`}
+                                        >
+                                            {option.label}
+                                            <span className={`ml-1.5 ${isActive ? 'text-white/85' : 'text-rose-400 dark:text-rose-400'}`}>
                                                 {count}
                                             </span>
                                         </button>
@@ -1750,7 +1922,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                 导入 AI 分类结果（按编号匹配未分类清单）
                                             </div>
                                             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                示例：1. AI介入 / 2. 自己完成
+                                                示例：1. AI介入 / 主要矛盾
                                             </p>
                                         </>
                                     )}
@@ -1820,7 +1992,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                     setAiClassifyText(e.target.value);
                                                     if (aiClassifyError) setAiClassifyError('');
                                                 }}
-                                                placeholder={'示例：\n1. AI介入\n2. 自己完成\n3. 主要矛盾'}
+                                                placeholder={'示例：\n1. AI介入 / 主要矛盾\n2. 自己完成 / 次要矛盾\n3. AI完成 / 主要矛盾'}
                                                 className="w-full min-h-[220px] rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-200 p-4 outline-none focus:ring-2 focus:ring-pink-300/50 dark:focus:ring-pink-700/50 focus:border-pink-300 dark:focus:border-pink-700 transition-all"
                                             />
                                         </div>
