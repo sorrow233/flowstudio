@@ -1514,7 +1514,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
     }, [handleCopyTodoFilterList]);
 
     const handleTodoConflictFilterClick = useCallback((filterValue) => {
-        setTodoConflictFilter(filterValue);
+        setTodoConflictFilter((current) => current === filterValue ? 'all' : filterValue);
     }, []);
 
     const handleTodoConflictFilterDoubleClick = useCallback((filterValue) => {
@@ -1702,7 +1702,7 @@ ${unclassifiedTodoNumberedText || '暂无未分类待办'}
                                                 }`}
                                             title={option.value === 'all'
                                                 ? '单击清除矛盾筛选，双击复制未完成待办清单'
-                                                : `单击切换到${option.label}，双击复制该分类未完成清单`}
+                                                : `单击切换到${option.label}，再次单击取消筛选，双击复制该分类未完成清单`}
                                         >
                                             {option.label}
                                             <span className={`ml-1.5 ${isActive ? 'text-white/85' : 'text-rose-400 dark:text-rose-400'}`}>

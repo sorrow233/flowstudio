@@ -23,8 +23,6 @@ export const TODO_CONFLICT_CLASS_OPTIONS = [
 ];
 
 export const TODO_CONFLICT_FILTER_OPTIONS = [
-    { value: 'all', label: '全部矛盾' },
-    { value: TODO_CONFLICT_CLASS_UNCLASSIFIED, label: '矛盾未分' },
     ...TODO_CONFLICT_CLASS_OPTIONS,
 ];
 
